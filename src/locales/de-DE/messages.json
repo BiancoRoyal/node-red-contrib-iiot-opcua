@@ -1,0 +1,21 @@
+{
+  "opcua-iiot-contrib": {
+    "common": {
+      "label": {
+        "type": "Typ"
+      },
+      "response": {
+      },
+      "getter": {
+      },
+      "read": {
+      },
+      "write": {
+      },
+      "server": {
+      },
+      "client": {
+      }
+    }
+  }
+}

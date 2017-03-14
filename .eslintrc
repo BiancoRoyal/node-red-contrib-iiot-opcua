@@ -1,0 +1,16 @@
+{
+  "plugins": [
+    "mocha"
+  ],
+  "extends": [
+    "standard",
+    "standard-jsx"
+  ],
+  "ignore": [
+    "node_modules/",
+    "examples/",
+    "opcua-iiot/",
+    "docs",
+    "src/public/"
+  ]
+}

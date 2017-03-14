@@ -1,0 +1,28 @@
+{
+  "opcua-iiot-contrib": {
+    "common": {
+      "label": {
+        "type": "Type",
+        "server": "Server",
+        "timeout": "Timeout",
+        "name": "Name",
+        "endpoint": "Endpoint",
+        "topic": "Topic",
+        "user": "User",
+        "password": "Password"
+      },
+      "response": {
+      },
+      "getter": {
+      },
+      "read": {
+      },
+      "write": {
+      },
+      "server": {
+      },
+      "client": {
+      }
+    }
+  }
+}

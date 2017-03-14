@@ -1,0 +1,88 @@
+<!--
+ The BSD 3-Clause License
+
+ Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
+ All rights reserved.
+ node-red-contrib-opcua-iiot
+-->
+
+<script type="text/javascript">
+  RED.nodes.registerType('OPCUA-IIoT-Server', {
+    category: 'iiot',
+    color: "#ABCDEF",
+    defaults: {
+      port: {value: "53880", required: true},
+      name: {value: ""},
+      endpoint: {vlaue: ""}
+    },
+    inputs: 1,
+    outputs: 1,
+    align: "right",
+    icon: "opcuaiiot.png",
+    label: function () {
+      return this.name || "OPC UA Server";
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    }
+  });
+</script>
+
+
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Server">
+    <div class="form-row">
+        <label for="node-input-port"><i class="icon-tasks"></i> Port</label>
+        <!-- dynamic Ports from 49152 to 65535 (c000hex bis FFFFhex) -->
+        <input type="text" id="node-input-port" placeholder="Ports 49152 bis 65535 (c000hex bis FFFFhex)">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tasks"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="">
+    </div>
+        <div class="form-row">
+        <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
+        <input type="text" id="node-input-endpoint" placeholder="UA/SimpleNodeRedServer">
+    </div>
+
+</script>
+
+
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Server">
+    <p>Creates OPC UA server with own variables, object structures and methods to endpoint: opc.tcp://hostname.local:53880/</p>
+    <p>
+        OPC UA server commands:
+        <ul>
+            <li>restartOPCUAServer</li>
+            <li>addEquipment</li>
+            <li>addPhysicalAsset</li>
+            <li>deleteNode</li>
+        </ul>
+
+        Examples JSON Injects: <br />
+        <pre>
+        { "opcuaCommand":
+          "restartOPCUAServer" }
+
+        { "opcuaCommand": "addEquipment",
+          "nodeName": "Machine" }
+
+        { "opcuaCommand": "addPhysicalAsset",
+          "nodeName": "PhysicalAsset" }
+
+        { "opcuaCommand": "deleteNode",
+          "nodeId": "ns=4;s=PhysicalAsset2" }
+        </pre>
+    </p>
+
+    <p>
+        OPC UA message type to set variable Counter by JSON Inject
+
+        <pre>
+        { payload : { "messageType" : "Variable",
+          "variableName": "Counter",
+          "variableValue": msg.payload }};
+        </pre>
+    </p>
+
+</script>

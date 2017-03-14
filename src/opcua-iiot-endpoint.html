@@ -1,0 +1,86 @@
+<!--
+ The BSD 3-Clause License
+
+ Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
+ All rights reserved.
+ node-red-contrib-opcua-iiot
+-->
+
+<script type="text/javascript">
+  RED.nodes.registerType('OPCUA-IIoT-Endpoint', {
+    category: 'config',
+    defaults: {
+      endpoint: {value: "", required: true},
+      loginEnabled: {value: false}
+    },
+    credentials: {
+      user: {type: "text"},
+      password: {type: "password"}
+    },
+    label: function () {
+      return this.endpoint || "Endpoint";
+    },
+    oneditprepare: function () {
+      try {
+        let loginCheckbox = $("#node-config-input-login");
+        let loginFields = $("#node-config-login");
+
+        if (this.login) {
+          loginCheckbox.prop('checked', true);
+          loginFields.show();
+        } else {
+          loginCheckbox.prop('checked', false);
+          loginFields.hide();
+        }
+
+        loginCheckbox.change(function () {
+          if ($(this).is(":checked")) {
+            loginFields.show();
+          } else {
+            loginFields.hide();
+            $('#node-input-user').val('');
+            $('#node-input-password').val('');
+          }
+        });
+
+      } catch (err) {
+        console.log(err);
+      }
+      finally {
+        console.log("finally");
+      }
+    }
+  });
+</script>
+
+
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Endpoint">
+    <div class="form-row">
+        <label for="node-config-input-endpoint"><i class="icon-link"></i> <span data-i18n="opcua-iiot-contrib.label.common.endpoint"></span></label>
+        <input type="text" id="node-config-input-endpoint">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-sign"><i class="icon-key"></i> <span data-i18n="opcua-iiot-contrib.label.sign"></span></label>
+        <select type="text" id="node-input-sign">
+            <option value="None">None</option>
+            <option value="Basic128Rsa15Signed">Basic128Rsa15 signed</option>
+            <option value="Basic256Signed">Basic256 signed</option>
+            <option value="Basic128Rsa15">Basic128Rsa15 signed+crypted</option>
+            <option value="Basic256Signed">Basic256 signed+crypted</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <lable><input type="checkbox" id="node-config-input-loginEnabled"> <span data-i18n="opcua-iiot-contrib.label.credentials"></span></lable>
+    </div>
+    <div id="node-config-login">
+        <div class="form-row ">
+            <label for="node-config-input-user"><i class="icon-user"></i> <span data-i18n="opcua-iiot-contrib.label.common.user"></span></label>
+            <input type="text" id="node-config-input-user">
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-password"><i class="icon-password"></i> <span data-i18n="opcua-iiot-contrib.label.common.password"></span></label>
+            <input type="password" id="node-config-input-password">
+        </div>
+    </div>
+</script>

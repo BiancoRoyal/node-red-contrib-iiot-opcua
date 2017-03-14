@@ -1,0 +1,75 @@
+<!--
+ The BSD 3-Clause License
+
+ Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
+ All rights reserved.
+ node-red-contrib-opcua-iiot
+-->
+
+<script type="text/javascript">
+  RED.nodes.registerType('OPCUA-IIoT-Node', {
+    category: 'iiot',
+    color: "#ABCDEF",
+    defaults: {
+      item: {value: "", required: true},
+      datatype: {value: "", required: true},
+      value: {value: null},
+      name: {value: ""}
+    },
+    inputs: 1,
+    outputs: 1,
+    align: "right",
+    icon: "opcuaiiot.png",
+    label: function () {
+      return this.name || "OPC UA Node";
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    }
+  });
+</script>
+
+
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Node">
+    <div class="form-row">
+        <label for="node-input-item"><i class="icon-tasks"></i> Item</label>
+        <input type="text" id="node-input-item" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
+    </div>
+    <div class="form-row">
+        <label for="node-input-datatype"><i class="icon-tasks"></i> Type</label>
+        <select type="text" id="node-input-datatype">
+            <option value="Int8">Int8</option>
+            <option value="Int16">Int16</option>
+            <option value="Int32">Int32</option>
+            <option value="UInt8">UInt8</option>
+            <option value="UInt16">UInt16</option>
+            <option value="UInt32">UInt32</option>
+            <option value="Byte">Byte</option>
+            <option value="SByte">SByte</option>
+            <option value="Float">Float</option>
+            <option value="Double">Double</option>
+            <option value="Boolean">Boolean</option>
+            <option value="String">String</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-value"><i class="icon-tag"></i> Value</label>
+        <input type="text" id="node-input-value" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="">
+    </div>
+
+</script>
+
+
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Node">
+    <p>Defines OPC UA item, type and value.</p>
+    <p>Item contains valid OPC UA address like ns=2;i=4 OR ns=3;s=MyVariable</p>
+    <p>There are not all Types possible for now, but you can select some.</p>
+    <p>Value is needed only if item will be written to OPC UA server.</p>
+    <p>If value isn't filled, OpcUa-Item sends input <strong>payload</strong>.</p>
+
+</script>

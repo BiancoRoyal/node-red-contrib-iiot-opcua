@@ -1,0 +1,99 @@
+{
+  "name": "node-red-contrib-opcua-iiot",
+  "version": "0.1.0-alpha",
+  "tag": "alpha",
+  "description": "IIoT OPC UA contribution package for Node-RED based on node-opcua.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biancode/node-red-contrib-opcua-iiot"
+  },
+  "keywords": [
+    "node-red",
+    "OPC UA",
+    "opc-ua",
+    "iiot",
+    "IIoT",
+    "unified automation",
+    "opc foundation",
+    "node-opcua",
+    "biancode"
+  ],
+  "author": {
+    "name": "Klaus Landsdorf",
+    "email": "klaus.landsdorf@bianco-royal.de"
+  },
+  "license": "BSD 3-Clause",
+  "bugs": {
+    "url": "https://github.com/biancode/node-red-contrib-opcua-iiot/issues"
+  },
+  "node-red": {
+    "nodes": {
+      "OPCUA-IIoT-Endpoint": "opcua-iiot/opcua-iiot-endpoint.js",
+      "OPCUA-IIoT-Server": "opcua-iiot/opcua-iiot-server.js",
+      "OPCUA-IIoT-Client": "opcua-iiot/opcua-iiot-client.js",
+      "OPCUA-IIoT-Browser": "opcua-iiot/opcua-iiot-browser.js",
+      "OPCUA-IIoT-Node": "opcua-iiot/opcua-iiot-node.js",
+      "OPCUA-IIoT-Event": "opcua-iiot/opcua-iiot-event.js"
+    }
+  },
+  "engines": {
+    "node": ">=4.7"
+  },
+  "dependencies": {
+    "async": "2.1.4",
+    "collections": "5.0.6",
+    "debug": "2.6.2",
+    "node-opcua": "0.0.61",
+    "treeify": "1.0.1"
+  },
+  "homepage": "https://github.com/biancode/node-red-contrib-opcua-iiot#readme",
+  "scripts": {
+    "test": "standard && mocha test/*",
+    "build": "gulp publish",
+    "prepublish": "standard --fix && npm run build && npm test"
+  },
+  "files": [
+    "opcua-iiot"
+  ],
+  "devDependencies": {
+    "babel-preset-es2015": "^6.22.0",
+    "chai": "^3.5.0",
+    "eslint": "^3.15.0",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-config-standard-jsx": "^3.2.0",
+    "eslint-plugin-mocha": "^4.8.0",
+    "eslint-plugin-promise": "^3.4.1",
+    "eslint-plugin-react": "^6.9.0",
+    "eslint-plugin-standard": "^2.0.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-clean": "^0.3.2",
+    "gulp-htmlmin": "^3.0.0",
+    "gulp-jsdoc3": "^1.0.1",
+    "gulp-uglify": "^2.0.1",
+    "jsdoc": "^3.4.3",
+    "mocha": "^3.2.0",
+    "nock": "^9.0.4",
+    "node-red": "^0.16.2",
+    "pump": "^1.0.2",
+    "sinon": "^1.17.7",
+    "supertest": "^3.0.0",
+    "uglify-js": "^2.7.5",
+    "uglify-js-harmony": "^2.6.2",
+    "when": "^3.7.7"
+  },
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "standard": {
+    "ignore": [
+      "node_modules/",
+      "examples/",
+      "opcua-iiot/",
+      "docs",
+      "src/public/",
+      "test"
+    ]
+  }
+}

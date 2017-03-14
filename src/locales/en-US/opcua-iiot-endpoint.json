@@ -1,0 +1,11 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "type": "Type",
+      "host": "Host",
+      "port": "Port",
+      "sign": "Sign",
+      "credentials": "use credentials"
+    }
+  }
+}
