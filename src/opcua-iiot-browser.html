@@ -14,8 +14,6 @@
     color: "#ABCDEF",
     defaults: {
       endpoint: {value: "", required: true, type: "OPCUA-IIoT-Endpoint"},
-      item: {value: ""},
-      datatype: {value: ""},
       topic: {value: ""}
     },
     inputs: 1,
@@ -29,7 +27,6 @@
       return this.item ? "node_label_italic" : "";
     },
     oneditprepare: function () {
-
       let node = this
       node.items = []
 
@@ -40,13 +37,21 @@
           $("#node-lookup-topic").removeClass('disabled')
           node.items = []
 
-          $.each(data, function (i, port) {
-            node.items.push(port.item)
+          $.each(data, function (i, entry) {
+            node.items.push({value: entry.nodeId, label: entry.displayName.text})
           })
 
           $("#node-input-topic").autocomplete({
             source: node.items,
             minLength: 0,
+            focus: function (event, ui) {
+              $("#node-input-topic").val(ui.item.label);
+              return false;
+            },
+            select: function (event, ui) {
+              $("#node-input-topic").val(ui.item.value)
+              return false;
+            },
             close: function (event, ui) {
               $("#node-input-topic").autocomplete("destroy")
             }
@@ -64,7 +69,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-topic"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.common.topic"></span></label>
-        <input type="text" id="node-input-topic" style="width:60%;" placeholder="ns=0;i=85">
+        <input type="text" id="node-input-topic" style="width:40%;" placeholder="ns=0;i=85">
         <a id="node-lookup-topic" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
 </script>

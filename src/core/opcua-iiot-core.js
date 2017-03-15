@@ -19,6 +19,6 @@ var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line
 
 de.biancoroyal.opcua.iiot.core.nodeOPCUA = require('node-opcua')
 de.biancoroyal.opcua.iiot.core.internalDebugLog = require('debug')('opcuaIIoT')
-de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = 'ns=0;i=85'
+de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = 'ns=0;i=84'
 
 module.exports = de.biancoroyal.opcua.iiot.core

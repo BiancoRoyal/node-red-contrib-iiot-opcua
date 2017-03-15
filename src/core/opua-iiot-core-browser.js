@@ -51,7 +51,27 @@ de.biancoroyal.opcua.iiot.core.browser.createSession = function (opcuaClient) {
 de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
   return new Promise(
     function (resolve, reject) {
-      session.browse(topic, function (err, browseResult) {
+      let core = require('./opcua-iiot-core')
+      var browseOptions = [
+        {
+          nodeId: topic,
+          referenceTypeId: 'Organizes',
+          includeSubtypes: true,
+          browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+          resultMask: 0x3f
+
+        },
+        {
+          nodeId: topic,
+          referenceTypeId: 'Aggregates',
+          includeSubtypes: true,
+          browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+          resultMask: 0x3f
+
+        }
+      ]
+
+      session.browse(browseOptions, function (err, browseResult, diagnostics) {
         if (err) {
           reject(err)
         } else {

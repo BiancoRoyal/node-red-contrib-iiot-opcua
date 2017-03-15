@@ -20,111 +20,102 @@ module.exports = function (RED) {
     this.datatype = config.datatype
     this.topic = config.topic
 
-    let node = this
-    node.items = browserItems
-
     let browseTopic = core.OBJECTS_ROOT
-    let opcuaEndpoint = RED.nodes.getNode(config.endpoint)
-
-    node.status({fill: 'gray', shape: 'dot', text: 'no Items'})
+    let node = this
+    node.items = []
+    node.opcuaEndpoint = RED.nodes.getNode(config.endpoint)
 
     node.add_item = function (item) {
       if (item) {
-        node.items.add({'item': item})
+        node.items.add({
+          referenceTypeId: item.referenceTypeId.toString(),
+          isForward: item.isForward,
+          nodeId: item.nodeId.toString(),
+          browseName: item.browseName.toString(),
+          displayName: item.displayName,
+          nodeClass: item.nodeClass.toString(),
+          typeDefinition: item.typeDefinition.toString()
+        })
       }
     }
 
-    function setupClient (url, callback) {
+    node.browseResultHandling = function (err) {
+      if (err) {
+        browserItems = []
+        browserItems.push({displayName: {text: 'Objects'}, nodeId: core.OBJECTS_ROOT, browseName: 'Objects'})
+        core.internalDebugLog(err)
+        node.status({fill: 'red', shape: 'dot', text: 'error'})
+      } else {
+        core.internalDebugLog('browse done - result: ' + browserItems.length + ' item(s)')
+      }
+    }
+
+    node.setupClient = function (url, callback) {
+      node.items = []
+
       coreBrowser.connect(url).then(function (opcuaClient) {
-        core.internalDebugLog('connected on ' + opcuaEndpoint.endpoint)
+        core.internalDebugLog('connected on ' + node.opcuaEndpoint.endpoint)
         coreBrowser.createSession(opcuaClient).then(function (session) {
-          core.internalDebugLog('start session on ' + opcuaEndpoint.endpoint)
+          core.internalDebugLog('start session on ' + node.opcuaEndpoint.endpoint)
           coreBrowser.browse(session, browseTopic).then(function (browseResult) {
+            core.internalDebugLog('browse root ' + browseTopic + ' on' + node.opcuaEndpoint.endpoint)
             browseResult.forEach(function (result) {
+              // core.internalDebugLog('result:' + result)
               result.references.forEach(function (reference) {
+                // core.internalDebugLog('reference:' + reference)
                 node.add_item(reference)
               })
             })
-
-            node.status({fill: 'green', shape: 'dot', text: 'Items: ' + node.items.length})
-
+            browserItems = node.items
+            node.status({fill: 'green', shape: 'dot', text: 'active'})
             coreBrowser.closeSession(session).then(function () {
-              node.send({payload: node.items, endpoint: opcuaEndpoint.endpoint})
-              core.internalDebugLog('sucessfully browse on ' + opcuaEndpoint.endpoint)
+              core.internalDebugLog('sucessfully browsed on ' + node.opcuaEndpoint.endpoint)
             }).catch(callback)
           }).catch(callback)
         }).catch(callback)
       }).catch(callback)
     }
 
-    setupClient(opcuaEndpoint.endpoint, function (err) {
-      if (err) {
-        core.internalDebugLog(err)
-        node.status({fill: 'red', shape: 'dot', text: 'Error Items: ' + node.items.length})
-      } else {
-        core.internalDebugLog('Browse loading Items done ...')
-      }
-    })
-
     node.on('input', function (msg) {
       browseTopic = null
+
       core.internalDebugLog(msg)
 
-      if (msg.payload.hasOwnProperty('actiontype')) {
-        switch (msg.payload.actiontype) {
-          case 'browse':
-            if (msg.payload.hasOwnProperty('root')) {
-              if (msg.payload.root && msg.payload.root.hasOwnProperty('item')) {
-                if (msg.payload.root.item.hasOwnProperty('nodeId')) {
-                  browseTopic = browseByItem(msg.payload.root.item.nodeId)
-                }
-              }
-            }
-            break
-
-          default:
-            break
+      if (msg.payload.actiontype === 'browse') {
+        if (msg.payload.root && msg.payload.root.nodeId) {
+          browseTopic = browseByItem(msg.payload.root.nodeId)
+        } else {
+          browseTopic = node.topic || browseToRoot()
         }
       } else {
-        if (!node.topic && msg.topic) {
-          if (msg.topic) {
-            browseTopic = msg.topic
-          }
+        if (msg.topic) {
+          browseTopic = msg.topic
         } else {
-          browseTopic = node.topic
+          browseTopic = node.topic || browseToRoot()
         }
       }
 
-      node.items = []
-
-      if (!browseTopic) {
-        browseTopic = browseToRoot()
+      if (browseTopic) {
+        node.setupClient(node.opcuaEndpoint.endpoint, node.browseResultHandling)
+        msg.payload = {endpoint: node.opcuaEndpoint.endpoint, browseTopic: browseTopic, items: browserItems}
+        node.send(msg)
+      } else {
+        node.error('Browse error', new Error('No Topic To Browse'))
       }
-
-      setupClient(opcuaEndpoint.endpoint, function (err) {
-        if (err) {
-          core.internalDebugLog(err)
-          node.status({fill: 'red', shape: 'dot', text: 'Error Items: ' + node.items.length})
-        } else {
-          core.internalDebugLog('Browse loading Items done ...')
-        }
-      })
-
-      msg.endpoint = opcuaEndpoint.endpoint
-      msg.payload = node.items
-
-      node.send(msg)
     })
 
     function browseByItem (nodeId) {
-      core.internalDebugLog('Browse to parent ' + nodeId)
+      core.internalDebugLog('browse to parent ' + nodeId)
       return nodeId
     }
 
     function browseToRoot () {
-      core.internalDebugLog('Browse to root named Objects')
+      core.internalDebugLog('browse to root ' + core.OBJECTS_ROOT)
       return core.OBJECTS_ROOT
     }
+
+    // initial request for browser browse service
+    node.setupClient(node.opcuaEndpoint.endpoint, node.browseResultHandling)
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
