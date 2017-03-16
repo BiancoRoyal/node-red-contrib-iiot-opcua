@@ -145,7 +145,7 @@ module.exports = function (RED) {
 
     function setNodeStatusTo (statusValue) {
       verboseLog('Client status: ' + statusValue)
-      let statusParameter = opcuaIIoTCore.get_node_status(statusValue)
+      let statusParameter = opcuaIIoTCore.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
@@ -169,7 +169,7 @@ module.exports = function (RED) {
             node.client.createSession(userIdentity, function (err, session) {
               if (!err) {
                 node.session = session
-                node.session.timeout = opcuaIIoTCore.calc_milliseconds_by_time_and_unit(10, 's')
+                node.session.timeout = opcuaIIoTCore.calcMillisecondsByTimeAndUnit(10, 's')
                 node.session.startKeepAliveManager() // General for read/write/subscriptions/events
                 verboseLog('session active')
                 setNodeStatusTo('session active')
@@ -325,7 +325,7 @@ module.exports = function (RED) {
                   }
 
                   verboseLog('read item changed dataType: ' + dataValue.value.dataType + ' value:' + dataValue.value.value)
-                  msg.payload = opcuaIIoTCore.build_new_value_by_datatype(dataValue.value.dataType, dataValue.value.value)
+                  msg.payload = opcuaIIoTCore.buildNewValueByDatatype(dataValue.value.dataType, dataValue.value.value)
 
                   if (dataValue.statusCode && dataValue.statusCode.toString(16) === 'Good (0x00000)') {
                     verboseLog('\tStatus-Code:' + (dataValue.statusCode.toString(16)).green.bold)
@@ -385,7 +385,7 @@ module.exports = function (RED) {
       verboseLog('value=' + msg.payload)
       verboseLog(nodeid.toString())
 
-      let opcuaVariant = opcuaIIoTCore.build_new_variant(opcua, msg.datatype, msg.payload)
+      let opcuaVariant = opcuaIIoTCore.buildNewVariant(opcua, msg.datatype, msg.payload)
       if (node.session) {
         node.session.writeSingleNode(nodeid, opcuaVariant, function (err) {
           if (err) {
@@ -408,7 +408,7 @@ module.exports = function (RED) {
 
       if (!subscription) {
         // first build and start subscription and subscribe on its started event by callback
-        let timeMilliseconds = opcuaIIoTCore.calc_milliseconds_by_time_and_unit(node.time, node.timeUnit)
+        let timeMilliseconds = opcuaIIoTCore.calcMillisecondsByTimeAndUnit(node.time, node.timeUnit)
         subscription = makeSubscription(subscribeMonitoredItem, msg, opcuaIIoTCore.getSubscriptionParameters(timeMilliseconds))
       } else {
         // otherwise check if its terminated start to renew the subscription
@@ -476,7 +476,7 @@ module.exports = function (RED) {
           }
 
           verboseLog('subscribed item changed dataType: ' + dataValue.value.dataType + ' value:' + dataValue.value.value)
-          msg.payload = opcuaIIoTCore.build_new_value_by_datatype(dataValue.value.dataType, dataValue.value.value)
+          msg.payload = opcuaIIoTCore.buildNewValueByDatatype(dataValue.value.dataType, dataValue.value.value)
           node.send(msg)
         })
 
@@ -613,7 +613,7 @@ module.exports = function (RED) {
 
       if (!subscription) {
         // first build and start subscription and subscribe on its started event by callback
-        let timeMilliseconds = opcuaIIoTCore.calc_milliseconds_by_time_and_unit(node.time, node.timeUnit)
+        let timeMilliseconds = opcuaIIoTCore.calcMillisecondsByTimeAndUnit(node.time, node.timeUnit)
         subscription = makeSubscription(subscribeMonitoredEvent, msg, opcuaIIoTCore.getEventSubscribtionParameters(timeMilliseconds))
       } else {
         // otherwise check if its terminated start to renew the subscription

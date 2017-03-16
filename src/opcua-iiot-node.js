@@ -41,10 +41,10 @@ module.exports = function (RED) {
       verboseLog('node value:' + node.value)
 
       if (node.value) {
-        msg.payload = opcuaIIoTCore.build_new_value_by_datatype(node.datatype, node.value)
+        msg.payload = opcuaIIoTCore.buildNewValueByDatatype(node.datatype, node.value)
         verboseWarn('setting value by Item ' + msg.payload)
       } else {
-        msg.payload = opcuaIIoTCore.build_new_value_by_datatype(msg.datatype, msg.payload)
+        msg.payload = opcuaIIoTCore.buildNewValueByDatatype(msg.datatype, msg.payload)
         verboseWarn('setting value by Input ' + msg.payload)
       }
 
