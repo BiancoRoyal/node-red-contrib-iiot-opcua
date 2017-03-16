@@ -59,7 +59,6 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
           includeSubtypes: true,
           browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
           resultMask: 0x3f
-
         },
         {
           nodeId: topic,
@@ -67,7 +66,6 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
           includeSubtypes: true,
           browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
           resultMask: 0x3f
-
         }
       ]
 

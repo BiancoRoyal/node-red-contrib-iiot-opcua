@@ -8,13 +8,13 @@
 -->
 
 <script type="text/javascript">
-  RED.nodes.registerType('OPCUA-IIoT-Client', {
+  RED.nodes.registerType('OPCUA-IIoT-Reader', {
     category: 'iiot',
     color: "#ABCDEF",
     defaults: {
-      endpoint: {value: "", required: true, type: "OpcUa-Endpoint"},
+      endpoint: {value: "", required: true, type: "OPCUA-IIoT-Connector"},
       action: {value: "read", required: true},
-      time: {value: 10},
+      time: {value: 1},
       timeUnit: {value: "s"},
       name: {value: ""}
     },
@@ -23,7 +23,7 @@
     align: "right",
     icon: "opcuaiiot.png",
     label: function () {
-      return this.name || "OPC UA Client";
+      return this.name || "OPC UA Reader";
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
@@ -55,7 +55,7 @@
 </script>
 
 
-<script type="text/x-red" data-template-name="OPCUA-IIoT-Client">
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Reader">
     <div class="form-row">
         <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
         <input type="text" id="node-input-endpoint" placeholder="opc.tcp://localhost:4334">
@@ -64,10 +64,7 @@
         <label for="node-input-action"><i class="fa fa-tasks"></i> Action</label>
         <select type="text" id="node-input-action" style="width:72%;">
             <option selected value="read">READ</option>
-            <option value="write">WRITE</option>
             <option value="browse">BROWSE</option>
-            <option value="subscribe">SUBSCRIBE</option>
-            <option value="events">EVENTS</option>
         </select>
     </div>
     <div class="form-row" id="node-input-timerow">
@@ -88,24 +85,5 @@
 
 </script>
 
-<script type="text/x-red" data-help-name="OPCUA-IIoT-Client">
-    <p>Connect to an endpoint like opc.tcp://host:port/UA/EndpointName.</p>
-    <p>Actions are:</p>
-    <p>
-        <ul>
-            <li>Read</li>
-            <li>Write</li>
-            <li>Browse</li>
-            <li>Subscribe</li>
-            <li>Event</li>
-         </ul>
-    </p>
-    <p>Inject your OPC UA address (NodeId) by the <strong>Topic</strong> of an Inject node or with the OpcUa-Item cotrolled by an Inject node.</p>
-    <p>To Read/Write inject the Topic for every operation.</p>
-    <p>The value to Write should be injected by an OpcUa-Item.</p>
-    <p>Inject the Topic only once on Subscribe or Event for subscription and you got the changing value on every Interval.
-        Every inject subscribes a new monitored Item.</p>
-    <p>Interval is setting for Client <strong>requestedPublishingInterval</strong> (default: 100ms).</p>
-    <p>Input <strong>msg.payload</strong> can bring an samplingInterval for monitored Items/Events in subscription (default: 100ms).</p>
-
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Reader">
 </script>

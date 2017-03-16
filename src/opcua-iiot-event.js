@@ -10,7 +10,7 @@
 
 module.exports = function (RED) {
   let opcua = require('node-opcua')
-  let opcuaBasic = require('./opcua-iiot-core')
+  let opcuaBasic = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTEvent (n) {
     RED.nodes.createNode(this, n)

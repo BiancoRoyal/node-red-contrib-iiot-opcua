@@ -9,7 +9,7 @@
 'use strict'
 
 module.exports = function (RED) {
-  function OPCUAIIoTEndpointConfiguration (config) {
+  function OPCUAIIoTConnectorConfiguration (config) {
     RED.nodes.createNode(this, config)
 
     this.endpoint = config.endpoint
@@ -23,7 +23,7 @@ module.exports = function (RED) {
     }
   }
 
-  RED.nodes.registerType('OPCUA-IIoT-Endpoint', OPCUAIIoTEndpointConfiguration, {
+  RED.nodes.registerType('OPCUA-IIoT-Connector', OPCUAIIoTConnectorConfiguration, {
     credentials: {
       user: {type: 'text'},
       password: {type: 'password'}

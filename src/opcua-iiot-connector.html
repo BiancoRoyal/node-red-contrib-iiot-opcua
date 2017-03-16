@@ -8,7 +8,7 @@
 -->
 
 <script type="text/javascript">
-  RED.nodes.registerType('OPCUA-IIoT-Endpoint', {
+  RED.nodes.registerType('OPCUA-IIoT-Connector', {
     category: 'config',
     defaults: {
       endpoint: {value: "", required: true},
@@ -19,7 +19,7 @@
       password: {type: "password"}
     },
     label: function () {
-      return this.endpoint || "Endpoint";
+      return this.endpoint || "Connector";
     },
     oneditprepare: function () {
       try {
@@ -54,8 +54,7 @@
   });
 </script>
 
-
-<script type="text/x-red" data-template-name="OPCUA-IIoT-Endpoint">
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Connector">
     <div class="form-row">
         <label for="node-config-input-endpoint"><i class="icon-link"></i> <span data-i18n="opcua-iiot-contrib.label.common.endpoint"></span></label>
         <input type="text" id="node-config-input-endpoint">

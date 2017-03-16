@@ -10,7 +10,7 @@
 
 module.exports = function (RED) {
   let opcua = require('node-opcua')
-  let opcuaIIoTCore = require('./opcua-iiot-core')
+  let opcuaIIoTCore = require('./core/opcua-iiot-core')
   let nodeId = require('node-opcua/lib/datamodel/nodeid')
   let async = require('async')
   let Queue = require('async').queue
@@ -19,7 +19,7 @@ module.exports = function (RED) {
   let DataType = opcua.DataType
   let AttributeIds = opcua.AttributeIds
 
-  function OPCUAIIoTClient (n) {
+  function OPCUAIIoTWrite (n) {
     RED.nodes.createNode(this, n)
 
     this.name = n.name
@@ -46,7 +46,7 @@ module.exports = function (RED) {
 
     function verboseWarn (logMessage) {
       if (RED.settings.verbose) {
-        node.warn((node.name) ? node.name + ': ' + logMessage : 'OPCUAIIoTClient: ' + logMessage)
+        node.warn((node.name) ? node.name + ': ' + logMessage : 'OPCUAIIoTWrite: ' + logMessage)
       }
     }
 
@@ -676,5 +676,5 @@ module.exports = function (RED) {
     })
   }
 
-  RED.nodes.registerType('OPCUA-IIoT-Client', OPCUAIIoTClient)
+  RED.nodes.registerType('OPCUA-IIoT-Write', OPCUAIIoTWrite)
 }

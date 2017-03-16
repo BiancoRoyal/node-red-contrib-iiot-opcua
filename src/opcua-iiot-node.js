@@ -9,7 +9,7 @@
 'use strict'
 
 module.exports = function (RED) {
-  let opcuaIIoTCore = require('./opcua-iiot-core')
+  let opcuaIIoTCore = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTNode (n) {
     RED.nodes.createNode(this, n)
