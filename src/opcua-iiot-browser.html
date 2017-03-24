@@ -10,10 +10,11 @@
 <script type="text/javascript">
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', {
-    category: 'iiot',
+    category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
-      endpoint: {value: "", required: true, type: "OPCUA-IIoT-Connector"},
+      name: {value: ""},
+      connector: {type: "OPCUA-IIoT-Connector", required: true},
       topic: {value: ""}
     },
     inputs: 1,
@@ -21,7 +22,7 @@
     align: "right",
     icon: "opcuaiiot.png",
     label: function () {
-      return this.item || "Browser";
+      return this.name || "Browser";
     },
     labelStyle: function () {
       return this.item ? "node_label_italic" : "";
@@ -63,9 +64,13 @@
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Browser">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
     <div class="form-row" style="min-width:640px">
-        <label for="node-input-endpoint"><i class="icon-bookmark"></i> <span data-i18n="opcua-iiot-contrib.label.common.endpoint"></span></label>
-        <input type="text" id="node-input-endpoint">
+        <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.common.connector"></span></label>
+        <input type="text" id="node-input-connector">
     </div>
     <div class="form-row">
         <label for="node-input-topic"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.common.topic"></span></label>

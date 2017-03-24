@@ -1,0 +1,8 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "connector": "Connector",
+      "topic": "Topic"
+    }
+  }
+}

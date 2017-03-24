@@ -47,3 +47,7 @@ Some basic rules include:
  - indent with 2-spaces, no tabs. No arguments.
  - follow ES6 coding standards
  - follow standard.js coding standards
+
+### Update
+
+### Upgrade

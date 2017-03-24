@@ -1,4 +1,32 @@
 {
+  "common": {
+    "label": {
+      "payload": "Payload",
+      "topic": "Topic",
+      "name": "Name",
+      "username": "Username",
+      "password": "Password"
+    },
+    "status": {
+      "connected": "connected",
+      "not-connected": "not connected",
+      "disconnected": "disconnected",
+      "connecting": "connecting",
+      "error": "error",
+      "ok": "OK"
+    },
+    "notification": {
+      "error": "<strong>Error</strong>: __message__",
+      "errors": {
+        "not-deployed": "node not deployed",
+        "no-response": "no response from server",
+        "unexpected": "unexpected error (__status__) __message__"
+      }
+    },
+    "errors": {
+      "nooverride": "Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props"
+    }
+  },
   "opcua-iiot-contrib": {
     "common": {
       "label": {
@@ -7,6 +35,7 @@
         "timeout": "Timeout",
         "name": "Name",
         "endpoint": "Endpoint",
+        "connector": "Connector",
         "topic": "Topic",
         "user": "User",
         "password": "Password"

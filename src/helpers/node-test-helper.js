@@ -29,13 +29,13 @@ if (!process.version.match(/^v0\.[0-9]\./)) {
     nock = null
   }
 }
-var RED = require('../../red/red.js')
-var redNodes = require('../../red/runtime/nodes')
-var flows = require('../../red/runtime/nodes/flows')
-var credentials = require('../../red/runtime/nodes/credentials')
-var comms = require('../../red/api/comms.js')
-var log = require('../../red/runtime/log.js')
-var context = require('../../red/runtime/nodes/context.js')
+var RED = require('node-red/red/red.js')
+var redNodes = require('node-red/red/runtime/nodes')
+var flows = require('node-red/red/runtime/nodes/flows')
+var credentials = require('node-red/red/runtime/nodes/credentials')
+var comms = require('node-red/red/api/comms.js')
+var log = require('node-red/red/runtime/log.js')
+var context = require('node-red/red/runtime/nodes/context.js')
 
 var http = require('http')
 var app = express()
@@ -148,9 +148,6 @@ module.exports = {
   stopServer: function (done) {
     if (server) {
       try {
-        server.on('close', function () {
-          comms.stop()
-        })
         server.close(done)
       } catch (e) {
         done()

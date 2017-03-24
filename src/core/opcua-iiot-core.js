@@ -16,10 +16,9 @@
  * @Namesapce de.biancoroyal.opcua.iiot.core
  */
 var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line no-use-before-define
-
-de.biancoroyal.opcua.iiot.core.nodeOPCUA = require('node-opcua')
-de.biancoroyal.opcua.iiot.core.internalDebugLog = require('debug')('opcuaIIoT')
-de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = 'ns=0;i=84'
+de.biancoroyal.opcua.iiot.core.nodeOPCUA = de.biancoroyal.opcua.iiot.core.nodeOPCUA || require('node-opcua') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT || 'ns=0;i=84' // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.getTimeUnitName = function (unit) {
   let unitAbbreviation = ''

@@ -11,6 +11,7 @@
   RED.nodes.registerType('OPCUA-IIoT-Connector', {
     category: 'config',
     defaults: {
+      name: {value: ""},
       endpoint: {value: "", required: true},
       loginEnabled: {value: false}
     },
@@ -19,7 +20,7 @@
       password: {type: "password"}
     },
     label: function () {
-      return this.endpoint || "Connector";
+      return this.name || "Connector";
     },
     oneditprepare: function () {
       try {
@@ -56,6 +57,10 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Connector">
     <div class="form-row">
+        <label for="node-config-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
         <label for="node-config-input-endpoint"><i class="icon-link"></i> <span data-i18n="opcua-iiot-contrib.label.common.endpoint"></span></label>
         <input type="text" id="node-config-input-endpoint">
     </div>
@@ -82,4 +87,8 @@
             <input type="password" id="node-config-input-password">
         </div>
     </div>
+</script>
+
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Connector">
+    <p>Information OPC UA IIoT Connector</p>
 </script>

@@ -9,11 +9,11 @@
 
 <script type="text/javascript">
   RED.nodes.registerType('OPCUA-IIoT-Listener', {
-    category: 'iiot',
+    category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
       endpoint: {value: "", required: true, type: "OPCUA-IIoT-Connector"},
-      action: {value: "read", required: true},
+      action: {value: "subscribe", required: true},
       time: {value: 10},
       timeUnit: {value: "s"},
       name: {value: ""}
@@ -63,9 +63,6 @@
      <div class="form-row">
         <label for="node-input-action"><i class="fa fa-tasks"></i> Action</label>
         <select type="text" id="node-input-action" style="width:72%;">
-            <option selected value="read">READ</option>
-            <option value="write">WRITE</option>
-            <option value="browse">BROWSE</option>
             <option value="subscribe">SUBSCRIBE</option>
             <option value="events">EVENTS</option>
         </select>

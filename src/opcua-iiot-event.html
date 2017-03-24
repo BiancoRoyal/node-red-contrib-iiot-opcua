@@ -9,11 +9,11 @@
 
 <script type="text/javascript">
   RED.nodes.registerType('OPCUA-IIoT-Event', {
-    category: 'iiot',
+    category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
-      root: {value: "", required: true}, 	// ns=2;i=85 Server object to look through all objects under it
-      eventtype: {value: "", required: true}, 		// TODO ui should contain selectable condition types or all
+      root: {value: "", required: true},
+      eventtype: {value: "", required: true},
       name: {value: ""}
     },
     inputs: 1,

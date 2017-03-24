@@ -1,6 +1,7 @@
 {
   "opcua-iiot-contrib": {
     "label": {
+      "connector": "Connector",
       "type": "Type",
       "host": "Host",
       "port": "Port",

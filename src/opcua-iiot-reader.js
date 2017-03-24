@@ -239,13 +239,13 @@ module.exports = function (RED) {
 
     node.on('input', function (msg) {
       if (!node.action) {
-        verboseWarn("can't work without action (read, write, browse ...)")
+        verboseWarn('can\'t work without action (read, write, browse ...)')
         // node.send(msg); // do not send in case of error
         return
       }
 
       if (!node.client || !node.session) {
-        verboseWarn("can't work without OPC UA Session")
+        verboseWarn('can\'t work without OPC UA Session')
         resetOpcuaClient(connectOpcuaClient)
         // node.send(msg); // do not send in case of error
         return
@@ -261,7 +261,7 @@ module.exports = function (RED) {
       }
 
       if (!msg || !msg.topic) {
-        verboseWarn("can't work without OPC UA NodeId - msg.topic")
+        verboseWarn('can\'t work without OPC UA NodeId - msg.topic')
         // node.send(msg); // do not send in case of error
         return
       }
@@ -317,14 +317,17 @@ module.exports = function (RED) {
                   verboseLog('\tValue : ' + dataValue.value.value)
                   verboseLog('\tDataType: ' + dataValue.value.dataType + ' (' + dataValue.value.dataType.toString() + ')')
                   verboseLog('\tMessage: ' + msg.topic + ' (' + msg.datatype + ')')
+
                   if (msg.datatype.localeCompare(dataValue.value.dataType.toString()) !== 0) {
                     node.error('\tMessage types are not matching: ' + msg.topic + ' types: ' + msg.datatype + ' <> ' + dataValue.value.dataType.toString())
                   }
+
                   if (dataValue.value.dataType === opcua.DataType.UInt16) {
                     verboseLog('UInt16:' + dataValue.value.value + ' -> Int32:' + opcuaIIoTCore.toInt32(dataValue.value.value))
                   }
 
                   verboseLog('read item changed dataType: ' + dataValue.value.dataType + ' value:' + dataValue.value.value)
+
                   msg.payload = opcuaIIoTCore.buildNewValueByDatatype(dataValue.value.dataType, dataValue.value.value)
 
                   if (dataValue.statusCode && dataValue.statusCode.toString(16) === 'Good (0x00000)') {
@@ -336,11 +339,11 @@ module.exports = function (RED) {
                   node.send(msg)
                 } catch (e) {
                   if (dataValue) {
-                    node.error('\tBad read: ' + (dataValue.statusCode.toString(16)).red.bold)
-                    node.error('\tMessage:' + msg.topic + ' dataType:' + msg.datatype)
-                    node.error('\tData:' + JSON.stringify(dataValue))
+                    node.error(new Error('Bad read: ' + (dataValue.statusCode.toString(16)).red.bold +
+                      ' Message:' + msg.topic + ' DataType:' + msg.datatype + ' Data:' + JSON.stringify(dataValue), msg))
+                    node.send({payload: dataValue})
                   } else {
-                    node.error(e.message)
+                    node.error(e, msg)
                   }
                 }
               }

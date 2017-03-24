@@ -15,10 +15,8 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.client
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.client = de.biancoroyal.opcua.iiot.core.client || {} // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core = de.biancoroyal.opcua.iiot.core || require('./opcua-iiot-core')
+var de = de || {biancoroyal: {opcua: {iiot: {core: {client: {}}}}}} // eslint-disable-line no-use-before-define
 
-de.biancoroyal.opcua.iiot.core = require('./opcua-iiot-core')
+de.biancoroyal.opcua.iiot.core.client.core = require('./opcua-iiot-core')
 
 module.exports = de.biancoroyal.opcua.iiot.core.client

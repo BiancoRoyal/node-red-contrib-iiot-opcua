@@ -1,0 +1,42 @@
+{
+  "opcuaiiotinject": {
+    "opcuaiiotinject": "inject",
+    "inject": "inject",
+    "repeat": "repeat = __repeat__",
+    "crontab": "crontab = __crontab__",
+    "stopped": "stopped",
+    "failed": "Inject failed: __error__",
+    "label": {
+      "repeat": "Wiederholung"
+    },
+    "timestamp": "Zeitstempel",
+    "none": "keine",
+    "interval": "Interval",
+    "interval-time": "Zeitinterval",
+    "time": "bestimmter Zeitpunkt",
+    "seconds": "Sekunden",
+    "minutes": "Minuten",
+    "hours": "Stunden",
+    "between": "zwischen",
+    "previous": "previous value",
+    "at": "an",
+    "and": "und",
+    "every": "jede",
+    "days": [
+      "Montag",
+      "Dienstag",
+      "Mittwoch",
+      "Donnerstag",
+      "Freitag",
+      "Samstag",
+      "Sonntag"
+    ],
+    "on": "um",
+    "onstart": "Inject beim Start?",
+    "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
+    "success": "Erfolgreich injected: __label__",
+    "errors": {
+      "failed": "inject failed, see log for details"
+    }
+  }
+}
