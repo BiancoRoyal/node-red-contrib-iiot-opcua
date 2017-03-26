@@ -13,6 +13,7 @@
     defaults: {
       name: {value: ''},
       topic: {value: ''},
+      datatype: {value: '', required: true},
       payload: {
         value: '', validate: function (v) {
           let ptype = $('#node-input-payloadType').val() || this.payloadType
@@ -392,6 +393,21 @@
     <div class="form-row">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
         <input type="text" id="node-input-topic">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcuaiiotinject.label.datatype"></span></label>
+        <select type="text" id="node-input-datatype">
+            <option value="Boolean">Boolean</option>
+            <option value="Integer">Integer</option>
+            <option value="Float">Float</option>
+            <option value="Double">Double</option>
+            <option value="String">String</option>
+            <option value="Int16">Int16</option>
+            <option value="Int32">Int32</option>
+            <option value="UInt16">UInt16</option>
+            <option value="UInt32">UInt32</option>
+        </select>
     </div>
 
     <div class="form-row">

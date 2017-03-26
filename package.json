@@ -39,7 +39,7 @@
     "nodes": {
       "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",
       "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
-      "OPCUA-IIoT-Reader": "opcuaIIoT/opcua-iiot-reader.js",
+      "OPCUA-IIoT-Read": "opcuaIIoT/opcua-iiot-read.js",
       "OPCUA-IIoT-Listener": "opcuaIIoT/opcua-iiot-listener.js",
       "OPCUA-IIoT-Write": "opcuaIIoT/opcua-iiot-write.js",
       "OPCUA-IIoT-Browser": "opcuaIIoT/opcua-iiot-browser.js",

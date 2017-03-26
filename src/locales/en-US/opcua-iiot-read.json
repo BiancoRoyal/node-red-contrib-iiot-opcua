@@ -4,7 +4,7 @@
       "connector": "Connector",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
-      "topic": "Topic"
+      "attributeId": "Attribute Id"
     }
   }
 }

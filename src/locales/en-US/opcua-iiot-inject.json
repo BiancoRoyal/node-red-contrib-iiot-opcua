@@ -7,7 +7,8 @@
     "stopped": "stopped",
     "failed": "Inject failed: __error__",
     "label": {
-      "repeat": "Repeat"
+      "repeat": "Repeat",
+      "datatype": "Datatype"
     },
     "timestamp": "timestamp",
     "none": "none",

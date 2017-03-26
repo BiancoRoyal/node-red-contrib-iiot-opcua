@@ -38,7 +38,9 @@
         "connector": "Connector",
         "topic": "Topic",
         "user": "User",
-        "password": "Password"
+        "password": "Password",
+        "showActivities": "Show Activities",
+        "showErrors": "Show Errors"
       },
       "response": {
       },

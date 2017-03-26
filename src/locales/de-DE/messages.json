@@ -2,7 +2,9 @@
   "opcua-iiot-contrib": {
     "common": {
       "label": {
-        "type": "Typ"
+        "type": "Typ",
+        "showActivities": "Zeige Aktivitäten",
+        "showErrors": "Zeige Fehler"
       },
       "response": {
       },

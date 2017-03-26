@@ -46,16 +46,43 @@ module.exports = function (RED) {
             })
         }
       } else {
+        let entry = null
+        let statusName = null
+        let entryStatus = [0, 0, 0]
+        let informationText = 'unknown'
+
+        if (msg.payload.length) {
+          for (entry of msg.payload) {
+            if (msg.type === 'write') {
+              statusName = entry.name
+            } else {
+              statusName = entry.statusCode.name
+            }
+
+            if (statusName) {
+              switch (statusName) {
+                case 'Good':
+                  entryStatus[0] += 1
+                  break
+                case 'Bad':
+                  entryStatus[1] += 1
+                  break
+                default:
+                  entryStatus[2] += 1
+              }
+            }
+          }
+
+          informationText = 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2]
+        }
         node.status({
           fill: 'yellow',
           shape: 'dot',
-          text: 'unknown'
+          text: informationText
         })
+        node.send(msg)
       }
-
-      node.send(msg)
-    }
-    )
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Response', OPCUAIIoTResponse)

@@ -9,7 +9,7 @@
 'use strict'
 
 module.exports = function (RED) {
-  let coreBrowser = require('./core/opua-iiot-core-browser')
+  let coreBrowser = require('./core/opcua-iiot-core-browser')
   let browserItems = []
 
   function OPCUAIIoTBrowser (config) {
@@ -19,7 +19,6 @@ module.exports = function (RED) {
     this.datatype = config.datatype
     this.topic = config.topic
 
-    const TEN_SECONDS_TIMEOUT = 10
     let node = this
     node.items = []
     node.connector = RED.nodes.getNode(config.connector)
@@ -41,7 +40,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.browseResultHandling = function (err) {
+    node.browseResultHandling = function (err, msg) {
       if (err) {
         browserItems = []
         browserItems.push({
@@ -50,13 +49,18 @@ module.exports = function (RED) {
           browseName: 'Objects'
         })
         coreBrowser.core.internalDebugLog(err)
+
+        if (node.showErrors) {
+          node.error(err, msg)
+        }
+
         node.status({fill: 'red', shape: 'dot', text: 'error'})
       } else {
-        coreBrowser.core.internalDebugLog('browse done - result: ' + browserItems.length + ' item(s)')
+        coreBrowser.core.internalDebugLog('browse done with catch but no error: ' + browserItems.length + ' item(s)')
       }
     }
 
-    node.browse = function (session) {
+    node.browse = function (session, msg) {
       node.items = []
 
       if (session && node.browseTopic) {
@@ -75,7 +79,9 @@ module.exports = function (RED) {
 
           browserItems = node.items
           node.status({fill: 'green', shape: 'dot', text: 'active'})
-        }).catch(node.browseResultHandling)
+        }).catch(function (err) {
+          node.browseResultHandling(err, msg)
+        })
       }
     }
 
@@ -99,7 +105,7 @@ module.exports = function (RED) {
       }
 
       if (node.browseTopic) {
-        node.browse(node.opcuaSession)
+        node.browse(node.opcuaSession, msg)
         msg.payload = {
           endpoint: node.connector.endpoint,
           session: node.opcuaSession.name,
@@ -123,7 +129,10 @@ module.exports = function (RED) {
     }
 
     node.handleSessionError = function (err) {
-      node.error(err, {payload: 'OPC UA Session Error'})
+      if (node.showErrors) {
+        node.error(err, {payload: 'OPC UA Session Error'})
+      }
+
       node.connector.closeSession(function () {
         node.startOPCUASession(node.opcuaClient)
       })
@@ -131,7 +140,7 @@ module.exports = function (RED) {
 
     node.startOPCUASession = function (opcuaClient) {
       node.opcuaClient = opcuaClient
-      node.connector.startSession(TEN_SECONDS_TIMEOUT).then(function (session) {
+      node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT).then(function (session) {
         node.opcuaSession = session
       }).catch(node.handleSessionError)
     }

@@ -13,7 +13,9 @@
     defaults: {
       name: {value: ""},
       endpoint: {value: "", required: true},
-      loginEnabled: {value: false}
+      loginEnabled: {value: false},
+      showStatusActivities: {value: false},
+      showErrors: {value: false}
     },
     credentials: {
       user: {type: "text"},
@@ -86,6 +88,17 @@
             <label for="node-config-input-password"><i class="icon-password"></i> <span data-i18n="opcua-iiot-contrib.label.common.password"></span></label>
             <input type="password" id="node-config-input-password">
         </div>
+    </div>
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-config-input-showStatusActivities"><i class="fa fa-th"></i> <span
+        data-i18n="opcua-iiot.label.showActivities"></span></label>
+        <input type="checkbox" id="node-config-input-showStatusActivities" style="max-width:30px">
+    </div>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-config-input-showErrors"><i class="fa fa-th"></i> <span
+        data-i18n="opcua-iiot.label.showErrors"></span></label>
+        <input type="checkbox" id="node-config-input-showErrors" style="max-width:30px">
     </div>
 </script>
 

@@ -15,6 +15,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
 
     this.topic = config.topic
+    this.datatype = config.datatype
     this.payload = config.payload
     this.payloadType = config.payloadType
     this.repeat = config.repeat
@@ -25,41 +26,43 @@ module.exports = function (RED) {
     node.interval_id = null
     node.cronjob = null
 
-    if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
-      this.repeat = this.repeat * 1000
-      if (RED.settings.verbose) { this.log(RED._('opcuaiiotinject.repeat', this)) }
-      this.interval_id = setInterval(function () {
+    if (node.repeat && !isNaN(node.repeat) && node.repeat > 0) {
+      node.repeat = node.repeat * 1000
+      if (RED.settings.verbose) { node.log(RED._('opcuaiiotinject.repeat', this)) }
+      node.interval_id = setInterval(function () {
         node.emit('input', {})
-      }, this.repeat)
-    } else if (this.crontab) {
-      if (RED.settings.verbose) { this.log(RED._('opcuaiiotinject.crontab', this)) }
-      this.cronjob = new cron.CronJob(this.crontab,
+      }, node.repeat)
+    } else if (node.crontab) {
+      if (RED.settings.verbose) { node.log(RED._('opcuaiiotinject.crontab', this)) }
+      node.cronjob = new cron.CronJob(node.crontab,
         function () {
           node.emit('input', {})
         },
         null, true)
     }
 
-    if (this.once) {
+    if (node.once) {
       setTimeout(function () { node.emit('input', {}) }, 100)
     }
 
-    this.on('input', function (msg) {
+    node.on('input', function (msg) {
       try {
-        msg.topic = this.topic
-        if ((this.payloadType === null && this.payload === '') || this.payloadType === 'date') {
+        msg.topic = node.topic
+        msg.datatype = node.datatype
+
+        if ((node.payloadType === null && node.payload === '') || node.payloadType === 'date') {
           msg.payload = Date.now()
-        } else if (this.payloadType === null) {
-          msg.payload = this.payload
-        } else if (this.payloadType === 'none') {
+        } else if (node.payloadType === null) {
+          msg.payload = node.payload
+        } else if (node.payloadType === 'none') {
           msg.payload = ''
         } else {
-          msg.payload = RED.util.evaluateNodeProperty(this.payload, this.payloadType, this, msg)
+          msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, this, msg)
         }
-        this.send(msg)
+        node.send(msg)
         msg = null
       } catch (err) {
-        this.error(err, msg)
+        node.error(err, msg)
       }
     })
   }

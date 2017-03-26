@@ -3,8 +3,7 @@
     "label": {
       "connector": "Connector",
       "showActivities": "Show Activities",
-      "showErrors": "Show Errors",
-      "topic": "Topic"
+      "showErrors": "Show Errors"
     }
   }
 }

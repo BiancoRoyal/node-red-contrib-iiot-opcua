@@ -15,7 +15,9 @@
     defaults: {
       name: {value: ""},
       connector: {type: "OPCUA-IIoT-Connector", required: true},
-      topic: {value: ""}
+      topic: {value: ""},
+      showStatusActivities: {value: false},
+      showErrors: {value: false}
     },
     inputs: 1,
     outputs: 1,
@@ -76,6 +78,17 @@
         <label for="node-input-topic"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.common.topic"></span></label>
         <input type="text" id="node-input-topic" style="width:40%;" placeholder="ns=0;i=85">
         <a id="node-lookup-topic" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
+    </div>
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i> <span
+        data-i18n="opcua-iiot.label.showActivities"></span></label>
+        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+    </div>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i> <span
+        data-i18n="opcua-iiot.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
 </script>
 

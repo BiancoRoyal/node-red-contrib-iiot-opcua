@@ -7,10 +7,9 @@
  */
 'use strict'
 
-var assert = require('chai').assert
-var core = require('../../src/core/opcua-iiot-core')
-
 describe('OPC UA Core', function () {
+  let assert = require('chai').assert
+  let core = require('../../src/core/opcua-iiot-core')
 
   describe('get the name of a time unit', function () {
     it('should return the right string when the value is present', function (done) {

@@ -15,8 +15,7 @@
  * @Namesapce de.biancoroyal.opcua.iiot.core.connector
  */
 var de = de || {biancoroyal: {opcua: {iiot: {core: {connector: {}}}}}} // eslint-disable-line no-use-before-define
-
-de.biancoroyal.opcua.iiot.core.connector.core = require('./opcua-iiot-core')
+de.biancoroyal.opcua.iiot.core.connector.core = de.biancoroyal.opcua.iiot.core.connector.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.connector.connect = function (url) {
   return new Promise(
@@ -59,7 +58,7 @@ de.biancoroyal.opcua.iiot.core.connector.createSession = function (opcuaClient, 
 de.biancoroyal.opcua.iiot.core.connector.closeSession = function (session) {
   return new Promise(
     function (resolve, reject) {
-      if (session) {
+      if (session && session.sessionId !== 'terminated') {
         session.close(function (err) {
           if (err) {
             reject(err)

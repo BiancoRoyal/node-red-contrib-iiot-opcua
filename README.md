@@ -12,11 +12,11 @@
 
 Run command on Node-RED installation directory.
 
-	npm install node-red-contrib-opcua
+	npm install node-red-contrib-opcua-iiot
 
 or run command for global installation.
 
-	npm install -g node-red-contrib-opcua
+	npm install -g node-red-contrib-opcua-iiot
 
 try these options on npm install to build, if you have problems to install
 
@@ -34,19 +34,17 @@ start debug with Node-RED in verbose (-v) mode
 
     DEBUG=opcuaIIoT node-red -v
 
+### Wiki
+
+Link to Wiki
+
 ## Package Information
 
 ### License
 
 The BSD 3-Clause License
 
-### Authors
-
 [Klaus Landsdorf][1]
-
-#### History
-
-M. Karaila
 
 ### Features
 

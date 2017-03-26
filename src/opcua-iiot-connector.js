@@ -9,7 +9,7 @@
 'use strict'
 
 module.exports = function (RED) {
-  let coreConnector = require('./core/opua-iiot-core-connector')
+  let coreConnector = require('./core/opcua-iiot-core-connector')
 
   function OPCUAIIoTConnectorConfiguration (config) {
     RED.nodes.createNode(this, config)
@@ -53,6 +53,10 @@ module.exports = function (RED) {
     }
 
     node.closeSession = function (done) {
+      if (node.session) {
+        coreConnector.core.internalDebugLog('close Session Id: ' + node.session.sessionId)
+      }
+
       coreConnector.closeSession(node.session).then(function () {
         coreConnector.core.internalDebugLog('sucessfully closed for reconnect on ' + node.endpoint)
         done()
