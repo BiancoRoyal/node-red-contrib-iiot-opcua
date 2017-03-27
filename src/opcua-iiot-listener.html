@@ -10,65 +10,48 @@
 <script type="text/javascript">
   RED.nodes.registerType('OPCUA-IIoT-Listener', {
     category: 'IIoT',
-    color: "#ABCDEF",
+    color: '#ABCDEF',
     defaults: {
-      endpoint: {value: "", required: true, type: "OPCUA-IIoT-Connector"},
-      action: {value: "subscribe", required: true},
-      time: {value: 10},
-      timeUnit: {value: "s"},
-      name: {value: ""}
+      name: {value: ''},
+      connector: {type: 'OPCUA-IIoT-Connector', required: true},
+      action: {value: 'subscribe', required: true},
+      time: {value: 10, required: true, validate: RED.validators.number()},
+      timeUnit: {value: 's', required: true},
+      showStatusActivities: {value: false},
+      showErrors: {value: false}
     },
     inputs: 1,
     outputs: 1,
-    align: "right",
-    icon: "opcuaiiot.png",
+    align: 'right',
+    icon: 'opcuaiiot.png',
     label: function () {
-      return this.name || "OPC UA Listener";
+      return this.name || 'Listener'
     },
     labelStyle: function () {
-      return this.name ? "node_label_italic" : "";
-    },
-    oneditprepare: function () {
-
-      let node = this;
-
-      try {
-        let inputAction = $('#node-input-action');
-        let inputTime = $('#node-input-timerow');
-        change_time_input(); // first to fit config now
-        inputAction.change(change_time_input);
-
-      } catch (err) {
-        console.log(err);
-      }
-
-      function change_time_input () {
-        if (inputAction.val() == "subscribe" || inputAction.val() == "events") {
-          inputTime.show();
-        }
-        else {
-          inputTime.hide();
-        }
-      }
+      return this.name ? 'node_label_italic' : ''
     }
-  });
+  })
 </script>
 
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Listener">
     <div class="form-row">
-        <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
-        <input type="text" id="node-input-endpoint" placeholder="opc.tcp://localhost:4334">
+        <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-connector"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.common.connector"></span></label>
+        <input type="text" id="node-input-connector" placeholder="opc.tcp://localhost:4334">
     </div>
      <div class="form-row">
-        <label for="node-input-action"><i class="fa fa-tasks"></i> Action</label>
+        <label for="node-input-action"><i class="fa fa-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.common.action"></span></label>
         <select type="text" id="node-input-action" style="width:72%;">
             <option value="subscribe">SUBSCRIBE</option>
             <option value="events">EVENTS</option>
         </select>
     </div>
     <div class="form-row" id="node-input-timerow">
-        <label for="node-input-time"><i class="icon-time"></i> Interval</label>
+        <label for="node-input-time"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.common.interval"></span></label>
         <input type="number" id="node-input-time" placeholder="number" style="max-width:120px">
         <select id="node-input-timeUnit" style="max-width:160px">
             <option value="ms">millisecond(s)</option>
@@ -77,12 +60,17 @@
             <option value="h">hour(s)</option>
         </select>
     </div>
+    <hr>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tasks"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="">
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i> <span
+        data-i18n="opcua-iiot.label.showActivities"></span></label>
+        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
     </div>
-
-
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i> <span
+        data-i18n="opcua-iiot.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Listener">

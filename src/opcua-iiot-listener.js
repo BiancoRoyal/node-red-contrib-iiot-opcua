@@ -9,12 +9,10 @@
 'use strict'
 
 module.exports = function (RED) {
-  let opcuaIIoTCore = require('./core/opcua-iiot-core')
+  let coreListener = require('./core/opcua-iiot-core-listener')
   let async = require('async')
   let Queue = require('async').queue
   let Set = require('collections/set')
-  let DataType = opcuaIIoTCore.nodeOPCUA.DataType
-  let AttributeIds = opcuaIIoTCore.nodeOPCUA.AttributeIds
 
   function OPCUAIIoTListener (config) {
     RED.nodes.createNode(this, config)
@@ -23,72 +21,57 @@ module.exports = function (RED) {
     this.action = config.action
     this.time = config.time
     this.timeUnit = config.timeUnit
+    this.showStatusActivities = config.showStatusActivities
+    this.showErrors = config.showErrors
 
     let node = this
+    node.connector = RED.nodes.getNode(config.connector)
 
-    let opcuaEndpoint = RED.nodes.getNode(config.endpoint)
-    let subscription // only one subscription needed to hold multiple monitored Items
+    let subscription = null
+    let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
+    let DataType = coreListener.core.nodeOPCUA.DataType
+    let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
+    let monitoredItems = coreListener.MonitoredItemSet()
 
-    let monitoredItems = new Set(null, function (a, b) {
-      return a.topicName === b.topicName
-    }, function (object) {
-      return object.topicName
-    }) // multiple monitored Items should be registered only once
+    node.createSubscription = function (msg, cb) {
+      let timeMilliseconds = coreListener.core.calcMillisecondsByTimeAndUnit(node.time, node.timeUnit)
+      subscription = node.makeSubscription(cb, msg, coreListener.getSubscriptionParameters(timeMilliseconds))
+    }
 
-    /*  Subscription */
-    function subscribeActionInput (msg) {
+    node.resetSubscription = function () {
+      subscription = null
+      monitoredItems.clear()
+      setNodeStatusTo('terminated')
+    }
+
+    node.subscribeActionInput = function (msg) {
       if (!subscription) {
-        // first build and start subscription and subscribe on its started event by callback
-        let timeMilliseconds = opcuaIIoTCore.calcMillisecondsByTimeAndUnit(node.time, node.timeUnit)
-        subscription = makeSubscription(subscribeMonitoredItem, msg, opcuaIIoTCore.getSubscriptionParameters(timeMilliseconds))
+        node.createSubscription(msg, node.subscribeMonitoredItem)
       } else {
-        // otherwise check if its terminated start to renew the subscription
         if (subscription.subscriptionId !== 'terminated') {
-          setNodeStatusTo('active subscribing')
-          subscribeMonitoredItem(subscription, msg)
+          setNodeStatusTo('active')
+          node.subscribeMonitoredItem(subscription, msg)
         } else {
-          subscription = null
-          monitoredItems.clear()
-          setNodeStatusTo('terminated')
-          opcuaEndpoint.resetOpcuaClient()
+          node.resetSubscription()
         }
       }
     }
 
-    function subscribeMonitoredItem (subscription, msg) {
+    node.subscribeMonitoredItem = function (subscription, msg) {
       let monitoredItem = monitoredItems.get({'topicName': msg.topic})
 
       if (!monitoredItem) {
-        let interval = 100
-
-        if (typeof msg.payload === 'number') {
-          interval = Number(msg.payload)
-        }
-
-        monitoredItem = subscription.monitor(
-          {
-            nodeId: msg.topic,
-            attributeId: opcuaIIoTCore.nodeOPCUA.AttributeIds.Value
-          },
-          {
-            samplingInterval: interval,
-            queueSize: 10,
-            discardOldest: true
-          },
-          3,
-          function (err) {
-            if (err) {
-              node.error('subscription.monitorItem:' + err)
-              opcuaEndpoint.resetOpcuaClient()
-            }
+        monitoredItem = coreListener.buildNewMonitoredItem(msg, subscription, function (err) {
+          if (err) {
+            node.error('subscription.monitorItem:' + err)
           }
-        )
+        })
 
         monitoredItems.add({'topicName': msg.topic, mItem: monitoredItem})
 
         monitoredItem.on('changed', function (dataValue) {
           setNodeStatusTo('active subscribed')
-          msg.payload = opcuaIIoTCore.buildNewValueByDatatype(dataValue.value.dataType, dataValue.value.value)
+          msg.payload = coreListener.core.buildMsgPayloadByDataValue(dataValue.value.dataType, dataValue.value.value)
           node.send(msg)
         })
 
@@ -102,35 +85,15 @@ module.exports = function (RED) {
       return monitoredItem
     }
 
-    function subscribeMonitoredEvent (subscription, msg) {
+    node.subscribeMonitoredEvent = function (subscription, msg) {
       let monitoredItem = monitoredItems.get({'topicName': msg.topic})
 
       if (!monitoredItem) {
-        let interval = 100
-
-        if (typeof msg.payload === 'number') {
-          interval = Number(msg.payload)
-        }
-
-        monitoredItem = subscription.monitor(
-          {
-            nodeId: msg.topic, // serverObjectId
-            attributeId: AttributeIds.EventNotifier
-          },
-          {
-            samplingInterval: interval,
-            queueSize: 100000,
-            filter: msg.eventFilter,
-            discardOldest: true
-          },
-          3,
-          function (err) {
-            if (err) {
-              node.error('subscription.monitorEvent:' + err)
-              opcuaEndpoint.resetOpcuaClient()
-            }
+        monitoredItem = coreListener.buildNewEventItem(msg, subscription, function (err) {
+          if (err) {
+            node.error('subscription.monitorEvent:' + err)
           }
-        )
+        })
 
         monitoredItems.add({'topicName': msg.topic, mItem: monitoredItem})
 
@@ -162,26 +125,21 @@ module.exports = function (RED) {
       return monitoredItem
     }
 
-    function subscribeEventsInput (msg) {
+    node.subscribeEventsInput = function (msg) {
       if (!subscription) {
-        // first build and start subscription and subscribe on its started event by callback
-        let timeMilliseconds = opcuaIIoTCore.calcMillisecondsByTimeAndUnit(node.time, node.timeUnit)
-        subscription = makeSubscription(subscribeMonitoredEvent, msg, opcuaIIoTCore.getEventSubscribtionParameters(timeMilliseconds))
+        node.createSubscription(msg, node.subscribeMonitoredEvent)
       } else {
-        // otherwise check if its terminated start to renew the subscription
         if (subscription.subscriptionId !== 'terminated') {
-          setNodeStatusTo('active subscribing')
-          subscribeMonitoredEvent(subscription, msg)
+          setNodeStatusTo('active')
+          node.subscribeMonitoredEvent(subscription, msg)
         } else {
-          subscription = null
-          monitoredItems.clear()
-          setNodeStatusTo('terminated')
-          opcuaEndpoint.resetOpcuaClient()
+          node.resetSubscription()
         }
       }
     }
 
-    function makeSubscription (callback, msg, parameters) {
+    // TODO: transform to promises
+    node.makeSubscription = function (callback, msg, parameters) {
       let newSubscription = null
 
       if (!node.session) {
@@ -192,7 +150,7 @@ module.exports = function (RED) {
         return newSubscription
       }
 
-      newSubscription = new opcuaIIoTCore.nodeOPCUA.ClientSubscription(node.session, parameters)
+      newSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.session, parameters)
 
       newSubscription.on('initialized', function () {
         setNodeStatusTo('initialized')
@@ -209,19 +167,20 @@ module.exports = function (RED) {
       })
 
       newSubscription.on('terminated', function () {
-        setNodeStatusTo('terminated')
-        subscription = null
-        monitoredItems.clear()
+        node.resetSubscription()
       })
 
       return newSubscription
     }
 
-    /* Events */
-    function getBrowseName (session, nodeId, callback) {
-      session.read([{nodeId: nodeId, attributeId: AttributeIds.BrowseName}], function (err, org, readValue) {
+    // TODO: clean code
+    node.getBrowseName = function (session, nodeId, callback) {
+      coreListener.client.read(session, [{
+        nodeId: nodeId,
+        attributeId: AttributeIds.BrowseName
+      }], function (err, org, readValue) {
         if (!err) {
-          if (readValue[0].statusCode === opcuaIIoTCore.nodeOPCUA.StatusCodes.Good) {
+          if (readValue[0].statusCode === StatusCodes.Good) {
             let browseName = readValue[0].value.value.name
             return callback(null, browseName)
           }
@@ -230,6 +189,11 @@ module.exports = function (RED) {
       })
     }
 
+    // looks like the example from node-opcua see:
+    // https://github.com/node-opcua/node-opcua/blob/master/bin/interactive_client.js
+    // or here:
+    // https://github.com/node-opcua/node-opcua/tree/master/test/end_to_end
+    //
     // Fields selected alarm fields
     // EventFields same order returned from server array of variants (filled or empty)
     function __dumpEvent (node, session, fields, eventFields, _callback) {
@@ -242,9 +206,9 @@ module.exports = function (RED) {
         }
 
         if (variant.dataType === DataType.NodeId) {
-          getBrowseName(session, variant.value, function (err, name) {
+          node.getBrowseName(session, variant.value, function (err, name) {
             if (!err) {
-              opcuaIIoTCore.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
+              coreListener.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
               setNodeStatusTo('active event')
               node.send(msg)
             }
@@ -252,7 +216,7 @@ module.exports = function (RED) {
           })
         } else {
           setImmediate(function () {
-            opcuaIIoTCore.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
+            coreListener.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
             setNodeStatusTo('active event')
             callback()
           })
@@ -270,42 +234,21 @@ module.exports = function (RED) {
       })
     }
 
-    /* Node */
     function setNodeStatusTo (statusValue) {
-      let statusParameter = opcuaIIoTCore.getNodeStatus(statusValue)
+      let statusParameter = coreListener.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    opcuaEndpoint.createOpcuaClient()
-
     node.on('input', function (msg) {
-      if (!msg || !msg.topic) {
-        return
-      }
-
-      if (!node.action) {
-        return
-      }
-
-      if (!node.client || !node.session) {
-        opcuaEndpoint.resetOpcuaClient()
-        return
-      }
-
-      if (!node.session.sessionId === 'terminated') {
-        opcuaEndpoint.resetOpcuaClient()
-        return
-      }
-
       switch (node.action) {
         case 'subscribe':
-          subscribeActionInput(msg)
+          node.subscribeActionInput(msg)
           break
         case 'events':
-          subscribeEventsInput(msg)
+          node.subscribeEventsInput(msg)
           break
         default:
-          break
+          throw new TypeError('Unknown Action Type')
       }
     })
 
@@ -320,34 +263,10 @@ module.exports = function (RED) {
           if (err) {
             node.error(node.name + ' ' + err)
           }
-
           node.session = null
-          opcuaEndpoint.closeOpcuaClient()
         })
       } else {
         node.session = null
-        opcuaEndpoint.closeOpcuaClient()
-      }
-    })
-
-    node.on('error', function () {
-      if (subscription && subscription.isActive()) {
-        subscription.terminate()
-      }
-
-      if (node.session) {
-        node.session.close(function (err) {
-          if (err) {
-            node.error(node.name + ' ' + err)
-          }
-
-          setNodeStatusTo('session closed')
-          node.session = null
-          opcuaEndpoint.closeOpcuaClient()
-        })
-      } else {
-        node.session = null
-        opcuaEndpoint.closeOpcuaClient()
       }
     })
   }
