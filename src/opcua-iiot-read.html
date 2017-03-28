@@ -12,10 +12,10 @@
     category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
-      name: {value: ""},
       attributeId: {value: 0, required: true, validate: RED.validators.number()},
       maxAge: {value: 0, required: true, validate: RED.validators.number()},
       connector: {type: "OPCUA-IIoT-Connector", required: true},
+      name: {value: ""},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -34,10 +34,6 @@
 
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Read">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
      <div class="form-row">
         <label for="node-input-attributeId"><i class="fa fa-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.attributeId"></span></label>
         <select type="text" id="node-input-attributeId">
@@ -57,6 +53,10 @@
     <div class="form-row" style="min-width:640px">
         <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.common.connector"></span></label>
         <input type="text" id="node-input-connector">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <hr>
     <div class="form-row">

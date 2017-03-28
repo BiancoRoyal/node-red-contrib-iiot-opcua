@@ -12,11 +12,11 @@
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      name: {value: ''},
       connector: {type: 'OPCUA-IIoT-Connector', required: true},
       action: {value: 'subscribe', required: true},
       time: {value: 10, required: true, validate: RED.validators.number()},
       timeUnit: {value: 's', required: true},
+      name: {value: ''},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -33,12 +33,7 @@
   })
 </script>
 
-
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Listener">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" placeholder="">
-    </div>
     <div class="form-row">
         <label for="node-input-connector"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.common.connector"></span></label>
         <input type="text" id="node-input-connector" placeholder="opc.tcp://localhost:4334">
@@ -50,7 +45,7 @@
             <option value="events">EVENTS</option>
         </select>
     </div>
-    <div class="form-row" id="node-input-timerow">
+    <div class="form-row" id="node-input-time-row">
         <label for="node-input-time"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.common.interval"></span></label>
         <input type="number" id="node-input-time" placeholder="number" style="max-width:120px">
         <select id="node-input-timeUnit" style="max-width:160px">
@@ -59,6 +54,10 @@
             <option value="m">minute(s)</option>
             <option value="h">hour(s)</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" placeholder="">
     </div>
     <hr>
     <div class="form-row">

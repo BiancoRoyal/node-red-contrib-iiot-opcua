@@ -14,9 +14,9 @@ module.exports = function (RED) {
   function OPCUAIIoTRead (config) {
     RED.nodes.createNode(this, config)
 
-    this.name = config.name
     this.attributeId = config.attributeId || 0
     this.maxAge = config.maxAge || 0
+    this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 

@@ -12,7 +12,7 @@
     category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
-      item: {value: "", required: true},
+      nodeId: {value: "", required: true},
       datatype: {value: "", required: true},
       value: {value: null},
       name: {value: ""}
@@ -22,7 +22,7 @@
     align: "right",
     icon: "opcuaiiot.png",
     label: function () {
-      return this.name || "OPC UA Node";
+      return this.name || "Node";
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
@@ -30,27 +30,39 @@
   });
 </script>
 
-
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Node">
     <div class="form-row">
-        <label for="node-input-item"><i class="icon-tasks"></i> Item</label>
-        <input type="text" id="node-input-item" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
+        <label for="node-input-nodeId"><i class="icon-tasks"></i> Node-Id</label>
+        <input type="text" id="node-input-nodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
     </div>
     <div class="form-row">
-        <label for="node-input-datatype"><i class="icon-tasks"></i> Type</label>
+        <!-- DataType_Schema via REST -->
+        <label for="node-input-datatype"><i class="icon-tasks"></i> Data-Type</label>
         <select type="text" id="node-input-datatype">
-            <option value="Int8">Int8</option>
-            <option value="Int16">Int16</option>
-            <option value="Int32">Int32</option>
-            <option value="UInt8">UInt8</option>
-            <option value="UInt16">UInt16</option>
-            <option value="UInt32">UInt32</option>
-            <option value="Byte">Byte</option>
+            <option value="Null">Null</option>
             <option value="SByte">SByte</option>
+            <option value="Byte">Byte</option>
+            <option value="Int16">Int16</option>
+            <option value="UInt16">UInt16</option>
+            <option value="Int32">Int32</option>
+            <option value="UInt32">UInt32</option>
+            <option value="Int64">Int64</option>
+            <option value="UInt64">UInt64</option>
             <option value="Float">Float</option>
             <option value="Double">Double</option>
-            <option value="Boolean">Boolean</option>
             <option value="String">String</option>
+            <option value="DateTime">DateTime</option>
+            <option value="Guid">Guid</option>
+            <option value="ByteString">ByteString</option>
+            <option value="XmlElement">XmlElement</option>
+            <option value="NodeId">NodeId</option>
+            <option value="ExpandedNodeId">ExpandedNodeId</option>
+            <option value="StatusCode">StatusCode</option>
+            <option value="LocalizedText">LocalizedText</option>
+            <option value="ExtensionObject">ExtensionObject</option>
+            <option value="DataValue">DataValue</option>
+            <option value="Variant">Variant</option>
+            <option value="DiagnosticInfo">DiagnosticInfo</option>
         </select>
     </div>
     <div class="form-row">
@@ -62,7 +74,6 @@
         <input type="text" id="node-input-name" placeholder="">
     </div>
 </script>
-
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Node">
 </script>

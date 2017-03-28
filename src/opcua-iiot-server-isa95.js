@@ -13,9 +13,10 @@ module.exports = function (RED) {
   let path = require('path')
   let os = require('os')
 
-  let xmlFiles = [path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.NodeSet2.xml')]
+  let xmlFiles = [path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.NodeSet2.xml'),
+    path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml')]
 
-  function OPCUAIIoTServer (config) {
+  function OPCUAIIoTServerISA95 (config) {
     RED.nodes.createNode(this, config)
 
     this.port = config.port
@@ -24,14 +25,19 @@ module.exports = function (RED) {
 
     let node = this
 
+    let equipmentCounter = 0
+    let physicalAssetCounter = 0
     let counterValue = 0
+    let equipment
+    let physicalAssets
     let vendorName
+    let equipmentNotFound = true
     let initialized = false
     let server = null
 
     function verboseWarn (logMessage) {
       if (RED.settings.verbose) {
-        node.warn((node.name) ? node.name + ': ' + logMessage : 'OPCUAIIoTServer: ' + logMessage)
+        node.warn((node.name) ? node.name + ': ' + logMessage : 'OPCUAIIoTServerISA95: ' + logMessage)
       }
     }
 
@@ -69,6 +75,18 @@ module.exports = function (RED) {
         organizedBy: addressSpace.rootFolder.objects,
         nodeId: 'ns=4;s=VendorName',
         browseName: 'VendorName'
+      })
+
+      equipment = addressSpace.addObject({
+        organizedBy: vendorName,
+        nodeId: 'ns=4;s=Equipment',
+        browseName: 'Equipment'
+      })
+
+      physicalAssets = addressSpace.addObject({
+        organizedBy: vendorName,
+        nodeId: 'ns=4;s=PhysicalAssets',
+        browseName: 'Physical Assets'
       })
 
       verboseWarn('Server add MyVariable2 ...')
@@ -208,6 +226,25 @@ module.exports = function (RED) {
         return false
       }
 
+      if (equipmentNotFound) {
+        let addressSpace = server.engine.addressSpace
+
+        if (addressSpace === undefined) {
+          node.error('addressSpace undefinded')
+          return false
+        }
+
+        let rootFolder = addressSpace.findNode('ns=4;s=VendorName')
+        let references = rootFolder.findReferences('Organizes', true)
+
+        if (findReference(references, equipment.nodeId)) {
+          verboseWarn('Equipment Reference found in VendorName')
+          equipmentNotFound = false
+        } else {
+          verboseWarn('Equipment Reference not found in VendorName')
+        }
+      }
+
       let payload = msg.payload
 
       if (containsMessageType(payload)) {
@@ -220,6 +257,12 @@ module.exports = function (RED) {
 
       node.send(msg)
     })
+
+    function findReference (references, nodeId) {
+      return references.filter(function (r) {
+        return r.nodeId.toString() === nodeId.toString()
+      })
+    }
 
     function containsMessageType (payload) {
       return payload.hasOwnProperty('messageType')
@@ -246,10 +289,33 @@ module.exports = function (RED) {
 
     function executeOpcuaCommand (payload) {
       let addressSpace = server.engine.addressSpace
+      let name
 
       switch (payload.opcuaCommand) {
         case 'restartOPCUAServer':
           restartServer()
+          break
+        case 'addEquipment':
+          verboseWarn('adding Node'.concat(payload.nodeName))
+          equipmentCounter++
+          name = payload.nodeName.concat(equipmentCounter)
+
+          addressSpace.addObject({
+            organizedBy: addressSpace.findNode(equipment.nodeId),
+            nodeId: 'ns=4;s='.concat(name),
+            browseName: name
+          })
+          break
+        case 'addPhysicalAsset':
+          verboseWarn('adding Node'.concat(payload.nodeName))
+          physicalAssetCounter++
+          name = payload.nodeName.concat(physicalAssetCounter)
+
+          addressSpace.addObject({
+            organizedBy: addressSpace.findNode(physicalAssets.nodeId),
+            nodeId: 'ns=4;s='.concat(name),
+            browseName: name
+          })
           break
         case 'deleteNode':
           if (addressSpace === undefined) {
@@ -308,7 +374,7 @@ module.exports = function (RED) {
     }
   }
 
-  RED.nodes.registerType('OPCUA-IIoT-Server', OPCUAIIoTServer)
+  RED.nodes.registerType('OPCUA-IIoT-Server-ISA95', OPCUAIIoTServerISA95)
 
   RED.httpAdmin.get('/opcua/server/specifications', RED.auth.needsPermission('opcua.server.read'), function (req, res) {
     xmlFiles.list(function (err, ports) {

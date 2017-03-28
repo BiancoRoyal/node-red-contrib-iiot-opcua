@@ -21,6 +21,7 @@ module.exports = function (RED) {
     this.repeat = config.repeat
     this.crontab = config.crontab
     this.once = config.once
+    this.name = config.name
 
     let node = this
     node.interval_id = null

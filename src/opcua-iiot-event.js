@@ -9,31 +9,23 @@
 'use strict'
 
 module.exports = function (RED) {
-  let opcua = require('node-opcua')
-  let opcuaBasic = require('./core/opcua-iiot-core')
+  let coreListener = require('./core/opcua-iiot-core-listener')
 
-  function OPCUAIIoTEvent (n) {
-    RED.nodes.createNode(this, n)
+  function OPCUAIIoTEvent (config) {
+    RED.nodes.createNode(this, config)
 
-    this.root = n.root // OPC UA item nodeID root
-    this.eventtype = n.eventtype
-    this.name = n.name
+    this.eventRoot = config.eventRoot
+    this.eventType = config.eventType
+    this.name = config.name
 
     let node = this
 
     node.on('input', function (msg) {
-      // let baseEventTypeId = "i=2041";
-      // let serverObjectId = "i=2253";
-      // All event field, perhaps selectable in UI
+      let basicEventFields = coreListener.getBasicEventFields()
+      let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(basicEventFields)
 
-      let basicEventFields = opcuaBasic.getBasicEventFields()
-      let eventFilter = opcua.constructEventFilter(basicEventFields)
-
-      msg.topic = node.root // example: ns=0;i=85;
-      msg.eventFilter = eventFilter
-      msg.eventFields = basicEventFields
-      msg.eventTypeIds = node.eventtype // example: ns=0;i=10751;
-
+      msg.topic = node.eventRoot
+      msg.payload = {eventFilter: eventFilter, eventFields: basicEventFields, eventTypeIds: node.eventType}
       node.send(msg)
     })
   }

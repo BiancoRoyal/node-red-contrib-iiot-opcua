@@ -15,9 +15,9 @@ module.exports = function (RED) {
   function OPCUAIIoTBrowser (config) {
     RED.nodes.createNode(this, config)
 
-    this.name = config.name
     this.datatype = config.datatype
     this.topic = config.topic
+    this.name = config.name
 
     let node = this
     node.items = []

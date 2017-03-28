@@ -11,9 +11,6 @@
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      name: {value: ''},
-      topic: {value: ''},
-      datatype: {value: '', required: true},
       payload: {
         value: '', validate: function (v) {
           let ptype = $('#node-input-payloadType').val() || this.payloadType
@@ -33,9 +30,12 @@
         }
       },
       payloadType: {value: 'date'},
+      topic: {value: ''},
+      datatype: {value: '', required: true},
       repeat: {value: ''},
       crontab: {value: ''},
-      once: {value: false}
+      once: {value: false},
+      name: {value: ''}
     },
     inputs: 0,
     outputs: 1,
@@ -396,6 +396,7 @@
     </div>
 
     <div class="form-row">
+        <!-- DataType_Schema via REST to select from -->
         <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcuaiiotinject.label.datatype"></span></label>
         <select type="text" id="node-input-datatype">
             <option value="Boolean">Boolean</option>
@@ -546,5 +547,4 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">
     <p>Pressing the button on the left side of the node allows a request on a topic to be injected into the flow.</p>
-
 </script>

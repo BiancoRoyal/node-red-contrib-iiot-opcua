@@ -12,15 +12,14 @@ module.exports = function (RED) {
   let coreListener = require('./core/opcua-iiot-core-listener')
   let async = require('async')
   let Queue = require('async').queue
-  let Set = require('collections/set')
 
   function OPCUAIIoTListener (config) {
     RED.nodes.createNode(this, config)
 
-    this.name = config.name
     this.action = config.action
     this.time = config.time
     this.timeUnit = config.timeUnit
+    this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
@@ -33,8 +32,11 @@ module.exports = function (RED) {
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
     let monitoredItems = coreListener.MonitoredItemSet()
 
+    setNodeStatusTo(null)
+
     node.createSubscription = function (msg, cb) {
       let timeMilliseconds = coreListener.core.calcMillisecondsByTimeAndUnit(node.time, node.timeUnit)
+      coreListener.core.internalDebugLog('create subscription')
       subscription = node.makeSubscription(cb, msg, coreListener.getSubscriptionParameters(timeMilliseconds))
     }
 
@@ -67,10 +69,14 @@ module.exports = function (RED) {
           }
         })
 
+        monitoredItem.on('initialized', function () {
+          setNodeStatusTo('initialized')
+        })
+
         monitoredItems.add({'topicName': msg.topic, mItem: monitoredItem})
 
         monitoredItem.on('changed', function (dataValue) {
-          setNodeStatusTo('active subscribed')
+          setNodeStatusTo('active')
           msg.payload = coreListener.core.buildMsgPayloadByDataValue(dataValue.value.dataType, dataValue.value.value)
           node.send(msg)
         })
@@ -104,7 +110,7 @@ module.exports = function (RED) {
         monitoredItem.on('changed', function (eventFields) {
           dumpEvent(node, node.session, msg.eventFields, eventFields, function () {
           })
-          setNodeStatusTo('changed')
+          setNodeStatusTo('active')
         })
 
         monitoredItem.on('error', function (err) {
@@ -128,6 +134,7 @@ module.exports = function (RED) {
     node.subscribeEventsInput = function (msg) {
       if (!subscription) {
         node.createSubscription(msg, node.subscribeMonitoredEvent)
+        setNodeStatusTo('active')
       } else {
         if (subscription.subscriptionId !== 'terminated') {
           setNodeStatusTo('active')
@@ -209,7 +216,7 @@ module.exports = function (RED) {
           node.getBrowseName(session, variant.value, function (err, name) {
             if (!err) {
               coreListener.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
-              setNodeStatusTo('active event')
+              setNodeStatusTo('active')
               node.send(msg)
             }
             callback(err)
@@ -217,7 +224,7 @@ module.exports = function (RED) {
         } else {
           setImmediate(function () {
             coreListener.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
-            setNodeStatusTo('active event')
+            setNodeStatusTo('active')
             callback()
           })
         }
@@ -235,11 +242,14 @@ module.exports = function (RED) {
     }
 
     function setNodeStatusTo (statusValue) {
+      coreListener.core.internalDebugLog('listener status ' + statusValue)
       let statusParameter = coreListener.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
     node.on('input', function (msg) {
+      coreListener.core.internalDebugLog(node.action + ' listener input ' + JSON.stringify(msg))
+
       switch (node.action) {
         case 'subscribe':
           node.subscribeActionInput(msg)
@@ -259,7 +269,7 @@ module.exports = function (RED) {
 
       if (node.session) {
         node.session.close(function (err) {
-          setNodeStatusTo('session closed')
+          setNodeStatusTo('closed')
           if (err) {
             node.error(node.name + ' ' + err)
           }

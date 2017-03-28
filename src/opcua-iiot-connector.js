@@ -16,6 +16,7 @@ module.exports = function (RED) {
 
     this.endpoint = config.endpoint
     this.loginEnabled = config.loginEnabled
+    this.name = config.name
 
     let node = this
     node.client = null

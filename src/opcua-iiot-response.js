@@ -22,16 +22,15 @@ module.exports = function (RED) {
       core.internalDebugLog(JSON.stringify(msg))
 
       if (msg.payload && msg.payload.statusCode) {
-        switch (msg.payload.statusCode.name) {
-          case 'Good':
+        switch (msg.payload.statusCode) {
+          case core.nodeOPCUA.StatusCodes.Good:
             node.status({
               fill: 'green',
               shape: 'dot',
               text: msg.payload.statusCode.name
             })
             break
-
-          case 'Bad':
+          case core.nodeOPCUA.StatusCodes.Bad:
             node.status({
               fill: 'red',
               shape: 'dot',
