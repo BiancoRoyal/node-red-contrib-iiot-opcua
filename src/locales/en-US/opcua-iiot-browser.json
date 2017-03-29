@@ -4,7 +4,8 @@
       "connector": "Connector",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
-      "topic": "Topic"
+      "topic": "Topic",
+      "nodeId": "Node-Id"
     }
   }
 }

@@ -14,7 +14,7 @@
     color: "#ABCDEF",
     defaults: {
       connector: {type: "OPCUA-IIoT-Connector", required: true},
-      topic: {value: ""},
+      nodeId: {value: ""},
       name: {value: ""},
       showStatusActivities: {value: false},
       showErrors: {value: false}
@@ -33,30 +33,30 @@
       let node = this
       node.items = []
 
-      $("#node-lookup-topic").click(function () {
-        $("#node-lookup-topic").addClass('disabled')
+      $("#node-lookup-nodeId").click(function () {
+        $("#node-lookup-nodeId").addClass('disabled')
 
         $.getJSON('browser/browse', function (data) {
-          $("#node-lookup-topic").removeClass('disabled')
+          $("#node-lookup-nodeId").removeClass('disabled')
           node.items = []
 
           $.each(data, function (i, entry) {
             node.items.push({value: entry.nodeId, label: entry.displayName.text})
           })
 
-          $("#node-input-topic").autocomplete({
+          $("#node-input-nodeId").autocomplete({
             source: node.items,
             minLength: 0,
             focus: function (event, ui) {
-              $("#node-input-topic").val(ui.item.label);
+              $("#node-input-nodeId").val(ui.item.label);
               return false;
             },
             select: function (event, ui) {
-              $("#node-input-topic").val(ui.item.value)
+              $("#node-input-nodeId").val(ui.item.value)
               return false;
             },
             close: function (event, ui) {
-              $("#node-input-topic").autocomplete("destroy")
+              $("#node-input-nodeId").autocomplete("destroy")
             }
           }).autocomplete("search", "")
         })
@@ -67,28 +67,28 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Browser">
     <div class="form-row" style="min-width:640px">
-        <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.common.connector"></span></label>
+        <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
         <input type="text" id="node-input-connector">
     </div>
     <div class="form-row">
-        <label for="node-input-topic"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.common.topic"></span></label>
-        <input type="text" id="node-input-topic" style="width:40%;" placeholder="ns=0;i=85">
-        <a id="node-lookup-topic" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
-    </div>
-    <hr>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showActivities"></span></label>
-        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
-    </div>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showErrors"></span></label>
-        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+        <label for="node-input-nodeId"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
+        <input type="text" id="node-input-nodeId" style="width:40%;" placeholder="ns=0;i=85">
+        <a id="node-lookup-nodeId" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+    </div>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
     <!-- TODO: ReferenceTypeIds List to add or remove reference types tp browse for -->
 </script>

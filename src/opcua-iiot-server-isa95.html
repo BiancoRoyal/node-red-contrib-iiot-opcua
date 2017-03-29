@@ -12,7 +12,7 @@
     category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
-      port: {value: "5395", required: true},
+      port: {value: "55395", required: true},
       endpoint: {value: ""},
       name: {value: ""}
     },
@@ -31,16 +31,16 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Server-ISA95">
     <div class="form-row">
-        <label for="node-input-port"><i class="icon-tasks"></i> Port</label>
+        <label for="node-input-port"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.port"></span></label>
         <!-- dynamic Ports from 49152 to 65535 (c000hex bis FFFFhex) -->
         <input type="text" id="node-input-port" placeholder="Ports 49152 bis 65535 (c000hex bis FFFFhex)">
     </div>
     <div class="form-row">
-        <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
+        <label for="node-input-endpoint"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.endpoint"></span></label>
         <input type="text" id="node-input-endpoint" placeholder="UA/SimpleNodeRedServer">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tasks"></i> Name</label>
+        <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
     </div>
 </script>

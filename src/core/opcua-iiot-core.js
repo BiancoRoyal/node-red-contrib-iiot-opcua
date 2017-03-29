@@ -452,7 +452,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
     })
   }
 
-  this.internalDebugLog('buildNodesToWrite output: ' + nodesToWrite.toString())
+  this.internalDebugLog('buildNodesToWrite output: ' + JSON.stringify(nodesToWrite))
 
   return nodesToWrite
 }
@@ -472,7 +472,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
     nodesToRead.push(msg.topic)
   }
 
-  this.internalDebugLog('buildNodesToRead output: ' + nodesToRead.toString())
+  this.internalDebugLog('buildNodesToRead output: ' + JSON.stringify(nodesToRead))
 
   return nodesToRead
 }

@@ -1,0 +1,10 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "eventRoot": "Root Id",
+      "eventType": "Event Type",
+      "showActivities": "Show Activities",
+      "showErrors": "Show Errors"
+    }
+  }
+}

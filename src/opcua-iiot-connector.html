@@ -59,17 +59,21 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Connector">
     <div class="form-row">
-        <label for="node-config-input-endpoint"><i class="icon-link"></i> <span data-i18n="opcua-iiot-contrib.label.common.endpoint"></span></label>
+        <label for="node-config-input-endpoint"><i class="icon-link"></i> <span data-i18n="opcua-iiot-contrib.label.endpoint"></span></label>
         <input type="text" id="node-config-input-endpoint">
     </div>
     <div class="form-row">
+        <!-- SecurityPolicy enum via REST -->
         <label for="node-config-input-sign"><i class="icon-key"></i> <span data-i18n="opcua-iiot-contrib.label.sign"></span></label>
         <select type="text" id="node-input-sign">
-            <option value="None">None</option>
-            <option value="Basic128Rsa15Signed">Basic128Rsa15 signed</option>
-            <option value="Basic256Signed">Basic256 signed</option>
-            <option value="Basic128Rsa15">Basic128Rsa15 signed+crypted</option>
-            <option value="Basic256Signed">Basic256 signed+crypted</option>
+            <option value="None" selected>None</option>
+            <option value="Basic128">Basic128</option>
+            <option value="Basic128Rsa15">Basic128Rsa15</option>
+            <option value="Basic192">Basic192</option>
+            <option value="Basic192Rsa15">Basic192Rsa15</option>
+            <option value="Basic256">Basic256</option>
+            <option value="Basic256Rsa15">Basic256Rsa15</option>
+            <option value="Basic256Sha256">Basic256Sha256</option>
         </select>
     </div>
     <div class="form-row">
@@ -77,11 +81,11 @@
     </div>
     <div id="node-config-login">
         <div class="form-row ">
-            <label for="node-config-input-user"><i class="icon-user"></i> <span data-i18n="opcua-iiot-contrib.label.common.user"></span></label>
+            <label for="node-config-input-user"><i class="icon-user"></i> <span data-i18n="opcua-iiot-contrib.label.user"></span></label>
             <input type="text" id="node-config-input-user">
         </div>
         <div class="form-row">
-            <label for="node-config-input-password"><i class="icon-password"></i> <span data-i18n="opcua-iiot-contrib.label.common.password"></span></label>
+            <label for="node-config-input-password"><i class="icon-password"></i> <span data-i18n="opcua-iiot-contrib.label.password"></span></label>
             <input type="password" id="node-config-input-password">
         </div>
     </div>
@@ -91,13 +95,13 @@
     </div>
     <hr>
     <div class="form-row">
-        <label style="min-width:160px" for="node-config-input-showStatusActivities"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showActivities"></span></label>
+        <label style="min-width:160px" for="node-config-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
         <input type="checkbox" id="node-config-input-showStatusActivities" style="max-width:30px">
     </div>
     <div class="form-row">
-        <label style="min-width:160px" for="node-config-input-showErrors"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showErrors"></span></label>
+        <label style="min-width:160px" for="node-config-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
         <input type="checkbox" id="node-config-input-showErrors" style="max-width:30px">
     </div>
 </script>

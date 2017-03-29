@@ -8,7 +8,8 @@
     "failed": "Inject failed: __error__",
     "label": {
       "repeat": "Repeat",
-      "datatype": "Datatype"
+      "datatype": "Datatype",
+      "nodeid": "Node-Id"
     },
     "timestamp": "timestamp",
     "none": "none",

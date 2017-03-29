@@ -1,0 +1,10 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "port": "Port",
+      "endpoint": "Endpoint",
+      "showActivities": "Show Activities",
+      "showErrors": "Show Errors"
+    }
+  }
+}

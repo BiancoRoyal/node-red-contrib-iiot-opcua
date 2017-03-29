@@ -50,6 +50,7 @@ module.exports = function (RED) {
       try {
         msg.topic = node.topic
         msg.datatype = node.datatype
+        msg.nodetype = 'inject'
 
         if ((node.payloadType === null && node.payload === '') || node.payloadType === 'date') {
           msg.payload = Date.now()

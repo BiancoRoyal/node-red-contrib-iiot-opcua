@@ -10,31 +10,36 @@
 <script type="text/javascript">
   RED.nodes.registerType('OPCUA-IIoT-Read', {
     category: 'IIoT',
-    color: "#ABCDEF",
+    color: '#ABCDEF',
     defaults: {
       attributeId: {value: 0, required: true, validate: RED.validators.number()},
       maxAge: {value: 0, required: true, validate: RED.validators.number()},
-      connector: {type: "OPCUA-IIoT-Connector", required: true},
-      name: {value: ""},
+      connector: {type: 'OPCUA-IIoT-Connector', required: true},
+      name: {value: ''},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
     inputs: 1,
     outputs: 1,
-    align: "right",
-    icon: "opcuaiiot.png",
+    align: 'right',
+    icon: 'opcuaiiot.png',
     label: function () {
-      return this.name || "Read";
+      return this.name || 'Read'
     },
     labelStyle: function () {
-      return this.name ? "node_label_italic" : "";
+      return this.name ? 'node_label_italic' : ''
     }
-  });
+  })
 </script>
 
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Read">
+    <div class="form-row" style="min-width:640px">
+        <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
+        <input type="text" id="node-input-connector">
+    </div>
      <div class="form-row">
+        <!-- AttributeId via REST -->
         <label for="node-input-attributeId"><i class="fa fa-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.attributeId"></span></label>
         <select type="text" id="node-input-attributeId">
             <option value="0">All</option>
@@ -50,23 +55,19 @@
         <label for="node-input-maxAge"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.maxAge"></span></label>
         <input type="text" id="node-input-maxAge" placeholder="0">
     </div>
-    <div class="form-row" style="min-width:640px">
-        <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.common.connector"></span></label>
-        <input type="text" id="node-input-connector">
-    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <hr>
     <div class="form-row">
-        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showActivities"></span></label>
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
         <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
     </div>
     <div class="form-row">
-        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showErrors"></span></label>
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
         <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
 </script>

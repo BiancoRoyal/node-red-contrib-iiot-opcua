@@ -25,10 +25,20 @@ module.exports = function (RED) {
       let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(basicEventFields)
 
       msg.topic = node.eventRoot
-      msg.payload = {eventFilter: eventFilter, eventFields: basicEventFields, eventTypeIds: node.eventType}
+      msg.nodetype = 'events'
+
+      msg.payload = {
+        eventRoot: node.eventRoot,
+        eventType: node.eventType,
+        eventFilter: eventFilter,
+        eventFields: basicEventFields,
+        eventTypeIds: node.eventType // TODO: replace eventTypeIds with eventType in following nodes
+      }
       node.send(msg)
     })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Event', OPCUAIIoTEvent)
+
+  // ObjectTypeIds via REST with Filter *EventType
 }

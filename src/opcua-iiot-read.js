@@ -80,7 +80,8 @@ module.exports = function (RED) {
 
                 let message = {
                   payload: {results: resultsConverted, nodesToRead: nodesToRead},
-                  type: 'readAllAttributes',
+                  nodetype: 'read',
+                  readtype: 'readAllAttributes',
                   attributeId: node.attributeId
                 }
                 coreClient.core.internalDebugLog('readAllAttributes:' + JSON.stringify(message))
@@ -96,7 +97,12 @@ module.exports = function (RED) {
                 coreClient.core.internalDebugLog('readVariableValue results: ' + JSON.stringify(results))
                 coreClient.core.internalDebugLog('readVariableValue diagnostics: ' + JSON.stringify(diagnostics))
 
-                let message = {payload: resultsConverted, type: 'readVariableValue', attributeId: node.attributeId}
+                let message = {
+                  payload: resultsConverted,
+                  nodetype: 'read',
+                  readtype: 'readVariableValue',
+                  attributeId: node.attributeId
+                }
                 coreClient.core.internalDebugLog('readVariableValue:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
@@ -121,7 +127,12 @@ module.exports = function (RED) {
                 coreClient.core.internalDebugLog('read results: ' + JSON.stringify(results))
                 coreClient.core.internalDebugLog('read diagnostics: ' + JSON.stringify(diagnostics))
 
-                let message = {payload: resultsConverted, type: 'read', attributeId: node.attributeId}
+                let message = {
+                  payload: resultsConverted,
+                  nodetype: 'read',
+                  readtype: 'read',
+                  attributeId: node.attributeId
+                }
                 coreClient.core.internalDebugLog('read:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
@@ -173,4 +184,6 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Read', OPCUAIIoTRead)
+
+  // AttributeId via REST
 }

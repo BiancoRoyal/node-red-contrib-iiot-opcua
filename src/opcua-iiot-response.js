@@ -21,6 +21,8 @@ module.exports = function (RED) {
       core.internalDebugLog(msg)
       core.internalDebugLog(JSON.stringify(msg))
 
+      // TODO: working with the msg.nodetype
+
       if (msg.payload && msg.payload.statusCode) {
         switch (msg.payload.statusCode) {
           case core.nodeOPCUA.StatusCodes.Good:
@@ -52,7 +54,7 @@ module.exports = function (RED) {
 
         if (msg.payload.length) {
           for (entry of msg.payload) {
-            if (msg.type === 'write') {
+            if (msg.nodetype === 'write') {
               statusName = entry.name
             } else {
               statusName = entry.statusCode.name
@@ -85,4 +87,6 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Response', OPCUAIIoTResponse)
+
+  // StatusCodes via REST anbieten
 }

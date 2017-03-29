@@ -24,16 +24,18 @@ module.exports = function (RED) {
     node.on('input', function (msg) {
       msg.topic = node.nodeId
       msg.datatype = node.datatype
+      msg.nodetype = 'node'
 
       if (node.value) {
-        msg.payload = core.buildMsgPayloadByDataValue(node.datatype, node.value)
-      } else {
-        msg.payload = core.buildMsgPayloadByDataValue(node.datatype, msg.payload)
+        msg.payload = node.value
       }
 
+      core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
       node.send(msg)
     })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Node', OPCUAIIoTNode)
+
+  // DataType_Schema via REST
 }

@@ -35,22 +35,22 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Listener">
     <div class="form-row">
-        <label for="node-input-connector"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.common.connector"></span></label>
+        <label for="node-input-connector"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
         <input type="text" id="node-input-connector" placeholder="opc.tcp://localhost:4334">
     </div>
      <div class="form-row">
-        <label for="node-input-action"><i class="fa fa-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.common.action"></span></label>
+        <label for="node-input-action"><i class="fa fa-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.actiontype"></span></label>
         <select type="text" id="node-input-action" style="width:72%;">
-            <option value="subscribe">SUBSCRIBE</option>
+            <option value="subscribe" selected>SUBSCRIBE</option>
             <option value="events">EVENTS</option>
         </select>
     </div>
     <div class="form-row" id="node-input-time-row">
-        <label for="node-input-time"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.common.interval"></span></label>
+        <label for="node-input-time"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.interval"></span></label>
         <input type="number" id="node-input-time" placeholder="number" style="max-width:120px">
         <select id="node-input-timeUnit" style="max-width:160px">
             <option value="ms">millisecond(s)</option>
-            <option value="s">second(s)</option>
+            <option value="s" selected>second(s)</option>
             <option value="m">minute(s)</option>
             <option value="h">hour(s)</option>
         </select>
@@ -61,13 +61,13 @@
     </div>
     <hr>
     <div class="form-row">
-        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showActivities"></span></label>
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
         <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
     </div>
     <div class="form-row">
-        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i> <span
-        data-i18n="opcua-iiot.label.showErrors"></span></label>
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
         <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
 </script>

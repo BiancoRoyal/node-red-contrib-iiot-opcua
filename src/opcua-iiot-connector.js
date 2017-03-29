@@ -85,4 +85,6 @@ module.exports = function (RED) {
       password: {type: 'password'}
     }
   })
+
+  // SecurityPolicy enum via REST
 }

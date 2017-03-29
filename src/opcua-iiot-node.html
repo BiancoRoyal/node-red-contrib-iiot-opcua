@@ -32,12 +32,12 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Node">
     <div class="form-row">
-        <label for="node-input-nodeId"><i class="icon-tasks"></i> Node-Id</label>
+        <label for="node-input-nodeId"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
         <input type="text" id="node-input-nodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
     </div>
     <div class="form-row">
         <!-- DataType_Schema via REST -->
-        <label for="node-input-datatype"><i class="icon-tasks"></i> Data-Type</label>
+        <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
         <select type="text" id="node-input-datatype">
             <option value="Null">Null</option>
             <option value="SByte">SByte</option>
@@ -60,17 +60,17 @@
             <option value="StatusCode">StatusCode</option>
             <option value="LocalizedText">LocalizedText</option>
             <option value="ExtensionObject">ExtensionObject</option>
-            <option value="DataValue">DataValue</option>
+            <option value="DataValue" selected>DataValue</option>
             <option value="Variant">Variant</option>
             <option value="DiagnosticInfo">DiagnosticInfo</option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-value"><i class="icon-tag"></i> Value</label>
+        <label for="node-input-value"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.value"></span></label>
         <input type="text" id="node-input-value" placeholder="">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
     </div>
 </script>

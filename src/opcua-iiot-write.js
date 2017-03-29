@@ -66,7 +66,7 @@ module.exports = function (RED) {
             coreClient.core.internalDebugLog('write results: ' + JSON.stringify(results))
             coreClient.core.internalDebugLog('write diagnostics: ' + JSON.stringify(diagnostics))
 
-            let message = {payload: resultsConverted, type: 'write'}
+            let message = {payload: resultsConverted, nodetype: 'write'}
             node.send(message)
           }).catch(function (err) {
             node.handleWriteError(err, msg)

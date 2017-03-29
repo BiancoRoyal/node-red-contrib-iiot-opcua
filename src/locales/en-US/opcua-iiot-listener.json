@@ -2,6 +2,8 @@
   "opcua-iiot-contrib": {
     "label": {
       "connector": "Connector",
+      "actiontype": "Action Type",
+      "interval": "Interval",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "attributeId": "Attribute Id"

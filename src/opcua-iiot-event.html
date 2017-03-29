@@ -31,14 +31,13 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Event">
     <div class="form-row">
-        <label for="node-input-eventRoot"><i class="icon-tasks"></i> Event-Root</label>
+        <label for="node-input-eventRoot"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.eventRoot"></span></label>
         <input type="text" id="node-input-eventRoot" placeholder="i=2253">
     </div>
     <div class="form-row">
         <!-- ObjectTypeIds via REST with Filter *EventType -->
-        <label for="node-input-eventType"><i class="icon-tag"></i> Event-Type</label>
+        <label for="node-input-eventType"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.eventType"></span></label>
         <select type="text" id="node-input-eventType" style="display: inline-block; vertical-align: middle; width:60%;">
-            <option selected disabled value="" >Choose an Event-Type</option>
             <option selected value="i=2041">All</option>
             <option value="i=2052">Audit</option>
             <option value="i=2058">Audit Security</option>
@@ -52,7 +51,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
     </div>
 

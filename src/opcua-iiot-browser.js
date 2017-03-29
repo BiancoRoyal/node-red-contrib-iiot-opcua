@@ -90,7 +90,7 @@ module.exports = function (RED) {
 
       coreBrowser.core.internalDebugLog(msg)
 
-      if (msg.payload.actiontype === 'browse') {
+      if (msg.payload.actiontype === 'browse') { // event driven browsing
         if (msg.payload.root && msg.payload.root.nodeId) {
           node.browseTopic = node.browseByItem(msg.payload.root.nodeId)
         } else {
@@ -106,6 +106,8 @@ module.exports = function (RED) {
 
       if (node.browseTopic) {
         node.browse(node.opcuaSession, msg)
+        msg.nodetype = 'browse'
+
         msg.payload = {
           endpoint: node.connector.endpoint,
           session: node.opcuaSession.name,
