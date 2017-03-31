@@ -14,7 +14,8 @@
     defaults: {
       port: {value: "55395", required: true},
       endpoint: {value: ""},
-      name: {value: ""}
+      name: {value: ""},
+      statusLog: {value: false}
     },
     inputs: 1,
     outputs: 1,
@@ -42,6 +43,14 @@
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-config-input-statusLog">
+            <i class="fa fa-th"></i>
+            <span data-i18n="opcua-iiot-contrib.label.statusLog"></span>
+        </label>
+        <input type="checkbox" id="node-config-input-statusLog" style="max-width:30px">
     </div>
 </script>
 

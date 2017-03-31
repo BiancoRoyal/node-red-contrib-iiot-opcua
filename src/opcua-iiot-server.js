@@ -9,7 +9,7 @@
 'use strict'
 
 module.exports = function (RED) {
-  let opcua = require('node-opcua')
+  let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
   let os = require('os')
 
@@ -21,6 +21,7 @@ module.exports = function (RED) {
     this.port = config.port
     this.endpoint = config.endpoint
     this.name = config.name
+    this.statusLog = config.statusLog
 
     let node = this
 
@@ -29,95 +30,119 @@ module.exports = function (RED) {
     let initialized = false
     let server = null
 
-    function verboseWarn (logMessage) {
-      if (RED.settings.verbose) {
-        node.warn((node.name) ? node.name + ': ' + logMessage : 'OPCUAIIoTServer: ' + logMessage)
-      }
-    }
+    setNodeStatusTo(false)
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {
-        node.log(logMessage)
+        coreServer.core.internalDebugLog(logMessage)
       }
     }
 
-    node.status({fill: 'red', shape: 'ring', text: 'Not running'})
+    function statusLog (logMessage) {
+      if (RED.settings.verbose && node.statusLog) {
+        coreServer.core.internalDebugLog('Status: ' + logMessage)
+      }
+    }
 
-    verboseWarn('node set:' + xmlFiles.toString())
+    function setNodeStatusTo (statusValue) {
+      statusLog(statusValue)
+      let statusParameter = coreServer.core.getNodeStatus(statusValue)
+      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+    }
+
+    coreServer.core.internalDebugLog('node set:' + xmlFiles.toString())
 
     function initNewServer () {
       initialized = false
-      verboseWarn('create Server from XML ...')
 
-      server = new opcua.OPCUAServer({
+      server = new coreServer.core.nodeOPCUA.OPCUAServer({
         port: node.port,
         nodeset_filename: xmlFiles,
-        resourcePath: node.endpoint || 'UA/SimpleNodeRedServer'
+        resourcePath: node.endpoint || 'UA/NodeREDIIOTServer',
+        buildInfo: {
+          productName: node.name.concat(' IIoT Server'),
+          buildNumber: '1604',
+          buildDate: new Date(2017, 4, 1)
+        }
       })
 
-      server.buildInfo.productName = node.name.concat('OPC UA server')
-      server.buildInfo.buildNumber = '112'
-      server.buildInfo.buildDate = new Date(2016, 3, 24)
-      verboseWarn('init next...')
       server.initialize(postInitialize)
     }
 
     function constructAddressSpace (addressSpace) {
-      verboseWarn('Server add VendorName ...')
-
       vendorName = addressSpace.addObject({
         organizedBy: addressSpace.rootFolder.objects,
         nodeId: 'ns=4;s=VendorName',
         browseName: 'VendorName'
       })
 
-      verboseWarn('Server add MyVariable2 ...')
+      let variable1 = 1
+
+      setInterval(function () { variable1 += 1 }, 500)
+
+      addressSpace.addVariable({
+        componentOf: vendorName,
+        browseName: 'MyVariable1',
+        dataType: 'Double',
+        value: {
+          get: function () {
+            return new coreServer.core.nodeOPCUA.Variant({
+              dataType: coreServer.core.nodeOPCUA.DataType.Double,
+              value: variable1
+            })
+          }
+        }
+      })
 
       let variable2 = 10.0
 
-      addressSpace.addVariable({
+      server.engine.addressSpace.addVariable({
         componentOf: vendorName,
-        nodeId: 'ns=4;s=MyVariable2',
+        nodeId: 'ns=1;b=1020FFAA',
         browseName: 'MyVariable2',
-        dataType: opcua.DataType.Double,
-
+        dataType: 'Double',
         value: {
           get: function () {
-            return new opcua.Variant({dataType: opcua.DataType.Double, value: variable2})
+            return new coreServer.core.nodeOPCUA.Variant({
+              dataType: coreServer.core.nodeOPCUA.DataType.Double,
+              value: variable2
+            })
           },
           set: function (variant) {
             variable2 = parseFloat(variant.value)
-            return opcua.StatusCodes.Good
+            return coreServer.core.nodeOPCUA.StatusCodes.Good
           }
         }
       })
-
-      verboseWarn('Server add FreeMemory ...')
 
       addressSpace.addVariable({
         componentOf: vendorName,
-        nodeId: 'ns=4;s=FreeMemory',
+        nodeId: 'ns=4;s=free_memory',
         browseName: 'FreeMemory',
-        dataType: opcua.DataType.Double,
+        dataType: coreServer.core.nodeOPCUA.DataType.Double,
 
         value: {
           get: function () {
-            return new opcua.Variant({dataType: opcua.DataType.Double, value: availableMemory()})
+            return new coreServer.core.nodeOPCUA.Variant({
+              dataType: coreServer.core.nodeOPCUA.DataType.Double,
+              value: availableMemory()
+            })
           }
         }
       })
-
-      verboseWarn('Server add Counter ...')
 
       addressSpace.addVariable({
         componentOf: vendorName,
         nodeId: 'ns=4;s=Counter',
         browseName: 'Counter',
-        dataType: opcua.DataType.UInt16,
+        dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
 
         value: {
           get: function () {
-            return new opcua.Variant({dataType: opcua.DataType.UInt16, value: counterValue})
+            return new coreServer.core.nodeOPCUA.Variant({
+              dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
+              value: counterValue
+            })
           }
         }
       })
@@ -130,18 +155,18 @@ module.exports = function (RED) {
             {
               name: 'nbBarks',
               description: {text: 'specifies the number of time I should bark'},
-              dataType: opcua.DataType.UInt32
+              dataType: coreServer.core.nodeOPCUA.DataType.UInt32
             }, {
               name: 'volume',
               description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'},
-              dataType: opcua.DataType.UInt32
+              dataType: coreServer.core.nodeOPCUA.DataType.UInt32
             }
           ],
 
           outputArguments: [{
             name: 'Barks',
             description: {text: 'the generated barks'},
-            dataType: opcua.DataType.String,
+            dataType: coreServer.core.nodeOPCUA.DataType.String,
             valueRank: 1
           }]
         })
@@ -160,10 +185,10 @@ module.exports = function (RED) {
         }
 
         let callMethodResult = {
-          statusCode: opcua.StatusCodes.Good,
+          statusCode: coreServer.core.nodeOPCUA.StatusCodes.Good,
           outputArguments: [{
-            dataType: opcua.DataType.String,
-            arrayType: opcua.VariantArrayType.Array,
+            dataType: coreServer.core.nodeOPCUA.DataType.String,
+            arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
             value: barks
           }]
         }
@@ -176,23 +201,19 @@ module.exports = function (RED) {
         let addressSpace = server.engine.addressSpace
         constructAddressSpace(addressSpace)
 
-        verboseWarn('Next server start...')
-
         server.start(function () {
-          verboseWarn('Server is now listening ... ( press CTRL+C to stop)')
           server.endpoints[0].endpointDescriptions().forEach(function (endpoint) {
-            verboseWarn('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' + endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
+            coreServer.core.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' + endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
           })
 
           let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
           verboseLog(' the primary server endpoint url is ' + endpointUrl)
         })
-        node.status({fill: 'green', shape: 'dot', text: 'running'})
+        setNodeStatusTo('active')
         initialized = true
-        verboseWarn('server initialized')
+        coreServer.core.internalDebugLog('server initialized')
       } else {
-        node.status({fill: 'gray', shape: 'dot', text: 'not running'})
-        node.error('server is not initialized')
+        coreServer.core.internalDebugLog('server was not initialized')
       }
     }
 
@@ -202,7 +223,6 @@ module.exports = function (RED) {
 
     initNewServer()
 
-    // ######################################################################################
     node.on('input', function (msg) {
       if (server === undefined || !initialized) {
         return false
@@ -214,8 +234,8 @@ module.exports = function (RED) {
         readMessage(payload)
       }
 
-      if (containsOpcuaCommand(payload)) {
-        executeOpcuaCommand(payload)
+      if (msg && payload && containsOpcuaCommand(payload)) {
+        executeOpcuaCommand(msg)
       }
 
       node.send(msg)
@@ -244,33 +264,32 @@ module.exports = function (RED) {
       return payload.hasOwnProperty('opcuaCommand')
     }
 
-    function executeOpcuaCommand (payload) {
+    function executeOpcuaCommand (msg) {
       let addressSpace = server.engine.addressSpace
 
-      switch (payload.opcuaCommand) {
+      switch (msg.payload.opcuaCommand) {
         case 'restartOPCUAServer':
           restartServer()
           break
         case 'deleteNode':
           if (addressSpace === undefined) {
-            node.error('addressSpace undefinded')
+            coreServer.core.internalDebugLog('addressSpace undefinded')
             return false
           }
 
-          let searchedNode = addressSpace.findNode(payload.nodeId)
-          if (searchedNode === undefined) {
-            verboseWarn('can not find Node in addressSpace')
-          } else {
+          let searchedNode = addressSpace.findNode(msg.payload.nodeId)
+          if (searchedNode !== undefined) {
             addressSpace.deleteNode(searchedNode)
           }
           break
         default:
-          node.error('unknown OPC UA Command')
+          node.error(new Error('Unknown OPC UA Command'), msg)
       }
     }
 
     function restartServer () {
-      verboseWarn('Restart OPC UA Server')
+      coreServer.core.internalDebugLog('Restart OPC UA Server')
+
       if (server) {
         server.shutdown(0, function () {
           server = null
@@ -284,14 +303,13 @@ module.exports = function (RED) {
       }
 
       if (server) {
-        verboseWarn('Restart OPC UA Server done')
+        coreServer.core.internalDebugLog('OPC UA Server restarted')
       } else {
-        node.error('can not restart OPC UA Server')
+        coreServer.core.internalDebugLogr('Can not restart OPC UA server')
       }
     }
 
     node.on('close', function () {
-      verboseWarn('closing...')
       closeServer()
     })
 
@@ -310,7 +328,7 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Server', OPCUAIIoTServer)
 
-  RED.httpAdmin.get('/opcua/server/specifications', RED.auth.needsPermission('opcua.server.read'), function (req, res) {
+  RED.httpAdmin.get('/opcua/server/specifications', RED.auth.needsPermission('coreServer.core.nodeOPCUA.server.read'), function (req, res) {
     xmlFiles.list(function (err, ports) {
       if (err) console.log(err)
       res.json(ports)

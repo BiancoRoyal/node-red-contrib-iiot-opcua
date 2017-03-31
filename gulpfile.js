@@ -22,7 +22,7 @@ gulp.task('docs', ['doc', 'docIcons', 'docExamples', 'docImages'])
 gulp.task('websites', ['opcua-iiot-web'])
 gulp.task('nodejs', ['opcua-iiot'])
 gulp.task('build', ['nodejs', 'websites', 'locale'])
-gulp.task('publish', ['build', 'icons', 'docs'])
+gulp.task('publish', ['build', 'public', 'icons', 'docs'])
 
 gulp.task('icons', function () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
@@ -42,6 +42,10 @@ gulp.task('docImages', function () {
 
 gulp.task('locale', function () {
   return gulp.src('src/locales/**/*').pipe(gulp.dest('opcuaIIoT/locales'))
+})
+
+gulp.task('public', function () {
+  return gulp.src('src/public/**/*').pipe(gulp.dest('opcuaIIoT/public'))
 })
 
 gulp.task('clean', function () {

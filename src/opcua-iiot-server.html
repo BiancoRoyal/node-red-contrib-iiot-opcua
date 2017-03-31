@@ -10,23 +10,24 @@
 <script type="text/javascript">
   RED.nodes.registerType('OPCUA-IIoT-Server', {
     category: 'IIoT',
-    color: "#ABCDEF",
+    color: '#ABCDEF',
     defaults: {
-      port: {value: "55388", required: true},
-      endpoint: {value: ""},
-      name: {value: ""}
+      port: {value: '55388', required: true},
+      endpoint: {value: ''},
+      name: {value: ''},
+      statusLog: {value: false}
     },
     inputs: 1,
     outputs: 1,
-    align: "right",
-    icon: "opcuaiiot.png",
+    align: 'right',
+    icon: 'opcuaiiot.png',
     label: function () {
-      return this.name || "Server";
+      return this.name || 'Server'
     },
     labelStyle: function () {
-      return this.name ? "node_label_italic" : "";
+      return this.name ? 'node_label_italic' : ''
     }
-  });
+  })
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Server">
@@ -42,6 +43,14 @@
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-config-input-statusLog">
+            <i class="fa fa-th"></i>
+            <span data-i18n="opcua-iiot-contrib.label.statusLog"></span>
+        </label>
+        <input type="checkbox" id="node-config-input-statusLog" style="max-width:30px">
     </div>
 </script>
 

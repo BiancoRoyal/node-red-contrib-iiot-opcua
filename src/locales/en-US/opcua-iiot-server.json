@@ -4,7 +4,8 @@
       "port": "Port",
       "endpoint": "Endpoint",
       "showActivities": "Show Activities",
-      "showErrors": "Show Errors"
+      "showErrors": "Show Errors",
+      "stateLogEnabled": "Log State"
     }
   }
 }
