@@ -1,4 +1,4 @@
-# Contributing to node-red-contrib-opcua-iiot
+# Contributing to node-red-iiot-opcua
 
 As in Node-RED we have some guidelines for the OPC UA IIoT contribution package.
 We welcome contributions, but request you follow these guidelines.
@@ -23,7 +23,7 @@ At a minimum, please include:
 
  - Version of node.js
  - Version of Node-RED?
- - Version of node-red-contrib-opcua-iiot?
+ - Version of node-red-iiot-opcua?
  
  - What is your platform? (Linux, macOS, ...)
  - What does `DEBUG=node_red_contrib_opcua_iiot node -v` say? (log files are welcome)

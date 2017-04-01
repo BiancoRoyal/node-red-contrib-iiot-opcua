@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-contrib-opcua-iiot
+ node-red-iiot-opcua
  */
 'use strict'
 
@@ -18,7 +18,7 @@
 var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.nodeOPCUA = de.biancoroyal.opcua.iiot.core.nodeOPCUA || require('node-opcua') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua/lib/datamodel/nodeid') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT:core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT || 'ns=0;i=84' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
 
@@ -102,6 +102,8 @@ de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue) {
       break
     case 'connected':
     case 'keepalive':
+    case 'subscribe':
+    case 'started':
       fillValue = 'green'
       break
     case 'active':
@@ -271,13 +273,26 @@ de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue)
           }
         }
       } else {
-        return {
-          nodeId: dataValue.nodeId,
-          attributeId: dataValue.attributeId,
-          indexRange: dataValue.indexRange,
-          dataEncoding: {
-            namespaceIndex: dataValue.dataEncoding.namespaceIndex,
-            name: dataValue.dataEncoding.name
+        if (dataValue.statusCode) {
+          return {
+            value: null,
+            statusCode: {
+              value: dataValue.statusCode.value,
+              description: dataValue.statusCode.description,
+              name: dataValue.statusCode.name
+            },
+            sourcePicoseconds: dataValue.sourcePicoseconds,
+            serverPicoseconds: dataValue.serverPicoseconds
+          }
+        } else {
+          return {
+            nodeId: dataValue.nodeId,
+            attributeId: dataValue.attributeId,
+            indexRange: dataValue.indexRange,
+            dataEncoding: {
+              namespaceIndex: dataValue.dataEncoding.namespaceIndex,
+              name: dataValue.dataEncoding.name
+            }
           }
         }
       }

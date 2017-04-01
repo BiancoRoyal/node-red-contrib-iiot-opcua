@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-contrib-opcua-iiot
+ node-red-iiot-opcua
  */
 'use strict'
 
@@ -16,7 +16,6 @@ module.exports = function (RED) {
   let xmlFiles = [path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.NodeSet2.xml')]
 
   function OPCUAIIoTServer (config) {
-    let node
     let counterValue = 0
     let vendorName
     let initialized = false
@@ -28,19 +27,19 @@ module.exports = function (RED) {
     this.name = config.name
     this.statusLog = config.statusLog
 
-    node = this
+    let node = this
 
     setNodeStatusTo('waiting')
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {
-        coreServer.core.internalDebugLog(logMessage)
+        coreServer.internalDebugLog(logMessage)
       }
     }
 
     function statusLog (logMessage) {
       if (RED.settings.verbose && node.statusLog) {
-        coreServer.core.internalDebugLog('Status: ' + logMessage)
+        coreServer.internalDebugLog('Status: ' + logMessage)
       }
     }
 
@@ -50,7 +49,7 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    coreServer.core.internalDebugLog('node set:' + xmlFiles.toString())
+    coreServer.internalDebugLog('node set:' + xmlFiles.toString())
 
     function initNewServer () {
       initialized = false
@@ -203,7 +202,7 @@ module.exports = function (RED) {
 
         server.start(function () {
           server.endpoints[0].endpointDescriptions().forEach(function (endpoint) {
-            coreServer.core.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' + endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
+            coreServer.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' + endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
           })
 
           let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
@@ -211,9 +210,9 @@ module.exports = function (RED) {
         })
         setNodeStatusTo('active')
         initialized = true
-        coreServer.core.internalDebugLog('server initialized')
+        coreServer.internalDebugLog('server initialized')
       } else {
-        coreServer.core.internalDebugLog('server was not initialized')
+        coreServer.internalDebugLog('server was not initialized')
       }
     }
 
@@ -273,7 +272,7 @@ module.exports = function (RED) {
           break
         case 'deleteNode':
           if (addressSpace === undefined) {
-            coreServer.core.internalDebugLog('addressSpace undefinded')
+            coreServer.internalDebugLog('addressSpace undefinded')
             return false
           }
 
@@ -288,7 +287,7 @@ module.exports = function (RED) {
     }
 
     function restartServer () {
-      coreServer.core.internalDebugLog('Restart OPC UA Server')
+      coreServer.internalDebugLog('Restart OPC UA Server')
 
       if (server) {
         server.shutdown(0, function () {
@@ -303,9 +302,9 @@ module.exports = function (RED) {
       }
 
       if (server) {
-        coreServer.core.internalDebugLog('OPC UA Server restarted')
+        coreServer.internalDebugLog('OPC UA Server restarted')
       } else {
-        coreServer.core.internalDebugLogr('Can not restart OPC UA server')
+        coreServer.internalDebugLogr('Can not restart OPC UA server')
       }
     }
 

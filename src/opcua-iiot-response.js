@@ -3,7 +3,7 @@
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-contrib-opcua-iiot
+ node-red-iiot-opcua
  */
 'use strict'
 
@@ -11,18 +11,16 @@ module.exports = function (RED) {
   let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTResponse (config) {
-    let node
-
     RED.nodes.createNode(this, config)
     this.name = config.name
 
-    node = this
+    let node = this
 
     node.on('input', function (msg) {
       core.internalDebugLog(msg)
       core.internalDebugLog(JSON.stringify(msg))
 
-      // TODO: working with the msg.nodetype
+        // TODO: working with the msg.nodetype
 
       if (msg.payload && msg.payload.statusCode) {
         switch (msg.payload.statusCode) {
@@ -41,11 +39,28 @@ module.exports = function (RED) {
             })
             break
           default:
-            node.status({
-              fill: 'yellow',
-              shape: 'dot',
-              text: msg.payload.statusCode.name + ': ' + msg.payload.statusCode.description
-            })
+            if (msg.payload.statusCode.name.includes('Good')) {
+              node.status({
+                fill: 'green',
+                shape: 'dot',
+                text: msg.payload.statusCode.name
+              })
+            } else {
+              if (msg.payload.statusCode.name.includes('Bad')) {
+                node.status({
+                  fill: 'red',
+                  shape: 'dot',
+                  text: msg.payload.statusCode.name + ': ' + msg.payload.statusCode.description
+                })
+              } else {
+                node.status({
+                  fill: 'yellow',
+                  shape: 'dot',
+                  text: msg.payload.statusCode.name + ': ' + msg.payload.statusCode.description
+                })
+              }
+            }
+
         }
       } else {
         let entry = null
@@ -84,10 +99,11 @@ module.exports = function (RED) {
         })
         node.send(msg)
       }
-    })
+    }
+    )
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Response', OPCUAIIoTResponse)
 
-  // StatusCodes via REST anbieten
+// StatusCodes via REST anbieten
 }

@@ -4,7 +4,7 @@
  Copyright 2016, 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2013, 2016 IBM Corp. (node-red)
  All rights reserved.
- node-red-contrib-opcua-iiot
+ node-red-iiot-opcua
  **/
 'use strict'
 
@@ -12,8 +12,6 @@ module.exports = function (RED) {
   let cron = require('cron')
 
   function OPCUAIIoTInject (config) {
-    let node
-
     RED.nodes.createNode(this, config)
     this.topic = config.topic
     this.datatype = config.datatype
@@ -24,7 +22,7 @@ module.exports = function (RED) {
     this.once = config.once
     this.name = config.name
 
-    node = this
+    let node = this
     node.interval_id = null
     node.cronjob = null
 

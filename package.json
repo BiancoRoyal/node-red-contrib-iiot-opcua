@@ -1,11 +1,11 @@
 {
-  "name": "node-red-contrib-opcua-iiot",
-  "version": "0.1.0-alpha",
+  "name": "@biancoroyal/node-red-iiot-opcua",
+  "version": "0.1.0-beta",
   "tag": "alpha",
-  "description": "IIoT OPC UA contribution package for Node-RED based on node-opcua.",
+  "description": "IIoT OPC UA package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/biancode/node-red-contrib-opcua-iiot"
+    "url": "git+https://github.com/biancode/node-red-iiot-opcua.git"
   },
   "dependencies": {
     "async": "2.2.0",
@@ -27,13 +27,10 @@
     "biancode",
     "modbus"
   ],
-  "author": {
-    "name": "Klaus Landsdorf",
-    "email": "klaus.landsdorf@bianco-royal.de"
-  },
+  "author": "Klaus Landsdorf <klaus.landsdorf@bianco-royal.de>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/biancode/node-red-contrib-opcua-iiot/issues"
+    "url": "https://github.com/biancode/node-red-iiot-opcua/issues"
   },
   "node-red": {
     "nodes": {
@@ -53,7 +50,7 @@
   "engines": {
     "node": ">=4.7"
   },
-  "homepage": "https://github.com/biancode/node-red-contrib-opcua-iiot#readme",
+  "homepage": "https://github.com/biancode/node-red-iiot-opcua#readme",
   "scripts": {
     "test": "standard && mocha test/*",
     "build": "gulp publish",
@@ -92,6 +89,7 @@
     "when": "^3.7.8"
   },
   "directories": {
+    "doc": "docs",
     "example": "examples",
     "test": "test"
   },
@@ -104,5 +102,6 @@
       "src/public/",
       "test"
     ]
-  }
+  },
+  "main": "index.js"
 }

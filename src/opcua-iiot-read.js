@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-contrib-opcua-iiot
+ node-red-iiot-opcua
  */
 'use strict'
 
@@ -12,29 +12,27 @@ module.exports = function (RED) {
   let coreClient = require('./core/opcua-iiot-core-client')
 
   function OPCUAIIoTRead (config) {
-    let node
-
     RED.nodes.createNode(this, config)
     this.attributeId = config.attributeId || 0
     this.maxAge = config.maxAge || 0
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.connector = RED.nodes.getNode(config.connector)
 
-    node = this
-    node.connector = RED.nodes.getNode(config.connector)
+    let node = this
 
     setNodeStatusTo(false)
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {
-        coreClient.core.internalDebugLog(logMessage)
+        coreClient.internalDebugLog(logMessage)
       }
     }
 
     function statusLog (logMessage) {
       if (RED.settings.verbose && node.statusLog) {
-        coreClient.core.internalDebugLog('Status: ' + logMessage)
+        coreClient.internalDebugLog('Status: ' + logMessage)
       }
     }
 
@@ -46,7 +44,7 @@ module.exports = function (RED) {
 
     node.handleReadError = function (err, msg) {
       if (RED.settings.verbose) {
-        coreClient.core.internalDebugLog('ERROR: ' + err)
+        coreClient.internalDebugLog('ERROR: ' + err)
       }
 
       if (node.showErrors) {
@@ -64,20 +62,20 @@ module.exports = function (RED) {
 
       if (session) {
         if (session.sessionId === 'terminated') {
-          coreClient.core.internalDebugLog('ERROR: Session Terminated')
+          coreClient.internalDebugLog('ERROR: Session Terminated')
           if (node.showErrors) {
             node.error(new Error('Session Terminated'), msg)
           }
         } else {
-          coreClient.core.internalDebugLog('Read with AttributeId ' + node.attributeId)
+          coreClient.internalDebugLog('Read with AttributeId ' + node.attributeId)
 
           switch (parseInt(node.attributeId)) {
             case 0:
               coreClient.readAllAttributes(session, itemsToRead).then(function (resultsConverted, nodesToRead, results, diagnostics) {
                 setNodeStatusTo('active')
 
-                coreClient.core.internalDebugLog('readAllAttributes results: ' + JSON.stringify(results))
-                coreClient.core.internalDebugLog('readAllAttributes diagnostics: ' + JSON.stringify(diagnostics))
+                coreClient.internalDebugLog('readAllAttributes results: ' + JSON.stringify(results))
+                coreClient.internalDebugLog('readAllAttributes diagnostics: ' + JSON.stringify(diagnostics))
 
                 let message = {
                   payload: {results: resultsConverted, nodesToRead: nodesToRead},
@@ -85,7 +83,7 @@ module.exports = function (RED) {
                   readtype: 'readAllAttributes',
                   attributeId: node.attributeId
                 }
-                coreClient.core.internalDebugLog('readAllAttributes:' + JSON.stringify(message))
+                coreClient.internalDebugLog('readAllAttributes:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
                 node.handleReadError(err, msg)
@@ -95,8 +93,8 @@ module.exports = function (RED) {
               coreClient.readVariableValue(session, itemsToRead).then(function (resultsConverted, results, diagnostics) {
                 setNodeStatusTo('active')
 
-                coreClient.core.internalDebugLog('readVariableValue results: ' + JSON.stringify(results))
-                coreClient.core.internalDebugLog('readVariableValue diagnostics: ' + JSON.stringify(diagnostics))
+                coreClient.internalDebugLog('readVariableValue results: ' + JSON.stringify(results))
+                coreClient.internalDebugLog('readVariableValue diagnostics: ' + JSON.stringify(diagnostics))
 
                 let message = {
                   payload: resultsConverted,
@@ -104,7 +102,7 @@ module.exports = function (RED) {
                   readtype: 'readVariableValue',
                   attributeId: node.attributeId
                 }
-                coreClient.core.internalDebugLog('readVariableValue:' + JSON.stringify(message))
+                coreClient.internalDebugLog('readVariableValue:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
                 node.handleReadError(err, msg)
@@ -125,8 +123,8 @@ module.exports = function (RED) {
               coreClient.read(session, nodesToReadWithAttributeId, node.maxAge).then(function (resultsConverted, results, diagnostics) {
                 setNodeStatusTo('active')
 
-                coreClient.core.internalDebugLog('read results: ' + JSON.stringify(results))
-                coreClient.core.internalDebugLog('read diagnostics: ' + JSON.stringify(diagnostics))
+                coreClient.internalDebugLog('read results: ' + JSON.stringify(results))
+                coreClient.internalDebugLog('read diagnostics: ' + JSON.stringify(diagnostics))
 
                 let message = {
                   payload: resultsConverted,
@@ -134,7 +132,7 @@ module.exports = function (RED) {
                   readtype: 'read',
                   attributeId: node.attributeId
                 }
-                coreClient.core.internalDebugLog('read:' + JSON.stringify(message))
+                coreClient.internalDebugLog('read:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
                 node.handleReadError(err, msg)
@@ -161,19 +159,25 @@ module.exports = function (RED) {
     }
 
     node.startOPCUASession = function (opcuaClient) {
+      coreClient.internalDebugLog('Read Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT).then(function (session) {
         node.opcuaSession = session
+        setNodeStatusTo('connected')
       }).catch(node.handleSessionError)
     }
 
-    node.connector.on('connected', node.startOPCUASession)
+    if (node.connector) {
+      node.connector.on('connected', node.startOPCUASession)
+    } else {
+      throw new TypeError('Connector Not Valid')
+    }
 
     node.on('close', function () {
       if (node.opcuaSession) {
         node.opcuaSession.close(function (err) {
           if (err) {
-            coreClient.core.internalDebugLog('ERROR: on close session ' + err)
+            coreClient.internalDebugLog('ERROR: on close session ' + err)
           }
           node.opcuaSession = null
           verboseLog('Session closed')

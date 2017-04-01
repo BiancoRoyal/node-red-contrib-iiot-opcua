@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-contrib-opcua-iiot
+ node-red-iiot-opcua
  */
 'use strict'
 
@@ -12,27 +12,25 @@ module.exports = function (RED) {
   let coreClient = require('./core/opcua-iiot-core-client')
 
   function OPCUAIIoTWrite (config) {
-    let node
-
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.connector = RED.nodes.getNode(config.connector)
 
-    node = this
-    node.connector = RED.nodes.getNode(config.connector)
+    let node = this
 
     setNodeStatusTo('waiting')
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {
-        coreClient.core.internalDebugLog(logMessage)
+        coreClient.internalDebugLog(logMessage)
       }
     }
 
     function statusLog (logMessage) {
       if (RED.settings.verbose && node.statusLog) {
-        coreClient.core.internalDebugLog('Status: ' + logMessage)
+        coreClient.internalDebugLog('Status: ' + logMessage)
       }
     }
 
@@ -44,7 +42,7 @@ module.exports = function (RED) {
 
     node.handleWriteError = function (err, msg) {
       if (RED.settings.verbose) {
-        coreClient.core.internalDebugLog('ERROR: ' + err)
+        coreClient.internalDebugLog('ERROR: ' + err)
       }
 
       if (node.showErrors) {
@@ -64,8 +62,8 @@ module.exports = function (RED) {
           coreClient.write(session, nodesToWrite).then(function (resultsConverted, results, diagnostics) {
             setNodeStatusTo('active')
 
-            coreClient.core.internalDebugLog('write results: ' + JSON.stringify(results))
-            coreClient.core.internalDebugLog('write diagnostics: ' + JSON.stringify(diagnostics))
+            coreClient.internalDebugLog('write results: ' + JSON.stringify(results))
+            coreClient.internalDebugLog('write diagnostics: ' + JSON.stringify(diagnostics))
 
             let message = {payload: resultsConverted, nodetype: 'write'}
             node.send(message)
@@ -93,19 +91,25 @@ module.exports = function (RED) {
     }
 
     node.startOPCUASession = function (opcuaClient) {
+      coreClient.internalDebugLog('Write Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT).then(function (session) {
         node.opcuaSession = session
+        setNodeStatusTo('connected')
       }).catch(node.handleSessionError)
     }
 
-    node.connector.on('connected', node.startOPCUASession)
+    if (node.connector) {
+      node.connector.on('connected', node.startOPCUASession)
+    } else {
+      throw new TypeError('Connector Not Valid')
+    }
 
     node.on('close', function () {
       if (node.opcuaSession) {
         node.opcuaSession.close(function (err) {
           if (err) {
-            coreClient.core.internalDebugLog('ERROR: on close session ' + err)
+            coreClient.internalDebugLog('ERROR: on close session ' + err)
           }
           node.opcuaSession = null
           verboseLog('Session closed')

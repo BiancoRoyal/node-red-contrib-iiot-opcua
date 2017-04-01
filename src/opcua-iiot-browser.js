@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-contrib-opcua-iiot
+ node-red-iiot-opcua
  */
 'use strict'
 
@@ -13,16 +13,14 @@ module.exports = function (RED) {
   let browserItems = []
 
   function OPCUAIIoTBrowser (config) {
-    let node
-
     RED.nodes.createNode(this, config)
     this.datatype = config.datatype
     this.topic = config.topic
     this.name = config.name
+    this.connector = RED.nodes.getNode(config.connector)
 
-    node = this
+    let node = this
     node.items = []
-    node.connector = RED.nodes.getNode(config.connector)
     node.browseTopic = coreBrowser.core.OBJECTS_ROOT
     node.opcuaClient = null
     node.opcuaSession = null
@@ -30,7 +28,7 @@ module.exports = function (RED) {
     setNodeStatusTo('waiting')
 
     function setNodeStatusTo (statusValue) {
-      coreBrowser.core.internalDebugLog('listener status ' + statusValue)
+      coreBrowser.internalDebugLog('listener status ' + statusValue)
       let statusParameter = coreBrowser.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
@@ -57,7 +55,7 @@ module.exports = function (RED) {
           nodeId: coreBrowser.core.OBJECTS_ROOT,
           browseName: 'Objects'
         })
-        coreBrowser.core.internalDebugLog(err)
+        coreBrowser.internalDebugLog(err)
 
         if (node.showErrors) {
           node.error(err, msg)
@@ -65,7 +63,7 @@ module.exports = function (RED) {
 
         node.status({fill: 'red', shape: 'dot', text: 'error'})
       } else {
-        coreBrowser.core.internalDebugLog('browse done with catch but no error: ' + browserItems.length + ' item(s)')
+        coreBrowser.internalDebugLog('browse done with catch but no error: ' + browserItems.length + ' item(s)')
       }
     }
 
@@ -74,14 +72,14 @@ module.exports = function (RED) {
 
       if (session && node.browseTopic) {
         coreBrowser.browse(session, node.browseTopic).then(function (browseResult) {
-          coreBrowser.core.internalDebugLog('browse root ' + node.browseTopic + ' on ' +
-            node.opcuaSession.name + ' Id: ' + node.opcuaSession.sessionId)
+          coreBrowser.internalDebugLog('browse root ' + node.browseTopic + ' on ' +
+            session.name + ' Id: ' + session.sessionId)
 
           browseResult.forEach(function (result) {
-            // coreBrowser.core.internalDebugLog('result:' + result)
+            // coreBrowser.internalDebugLog('result:' + result)
 
             result.references.forEach(function (reference) {
-              // coreBrowser.core.internalDebugLog('reference:' + reference)
+              // coreBrowser.internalDebugLog('reference:' + reference)
               node.add_item(reference)
             })
           })
@@ -97,7 +95,7 @@ module.exports = function (RED) {
     node.on('input', function (msg) {
       node.browseTopic = null
 
-      coreBrowser.core.internalDebugLog(msg)
+      coreBrowser.internalDebugLog(msg)
 
       if (msg.payload.actiontype === 'browse') { // event driven browsing
         if (msg.payload.root && msg.payload.root.nodeId) {
@@ -111,6 +109,11 @@ module.exports = function (RED) {
         } else {
           node.browseTopic = node.topic || node.browseToRoot()
         }
+      }
+
+      if (!node.opcuaSession) {
+        node.error(new Error('Session Not Ready To Browse'), msg)
+        return
       }
 
       if (node.browseTopic) {
@@ -130,12 +133,12 @@ module.exports = function (RED) {
     })
 
     node.browseByItem = function (nodeId) {
-      coreBrowser.core.internalDebugLog('browse to parent ' + nodeId)
+      coreBrowser.internalDebugLog('browse to parent ' + nodeId)
       return nodeId
     }
 
     node.browseToRoot = function () {
-      coreBrowser.core.internalDebugLog('browse to root ' + coreBrowser.core.OBJECTS_ROOT)
+      coreBrowser.internalDebugLog('browse to root ' + coreBrowser.core.OBJECTS_ROOT)
       return coreBrowser.core.OBJECTS_ROOT
     }
 
@@ -150,13 +153,20 @@ module.exports = function (RED) {
     }
 
     node.startOPCUASession = function (opcuaClient) {
+      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT).then(function (session) {
         node.opcuaSession = session
+        setNodeStatusTo('connected')
       }).catch(node.handleSessionError)
     }
 
-    node.connector.on('connected', node.startOPCUASession)
+    if (node.connector) {
+      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
+      node.connector.on('connected', node.startOPCUASession)
+    } else {
+      throw new TypeError('Connector Not Valid')
+    }
 
     node.on('close', function (done) {
       node.connector.closeSession(done)
@@ -166,7 +176,7 @@ module.exports = function (RED) {
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
 
   RED.httpAdmin.get('/browser/browse', RED.auth.needsPermission('browser.browse'), function (req, res) {
-    coreBrowser.core.internalDebugLog(req)
+    coreBrowser.internalDebugLog(req)
     res.json(browserItems)
   })
 }

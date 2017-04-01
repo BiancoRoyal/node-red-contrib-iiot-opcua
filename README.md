@@ -1,22 +1,18 @@
-[![NPM download](https://img.shields.io/npm/dm/node-red-contrib-opcua-iiot.svg)](http://www.npm-stats
-.com/~packages/node-red-contrib-opcua-iiot)
-[![NPM version](https://badge.fury.io/js/node-red-contrib-opcua-iiot.png)](http://badge.fury
-.io/js/node-red-contrib-opcua-iiot)
 ![Node-RED OPC UA IIoT](http://b.repl.ca/v1/Node--RED-OPC_UA_IIoT-blue.png)
 
-# node-red-contrib-opcua-iiot
+# node-red-iiot-opcua
 
-[![opcuaiiot64](images/opcua-iiot-logo64.png)](https://www.npmjs.com/package/node-red-contrib-opcua-iiot)
+[![opcuaiiot64](images/opcua-iiot-logo64-white.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
 
 ## Install
 
 Run command on Node-RED installation directory.
 
-	npm install node-red-contrib-opcua-iiot
+	npm install node-red-iiot-opcua
 
 or run command for global installation.
 
-	npm install -g node-red-contrib-opcua-iiot
+	npm install -g node-red-iiot-opcua
 
 try these options on npm install to build, if you have problems to install
 
@@ -32,7 +28,7 @@ try these options on npm install to build, if you have problems to install
 
 start debug with Node-RED in verbose (-v) mode
 
-    DEBUG=opcuaIIoT node-red -v
+    DEBUG=opcuaIIoT:* node-red -v
 
 ### Wiki
 
