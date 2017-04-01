@@ -11,11 +11,12 @@ module.exports = function (RED) {
   let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTResponse (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.name = config.name
 
-    let node = this
+    node = this
 
     node.on('input', function (msg) {
       core.internalDebugLog(msg)

@@ -12,13 +12,14 @@ module.exports = function (RED) {
   let coreListener = require('./core/opcua-iiot-core-listener')
 
   function OPCUAIIoTEvent (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.eventRoot = config.eventRoot
     this.eventType = config.eventType
     this.name = config.name
 
-    let node = this
+    node = this
 
     node.on('input', function (msg) {
       let basicEventFields = coreListener.getBasicEventFields()

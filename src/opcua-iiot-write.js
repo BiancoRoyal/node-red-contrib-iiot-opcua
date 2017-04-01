@@ -12,16 +12,17 @@ module.exports = function (RED) {
   let coreClient = require('./core/opcua-iiot-core-client')
 
   function OPCUAIIoTWrite (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let node = this
+    node = this
     node.connector = RED.nodes.getNode(config.connector)
 
-    setNodeStatusTo(false)
+    setNodeStatusTo('waiting')
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {

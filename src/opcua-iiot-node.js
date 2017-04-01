@@ -12,14 +12,15 @@ module.exports = function (RED) {
   let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTNode (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.datatype = config.datatype
     this.value = config.value
     this.name = config.name
 
-    let node = this
+    node = this
 
     node.on('input', function (msg) {
       msg.topic = node.nodeId

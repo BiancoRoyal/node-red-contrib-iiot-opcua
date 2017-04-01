@@ -12,10 +12,12 @@ module.exports = function (RED) {
   let coreListener = require('./core/opcua-iiot-core-listener')
   let async = require('async')
   let Queue = require('async').queue
+  let Map = require('collections/map')
 
   function OPCUAIIoTListener (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.action = config.action
     this.time = config.time
     this.timeUnit = config.timeUnit
@@ -23,16 +25,16 @@ module.exports = function (RED) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let node = this
+    node = this
     node.connector = RED.nodes.getNode(config.connector)
 
     let subscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let DataType = coreListener.core.nodeOPCUA.DataType
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
-    let monitoredItems = coreListener.MonitoredItemSet()
+    let monitoredItems = new Map()
 
-    setNodeStatusTo(null)
+    setNodeStatusTo('waiting')
 
     node.createSubscription = function (msg, cb) {
       let timeMilliseconds = coreListener.core.calcMillisecondsByTimeAndUnit(node.time, node.timeUnit)
@@ -43,7 +45,7 @@ module.exports = function (RED) {
     node.resetSubscription = function () {
       subscription = null
       monitoredItems.clear()
-      setNodeStatusTo('terminated')
+      setNodeStatusTo('reset')
     }
 
     node.subscribeActionInput = function (msg) {
@@ -60,6 +62,15 @@ module.exports = function (RED) {
     }
 
     node.subscribeMonitoredItem = function (subscription, msg) {
+      if (!monitoredItems) {
+        coreListener.core.internalDebugLog('Monitored Item Set Not Valid')
+        return
+      }
+
+      if (!msg.queueSize) {
+        msg.queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
+      }
+
       let monitoredItem = monitoredItems.get({'topicName': msg.topic})
 
       if (!monitoredItem) {
@@ -73,11 +84,11 @@ module.exports = function (RED) {
           setNodeStatusTo('initialized')
         })
 
-        monitoredItems.add({'topicName': msg.topic, mItem: monitoredItem})
+        monitoredItems.set({'topicName': msg.topic, mItem: monitoredItem})
 
         monitoredItem.on('changed', function (dataValue) {
           setNodeStatusTo('active')
-          msg.payload = coreListener.core.buildMsgPayloadByDataValue(dataValue.value.dataType, dataValue.value.value)
+          msg.payload = coreListener.core.buildMsgPayloadByDataValue(dataValue)
           node.send(msg)
         })
 
@@ -92,6 +103,15 @@ module.exports = function (RED) {
     }
 
     node.subscribeMonitoredEvent = function (subscription, msg) {
+      if (!monitoredItems) {
+        coreListener.core.internalDebugLog('Monitored Item Set Not Valid')
+        return
+      }
+
+      if (!msg.queueSize) {
+        msg.queueSize = coreListener.EVENT_DEFAULT_QUEUE_SIZE
+      }
+
       let monitoredItem = monitoredItems.get({'topicName': msg.topic})
 
       if (!monitoredItem) {
@@ -101,14 +121,15 @@ module.exports = function (RED) {
           }
         })
 
-        monitoredItems.add({'topicName': msg.topic, mItem: monitoredItem})
+        monitoredItems.set({'topicName': msg.topic, mItem: monitoredItem})
 
         monitoredItem.on('initialized', function () {
           setNodeStatusTo('initialized')
         })
 
         monitoredItem.on('changed', function (eventFields) {
-          dumpEvent(node, node.session, msg.eventFields, eventFields, function () {
+          dumpEvent(node, node.opcuaSession, msg.eventFields, eventFields, function () {
+            coreListener.core.internalDebugLog('event changed callback')
           })
           setNodeStatusTo('active')
         })
@@ -149,15 +170,17 @@ module.exports = function (RED) {
     node.makeSubscription = function (callback, msg, parameters) {
       let newSubscription = null
 
-      if (!node.session) {
+      if (!node.opcuaSession) {
+        coreListener.core.internalDebugLog('Subscription Session Not Valid')
         return newSubscription
       }
 
       if (!parameters) {
+        coreListener.core.internalDebugLog('Subscription Parameters Not Valid')
         return newSubscription
       }
 
-      newSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.session, parameters)
+      newSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
 
       newSubscription.on('initialized', function () {
         setNodeStatusTo('initialized')
@@ -247,6 +270,25 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
+    node.handleSessionError = function (err) {
+      if (node.showErrors) {
+        node.error(err, {payload: 'OPC UA Session Error'})
+      }
+
+      node.connector.closeSession(function () {
+        node.startOPCUASession(node.opcuaClient)
+      })
+    }
+
+    node.startOPCUASession = function (opcuaClient) {
+      node.opcuaClient = opcuaClient
+      node.connector.startSession(coreListener.core.TEN_SECONDS_TIMEOUT).then(function (session) {
+        node.opcuaSession = session
+      }).catch(node.handleSessionError)
+    }
+
+    node.connector.on('connected', node.startOPCUASession)
+
     node.on('input', function (msg) {
       coreListener.core.internalDebugLog(node.action + ' listener input ' + JSON.stringify(msg))
 
@@ -265,18 +307,6 @@ module.exports = function (RED) {
     node.on('close', function () {
       if (subscription && subscription.isActive()) {
         subscription.terminate()
-      }
-
-      if (node.session) {
-        node.session.close(function (err) {
-          setNodeStatusTo('closed')
-          if (err) {
-            node.error(node.name + ' ' + err)
-          }
-          node.session = null
-        })
-      } else {
-        node.session = null
       }
     })
   }

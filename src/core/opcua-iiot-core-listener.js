@@ -18,7 +18,8 @@
 var de = de || {biancoroyal: {opcua: {iiot: {core: {listener: {}}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.core = de.biancoroyal.opcua.iiot.core.listener.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.client = de.biancoroyal.opcua.iiot.core.listener.client || require('./opcua-iiot-core-client') // eslint-disable-line no-use-before-define
-
+de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
 /*
  Options defaults node-opcua
 
@@ -198,15 +199,17 @@ de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
 }
 
 de.biancoroyal.opcua.iiot.core.listener.MonitoredItemSet = function () {
+  let Set = require('collections/set')
   return new Set(null, function (a, b) {
     return a.topicName === b.topicName
   }, function (object) {
     return object.topicName
   })
-} // multiple monitored Items should be registered only once
+}
 
 de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, subscription, handleErrorCallback) {
   let interval
+  let queueSize
 
   if (typeof msg.payload === 'number') {
     interval = parseInt(msg.payload)
@@ -214,23 +217,30 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
     interval = 100
   }
 
-  subscription.monitor(
+  if (typeof msg.queueSize === 'number') {
+    queueSize = parseInt(msg.queueSize)
+  } else {
+    queueSize = 1
+  }
+
+  return subscription.monitor(
     {
-      nodeId: msg.topic,
+      nodeId: this.core.nodeOPCUA.resolveNodeId(msg.topic),
       attributeId: this.core.nodeOPCUA.AttributeIds.Value
     },
     {
       samplingInterval: interval,
-      queueSize: 10,
-      discardOldest: true
+      discardOldest: true,
+      queueSize: queueSize
     },
-    3,
+    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
     handleErrorCallback
   )
 }
 
 de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subscription, handleErrorCallback) {
   let interval
+  let queueSize
 
   if (typeof msg.payload === 'number') {
     interval = parseInt(msg.payload)
@@ -238,18 +248,24 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
     interval = 100
   }
 
-  subscription.monitor(
+  if (typeof msg.queueSize === 'number') {
+    queueSize = parseInt(msg.queueSize)
+  } else {
+    queueSize = 1
+  }
+
+  return subscription.monitor(
     {
-      nodeId: msg.topic,
+      nodeId: this.core.nodeOPCUA.resolveNodeId(msg.topic),
       attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier
     },
     {
       samplingInterval: interval,
-      queueSize: 100000,
-      filter: msg.eventFilter,
-      discardOldest: true
+      discardOldest: true,
+      queueSize: queueSize,
+      filter: msg.eventFilter
     },
-    3,
+    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
     handleErrorCallback
   )
 }

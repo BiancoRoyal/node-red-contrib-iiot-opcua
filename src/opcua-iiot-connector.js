@@ -12,13 +12,14 @@ module.exports = function (RED) {
   let coreConnector = require('./core/opcua-iiot-core-connector')
 
   function OPCUAIIoTConnectorConfiguration (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.endpoint = config.endpoint
     this.loginEnabled = config.loginEnabled
     this.name = config.name
 
-    let node = this
+    node = this
     node.client = null
     node.userIdentity = {}
 

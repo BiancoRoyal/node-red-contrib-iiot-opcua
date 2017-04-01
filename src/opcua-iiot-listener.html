@@ -14,8 +14,7 @@
     defaults: {
       connector: {type: 'OPCUA-IIoT-Connector', required: true},
       action: {value: 'subscribe', required: true},
-      time: {value: 10, required: true, validate: RED.validators.number()},
-      timeUnit: {value: 's', required: true},
+      queueSize: {value: 10, required: true, validate: RED.validators.number()},
       name: {value: ''},
       showStatusActivities: {value: false},
       showErrors: {value: false}
@@ -45,15 +44,9 @@
             <option value="events">EVENTS</option>
         </select>
     </div>
-    <div class="form-row" id="node-input-time-row">
-        <label for="node-input-time"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.interval"></span></label>
-        <input type="number" id="node-input-time" placeholder="number" style="max-width:120px">
-        <select id="node-input-timeUnit" style="max-width:160px">
-            <option value="ms">millisecond(s)</option>
-            <option value="s" selected>second(s)</option>
-            <option value="m">minute(s)</option>
-            <option value="h">hour(s)</option>
-        </select>
+    <div class="form-row">
+        <label for="node-input-queueSize"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.queueSize"></span></label>
+        <input type="number" id="node-input-queueSize" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>

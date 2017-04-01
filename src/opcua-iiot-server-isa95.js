@@ -17,21 +17,21 @@ module.exports = function (RED) {
     path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml')]
 
   function OPCUAIIoTServerISA95 (config) {
-    RED.nodes.createNode(this, config)
-
-    this.port = config.port
-    this.endpoint = config.endpoint
-    this.name = config.name
-    this.statusLog = config.statusLog
-
-    let node = this
-
+    let node
     let counterValue = 0
     let vendorName
     let initialized = false
     let server = null
 
-    setNodeStatusTo(false)
+    RED.nodes.createNode(this, config)
+    this.port = config.port
+    this.endpoint = config.endpoint
+    this.name = config.name
+    this.statusLog = config.statusLog
+
+    node = this
+
+    setNodeStatusTo('waiting')
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {

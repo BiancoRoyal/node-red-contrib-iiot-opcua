@@ -22,7 +22,7 @@
       password: {type: "password"}
     },
     label: function () {
-      return this.name || "Connector";
+      return this.name || this.endpoint;
     },
     oneditprepare: function () {
       try {

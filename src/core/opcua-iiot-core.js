@@ -46,24 +46,27 @@ de.biancoroyal.opcua.iiot.core.getTimeUnitName = function (unit) {
 }
 
 de.biancoroyal.opcua.iiot.core.calcMillisecondsByTimeAndUnit = function (time, unit) {
+  let convertedTime
+
   switch (unit) {
     case 'ms':
+      convertedTime = time
       break
     case 's':
-      time = time * 1000 // seconds
+      convertedTime = time * 1000 // seconds
       break
     case 'm':
-      time = time * 60000 // minutes
+      convertedTime = time * 60000 // minutes
       break
     case 'h':
-      time = time * 3600000 // hours
+      convertedTime = time * 3600000 // hours
       break
     default:
-      time = 10000 // 10 sec.
+      convertedTime = 10000 // 10 sec.
       break
   }
 
-  return time
+  return convertedTime
 }
 
 de.biancoroyal.opcua.iiot.core.buildBrowseMessage = function (topic) {
@@ -78,40 +81,47 @@ de.biancoroyal.opcua.iiot.core.buildBrowseMessage = function (topic) {
 }
 
 de.biancoroyal.opcua.iiot.core.toInt32 = function (x) {
-  let uint16 = x
+  let uintSixteen = x
 
-  if (uint16 >= Math.pow(2, 15)) {
-    uint16 = x - Math.pow(2, 16)
-    return uint16
+  if (uintSixteen >= Math.pow(2, 15)) {
+    uintSixteen = x - Math.pow(2, 16)
+    return uintSixteen
   } else {
-    return uint16
+    return uintSixteen
   }
 }
 
 de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue) {
-  let fillValue = 'red'
-  let shapeValue = 'dot'
+  let fillValue = 'yellow'
+  let shapeValue = 'ring'
 
   switch (statusValue) {
     case 'initialize':
     case 'connecting':
       fillValue = 'yellow'
-      shapeValue = 'ring'
       break
     case 'connected':
     case 'keepalive':
       fillValue = 'green'
-      shapeValue = 'ring'
       break
     case 'active':
     case 'subscribed':
+    case 'listening':
       fillValue = 'green'
       shapeValue = 'dot'
       break
     case 'disconnected':
     case 'terminated':
       fillValue = 'red'
-      shapeValue = 'ring'
+      break
+    case 'waiting':
+      fillValue = 'blue'
+      shapeValue = 'dot'
+      statusValue = 'waiting ...'
+      break
+    case 'error':
+      fillValue = 'red'
+      shapeValue = 'dot'
       break
     default:
       if (!statusValue) {
@@ -241,17 +251,24 @@ de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue)
       }
     default:
       if (dataValue.value) {
-        return {
-          value: convertedValue,
-          dataType: dataValue.value.dataType,
-          arrayType: dataValue.value.arrayType,
-          statusCode: {
-            value: dataValue.statusCode.value,
-            description: dataValue.statusCode.description,
-            name: dataValue.statusCode.name
-          },
-          sourcePicoseconds: dataValue.sourcePicoseconds,
-          serverPicoseconds: dataValue.serverPicoseconds
+        if (dataValue.statusCode) {
+          return {
+            value: convertedValue,
+            dataType: dataValue.value.dataType,
+            arrayType: dataValue.value.arrayType,
+            statusCode: {
+              value: dataValue.statusCode.value,
+              description: dataValue.statusCode.description,
+              name: dataValue.statusCode.name
+            },
+            sourcePicoseconds: dataValue.sourcePicoseconds,
+            serverPicoseconds: dataValue.serverPicoseconds
+          }
+        } else {
+          return {
+            value: convertedValue,
+            dataValueStringified: JSON.stringify(dataValue)
+          }
         }
       } else {
         return {
@@ -306,7 +323,11 @@ de.biancoroyal.opcua.iiot.core.convertDataValue = function (value) {
       break
     default:
       this.internalDebugLog('convertDataValue unused DataType: ' + value.dataType)
-      convertedValue = value.value
+      if (value.value) {
+        convertedValue = value.value
+      } else {
+        convertedValue = value
+      }
       break
   }
 

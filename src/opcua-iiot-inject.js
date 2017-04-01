@@ -12,8 +12,9 @@ module.exports = function (RED) {
   let cron = require('cron')
 
   function OPCUAIIoTInject (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.topic = config.topic
     this.datatype = config.datatype
     this.payload = config.payload
@@ -23,7 +24,7 @@ module.exports = function (RED) {
     this.once = config.once
     this.name = config.name
 
-    let node = this
+    node = this
     node.interval_id = null
     node.cronjob = null
 

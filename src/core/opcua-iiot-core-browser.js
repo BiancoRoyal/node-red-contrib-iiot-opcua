@@ -21,7 +21,7 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
   return new Promise(
     function (resolve, reject) {
       let core = require('./opcua-iiot-core')
-      var browseOptions = [
+      let browseOptions = [
         {
           nodeId: topic,
           referenceTypeId: 'Organizes',

@@ -13,18 +13,27 @@ module.exports = function (RED) {
   let browserItems = []
 
   function OPCUAIIoTBrowser (config) {
-    RED.nodes.createNode(this, config)
+    let node
 
+    RED.nodes.createNode(this, config)
     this.datatype = config.datatype
     this.topic = config.topic
     this.name = config.name
 
-    let node = this
+    node = this
     node.items = []
     node.connector = RED.nodes.getNode(config.connector)
     node.browseTopic = coreBrowser.core.OBJECTS_ROOT
     node.opcuaClient = null
     node.opcuaSession = null
+
+    setNodeStatusTo('waiting')
+
+    function setNodeStatusTo (statusValue) {
+      coreBrowser.core.internalDebugLog('listener status ' + statusValue)
+      let statusParameter = coreBrowser.core.getNodeStatus(statusValue)
+      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+    }
 
     node.add_item = function (item) {
       if (item) {

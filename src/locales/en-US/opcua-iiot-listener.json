@@ -6,7 +6,8 @@
       "interval": "Interval",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
-      "attributeId": "Attribute Id"
+      "attributeId": "Attribute Id",
+      "queueSize": "Queue Size"
     }
   }
 }
