@@ -1,0 +1,19 @@
+2 Apr 11:50:50 - [error] [OPCUA-IIoT-Read:4880df4.b19c92] Error:  ServiceFault returned by server { /*ServiceFault*/
+ responseHeader                /* ResponseHeader                   */: {
+   timeStamp                   /* UtcTime                          */: 2017-04-02T09:50:47.647Z
+   requestHandle               /* IntegerId                        */: 69303               0x10eb7
+   serviceResult               /* StatusCode                       */: BadSessionClosed (0x80260000)
+   serviceDiagnostics          /* DiagnosticInfo                   */: {
+     namespaceUri              /* Int32                            */: -1
+     symbolicId                /* Int32                            */: -1
+     locale                    /* Int32                            */: -1
+     localizedText             /* Int32                            */: -1
+     additionalInfo            /* String                           */: null
+     innerStatusCode           /* StatusCode                       */: Good (0x00000)
+     innerDiagnosticInfo       /* DiagnosticInfo                   */: {
+     }
+   }
+   stringTable                 /* String                        [] */: [ ] (l=1)
+   additionalHeader            /* ExtensionObject                  */: null
+ }
+};

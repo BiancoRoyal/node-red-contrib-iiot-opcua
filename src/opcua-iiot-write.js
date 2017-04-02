@@ -82,7 +82,7 @@ module.exports = function (RED) {
 
     node.handleSessionError = function (err) {
       if (node.showErrors) {
-        node.error(err, {payload: 'OPC UA Session Error'})
+        node.error(err, {payload: 'Write Session Error'})
       }
 
       node.connector.closeSession(function () {

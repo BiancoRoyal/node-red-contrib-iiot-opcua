@@ -268,15 +268,21 @@ module.exports = function (RED) {
       })
     }
 
+    function statusLog (logMessage) {
+      if (RED.settings.verbose && node.statusLog) {
+        coreListener.internalDebugLog('Status: ' + logMessage)
+      }
+    }
+
     function setNodeStatusTo (statusValue) {
-      coreListener.internalDebugLog('listener status ' + statusValue)
+      statusLog(statusValue)
       let statusParameter = coreListener.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
     node.handleSessionError = function (err) {
       if (node.showErrors) {
-        node.error(err, {payload: 'OPC UA Session Error'})
+        node.error(err, {payload: 'Listener Session Error'})
       }
 
       node.connector.closeSession(function () {

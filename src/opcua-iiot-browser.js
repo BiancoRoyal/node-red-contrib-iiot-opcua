@@ -10,7 +10,7 @@
 
 module.exports = function (RED) {
   let coreBrowser = require('./core/opcua-iiot-core-browser')
-  let browserItems = []
+  let browserEntries = []
 
   function OPCUAIIoTBrowser (config) {
     RED.nodes.createNode(this, config)
@@ -27,30 +27,22 @@ module.exports = function (RED) {
 
     setNodeStatusTo('waiting')
 
+    function statusLog (logMessage) {
+      if (RED.settings.verbose && node.statusLog) {
+        coreBrowser.internalDebugLog('Status: ' + logMessage)
+      }
+    }
+
     function setNodeStatusTo (statusValue) {
-      coreBrowser.internalDebugLog('listener status ' + statusValue)
+      statusLog(statusValue)
       let statusParameter = coreBrowser.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.add_item = function (item) {
-      if (item) {
-        node.items.add({
-          referenceTypeId: item.referenceTypeId.toString(),
-          isForward: item.isForward,
-          nodeId: item.nodeId.toString(),
-          browseName: item.browseName.toString(),
-          displayName: item.displayName,
-          nodeClass: item.nodeClass.toString(),
-          typeDefinition: item.typeDefinition.toString()
-        })
-      }
-    }
-
-    node.browseResultHandling = function (err, msg) {
+    node.browseErrorHandling = function (err, msg, itemList) {
       if (err) {
-        browserItems = []
-        browserItems.push({
+        itemList = []
+        itemList.push({
           displayName: {text: 'Objects'},
           nodeId: coreBrowser.core.OBJECTS_ROOT,
           browseName: 'Objects'
@@ -60,91 +52,125 @@ module.exports = function (RED) {
         if (node.showErrors) {
           node.error(err, msg)
         }
-
+        coreBrowser.internalDebugLog('Browser Error ' + err.message)
         node.status({fill: 'red', shape: 'dot', text: 'error'})
       } else {
-        coreBrowser.internalDebugLog('browse done with catch but no error: ' + browserItems.length + ' item(s)')
+        coreBrowser.internalDebugLog('Browse Done With Error: ' + browserEntries.length + ' item(s)')
       }
+
+      return itemList
     }
 
     node.browse = function (session, msg) {
-      node.items = []
+      browserEntries = []
+      coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
 
-      if (session && node.browseTopic) {
+      if (session) {
         coreBrowser.browse(session, node.browseTopic).then(function (browseResult) {
-          coreBrowser.internalDebugLog('browse root ' + node.browseTopic + ' on ' +
+          coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' +
             session.name + ' Id: ' + session.sessionId)
 
           browseResult.forEach(function (result) {
             // coreBrowser.internalDebugLog('result:' + result)
-
             result.references.forEach(function (reference) {
-              // coreBrowser.internalDebugLog('reference:' + reference)
-              node.add_item(reference)
+              coreBrowser.internalDebugLog('Add Reference To List :' + reference)
+              browserEntries.push(node.transformToEntry(reference))
             })
           })
 
-          browserItems = node.items
           node.status({fill: 'green', shape: 'dot', text: 'active'})
+          node.sendMessage(msg)
         }).catch(function (err) {
-          node.browseResultHandling(err, msg)
+          browserEntries = node.browseErrorHandling(err, msg, browserEntries)
+          node.sendMessage(msg)
         })
+      } else {
+        coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
       }
+    }
+
+    node.transformToEntry = function (reference) {
+      if (reference) {
+        return {
+          referenceTypeId: reference.referenceTypeId.toString(),
+          isForward: reference.isForward,
+          nodeId: reference.nodeId.toString(),
+          browseName: reference.browseName.toString(),
+          displayName: reference.displayName,
+          nodeClass: reference.nodeClass.toString(),
+          typeDefinition: reference.typeDefinition.toString()
+        }
+      } else {
+        coreBrowser.internalDebugLog('Empty Reference On Browse')
+      }
+    }
+
+    node.sendMessage = function (originMessage) {
+      let msg = {}
+
+      msg.nodetype = 'browse'
+      msg.payload = {
+        request: originMessage,
+        endpoint: node.connector.endpoint,
+        session: node.opcuaSession.name,
+        browseTopic: node.browseTopic,
+        browserResultCount: browserEntries.length,
+        browserItems: browserEntries
+      }
+
+      node.send(msg)
     }
 
     node.on('input', function (msg) {
       node.browseTopic = null
-
-      coreBrowser.internalDebugLog(msg)
-
-      if (msg.payload.actiontype === 'browse') { // event driven browsing
-        if (msg.payload.root && msg.payload.root.nodeId) {
-          node.browseTopic = node.browseByItem(msg.payload.root.nodeId)
-        } else {
-          node.browseTopic = node.topic || node.browseToRoot()
-        }
-      } else {
-        if (msg.topic) {
-          node.browseTopic = msg.topic
-        } else {
-          node.browseTopic = node.topic || node.browseToRoot()
-        }
-      }
 
       if (!node.opcuaSession) {
         node.error(new Error('Session Not Ready To Browse'), msg)
         return
       }
 
+      node.browseTopic = node.extractBrowserTopic(msg)
       if (node.browseTopic) {
         node.browse(node.opcuaSession, msg)
-        msg.nodetype = 'browse'
-
-        msg.payload = {
-          endpoint: node.connector.endpoint,
-          session: node.opcuaSession.name,
-          browseTopic: node.browseTopic,
-          items: browserItems
-        }
-        node.send(msg)
       } else {
         node.error(new Error('No Topic To Browse'), msg)
       }
     })
 
+    node.extractBrowserTopic = function (msg) {
+      let rootNodeId
+
+      if (msg.payload.actiontype === 'browse') { // event driven browsing
+        if (msg.payload.root && msg.payload.root.nodeId) {
+          coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
+          rootNodeId = node.browseByItem(msg.payload.root.nodeId)
+        } else {
+          rootNodeId = node.topic
+        }
+      } else {
+        if (msg.topic) {
+          rootNodeId = msg.topic
+        } else {
+          rootNodeId = node.topic
+        }
+      }
+
+      return rootNodeId || node.browseToRoot()
+    }
+
     node.browseByItem = function (nodeId) {
-      coreBrowser.internalDebugLog('browse to parent ' + nodeId)
+      coreBrowser.internalDebugLog('Browse To Parent ' + nodeId)
       return nodeId
     }
 
     node.browseToRoot = function () {
-      coreBrowser.internalDebugLog('browse to root ' + coreBrowser.core.OBJECTS_ROOT)
+      coreBrowser.internalDebugLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
       return coreBrowser.core.OBJECTS_ROOT
     }
 
     node.handleSessionError = function (err) {
       if (node.showErrors) {
-        node.error(err, {payload: 'OPC UA Session Error'})
+        node.error(err, {payload: 'Browser Session Error'})
       }
 
       node.connector.closeSession(function () {
@@ -176,7 +202,7 @@ module.exports = function (RED) {
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
 
   RED.httpAdmin.get('/browser/browse', RED.auth.needsPermission('browser.browse'), function (req, res) {
-    coreBrowser.internalDebugLog(req)
-    res.json(browserItems)
+    coreBrowser.internalDebugLog(browserEntries.length + ' Items In List On HTTP Request ' + req)
+    res.json(browserEntries)
   })
 }

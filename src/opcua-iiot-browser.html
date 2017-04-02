@@ -31,21 +31,21 @@
     },
     oneditprepare: function () {
       let node = this
-      node.items = []
+      node.lookupItems = []
 
       $("#node-lookup-nodeId").click(function () {
         $("#node-lookup-nodeId").addClass('disabled')
 
         $.getJSON('browser/browse', function (data) {
           $("#node-lookup-nodeId").removeClass('disabled')
-          node.items = []
+          node.lookupItems = []
 
           $.each(data, function (i, entry) {
-            node.items.push({value: entry.nodeId, label: entry.displayName.text})
+            node.lookupItems.push({value: entry.nodeId, label: entry.displayName.text})
           })
 
           $("#node-input-nodeId").autocomplete({
-            source: node.items,
+            source: node.lookupItems,
             minLength: 0,
             focus: function (event, ui) {
               $("#node-input-nodeId").val(ui.item.label);
