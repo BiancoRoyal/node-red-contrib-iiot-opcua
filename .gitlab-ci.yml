@@ -1,0 +1,19 @@
+image: node:6
+
+before_script:
+  - npm install -g gulp
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - npm install
+    - npm run build
+
+test:
+  stage: test
+  script:
+    - npm test

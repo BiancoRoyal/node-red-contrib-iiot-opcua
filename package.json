@@ -1,7 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
   "version": "0.1.0-beta",
-  "tag": "alpha",
   "description": "IIoT OPC UA package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
