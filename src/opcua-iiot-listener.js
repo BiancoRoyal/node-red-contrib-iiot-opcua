@@ -296,6 +296,16 @@ module.exports = function (RED) {
       node.connector.startSession(coreListener.core.TEN_SECONDS_TIMEOUT).then(function (session) {
         node.opcuaSession = session
         setNodeStatusTo('connected')
+
+        coreListener.getAllEventTypes(session, function (err, entries) {
+          if (err) {
+            coreListener.internalDebugLog(err)
+          } else {
+            entries.forEach(function (entry) {
+              coreListener.internalDebugLog(entry.displayName + ' : ' + entry.nodeId)
+            })
+          }
+        })
       }).catch(node.handleSessionError)
     }
 

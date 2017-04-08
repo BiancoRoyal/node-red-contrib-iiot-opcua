@@ -32,63 +32,96 @@
     oneditprepare: function () {
       let node = this
       node.lookupItems = []
+      let nodeIdLookupField = $("#node-lookup-nodeId")
+      let nodeIdField = $("#node-input-nodeId")
 
-      $("#node-lookup-nodeId").click(function () {
-        $("#node-lookup-nodeId").addClass('disabled')
+      nodeIdLookupField.click(function () {
+        nodeIdLookupField.addClass('disabled')
 
-        $.getJSON('browser/browse', function (data) {
-          $("#node-lookup-nodeId").removeClass('disabled')
+        let rootid = nodeIdField.val() || 'ns=0;i=84'
+        let url = '/opcuabrowser/' + node.id + '/rootid/' + rootid
+        console.log('url: ' + url)
+
+        $.getJSON(url, function(data) {
+          nodeIdLookupField.removeClass('disabled')
           node.lookupItems = []
 
           $.each(data, function (i, entry) {
             node.lookupItems.push({value: entry.nodeId, label: entry.displayName.text})
           })
 
-          $("#node-input-nodeId").autocomplete({
+          nodeIdField.autocomplete({
             source: node.lookupItems,
             minLength: 0,
             focus: function (event, ui) {
-              $("#node-input-nodeId").val(ui.item.label);
+              nodeIdField.val(ui.item.label);
               return false;
             },
             select: function (event, ui) {
-              $("#node-input-nodeId").val(ui.item.value)
+              nodeIdField.val(ui.item.value)
               return false;
             },
             close: function (event, ui) {
-              $("#node-input-nodeId").autocomplete("destroy")
+              nodeIdField.autocomplete("destroy")
             }
           }).autocomplete("search", "")
         })
+      })
+
+      let tabs = RED.tabs.create({
+        id: "node-input-browser-tabs",
+        onchange: function (tab) {
+          $("#node-input-browser-tabs-content").children().hide()
+          $("#" + tab.id).show()
+        }
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-browser-tab-settings",
+        label: this._("opcua-iiot-contrib.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-browser-tab-browse",
+        label: this._("opcua-iiot-contrib.tabs-label.browser")
       })
     }
   });
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Browser">
-    <div class="form-row" style="min-width:640px">
-        <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
-        <input type="text" id="node-input-connector">
-    </div>
     <div class="form-row">
-        <label for="node-input-nodeId"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
-        <input type="text" id="node-input-nodeId" style="width:40%;" placeholder="ns=0;i=85">
-        <a id="node-lookup-nodeId" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-browser-tabs"></ul>
     </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <hr>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
-        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
-        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
-    </div>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
-        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
-        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+    <div id="node-input-browser-tabs-content" style="min-height: 170px;">
+        <div id="opcuaiiot-browser-tab-settings" style="display:none">
+            <div class="form-row" style="min-width:640px">
+                <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
+                <input type="text" id="node-input-connector">
+            </div>
+            <div class="form-row">
+                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <input type="text" id="node-input-name" placeholder="Name">
+            </div>
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+                <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+                <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+            </div>
+        </div>
+        <div id="opcuaiiot-browser-tab-browse" style="display:none">
+            <div class="form-row">
+                <label for="node-input-nodeId"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
+                <input type="text" id="node-input-nodeId" style="width:40%;" placeholder="ns=0;i=84">
+                <a id="node-lookup-nodeId" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
+            </div>
+        </div>
     </div>
     <!-- TODO: ReferenceTypeIds List to add or remove reference types tp browse for -->
 </script>

@@ -1,5 +1,9 @@
 {
   "opcua-iiot-contrib": {
+    "tabs-label":{
+      "settings": "Settings",
+      "browser": "Browser"
+    },
     "label": {
       "connector": "Connector",
       "showActivities": "Show Activities",

@@ -271,4 +271,30 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
   )
 }
 
+de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session, callback) {
+  let entries = []
+  let makeNodeId = this.core.nodeOPCUA.makeNodeId
+  let ObjectTypeIds = this.core.nodeOPCUA.ObjectTypeIds
+
+  let browseEventTypes = {
+    nodeId: makeNodeId(ObjectTypeIds.BaseEventType),
+    referenceTypeId: this.core.nodeOPCUA.resolveNodeId('HasSubtype'),
+    browseDirection: this.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+    includeSubtypes: true,
+    nodeClassMask: this.core.nodeOPCUA.browse_service.NodeClassMask.ObjectType,
+    resultMask: 63 // All ResultMask_Schema
+  }
+
+  let nodesToBrowse = [browseEventTypes]
+
+  session.browse(nodesToBrowse, function (err, results, diagnostics) {
+    if (err) { callback(err) }
+    results[0].references.forEach(function (reference) {
+      entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
+    })
+
+    callback(null, entries, diagnostics)
+  })
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.listener

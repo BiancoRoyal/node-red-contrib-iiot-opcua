@@ -2,7 +2,7 @@
 
 # node-red-iiot-opcua
 
-[![opcuaiiot64](images/opcua-iiot-logo64-white.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
+[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
 
 ## Install
 

@@ -14,9 +14,10 @@ module.exports = function (RED) {
 
   function OPCUAIIoTBrowser (config) {
     RED.nodes.createNode(this, config)
-    this.datatype = config.datatype
-    this.topic = config.topic
+    this.nodeId = config.nodeId
     this.name = config.name
+    this.showStatusActivities = config.showStatusActivities
+    this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
@@ -37,6 +38,22 @@ module.exports = function (RED) {
       statusLog(statusValue)
       let statusParameter = coreBrowser.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+    }
+
+    node.transformToEntry = function (reference) {
+      if (reference) {
+        return {
+          referenceTypeId: reference.referenceTypeId.toString(),
+          isForward: reference.isForward,
+          nodeId: reference.nodeId.toString(),
+          browseName: reference.browseName.toString(),
+          displayName: reference.displayName,
+          nodeClass: reference.nodeClass.toString(),
+          typeDefinition: reference.typeDefinition.toString()
+        }
+      } else {
+        coreBrowser.internalDebugLog('Empty Reference On Browse')
+      }
     }
 
     node.browseErrorHandling = function (err, msg, itemList) {
@@ -89,22 +106,6 @@ module.exports = function (RED) {
       }
     }
 
-    node.transformToEntry = function (reference) {
-      if (reference) {
-        return {
-          referenceTypeId: reference.referenceTypeId.toString(),
-          isForward: reference.isForward,
-          nodeId: reference.nodeId.toString(),
-          browseName: reference.browseName.toString(),
-          displayName: reference.displayName,
-          nodeClass: reference.nodeClass.toString(),
-          typeDefinition: reference.typeDefinition.toString()
-        }
-      } else {
-        coreBrowser.internalDebugLog('Empty Reference On Browse')
-      }
-    }
-
     node.sendMessage = function (originMessage) {
       let msg = {}
 
@@ -145,13 +146,13 @@ module.exports = function (RED) {
           coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
           rootNodeId = node.browseByItem(msg.payload.root.nodeId)
         } else {
-          rootNodeId = node.topic
+          rootNodeId = node.nodeId
         }
       } else {
         if (msg.topic) {
           rootNodeId = msg.topic
         } else {
-          rootNodeId = node.topic
+          rootNodeId = node.nodeId
         }
       }
 
@@ -201,8 +202,44 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
 
-  RED.httpAdmin.get('/browser/browse', RED.auth.needsPermission('browser.browse'), function (req, res) {
-    coreBrowser.internalDebugLog(browserEntries.length + ' Items In List On HTTP Request ' + req)
-    res.json(browserEntries)
+  OPCUAIIoTBrowser.prototype.browseFromSettings = function (node, nodeId, res) {
+    let entries = []
+    let nodeRootId = nodeId || coreBrowser.core.OBJECTS_ROOT
+
+    if (node.opcuaSession && nodeRootId) {
+      coreBrowser.internalDebugLog('Session To Browse From Settings To ' + nodeRootId)
+      coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browseResult) {
+        browseResult.forEach(function (result) {
+          // coreBrowser.internalDebugLog('Session To Browse From Settings ' + JSON.stringify(result))
+          result.references.forEach(function (reference) {
+            entries.push(node.transformToEntry(reference))
+          })
+        })
+        res.json(entries)
+        browserEntries = entries
+      }).catch(function (err) {
+        if (err) {
+          coreBrowser.internalDebugLog(err)
+        }
+        entries.push({
+          displayName: {text: 'Objects'},
+          nodeId: coreBrowser.core.OBJECTS_ROOT,
+          browseName: 'Objects'
+        })
+        res.json(entries)
+        browserEntries = entries
+      })
+    } else {
+      res.json(entries)
+      browserEntries = entries
+      coreBrowser.internalDebugLog('Session To Browse From Settings Is Not Valid')
+    }
+  }
+
+  RED.httpAdmin.get('/opcuabrowser/:id/rootid/:rid', RED.auth.needsPermission('browser.write'), function (req, res) {
+    coreBrowser.internalDebugLog(browserEntries.length + ' Items In List On HTTP Request Body: ' + JSON.stringify(req.body))
+    coreBrowser.internalDebugLog(browserEntries.length + ' Items In List On HTTP Request Params: ' + JSON.stringify(req.params))
+    let node = RED.nodes.getNode(req.params.id)
+    node.browseFromSettings(node, req.params.rid, res)
   })
 }
