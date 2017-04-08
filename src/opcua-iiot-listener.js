@@ -67,9 +67,11 @@ module.exports = function (RED) {
         msg.queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
 
-      let monitoredItem = monitoredItems.get({'topicName': msg.topic})
+      let monitoredItem = monitoredItems.get(msg.topic)
 
       if (!monitoredItem) {
+        coreListener.internalDebugLog('Monitored Item Subscribe')
+
         monitoredItem = coreListener.buildNewMonitoredItem(msg, subscription, function (err) {
           if (err) {
             node.error('subscription.monitorItem:' + err)
@@ -80,19 +82,22 @@ module.exports = function (RED) {
           setNodeStatusTo('subscribed')
         })
 
-        monitoredItems.set({'topicName': msg.topic, mItem: monitoredItem})
+        monitoredItems.set(msg.topic, monitoredItem)
 
         monitoredItem.on('changed', function (dataValue) {
           setNodeStatusTo('active')
           msg.payload = coreListener.core.buildMsgPayloadByDataValue(dataValue)
-          node.send(msg)
+          node.send([{payload: msg.payload.value}, msg])
         })
 
         monitoredItem.on('terminated', function () {
-          if (monitoredItems.get({'topicName': msg.topic})) {
-            monitoredItems.delete({'topicName': msg.topic})
+          if (monitoredItems.get(msg.topic)) {
+            monitoredItems.delete(msg.topic)
           }
         })
+      } else {
+        coreListener.internalDebugLog('Monitored Item Unsubscribe')
+        monitoredItem.terminate()
       }
 
       return monitoredItem
@@ -108,7 +113,7 @@ module.exports = function (RED) {
         msg.queueSize = coreListener.EVENT_DEFAULT_QUEUE_SIZE
       }
 
-      let monitoredItem = monitoredItems.get({'topicName': msg.topic})
+      let monitoredItem = monitoredItems.get(msg.topic)
 
       if (!monitoredItem) {
         monitoredItem = coreListener.buildNewEventItem(msg, subscription, function (err) {
@@ -117,7 +122,7 @@ module.exports = function (RED) {
           }
         })
 
-        monitoredItems.set({'topicName': msg.topic, mItem: monitoredItem})
+        monitoredItems.set(msg.topic, monitoredItem)
 
         monitoredItem.on('initialized', function () {
           setNodeStatusTo('listening')
@@ -135,16 +140,16 @@ module.exports = function (RED) {
         })
 
         monitoredItem.on('error', function (err) {
-          if (monitoredItems.get({'topicName': msg.topic})) {
-            monitoredItems.delete({'topicName': msg.topic})
+          if (monitoredItems.get(msg.topic)) {
+            monitoredItems.delete(msg.topic)
           }
           node.err('monitored Event ', msg.eventTypeId, ' ERROR'.red, err)
           setNodeStatusTo('error')
         })
 
         monitoredItem.on('terminated', function () {
-          if (monitoredItems.get({'topicName': msg.topic})) {
-            monitoredItems.delete({'topicName': msg.topic})
+          if (monitoredItems.get(msg.topic)) {
+            monitoredItems.delete(msg.topic)
           }
         })
       }
@@ -243,7 +248,7 @@ module.exports = function (RED) {
             if (!err) {
               coreListener.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
               setNodeStatusTo('active')
-              node.send(msg)
+              node.send([{payload: msg.payload}, msg])
             }
             callback(err)
           })

@@ -1,4 +1,7 @@
-![Node-RED OPC UA IIoT](http://b.repl.ca/v1/Node--RED-OPC_UA_IIoT-blue.png)
+![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
+![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
+![Repository GitLab](http://b.repl.ca/v1/Repository-GitLab-orange.png)
+![Quality GitLab CI](http://b.repl.ca/v1/Quality-GitLab_CI-green.png)
 
 # node-red-iiot-opcua
 
@@ -29,6 +32,21 @@ try these options on npm install to build, if you have problems to install
 start debug with Node-RED in verbose (-v) mode
 
     DEBUG=opcuaIIoT:* node-red -v
+      
+DEBUG options opcuaIIoT:
+ 
+ * core
+ * connector
+ * browser
+ * listener
+    * listener:subscribe
+    * listener:event
+ * client
+    * client:read
+    * client:write
+ * server
+    * server:ISA95
+
 
 ### Wiki
 
