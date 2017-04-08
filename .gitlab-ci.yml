@@ -2,6 +2,7 @@ image: node:6
 
 before_script:
   - npm install -g gulp
+  - npm install -g standard
 
 stages:
   - build
