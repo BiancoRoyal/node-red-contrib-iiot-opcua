@@ -13,6 +13,7 @@ const htmlmin = require('gulp-htmlmin')
 const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
 const pump = require('pump')
+const javascriptObfuscator = require('gulp-javascript-obfuscator')
 
 gulp.task('default', function () {
   // place code for your default task here
@@ -72,7 +73,7 @@ gulp.task('opcua-iiot-web', function () {
 
 gulp.task('opcua-iiot', function (cb) {
   pump([
-    gulp.src('src/**/*.js'),
+    gulp.src('src/**/*.js').pipe(javascriptObfuscator()),
     gulp.dest('opcuaIIoT')
   ],
     cb

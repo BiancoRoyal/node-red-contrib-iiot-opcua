@@ -72,6 +72,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-clean": "^0.3.2",
     "gulp-htmlmin": "^3.0.0",
+    "gulp-javascript-obfuscator": "^1.1.2",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-uglify": "^2.1.2",
     "javascript-obfuscator": "^0.9.2",
