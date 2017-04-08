@@ -51,8 +51,8 @@
   },
   "homepage": "https://github.com/biancode/node-red-iiot-opcua#readme",
   "scripts": {
-    "test": "standard && mocha test/*",
-    "build": "gulp publish",
+    "test": "standard --fix && mocha test/*",
+    "build": "standard --fix && gulp publish",
     "prepublish": "standard --fix && npm run build && npm test"
   },
   "files": [
