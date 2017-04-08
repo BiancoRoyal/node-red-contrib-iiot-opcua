@@ -60,7 +60,6 @@ module.exports = function (RED) {
                 })
               }
             }
-
         }
       } else {
         let entry = null
