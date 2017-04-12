@@ -74,16 +74,30 @@ module.exports = function (RED) {
               coreClient.readAllAttributes(session, itemsToRead).then(function (resultsConverted, nodesToRead, results, diagnostics) {
                 setNodeStatusTo('active')
 
-                coreClient.internalDebugLog('readAllAttributes results: ' + JSON.stringify(results))
-                coreClient.internalDebugLog('readAllAttributes diagnostics: ' + JSON.stringify(diagnostics))
+                if (results) {
+                  results.forEach(function (result) {
+                    coreClient.internalDebugLog('read All Attributes result: ' + JSON.stringify(result))
+                  })
+                }
+
+                if (diagnostics) {
+                  diagnostics.forEach(function (diagnostic) {
+                    coreClient.internalDebugLog('read All Attributes diagnostic: ' + JSON.stringify(diagnostic))
+                  })
+                }
 
                 let message = {
-                  payload: {results: resultsConverted, nodesToRead: nodesToRead},
+                  payload: resultsConverted,
+                  nodesToRead: nodesToRead,
+                  input: msg,
+                  resultsConverted: resultsConverted,
+                  results: results,
+                  diagnostics: diagnostics,
                   nodetype: 'read',
-                  readtype: 'readAllAttributes',
+                  readtype: 'AllAttributes',
                   attributeId: node.attributeId
                 }
-                coreClient.internalDebugLog('readAllAttributes:' + JSON.stringify(message))
+                coreClient.internalDebugLog('read All Attributes:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
                 node.handleReadError(err, msg)
@@ -93,16 +107,30 @@ module.exports = function (RED) {
               coreClient.readVariableValue(session, itemsToRead).then(function (resultsConverted, results, diagnostics) {
                 setNodeStatusTo('active')
 
-                coreClient.internalDebugLog('readVariableValue results: ' + JSON.stringify(results))
-                coreClient.internalDebugLog('readVariableValue diagnostics: ' + JSON.stringify(diagnostics))
+                if (results) {
+                  results.forEach(function (result) {
+                    coreClient.internalDebugLog('read Variable Value result: ' + JSON.stringify(result))
+                  })
+                }
+
+                if (diagnostics) {
+                  diagnostics.forEach(function (diagnostic) {
+                    coreClient.internalDebugLog('read Variable Value diagnostic: ' + JSON.stringify(diagnostic))
+                  })
+                }
 
                 let message = {
                   payload: resultsConverted,
+                  nodesToRead: itemsToRead,
+                  input: msg,
+                  resultsConverted: resultsConverted,
+                  results: results,
+                  diagnostics: diagnostics,
                   nodetype: 'read',
-                  readtype: 'readVariableValue',
+                  readtype: 'VariableValue',
                   attributeId: node.attributeId
                 }
-                coreClient.internalDebugLog('readVariableValue:' + JSON.stringify(message))
+                coreClient.internalDebugLog('read Variable Value:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
                 node.handleReadError(err, msg)
@@ -123,13 +151,28 @@ module.exports = function (RED) {
               coreClient.read(session, nodesToReadWithAttributeId, node.maxAge).then(function (resultsConverted, results, diagnostics) {
                 setNodeStatusTo('active')
 
-                coreClient.internalDebugLog('read results: ' + JSON.stringify(results))
-                coreClient.internalDebugLog('read diagnostics: ' + JSON.stringify(diagnostics))
+                if (results) {
+                  results.forEach(function (result) {
+                    coreClient.internalDebugLog('read result: ' + JSON.stringify(result))
+                  })
+                }
+
+                if (diagnostics) {
+                  diagnostics.forEach(function (diagnostic) {
+                    coreClient.internalDebugLog('read diagnostic: ' + JSON.stringify(diagnostic))
+                  })
+                }
 
                 let message = {
                   payload: resultsConverted,
+                  nodesToRead: nodesToReadWithAttributeId,
+                  maxAge: node.maxAge,
+                  input: msg,
+                  resultsConverted: resultsConverted,
+                  results: results,
+                  diagnostics: diagnostics,
                   nodetype: 'read',
-                  readtype: 'read',
+                  readtype: 'Default',
                   attributeId: node.attributeId
                 }
                 coreClient.internalDebugLog('read:' + JSON.stringify(message))

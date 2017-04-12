@@ -62,10 +62,27 @@ module.exports = function (RED) {
           coreClient.write(session, nodesToWrite).then(function (resultsConverted, results, diagnostics) {
             setNodeStatusTo('active')
 
-            coreClient.internalDebugLog('write results: ' + JSON.stringify(results))
-            coreClient.internalDebugLog('write diagnostics: ' + JSON.stringify(diagnostics))
+            if (results) {
+              results.forEach(function (result) {
+                coreClient.internalDebugLog('write result: ' + JSON.stringify(result))
+              })
+            }
 
-            let message = {payload: resultsConverted, nodetype: 'write'}
+            if (diagnostics) {
+              diagnostics.forEach(function (diagnostic) {
+                coreClient.internalDebugLog('write diagnostic: ' + JSON.stringify(diagnostic))
+              })
+            }
+
+            let message = {
+              payload: msg.payload,
+              input: msg,
+              resultsConverted: resultsConverted,
+              results: results,
+              diagnostics: diagnostics,
+              nodetype: 'write'
+            }
+
             node.send(message)
           }).catch(function (err) {
             node.handleWriteError(err, msg)

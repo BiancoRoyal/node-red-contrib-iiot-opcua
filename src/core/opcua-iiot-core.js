@@ -402,9 +402,16 @@ de.biancoroyal.opcua.iiot.core.parseIdentifierFromMsgTopic = function (msg) {
         type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.NUMERIC
       }
     } else {
-      nodeIdentifier = {
-        identifier: msg.topic.substring(msg.topic.indexOf(';s=') + 3),
-        type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
+      if (msg.topic.toString().includes(';b=')) {
+        nodeIdentifier = {
+          identifier: msg.topic.substring(msg.topic.indexOf(';b=') + 3),
+          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.NUMERIC
+        }
+      } else {
+        nodeIdentifier = {
+          identifier: msg.topic.substring(msg.topic.indexOf(';s=') + 3),
+          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
+        }
       }
     }
   }
@@ -423,9 +430,16 @@ de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId = function (item) {
         type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.NUMERIC
       }
     } else {
-      nodeIdentifier = {
-        identifier: item.nodeId.substring(item.nodeId.indexOf(';s=') + 3),
-        type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
+      if (item.nodeId.toString().includes(';b=')) {
+        nodeIdentifier = {
+          identifier: item.nodeId.substring(item.nodeId.indexOf(';b=') + 3),
+          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
+        }
+      } else {
+        nodeIdentifier = {
+          identifier: item.nodeId.substring(item.nodeId.indexOf(';s=') + 3),
+          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
+        }
       }
     }
   }

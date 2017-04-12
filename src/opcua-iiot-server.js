@@ -114,6 +114,27 @@ module.exports = function (RED) {
         }
       })
 
+      let variable3 = 1000.0
+
+      server.engine.addressSpace.addVariable({
+        componentOf: vendorName,
+        nodeId: 'ns=1;s=TestReadWrite',
+        browseName: 'TestReadWrite',
+        dataType: 'Double',
+        value: {
+          get: function () {
+            return new coreServer.core.nodeOPCUA.Variant({
+              dataType: coreServer.core.nodeOPCUA.DataType.Double,
+              value: variable3
+            })
+          },
+          set: function (variant) {
+            variable3 = parseFloat(variant.value)
+            return coreServer.core.nodeOPCUA.StatusCodes.Good
+          }
+        }
+      })
+
       addressSpace.addVariable({
         componentOf: vendorName,
         nodeId: 'ns=4;s=free_memory',

@@ -20,7 +20,7 @@ module.exports = function (RED) {
       core.internalDebugLog(msg)
       core.internalDebugLog(JSON.stringify(msg))
 
-        // TODO: working with the msg.nodetype
+      // TODO: working with the msg.nodetype
 
       if (msg.payload && msg.payload.statusCode) {
         switch (msg.payload.statusCode) {
