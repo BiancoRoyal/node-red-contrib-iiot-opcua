@@ -91,7 +91,7 @@ de.biancoroyal.opcua.iiot.core.toInt32 = function (x) {
   }
 }
 
-de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue) {
+de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue, statusLog) {
   let fillValue = 'yellow'
   let shapeValue = 'ring'
 
@@ -104,6 +104,10 @@ de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue) {
     case 'keepalive':
     case 'subscribe':
     case 'started':
+      if (!statusLog) {
+        statusValue = 'active'
+        shapeValue = 'dot'
+      }
       fillValue = 'green'
       break
     case 'active':

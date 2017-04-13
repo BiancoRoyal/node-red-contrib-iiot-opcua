@@ -24,13 +24,13 @@ module.exports = function (RED) {
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {
-        coreClient.internalDebugLog(logMessage)
+        coreClient.writeDebugLog(logMessage)
       }
     }
 
     function statusLog (logMessage) {
       if (RED.settings.verbose && node.statusLog) {
-        coreClient.internalDebugLog('Status: ' + logMessage)
+        coreClient.writeDebugLog('Status: ' + logMessage)
       }
     }
 
@@ -42,7 +42,7 @@ module.exports = function (RED) {
 
     node.handleWriteError = function (err, msg) {
       if (RED.settings.verbose) {
-        coreClient.internalDebugLog('ERROR: ' + err)
+        coreClient.writeDebugLog('ERROR: ' + err)
       }
 
       if (node.showErrors) {
@@ -64,18 +64,19 @@ module.exports = function (RED) {
 
             if (results) {
               results.forEach(function (result) {
-                coreClient.internalDebugLog('write result: ' + JSON.stringify(result))
+                coreClient.writeDebugLog('write result: ' + JSON.stringify(result))
               })
             }
 
             if (diagnostics) {
               diagnostics.forEach(function (diagnostic) {
-                coreClient.internalDebugLog('write diagnostic: ' + JSON.stringify(diagnostic))
+                coreClient.writeDebugLog('write diagnostic: ' + JSON.stringify(diagnostic))
               })
             }
 
             let message = {
-              payload: msg.payload,
+              payload: resultsConverted,
+              nodesToWrite: nodesToWrite,
               input: msg,
               resultsConverted: resultsConverted,
               results: results,
@@ -108,7 +109,7 @@ module.exports = function (RED) {
     }
 
     node.startOPCUASession = function (opcuaClient) {
-      coreClient.internalDebugLog('Write Start OPC UA Session')
+      coreClient.writeDebugLog('Write Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT).then(function (session) {
         node.opcuaSession = session
@@ -126,7 +127,7 @@ module.exports = function (RED) {
       if (node.opcuaSession) {
         node.opcuaSession.close(function (err) {
           if (err) {
-            coreClient.internalDebugLog('ERROR: on close session ' + err)
+            coreClient.writeDebugLog('ERROR: on close session ' + err)
           }
           node.opcuaSession = null
           verboseLog('Session closed')

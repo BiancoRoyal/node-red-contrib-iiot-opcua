@@ -8,7 +8,8 @@
 'use strict'
 
 module.exports = function (RED) {
-  let core = require('./core/opcua-iiot-core')
+  let coreResponse = require('./core/opcua-iiot-core-response')
+  const EMPTY_LIST = 0
 
   function OPCUAIIoTResponse (config) {
     RED.nodes.createNode(this, config)
@@ -17,89 +18,117 @@ module.exports = function (RED) {
     let node = this
 
     node.on('input', function (msg) {
-      core.internalDebugLog(msg)
-      core.internalDebugLog(JSON.stringify(msg))
+      coreResponse.internalDebugLog(msg)
+      coreResponse.internalDebugLog(JSON.stringify(msg))
 
-      // TODO: working with the msg.nodetype
+      if (msg.nodetype) {
+        switch (msg.nodetype) {
+          case 'read':
+            node.analyzeReadResults(msg)
+            break
 
-      if (msg.payload && msg.payload.statusCode) {
-        switch (msg.payload.statusCode) {
-          case core.nodeOPCUA.StatusCodes.Good:
-            node.status({
-              fill: 'green',
-              shape: 'dot',
-              text: msg.payload.statusCode.name
-            })
+          case 'write':
+            node.analyzeWriteResults(msg)
             break
-          case core.nodeOPCUA.StatusCodes.Bad:
-            node.status({
-              fill: 'red',
-              shape: 'dot',
-              text: msg.payload.statusCode.name + ': ' + msg.payload.statusCode.description
-            })
-            break
+
           default:
-            if (msg.payload.statusCode.name.includes('Good')) {
-              node.status({
-                fill: 'green',
-                shape: 'dot',
-                text: msg.payload.statusCode.name
-              })
-            } else {
-              if (msg.payload.statusCode.name.includes('Bad')) {
-                node.status({
-                  fill: 'red',
-                  shape: 'dot',
-                  text: msg.payload.statusCode.name + ': ' + msg.payload.statusCode.description
-                })
-              } else {
-                node.status({
-                  fill: 'yellow',
-                  shape: 'dot',
-                  text: msg.payload.statusCode.name + ': ' + msg.payload.statusCode.description
-                })
-              }
-            }
+            node.analyzeResultListStatus(msg)
+            break
         }
-      } else {
-        let entry = null
-        let statusName = null
-        let entryStatus = [0, 0, 0]
-        let informationText = 'unknown'
+      }
 
-        if (msg.payload.length) {
-          for (entry of msg.payload) {
-            if (msg.nodetype === 'write') {
-              statusName = entry.name
-            } else {
-              statusName = entry.statusCode.name
-            }
+      node.send(msg)
+    })
 
-            if (statusName) {
-              switch (statusName) {
-                case 'Good':
-                  entryStatus[0] += 1
-                  break
-                case 'Bad':
-                  entryStatus[1] += 1
-                  break
-                default:
-                  entryStatus[2] += 1
-              }
-            }
-          }
+    node.analyzeReadResults = function (msg) {
+      switch (msg.readtype) {
+        case 'AllAttributes':
+          node.analyzeResultListStatus(msg) // TODO: do more
+          break
 
-          informationText = 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2]
-        }
-        node.status({
-          fill: 'yellow',
-          shape: 'dot',
-          text: informationText
-        })
-        node.send(msg)
+        case 'VariableValue':
+          node.analyzeResultListStatus(msg) // TODO: do less
+          break
+
+        default:
+          node.analyzeResultListStatus(msg) // TODO: do default
+          break
       }
     }
-    )
+
+    node.analyzeResultListStatus = function (msg) {
+      let entry = null
+      let entryStatus = [0, 0, 0]
+      let informationText = 'unknown'
+
+      if (msg.payload.length) {
+        for (entry of msg.payload) {
+          if (entry.statusCode) {
+            switch (entry.statusCode.name) {
+              case 'Good':
+                entryStatus[0] += 1
+                break
+              case 'Bad':
+                entryStatus[1] += 1
+                break
+              default:
+                coreResponse.internalDebugLog('unknown status name: ' + JSON.stringify(entry.statusCode.name))
+                entryStatus[2] += 1
+            }
+          }
+        }
+
+        informationText = 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2]
+      }
+
+      node.setNodeStatus(entryStatus, informationText)
+    }
+
+    node.setNodeStatus = function (entryStatus, informationText) {
+      let fillColor = 'green'
+
+      if (entryStatus[2] > EMPTY_LIST) {
+        fillColor = 'yellow'
+      }
+
+      if (entryStatus[1] > EMPTY_LIST) {
+        fillColor = 'red'
+      }
+
+      node.status({
+        fill: fillColor,
+        shape: 'dot',
+        text: informationText
+      })
+    }
+
+    node.analyzeWriteResults = function (msg) {
+      let entry = null
+      let entryStatus = [0, 0, 0]
+      let informationText = 'unknown'
+
+      if (msg.payload.length) {
+        for (entry of msg.payload) {
+          if (entry.name) {
+            switch (entry.name) {
+              case 'Good':
+                entryStatus[0] += 1
+                break
+              case 'Bad':
+                entryStatus[1] += 1
+                break
+              default:
+                coreResponse.internalDebugLog('unknown status name: ' + JSON.stringify(entry.name))
+                entryStatus[2] += 1
+            }
+          }
+        }
+
+        informationText = 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2]
+      }
+
+      node.setNodeStatus(entryStatus, informationText)
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Response', OPCUAIIoTResponse)

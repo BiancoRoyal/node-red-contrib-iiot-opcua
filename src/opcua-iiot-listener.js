@@ -281,7 +281,7 @@ module.exports = function (RED) {
 
     function setNodeStatusTo (statusValue) {
       statusLog(statusValue)
-      let statusParameter = coreListener.core.getNodeStatus(statusValue)
+      let statusParameter = coreListener.core.getNodeStatus(statusValue, node.statusLog)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 

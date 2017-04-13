@@ -26,13 +26,13 @@ module.exports = function (RED) {
 
     function verboseLog (logMessage) {
       if (RED.settings.verbose) {
-        coreClient.internalDebugLog(logMessage)
+        coreClient.readDebugLog(logMessage)
       }
     }
 
     function statusLog (logMessage) {
       if (RED.settings.verbose && node.statusLog) {
-        coreClient.internalDebugLog('Status: ' + logMessage)
+        coreClient.readDebugLog('Status: ' + logMessage)
       }
     }
 
@@ -44,7 +44,7 @@ module.exports = function (RED) {
 
     node.handleReadError = function (err, msg) {
       if (RED.settings.verbose) {
-        coreClient.internalDebugLog('ERROR: ' + err)
+        coreClient.readDebugLog('ERROR: ' + err)
       }
 
       if (node.showErrors) {
@@ -62,12 +62,12 @@ module.exports = function (RED) {
 
       if (session) {
         if (session.sessionId === 'terminated') {
-          coreClient.internalDebugLog('ERROR: Session Terminated')
+          coreClient.readDebugLog('ERROR: Session Terminated')
           if (node.showErrors) {
             node.error(new Error('Session Terminated'), msg)
           }
         } else {
-          coreClient.internalDebugLog('Read with AttributeId ' + node.attributeId)
+          coreClient.readDebugLog('Read with AttributeId ' + node.attributeId)
 
           switch (parseInt(node.attributeId)) {
             case 0:
@@ -76,13 +76,13 @@ module.exports = function (RED) {
 
                 if (results) {
                   results.forEach(function (result) {
-                    coreClient.internalDebugLog('read All Attributes result: ' + JSON.stringify(result))
+                    coreClient.readDebugLog('read All Attributes result: ' + JSON.stringify(result))
                   })
                 }
 
                 if (diagnostics) {
                   diagnostics.forEach(function (diagnostic) {
-                    coreClient.internalDebugLog('read All Attributes diagnostic: ' + JSON.stringify(diagnostic))
+                    coreClient.readDebugLog('read All Attributes diagnostic: ' + JSON.stringify(diagnostic))
                   })
                 }
 
@@ -97,9 +97,10 @@ module.exports = function (RED) {
                   readtype: 'AllAttributes',
                   attributeId: node.attributeId
                 }
-                coreClient.internalDebugLog('read All Attributes:' + JSON.stringify(message))
+                coreClient.readDebugLog('read All Attributes:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
+                coreClient.readDebugLog('itemsToRead: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
               })
               break
@@ -109,13 +110,13 @@ module.exports = function (RED) {
 
                 if (results) {
                   results.forEach(function (result) {
-                    coreClient.internalDebugLog('read Variable Value result: ' + JSON.stringify(result))
+                    coreClient.readDebugLog('read Variable Value result: ' + JSON.stringify(result))
                   })
                 }
 
                 if (diagnostics) {
                   diagnostics.forEach(function (diagnostic) {
-                    coreClient.internalDebugLog('read Variable Value diagnostic: ' + JSON.stringify(diagnostic))
+                    coreClient.readDebugLog('read Variable Value diagnostic: ' + JSON.stringify(diagnostic))
                   })
                 }
 
@@ -130,42 +131,45 @@ module.exports = function (RED) {
                   readtype: 'VariableValue',
                   attributeId: node.attributeId
                 }
-                coreClient.internalDebugLog('read Variable Value:' + JSON.stringify(message))
+                coreClient.readDebugLog('read Variable Value:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
+                coreClient.readDebugLog('itemsToRead: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
               })
               break
             default:
               let item = null
-              let newItem = {}
-              let nodesToReadWithAttributeId = []
+              let transformedItem = null
+              let transformedItemsToRead = []
+
               for (item of itemsToRead) {
-                newItem.nodeId = item
-                nodesToReadWithAttributeId.push({
-                  nodeId: coreClient.core.newOPCUANodeIdFromItemNodeId(newItem),
-                  attributeId: node.attributeId
-                })
+                transformedItem = {
+                  nodeId: item,
+                  attributeId: Number(node.attributeId)
+                }
+                coreClient.readDebugLog('transformed item: ' + JSON.stringify(transformedItem))
+                transformedItemsToRead.push(transformedItem)
               }
 
-              coreClient.read(session, nodesToReadWithAttributeId, node.maxAge).then(function (resultsConverted, results, diagnostics) {
+              coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (resultsConverted, results, diagnostics) {
                 setNodeStatusTo('active')
 
                 if (results) {
                   results.forEach(function (result) {
-                    coreClient.internalDebugLog('read result: ' + JSON.stringify(result))
+                    coreClient.readDebugLog('read result: ' + JSON.stringify(result))
                   })
                 }
 
                 if (diagnostics) {
                   diagnostics.forEach(function (diagnostic) {
-                    coreClient.internalDebugLog('read diagnostic: ' + JSON.stringify(diagnostic))
+                    coreClient.readDebugLog('read diagnostic: ' + JSON.stringify(diagnostic))
                   })
                 }
 
                 let message = {
                   payload: resultsConverted,
-                  nodesToRead: nodesToReadWithAttributeId,
+                  nodesToRead: itemsToRead,
                   maxAge: node.maxAge,
                   input: msg,
                   resultsConverted: resultsConverted,
@@ -175,9 +179,11 @@ module.exports = function (RED) {
                   readtype: 'Default',
                   attributeId: node.attributeId
                 }
-                coreClient.internalDebugLog('read:' + JSON.stringify(message))
+                coreClient.readDebugLog('read:' + JSON.stringify(message))
                 node.send(message)
               }).catch(function (err) {
+                coreClient.readDebugLog('itemsToRead: ' + JSON.stringify(itemsToRead))
+                coreClient.readDebugLog('transformedItemsToRead: ' + JSON.stringify(transformedItemsToRead))
                 node.handleReadError(err, msg)
               })
           }
@@ -202,7 +208,7 @@ module.exports = function (RED) {
     }
 
     node.startOPCUASession = function (opcuaClient) {
-      coreClient.internalDebugLog('Read Start OPC UA Session')
+      coreClient.readDebugLog('Read Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT).then(function (session) {
         node.opcuaSession = session
@@ -220,7 +226,7 @@ module.exports = function (RED) {
       if (node.opcuaSession) {
         node.opcuaSession.close(function (err) {
           if (err) {
-            coreClient.internalDebugLog('ERROR: on close session ' + err)
+            coreClient.readDebugLog('ERROR: on close session ' + err)
           }
           node.opcuaSession = null
           verboseLog('Session closed')
