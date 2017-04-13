@@ -54,7 +54,7 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.read(items, maxAge, function (err, results, diagnostics) {
+        session.read(items, maxAge, function (err, nodesToRead, results, diagnostics) {
           if (err) {
             reject(err)
           } else {
@@ -67,7 +67,7 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge) {
               }
             }
 
-            resolve(resultsConverted, results, diagnostics)
+            resolve(resultsConverted, nodesToRead, results, diagnostics)
           }
         })
       } else {

@@ -152,7 +152,7 @@ module.exports = function (RED) {
                 transformedItemsToRead.push(transformedItem)
               }
 
-              coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (resultsConverted, results, diagnostics) {
+              coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (resultsConverted, nodesToRead, results, diagnostics) {
                 setNodeStatusTo('active')
 
                 if (results) {
@@ -169,7 +169,7 @@ module.exports = function (RED) {
 
                 let message = {
                   payload: resultsConverted,
-                  nodesToRead: itemsToRead,
+                  nodesToRead: nodesToRead,
                   maxAge: node.maxAge,
                   input: msg,
                   resultsConverted: resultsConverted,
