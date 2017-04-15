@@ -20,36 +20,32 @@ module.exports = function (RED) {
 
     let node = this
 
-    setNodeStatusTo('waiting')
-
-    function verboseLog (logMessage) {
+    node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
         coreClient.writeDebugLog(logMessage)
       }
     }
 
-    function statusLog (logMessage) {
-      if (RED.settings.verbose && node.statusLog) {
-        coreClient.writeDebugLog('Status: ' + logMessage)
+    node.statusLog = function (logMessage) {
+      if (RED.settings.verbose && node.showStatusActivities) {
+        node.verboseLog('Status: ' + logMessage)
       }
     }
 
-    function setNodeStatusTo (statusValue) {
-      statusLog(statusValue)
-      let statusParameter = coreClient.core.getNodeStatus(statusValue)
+    node.setNodeStatusTo = function (statusValue) {
+      node.statusLog(statusValue)
+      let statusParameter = coreClient.core.getNodeStatus(statusValue, node.showStatusActivities)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
     node.handleWriteError = function (err, msg) {
-      if (RED.settings.verbose) {
-        coreClient.writeDebugLog('ERROR: ' + err)
-      }
+      node.verboseLog('ERROR: ' + err)
 
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      setNodeStatusTo('error')
+      node.setNodeStatusTo('error')
     }
 
     node.writeToSession = function (session, msg) {
@@ -60,17 +56,17 @@ module.exports = function (RED) {
           let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
 
           coreClient.write(session, nodesToWrite).then(function (resultsConverted, results, diagnostics) {
-            setNodeStatusTo('active')
+            node.setNodeStatusTo('active')
 
             if (results) {
               results.forEach(function (result) {
-                coreClient.writeDebugLog('write result: ' + JSON.stringify(result))
+                node.verboseLog('write result: ' + JSON.stringify(result))
               })
             }
 
             if (diagnostics) {
               diagnostics.forEach(function (diagnostic) {
-                coreClient.writeDebugLog('write diagnostic: ' + JSON.stringify(diagnostic))
+                node.verboseLog('write diagnostic: ' + JSON.stringify(diagnostic))
               })
             }
 
@@ -90,11 +86,12 @@ module.exports = function (RED) {
           })
         }
       } else {
-        node.handleReadError(new Error('Session Not Valid On Write'), msg)
+        node.handleWriteError(new Error('Session Not Valid On Write'), msg)
       }
     }
 
     node.on('input', function (msg) {
+      coreClient.writeDebugLog(JSON.stringify(msg))
       node.writeToSession(node.opcuaSession, msg)
     })
 
@@ -103,17 +100,18 @@ module.exports = function (RED) {
         node.error(err, {payload: 'Write Session Error'})
       }
 
-      node.connector.closeSession(function () {
+      node.connector.closeSession(node.opcuaSession, function () {
         node.startOPCUASession(node.opcuaClient)
       })
     }
 
     node.startOPCUASession = function (opcuaClient) {
-      coreClient.writeDebugLog('Write Start OPC UA Session')
+      node.verboseLog('Write Start OPC UA Session')
       node.opcuaClient = opcuaClient
-      node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT).then(function (session) {
+      node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT, 'Write Node').then(function (session) {
         node.opcuaSession = session
-        setNodeStatusTo('connected')
+        node.verboseLog('Session Connected')
+        node.setNodeStatusTo('connected')
       }).catch(node.handleSessionError)
     }
 
@@ -123,19 +121,22 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    node.on('close', function () {
+    node.on('close', function (done) {
       if (node.opcuaSession) {
-        node.opcuaSession.close(function (err) {
+        node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
-            coreClient.writeDebugLog('ERROR: on close session ' + err)
+            node.verboseLog('Error On Close Session ' + err)
           }
           node.opcuaSession = null
-          verboseLog('Session closed')
+          done()
         })
       } else {
         node.opcuaSession = null
+        done()
       }
     })
+
+    node.setNodeStatusTo('waiting')
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Write', OPCUAIIoTWrite)

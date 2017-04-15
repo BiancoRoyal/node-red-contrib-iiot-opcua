@@ -1,5 +1,6 @@
 {
   "opcuaiiotinject": {
+    "inject": "inject",
     "opcuaiiotinject": "inject",
     "inject": "inject",
     "repeat": "repeat = __repeat__",
@@ -16,6 +17,7 @@
     "interval": "interval",
     "interval-time": "interval between times",
     "time": "at a specific time",
+    "milliseconds": "milliseconds",
     "seconds": "seconds",
     "minutes": "minutes",
     "hours": "hours",

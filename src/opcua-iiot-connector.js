@@ -24,48 +24,63 @@ module.exports = function (RED) {
     let node = this
     node.client = null
     node.userIdentity = {}
+    node.opcuaClient = null
 
     if (node.credentials && node.loginEnabled) {
       node.userIdentity.userName = node.credentials.user
       node.userIdentity.password = node.credentials.password
-      coreConnector.internalDebugLog('connecting with login data on ' + node.endpoint)
+      coreConnector.internalDebugLog('Connecting With Login Data On ' + node.endpoint)
     }
 
     node.connectOPCUAEndpoint = function () {
-      coreConnector.internalDebugLog('connecting on ' + node.endpoint)
-      node.session = null
+      coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
       node.opcuaClient = null
+
       coreConnector.connect(node.endpoint).then(function (opcuaClient) {
-        coreConnector.internalDebugLog('connected on ' + node.endpoint)
+        coreConnector.internalDebugLog('Connected On ' + node.endpoint)
         node.opcuaClient = opcuaClient
+        coreConnector.internalDebugLog('Emit Connected Event')
         node.emit('connected', node.opcuaClient)
       }).catch(node.handleError)
     }
 
-    node.startSession = function (timeoutSeconds) {
-      coreConnector.internalDebugLog('request for new session')
+    node.startSession = function (timeoutSeconds, type) {
+      coreConnector.internalDebugLog('Request For New Session From ' + type)
+      let now = Date.now()
+
       return new Promise(
         function (resolve, reject) {
           coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (session) {
-            coreConnector.internalDebugLog('starting session on ' + node.endpoint)
+            coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
             session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 10, 's')
             session.startKeepAliveManager()
             session.on('error', node.handleError)
+            coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ' + node.endpoint)
+
+            coreConnector.internalDebugLog(' name..................... ', session.name)
+            coreConnector.internalDebugLog(' sessionId................ ', session.sessionId)
+            coreConnector.internalDebugLog(' authenticationToken...... ', session.authenticationToken)
+            coreConnector.internalDebugLog(' timeout.................. ', session.timeout)
+            coreConnector.internalDebugLog(' serverNonce.............. ', session.serverNonce.toString('hex'))
+            coreConnector.internalDebugLog(' serverCertificate........ ', session.serverCertificate.toString('base64'))
+            coreConnector.internalDebugLog(' serverSignature.......... ', session.serverSignature)
+            coreConnector.internalDebugLog(' lastRequestSentTime...... ', new Date(session.lastRequestSentTime).toISOString(), now - session.lastRequestSentTime)
+            coreConnector.internalDebugLog(' lastResponseReceivedTime. ', new Date(session.lastResponseReceivedTime).toISOString(), now - session.lastResponseReceivedTime)
+
             resolve(session)
-            coreConnector.internalDebugLog('session started on ' + node.endpoint)
           }).catch(reject)
         })
     }
 
-    node.closeSession = function (done) {
-      if (node.session) {
-        coreConnector.internalDebugLog('close Session Id: ' + node.session.sessionId)
-        coreConnector.closeSession(node.session).then(function (done) {
-          coreConnector.internalDebugLog('sucessfully closed for reconnect on ' + node.endpoint)
+    node.closeSession = function (session, done) {
+      if (session) {
+        coreConnector.internalDebugLog('Close Session Id: ' + session.sessionId)
+        coreConnector.closeSession(session).then(function (done) {
+          coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
           done()
         }).catch(done)
       } else {
-        coreConnector.internalDebugLog('No Session To Close' + node.endpoint)
+        coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
         done()
       }
     }
@@ -81,8 +96,8 @@ module.exports = function (RED) {
     node.setMaxListeners(UNLIMITED_LISTENERS)
     setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
 
-    node.on('close', function (done) {
-      node.closeSession(done)
+    node.on('close', function () {
+      coreConnector.internalDebugLog('Connector Close ' + node.endpoint)
     })
   }
 

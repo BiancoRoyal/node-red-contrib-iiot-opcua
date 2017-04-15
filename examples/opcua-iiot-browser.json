@@ -1,132 +1,199 @@
 [
-  {
-    "id": "ed2e837d.7e8a4",
-    "type": "tab",
-    "label": "IIoT Browser"
-  },
-  {
-    "id": "ced012e6.cecb4",
-    "type": "OPCUA-IIoT-Browser",
-    "z": "ed2e837d.7e8a4",
-    "endpoint": "ddd1dd05.f283f8",
-    "topic": "ns=0;i=85",
-    "x": 340,
-    "y": 140,
-    "wires": [
-      [
-        "a0fdeaa6.687c78",
-        "10d1be34.3b7d42"
+  [
+    {
+      "id": "ed2e837d.7e8a4",
+      "type": "tab",
+      "label": "IIoT Browser"
+    },
+    {
+      "id": "ced012e6.cecb4",
+      "type": "OPCUA-IIoT-Browser",
+      "z": "ed2e837d.7e8a4",
+      "endpoint": "ddd1dd05.f283f8",
+      "topic": "ns=0;i=85",
+      "x": 340,
+      "y": 140,
+      "wires": [
+        [
+          "a0fdeaa6.687c78",
+          "10d1be34.3b7d42"
+        ]
       ]
-    ]
-  },
-  {
-    "id": "34546396.845444",
-    "type": "inject",
-    "z": "ed2e837d.7e8a4",
-    "name": "ns=0;i=84",
-    "topic": "ns=0;i=85",
-    "payload": "",
-    "payloadType": "date",
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "x": 140,
-    "y": 100,
-    "wires": [
-      [
-        "ced012e6.cecb4"
+    },
+    {
+      "id": "34546396.845444",
+      "type": "inject",
+      "z": "ed2e837d.7e8a4",
+      "name": "ns=0;i=84",
+      "topic": "ns=0;i=85",
+      "payload": "",
+      "payloadType": "date",
+      "repeat": "",
+      "crontab": "",
+      "once": false,
+      "x": 140,
+      "y": 100,
+      "wires": [
+        [
+          "ced012e6.cecb4"
+        ]
       ]
-    ]
-  },
-  {
-    "id": "a0fdeaa6.687c78",
-    "type": "debug",
-    "z": "ed2e837d.7e8a4",
-    "name": "",
-    "active": true,
-    "console": "true",
-    "complete": "payload",
-    "x": 540,
-    "y": 140,
-    "wires": []
-  },
-  {
-    "id": "f4327bc7.50b378",
-    "type": "inject",
-    "z": "ed2e837d.7e8a4",
-    "name": "Empty",
-    "topic": "",
-    "payload": "",
-    "payloadType": "date",
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "x": 130,
-    "y": 140,
-    "wires": [
-      [
-        "ced012e6.cecb4"
+    },
+    {
+      "id": "a0fdeaa6.687c78",
+      "type": "debug",
+      "z": "ed2e837d.7e8a4",
+      "name": "",
+      "active": true,
+      "console": "true",
+      "complete": "payload",
+      "x": 540,
+      "y": 140,
+      "wires": []
+    },
+    {
+      "id": "f4327bc7.50b378",
+      "type": "inject",
+      "z": "ed2e837d.7e8a4",
+      "name": "Empty",
+      "topic": "",
+      "payload": "",
+      "payloadType": "date",
+      "repeat": "",
+      "crontab": "",
+      "once": false,
+      "x": 130,
+      "y": 140,
+      "wires": [
+        [
+          "ced012e6.cecb4"
+        ]
       ]
-    ]
-  },
-  {
-    "id": "10d1be34.3b7d42",
-    "type": "ui_template",
-    "z": "ed2e837d.7e8a4",
-    "group": "4ba1f37b.497d04",
-    "name": "",
-    "order": 0,
-    "width": "8",
-    "height": "20",
-    "format": "<div layout=\"row\" layout-align=\"space-between\">\n    <p>{{msg.payload.endpoint}}</p>\n    <p>{{msg.payload.browseTopic}}</p>\n</div>\n<div layout=\"row\" layout-align=\"space-between\">\n    <select ng-model=\"item\" ng-options=\"item.displayName.text for item in msg.payload.items\">\n        <option value=\"\">-- Objects Root --</option>\n    </select>\n    <button ng-click=\"send({payload: {actiontype: 'browse', root: item}})\">\n        Browse\n    </button>\n</div>\n<div layout=\"row\" layout-align=\"space-between\">\n    <ul>\n        <li ng-repeat=\"item in msg.payload.items\">\n          {{item.displayName.text}} ( {{item.nodeId}} - {{item.browseName}})\n        </li>\n    </ul>\n</div>\n",
-    "storeOutMessages": false,
-    "fwdInMessages": false,
-    "x": 340,
-    "y": 60,
-    "wires": [
-      [
-        "ced012e6.cecb4",
-        "9e9c81f.6b117"
+    },
+    {
+      "id": "10d1be34.3b7d42",
+      "type": "ui_template",
+      "z": "ed2e837d.7e8a4",
+      "group": "4ba1f37b.497d04",
+      "name": "",
+      "order": 0,
+      "width": "8",
+      "height": "20",
+      "format": "<div layout=\"row\" layout-align=\"space-between\">\n    <p>{{msg.payload.endpoint}}</p>\n    <p>{{msg.payload.browseTopic}}</p>\n</div>\n<div layout=\"row\" layout-align=\"space-between\">\n    <select ng-model=\"item\" ng-options=\"item.displayName.text for item in msg.payload.items\">\n        <option value=\"\">-- Objects Root --</option>\n    </select>\n    <button ng-click=\"send({payload: {actiontype: 'browse', root: item}})\">\n        Browse\n    </button>\n</div>\n<div layout=\"row\" layout-align=\"space-between\">\n    <ul>\n        <li ng-repeat=\"item in msg.payload.items\">\n          {{item.displayName.text}} ( {{item.nodeId}} - {{item.browseName}})\n        </li>\n    </ul>\n</div>\n",
+      "storeOutMessages": false,
+      "fwdInMessages": false,
+      "x": 340,
+      "y": 60,
+      "wires": [
+        [
+          "ced012e6.cecb4",
+          "9e9c81f.6b117"
+        ]
       ]
-    ]
-  },
-  {
-    "id": "9e9c81f.6b117",
-    "type": "ui_toast",
-    "z": "ed2e837d.7e8a4",
-    "position": "top right",
-    "displayTime": "5",
-    "highlight": "",
-    "outputs": 0,
-    "ok": "OK",
-    "cancel": "",
-    "topic": "",
-    "name": "",
-    "x": 590,
-    "y": 60,
-    "wires": []
-  },
-  {
-    "id": "ddd1dd05.f283f8",
-    "type": "OPCUA-IIoT-Endpoint",
-    "z": "",
-    "endpoint": "opc.tcp://commsvr.com:51234/UA/CAS_UA_Server",
-    "loginEnabled": false
-  },
-  {
-    "id": "4ba1f37b.497d04",
-    "type": "ui_group",
-    "z": "",
-    "name": "Bianco Royal",
-    "tab": "4a3b44a4.c1306c",
-    "disp": true,
-    "width": "8"
-  },
-  {
-    "id": "4a3b44a4.c1306c",
-    "type": "ui_tab",
-    "z": "",
-    "name": "Home",
-    "icon": "dashboard"
-  }
+    },
+    {
+      "id": "9e9c81f.6b117",
+      "type": "ui_toast",
+      "z": "ed2e837d.7e8a4",
+      "position": "top right",
+      "displayTime": "5",
+      "highlight": "",
+      "outputs": 0,
+      "ok": "OK",
+      "cancel": "",
+      "topic": "",
+      "name": "",
+      "x": 590,
+      "y": 60,
+      "wires": []
+    },
+    {
+      "id": "ddd1dd05.f283f8",
+      "type": "OPCUA-IIoT-Endpoint",
+      "z": "",
+      "endpoint": "opc.tcp://commsvr.com:51234/UA/CAS_UA_Server",
+      "loginEnabled": false
+    },
+    {
+      "id": "4ba1f37b.497d04",
+      "type": "ui_group",
+      "z": "",
+      "name": "Bianco Royal",
+      "tab": "4a3b44a4.c1306c",
+      "disp": true,
+      "width": "8"
+    },
+    {
+      "id": "4a3b44a4.c1306c",
+      "type": "ui_tab",
+      "z": "",
+      "name": "Home",
+      "icon": "dashboard"
+    }
+  ],
+  [
+    {
+      "id": "da3e0c17.e5c4b",
+      "type": "OPCUA-IIoT-Browser",
+      "z": "a1ed0f45.d1ebe",
+      "connector": "edb30168.10cae",
+      "nodeId": "ns=4;i=1240",
+      "name": "",
+      "showStatusActivities": false,
+      "showErrors": false,
+      "x": 460,
+      "y": 720,
+      "wires": [
+        [
+          "cba3107f.cafe6"
+        ]
+      ]
+    },
+    {
+      "id": "cba3107f.cafe6",
+      "type": "ui_template",
+      "z": "a1ed0f45.d1ebe",
+      "group": "32dafea3.78fac2",
+      "name": "",
+      "order": 0,
+      "width": "0",
+      "height": "0",
+      "format": "<div layout=\"column\" layout-align=\"space-between\">\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <p>\n            {{msg.payload.endpoint}}\n        </p>\n    </div>\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <p>\n            {{msg.payload.browseTopic}} with {{msg.payload.browserResultCount}} references\n        </p>\n    </div>\n    <div layout=\"row\" layout-align=\"space-between center\">\n        <h1>Results</h1>\n    </div>\n    <div layout=\"row\" layout-align=\"space-between center\">\n        <select ng-model=\"item\" ng-options=\"item.displayName.text for item in msg.payload.browserItems\">\n            <option value=\"\">-- Root --</option>\n        </select>\n        <button ng-click=\"send({payload: {actiontype: 'browse', root: item}})\">Browse</button>\n    </div>\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <div>\n            <ul>\n                <li ng-repeat=\"item in msg.payload.browserItems\">\n                  {{item.displayName.text}} ( {{item.nodeId}} - {{item.browseName}})\n                </li>\n            </ul>\n        </div>\n    </div>\n</div>",
+      "storeOutMessages": false,
+      "fwdInMessages": false,
+      "x": 460,
+      "y": 640,
+      "wires": [
+        [
+          "da3e0c17.e5c4b"
+        ]
+      ]
+    },
+    {
+      "id": "edb30168.10cae",
+      "type": "OPCUA-IIoT-Connector",
+      "z": "",
+      "endpoint": "opc.tcp://opcua.demo-this.com:51210/UA/SampleServer",
+      "loginEnabled": false,
+      "name": "SampelServer",
+      "showStatusActivities": false,
+      "showErrors": false
+    },
+    {
+      "id": "32dafea3.78fac2",
+      "type": "ui_group",
+      "z": "",
+      "name": "OPC UA Browser",
+      "tab": "875ce777.c22ee8",
+      "disp": true,
+      "width": "8"
+    },
+    {
+      "id": "875ce777.c22ee8",
+      "type": "ui_tab",
+      "z": "",
+      "name": "OPC UA",
+      "icon": "dashboard"
+    }
+  ]
 ]

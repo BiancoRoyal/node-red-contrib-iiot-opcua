@@ -26,10 +26,10 @@
     },
     oneditprepare: function () {
       try {
-        let loginCheckbox = $("#node-config-input-login");
+        let loginCheckbox = $("#node-config-input-loginEnabled");
         let loginFields = $("#node-config-login");
 
-        if (this.login) {
+        if (this.loginEnabled) {
           loginCheckbox.prop('checked', true);
           loginFields.show();
         } else {
@@ -42,8 +42,8 @@
             loginFields.show();
           } else {
             loginFields.hide();
-            $('#node-input-user').val('');
-            $('#node-input-password').val('');
+            $('#node-config-input-user').val('');
+            $('#node-config-input-password').val('');
           }
         });
 
@@ -64,7 +64,8 @@
     </div>
     <div class="form-row">
         <!-- SecurityPolicy enum via REST -->
-        <label for="node-config-input-sign"><i class="icon-key"></i> <span data-i18n="opcua-iiot-contrib.label.sign"></span></label>
+        <label for="node-config-input-sign"><i class="icon-certificate"></i> <span data-i18n="opcua-iiot-contrib.label
+        .sign"></span></label>
         <select type="text" id="node-input-sign">
             <option value="None" selected>None</option>
             <option value="Basic128">Basic128</option>
@@ -77,15 +78,19 @@
         </select>
     </div>
     <div class="form-row">
-        <lable><input type="checkbox" id="node-config-input-loginEnabled"> <span data-i18n="opcua-iiot-contrib.label.credentials"></span></lable>
+         <label for="node-config-input-loginEnabled"><i class="icon-lock"></i>
+         <span data-i18n="opcua-iiot-contrib.label.credentials"></span></label>
+        <input type="checkbox" id="node-config-input-loginEnabled">
     </div>
     <div id="node-config-login">
         <div class="form-row ">
-            <label for="node-config-input-user"><i class="icon-user"></i> <span data-i18n="opcua-iiot-contrib.label.user"></span></label>
+            <label for="node-config-input-user"><i class="icon-user"></i>
+            <span data-i18n="opcua-iiot-contrib.label.user"></span></label>
             <input type="text" id="node-config-input-user">
         </div>
         <div class="form-row">
-            <label for="node-config-input-password"><i class="icon-password"></i> <span data-i18n="opcua-iiot-contrib.label.password"></span></label>
+            <label for="node-config-input-password"><i class="icon-asterisk"></i>
+            <span data-i18n="opcua-iiot-contrib.label.password"></span></label>
             <input type="password" id="node-config-input-password">
         </div>
     </div>

@@ -39,7 +39,7 @@ module.exports = function (RED) {
     }
 
     function statusLog (logMessage) {
-      if (RED.settings.verbose && node.statusLog) {
+      if (RED.settings.verbose && node.showStatusActivities) {
         coreServer.internalDebugLog('Status: ' + logMessage)
       }
     }
@@ -61,8 +61,8 @@ module.exports = function (RED) {
         resourcePath: node.endpoint || 'UA/NodeREDIIOTServerISA95',
         buildInfo: {
           productName: node.name.concat(' IIoT Server'),
-          buildNumber: '1604',
-          buildDate: new Date(2017, 4, 1)
+          buildNumber: '160479',
+          buildDate: new Date(2017, 5, 16)
         }
       })
 
@@ -313,7 +313,9 @@ module.exports = function (RED) {
 
   RED.httpAdmin.get('/opcua/server/specifications', RED.auth.needsPermission('opcua.server.read'), function (req, res) {
     xmlFiles.list(function (err, ports) {
-      if (err) console.log(err)
+      if (err) {
+        console.log(err)
+      }
       res.json(ports)
     })
   })

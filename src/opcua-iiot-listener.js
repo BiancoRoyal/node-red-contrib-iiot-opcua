@@ -30,7 +30,23 @@ module.exports = function (RED) {
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
     let monitoredItems = new Map()
 
-    setNodeStatusTo('waiting')
+    node.verboseLog = function (logMessage) {
+      if (RED.settings.verbose) {
+        coreListener.internalDebugLog(logMessage)
+      }
+    }
+
+    node.statusLog = function (logMessage) {
+      if (RED.settings.verbose && node.showStatusActivities) {
+        node.verboseLog('Status: ' + logMessage)
+      }
+    }
+
+    node.setNodeStatusTo = function (statusValue) {
+      node.statusLog(statusValue)
+      let statusParameter = coreListener.core.getNodeStatus(statusValue, node.showStatusActivities)
+      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+    }
 
     node.createSubscription = function (msg, cb) {
       let timeMilliseconds = msg.payload
@@ -41,7 +57,7 @@ module.exports = function (RED) {
     node.resetSubscription = function () {
       subscription = null
       monitoredItems.clear()
-      setNodeStatusTo('reset')
+      node.setNodeStatusTo('reset')
     }
 
     node.subscribeActionInput = function (msg) {
@@ -49,7 +65,7 @@ module.exports = function (RED) {
         node.createSubscription(msg, node.subscribeMonitoredItem)
       } else {
         if (subscription.subscriptionId !== 'terminated') {
-          setNodeStatusTo('active')
+          node.setNodeStatusTo('active')
           node.subscribeMonitoredItem(subscription, msg)
         } else {
           node.resetSubscription()
@@ -79,13 +95,13 @@ module.exports = function (RED) {
         })
 
         monitoredItem.on('initialized', function () {
-          setNodeStatusTo('subscribed')
+          node.setNodeStatusTo('subscribed')
         })
 
         monitoredItems.set(msg.topic, monitoredItem)
 
         monitoredItem.on('changed', function (dataValue) {
-          setNodeStatusTo('active')
+          node.setNodeStatusTo('active')
           msg.payload = coreListener.core.buildMsgPayloadByDataValue(dataValue)
           node.send([{payload: msg.payload.value}, msg])
         })
@@ -125,7 +141,7 @@ module.exports = function (RED) {
         monitoredItems.set(msg.topic, monitoredItem)
 
         monitoredItem.on('initialized', function () {
-          setNodeStatusTo('listening')
+          node.setNodeStatusTo('listening')
         })
 
         monitoredItem.on('changed', function (eventFields) {
@@ -136,7 +152,7 @@ module.exports = function (RED) {
               coreListener.internalDebugLog('successful event call')
             }
           })
-          setNodeStatusTo('active')
+          node.setNodeStatusTo('active')
         })
 
         monitoredItem.on('error', function (err) {
@@ -144,7 +160,7 @@ module.exports = function (RED) {
             monitoredItems.delete(msg.topic)
           }
           node.err('monitored Event ', msg.eventTypeId, ' ERROR'.red, err)
-          setNodeStatusTo('error')
+          node.setNodeStatusTo('error')
         })
 
         monitoredItem.on('terminated', function () {
@@ -160,10 +176,10 @@ module.exports = function (RED) {
     node.subscribeEventsInput = function (msg) {
       if (!subscription) {
         node.createSubscription(msg, node.subscribeMonitoredEvent)
-        setNodeStatusTo('active')
+        node.setNodeStatusTo('active')
       } else {
         if (subscription.subscriptionId !== 'terminated') {
-          setNodeStatusTo('active')
+          node.setNodeStatusTo('active')
           node.subscribeMonitoredEvent(subscription, msg)
         } else {
           node.resetSubscription()
@@ -188,17 +204,17 @@ module.exports = function (RED) {
       newSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
 
       newSubscription.on('initialized', function () {
-        setNodeStatusTo('initialize')
+        node.setNodeStatusTo('initialize')
       })
 
       newSubscription.on('started', function () {
-        setNodeStatusTo('started')
+        node.setNodeStatusTo('started')
         monitoredItems.clear()
         callback(newSubscription, msg)
       })
 
       newSubscription.on('keepalive', function () {
-        setNodeStatusTo('keepalive')
+        node.setNodeStatusTo('keepalive')
       })
 
       newSubscription.on('terminated', function () {
@@ -247,7 +263,7 @@ module.exports = function (RED) {
           node.getBrowseName(session, variant.value, function (err, name) {
             if (!err) {
               coreListener.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
-              setNodeStatusTo('active')
+              node.setNodeStatusTo('active')
               node.send([{payload: msg.payload}, msg])
             }
             callback(err)
@@ -255,7 +271,7 @@ module.exports = function (RED) {
         } else {
           setImmediate(function () {
             coreListener.collectAlarmFields(fields[index], variant.dataType.key.toString(), variant.value, msg)
-            setNodeStatusTo('active')
+            node.setNodeStatusTo('active')
             callback()
           })
         }
@@ -267,47 +283,38 @@ module.exports = function (RED) {
     })
 
     function dumpEvent (node, session, fields, eventFields, _callback) {
-      coreListener.internalDebugLog('Push Into Event Queue')
+      node.verboseLog('Push Into Event Queue')
       eventQueue.push({
         node: node, session: session, fields: fields, eventFields: eventFields, _callback: _callback
       })
     }
 
-    function statusLog (logMessage) {
-      if (RED.settings.verbose && node.statusLog) {
-        coreListener.internalDebugLog('Status: ' + logMessage)
-      }
-    }
-
-    function setNodeStatusTo (statusValue) {
-      statusLog(statusValue)
-      let statusParameter = coreListener.core.getNodeStatus(statusValue, node.statusLog)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
-
     node.handleSessionError = function (err) {
+      node.verboseLog('Handle Session Error ' + err)
+
       if (node.showErrors) {
         node.error(err, {payload: 'Listener Session Error'})
       }
 
-      node.connector.closeSession(function () {
+      node.connector.closeSession(node.opcuaSession, function () {
         node.startOPCUASession(node.opcuaClient)
       })
     }
 
     node.startOPCUASession = function (opcuaClient) {
-      coreListener.internalDebugLog('Listener Start OPC UA Session')
+      node.verboseLog('Listener Start OPC UA Session')
       node.opcuaClient = opcuaClient
-      node.connector.startSession(coreListener.core.TEN_SECONDS_TIMEOUT).then(function (session) {
+      node.connector.startSession(coreListener.core.TEN_SECONDS_TIMEOUT, 'Listener Node').then(function (session) {
         node.opcuaSession = session
-        setNodeStatusTo('connected')
+        node.verboseLog('Session Connected')
+        node.setNodeStatusTo('connected')
 
         coreListener.getAllEventTypes(session, function (err, entries) {
           if (err) {
-            coreListener.internalDebugLog(err)
+            node.verboseLog(err)
           } else {
             entries.forEach(function (entry) {
-              coreListener.internalDebugLog(entry.displayName + ' : ' + entry.nodeId)
+              node.verboseLog(entry.displayName + ' : ' + entry.nodeId)
             })
           }
         })
@@ -321,7 +328,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      coreListener.internalDebugLog(node.action + ' listener input ' + JSON.stringify(msg))
+      node.verboseLog(node.action + ' listener input ' + JSON.stringify(msg))
 
       switch (node.action) {
         case 'subscribe':
@@ -335,11 +342,26 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', function () {
+    node.on('close', function (done) {
       if (subscription && subscription.isActive()) {
         subscription.terminate()
       }
+
+      if (node.opcuaSession) {
+        node.connector.closeSession(node.opcuaSession, function (err) {
+          if (err) {
+            node.verboseLog('Error On Close Session ' + err)
+          }
+          node.opcuaSession = null
+          done()
+        })
+      } else {
+        node.opcuaSession = null
+        done()
+      }
     })
+
+    node.setNodeStatusTo('waiting')
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Listener', OPCUAIIoTListener)

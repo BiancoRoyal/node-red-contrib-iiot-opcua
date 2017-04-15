@@ -42,41 +42,47 @@
     icon: 'opcuaiiot.png',
     label: function () {
       let suffix = ''
+
       if (this.repeat || this.crontab) {
         suffix = ' ↻'
       }
+
       if (this.name) {
         return this.name + suffix
-      } else if (this.payloadType === 'string' ||
-        this.payloadType === 'str' ||
-        this.payloadType === 'num' ||
-        this.payloadType === 'bool' ||
-        this.payloadType === 'json') {
-        if ((this.topic !== '') && ((this.topic.length + this.payload.length) <= 32)) {
-          return this.topic + ':' + this.payload + suffix
-        } else if (this.payload.length > 0 && this.payload.length < 24) {
-          return this.payload + suffix
-        } else {
-          return this._('opcuaiiotinject.opcuaiiotinject') + suffix
-        }
-      } else if (this.payloadType === 'date') {
-        if ((this.topic !== '') && (this.topic.length <= 16)) {
-          return this.topic + ':' + this._('opcuaiiotinject.timestamp') + suffix
-        } else {
+      }
+
+      switch (this.payloadType) {
+        case 'string':
+        case 'str':
+        case 'num':
+        case 'bool':
+        case 'json':
+          if (this.topic !== '' && (this.topic.length + this.payload.length) <= 32) {
+            return this.topic + ':' + this.payload + suffix
+          } else if (this.payload.length > 0 && this.payload.length < 24) {
+            return this.payload + suffix
+          }
+          return this._('opcuaiiotinject.inject') + suffix
+        case 'date':
+          if (this.topic !== '' && this.topic.length <= 16) {
+            return this.topic + ':' + this._('opcuaiiotinject.timestamp') + suffix
+          }
           return this._('opcuaiiotinject.timestamp') + suffix
-        }
-      } else if (this.payloadType === 'flow' && this.payload.length < 19) {
-        return 'flow.' + this.payload + suffix
-      } else if (this.payloadType === 'global' && this.payload.length < 17) {
-        return 'global.' + this.payload + suffix
-      } else {
-        return this._('opcuaiiotinject.opcuaiiotinject') + suffix
+        default:
+          if (this.payloadType === 'flow' && this.payload.length < 19) {
+            return 'flow.' + this.payload + suffix
+          } else if (this.payloadType === 'global' && this.payload.length < 17) {
+            return 'global.' + this.payload + suffix
+          }
+          return this._('opcuaiiotinject.inject') + suffix
       }
     },
     labelStyle: function () {
       return this.name ? 'node_label_italic' : ''
     },
     oneditprepare: function () {
+      let fieldPayloadType = $('#node-input-payloadType')
+
       if (this.payloadType === null) {
         if (this.payload === '') {
           this.payloadType = 'date'
@@ -86,19 +92,22 @@
       } else if (this.payloadType === 'string' || this.payloadType === 'none') {
         this.payloadType = 'str'
       }
-      $('#node-input-payloadType').val(this.payloadType)
+
+      fieldPayloadType.val(this.payloadType)
 
       $('#node-input-payload').typedInput({
         default: 'str',
-        typeField: $('#node-input-payloadType'),
+        typeField: fieldPayloadType,
         types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'date']
       })
 
       $('#opcuaiiotinject-time-type-select').change(function () {
         $('#node-input-crontab').val('')
         let id = $('#opcuaiiotinject-time-type-select').val()
+
         $('.opcuaiiotinject-time-row').hide()
         $('#opcuaiiotinject-time-row-' + id).show()
+
         if ((id === 'none') || (id === 'interval')) {
           $('#node-once').show()
         }
@@ -115,9 +124,11 @@
         }
       })
       $('<option></option>').val(24).text('00:00').appendTo('#opcuaiiotinject-time-interval-time-end')
+
       $('#opcuaiiotinject-time-interval-time-start').change(function () {
         let start = Number($('#opcuaiiotinject-time-interval-time-start').val())
         let end = Number($('#opcuaiiotinject-time-interval-time-end').val())
+
         $('#opcuaiiotinject-time-interval-time-end option').remove()
 
         for (let i = start + 1; i < 25; i++) {
@@ -133,7 +144,6 @@
       })
 
       $('.opcuaiiotinject-time-count').spinner({
-        //max:60,
         min: 1
       })
 
@@ -167,30 +177,42 @@
       $('#opcuaiiotinject-time-time').injecttimespinner()
 
       let repeattype = 'none'
-      if (this.repeat != '' && this.repeat != 0) {
+
+      if (this.repeat !== '') {
         repeattype = 'interval'
-        let r = 's'
-        let c = this.repeat
+
+        let units = 's'
+        let timeRange = this.repeat
+
         if (this.repeat % 60 === 0) {
-          r = 'm'
-          c = c / 60
+          units = 'm'
+          timeRange = timeRange / 60
         }
+
         if (this.repeat % 1440 === 0) {
-          r = 'h'
-          c = c / 60
+          units = 'h'
+          timeRange = timeRange / 60
         }
-        $('#opcuaiiotinject-time-interval-count').val(c)
-        $('#opcuaiiotinject-time-interval-units').val(r)
+
+        console.log('interval timeRange:' + timeRange + ' units:' + units)
+
+        $('#opcuaiiotinject-time-interval-count').val(timeRange)
+        $('#opcuaiiotinject-time-interval-units').val(units)
         $('#opcuaiiotinject-time-interval-days').prop('disabled', 'disabled')
-      } else if (this.crontab) {
+      } else if (this.crontab !== '') {
         let cronparts = this.crontab.split(' ')
         let days = cronparts[4]
+
         if (!isNaN(cronparts[0]) && !isNaN(cronparts[1])) {
           repeattype = 'time'
           // Fixed time
           let time = cronparts[1] + ':' + cronparts[0]
+
           $('#opcuaiiotinject-time-time').val(time)
           $('#opcuaiiotinject-time-type-select').val('s')
+
+          console.log('crontab time:' + time + ' units: s')
+
           if (days === '*') {
             $('#opcuaiiotinject-time-time-days input[type=checkbox]').prop('checked', true)
           } else {
@@ -203,23 +225,32 @@
           repeattype = 'interval-time'
           // interval - time period
           let minutes = cronparts[0].slice(2)
-          if (minutes === '') { minutes = '0' }
+
+          if (minutes === '') {
+            minutes = '0'
+          }
+
           $('#opcuaiiotinject-time-interval-time-units').val(minutes)
+
           if (days === '*') {
             $('#opcuaiiotinject-time-interval-time-days input[type=checkbox]').prop('checked', true)
           } else {
             $('#opcuaiiotinject-time-interval-time-days input[type=checkbox]').removeAttr('checked')
+
             days.split(',').forEach(function (v) {
               $('#opcuaiiotinject-time-interval-time-days [value=' + v + ']').prop('checked', true)
             })
           }
+
           let time = cronparts[1]
           let timeparts = time.split(',')
           let start
           let end
+
           if (timeparts.length === 1) {
             // 0 or 0-10
             let hours = timeparts[0].split('-')
+
             if (hours.length === 1) {
               if (hours[0] === '') {
                 start = '0'
@@ -245,15 +276,18 @@
               end = Number(endparts[1]) + 1
             }
           }
+
           $('#opcuaiiotinject-time-interval-time-end').val(end)
           $('#opcuaiiotinject-time-interval-time-start').val(start)
-
         }
       } else {
-        $('#opcuaiiotinject-time-type-select').val('none')
+        repeattype = 'none'
       }
 
+      console.log('Inject Type: ' + repeattype)
+
       $('.opcuaiiotinject-time-row').hide()
+
       $('#opcuaiiotinject-time-type-select').val(repeattype)
       $('#opcuaiiotinject-time-row-' + repeattype).show()
 
@@ -261,36 +295,42 @@
 
       $('#opcuaiiotinject-time-type-select').change()
       $('#opcuaiiotinject-time-interval-time-start').change()
-
     },
     oneditsave: function () {
       let repeat = ''
       let crontab = ''
       let type = $('#opcuaiiotinject-time-type-select').val()
-      if (type === 'none') {
-        // nothing
-      } else if (type === 'interval') {
+
+
+      if (type === 'interval') {
+        crontab = ''
         let count = $('#opcuaiiotinject-time-interval-count').val()
         let units = $('#opcuaiiotinject-time-interval-units').val()
+
         if (units === 's') {
           repeat = count
         } else {
-          if (units === 'm') {
-            //crontab = "*/"+count+" * * * "+days
+          if (units === 'n') {
+            repeat = count / 1000
+          } else if (units === 'm') {
             repeat = count * 60
           } else if (units === 'h') {
-            //crontab = "0 */"+count+" * * "+days
             repeat = count * 60 * 60
           }
         }
+
+        console.log('save interval repeat:' + repeat + ' units:' + units)
+
       } else if (type === 'interval-time') {
         repeat = ''
         let count = $('#opcuaiiotinject-time-interval-time-units').val()
         let startTime = Number($('#opcuaiiotinject-time-interval-time-start').val())
         let endTime = Number($('#opcuaiiotinject-time-interval-time-end').val())
+
         let days = $('#opcuaiiotinject-time-interval-time-days  input[type=checkbox]:checked').map(function (_, el) {
           return $(el).val()
         }).get()
+
         if (days.length === 0) {
           crontab = ''
         } else {
@@ -299,7 +339,9 @@
           } else {
             days = days.join(',')
           }
+
           let timerange = ''
+
           if (endTime === 0) {
             timerange = startTime + '-23'
           } else if (startTime + 1 < endTime) {
@@ -309,18 +351,22 @@
           } else {
             let startpart = ''
             let endpart = ''
+
             if (startTime === 23) {
               startpart = '23'
             } else {
               startpart = startTime + '-23'
             }
+
             if (endTime === 1) {
               endpart = '0'
             } else {
               endpart = '0-' + (endTime - 1)
             }
+
             timerange = startpart + ',' + endpart
           }
+
           if (count === '0') {
             crontab = count + ' ' + timerange + ' * * ' + days
           } else {
@@ -329,9 +375,11 @@
         }
       } else if (type === 'time') {
         let time = $('#opcuaiiotinject-time-time').val()
+
         let days = $('#opcuaiiotinject-time-time-days  input[type=checkbox]:checked').map(function (_, el) {
           return $(el).val()
         }).get()
+
         if (days.length === 0) {
           crontab = ''
         } else {
@@ -340,11 +388,14 @@
           } else {
             days = days.join(',')
           }
+
           let parts = time.split(':')
           repeat = ''
           crontab = parts[1] + ' ' + parts[0] + ' * * ' + days
         }
       }
+
+      console.log('save repeat:' + repeat + ' crontab:' + crontab)
 
       $('#node-input-repeat').val(repeat)
       $('#node-input-crontab').val(crontab)
@@ -352,9 +403,17 @@
     button: {
       onclick: function () {
         let label = (this.name || this.payload).replace(/&/g, '&amp').replace(/</g, '&lt').replace(/>/g, '&gt')
-        if (this.payloadType === 'date') { label = this._('opcuaiiotinject.timestamp') }
-        if (this.payloadType === 'none') { label = this._('opcuaiiotinject.blank') }
+
+        if (this.payloadType === 'date') {
+          label = this._('opcuaiiotinject.timestamp')
+        }
+
+        if (this.payloadType === 'none') {
+          label = this._('opcuaiiotinject.blank')
+        }
+
         let node = this
+
         $.ajax({
           url: 'opcuaiiotinject/' + this.id,
           type: 'POST',
@@ -441,14 +500,15 @@
     <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-interval">
         <span data-i18n="opcuaiiotinject.every"></span>
         <input id="opcuaiiotinject-time-interval-count" class="opcuaiiotinject-time-count" value="1"></input>
-        <select style="width: 100px" id="opcuaiiotinject-time-interval-units">
+        <select style="width:140px" id="opcuaiiotinject-time-interval-units">
+            <option value="n" data-i18n="opcuaiiotinject.milliseconds"></option>
             <option value="s" data-i18n="opcuaiiotinject.seconds"></option>
             <option value="m" data-i18n="opcuaiiotinject.minutes"></option>
             <option value="h" data-i18n="opcuaiiotinject.hours"></option>
         </select><br/>
     </div>
 
-    <div class="form-row opcuaiiotinject-time-row hidden" id="OPCUA-IIoT-Inject-time-row-interval-time">
+    <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-interval-time">
         <span data-i18n="opcuaiiotinject.every"></span> <select style="width:90px" id="opcuaiiotinject-time-interval-time-units" class="opcuaiiotinject-time-int-count" value="1">
             <option value="1">1</option>
             <option value="2">2</option>
@@ -521,6 +581,9 @@
     <div class="form-tips" data-i18n="[html]opcuaiiotinject.tip"></div>
 
 
+
+
+
 </script>
 
 <style>
@@ -562,4 +625,7 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">
     <p>Pressing the button on the left side of the node allows a request on a topic to be injected into the flow.</p>
+
+
+
 </script>

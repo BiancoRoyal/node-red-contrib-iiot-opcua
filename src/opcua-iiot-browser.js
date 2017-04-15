@@ -26,17 +26,21 @@ module.exports = function (RED) {
     node.opcuaClient = null
     node.opcuaSession = null
 
-    setNodeStatusTo('waiting')
-
-    function statusLog (logMessage) {
-      if (RED.settings.verbose && node.statusLog) {
-        coreBrowser.internalDebugLog('Status: ' + logMessage)
+    node.verboseLog = function (logMessage) {
+      if (RED.settings.verbose) {
+        coreBrowser.internalDebugLog(logMessage)
       }
     }
 
-    function setNodeStatusTo (statusValue) {
-      statusLog(statusValue)
-      let statusParameter = coreBrowser.core.getNodeStatus(statusValue)
+    node.statusLog = function (logMessage) {
+      if (RED.settings.verbose && node.showStatusActivities) {
+        node.verboseLog('Status: ' + logMessage)
+      }
+    }
+
+    node.setNodeStatusTo = function (statusValue) {
+      node.statusLog(statusValue)
+      let statusParameter = coreBrowser.core.getNodeStatus(statusValue, node.showStatusActivities)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
@@ -52,45 +56,46 @@ module.exports = function (RED) {
           typeDefinition: reference.typeDefinition.toString()
         }
       } else {
-        coreBrowser.internalDebugLog('Empty Reference On Browse')
+        node.verboseLog('Empty Reference On Browse')
       }
     }
 
     node.browseErrorHandling = function (err, msg, itemList) {
+      let results = []
       if (err) {
-        itemList = []
-        itemList.push({
+        results.push({
           displayName: {text: 'Objects'},
           nodeId: coreBrowser.core.OBJECTS_ROOT,
           browseName: 'Objects'
         })
-        coreBrowser.internalDebugLog(err)
+        node.verboseLog(err)
 
         if (node.showErrors) {
           node.error(err, msg)
         }
-        coreBrowser.internalDebugLog('Browser Error ' + err.message)
+        node.verboseLog('Browser Error ' + err.message)
         node.status({fill: 'red', shape: 'dot', text: 'error'})
       } else {
-        coreBrowser.internalDebugLog('Browse Done With Error: ' + browserEntries.length + ' item(s)')
+        results = itemList
+        node.verboseLog('Browse Done With Error: ' + results.length + ' item(s)')
       }
 
-      return itemList
+      return results
     }
 
     node.browse = function (session, msg) {
       browserEntries = []
-      coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
+      node.verboseLog('Browse Topic To Call Browse ' + node.browseTopic)
 
       if (session) {
         coreBrowser.browse(session, node.browseTopic).then(function (browseResult) {
-          coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' +
+          node.verboseLog('Browser Root ' + node.browseTopic + ' on ' +
             session.name + ' Id: ' + session.sessionId)
 
           browseResult.forEach(function (result) {
-            // coreBrowser.internalDebugLog('result:' + result)
+            // node.verboseLog('result:' + result)
             result.references.forEach(function (reference) {
-              coreBrowser.internalDebugLog('Add Reference To List :' + reference)
+              node.verboseLog('Add Reference To List :' + reference)
               browserEntries.push(node.transformToEntry(reference))
             })
           })
@@ -102,7 +107,7 @@ module.exports = function (RED) {
           node.sendMessage(msg)
         })
       } else {
-        coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
+        node.verboseLog('Session To Browse Is Not Valid')
       }
     }
 
@@ -143,7 +148,7 @@ module.exports = function (RED) {
 
       if (msg.payload.actiontype === 'browse') { // event driven browsing
         if (msg.payload.root && msg.payload.root.nodeId) {
-          coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
+          node.verboseLog('Root Selected External ' + msg.payload.root)
           rootNodeId = node.browseByItem(msg.payload.root.nodeId)
         } else {
           rootNodeId = node.nodeId
@@ -160,12 +165,12 @@ module.exports = function (RED) {
     }
 
     node.browseByItem = function (nodeId) {
-      coreBrowser.internalDebugLog('Browse To Parent ' + nodeId)
+      node.verboseLog('Browse To Parent ' + nodeId)
       return nodeId
     }
 
     node.browseToRoot = function () {
-      coreBrowser.internalDebugLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
+      node.verboseLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
       return coreBrowser.core.OBJECTS_ROOT
     }
 
@@ -174,30 +179,44 @@ module.exports = function (RED) {
         node.error(err, {payload: 'Browser Session Error'})
       }
 
-      node.connector.closeSession(function () {
+      node.connector.closeSession(node.opcuaSession, function () {
         node.startOPCUASession(node.opcuaClient)
       })
     }
 
     node.startOPCUASession = function (opcuaClient) {
-      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
+      node.verboseLog('Browser Start OPC UA Session')
       node.opcuaClient = opcuaClient
-      node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT).then(function (session) {
+      node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT, 'Browser Node').then(function (session) {
         node.opcuaSession = session
-        setNodeStatusTo('connected')
+        node.verboseLog('Session Connected')
+        node.setNodeStatusTo('connected')
       }).catch(node.handleSessionError)
     }
 
     if (node.connector) {
-      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
+      node.verboseLog('Browser Start OPC UA Session')
       node.connector.on('connected', node.startOPCUASession)
     } else {
       throw new TypeError('Connector Not Valid')
     }
 
     node.on('close', function (done) {
-      node.connector.closeSession(done)
+      if (node.opcuaSession) {
+        node.connector.closeSession(node.opcuaSession, function (err) {
+          if (err) {
+            node.verboseLog('Error On Close Session ' + err)
+          }
+          node.opcuaSession = null
+          done()
+        })
+      } else {
+        node.opcuaSession = null
+        done()
+      }
     })
+
+    node.setNodeStatusTo('waiting')
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
@@ -207,10 +226,10 @@ module.exports = function (RED) {
     let nodeRootId = nodeId || coreBrowser.core.OBJECTS_ROOT
 
     if (node.opcuaSession && nodeRootId) {
-      coreBrowser.internalDebugLog('Session To Browse From Settings To ' + nodeRootId)
+      node.node.verboseLog('Session To Browse From Settings To ' + nodeRootId)
       coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browseResult) {
         browseResult.forEach(function (result) {
-          // coreBrowser.internalDebugLog('Session To Browse From Settings ' + JSON.stringify(result))
+          // node.verboseLog('Session To Browse From Settings ' + JSON.stringify(result))
           result.references.forEach(function (reference) {
             entries.push(node.transformToEntry(reference))
           })
@@ -219,7 +238,7 @@ module.exports = function (RED) {
         browserEntries = entries
       }).catch(function (err) {
         if (err) {
-          coreBrowser.internalDebugLog(err)
+          node.verboseLog(err)
         }
         entries.push({
           displayName: {text: 'Objects'},
@@ -232,7 +251,7 @@ module.exports = function (RED) {
     } else {
       res.json(entries)
       browserEntries = entries
-      coreBrowser.internalDebugLog('Session To Browse From Settings Is Not Valid')
+      node.verboseLog('Session To Browse From Settings Is Not Valid')
     }
   }
 

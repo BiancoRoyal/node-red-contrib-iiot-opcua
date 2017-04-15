@@ -8,7 +8,9 @@
       "host": "Host",
       "port": "Port",
       "sign": "Sign",
-      "credentials": "use credentials"
+      "user": "User",
+      "password": "Password",
+      "credentials": "Use Login"
     }
   }
 }

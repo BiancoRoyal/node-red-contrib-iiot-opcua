@@ -38,7 +38,7 @@ module.exports = function (RED) {
     }
 
     function statusLog (logMessage) {
-      if (RED.settings.verbose && node.statusLog) {
+      if (RED.settings.verbose && node.showStatusActivities) {
         coreServer.internalDebugLog('Status: ' + logMessage)
       }
     }
@@ -60,19 +60,40 @@ module.exports = function (RED) {
         resourcePath: node.endpoint || 'UA/NodeREDIIOTServer',
         buildInfo: {
           productName: node.name.concat(' IIoT Server'),
-          buildNumber: '1604',
-          buildDate: new Date(2017, 4, 1)
+          buildNumber: '160417',
+          buildDate: new Date(2017, 4, 16)
+        },
+        serverCapabilities: {
+          operationLimits: {
+            maxNodesPerRead: 1000,
+            maxNodesPerBrowse: 2000
+          }
+        },
+        userManager: {
+          isValidUser: node.isValidUser
         }
       })
 
       server.initialize(postInitialize)
     }
 
+    // TODO: User Management from Node
+    node.isValidUser = function (userName, userPassword) {
+      if (userName === 'bianco' && userPassword === 'royal') {
+        return true
+      }
+      if (userName === 'user' && userPassword === 'S3cr3t.OPCua') {
+        return true
+      }
+      return false
+    }
+
     function constructAddressSpace (addressSpace) {
       vendorName = addressSpace.addObject({
         organizedBy: addressSpace.rootFolder.objects,
         nodeId: 'ns=4;s=VendorName',
-        browseName: 'VendorName'
+        browseName: 'BiancoRoyal',
+        displayName: 'Bianco Royal'
       })
 
       let variable1 = 1
@@ -350,7 +371,9 @@ module.exports = function (RED) {
 
   RED.httpAdmin.get('/opcua/server/specifications', RED.auth.needsPermission('coreServer.core.nodeOPCUA.server.read'), function (req, res) {
     xmlFiles.list(function (err, ports) {
-      if (err) console.log(err)
+      if (err) {
+        console.log(err)
+      }
       res.json(ports)
     })
   })

@@ -36,6 +36,7 @@ start debug with Node-RED in verbose (-v) mode
 DEBUG options opcuaIIoT:
  
  * core
+    * core:details 
  * connector
  * browser
  * listener
@@ -47,6 +48,11 @@ DEBUG options opcuaIIoT:
  * server
     * server:ISA95
 
+Examples:
+
+    DEBUG=opcuaIIoT:client,opcuaIIoT:client:read,opcauaIIoT:connector node-red -v
+    
+    DEBUG=opcuaIIoT:client*,opcuaIIoT:listener*,opcauaIIoT:connector node-red -v
 
 ### Wiki
 

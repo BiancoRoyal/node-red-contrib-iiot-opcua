@@ -19,6 +19,7 @@ var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line
 de.biancoroyal.opcua.iiot.core.nodeOPCUA = de.biancoroyal.opcua.iiot.core.nodeOPCUA || require('node-opcua') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua/lib/datamodel/nodeid') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT:core') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.detailDebugLog = de.biancoroyal.opcua.iiot.core.detailDebugLog || require('debug')('opcuaIIoT:core:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT || 'ns=0;i=84' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
 
@@ -143,7 +144,7 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
   let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
   let variantValue = null
 
-  this.internalDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
+  this.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
 
   switch (datatype) {
     case 'Float':
@@ -219,7 +220,7 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
       break
   }
 
-  this.internalDebugLog('buildNewVariant variantValue: ' + JSON.stringify(variantValue))
+  this.detailDebugLog('buildNewVariant variantValue: ' + JSON.stringify(variantValue))
 
   return variantValue
 }
@@ -237,23 +238,59 @@ de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue)
   switch (dataValue.attributeId) {
     case opcua.AttributeIds.NodeId:
       return {
-        nodeId: dataValue.nodeId,
+        value: convertedValue,
+        dataType: dataValue.dataType.toString(),
+        arrayType: dataValue.arrayType.toString(),
         attributeId: dataValue.attributeId,
-        indexRange: dataValue.indexRange,
-        dataEncoding: {
-          namespaceIndex: dataValue.dataEncoding.namespaceIndex,
-          name: dataValue.dataEncoding.name
-        }
+        statusCode: {
+          value: dataValue.statusCode.value,
+          description: dataValue.statusCode.description,
+          name: dataValue.statusCode.name
+        },
+        sourcePicoseconds: dataValue.sourcePicoseconds,
+        serverPicoseconds: dataValue.serverPicoseconds
+      }
+    case opcua.AttributeIds.NodeClass:
+      return {
+        value: dataValue.value,
+        dataType: dataValue.value.dataType.toString(),
+        arrayType: dataValue.value.arrayType.toString(),
+        attributeId: dataValue.attributeId,
+        statusCode: {
+          value: dataValue.statusCode.value,
+          description: dataValue.statusCode.description,
+          name: dataValue.statusCode.name
+        },
+        sourcePicoseconds: dataValue.sourcePicoseconds,
+        serverPicoseconds: dataValue.serverPicoseconds
       }
     case opcua.AttributeIds.BrowseName:
       return {
-        nodeId: dataValue.nodeId,
+        value: convertedValue,
+        dataType: dataValue.value.dataType.toString(),
+        arrayType: dataValue.value.arrayType.toString(),
         attributeId: dataValue.attributeId,
-        indexRange: dataValue.indexRange,
-        dataEncoding: {
-          namespaceIndex: dataValue.dataEncoding.namespaceIndex,
-          name: dataValue.dataEncoding.name
-        }
+        statusCode: {
+          value: dataValue.statusCode.value,
+          description: dataValue.statusCode.description,
+          name: dataValue.statusCode.name
+        },
+        sourcePicoseconds: dataValue.sourcePicoseconds,
+        serverPicoseconds: dataValue.serverPicoseconds
+      }
+    case opcua.AttributeIds.DisplayName:
+      return {
+        value: convertedValue,
+        dataType: dataValue.value.dataType.toString(),
+        arrayType: dataValue.value.arrayType.toString(),
+        attributeId: dataValue.attributeId,
+        statusCode: {
+          value: dataValue.statusCode.value,
+          description: dataValue.statusCode.description,
+          name: dataValue.statusCode.name
+        },
+        sourcePicoseconds: dataValue.sourcePicoseconds,
+        serverPicoseconds: dataValue.serverPicoseconds
       }
     default:
       if (dataValue.value) {
@@ -290,7 +327,7 @@ de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue)
           }
         } else {
           return {
-            nodeId: dataValue.nodeId,
+            value: convertedValue,
             attributeId: dataValue.attributeId,
             indexRange: dataValue.indexRange,
             dataEncoding: {
@@ -307,9 +344,18 @@ de.biancoroyal.opcua.iiot.core.convertDataValue = function (value) {
   let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
   let convertedValue = null
 
-  this.internalDebugLog('convertDataValue: ' + JSON.stringify(value))
+  this.detailDebugLog('convertDataValue: ' + JSON.stringify(value))
 
   switch (value.dataType) {
+    case opcua.DataType.NodeId:
+      convertedValue = value.value.toString()
+      break
+    case opcua.DataType.QualifiedName:
+      convertedValue = value.value.toString()
+      break
+    case opcua.DataType.LocalizedText:
+      convertedValue = value.value.text
+      break
     case opcua.DataType.Float:
       convertedValue = parseFloat(value.value)
       break
@@ -350,13 +396,13 @@ de.biancoroyal.opcua.iiot.core.convertDataValue = function (value) {
       break
   }
 
-  this.internalDebugLog('convertDataValue is: ' + convertedValue)
+  this.detailDebugLog('convertDataValue is: ' + convertedValue)
 
   return convertedValue
 }
 
 de.biancoroyal.opcua.iiot.core.buildMsgPayloadByStatusCode = function (statusCode) {
-  this.internalDebugLog('buildMsgPayloadByStatusCode: ' + JSON.stringify(statusCode))
+  this.detailDebugLog('buildMsgPayloadByStatusCode: ' + JSON.stringify(statusCode))
 
   return {
     value: statusCode.value,
@@ -484,7 +530,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
   let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
   let nodesToWrite = []
 
-  this.internalDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
+  this.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
 
   if (msg.payload.items) {
     let item = null
@@ -514,7 +560,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
 de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
   let nodesToRead = []
 
-  this.internalDebugLog('buildNodesToRead input: ' + JSON.stringify(msg))
+  this.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(msg))
 
   if (msg.payload.items) {
     let item = null
