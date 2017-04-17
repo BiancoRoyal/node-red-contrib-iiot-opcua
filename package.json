@@ -1,6 +1,8 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
   "version": "0.1.0-beta",
+  "tag": "beta010",
+  "private": false,
   "description": "IIoT OPC UA package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
@@ -52,8 +54,8 @@
   "homepage": "https://github.com/biancode/node-red-iiot-opcua#readme",
   "scripts": {
     "test": "standard --fix && mocha test/*",
-    "build": "standard --fix && gulp publish",
-    "prepublish": "gulp clean && standard --fix && npm run build && npm test"
+    "build": "standard --fix && gulp clean && gulp publish",
+    "prepublish": "standard --fix && npm run build && npm test"
   },
   "files": [
     "opcuaIIoT"
