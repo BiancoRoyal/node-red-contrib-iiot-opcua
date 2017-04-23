@@ -577,4 +577,9 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
   return nodesToRead
 }
 
+de.biancoroyal.opcua.iiot.core.availableMemory = function () {
+  let os = require('os')
+  return os.freemem() / os.totalmem() * 100.0
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core

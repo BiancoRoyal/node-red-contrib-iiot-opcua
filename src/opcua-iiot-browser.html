@@ -39,7 +39,7 @@
         nodeIdLookupField.addClass('disabled')
 
         let rootid = nodeIdField.val() || 'ns=0;i=84'
-        let url = '/opcuabrowser/' + node.id + '/rootid/' + rootid
+        let url = '/opcuaIIoT/browser/' + node.id + '/rootid/' + rootid
         console.log('url: ' + url)
 
         $.getJSON(url, function(data) {

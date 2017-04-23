@@ -311,7 +311,7 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Server-ISA95', OPCUAIIoTServerISA95)
 
-  RED.httpAdmin.get('/opcua/server/specifications', RED.auth.needsPermission('opcua.server.read'), function (req, res) {
+  RED.httpAdmin.get('/opcuaIIoT/server/ISA95/specifications', RED.auth.needsPermission('opcuaIIoT.server.ISA95.read'), function (req, res) {
     xmlFiles.list(function (err, ports) {
       if (err) {
         console.log(err)

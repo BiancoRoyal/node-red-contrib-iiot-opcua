@@ -128,7 +128,7 @@ module.exports = function (RED) {
     }
   }
 
-  RED.httpAdmin.post('/opcuaiiotinject/:id', RED.auth.needsPermission('opcuaiiotinject.write'), function (req, res) {
+  RED.httpAdmin.post('/opcuaIIoT/inject/:id', RED.auth.needsPermission('opcuaIIoT.inject.write'), function (req, res) {
     let node = RED.nodes.getNode(req.params.id)
 
     if (node) {

@@ -11,15 +11,13 @@
 module.exports = function (RED) {
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
-  let os = require('os')
-
+  let Map = require('collections/map')
   let xmlFiles = [path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.NodeSet2.xml')]
 
   function OPCUAIIoTServer (config) {
-    let counterValue = 0
-    let vendorName
     let initialized = false
     let server = null
+    let addressSpaceMessages = new Map()
 
     RED.nodes.createNode(this, config)
     this.port = config.port
@@ -88,163 +86,14 @@ module.exports = function (RED) {
       return false
     }
 
-    function constructAddressSpace (addressSpace) {
-      vendorName = addressSpace.addObject({
-        organizedBy: addressSpace.rootFolder.objects,
-        nodeId: 'ns=4;s=VendorName',
-        browseName: 'BiancoRoyal',
-        displayName: 'Bianco Royal'
-      })
-
-      let variable1 = 1
-
-      setInterval(function () { variable1 += 1 }, 500)
-
-      addressSpace.addVariable({
-        componentOf: vendorName,
-        browseName: 'MyVariable1',
-        dataType: 'Double',
-        value: {
-          get: function () {
-            return new coreServer.core.nodeOPCUA.Variant({
-              dataType: coreServer.core.nodeOPCUA.DataType.Double,
-              value: variable1
-            })
-          }
-        }
-      })
-
-      let variable2 = 10.0
-
-      server.engine.addressSpace.addVariable({
-        componentOf: vendorName,
-        nodeId: 'ns=1;b=1020FFAA',
-        browseName: 'MyVariable2',
-        dataType: 'Double',
-        value: {
-          get: function () {
-            return new coreServer.core.nodeOPCUA.Variant({
-              dataType: coreServer.core.nodeOPCUA.DataType.Double,
-              value: variable2
-            })
-          },
-          set: function (variant) {
-            variable2 = parseFloat(variant.value)
-            return coreServer.core.nodeOPCUA.StatusCodes.Good
-          }
-        }
-      })
-
-      let variable3 = 1000.0
-
-      server.engine.addressSpace.addVariable({
-        componentOf: vendorName,
-        nodeId: 'ns=1;s=TestReadWrite',
-        browseName: 'TestReadWrite',
-        dataType: 'Double',
-        value: {
-          get: function () {
-            return new coreServer.core.nodeOPCUA.Variant({
-              dataType: coreServer.core.nodeOPCUA.DataType.Double,
-              value: variable3
-            })
-          },
-          set: function (variant) {
-            variable3 = parseFloat(variant.value)
-            return coreServer.core.nodeOPCUA.StatusCodes.Good
-          }
-        }
-      })
-
-      addressSpace.addVariable({
-        componentOf: vendorName,
-        nodeId: 'ns=4;s=free_memory',
-        browseName: 'FreeMemory',
-        dataType: coreServer.core.nodeOPCUA.DataType.Double,
-
-        value: {
-          get: function () {
-            return new coreServer.core.nodeOPCUA.Variant({
-              dataType: coreServer.core.nodeOPCUA.DataType.Double,
-              value: availableMemory()
-            })
-          }
-        }
-      })
-
-      addressSpace.addVariable({
-        componentOf: vendorName,
-        nodeId: 'ns=4;s=Counter',
-        browseName: 'Counter',
-        dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
-
-        value: {
-          get: function () {
-            return new coreServer.core.nodeOPCUA.Variant({
-              dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
-              value: counterValue
-            })
-          }
-        }
-      })
-
-      let method = addressSpace.addMethod(
-        vendorName, {
-          browseName: 'Bark',
-
-          inputArguments: [
-            {
-              name: 'nbBarks',
-              description: {text: 'specifies the number of time I should bark'},
-              dataType: coreServer.core.nodeOPCUA.DataType.UInt32
-            }, {
-              name: 'volume',
-              description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'},
-              dataType: coreServer.core.nodeOPCUA.DataType.UInt32
-            }
-          ],
-
-          outputArguments: [{
-            name: 'Barks',
-            description: {text: 'the generated barks'},
-            dataType: coreServer.core.nodeOPCUA.DataType.String,
-            valueRank: 1
-          }]
-        })
-
-      method.bindMethod(function (inputArguments, context, callback) {
-        let nbBarks = inputArguments[0].value
-        let volume = inputArguments[1].value
-
-        verboseLog('Hello World ! I will bark ', nbBarks, ' times')
-        verboseLog('the requested volume is ', volume, '')
-        let soundVolume = new Array(volume).join('!')
-
-        let barks = []
-        for (let i = 0; i < nbBarks; i++) {
-          barks.push('Whaff' + soundVolume)
-        }
-
-        let callMethodResult = {
-          statusCode: coreServer.core.nodeOPCUA.StatusCodes.Good,
-          outputArguments: [{
-            dataType: coreServer.core.nodeOPCUA.DataType.String,
-            arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
-            value: barks
-          }]
-        }
-        callback(null, callMethodResult)
-      })
-    }
-
     function postInitialize () {
       if (server) {
-        let addressSpace = server.engine.addressSpace
-        constructAddressSpace(addressSpace)
+        coreServer.constructAddressSpace(server)
 
         server.start(function () {
           server.endpoints[0].endpointDescriptions().forEach(function (endpoint) {
-            coreServer.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' + endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
+            coreServer.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' +
+              endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
           })
 
           let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
@@ -258,16 +107,14 @@ module.exports = function (RED) {
       }
     }
 
-    function availableMemory () {
-      return os.freemem() / os.totalmem() * 100.0
-    }
-
     initNewServer()
 
     node.on('input', function (msg) {
       if (server === undefined || !initialized) {
         return false
       }
+
+      addressSpaceMessages.clear()
 
       let payload = msg.payload
 
@@ -279,7 +126,7 @@ module.exports = function (RED) {
         executeOpcuaCommand(msg)
       }
 
-      node.send(msg)
+      node.send([msg, {payload: addressSpaceMessages}])
     })
 
     function containsMessageType (payload) {
@@ -289,12 +136,6 @@ module.exports = function (RED) {
     function readMessage (payload) {
       switch (payload.messageType) {
         case 'Variable':
-          if (payload.variableName === 'Counter') {
-            // Code for the Node-RED function to send the data by an inject
-            // msg = { payload : { "messageType" : "Variable", "variableName": "Counter", "variableValue": msg.payload }};
-            // return msg;
-            counterValue = payload.variableValue
-          }
           break
         default:
           break
@@ -334,12 +175,10 @@ module.exports = function (RED) {
       if (server) {
         server.shutdown(0, function () {
           server = null
-          vendorName = null
           initNewServer()
         })
       } else {
         server = null
-        vendorName = null
         initNewServer()
       }
 
@@ -358,18 +197,16 @@ module.exports = function (RED) {
       if (server) {
         server.shutdown(0, function () {
           server = null
-          vendorName = null
         })
       } else {
         server = null
-        vendorName = null
       }
     }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Server', OPCUAIIoTServer)
 
-  RED.httpAdmin.get('/opcua/server/specifications', RED.auth.needsPermission('coreServer.core.nodeOPCUA.server.read'), function (req, res) {
+  RED.httpAdmin.get('/opcuaIIoT/server/specifications', RED.auth.needsPermission('opcuaIIoT.server.read'), function (req, res) {
     xmlFiles.list(function (err, ports) {
       if (err) {
         console.log(err)

@@ -19,4 +19,167 @@ var de = de || {biancoroyal: {opcua: {iiot: {core: {server: {}}}}}} // eslint-di
 de.biancoroyal.opcua.iiot.core.server.core = de.biancoroyal.opcua.iiot.core.server.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.internalDebugLog = de.biancoroyal.opcua.iiot.core.server.internalDebugLog || require('debug')('opcuaIIoT:server') // eslint-disable-line no-use-before-define
 
+de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) {
+  let coreServer = de.biancoroyal.opcua.iiot.core.server
+  let addressSpace = server.engine.addressSpace
+
+  let vendorName = addressSpace.addObject({
+    organizedBy: addressSpace.rootFolder.objects,
+    nodeId: 'ns=4;s=VendorName',
+    browseName: 'BiancoRoyal',
+    displayName: 'Bianco Royal'
+  })
+
+  let variable1 = 1
+  setInterval(function () {
+    if (variable1 < 1000000) {
+      variable1 += 1
+    } else {
+      variable1 = 0
+    }
+  }, 100)
+
+  addressSpace.addVariable({
+    componentOf: vendorName,
+    browseName: 'MyVariable1',
+    dataType: 'Double',
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          value: variable1
+        })
+      }
+    }
+  })
+
+  let variable2 = 10.0
+
+  server.engine.addressSpace.addVariable({
+    componentOf: vendorName,
+    nodeId: 'ns=1;b=1020FFAA',
+    browseName: 'MyVariable2',
+    dataType: 'Double',
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          value: variable2
+        })
+      },
+      set: function (variant) {
+        variable2 = parseFloat(variant.value)
+        return coreServer.core.nodeOPCUA.StatusCodes.Good
+      }
+    }
+  })
+
+  let variable3 = 1000.0
+
+  server.engine.addressSpace.addVariable({
+    componentOf: vendorName,
+    nodeId: 'ns=1;s=TestReadWrite',
+    browseName: 'TestReadWrite',
+    dataType: 'Double',
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          value: variable3
+        })
+      },
+      set: function (variant) {
+        variable3 = parseFloat(variant.value)
+        return coreServer.core.nodeOPCUA.StatusCodes.Good
+      }
+    }
+  })
+
+  addressSpace.addVariable({
+    componentOf: vendorName,
+    nodeId: 'ns=4;s=free_memory',
+    browseName: 'FreeMemory',
+    dataType: coreServer.core.nodeOPCUA.DataType.Double,
+
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          value: coreServer.core.availableMemory()
+        })
+      }
+    }
+  })
+
+  let counterValue = 0
+  setInterval(function () {
+    if (counterValue < 65000) {
+      counterValue += 1
+    } else {
+      counterValue = 0
+    }
+  }, 1000)
+
+  addressSpace.addVariable({
+    componentOf: vendorName,
+    nodeId: 'ns=4;s=Counter',
+    browseName: 'Counter',
+    dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
+
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
+          value: counterValue
+        })
+      }
+    }
+  })
+
+  let method = addressSpace.addMethod(
+    vendorName, {
+      browseName: 'Bark',
+
+      inputArguments: [
+        {
+          name: 'nbBarks',
+          description: {text: 'specifies the number of time I should bark'},
+          dataType: coreServer.core.nodeOPCUA.DataType.UInt32
+        }, {
+          name: 'volume',
+          description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'},
+          dataType: coreServer.core.nodeOPCUA.DataType.UInt32
+        }
+      ],
+
+      outputArguments: [{
+        name: 'Barks',
+        description: {text: 'the generated barks'},
+        dataType: coreServer.core.nodeOPCUA.DataType.String,
+        valueRank: 1
+      }]
+    })
+
+  method.bindMethod(function (inputArguments, context, callback) {
+    let nbBarks = inputArguments[0].value
+    let volume = inputArguments[1].value
+    let soundVolume = new Array(volume).join('!')
+    let barks = []
+
+    for (let i = 0; i < nbBarks; i++) {
+      barks.push('Whaff' + soundVolume)
+    }
+
+    let callMethodResult = {
+      statusCode: coreServer.core.nodeOPCUA.StatusCodes.Good,
+      outputArguments: [{
+        dataType: coreServer.core.nodeOPCUA.DataType.String,
+        arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
+        value: barks
+      }]
+    }
+    callback(null, callMethodResult)
+  })
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.server

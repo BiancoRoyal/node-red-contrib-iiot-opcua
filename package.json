@@ -45,7 +45,8 @@
       "OPCUA-IIoT-Node": "opcuaIIoT/opcua-iiot-node.js",
       "OPCUA-IIoT-Event": "opcuaIIoT/opcua-iiot-event.js",
       "OPCUA-IIoT-Response": "opcuaIIoT/opcua-iiot-response.js",
-      "OPCUA-IIoT-Inject": "opcuaIIoT/opcua-iiot-inject.js"
+      "OPCUA-IIoT-Inject": "opcuaIIoT/opcua-iiot-inject.js",
+      "OPCUA-IIoT-ASO": "opcuaIIoT/opcua-iiot-aso.js"
     }
   },
   "engines": {

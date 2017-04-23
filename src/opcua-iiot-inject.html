@@ -415,7 +415,7 @@
         let node = this
 
         $.ajax({
-          url: 'opcuaiiotinject/' + this.id,
+          url: 'opcuaIIoT/inject/' + this.id,
           type: 'POST',
           success: function (resp) {
             RED.notify(node._('opcuaiiotinject.success', {label: label}), 'success')
