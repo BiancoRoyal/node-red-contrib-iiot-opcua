@@ -26,7 +26,7 @@ At a minimum, please include:
  - Version of node-red-iiot-opcua?
  
  - What is your platform? (Linux, macOS, ...)
- - What does `DEBUG=node_red_contrib_opcua_iiot node -v` say? (log files are welcome)
+ - What does `DEBUG=opcuaIIoT:* node-red -v` say? (log files are welcome)
 
 ## Feature requests
 
@@ -51,3 +51,11 @@ Some basic rules include:
 ### Update
 
 ### Upgrade
+
+### Return of Code Investment
+
+Please, make pull requests!
+If you are not sure how to do this, then ask for help please!
+It is open source to collaborate and to give some return of investment with your code.
+
+
