@@ -8,6 +8,11 @@
  */
 'use strict'
 
+/**
+ * Event Node-RED node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreListener = require('./core/opcua-iiot-core-listener')
 

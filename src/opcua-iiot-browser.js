@@ -8,6 +8,11 @@
  */
 'use strict'
 
+/**
+ * Browser Node-RED node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreBrowser = require('./core/opcua-iiot-core-browser')
   let browserEntries = []
@@ -226,10 +231,10 @@ module.exports = function (RED) {
     let nodeRootId = nodeId || coreBrowser.core.OBJECTS_ROOT
 
     if (node.opcuaSession && nodeRootId) {
-      node.node.verboseLog('Session To Browse From Settings To ' + nodeRootId)
+      coreBrowser.internalDebugLog('Session Is Valid And NodeId Is ' + nodeRootId)
+
       coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browseResult) {
         browseResult.forEach(function (result) {
-          // node.verboseLog('Session To Browse From Settings ' + JSON.stringify(result))
           result.references.forEach(function (reference) {
             entries.push(node.transformToEntry(reference))
           })
@@ -251,7 +256,7 @@ module.exports = function (RED) {
     } else {
       res.json(entries)
       browserEntries = entries
-      node.verboseLog('Session To Browse From Settings Is Not Valid')
+      coreBrowser.internalDebugLog('Session To Browse From Settings Is Not Valid')
     }
   }
 

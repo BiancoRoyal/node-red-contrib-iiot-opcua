@@ -7,6 +7,11 @@
  */
 'use strict'
 
+/**
+ * Response analyser Node-RED node for OPC UA IIoT nodes.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreResponse = require('./core/opcua-iiot-core-response')
   const EMPTY_LIST = 0

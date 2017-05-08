@@ -8,6 +8,11 @@
  **/
 'use strict'
 
+/**
+ * Inject Node-RED node for OPC UA IIoT nodes.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreInject = require('./core/opcua-iiot-core-inject')
   let cron = require('cron')

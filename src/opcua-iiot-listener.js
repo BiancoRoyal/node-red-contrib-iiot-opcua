@@ -8,6 +8,11 @@
  */
 'use strict'
 
+/**
+ * Listener Node-RED node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreListener = require('./core/opcua-iiot-core-listener')
   let async = require('async')
@@ -106,7 +111,19 @@ module.exports = function (RED) {
           node.send([{payload: msg.payload.value}, msg])
         })
 
+        monitoredItem.on('error', function (err) {
+          coreListener.internalDebugLog('Subscribe Error: ' + err + ' on ' + msg.topic)
+
+          if (monitoredItems.get(msg.topic)) {
+            monitoredItems.delete(msg.topic)
+          }
+          node.error('Subscribe Error ' + msg.topic, err)
+          node.setNodeStatusTo('error')
+        })
+
         monitoredItem.on('terminated', function () {
+          coreListener.internalDebugLog('Subscribe Monitoring Terminated for ' + msg.topic)
+
           if (monitoredItems.get(msg.topic)) {
             monitoredItems.delete(msg.topic)
           }
@@ -156,14 +173,18 @@ module.exports = function (RED) {
         })
 
         monitoredItem.on('error', function (err) {
+          coreListener.internalDebugLog('Event Error: ' + err + ' for ' + msg.topic)
+
           if (monitoredItems.get(msg.topic)) {
             monitoredItems.delete(msg.topic)
           }
-          node.err('monitored Event ', msg.eventTypeId, ' ERROR'.red, err)
+          node.error('Event Error ' + msg.topic, err)
           node.setNodeStatusTo('error')
         })
 
         monitoredItem.on('terminated', function () {
+          coreListener.internalDebugLog('Event Terminated for ' + msg.topic)
+
           if (monitoredItems.get(msg.topic)) {
             monitoredItems.delete(msg.topic)
           }

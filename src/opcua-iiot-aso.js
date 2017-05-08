@@ -7,6 +7,11 @@
  */
 'use strict'
 
+/**
+ * Address space object Node-RED node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let core = require('./core/opcua-iiot-core')
 

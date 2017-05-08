@@ -8,6 +8,11 @@
  */
 'use strict'
 
+/**
+ * ISA95 server Node-RED node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')

@@ -8,6 +8,11 @@
  */
 'use strict'
 
+/**
+ * Write Node-RED node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreClient = require('./core/opcua-iiot-core-client')
 

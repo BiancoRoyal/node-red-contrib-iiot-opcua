@@ -8,6 +8,11 @@
  */
 'use strict'
 
+/**
+ * OPC UA connector Node-RED config node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreConnector = require('./core/opcua-iiot-core-connector')
 

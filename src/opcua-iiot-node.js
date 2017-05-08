@@ -8,6 +8,11 @@
  */
 'use strict'
 
+/**
+ * OPC UA node representation for Node-RED OPC UA IIoT nodes.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let core = require('./core/opcua-iiot-core')
 

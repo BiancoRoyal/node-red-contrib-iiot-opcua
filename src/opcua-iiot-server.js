@@ -8,9 +8,15 @@
  */
 'use strict'
 
+/**
+ * Server Node-RED node.
+ *
+ * @param RED
+ */
 module.exports = function (RED) {
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
+  let os = require('os')
   let Map = require('collections/map')
   let xmlFiles = [path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.NodeSet2.xml')]
 
@@ -73,6 +79,21 @@ module.exports = function (RED) {
       })
 
       server.initialize(postInitialize)
+
+      let hostname = os.hostname()
+
+      if (hostname) {
+        let discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
+        coreServer.internalDebugLog('registering server to :' + discoveryEndpointUrl)
+
+        server.registerServer(discoveryEndpointUrl, function (err) {
+          if (err) {
+            coreServer.internalDebugLog('Register Server Error' + err)
+          } else {
+            coreServer.internalDebugLog('Discovery Setup Done')
+          }
+        })
+      }
     }
 
     // TODO: User Management from Node
