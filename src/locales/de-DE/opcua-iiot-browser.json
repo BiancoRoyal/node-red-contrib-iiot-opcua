@@ -1,0 +1,10 @@
+{
+  "opcua-iiot-contrib": {
+    "tabs-label":{
+      "settings": "Einstellungen"
+    },
+    "label": {
+      "lookupUseHint": "Das Browsen funktioniert via Auswahl und erneutem Klick auf Suche."
+    }
+  }
+}

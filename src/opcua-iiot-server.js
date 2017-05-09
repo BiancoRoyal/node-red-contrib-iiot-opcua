@@ -28,27 +28,22 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.port = config.port
     this.endpoint = config.endpoint
+    this.securityPolicy = config.securityPolicy
+    this.messageSecurityMode = config.securityMode
     this.name = config.name
-    this.statusLog = config.statusLog
+    this.showStatusActivities = config.showStatusActivities
+    this.showErrors = config.showErrors
 
     let node = this
 
+    node.opcuaServerOptions = {
+      securityPolicy: coreServer.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreServer.core.nodeOPCUA.SecurityPolicy.None,
+      securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
+    }
+
     setNodeStatusTo('waiting')
 
-    function verboseLog (logMessage) {
-      if (RED.settings.verbose) {
-        coreServer.internalDebugLog(logMessage)
-      }
-    }
-
-    function statusLog (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        coreServer.internalDebugLog('Status: ' + logMessage)
-      }
-    }
-
     function setNodeStatusTo (statusValue) {
-      statusLog(statusValue)
       let statusParameter = coreServer.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
@@ -73,6 +68,9 @@ module.exports = function (RED) {
             maxNodesPerBrowse: 2000
           }
         },
+        securityPolicy: node.opcuaServerOptions.securityPolicy,
+        securityMode: node.opcuaServerOptions.securityMode,
+        hostname: os.hostname(),
         userManager: {
           isValidUser: node.isValidUser
         }
@@ -118,7 +116,7 @@ module.exports = function (RED) {
           })
 
           let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
-          verboseLog(' the primary server endpoint url is ' + endpointUrl)
+          coreServer.internalDebugLog(' the primary server endpoint url is ' + endpointUrl)
         })
         setNodeStatusTo('active')
         initialized = true

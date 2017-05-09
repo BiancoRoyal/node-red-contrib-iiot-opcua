@@ -1,13 +1,15 @@
 {
   "opcua-iiot-contrib": {
     "label": {
+      "endpoint": "Endpoint",
       "connector": "Connector",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "type": "Type",
       "host": "Host",
       "port": "Port",
-      "sign": "Sign",
+      "securityPolicy": "Security Policy",
+      "securityMode": "Security Mode",
       "user": "User",
       "password": "Password",
       "credentials": "Use Login"

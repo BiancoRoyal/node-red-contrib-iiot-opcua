@@ -14,8 +14,11 @@
     defaults: {
       port: {value: '55388', required: true},
       endpoint: {value: ''},
+      securityPolicy: {value: 'None', required: true},
+      securityMode: {vlaue: 'NONE', required: true},
       name: {value: ''},
-      statusLog: {value: false}
+      showStatusActivities: {value: false},
+      showErrors: {value: false}
     },
     inputs: 1,
     outputs: 2,
@@ -38,7 +41,32 @@
     </div>
     <div class="form-row">
         <label for="node-input-endpoint"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.endpoint"></span></label>
-        <input type="text" id="node-input-endpoint" placeholder="UA/SimpleNodeRedServer">
+        <input type="text" id="node-input-endpoint" placeholder="UA/NodeREDIIOTServer">
+    </div>
+    <div class="form-row">
+        <!-- SecurityPolicy enum via REST -->
+        <label for="node-input-securityPolicy"><i class="fa fa-certificate"></i>
+        <span data-i18n="opcua-iiot-contrib.label.securityPolicy"></span></label>
+        <select type="text" id="node-input-securityPolicy">
+            <option value="None" selected>None</option>
+            <option value="Basic128">Basic128</option>
+            <option value="Basic128Rsa15">Basic128Rsa15</option>
+            <option value="Basic192">Basic192</option>
+            <option value="Basic192Rsa15">Basic192Rsa15</option>
+            <option value="Basic256">Basic256</option>
+            <option value="Basic256Rsa15">Basic256Rsa15</option>
+            <option value="Basic256Sha256">Basic256Sha256</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <!-- MessageSecurityMode enum via REST -->
+        <label for="node-input-securityMode"><i class="fa fa-key"></i>
+        <span data-i18n="opcua-iiot-contrib.label.securityMode"></span></label>
+        <select type="text" id="node-input-securityMode">
+            <option value="NONE">None</option>
+            <option value="SIGN">Sign</option>
+            <option value="SIGNANDENCRYPT">Sign&Encrypt</option>
+        </select>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
@@ -46,11 +74,14 @@
     </div>
     <hr>
     <div class="form-row">
-        <label style="min-width:160px" for="node-config-input-statusLog">
-            <i class="fa fa-th"></i>
-            <span data-i18n="opcua-iiot-contrib.label.statusLog"></span>
-        </label>
-        <input type="checkbox" id="node-config-input-statusLog" style="max-width:30px">
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+    </div>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
 </script>
 

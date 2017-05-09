@@ -1,8 +1,7 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.1.0-gamma",
-  "tag": "gamma010",
-  "private": true,
+  "version": "0.1.0-delta",
+  "private": false,
   "description": "IIoT OPC UA package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",

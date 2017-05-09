@@ -5,7 +5,10 @@
       "endpoint": "Endpoint",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
-      "stateLogEnabled": "Log State"
+      "stateLogEnabled": "Log State",
+      "statusLog": "Log Status",
+      "securityPolicy": "Security Policy",
+      "securityMode": "Security Mode"
     }
   }
 }

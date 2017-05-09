@@ -18,11 +18,11 @@ var de = de || {biancoroyal: {opcua: {iiot: {core: {connector: {}}}}}} // eslint
 de.biancoroyal.opcua.iiot.core.connector.core = de.biancoroyal.opcua.iiot.core.connector.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.internalDebugLog = de.biancoroyal.opcua.iiot.core.connector.internalDebugLog || require('debug')('opcuaIIoT:connector') // eslint-disable-line no-use-before-define
 
-de.biancoroyal.opcua.iiot.core.connector.connect = function (url) {
+de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
   return new Promise(
     function (resolve, reject) {
       let core = require('./opcua-iiot-core')
-      let opcuaClient = new core.nodeOPCUA.OPCUAClient()
+      let opcuaClient = new core.nodeOPCUA.OPCUAClient(options)
       if (url) {
         opcuaClient.connect(url, function (err) {
           if (err) {

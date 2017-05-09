@@ -66,6 +66,10 @@ The BSD 3-Clause License
 
 [Klaus Landsdorf][1]
 
+### Members
+
+Stefanie Schima
+
 ### Features
 
 [1]:http://bianco-royal.de/

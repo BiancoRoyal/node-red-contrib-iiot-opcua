@@ -9,7 +9,8 @@
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "topic": "Topic",
-      "nodeId": "Node-Id"
+      "nodeId": "Node-Id",
+      "lookupUseHint": "You can browse with the lookup by select and lookup agian."
     }
   }
 }

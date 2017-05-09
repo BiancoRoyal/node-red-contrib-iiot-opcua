@@ -25,11 +25,18 @@ module.exports = function (RED) {
     this.loginEnabled = config.loginEnabled
     this.name = config.name
     this.credentials = config.credentials
+    this.securityPolicy = config.securityPolicy
+    this.messageSecurityMode = config.securityMode
 
     let node = this
     node.client = null
     node.userIdentity = {}
     node.opcuaClient = null
+
+    node.opcuaClientOptions = {
+      securityPolicy: coreConnector.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreConnector.core.nodeOPCUA.SecurityPolicy.None,
+      securityMode: coreConnector.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreConnector.core.nodeOPCUA.MessageSecurityMode.NONE
+    }
 
     if (node.credentials && node.loginEnabled) {
       node.userIdentity.userName = node.credentials.user
@@ -41,7 +48,7 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
       node.opcuaClient = null
 
-      coreConnector.connect(node.endpoint).then(function (opcuaClient) {
+      coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
         coreConnector.internalDebugLog('Connected On ' + node.endpoint)
         node.opcuaClient = opcuaClient
         coreConnector.internalDebugLog('Emit Connected Event')

@@ -30,27 +30,22 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.port = config.port
     this.endpoint = config.endpoint
+    this.securityPolicy = config.securityPolicy
+    this.messageSecurityMode = config.securityMode
     this.name = config.name
-    this.statusLog = config.statusLog
+    this.showStatusActivities = config.showStatusActivities
+    this.showErrors = config.showErrors
 
     let node = this
 
+    node.opcuaServerOptions = {
+      securityPolicy: coreServer.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreServer.core.nodeOPCUA.SecurityPolicy.None,
+      securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
+    }
+
     setNodeStatusTo('waiting')
 
-    function verboseLog (logMessage) {
-      if (RED.settings.verbose) {
-        coreServer.internalDebugLog(logMessage)
-      }
-    }
-
-    function statusLog (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        coreServer.internalDebugLog('Status: ' + logMessage)
-      }
-    }
-
     function setNodeStatusTo (statusValue) {
-      statusLog(statusValue)
       let statusParameter = coreServer.core.getNodeStatus(statusValue)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
@@ -68,10 +63,48 @@ module.exports = function (RED) {
           productName: node.name.concat(' IIoT Server'),
           buildNumber: '160479',
           buildDate: new Date(2017, 5, 16)
+        },
+        serverCapabilities: {
+          operationLimits: {
+            maxNodesPerRead: 1000,
+            maxNodesPerBrowse: 2000
+          }
+        },
+        securityPolicy: node.opcuaServerOptions.securityPolicy,
+        securityMode: node.opcuaServerOptions.securityMode,
+        hostname: os.hostname(),
+        userManager: {
+          isValidUser: node.isValidUser
         }
       })
 
       server.initialize(postInitialize)
+
+      let hostname = os.hostname()
+
+      if (hostname) {
+        let discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
+        coreServer.internalDebugLog('registering server to :' + discoveryEndpointUrl)
+
+        server.registerServer(discoveryEndpointUrl, function (err) {
+          if (err) {
+            coreServer.internalDebugLog('Register Server Error' + err)
+          } else {
+            coreServer.internalDebugLog('Discovery Setup Done')
+          }
+        })
+      }
+    }
+
+    // TODO: User Management from Node
+    node.isValidUser = function (userName, userPassword) {
+      if (userName === 'bianco' && userPassword === 'royal') {
+        return true
+      }
+      if (userName === 'user' && userPassword === 'S3cr3t.OPCua') {
+        return true
+      }
+      return false
     }
 
     function constructAddressSpace (addressSpace) {
@@ -163,8 +196,8 @@ module.exports = function (RED) {
         let nbBarks = inputArguments[0].value
         let volume = inputArguments[1].value
 
-        verboseLog('Hello World ! I will bark ', nbBarks, ' times')
-        verboseLog('the requested volume is ', volume, '')
+        coreServer.internalDebugLog('Hello World ! I will bark ', nbBarks, ' times')
+        coreServer.internalDebugLog('the requested volume is ', volume, '')
         let soundVolume = new Array(volume).join('!')
 
         let barks = []
@@ -195,7 +228,7 @@ module.exports = function (RED) {
           })
 
           let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
-          verboseLog(' the primary server endpoint url is ' + endpointUrl)
+          coreServer.internalDebugLog(' the primary server endpoint url is ' + endpointUrl)
         })
         setNodeStatusTo('active')
         initialized = true
