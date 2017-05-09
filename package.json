@@ -2,7 +2,7 @@
   "name": "@biancoroyal/node-red-iiot-opcua",
   "version": "0.1.0-delta",
   "private": false,
-  "description": "IIoT OPC UA package for Node-RED based on node-opcua.",
+  "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/biancode/node-red-iiot-opcua.git"
@@ -88,7 +88,7 @@
     "standard": "^10.0.2",
     "supertest": "^3.0.0",
     "uglify-js": "^3.0.1",
-    "uglify-js-harmony": "^2.7.5",
+    "uglify-js-harmony": "^2.7.7",
     "when": "^3.7.8"
   },
   "directories": {
