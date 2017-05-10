@@ -56,7 +56,11 @@ module.exports = function (RED) {
     node.createSubscription = function (msg, cb) {
       let timeMilliseconds = msg.payload
       coreListener.internalDebugLog('create subscription')
-      subscription = node.makeSubscription(cb, msg, coreListener.getSubscriptionParameters(timeMilliseconds))
+      if (msg.nodetype !== 'event') {
+        subscription = node.makeSubscription(cb, msg, coreListener.getSubscriptionParameters(timeMilliseconds))
+      } else {
+        subscription = node.makeSubscription(cb, msg, coreListener.getEventSubscribtionParameters(timeMilliseconds))
+      }
     }
 
     node.resetSubscription = function () {
@@ -80,7 +84,7 @@ module.exports = function (RED) {
 
     node.subscribeMonitoredItem = function (subscription, msg) {
       if (!monitoredItems) {
-        coreListener.internalDebugLog('Monitored Item Set Not Valid')
+        coreListener.subscribeDebugLog('Monitored Item Set Not Valid')
         return
       }
 
@@ -91,11 +95,15 @@ module.exports = function (RED) {
       let monitoredItem = monitoredItems.get(msg.topic)
 
       if (!monitoredItem) {
-        coreListener.internalDebugLog('Monitored Item Subscribe')
+        coreListener.subscribeDebugLog('Monitored Item Subscribe')
 
         monitoredItem = coreListener.buildNewMonitoredItem(msg, subscription, function (err) {
           if (err) {
-            node.error('subscription.monitorItem:' + err)
+            coreListener.subscribeDebugLog('Subscribe Error: ' + err + ' on ' + msg.topic)
+
+            if (node.showErrors) {
+              node.error('Subscription Monitor for Subscribe', msg)
+            }
           }
         })
 
@@ -112,24 +120,28 @@ module.exports = function (RED) {
         })
 
         monitoredItem.on('error', function (err) {
-          coreListener.internalDebugLog('Subscribe Error: ' + err + ' on ' + msg.topic)
+          coreListener.subscribeDebugLog('Subscribe Error: ' + err + ' on ' + msg.topic)
 
           if (monitoredItems.get(msg.topic)) {
             monitoredItems.delete(msg.topic)
           }
-          node.error('Subscribe Error ' + msg.topic, err)
+
+          if (node.showErrors) {
+            node.error(err, msg)
+          }
+
           node.setNodeStatusTo('error')
         })
 
         monitoredItem.on('terminated', function () {
-          coreListener.internalDebugLog('Subscribe Monitoring Terminated for ' + msg.topic)
+          coreListener.subscribeDebugLog('Subscribe Monitoring Terminated For ' + msg.topic)
 
           if (monitoredItems.get(msg.topic)) {
             monitoredItems.delete(msg.topic)
           }
         })
       } else {
-        coreListener.internalDebugLog('Monitored Item Unsubscribe')
+        coreListener.subscribeDebugLog('Monitored Item Unsubscribe')
         monitoredItem.terminate()
       }
 
@@ -138,7 +150,7 @@ module.exports = function (RED) {
 
     node.subscribeMonitoredEvent = function (subscription, msg) {
       if (!monitoredItems) {
-        coreListener.internalDebugLog('Monitored Item Set Not Valid')
+        coreListener.eventDebugLog('Monitored Item Set Not Valid')
         return
       }
 
@@ -151,7 +163,10 @@ module.exports = function (RED) {
       if (!monitoredItem) {
         monitoredItem = coreListener.buildNewEventItem(msg, subscription, function (err) {
           if (err) {
-            node.error('subscription.monitorEvent:' + err)
+            coreListener.eventDebugLog(err)
+            if (node.showErrors) {
+              node.error('Subscription Monitor for Event', msg)
+            }
           }
         })
 
@@ -162,33 +177,47 @@ module.exports = function (RED) {
         })
 
         monitoredItem.on('changed', function (eventFields) {
-          dumpEvent(node, node.opcuaSession, msg.eventFields, eventFields, function (err) {
+          coreListener.eventDebugLog('Monitored Event Changed ' + eventFields)
+          coreListener.eventDebugLog('Monitored Event Changed ' + JSON.stringify(eventFields))
+
+          node.dumpEvent(node, node.opcuaSession, msg.eventFields, eventFields, function (err) {
             if (err) {
-              coreListener.internalDebugLog(err)
+              coreListener.eventDebugLog('Event Error: ' + err + ' for ' + msg.topic)
+
+              if (node.showErrors) {
+                node.error(err, msg)
+              }
             } else {
-              coreListener.internalDebugLog('successful event call')
+              coreListener.eventDebugLog('Successful Event Call')
             }
           })
           node.setNodeStatusTo('active')
         })
 
         monitoredItem.on('error', function (err) {
-          coreListener.internalDebugLog('Event Error: ' + err + ' for ' + msg.topic)
+          coreListener.eventDebugLog('Event Error: ' + err + ' for ' + msg.topic)
 
           if (monitoredItems.get(msg.topic)) {
             monitoredItems.delete(msg.topic)
           }
-          node.error('Event Error ' + msg.topic, err)
+
+          if (node.showErrors) {
+            node.error(err, msg)
+          }
+
           node.setNodeStatusTo('error')
         })
 
         monitoredItem.on('terminated', function () {
-          coreListener.internalDebugLog('Event Terminated for ' + msg.topic)
+          coreListener.eventDebugLog('Event Terminated For ' + msg.topic)
 
           if (monitoredItems.get(msg.topic)) {
             monitoredItems.delete(msg.topic)
           }
         })
+      } else {
+        coreListener.eventDebugLog('Monitored Event Unsubscribe')
+        monitoredItem.terminate()
       }
 
       return monitoredItem
@@ -268,16 +297,16 @@ module.exports = function (RED) {
     //
     // Fields selected alarm fields
     // EventFields same order returned from server array of variants (filled or empty)
-    function __dumpEvent (node, session, fields, eventFields, _callback) {
-      coreListener.internalDebugLog('Send Event Information')
+    node.dumpQueueEvent = function (node, session, fields, eventFields, _callback) {
+      coreListener.eventDebugLog('Send Event Information ' + eventFields)
       let msg = {}
       msg.payload = []
 
       async.forEachOf(eventFields, function (variant, index, callback) {
-        coreListener.internalDebugLog('Event Information Index:' + index + ' variant: ' + JSON.stringify(variant))
+        coreListener.eventDebugLog('Event Information Index:' + index + ' variant: ' + JSON.stringify(variant))
 
         if (variant.dataType === DataType.Null) {
-          return callback(new Error('variants dataType is Null'))
+          return callback(new Error('Variants DataType Is Null'))
         }
 
         if (variant.dataType === DataType.NodeId) {
@@ -299,22 +328,21 @@ module.exports = function (RED) {
       }, _callback)
     }
 
-    let eventQueue = new Queue(function (task, callback) {
-      __dumpEvent(task.node, task.session, task.fields, task.eventFields, callback)
+    node.eventQueue = new Queue(function (task, callback) {
+      node.dumpQueueEvent(task.node, task.session, task.fields, task.eventFields, callback)
     })
 
-    function dumpEvent (node, session, fields, eventFields, _callback) {
-      node.verboseLog('Push Into Event Queue')
-      eventQueue.push({
+    node.dumpEvent = function (node, session, fields, eventFields, _callback) {
+      node.eventQueue.push({
         node: node, session: session, fields: fields, eventFields: eventFields, _callback: _callback
       })
     }
 
     node.handleSessionError = function (err) {
-      node.verboseLog('Handle Session Error ' + err)
+      coreListener.internalDebugLog('Handle Session Error '.red + err)
 
       if (node.showErrors) {
-        node.error(err, {payload: 'Listener Session Error'})
+        node.error('Listener Session Error')
       }
 
       node.connector.closeSession(node.opcuaSession, function () {
@@ -331,6 +359,7 @@ module.exports = function (RED) {
         node.setNodeStatusTo('connected')
 
         coreListener.getAllEventTypes(session, function (err, entries) {
+          //  TODO: clean code
           if (err) {
             node.verboseLog(err)
           } else {

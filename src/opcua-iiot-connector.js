@@ -15,6 +15,7 @@
  */
 module.exports = function (RED) {
   let coreConnector = require('./core/opcua-iiot-core-connector')
+  // let OPCUADiscoveryServer = require('lib/server/opcua_discovery_server').OPCUADiscoveryServer
 
   function OPCUAIIoTConnectorConfiguration (config) {
     const CONNECTION_START_DELAY = 2000 // 2 sec.
@@ -32,6 +33,8 @@ module.exports = function (RED) {
     node.client = null
     node.userIdentity = {}
     node.opcuaClient = null
+    node.discoveryServer = null
+    node.discoveryServerEndpointUrl = null
 
     node.opcuaClientOptions = {
       securityPolicy: coreConnector.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreConnector.core.nodeOPCUA.SecurityPolicy.None,
@@ -54,6 +57,18 @@ module.exports = function (RED) {
         coreConnector.internalDebugLog('Emit Connected Event')
         node.emit('connected', node.opcuaClient)
       }).catch(node.handleError)
+
+      // TODO: use discovery to find other servers
+      /* node.discoveryServer = new OPCUADiscoveryServer()
+       node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
+       node.discoveryServer.start(function (err) {
+       if (err) {
+       coreConnector.internalDebugLog('Discovery Server Error ' + err)
+       } else {
+       coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
+       }
+       })
+       */
     }
 
     node.startSession = function (timeoutSeconds, type) {

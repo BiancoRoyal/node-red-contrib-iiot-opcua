@@ -23,4 +23,8 @@
 #### Server 
 
 * Security is not complete implemented
+* Signed or encrypted connection stops Node-RED
  
+#### Connector
+
+* Security is not complete implemented

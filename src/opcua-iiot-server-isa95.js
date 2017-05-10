@@ -43,6 +43,9 @@ module.exports = function (RED) {
       securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
     }
 
+    node.publicCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_cert_2048.pem')
+    node.privateCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
+
     setNodeStatusTo('waiting')
 
     function setNodeStatusTo (statusValue) {
@@ -54,6 +57,8 @@ module.exports = function (RED) {
 
     function initNewServer () {
       initialized = false
+
+      coreServer.name = 'NodeREDIIOTServerISA95'
 
       server = new coreServer.core.nodeOPCUA.OPCUAServer({
         port: node.port,
@@ -70,6 +75,8 @@ module.exports = function (RED) {
             maxNodesPerBrowse: 2000
           }
         },
+        certificateFile: node.publicCertificate,
+        privateKeyFile: node.privateCertificate,
         securityPolicy: node.opcuaServerOptions.securityPolicy,
         securityMode: node.opcuaServerOptions.securityMode,
         hostname: os.hostname(),
@@ -336,6 +343,10 @@ module.exports = function (RED) {
 
     function closeServer () {
       if (server) {
+        if (coreServer.simulatorInterval) {
+          clearInterval(coreServer.simulatorInterval)
+        }
+        coreServer.simulatorInterval = null
         server.shutdown(0, function () {
           server = null
           vendorName = null

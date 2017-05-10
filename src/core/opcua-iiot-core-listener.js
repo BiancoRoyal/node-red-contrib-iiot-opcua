@@ -19,6 +19,8 @@ var de = de || {biancoroyal: {opcua: {iiot: {core: {listener: {}}}}}} // eslint-
 de.biancoroyal.opcua.iiot.core.listener.core = de.biancoroyal.opcua.iiot.core.listener.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.client = de.biancoroyal.opcua.iiot.core.listener.client || require('./opcua-iiot-core-client') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.internalDebugLog = de.biancoroyal.opcua.iiot.core.listener.internalDebugLog || require('debug')('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog = de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog || require('debug')('opcuaIIoT:listener:subscribe') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.eventDebugLog = de.biancoroyal.opcua.iiot.core.listener.eventDebugLog || require('debug')('opcuaIIoT:listener:event') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
 /*
@@ -234,7 +236,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
       discardOldest: true,
       queueSize: queueSize
     },
-    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+    3, // this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
     handleErrorCallback
   )
 }
@@ -252,7 +254,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
   if (typeof msg.queueSize === 'number') {
     queueSize = parseInt(msg.queueSize)
   } else {
-    queueSize = 1
+    queueSize = 100000
   }
 
   return subscription.monitor(
@@ -266,7 +268,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
       queueSize: queueSize,
       filter: msg.eventFilter
     },
-    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+    3, // this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
     handleErrorCallback
   )
 }

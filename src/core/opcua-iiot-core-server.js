@@ -18,10 +18,39 @@
 var de = de || {biancoroyal: {opcua: {iiot: {core: {server: {}}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.core = de.biancoroyal.opcua.iiot.core.server.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.internalDebugLog = de.biancoroyal.opcua.iiot.core.server.internalDebugLog || require('debug')('opcuaIIoT:server') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.server.simulatorInterval = de.biancoroyal.opcua.iiot.core.server.simulatorInterval || null // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.server.timeInterval = de.biancoroyal.opcua.iiot.core.server.timeInterval || 1 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.server.name = de.biancoroyal.opcua.iiot.core.server.name || 'server' // eslint-disable-line no-use-before-define
+
+de.biancoroyal.opcua.iiot.core.server.simulateVariation = function (data) {
+  let value = (1.0 + Math.sin(de.biancoroyal.opcua.iiot.core.server.timeInterval / 360 * 3)) / 2.0
+  de.biancoroyal.opcua.iiot.core.server.timeInterval++
+  /*
+   de.biancoroyal.opcua.iiot.core.server.internalDebugLog(de.biancoroyal.opcua.iiot.core.server.name +
+   ' Simulation Timer Interval ' + de.biancoroyal.opcua.iiot.core.server.timeInterval)
+   */
+
+  if (de.biancoroyal.opcua.iiot.core.server.timeInterval > 500000) {
+    de.biancoroyal.opcua.iiot.core.server.timeInterval = 1
+  }
+
+  data.tankLevel.setValueFromSource({dataType: 'Double', value: value})
+  data.tankLevel2.setValueFromSource({dataType: 'Double', value: value})
+  // de.biancoroyal.opcua.iiot.core.server.internalDebugLog('Simulation Tank Level ' + value)
+}
 
 de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) {
   let coreServer = de.biancoroyal.opcua.iiot.core.server
   let addressSpace = server.engine.addressSpace
+
+  let constructAlarmAddressSpaceDemo = require('../helpers/alarms-and-conditions-demo').constructAlarmAddressSpaceDemo
+  let data = {}
+  constructAlarmAddressSpaceDemo(data, addressSpace)
+
+  de.biancoroyal.opcua.iiot.core.server.timeInterval = 1
+  de.biancoroyal.opcua.iiot.core.server.simulatorInterval = setInterval(function () {
+    de.biancoroyal.opcua.iiot.core.server.simulateVariation(data)
+  }, 500)
 
   let vendorName = addressSpace.addObject({
     organizedBy: addressSpace.rootFolder.objects,
