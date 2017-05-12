@@ -40,3 +40,5 @@ de.biancoroyal.opcua.iiot.api.functionToPromise = function (givenFunction) {
     }
   }
 }
+
+module.exports = de.biancoroyal.opcua.iiot.api

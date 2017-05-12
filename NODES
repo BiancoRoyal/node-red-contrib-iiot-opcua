@@ -1,0 +1,16 @@
+  "node-red": {
+    "nodes": {
+      "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",
+      "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
+      "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js",
+      "OPCUA-IIoT-Read": "opcuaIIoT/opcua-iiot-read.js",
+      "OPCUA-IIoT-Listener": "opcuaIIoT/opcua-iiot-listener.js",
+      "OPCUA-IIoT-Write": "opcuaIIoT/opcua-iiot-write.js",
+      "OPCUA-IIoT-Browser": "opcuaIIoT/opcua-iiot-browser.js",
+      "OPCUA-IIoT-Node": "opcuaIIoT/opcua-iiot-node.js",
+      "OPCUA-IIoT-Event": "opcuaIIoT/opcua-iiot-event.js",
+      "OPCUA-IIoT-Response": "opcuaIIoT/opcua-iiot-response.js",
+      "OPCUA-IIoT-Inject": "opcuaIIoT/opcua-iiot-inject.js",
+      "OPCUA-IIoT-ASO": "opcuaIIoT/opcua-iiot-aso.js"
+    }
+  },

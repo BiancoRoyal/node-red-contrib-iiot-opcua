@@ -8,13 +8,15 @@ stages:
 npm_test:
   stage: test
   script:
-    - npm build
+    - npm run build
     - npm test
 release:
   stage: deploy
   script:
     - export NPM_TOKEN="097cdf5c-9d2b-4c55-99ba-5af0c5582d08"
-    - echo Running release
+    - echo running build
+    - npm run build
+    - echo running release
     - npm run ci-publish || true
 
 
