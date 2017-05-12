@@ -3,6 +3,7 @@
     "label": {
       "eventRoot": "Root Id",
       "eventType": "Event Type",
+      "queueSize": "Queue Size",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors"
     }

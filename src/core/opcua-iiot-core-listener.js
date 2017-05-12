@@ -56,148 +56,146 @@ de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (ti
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, key, value, msg) {
+de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, key, value) {
+  let eventInformation = {}
+
   switch (field) {
     // Common fields
     case 'EventId':
-      msg.EventId = value
+      eventInformation.EventId = value
       break
     case 'EventType':
-      msg.EventType = value
+      eventInformation.EventType = value
       break
     case 'SourceNode':
-      msg.SourceNode = value
+      eventInformation.SourceNode = value
       break
     case 'SourceName':
-      msg.SourceName = value
+      eventInformation.SourceName = value
       break
     case 'Time':
-      msg.Time = value
+      eventInformation.Time = value
       break
     case 'ReceiveTime':
-      msg.ReceiveTime = value
+      eventInformation.ReceiveTime = value
       break
     case 'Message':
-      msg.Message = value.text
+      eventInformation.Message = value.text
       break
     case 'Severity':
-      msg.Severity = value
+      eventInformation.Severity = value
       break
 
     // ConditionType
     case 'ConditionClassId':
-      msg.ConditionClassId = value
+      eventInformation.ConditionClassId = value
       break
     case 'ConditionClassName':
-      msg.ConditionClassNameName = value
+      eventInformation.ConditionClassNameName = value
       break
     case 'ConditionName':
-      msg.ConditionName = value
+      eventInformation.ConditionName = value
       break
     case 'BranchId':
-      msg.BranchId = value
+      eventInformation.BranchId = value
       break
     case 'Retain':
-      msg.Retain = value
+      eventInformation.Retain = value
       break
     case 'EnabledState':
-      msg.EnabledState = value.text
+      eventInformation.EnabledState = value.text
       break
     case 'Quality':
-      msg.Quality = value
+      eventInformation.Quality = value
       break
     case 'LastSeverity':
-      msg.LastSeverity = value
+      eventInformation.LastSeverity = value
       break
     case 'Comment':
-      msg.Comment = value.text
+      eventInformation.Comment = value.text
       break
     case 'ClientUserId':
-      msg.ClientUserId = value
+      eventInformation.ClientUserId = value
       break
 
     // AcknowledgeConditionType
     case 'AckedState':
-      msg.AckedState = value.text
+      eventInformation.AckedState = value.text
       break
     case 'ConfirmedState':
-      msg.ConfirmedState = value.text
+      eventInformation.ConfirmedState = value.text
       break
 
     // AlarmConditionType
     case 'ActiveState':
-      msg.ActiveState = value.text
+      eventInformation.ActiveState = value.text
       break
     case 'InputNode':
-      msg.InputNode = value
+      eventInformation.InputNode = value
       break
     case 'SupressedState':
-      msg.SupressedState = value.text
+      eventInformation.SupressedState = value.text
       break
 
     // Limits
     case 'HighHighLimit':
-      msg.HighHighLimit = value
+      eventInformation.HighHighLimit = value
       break
     case 'HighLimit':
-      msg.HighLimit = value
+      eventInformation.HighLimit = value
       break
     case 'LowLimit':
-      msg.LowLimit = value
+      eventInformation.LowLimit = value
       break
     case 'LowLowLimit':
-      msg.LowLowLimit = value
+      eventInformation.LowLowLimit = value
       break
     case 'Value':
-      msg.Value = value
+      eventInformation.Value = value
       break
     default:
-      msg.error = 'unknown collected Alarm field ' + field
+      eventInformation = 'Unknown Collected Alarm Field ' + field
       break
   }
 
-  return msg
+  return eventInformation
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
   return [
-    // Common fields
     'EventId',
-    'EventType',
-    'SourceNode',
-    'SourceName',
-    'Time',
-    'ReceiveTime',
-    'Message',
-    'Severity',
-
-    // ConditionType
-    'ConditionClassId',
-    'ConditionClassName',
     'ConditionName',
+    'ConditionClassName',
+    'ConditionClassId',
+    'SourceName',
+    'SourceNode',
     'BranchId',
+    'EventType',
+    'SourceName',
+    'ReceiveTime',
+    'Severity',
+    'Message',
     'Retain',
-    'EnabledState',
-    'Quality',
-    'LastSeverity',
     'Comment',
+    'Comment.SourceTimestamp',
+    'EnabledState',
+    'EnabledState.Id',
+    'EnabledState.EffectiveDisplayName',
+    'EnabledState.TransitionTime',
+    'LastSeverity',
+    'LastSeverity.SourceTimestamp',
+    'Quality',
+    'Quality.SourceTimestamp',
+    'Time',
     'ClientUserId',
-
-    // AcknowledgeConditionType
     'AckedState',
+    'AckedState.Id',
     'ConfirmedState',
-
-    // AlarmConditionType
+    'ConfirmedState.Id',
+    'LimitState',
+    'LimitState.Id',
     'ActiveState',
-    'InputNode',
-    'SuppressedState',
-
-    'HighLimit',
-    'LowLimit',
-    'HighHighLimit',
-    'LowLowLimit',
-
-    'Value'
+    'ActiveState.Id'
   ]
 }
 
@@ -220,8 +218,8 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
     interval = 100
   }
 
-  if (typeof msg.queueSize === 'number') {
-    queueSize = parseInt(msg.queueSize)
+  if (typeof msg.payload.queueSize === 'number') {
+    queueSize = parseInt(msg.payload.queueSize)
   } else {
     queueSize = 1
   }
@@ -236,7 +234,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
       discardOldest: true,
       queueSize: queueSize
     },
-    3, // this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
     handleErrorCallback
   )
 }
@@ -251,8 +249,8 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
     interval = 100
   }
 
-  if (typeof msg.queueSize === 'number') {
-    queueSize = parseInt(msg.queueSize)
+  if (typeof msg.payload.queueSize === 'number') {
+    queueSize = parseInt(msg.payload.queueSize)
   } else {
     queueSize = 100000
   }
@@ -266,9 +264,9 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
       samplingInterval: interval,
       discardOldest: true,
       queueSize: queueSize,
-      filter: msg.eventFilter
+      filter: msg.payload.eventFilter
     },
-    3, // this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
     handleErrorCallback
   )
 }

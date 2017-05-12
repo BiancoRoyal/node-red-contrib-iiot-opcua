@@ -14,6 +14,7 @@
     defaults: {
       eventRoot: {value: '', required: true},
       eventType: {value: '', required: true},
+      queueSize: {value: 1, required: true, validate: RED.validators.number()},
       name: {value: ''}
     },
     inputs: 1,
@@ -50,6 +51,10 @@
             <option value="i=11436">Progress</option>
 			<option value="i=2130">System</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-queueSize"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.queueSize"></span></label>
+        <input type="number" id="node-input-queueSize" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>

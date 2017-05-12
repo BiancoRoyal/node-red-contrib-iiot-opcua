@@ -20,13 +20,22 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.eventRoot = config.eventRoot
     this.eventType = config.eventType
+    this.queueSize = config.queueSize
     this.name = config.name
 
     let node = this
 
     node.on('input', function (msg) {
-      let basicEventFields = coreListener.getBasicEventFields()
-      let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(basicEventFields)
+      let eventFields = coreListener.getBasicEventFields()
+
+      switch (node.eventType) {
+        case 'Condition':
+          eventFields = coreListener.getBasicEventFields()
+          break
+        default:
+          break
+      }
+      let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(eventFields)
 
       msg.topic = node.eventRoot
       msg.nodetype = 'events'
@@ -34,9 +43,9 @@ module.exports = function (RED) {
       msg.payload = {
         eventRoot: node.eventRoot,
         eventType: node.eventType,
+        queueSize: node.queueSize,
         eventFilter: eventFilter,
-        eventFields: basicEventFields,
-        eventTypeIds: node.eventType // TODO: replace eventTypeIds with eventType in following nodes
+        eventFields: eventFields
       }
       node.send(msg)
     })
