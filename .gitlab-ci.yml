@@ -4,10 +4,16 @@ before_script:
   - npm install
 
 stages:
-  - build
+  - test
+  - production
 
-build:
-  stage: build
+test:
+  stage: test
   script:
     - npm run build
     - npm test
+
+production:
+  stage: production
+  script:
+    - npm publish
