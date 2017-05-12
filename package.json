@@ -1,6 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.1.0-eta",
+  "version": "0.1.0-theta",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -8,7 +8,6 @@
     "url": "git+https://github.com/biancode/node-red-iiot-opcua.git"
   },
   "dependencies": {
-    "async": "2.4.0",
     "better-assert": "1.0.2",
     "collections": "5.0.6",
     "cron": "1.2.1",
@@ -85,12 +84,12 @@
     "mocha": "^3.3.0",
     "nock": "^9.0.13",
     "node-red": "^0.16.2",
-    "npm-check-updates": "^2.11.0",
+    "npm-check-updates": "^2.11.1",
     "pump": "^1.0.2",
     "sinon": "^2.2.0",
     "standard": "^10.0.2",
     "supertest": "^3.0.0",
-    "uglify-js": "^3.0.1",
+    "uglify-js": "^3.0.4",
     "uglify-js-harmony": "^2.7.7",
     "when": "^3.7.8"
   },

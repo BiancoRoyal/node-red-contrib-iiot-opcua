@@ -297,4 +297,46 @@ de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session, ca
   })
 }
 
+de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browseForBrowseName, eventFields, response) {
+  let core = de.biancoroyal.opcua.iiot.core.listener.core
+  let coreListener = de.biancoroyal.opcua.iiot.core.listener
+  let eventFieldMessage = {payload: {eventFields: eventFields, response: response}}
+  let msg = {payload: []}
+
+  return new Promise(
+    function (resolve, reject) {
+      if (!response) {
+        reject(new Error('Event Response Not Valid'))
+      } else {
+        let index = 0
+        let eventInformation
+
+        response.forEach(function (variant) {
+          coreListener.eventDebugLog('Event Information Variant: ' + JSON.stringify(variant))
+
+          if (variant.dataType !== core.nodeOPCUA.DataType.Null) {
+            eventInformation = coreListener.collectAlarmFields(eventFields[index], variant.dataType.key.toString(), variant.value)
+
+            if (variant.dataType === core.nodeOPCUA.DataType.NodeId) {
+              browseForBrowseName(session, variant.value, function (err, browseName) {
+                if (err) {
+                  coreListener.eventDebugLog(err)
+                }
+                eventInformation.browseName = browseName
+                msg.payload.push(eventInformation)
+              })
+            } else {
+              msg.payload.push(eventInformation)
+            }
+          }
+        })
+
+        index++
+      }
+
+      resolve(msg, eventFieldMessage)
+    }
+  )
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.listener

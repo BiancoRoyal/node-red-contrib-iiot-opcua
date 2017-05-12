@@ -15,9 +15,6 @@
  */
 module.exports = function (RED) {
   let coreListener = require('./core/opcua-iiot-core-listener')
-  // let promiseAPI = require('./api/promises')
-  let async = require('async')
-  let Queue = require('async').queue
   let Map = require('collections/map')
 
   function OPCUAIIoTListener (config) {
@@ -32,7 +29,6 @@ module.exports = function (RED) {
     let node = this
     let subscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
-    let DataType = coreListener.core.nodeOPCUA.DataType
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
     let monitoredItems = new Map()
 
@@ -185,28 +181,11 @@ module.exports = function (RED) {
 
           node.setNodeStatusTo('active ' + '(' + monitoredItems.length + ')')
 
-          /* promiseAPI.functionToPromise(node.analyzeEvent(node, node.opcuaSession, msg.payload.eventFields,
-           eventFieldResponse)).then(function (message, rawMessage) {
-           coreListener.eventDebugLog('Successful Event Call')
-           node.send([message, rawMessage])
-           }).catch(node.errorHandling())
-           */
-
-          node.dumpEvent(node, node.opcuaSession, msg.payload.eventFields, eventFieldResponse, function (err, message, rawMessage) {
-            if (err) {
-              coreListener.eventDebugLog('Event Dump Error ' + err)
-
-              if (node.showErrors) {
-                node.error(err, msg)
-              }
-            } else {
-              coreListener.eventDebugLog('Dump Done ' + message)
-              coreListener.eventDebugLog('Dump Done ' + rawMessage)
-
+          coreListener.analyzeEvent(node.opcuaSession, node.getBrowseName, msg.payload.eventFields, eventFieldResponse)
+            .then(function (message, eventFieldMessage) {
               coreListener.eventDebugLog('Successful Event Call')
-              node.send([message, rawMessage])
-            }
-          })
+              node.send([message, eventFieldMessage])
+            }).catch(node.errorHandling)
         })
 
         monitoredItem.on('error', function (err) {
@@ -310,72 +289,8 @@ module.exports = function (RED) {
             return callback(null, browseName)
           }
         }
-        callback(err, '<??>')
+        callback(err, 'Unknown')
       })
-    }
-
-    // looks like the example from node-opcua see:
-    // https://github.com/node-opcua/node-opcua/blob/master/bin/interactive_client.js
-    // or here:
-    // https://github.com/node-opcua/node-opcua/tree/master/test/end_to_end
-    //
-    // Fields selected alarm fields
-    // EventFields same order returned from server array of variants (filled or empty)
-    node.dumpQueueEvent = function (node, session, eventFields, eventFieldsResponse, callback) {
-      // coreListener.eventDebugLog('Dump Queue Event Event Fields: ' + eventFields)
-      // coreListener.eventDebugLog('Dump Queue Event Event Field Response: ' + eventFieldsResponse)
-
-      let rawMsg = {payload: {eventFields: eventFields, eventFieldsResponse: eventFieldsResponse}}
-      let singleMsg = {}
-      let msg = {payload: []}
-      let eventInformation
-
-      async.forEachOf(eventFieldsResponse, function (variant, index, callback) {
-        coreListener.eventDebugLog('Event Information Index:' + index + ' variant: ' + JSON.stringify(variant))
-
-        if (variant.dataType !== DataType.Null) {
-          setImmediate(function () {
-            eventInformation = coreListener.collectAlarmFields(eventFields[index], variant.dataType.key.toString(), variant.value)
-
-            if (variant.dataType === DataType.NodeId) {
-              node.getBrowseName(session, variant.value, function (err, browseName) {
-                if (err) {
-                  callback(err)
-                } else {
-                  eventInformation.browseName = browseName
-                  singleMsg.payload = eventInformation
-                  node.send(singleMsg)
-                  msg.payload.push(singleMsg)
-                  callback()
-                }
-              })
-            } else {
-              singleMsg.payload = eventInformation
-              node.send(singleMsg)
-              msg.payload.push(singleMsg)
-              callback()
-            }
-          })
-        } else {
-          callback()
-        }
-      }, function (err) {
-        coreListener.eventDebugLog('_callback')
-        callback(err, msg, rawMsg)
-      })
-    }
-
-    node.eventQueue = new Queue(function (task, callback) {
-      node.dumpQueueEvent(task.node, task.session, task.eventFields, task.eventFieldsResponse, callback)
-    })
-
-    node.dumpEvent = function (node, session, eventFields, eventFieldsResponse, callback) {
-      node.eventQueue.push({
-        node: node,
-        session: session,
-        eventFields: eventFields,
-        eventFieldsResponse: eventFieldsResponse
-      }, callback)
     }
 
     node.handleSessionError = function (err) {
