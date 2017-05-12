@@ -56,7 +56,8 @@
   "scripts": {
     "test": "standard --fix && mocha test/*",
     "build": "standard --fix && gulp clean && gulp publish",
-    "prepublish": "standard --fix && npm run build && npm test"
+    "prepublish": "standard --fix && npm run build && npm test",
+    "ci-publish": "ci-publish"
   },
   "files": [
     "opcuaIIoT"
@@ -64,6 +65,7 @@
   "devDependencies": {
     "babel-preset-es2015": "^6.24.1",
     "chai": "^3.5.0",
+    "ci-publish": "^1.3.0",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-config-standard-jsx": "^4.0.1",

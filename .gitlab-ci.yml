@@ -2,18 +2,20 @@ image: node:6
 
 before_script:
   - npm install
-
 stages:
   - test
-  - production
-
-test:
+  - deploy
+npm_test:
   stage: test
   script:
-    - npm run build
+    - npm build
     - npm test
-
-production:
-  stage: production
+release:
+  stage: deploy
   script:
-    - npm publish
+    - export NPM_TOKEN="097cdf5c-9d2b-4c55-99ba-5af0c5582d08"
+    - echo Running release
+    - npm run ci-publish || true
+
+
+
