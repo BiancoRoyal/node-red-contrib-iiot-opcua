@@ -374,7 +374,7 @@ module.exports = function (RED) {
         node: node,
         session: session,
         eventFields: eventFields,
-        eventFieldsResponse: eventFieldsResponse,
+        eventFieldsResponse: eventFieldsResponse
       }, callback)
     }
 
