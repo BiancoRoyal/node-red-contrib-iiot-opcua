@@ -87,10 +87,6 @@ module.exports = function (RED) {
         return
       }
 
-      if (!msg.payload.queueSize) {
-        msg.payload.queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
-      }
-
       let monitoredItem = monitoredItems.get(msg.topic)
 
       if (!monitoredItem) {
@@ -130,6 +126,10 @@ module.exports = function (RED) {
           }
 
           node.setNodeStatusTo('error')
+
+          if (err.message.includes('BadSession')) {
+            node.handleSessionError(err)
+          }
         })
 
         monitoredItem.on('terminated', function () {
@@ -151,10 +151,6 @@ module.exports = function (RED) {
       if (!monitoredItems) {
         coreListener.eventDebugLog('Monitored Item Set Not Valid')
         return
-      }
-
-      if (!msg.payload.queueSize) {
-        msg.payload.queueSize = coreListener.EVENT_DEFAULT_QUEUE_SIZE
       }
 
       let monitoredItem = monitoredItems.get(msg.topic)
@@ -200,6 +196,10 @@ module.exports = function (RED) {
           }
 
           node.setNodeStatusTo('error')
+
+          if (err.message.includes('BadSession')) {
+            node.handleSessionError(err)
+          }
         })
 
         monitoredItem.on('terminated', function () {

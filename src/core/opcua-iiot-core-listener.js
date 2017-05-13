@@ -21,7 +21,9 @@ de.biancoroyal.opcua.iiot.core.listener.client = de.biancoroyal.opcua.iiot.core.
 de.biancoroyal.opcua.iiot.core.listener.internalDebugLog = de.biancoroyal.opcua.iiot.core.listener.internalDebugLog || require('debug')('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog = de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog || require('debug')('opcuaIIoT:listener:subscribe') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.eventDebugLog = de.biancoroyal.opcua.iiot.core.listener.eventDebugLog || require('debug')('opcuaIIoT:listener:event') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
 /*
  Options defaults node-opcua
@@ -215,13 +217,13 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
   if (typeof msg.payload === 'number') {
     interval = parseInt(msg.payload)
   } else {
-    interval = 100
+    interval = this.SUBSCRIBE_DEFAULT_INTERVAL
   }
 
-  if (typeof msg.payload.queueSize === 'number') {
+  if (msg.payload.queueSize && typeof msg.payload.queueSize === 'number') {
     queueSize = parseInt(msg.payload.queueSize)
   } else {
-    queueSize = 1
+    queueSize = this.SUBSCRIBE_DEFAULT_QUEUE_SIZE
   }
 
   return subscription.monitor(
@@ -246,13 +248,13 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
   if (typeof msg.payload === 'number') {
     interval = parseInt(msg.payload)
   } else {
-    interval = 100
+    interval = this.EVENT_DEFAULT_INTERVAL
   }
 
   if (typeof msg.payload.queueSize === 'number') {
     queueSize = parseInt(msg.payload.queueSize)
   } else {
-    queueSize = 100000
+    queueSize = this.EVENT_DEFAULT_QUEUE_SIZE
   }
 
   return subscription.monitor(
