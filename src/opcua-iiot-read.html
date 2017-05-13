@@ -13,7 +13,8 @@
     color: '#ABCDEF',
     defaults: {
       attributeId: {value: 0, required: true, validate: RED.validators.number()},
-      maxAge: {value: 0, required: true, validate: RED.validators.number()},
+      maxAge: {value: 0, validate: RED.validators.number()},
+      depth: {value: 1, validate: RED.validators.number()},
       connector: {type: 'OPCUA-IIoT-Connector', required: true},
       name: {value: ''},
       showStatusActivities: {value: false},
@@ -28,6 +29,30 @@
     },
     labelStyle: function () {
       return this.name ? 'node_label_italic' : ''
+    },
+    oneditprepare: function () {
+      try {
+        let depthRow = $("#node-input-depth-row")
+
+        if (parseInt(this.attributeId) === 99) {
+          depthRow.show();
+        } else {
+          depthRow.hide();
+        }
+
+        let attributeIdCheckbox = $("#node-input-attributeId")
+
+        attributeIdCheckbox.change(function () {
+          if ($(this).val() === "99") {
+            depthRow.show()
+          } else {
+            depthRow.hide()
+          }
+        })
+      } catch
+        (err) {
+        this.error(err);
+      }
     }
   })
 </script>
@@ -48,11 +73,16 @@
             <option value="3">Browse-Name</option>
             <option value="4">Display-Name</option>
             <option value="13">Value</option>
+            <option value="99">Meta</option>
         </select>
     </div>
     <div class="form-row">
         <label for="node-input-maxAge"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.maxAge"></span></label>
         <input type="text" id="node-input-maxAge" placeholder="0">
+    </div>
+    <div class="form-row" id="node-input-depth-row">
+        <label for="node-input-depth"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.depth"></span></label>
+        <input type="text" id="node-input-depth" placeholder="0">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>

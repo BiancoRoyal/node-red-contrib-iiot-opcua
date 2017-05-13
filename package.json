@@ -1,6 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.1.0-iota",
+  "version": "0.1.0-kappa",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -34,18 +34,18 @@
   },
   "node-red": {
     "nodes": {
-      "OPCUA-IIoT-Inject": "opcuaIIoT/opcua-iiot-inject.js",
       "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",
-      "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
-      "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js",
-      "OPCUA-IIoT-Browser": "opcuaIIoT/opcua-iiot-browser.js",
-      "OPCUA-IIoT-Read": "opcuaIIoT/opcua-iiot-read.js",
-      "OPCUA-IIoT-Listener": "opcuaIIoT/opcua-iiot-listener.js",
-      "OPCUA-IIoT-Write": "opcuaIIoT/opcua-iiot-write.js",
+      "OPCUA-IIoT-Inject": "opcuaIIoT/opcua-iiot-inject.js",
       "OPCUA-IIoT-Node": "opcuaIIoT/opcua-iiot-node.js",
       "OPCUA-IIoT-Event": "opcuaIIoT/opcua-iiot-event.js",
+      "OPCUA-IIoT-Listener": "opcuaIIoT/opcua-iiot-listener.js",
+      "OPCUA-IIoT-Read": "opcuaIIoT/opcua-iiot-read.js",
+      "OPCUA-IIoT-Write": "opcuaIIoT/opcua-iiot-write.js",
       "OPCUA-IIoT-Response": "opcuaIIoT/opcua-iiot-response.js",
-      "OPCUA-IIoT-ASO": "opcuaIIoT/opcua-iiot-aso.js"
+      "OPCUA-IIoT-Browser": "opcuaIIoT/opcua-iiot-browser.js",
+      "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
+      "OPCUA-IIoT-ASO": "opcuaIIoT/opcua-iiot-aso.js",
+      "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js"
     }
   },
   "engines": {
@@ -78,6 +78,7 @@
     "gulp-htmlmin": "^3.0.0",
     "gulp-javascript-obfuscator": "^1.1.2",
     "gulp-jsdoc3": "^1.0.1",
+    "gulp-obfuscate": "^0.2.9",
     "gulp-uglify": "^2.1.2",
     "javascript-obfuscator": "^0.9.4",
     "jsdoc": "^3.4.3",

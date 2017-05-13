@@ -19,6 +19,8 @@ module.exports = function (RED) {
   function OPCUAIIoTResponse (config) {
     RED.nodes.createNode(this, config)
     this.name = config.name
+    this.showStatusActivities = config.showStatusActivities
+    this.showErrors = config.showErrors
 
     let node = this
 
@@ -26,19 +28,26 @@ module.exports = function (RED) {
       coreResponse.internalDebugLog(msg)
       coreResponse.internalDebugLog(JSON.stringify(msg))
 
-      if (msg.nodetype) {
-        switch (msg.nodetype) {
-          case 'read':
-            node.analyzeReadResults(msg)
-            break
+      try {
+        if (msg.nodetype) {
+          switch (msg.nodetype) {
+            case 'read':
+              node.analyzeReadResults(msg)
+              break
 
-          case 'write':
-            node.analyzeWriteResults(msg)
-            break
+            case 'write':
+              node.analyzeWriteResults(msg)
+              break
 
-          default:
-            node.analyzeResultListStatus(msg)
-            break
+            default:
+              node.analyzeResultListStatus(msg)
+              break
+          }
+        }
+      } catch (err) {
+        coreResponse.internalDebugLog(err)
+        if (node.showErrors) {
+          node.error(err, msg)
         }
       }
 

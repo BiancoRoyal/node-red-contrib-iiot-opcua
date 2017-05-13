@@ -12,8 +12,11 @@ const gulp = require('gulp')
 const htmlmin = require('gulp-htmlmin')
 const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
+const uglify = require('gulp-uglify')
+const babel = require('gulp-babel')
 const pump = require('pump')
-const javascriptObfuscator = require('gulp-javascript-obfuscator')
+// const obfuscate = require('gulp-obfuscate')
+// const javascriptObfuscator = require('gulp-javascript-obfuscator')
 
 gulp.task('default', function () {
   // place code for your default task here
@@ -71,11 +74,31 @@ gulp.task('opcua-iiot-web', function () {
     .pipe(gulp.dest('opcuaIIoT'))
 })
 
+/*
 gulp.task('opcua-iiot', function (cb) {
   pump([
-    gulp.src('src/**/*.js').pipe(javascriptObfuscator()),
+    gulp.src('src/!**!/!*.js').pipe(javascriptObfuscator()),
     gulp.dest('opcuaIIoT')
   ],
+    cb
+  )
+})
+*/
+
+// gulp.task('opcua-iiot', function (cb) {
+//   pump([gulp.src('src/**/*.js')
+//       .pipe(babel({presets: ['es2015']}))
+//       .pipe(obfuscate(/*{ replaceMethod: obfuscate.ZALGO} */)), gulp.dest('opcuaIIoT')],
+//     cb
+//   )
+// })
+
+gulp.task('opcua-iiot', function (cb) {
+  let options = {
+    preserveComments: 'license'
+  }
+  pump([
+    gulp.src('src/**/*.js').pipe(babel({presets: ['es2015']})).pipe(uglify(options)), gulp.dest('opcuaIIoT')],
     cb
   )
 })

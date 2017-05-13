@@ -5,7 +5,8 @@
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "attributeId": "Attribute Id",
-      "maxAge": "Max. Age"
+      "maxAge": "Max. Age",
+      "depth": "Depth"
     }
   }
 }

@@ -11,7 +11,9 @@
     category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
-      name: {value: ""}
+      name: {value: ""},
+      showStatusActivities: {value: false},
+      showErrors: {value: false}
     },
     inputs: 1,
     outputs: 1,
@@ -32,6 +34,17 @@
         <input type="text" id="node-input-name" placeholder="">
     </div>
     <!-- StatusCodes to add and remove to filter for in a second output -->
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+    </div>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Response">

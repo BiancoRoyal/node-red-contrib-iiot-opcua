@@ -14,7 +14,7 @@
       endpoint: {value: "", required: true},
       loginEnabled: {value: false},
       securityPolicy: {value: 'None', required: true},
-      securityMode: {vlaue: 'NONE', required: true},
+      securityMode: {value: 'NONE', required: true},
       name: {value: ""},
       showStatusActivities: {value: false},
       showErrors: {value: false}
@@ -50,10 +50,7 @@
         });
 
       } catch (err) {
-        console.log(err);
-      }
-      finally {
-        console.log("finally");
+        this.error(err);
       }
     }
   });
@@ -123,8 +120,10 @@
         <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
         <input type="checkbox" id="node-config-input-showErrors" style="max-width:30px">
     </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Connector">
     <h2>OPC UA IIoT Connector</h2>
+
 </script>

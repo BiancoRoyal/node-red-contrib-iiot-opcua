@@ -20,6 +20,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.attributeId = config.attributeId || 0
     this.maxAge = config.maxAge || 0
+    this.depth = config.depth || 1
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
@@ -137,6 +138,35 @@ module.exports = function (RED) {
               }).catch(function (err) {
                 node.verboseLog('itemsToRead: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
+              })
+              break
+            case 99:
+              itemsToRead.forEach(function (element, index, array) {
+                coreClient.readObject(session, element, {depth: node.depth}).then(function (meta) {
+                  node.setNodeStatusTo('active')
+                  coreClient.internalDebugLog('Read Meta Information ' + index + 1 + ' of ' + array.length)
+
+                  meta.payload.index = index + 1
+                  meta.payload.requested = array.length
+
+                  coreClient.internalDebugLog('Meta Payload ' + meta.payload)
+
+                  let message = {
+                    payload: meta.payload,
+                    nodesToRead: element,
+                    input: msg,
+                    resultsConverted: meta,
+                    results: meta,
+                    diagnostics: [],
+                    nodetype: 'read',
+                    readtype: 'Meta',
+                    attributeId: node.attributeId
+                  }
+                  node.send(message)
+                }).catch(function (err) {
+                  coreClient.internalDebugLog('Read Meta Information ' + element)
+                  node.handleReadError(err, msg)
+                })
               })
               break
             default:
