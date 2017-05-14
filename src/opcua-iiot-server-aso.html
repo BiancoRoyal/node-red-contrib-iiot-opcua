@@ -7,16 +7,18 @@
 -->
 
 <script type="text/javascript">
-  RED.nodes.registerType('OPCUA-IIoT-ASO', {
+  RED.nodes.registerType('OPCUA-IIoT-Server-ASO', {
     category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
       nodeId: {value: "", required: true},
+      browsename: {value: "", required: true},
+      displayname: {value: ""},
       objecttype: {value: "", required: true},
-      referencetype: {value: "", required: true},
-      referenceNodeId: {value: "", required: true},
-      datatype: {value: "", required: true},
+      datatype: {value: ""},
       value: {value: null},
+      referenceNodeId: {value: "", required: true},
+      referencetype: {value: ""},
       name: {value: ""}
     },
     inputs: 1,
@@ -24,18 +26,49 @@
     align: "right",
     icon: "opcuaiiot.png",
     label: function () {
-      return this.name || "ASO";
+      return this.name || "S-ASO";
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+      let node = this
+
+      let objectTypeCheckbox = $("#node-input-objecttype")
+      let dataTypeRow = $("#node-input-datatype-row")
+      let referenceTypeRow = $("#node-input-referencetype-row")
+
+      objectTypeCheckbox.change(function () {
+        if ($(this).val() !== '61') {
+          node.datatype.required = true
+          node.referencetype.required = true
+          dataTypeRow.show()
+          referenceTypeRow.show()
+        } else {
+          node.datatype.required = false
+          node.referencetype.required = false
+          dataTypeRow.hide()
+          referenceTypeRow.hide()
+        }
+      })
     }
   });
 </script>
 
-<script type="text/x-red" data-template-name="OPCUA-IIoT-ASO">
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Server-ASO">
     <div class="form-row">
         <label for="node-input-nodeId"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
         <input type="text" id="node-input-nodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
+    </div>
+    <div class="form-row">
+        <label for="node-input-browsename"><i class="icon-tag"></i>
+        <span data-i18n="opcua-iiot-contrib.label.browsename"></span></label>
+        <input type="text" id="node-input-browsename" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-displayname"><i class="icon-tag"></i>
+        <span data-i18n="opcua-iiot-contrib.label.displayname"></span></label>
+        <input type="text" id="node-input-displayname" placeholder="">
     </div>
     <div class="form-row">
         <!-- ObjectTypeIds, VariableTypeIds via REST -->
@@ -51,26 +84,7 @@
             <option value="63">BaseDataVariableType</option>
         </select>
     </div>
-    <div class="form-row">
-        <!-- ReferenceTypeIds via REST -->
-        <label for="node-input-referencetype"><i class="icon-tasks"></i>
-        <span data-i18n="opcua-iiot-contrib.label.referencetype"></span></label>
-        <select type="text" id="node-input-referencetype">
-            <option value="35">Organizes</option>
-            <option value="44">Aggregates</option>
-            <option value="47">HasComponent</option>
-            <option value="63">BaseDataVariableType</option>
-            <option value="69">DataTypeDescriptionType</option>
-            <option value="72">DataTypeDictionaryType</option>
-            <option value="63">BaseDataVariableType</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-referenceNodeId"><i class="icon-tasks"></i>
-        <span data-i18n="opcua-iiot-contrib.label.referenceNodeId"></span></label>
-        <input type="text" id="node-input-referenceNodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
-    </div>
-    <div class="form-row">
+    <div class="form-row" id="node-input-datatype-row">
         <!-- DataType_Schema via REST -->
         <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
         <select type="text" id="node-input-datatype">
@@ -104,12 +118,33 @@
         <label for="node-input-value"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.value"></span></label>
         <input type="text" id="node-input-value" placeholder="">
     </div>
+    <hr>
+    <div class="form-row">
+        <label for="node-input-referenceNodeId"><i class="icon-tasks"></i>
+        <span data-i18n="opcua-iiot-contrib.label.referenceNodeId"></span></label>
+        <input type="text" id="node-input-referenceNodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
+    </div>
+    <div class="form-row" id="node-input-referencetype-row">
+        <!-- ReferenceTypeIds via REST -->
+        <label for="node-input-referencetype"><i class="icon-tasks"></i>
+        <span data-i18n="opcua-iiot-contrib.label.referencetype"></span></label>
+        <select type="text" id="node-input-referencetype">
+            <option value="35">Organizes</option>
+            <option value="44">Aggregates</option>
+            <option value="47">HasComponent</option>
+            <option value="63">BaseDataVariableType</option>
+            <option value="69">DataTypeDescriptionType</option>
+            <option value="72">DataTypeDictionaryType</option>
+            <option value="63">BaseDataVariableType</option>
+        </select>
+    </div>
+    <hr>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="OPCUA-IIoT-ASO">
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Server-ASO">
     <h2>OPC UA IIoT Address Space Object</h2>
 </script>

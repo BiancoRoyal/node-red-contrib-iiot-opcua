@@ -25,7 +25,6 @@ module.exports = function (RED) {
     this.endpoint = config.endpoint
     this.loginEnabled = config.loginEnabled
     this.name = config.name
-    this.credentials = config.credentials
     this.securityPolicy = config.securityPolicy
     this.messageSecurityMode = config.securityMode
 
@@ -41,10 +40,15 @@ module.exports = function (RED) {
       securityMode: coreConnector.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreConnector.core.nodeOPCUA.MessageSecurityMode.NONE
     }
 
-    if (node.credentials && node.loginEnabled) {
-      node.userIdentity.userName = node.credentials.user
-      node.userIdentity.password = node.credentials.password
-      coreConnector.internalDebugLog('Connecting With Login Data On ' + node.endpoint)
+    if (node.loginEnabled) {
+      if (node.credentials) {
+        // client.createSession({userName: "JoeDoe", password:"secret"}, function ...
+        node.userIdentity.userName = node.credentials.user
+        node.userIdentity.password = node.credentials.password
+        coreConnector.internalDebugLog('Connecting With Login Data On ' + node.endpoint)
+      } else {
+        node.error(new Error('Login Enabled But No Credentials'))
+      }
     }
 
     node.connectOPCUAEndpoint = function () {
@@ -79,11 +83,12 @@ module.exports = function (RED) {
         function (resolve, reject) {
           coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (session) {
             coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
+
             session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 10, 's')
             session.startKeepAliveManager()
             session.on('error', node.handleError)
-            coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ' + node.endpoint)
 
+            coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ' + node.endpoint)
             coreConnector.internalDebugLog(' name..................... ', session.name)
             coreConnector.internalDebugLog(' sessionId................ ', session.sessionId)
             coreConnector.internalDebugLog(' authenticationToken...... ', session.authenticationToken)
@@ -95,7 +100,10 @@ module.exports = function (RED) {
             coreConnector.internalDebugLog(' lastResponseReceivedTime. ', new Date(session.lastResponseReceivedTime).toISOString(), now - session.lastResponseReceivedTime)
 
             resolve(session)
-          }).catch(reject)
+          }).catch(function (err) {
+            coreConnector.internalDebugLog('Session Start Error ' + err)
+            reject(err)
+          })
         })
     }
 
@@ -105,7 +113,10 @@ module.exports = function (RED) {
         coreConnector.closeSession(session).then(function (done) {
           coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
           done()
-        }).catch(done)
+        }).catch(function (err) {
+          coreConnector.internalDebugLog('Session Close Error ' + err)
+          done()
+        })
       } else {
         coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
         done()
@@ -135,5 +146,5 @@ module.exports = function (RED) {
     }
   })
 
-  // SecurityPolicy enum via REST
+// SecurityPolicy enum via REST
 }

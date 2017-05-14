@@ -27,6 +27,7 @@ module.exports = function (RED) {
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
+    node.reconnectTimeout = 1000
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -233,8 +234,11 @@ module.exports = function (RED) {
         node.error(err, {payload: 'Read Session Error'})
       }
 
+      coreClient.internalDebugLog('Reconnect in ' + node.reconnectTimeout + ' msec.')
       node.connector.closeSession(node.opcuaSession, function () {
-        node.startOPCUASession(node.opcuaClient)
+        setTimeout(function () {
+          node.startOPCUASession(node.opcuaClient)
+        }, node.reconnectTimeout)
       })
     }
 

@@ -19,6 +19,7 @@ module.exports = function (RED) {
   let os = require('os')
   let Map = require('collections/map')
   let xmlFiles = [path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.NodeSet2.xml')]
+  let LocalizedText = require('node-opcua/lib/datamodel/localized_text').LocalizedText
 
   function OPCUAIIoTServer (config) {
     let initialized = false
@@ -28,13 +29,22 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.port = config.port
     this.endpoint = config.endpoint
-    this.securityPolicy = config.securityPolicy
-    this.messageSecurityMode = config.securityMode
+    this.maxAllowedSessionNumber = parseInt(config.maxAllowedSessionNumber) || 10
+    this.maxConnectionsPerEndpoint = parseInt(config.maxConnectionsPerEndpoint) || 10
+    this.maxAllowedSubscriptionNumber = parseInt(config.maxAllowedSubscriptionNumber) || 50
+    this.alternateHostname = config.alternateHostname
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    // Security
+    this.securityPolicy = config.securityPolicy
+    this.messageSecurityMode = config.securityMode
+    this.allowAnonymous = config.allowAnonymous
+    // User Management
+    this.users = config.users
 
     let node = this
+    coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
 
     node.opcuaServerOptions = {
       securityPolicy: coreServer.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreServer.core.nodeOPCUA.SecurityPolicy.None,
@@ -75,13 +85,26 @@ module.exports = function (RED) {
             maxNodesPerBrowse: 2000
           }
         },
+        maxAllowedSessionNumber: node.maxAllowedSessionNumber,
+        maxConnectionsPerEndpoint: node.maxConnectionsPerEndpoint,
+        allowAnonymous: node.allowAnonymous,
         certificateFile: node.publicCertificate,
         privateKeyFile: node.privateCertificate,
         securityPolicy: node.opcuaServerOptions.securityPolicy,
         securityMode: node.opcuaServerOptions.securityMode,
-        hostname: os.hostname(),
+        alternateHostname: node.alternateHostname,
         userManager: {
-          isValidUser: node.isValidUser
+          isValidUser: function (userName, userPassword) {
+            coreServer.internalDebugLog('User Login Validation')
+
+            node.users.forEach(function (user, index, array) {
+              coreServer.internalDebugLog('Check ' + userName + '===' + user.name + ' ' + userPassword + '===' + user.password)
+              if (userName === user.name && userPassword === user.password) {
+                return true
+              }
+            })
+            return false
+          }
         }
       })
 
@@ -103,35 +126,30 @@ module.exports = function (RED) {
       }
     }
 
-    // TODO: User Management from Node
-    node.isValidUser = function (userName, userPassword) {
-      if (userName === 'bianco' && userPassword === 'royal') {
-        return true
-      }
-      if (userName === 'user' && userPassword === 'S3cr3t.OPCua') {
-        return true
-      }
-      return false
-    }
-
     function postInitialize () {
+      initialized = true
+
       if (server) {
         coreServer.constructAddressSpace(server)
 
-        server.start(function () {
-          server.endpoints[0].endpointDescriptions().forEach(function (endpoint) {
-            coreServer.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' +
-              endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
-          })
+        server.start(function (err) {
+          if (err) {
+            coreServer.internalDebugLog(err)
+          } else {
+            server.endpoints[0].endpointDescriptions().forEach(function (endpoint) {
+              coreServer.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' +
+                endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
+            })
 
-          let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
-          coreServer.internalDebugLog(' the primary server endpoint url is ' + endpointUrl)
+            let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
+            coreServer.internalDebugLog(' the primary server endpoint url is ' + endpointUrl)
+
+            setNodeStatusTo('active')
+            coreServer.internalDebugLog('Server Initialized')
+          }
         })
-        setNodeStatusTo('active')
-        initialized = true
-        coreServer.internalDebugLog('server initialized')
       } else {
-        coreServer.internalDebugLog('server was not initialized')
+        coreServer.internalDebugLog('Server Is Not Valid')
       }
     }
 
@@ -144,41 +162,53 @@ module.exports = function (RED) {
 
       addressSpaceMessages.clear()
 
-      let payload = msg.payload
+      switch (msg.nodetype) {
+        case 'ASO':
+          changeAddressSpace(msg)
+          break
 
-      if (containsMessageType(payload)) {
-        readMessage(payload)
-      }
-
-      if (msg && payload && containsOpcuaCommand(payload)) {
-        executeOpcuaCommand(msg)
+        case 'CMD':
+          executeOpcuaCommand(msg)
+          break
+        default:
+          node.error(new Error('Unknown Node Type ' + msg.nodetype), msg)
       }
 
       node.send([msg, {payload: addressSpaceMessages}])
     })
 
-    function containsMessageType (payload) {
-      return payload.hasOwnProperty('messageType')
-    }
-
-    function readMessage (payload) {
-      switch (payload.messageType) {
-        case 'Variable':
+    function changeAddressSpace (msg) {
+      switch (parseInt(msg.payload.objecttype)) {
+        case 61: // FolderType
+          addObjectToAddressSpace(msg, 'Folder')
           break
         default:
+          addObjectToAddressSpace(msg, 'Unknown Object Type')
           break
       }
     }
 
-    function containsOpcuaCommand (payload) {
-      return payload.hasOwnProperty('opcuaCommand')
+    function addObjectToAddressSpace (msg, humanReadableType) {
+      let rootFolder = server.engine.addressSpace.findNode(msg.payload.referenceNodeId)
+
+      if (rootFolder) {
+        server.engine.addressSpace.addObject({
+          organizedBy: rootFolder,
+          nodeId: msg.payload.nodeId,
+          browseName: msg.payload.browsename,
+          displayName: new LocalizedText({locale: null, text: msg.payload.displayname})
+        })
+        coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
+      } else {
+        node.error(new Error('Root Reference Not Found'), msg)
+      }
     }
 
     function executeOpcuaCommand (msg) {
       let addressSpace = server.engine.addressSpace
 
-      switch (msg.payload.opcuaCommand) {
-        case 'restartOPCUAServer':
+      switch (msg.payload.commandtype) {
+        case 'restart':
           restartServer()
           break
         case 'deleteNode':

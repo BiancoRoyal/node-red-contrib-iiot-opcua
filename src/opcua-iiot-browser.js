@@ -30,6 +30,7 @@ module.exports = function (RED) {
     node.browseTopic = coreBrowser.core.OBJECTS_ROOT
     node.opcuaClient = null
     node.opcuaSession = null
+    node.reconnectTimeout = 1000
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -184,8 +185,11 @@ module.exports = function (RED) {
         node.error(err, {payload: 'Browser Session Error'})
       }
 
+      coreBrowser.internalDebugLog('Reconnect in ' + node.reconnectTimeout + ' msec.')
       node.connector.closeSession(node.opcuaSession, function () {
-        node.startOPCUASession(node.opcuaClient)
+        setTimeout(function () {
+          node.startOPCUASession(node.opcuaClient)
+        }, node.reconnectTimeout)
       })
     }
 

@@ -8,7 +8,19 @@
       "stateLogEnabled": "Log State",
       "statusLog": "Log Status",
       "securityPolicy": "Security Policy",
-      "securityMode": "Security Mode"
+      "securityMode": "Security Mode",
+      "addButton": "Add",
+      "removeButton": "Remove",
+      "maxAllowedSessionNumber": "Max Sessions",
+      "maxConnectionsPerEndpoint": "Max Connections Per Endpoint",
+      "maxAllowedSubscriptionNumber": "Max Subscriptions",
+      "alternateHostname": "Alternate Hostname",
+      "allowAnonymous": "Allow Anonymous"
+    },
+    "tabs-label": {
+      "users": "Users",
+      "settings": "Settings",
+      "security": "Security"
     }
   }
 }

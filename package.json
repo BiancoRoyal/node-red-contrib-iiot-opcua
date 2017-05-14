@@ -1,6 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.1.0-lambda",
+  "version": "0.1.0-m",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -44,7 +44,8 @@
       "OPCUA-IIoT-Response": "opcuaIIoT/opcua-iiot-response.js",
       "OPCUA-IIoT-Browser": "opcuaIIoT/opcua-iiot-browser.js",
       "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
-      "OPCUA-IIoT-ASO": "opcuaIIoT/opcua-iiot-aso.js",
+      "OPCUA-IIoT-Server-ASO": "opcuaIIoT/opcua-iiot-server-aso.js",
+      "OPCUA-IIoT-Server-Command": "opcuaIIoT/opcua-iiot-server-cmd.js",
       "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js"
     }
   },

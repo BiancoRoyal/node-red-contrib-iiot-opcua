@@ -8,7 +8,9 @@
       "datatype": "Data Type",
       "value": "Value",
       "showActivities": "Show Activities",
-      "showErrors": "Show Errors"
+      "showErrors": "Show Errors",
+      "displayname": "Display Name",
+      "browsename": "Browse Name"
     }
   }
 }

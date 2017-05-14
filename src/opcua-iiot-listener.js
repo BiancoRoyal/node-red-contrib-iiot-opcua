@@ -27,6 +27,7 @@ module.exports = function (RED) {
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
+    node.reconnectTimeout = 1000
     let subscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
@@ -300,8 +301,11 @@ module.exports = function (RED) {
         node.error('Listener Session Error')
       }
 
+      coreListener.internalDebugLog('Reconnect in ' + node.reconnectTimeout + ' msec.')
       node.connector.closeSession(node.opcuaSession, function () {
-        node.startOPCUASession(node.opcuaClient)
+        setTimeout(function () {
+          node.startOPCUASession(node.opcuaClient)
+        }, node.reconnectTimeout)
       })
     }
 

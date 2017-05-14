@@ -13,6 +13,10 @@
       "user": "User",
       "password": "Password",
       "credentials": "Use Login"
+    },
+    "tabs-label": {
+      "settings": "Settings",
+      "security": "Security"
     }
   }
 }

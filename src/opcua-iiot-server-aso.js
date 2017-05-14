@@ -18,6 +18,11 @@ module.exports = function (RED) {
   function OPCUAIIoTASO (config) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
+    this.browsename = config.browsename
+    this.displayname = config.displayname
+    this.objecttype = config.objecttype
+    this.referencetype = config.referencetype
+    this.referenceNodeId = config.referenceNodeId
     this.datatype = config.datatype
     this.value = config.value
     this.name = config.name
@@ -25,20 +30,36 @@ module.exports = function (RED) {
     let node = this
 
     node.on('input', function (msg) {
-      msg.topic = node.nodeId
-      msg.datatype = node.datatype
-      msg.nodetype = 'node'
-
-      if (node.value) {
-        msg.payload = node.value
+      if (msg.nodetype === 'inject') {
+        node.nodeId = msg.topic || node.nodeId
+        node.datatype = msg.datatype || node.datatype
+        node.value = msg.payload || node.value
       }
 
-      core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-      node.send(msg)
+      msg = {payload: {}} // clean message
+      msg.topic = 'ServerAddressSpaceObject'
+      msg.nodetype = 'ASO'
+
+      if (node.nodeId.includes('i=') || node.nodeId.includes('s=') || node.nodeId.includes('b=')) {
+        msg.payload.nodeId = node.nodeId
+        msg.payload.browsename = node.browsename
+        msg.payload.displayname = node.displayname
+        msg.payload.objecttype = node.objecttype
+        msg.payload.datatype = node.datatype
+        msg.payload.value = node.value
+
+        msg.payload.referenceNodeId = node.referenceNodeId || core.nodeOPCUA.OBJECTS_ROOT
+        msg.payload.referencetype = node.referencetype || core.nodeOPCUA.ReferenceTypeIds.Organizes
+
+        core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
+        node.send(msg)
+      } else {
+        node.error(new Error('ASO NodeId Is Not Valid', msg))
+      }
     })
   }
 
-  RED.nodes.registerType('OPCUA-IIoT-ASO', OPCUAIIoTASO)
+  RED.nodes.registerType('OPCUA-IIoT-Server-ASO', OPCUAIIoTASO)
 
   // opcua_node_ids.js - node-opcua
 
