@@ -15,6 +15,7 @@
  */
 module.exports = function (RED) {
   let coreServer = require('./core/opcua-iiot-core-server')
+  let Table = require('easy-table')
   let path = require('path')
   let os = require('os')
   let Map = require('collections/map')
@@ -45,16 +46,16 @@ module.exports = function (RED) {
 
     let node = this
     coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
+    let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
+    let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
 
     node.opcuaServerOptions = {
       securityPolicy: coreServer.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreServer.core.nodeOPCUA.SecurityPolicy.None,
       securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
     }
 
-    node.publicCertificate = null
-    // path.join(__dirname, '../node_modules/node-opcua/certificates/server_cert_2048.pem')
-    node.privateCertificate = null
-    // path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
+    node.publicCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_selfsigned_cert_2048.pem')
+    node.privateCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
 
     setNodeStatusTo('waiting')
 
@@ -85,6 +86,14 @@ module.exports = function (RED) {
             maxNodesPerBrowse: 2000
           }
         },
+        serverInfo: {
+          applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), 'NodeRED-IIoT-Server'),
+          productUri: 'NodeRED-IIoT-Server',
+          applicationName: {text: 'NodeRED', locale: 'en'},
+          gatewayServerUri: null,
+          discoveryProfileUri: null,
+          discoveryUrls: []
+        },
         maxAllowedSessionNumber: node.maxAllowedSessionNumber,
         maxConnectionsPerEndpoint: node.maxConnectionsPerEndpoint,
         allowAnonymous: node.allowAnonymous,
@@ -105,7 +114,8 @@ module.exports = function (RED) {
             })
             return false
           }
-        }
+        },
+        isAuditing: false
       })
 
       server.initialize(postInitialize)
@@ -136,15 +146,52 @@ module.exports = function (RED) {
           if (err) {
             coreServer.internalDebugLog(err)
           } else {
-            server.endpoints[0].endpointDescriptions().forEach(function (endpoint) {
-              coreServer.internalDebugLog('Server endpointUrl: ' + endpoint.endpointUrl + ' securityMode: ' +
-                endpoint.securityMode.toString() + ' securityPolicyUri: ' + endpoint.securityPolicyUri.toString())
+            server.endpoints.forEach(function (endpoint) {
+              endpoint.endpointDescriptions().forEach(function (endpointDescription) {
+                coreServer.internalDebugLog('Server endpointUrl: ' +
+                  endpointDescription.endpointUrl + ' securityMode: ' +
+                  endpointDescription.securityMode.toString() +
+                  ' securityPolicyUri: ' + endpointDescription.securityPolicyUri.toString())
+              })
             })
 
             let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
-            coreServer.internalDebugLog(' the primary server endpoint url is ' + endpointUrl)
+            coreServer.internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
 
             setNodeStatusTo('active')
+
+            server.on('newChannel', function (channel) {
+              coreServer.internalDebugLog('Client connected with address = ' +
+                channel.remoteAddress + ' port = ' + channel.remotePort
+              )
+            })
+
+            server.on('closeChannel', function (channel) {
+              coreServer.internalDebugLog('Client disconnected with address = ' +
+                channel.remoteAddress + ' port = ' + channel.remotePort
+              )
+            })
+
+            server.on('create_session', function (session) {
+              let table = new Table()
+              table.cell(' SESSION CREATED', '')
+              table.cell('Client application URI', session.clientDescription.applicationUri)
+              table.cell('Client product URI', session.clientDescription.productUri)
+              table.cell('Client application name', session.clientDescription.applicationName.toString())
+              table.cell('Client application type', session.clientDescription.applicationType.toString())
+              table.cell('Session name', session.sessionName ? session.sessionName.toString() : '<null>')
+              table.cell('Session timeout', session.sessionTimeout)
+              table.cell('Session id', session.sessionId)
+              coreServer.internalDebugLog(table.toString().cyan)
+            })
+
+            server.on('session_closed', function (session, reason) {
+              let table = new Table()
+              table.cell('SESSION CLOSED', reason)
+              table.cell('Session name', session.sessionName ? session.sessionName.toString() : '<null>')
+              coreServer.internalDebugLog(table.toString().cyan)
+            })
+
             coreServer.internalDebugLog('Server Initialized')
           }
         })

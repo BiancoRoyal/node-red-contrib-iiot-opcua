@@ -37,6 +37,76 @@ de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
     }
   )
 }
+de.biancoroyal.opcua.iiot.core.connector.secureConnect = function (opcuaClient, options) {
+  return new Promise(
+    function (resolve, reject) {
+      opcuaClient.getEndpointsRequest(function (err, endpoints) {
+        if (err) {
+          reject(err)
+        } else {
+          let cryptoUtils = require('node-opcua/lib/misc/crypto_utils')
+          let Table = require('easy-table')
+          let fs = require('fs')
+          let path = require('path')
+          let table = new Table()
+
+          endpoints.forEach(function (endpoint, i) {
+            table.cell('endpoint', endpoint.endpointUrl + '')
+            table.cell('Application URI', endpoint.server.applicationUri)
+            table.cell('Product URI', endpoint.server.productUri)
+            table.cell('Application Name', endpoint.server.applicationName.text)
+            table.cell('Security Mode', endpoint.securityMode.toString())
+            table.cell('securityPolicyUri', endpoint.securityPolicyUri)
+            table.cell('Type', endpoint.server.applicationType.key)
+            table.cell('discoveryUrls', endpoint.server.discoveryUrls.join(' - '))
+
+            options.serverCertificate = endpoint.serverCertificate
+            options.defaultSecureTokenLifetime = 40000 // 40 sec.
+
+            let certificateFilename = path.join(__dirname, '../node_modules/node-opcua/certificates/PKI/server_certificate' + i + '.pem')
+            fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'))
+            table.newRow()
+          })
+          this.internalDebugLog(table.toString())
+
+          table = new Table()
+          endpoints.forEach(function (endpoint, i) {
+            this.internalDebugLog('Identify Token for : Security Mode=' +
+              endpoint.securityMode.toString() + ' Policy=' + endpoint.securityPolicyUri)
+
+            endpoint.userIdentityTokens.forEach(function (token) {
+              table.cell('policyId', token.policyId)
+              table.cell('tokenType', token.tokenType.toString())
+              table.cell('issuedTokenType', token.issuedTokenType)
+              table.cell('issuerEndpointUrl', token.issuerEndpointUrl)
+              table.cell('securityPolicyUri', token.securityPolicyUri)
+              table.newRow()
+            })
+            this.internalDebugLog(table.toString())
+            resolve()
+          })
+        }
+      })
+    })
+}
+
+de.biancoroyal.opcua.iiot.core.connector.disconnect = function (opcuaClient) {
+  return new Promise(
+    function (resolve, reject) {
+      if (opcuaClient) {
+        opcuaClient.disconnect(function (err) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      } else {
+        reject(new Error('OPC UA Client Is Not Valid'))
+      }
+    }
+  )
+}
 
 de.biancoroyal.opcua.iiot.core.connector.createSession = function (opcuaClient, userIdentity) {
   return new Promise(

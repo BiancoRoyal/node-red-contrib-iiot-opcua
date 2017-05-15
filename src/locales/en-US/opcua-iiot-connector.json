@@ -12,7 +12,8 @@
       "securityMode": "Security Mode",
       "user": "User",
       "password": "Password",
-      "credentials": "Use Login"
+      "credentials": "Use Login",
+      "keepSessionAlive": "Keep Session Alive"
     },
     "tabs-label": {
       "settings": "Settings",

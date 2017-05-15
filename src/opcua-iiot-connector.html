@@ -12,6 +12,7 @@
     category: 'config',
     defaults: {
       endpoint: {value: "", required: true},
+      keepSessionAlive: {value: true},
       loginEnabled: {value: false},
       securityPolicy: {value: 'None', required: true},
       securityMode: {value: 'NONE', required: true},
@@ -87,6 +88,11 @@
                 <label for="node-config-input-endpoint"><i class="fa fa-external-link"></i>
                 <span data-i18n="opcua-iiot-contrib.label.endpoint"></span></label>
                 <input type="text" id="node-config-input-endpoint">
+            </div>
+            <div class="form-row">
+                 <label for="node-config-input-keepSessionAlive"><i class="fa fa-heart-o"></i>
+                 <span data-i18n="opcua-iiot-contrib.label.keepSessionAlive"></span></label>
+                <input type="checkbox" id="node-config-input-keepSessionAlive">
             </div>
             <div class="form-row">
                 <label for="node-config-input-name"><i class="icon-tag"></i>

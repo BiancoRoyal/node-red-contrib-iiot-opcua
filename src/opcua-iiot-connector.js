@@ -15,6 +15,7 @@
  */
 module.exports = function (RED) {
   let coreConnector = require('./core/opcua-iiot-core-connector')
+
   // let OPCUADiscoveryServer = require('lib/server/opcua_discovery_server').OPCUADiscoveryServer
 
   function OPCUAIIoTConnectorConfiguration (config) {
@@ -23,6 +24,7 @@ module.exports = function (RED) {
 
     RED.nodes.createNode(this, config)
     this.endpoint = config.endpoint
+    this.keepSessionAlive = config.keepSessionAlive
     this.loginEnabled = config.loginEnabled
     this.name = config.name
     this.securityPolicy = config.securityPolicy
@@ -33,9 +35,16 @@ module.exports = function (RED) {
     node.userIdentity = {}
     node.opcuaClient = null
     node.discoveryServer = null
+    node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
 
     node.opcuaClientOptions = {
+      keepSessionAlive: node.keepSessionAlive,
+      connectionStrategy: {
+        maxRetry: 10,
+        initialDelay: 2000,
+        maxDelay: 10000
+      },
       securityPolicy: coreConnector.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreConnector.core.nodeOPCUA.SecurityPolicy.None,
       securityMode: coreConnector.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreConnector.core.nodeOPCUA.MessageSecurityMode.NONE
     }
@@ -51,28 +60,48 @@ module.exports = function (RED) {
       }
     }
 
+    // TODO: refactor code!
     node.connectOPCUAEndpoint = function () {
       coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
       node.opcuaClient = null
 
       coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
         coreConnector.internalDebugLog('Connected On ' + node.endpoint)
-        node.opcuaClient = opcuaClient
-        coreConnector.internalDebugLog('Emit Connected Event')
-        node.emit('connected', node.opcuaClient)
-      }).catch(node.handleError)
 
-      // TODO: use discovery to find other servers
-      /* node.discoveryServer = new OPCUADiscoveryServer()
-       node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
-       node.discoveryServer.start(function (err) {
-       if (err) {
-       coreConnector.internalDebugLog('Discovery Server Error ' + err)
-       } else {
-       coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
-       }
-       })
-       */
+        node.opcuaClient = opcuaClient
+        coreConnector.secureConnect(node.opcuaClient, node.opcuaClientOptions).then(function () {
+          coreConnector.disconnect(node.opcuaClient).then(function () {
+            // reconnect with the security options and servers certificate
+            node.opcuaClientOptions.serverCertificate = node.serverCertificate
+            node.opcuaClientOptions.defaultSecureTokenLifetime = 40000 // 40 sec.
+
+            coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
+              coreConnector.internalDebugLog('Certified Connected On ' + node.endpoint)
+              node.opcuaClient = opcuaClient
+              node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
+                if (err) {
+                  coreConnector.internalDebugLog(err)
+                } else {
+                  coreConnector.internalDebugLog('Emit Connected Event')
+                  node.emit('connected', node.opcuaClient)
+                }
+              })
+            }).catch(node.handleError)
+          }).catch(node.handleError)
+        }).catch(node.handleError)
+
+        // TODO: use discovery to find other servers
+        /* node.discoveryServer = new OPCUADiscoveryServer()
+         node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
+         node.discoveryServer.start(function (err) {
+         if (err) {
+         coreConnector.internalDebugLog('Discovery Server Error ' + err)
+         } else {
+         coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
+         }
+         })
+         */
+      }).catch(node.handleError)
     }
 
     node.startSession = function (timeoutSeconds, type) {
