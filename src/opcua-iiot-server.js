@@ -144,7 +144,7 @@ module.exports = function (RED) {
 
         server.start(function (err) {
           if (err) {
-            coreServer.internalDebugLog(err)
+            coreServer.internalDebugLog('Start Error ' + err)
           } else {
             server.endpoints.forEach(function (endpoint) {
               endpoint.endpointDescriptions().forEach(function (endpointDescription) {

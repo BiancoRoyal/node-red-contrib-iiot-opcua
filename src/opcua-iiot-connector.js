@@ -39,14 +39,12 @@ module.exports = function (RED) {
     node.discoveryServerEndpointUrl = null
 
     node.opcuaClientOptions = {
-      keepSessionAlive: node.keepSessionAlive,
+      keepSessionAlive: false,
       connectionStrategy: {
         maxRetry: 10,
         initialDelay: 2000,
         maxDelay: 10000
-      },
-      securityPolicy: coreConnector.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreConnector.core.nodeOPCUA.SecurityPolicy.None,
-      securityMode: coreConnector.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreConnector.core.nodeOPCUA.MessageSecurityMode.NONE
+      }
     }
 
     if (node.loginEnabled) {
@@ -62,22 +60,29 @@ module.exports = function (RED) {
 
     // TODO: refactor code!
     node.connectOPCUAEndpoint = function () {
-      coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
+      coreConnector.internalDebugLog('Connecting On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
       node.opcuaClient = null
 
       coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
-        coreConnector.internalDebugLog('Connected On ' + node.endpoint)
+        coreConnector.internalDebugLog('Connected On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
 
-        node.opcuaClient = opcuaClient
-        coreConnector.secureConnect(node.opcuaClient, node.opcuaClientOptions).then(function () {
-          coreConnector.disconnect(node.opcuaClient).then(function () {
-            // reconnect with the security options and servers certificate
-            node.opcuaClientOptions.serverCertificate = node.serverCertificate
-            node.opcuaClientOptions.defaultSecureTokenLifetime = 40000 // 40 sec.
+        coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (opcuaClient) {
+          coreConnector.internalDebugLog('Setup Certified Options For ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
+
+          node.opcuaClientOptions.securityPolicy = coreConnector.core.nodeOPCUA.SecurityPolicy.get(node.securityPolicy || 'None')
+          node.opcuaClientOptions.securityMode = coreConnector.core.nodeOPCUA.MessageSecurityMode.get(node.messageSecurityMode || 'NONE')
+          // node.opcuaClientOptions.keepSessionAlive = node.keepSessionAlive
+
+          coreConnector.disconnect(opcuaClient, node.opcuaClientOptions).then(function () {
+            coreConnector.internalDebugLog('Disconnected From ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
+
+            node.opcuaClient = null
 
             coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
-              coreConnector.internalDebugLog('Certified Connected On ' + node.endpoint)
+              coreConnector.internalDebugLog('Secured Connected On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
+
               node.opcuaClient = opcuaClient
+
               node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
                 if (err) {
                   coreConnector.internalDebugLog(err)
@@ -86,22 +91,30 @@ module.exports = function (RED) {
                   node.emit('connected', node.opcuaClient)
                 }
               })
-            }).catch(node.handleError)
-          }).catch(node.handleError)
-        }).catch(node.handleError)
+            }).catch(function (err) {
+              node.handleError(err)
+            })
+          }).catch(function (err) {
+            node.handleError(err)
+          })
+        }).catch(function (err) {
+          node.handleError(err)
+        })
+      }).catch(function (err) {
+        node.handleError(err)
+      })
 
-        // TODO: use discovery to find other servers
-        /* node.discoveryServer = new OPCUADiscoveryServer()
-         node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
-         node.discoveryServer.start(function (err) {
-         if (err) {
-         coreConnector.internalDebugLog('Discovery Server Error ' + err)
-         } else {
-         coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
-         }
-         })
-         */
-      }).catch(node.handleError)
+      // TODO: use discovery to find other servers
+      /* node.discoveryServer = new OPCUADiscoveryServer()
+       node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
+       node.discoveryServer.start(function (err) {
+       if (err) {
+       coreConnector.internalDebugLog('Discovery Server Error ' + err)
+       } else {
+       coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
+       }
+       })
+       */
     }
 
     node.startSession = function (timeoutSeconds, type) {
