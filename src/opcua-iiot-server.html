@@ -22,8 +22,6 @@
       name: {value: ''},
       showStatusActivities: {value: false},
       showErrors: {value: false},
-      securityPolicy: {value: 'None', required: true},
-      securityMode: {value: 'NONE', required: true},
       allowAnonymous: {value: true, required: true},
       users: { value: [] }
     },
@@ -244,33 +242,33 @@
         <div id="opcuaiiot-server-tab-security" style="display:none">
             <div class="form-row">
                 <!-- SecurityPolicy enum via REST -->
-                <label for="node-input-securityPolicy"><i class="fa fa-certificate"></i>
+                <label for="node-input-securityPolicy" style="min-width:140px"><i class="fa fa-certificate"></i>
                 <span data-i18n="opcua-iiot-contrib.label.securityPolicy"></span></label>
-                <select type="text" id="node-input-securityPolicy">
-                    <option value="None" selected>None</option>
-                    <option value="Basic128">Basic128</option>
-                    <option value="Basic128Rsa15">Basic128Rsa15</option>
-                    <option value="Basic192">Basic192</option>
-                    <option value="Basic192Rsa15">Basic192Rsa15</option>
-                    <option value="Basic256">Basic256</option>
-                    <option value="Basic256Rsa15">Basic256Rsa15</option>
-                    <option value="Basic256Sha256">Basic256Sha256</option>
-                </select>
+                <ul style="margin-left:80px">
+                    <li>None</li>
+                    <li>Basic128</li>
+                    <li>Basic128Rsa15</li>
+                    <li>Basic192</li>
+                    <li>Basic192Rsa15</li>
+                    <li>Basic256</li>
+                    <li>Basic256Rsa15</li>
+                    <li>Basic256Sha256</li>
+                </ul>
             </div>
             <div class="form-row">
                 <!-- MessageSecurityMode enum via REST -->
-                <label for="node-input-securityMode"><i class="fa fa-key"></i>
+                <label for="node-input-securityMode" style="min-width:140px"><i class="fa fa-key"></i>
                 <span data-i18n="opcua-iiot-contrib.label.securityMode"></span></label>
-                <select type="text" id="node-input-securityMode">
-                    <option value="NONE">None</option>
-                    <option value="SIGN">Sign</option>
-                    <option value="SIGNANDENCRYPT">Sign&Encrypt</option>
-                </select>
+                <ul style="margin-left:80px">
+                    <li>None</li>
+                    <li>Sign</li>
+                    <li>Sign&Encrypt</li>
+                </ul>
             </div>
             <div class="form-row">
-                 <label for="node-input-allowAnonymous"><i class="icon-lock"></i>
+                 <label for="node-input-allowAnonymous" style="min-width:140px"><i class="icon-lock"></i>
                  <span data-i18n="opcua-iiot-contrib.label.allowAnonymous"></span></label>
-                <input type="checkbox" id="node-input-allowAnonymous">
+                <input type="checkbox" id="node-input-allowAnonymous" style="max-width:35px">
             </div>
         </div>
         <div id="opcuaiiot-server-tab-users" style="display:none">

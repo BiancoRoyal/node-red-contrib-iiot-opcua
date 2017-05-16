@@ -15,7 +15,6 @@
  */
 module.exports = function (RED) {
   let coreConnector = require('./core/opcua-iiot-core-connector')
-
   // let OPCUADiscoveryServer = require('lib/server/opcua_discovery_server').OPCUADiscoveryServer
 
   function OPCUAIIoTConnectorConfiguration (config) {
@@ -32,14 +31,14 @@ module.exports = function (RED) {
 
     let node = this
     node.client = null
-    node.userIdentity = {}
+    node.userIdentity = null
     node.opcuaClient = null
     node.discoveryServer = null
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
 
     node.opcuaClientOptions = {
-      keepSessionAlive: false,
+      keepSessionAlive: true,
       connectionStrategy: {
         maxRetry: 10,
         initialDelay: 2000,
@@ -50,8 +49,10 @@ module.exports = function (RED) {
     if (node.loginEnabled) {
       if (node.credentials) {
         // client.createSession({userName: "JoeDoe", password:"secret"}, function ...
-        node.userIdentity.userName = node.credentials.user
-        node.userIdentity.password = node.credentials.password
+        node.userIdentity = {
+          userName: node.credentials.user,
+          password: node.credentials.password
+        }
         coreConnector.internalDebugLog('Connecting With Login Data On ' + node.endpoint)
       } else {
         node.error(new Error('Login Enabled But No Credentials'))
@@ -71,9 +72,9 @@ module.exports = function (RED) {
 
           node.opcuaClientOptions.securityPolicy = coreConnector.core.nodeOPCUA.SecurityPolicy.get(node.securityPolicy || 'None')
           node.opcuaClientOptions.securityMode = coreConnector.core.nodeOPCUA.MessageSecurityMode.get(node.messageSecurityMode || 'NONE')
-          // node.opcuaClientOptions.keepSessionAlive = node.keepSessionAlive
+          delete node.opcuaClientOptions.keepSessionAlive
 
-          coreConnector.disconnect(opcuaClient, node.opcuaClientOptions).then(function () {
+          coreConnector.disconnect(opcuaClient).then(function () {
             coreConnector.internalDebugLog('Disconnected From ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
 
             node.opcuaClient = null
@@ -85,7 +86,7 @@ module.exports = function (RED) {
 
               node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
                 if (err) {
-                  coreConnector.internalDebugLog(err)
+                  coreConnector.internalDebugLog('Get Endpoints Request Error' + err)
                 } else {
                   coreConnector.internalDebugLog('Emit Connected Event')
                   node.emit('connected', node.opcuaClient)
@@ -105,16 +106,38 @@ module.exports = function (RED) {
       })
 
       // TODO: use discovery to find other servers
-      /* node.discoveryServer = new OPCUADiscoveryServer()
-       node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
-       node.discoveryServer.start(function (err) {
-       if (err) {
-       coreConnector.internalDebugLog('Discovery Server Error ' + err)
-       } else {
-       coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
-       }
-       })
-       */
+      // node.discoveryServer = new OPCUADiscoveryServer()
+      // node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
+      // node.discoveryServer.start(function (err) {
+      //   if (err) {
+      //     coreConnector.internalDebugLog('Discovery Server Error ' + err)
+      //   } else {
+      //     coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
+      //   }
+      // })
+
+      let findServersRequest = require('node-opcua/lib/findservers').perform_findServersRequest
+      findServersRequest('opc.tcp://localhost:4840/UADiscovery', function (err, servers) {
+        if (err) {
+          coreConnector.internalDebugLog('Discovery Error ' + err)
+        } else {
+          servers.forEach(function (server) {
+            coreConnector.internalDebugLog('Discovery Server')
+            coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri.cyan.bold)
+            coreConnector.internalDebugLog('         productUri:' + server.productUri.cyan.bold)
+            coreConnector.internalDebugLog('    applicationName:' + server.applicationName.text.cyan.bold)
+            coreConnector.internalDebugLog('               type:' + server.applicationType.key.cyan.bold)
+            coreConnector.internalDebugLog('   gatewayServerUri:' + server.gatewayServerUri ? server.gatewayServerUri.cyan.bold : '')
+            coreConnector.internalDebugLog('discoveryProfileUri:' + server.discoveryProfileUri ? server.discoveryProfileUri.cyan.bold : '')
+            coreConnector.internalDebugLog('      discoveryUrls:')
+
+            server.discoveryUrls.forEach(function (discoveryUrl) {
+              coreConnector.internalDebugLog('                    ' + discoveryUrl.cyan.bold)
+            })
+            coreConnector.internalDebugLog('--------------------------------------')
+          })
+        }
+      })
     }
 
     node.startSession = function (timeoutSeconds, type) {
@@ -127,19 +150,19 @@ module.exports = function (RED) {
             coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
 
             session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 10, 's')
-            session.startKeepAliveManager()
+            // session.startKeepAliveManager()
             session.on('error', node.handleError)
 
-            coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ' + node.endpoint)
-            coreConnector.internalDebugLog(' name..................... ', session.name)
-            coreConnector.internalDebugLog(' sessionId................ ', session.sessionId)
-            coreConnector.internalDebugLog(' authenticationToken...... ', session.authenticationToken)
-            coreConnector.internalDebugLog(' timeout.................. ', session.timeout)
-            coreConnector.internalDebugLog(' serverNonce.............. ', session.serverNonce.toString('hex'))
-            coreConnector.internalDebugLog(' serverCertificate........ ', session.serverCertificate.toString('base64'))
-            coreConnector.internalDebugLog(' serverSignature.......... ', session.serverSignature)
-            coreConnector.internalDebugLog(' lastRequestSentTime...... ', new Date(session.lastRequestSentTime).toISOString(), now - session.lastRequestSentTime)
-            coreConnector.internalDebugLog(' lastResponseReceivedTime. ', new Date(session.lastResponseReceivedTime).toISOString(), now - session.lastResponseReceivedTime)
+            coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ', node.endpoint)
+            coreConnector.internalDebugLog('name :' + session.name)
+            coreConnector.internalDebugLog('sessionId :' + session.sessionId)
+            coreConnector.internalDebugLog('authenticationToken :' + session.authenticationToken)
+            coreConnector.internalDebugLog('timeout :' + session.timeout)
+            coreConnector.internalDebugLog('serverNonce :' + session.serverNonce.toString('hex'))
+            coreConnector.internalDebugLog('serverCertificate :' + session.serverCertificate.toString('base64'))
+            coreConnector.internalDebugLog('serverSignature :' + session.serverSignature)
+            coreConnector.internalDebugLog('lastRequestSentTime :' + new Date(session.lastRequestSentTime).toISOString() + ' ' + now - session.lastRequestSentTime)
+            coreConnector.internalDebugLog('lastResponseReceivedTime :' + new Date(session.lastResponseReceivedTime).toISOString() + ' ' + now - session.lastResponseReceivedTime)
 
             resolve(session)
           }).catch(function (err) {

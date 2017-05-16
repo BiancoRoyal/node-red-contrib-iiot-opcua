@@ -15,7 +15,6 @@
  */
 module.exports = function (RED) {
   let coreServer = require('./core/opcua-iiot-core-server')
-  let Table = require('easy-table')
   let path = require('path')
   let os = require('os')
   let Map = require('collections/map')
@@ -38,8 +37,6 @@ module.exports = function (RED) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     // Security
-    this.securityPolicy = config.securityPolicy
-    this.messageSecurityMode = config.securityMode
     this.allowAnonymous = config.allowAnonymous
     // User Management
     this.users = config.users
@@ -48,11 +45,6 @@ module.exports = function (RED) {
     coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
     let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
     let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
-
-    node.opcuaServerOptions = {
-      securityPolicy: coreServer.core.nodeOPCUA.SecurityPolicy[node.securityPolicy] || coreServer.core.nodeOPCUA.SecurityPolicy.None,
-      securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
-    }
 
     node.publicCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_selfsigned_cert_2048.pem')
     node.privateCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
@@ -99,21 +91,20 @@ module.exports = function (RED) {
         allowAnonymous: node.allowAnonymous,
         certificateFile: node.publicCertificate,
         privateKeyFile: node.privateCertificate,
-        securityPolicy: node.opcuaServerOptions.securityPolicy,
-        securityMode: node.opcuaServerOptions.securityMode,
+        securityPolicies: [coreServer.core.nodeOPCUA.SecurityPolicy.None,
+          coreServer.core.nodeOPCUA.SecurityPolicy.Basic128,
+          coreServer.core.nodeOPCUA.SecurityPolicy.Basic128Rsa15,
+          coreServer.core.nodeOPCUA.SecurityPolicy.Basic192,
+          coreServer.core.nodeOPCUA.SecurityPolicy.Basic192Rsa15,
+          coreServer.core.nodeOPCUA.SecurityPolicy.Basic256,
+          coreServer.core.nodeOPCUA.SecurityPolicy.Basic256Rsa15,
+          coreServer.core.nodeOPCUA.SecurityPolicy.Basic256Sha256],
+        securityModes: [coreServer.core.nodeOPCUA.MessageSecurityMode.NONE,
+          coreServer.core.nodeOPCUA.MessageSecurityMode.SIGN,
+          coreServer.core.nodeOPCUA.MessageSecurityMode.SIGNANDENCRYPT],
         alternateHostname: node.alternateHostname,
         userManager: {
-          isValidUser: function (userName, userPassword) {
-            coreServer.internalDebugLog('User Login Validation')
-
-            node.users.forEach(function (user, index, array) {
-              coreServer.internalDebugLog('Check ' + userName + '===' + user.name + ' ' + userPassword + '===' + user.password)
-              if (userName === user.name && userPassword === user.password) {
-                return true
-              }
-            })
-            return false
-          }
+          isValidUser: node.isValidServerUser
         },
         isAuditing: false
       })
@@ -134,6 +125,26 @@ module.exports = function (RED) {
           }
         })
       }
+
+      server.on('newChannel', function (channel) {
+        coreServer.internalDebugLog('Client connected with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
+      })
+
+      server.on('closeChannel', function (channel) {
+        coreServer.internalDebugLog('Client disconnected with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
+      })
+    }
+
+    node.isValidServerUser = function (userName, password) {
+      coreServer.internalDebugLog('Is Valid Server User?')
+
+      node.users.forEach(function (user, index, array) {
+        if (userName === user.name && password === user.password) {
+          coreServer.internalDebugLog('Valid Server User Found')
+          return true
+        }
+      })
+      return false
     }
 
     function postInitialize () {
@@ -173,23 +184,20 @@ module.exports = function (RED) {
             })
 
             server.on('create_session', function (session) {
-              let table = new Table()
-              table.cell(' SESSION CREATED', '')
-              table.cell('Client application URI', session.clientDescription.applicationUri)
-              table.cell('Client product URI', session.clientDescription.productUri)
-              table.cell('Client application name', session.clientDescription.applicationName.toString())
-              table.cell('Client application type', session.clientDescription.applicationType.toString())
-              table.cell('Session name', session.sessionName ? session.sessionName.toString() : '<null>')
-              table.cell('Session timeout', session.sessionTimeout)
-              table.cell('Session id', session.sessionId)
-              coreServer.internalDebugLog(table.toString().cyan)
+              coreServer.internalDebugLog(' SESSION CREATED')
+              coreServer.internalDebugLog('Client application URI:' + session.clientDescription.applicationUri)
+              coreServer.internalDebugLog('Client product URI:' + session.clientDescription.productUri)
+              coreServer.internalDebugLog('Client application name:' + session.clientDescription.applicationName.toString())
+              coreServer.internalDebugLog('Client application type:' + session.clientDescription.applicationType.toString())
+              coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
+              coreServer.internalDebugLog('Session timeout:' + session.sessionTimeout)
+              coreServer.internalDebugLog('Session id:' + session.sessionId)
             })
 
             server.on('session_closed', function (session, reason) {
-              let table = new Table()
-              table.cell('SESSION CLOSED', reason)
-              table.cell('Session name', session.sessionName ? session.sessionName.toString() : '<null>')
-              coreServer.internalDebugLog(table.toString().cyan)
+              coreServer.internalDebugLog('SESSION CLOSED')
+              coreServer.internalDebugLog('reason:' + reason)
+              coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
             })
 
             coreServer.internalDebugLog('Server Initialized')
