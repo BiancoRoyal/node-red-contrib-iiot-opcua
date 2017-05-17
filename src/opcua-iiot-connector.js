@@ -150,7 +150,9 @@ module.exports = function (RED) {
             coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
 
             session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 10, 's')
-            // session.startKeepAliveManager()
+            if (node.keepSessionAlive) {
+              session.startKeepAliveManager()
+            }
             session.on('error', node.handleError)
 
             coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ', node.endpoint)
