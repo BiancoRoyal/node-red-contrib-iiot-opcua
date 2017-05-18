@@ -38,6 +38,9 @@ module.exports = function (RED) {
     node.discoveryServerEndpointUrl = null
 
     node.opcuaClientOptions = {
+      securityPolicy: node.securityPolicy || 'None',
+      securityMode: node.messageSecurityMode || 'NONE',
+      defaultSecureTokenLifetime: 40000,
       keepSessionAlive: true,
       connectionStrategy: {
         maxRetry: 10,
@@ -69,9 +72,6 @@ module.exports = function (RED) {
 
         coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (opcuaClient) {
           coreConnector.internalDebugLog('Setup Certified Options For ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
-
-          node.opcuaClientOptions.securityPolicy = coreConnector.core.nodeOPCUA.SecurityPolicy.get(node.securityPolicy || 'None')
-          node.opcuaClientOptions.securityMode = coreConnector.core.nodeOPCUA.MessageSecurityMode.get(node.messageSecurityMode || 'NONE')
           delete node.opcuaClientOptions.keepSessionAlive
 
           coreConnector.disconnect(opcuaClient).then(function () {

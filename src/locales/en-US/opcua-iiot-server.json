@@ -15,7 +15,8 @@
       "maxConnectionsPerEndpoint": "Max Connections Per Endpoint",
       "maxAllowedSubscriptionNumber": "Max Subscriptions",
       "alternateHostname": "Alternate Hostname",
-      "allowAnonymous": "Allow Anonymous"
+      "allowAnonymous": "Allow Anonymous",
+      "isAuditing": "Auditing"
     },
     "tabs-label": {
       "users": "Users",

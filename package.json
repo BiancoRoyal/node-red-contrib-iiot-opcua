@@ -1,6 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.1.0-omicron",
+  "version": "0.1.0-pi",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -11,7 +11,7 @@
     "better-assert": "1.0.2",
     "collections": "5.0.6",
     "cron": "1.2.1",
-    "debug": "2.6.6",
+    "debug": "<2.7",
     "easy-table": "1.1.0",
     "node-opcua": "0.0.64",
     "treeify": "1.0.1"

@@ -23,6 +23,7 @@
       showStatusActivities: {value: false},
       showErrors: {value: false},
       allowAnonymous: {value: true, required: true},
+      isAuditing: {value: false},
       users: { value: [] }
     },
     inputs: 1,
@@ -227,6 +228,11 @@
                 <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" placeholder="">
             </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-isAuditing"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.isAuditing"></span></label>
+                <input type="checkbox" id="node-input-isAuditing" style="max-width:30px">
+            </div>
             <hr>
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
@@ -245,15 +251,16 @@
                 <label for="node-input-securityPolicy" style="min-width:140px"><i class="fa fa-certificate"></i>
                 <span data-i18n="opcua-iiot-contrib.label.securityPolicy"></span></label>
                 <ul style="margin-left:80px">
-                    <li>None</li>
+                    <li>None*</li>
                     <li>Basic128</li>
-                    <li>Basic128Rsa15</li>
+                    <li>Basic128Rsa15*</li>
                     <li>Basic192</li>
                     <li>Basic192Rsa15</li>
-                    <li>Basic256</li>
+                    <li>Basic256*</li>
                     <li>Basic256Rsa15</li>
                     <li>Basic256Sha256</li>
                 </ul>
+                <p>* supported by node-opcua for now</p>
             </div>
             <div class="form-row">
                 <!-- MessageSecurityMode enum via REST -->

@@ -18,7 +18,6 @@ module.exports = function (RED) {
   let path = require('path')
   let os = require('os')
   let Map = require('collections/map')
-  let xmlFiles = [path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.NodeSet2.xml')]
   let LocalizedText = require('node-opcua/lib/datamodel/localized_text').LocalizedText
 
   function OPCUAIIoTServer (config) {
@@ -40,14 +39,19 @@ module.exports = function (RED) {
     this.allowAnonymous = config.allowAnonymous
     // User Management
     this.users = config.users
+    // Audit
+    this.isAuditing = config.isAuditing
 
     let node = this
     coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
     let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
     let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
 
-    node.publicCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_selfsigned_cert_2048.pem')
-    node.privateCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
+    let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
+    let xmlFiles = [standardNodeSetFile, path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')]
+
+    node.publicCertificateFile = path.join(__dirname, '../node_modules/node-opcua/certificates/server_selfsigned_cert_2048.pem')
+    node.privateCertificateFile = path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
 
     setNodeStatusTo('waiting')
 
@@ -58,12 +62,26 @@ module.exports = function (RED) {
 
     coreServer.internalDebugLog('node set:' + xmlFiles.toString())
 
+    node.checkUser = function (userName, password) {
+      let isValid = false
+      coreServer.internalDebugLog('Is Valid Server User?')
+
+      node.users.forEach(function (user, index, array) {
+        if (userName === user.name && password === user.password) {
+          coreServer.internalDebugLog('Valid Server User Found')
+          isValid = true
+        }
+      })
+
+      return isValid
+    }
+
     function initNewServer () {
       initialized = false
 
       coreServer.name = 'NodeREDIIOTServer'
 
-      server = new coreServer.core.nodeOPCUA.OPCUAServer({
+      let serverOptions = {
         port: node.port,
         nodeset_filename: xmlFiles,
         resourcePath: node.endpoint || 'UA/NodeREDIIOTServer',
@@ -89,25 +107,17 @@ module.exports = function (RED) {
         maxAllowedSessionNumber: node.maxAllowedSessionNumber,
         maxConnectionsPerEndpoint: node.maxConnectionsPerEndpoint,
         allowAnonymous: node.allowAnonymous,
-        certificateFile: node.publicCertificate,
-        privateKeyFile: node.privateCertificate,
-        securityPolicies: [coreServer.core.nodeOPCUA.SecurityPolicy.None,
-          coreServer.core.nodeOPCUA.SecurityPolicy.Basic128,
-          coreServer.core.nodeOPCUA.SecurityPolicy.Basic128Rsa15,
-          coreServer.core.nodeOPCUA.SecurityPolicy.Basic192,
-          coreServer.core.nodeOPCUA.SecurityPolicy.Basic192Rsa15,
-          coreServer.core.nodeOPCUA.SecurityPolicy.Basic256,
-          coreServer.core.nodeOPCUA.SecurityPolicy.Basic256Rsa15,
-          coreServer.core.nodeOPCUA.SecurityPolicy.Basic256Sha256],
-        securityModes: [coreServer.core.nodeOPCUA.MessageSecurityMode.NONE,
-          coreServer.core.nodeOPCUA.MessageSecurityMode.SIGN,
-          coreServer.core.nodeOPCUA.MessageSecurityMode.SIGNANDENCRYPT],
+        certificateFile: node.publicCertificateFile,
+        privateKeyFile: node.privateCertificateFile,
         alternateHostname: node.alternateHostname,
         userManager: {
-          isValidUser: node.isValidServerUser
+          isValidUser: node.checkUser
         },
-        isAuditing: false
-      })
+        isAuditing: node.isAuditing
+      }
+
+      coreServer.internalDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+      server = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
 
       server.initialize(postInitialize)
 
@@ -127,24 +137,12 @@ module.exports = function (RED) {
       }
 
       server.on('newChannel', function (channel) {
-        coreServer.internalDebugLog('Client connected with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
+        coreServer.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
       })
 
       server.on('closeChannel', function (channel) {
-        coreServer.internalDebugLog('Client disconnected with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
+        coreServer.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
       })
-    }
-
-    node.isValidServerUser = function (userName, password) {
-      coreServer.internalDebugLog('Is Valid Server User?')
-
-      node.users.forEach(function (user, index, array) {
-        if (userName === user.name && password === user.password) {
-          coreServer.internalDebugLog('Valid Server User Found')
-          return true
-        }
-      })
-      return false
     }
 
     function postInitialize () {
@@ -322,13 +320,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Server', OPCUAIIoTServer)
-
-  RED.httpAdmin.get('/opcuaIIoT/server/specifications', RED.auth.needsPermission('opcuaIIoT.server.read'), function (req, res) {
-    xmlFiles.list(function (err, ports) {
-      if (err) {
-        console.log(err)
-      }
-      res.json(ports)
-    })
-  })
 }
