@@ -15,6 +15,7 @@
       nodeId: {value: "", required: true},
       datatype: {value: "", required: true},
       value: {value: null},
+      usingListener: {value: false},
       name: {value: ""}
     },
     inputs: 1,
@@ -72,6 +73,12 @@
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-usingListener"><i class="fa fa-assistive-listening-systems"></i>
+        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span></label>
+        <input type="checkbox" id="node-input-usingListener" style="max-width:30px">
     </div>
 </script>
 

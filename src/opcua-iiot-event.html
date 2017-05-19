@@ -15,6 +15,7 @@
       eventRoot: {value: '', required: true},
       eventType: {value: '', required: true},
       queueSize: {value: 1, required: true, validate: RED.validators.number()},
+      usingListener: {value: false},
       name: {value: ''}
     },
     inputs: 1,
@@ -34,7 +35,7 @@
     <div class="form-row">
         <label for="node-input-eventRoot"><i class="icon-tasks"></i>
         <span data-i18n="opcua-iiot-contrib.label.eventRoot"></span></label>
-        <input type="text" id="node-input-eventRoot" placeholder="i=2253">
+        <input type="text" id="node-input-eventRoot" placeholder="i=2253"> <!-- i=2253 is Server ns=0;i=2253 -->
     </div>
     <div class="form-row">
         <!-- ObjectTypeIds via REST with Filter *EventType -->
@@ -60,7 +61,12 @@
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
     </div>
-
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-usingListener"><i class="fa fa-assistive-listening-systems"></i>
+        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span></label>
+        <input type="checkbox" id="node-input-usingListener" style="max-width:30px">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Event">

@@ -21,23 +21,47 @@ module.exports = function (RED) {
     this.eventRoot = config.eventRoot
     this.eventType = config.eventType
     this.queueSize = config.queueSize
+    this.usingListener = config.usingListener
     this.name = config.name
 
     let node = this
+    node.subscribed = false
+
+    node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     node.on('input', function (msg) {
-      let eventFields = coreListener.getBasicEventFields()
+      node.subscribed = !node.subscribed
+
+      if (node.usingListener) {
+        if (node.subscribed) {
+          node.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
+        } else {
+          node.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})
+        }
+      } else {
+        node.status({fill: 'blue', shape: 'dot', text: 'injected'})
+      }
+
+      let eventFields
 
       switch (node.eventType) {
         case 'Condition':
-          eventFields = coreListener.getBasicEventFields()
+          eventFields = coreListener.getConditionEventFields()
           break
         default:
-          break
+          eventFields = coreListener.getBasicEventFields()
       }
+
       let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(eventFields)
 
       msg.topic = node.eventRoot
+
+      let interval = 1000
+
+      if (typeof msg.payload === 'number') {
+        interval = msg.payload * 1000 // msec.
+      }
+
       msg.nodetype = 'events'
 
       msg.payload = {
@@ -45,7 +69,8 @@ module.exports = function (RED) {
         eventType: node.eventType,
         queueSize: node.queueSize,
         eventFilter: eventFilter,
-        eventFields: eventFields
+        eventFields: eventFields,
+        interval: interval
       }
       node.send(msg)
     })

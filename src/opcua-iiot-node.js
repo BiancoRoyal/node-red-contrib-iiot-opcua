@@ -22,13 +22,28 @@ module.exports = function (RED) {
     this.datatype = config.datatype
     this.value = config.value
     this.name = config.name
+    this.usingListener = config.usingListener
 
     let node = this
+    node.subscribed = false
+
+    node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     node.on('input', function (msg) {
       msg.topic = node.nodeId
       msg.datatype = node.datatype
       msg.nodetype = 'node'
+      node.subscribed = !node.subscribed
+
+      if (node.usingListener) {
+        if (node.subscribed) {
+          node.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
+        } else {
+          node.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})
+        }
+      } else {
+        node.status({fill: 'blue', shape: 'dot', text: 'injected'})
+      }
 
       if (node.value) {
         msg.payload = node.value

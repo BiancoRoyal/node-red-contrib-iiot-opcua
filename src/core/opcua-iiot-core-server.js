@@ -70,6 +70,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
 
   addressSpace.addVariable({
     componentOf: vendorName,
+    nodeId: 'ns=4;i=16479',
     browseName: 'MyVariable1',
     dataType: 'Double',
     value: {
@@ -86,7 +87,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
 
   server.engine.addressSpace.addVariable({
     componentOf: vendorName,
-    nodeId: 'ns=1;b=1020FFAA',
+    nodeId: 'ns=4;b=1020FFAA',
     browseName: 'MyVariable2',
     dataType: 'Double',
     value: {
@@ -107,8 +108,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
 
   server.engine.addressSpace.addVariable({
     componentOf: vendorName,
-    nodeId: 'ns=1;s=TestReadWrite',
+    nodeId: 'ns=4;s=TestReadWrite',
     browseName: 'TestReadWrite',
+    displayName: 'Test Read and Write',
     dataType: 'Double',
     value: {
       get: function () {
@@ -128,6 +130,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     componentOf: vendorName,
     nodeId: 'ns=4;s=free_memory',
     browseName: 'FreeMemory',
+    displayName: 'Free Memory',
     dataType: coreServer.core.nodeOPCUA.DataType.Double,
 
     value: {
@@ -164,6 +167,113 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
       }
     }
   })
+
+  var externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
+    value: new coreServer.core.nodeOPCUA.Variant({dataType: coreServer.core.nodeOPCUA.DataType.Double, value: 10.0}),
+    sourceTimestamp: null,
+    sourcePicoseconds: 0
+  })
+
+  setInterval(function () {
+    externalValueWithSourceTimestamp.value.value = Math.random()
+    externalValueWithSourceTimestamp.sourceTimestamp = new Date()
+  }, 1000)
+
+  addressSpace.addVariable({
+    organizedBy: vendorName,
+    nodeId: 'ns=4;s=Pressure',
+    browseName: 'Pressure',
+    dataType: 'Double',
+    value: {
+      timestamped_get: function () {
+        return externalValueWithSourceTimestamp
+      }
+    }
+  })
+
+  addressSpace.addVariable({
+    organizedBy: vendorName,
+    nodeId: 'ns=4;s=Matrix',
+    browseName: 'Matrix',
+    dataType: 'Double',
+    valueRank: 2,
+    arrayDimensions: [3, 3],
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Matrix,
+          dimensions: [3, 3],
+          value: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        })
+      }
+    }
+  })
+
+  addressSpace.addVariable({
+    organizedBy: vendorName,
+    nodeId: 'ns=4;s=Position',
+    browseName: 'Position',
+    dataType: 'Double',
+    valueRank: 1,
+    arrayDimensions: null,
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
+          value: [1, 2, 3, 4]
+        })
+      }
+    }
+  })
+
+  addressSpace.addVariable({
+    organizedBy: vendorName,
+    nodeId: 'ns=4;s=PumpSpeed',
+    browseName: 'PumpSpeed',
+    displayName: 'Pump Speed',
+    dataType: 'Double',
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          value: 200 + 100 * Math.sin(Date.now() / 10000)
+        })
+      }
+    }
+  })
+
+  addressSpace.addVariable({
+    organizedBy: vendorName,
+    nodeId: 'ns=4;s=SomeDate',
+    browseName: 'SomeDate',
+    displayName: 'Some Date',
+    dataType: 'DateTime',
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.DateTime,
+          value: new Date(Date.UTC(2016, 9, 13, 8, 40, 0))
+        })
+      }
+    }
+  })
+
+  let fanSpeed = addressSpace.addVariable({
+    organizedBy: vendorName,
+    nodeId: 'ns=4;s=FanSpeed',
+    browseName: 'FanSpeed',
+    dataType: 'Double',
+    value: new coreServer.core.nodeOPCUA.Variant({dataType: coreServer.core.nodeOPCUA.DataType.Double, value: 1000.0})
+  })
+
+  setInterval(function () {
+    fanSpeed.setValueFromSource(new coreServer.core.nodeOPCUA.Variant({
+      dataType: coreServer.core.nodeOPCUA.DataType.Double,
+      value: 1000.0 + (Math.random() * 100 - 50)
+    }))
+  }, 10)
 
   let method = addressSpace.addMethod(
     vendorName, {
@@ -208,6 +318,36 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
       }]
     }
     callback(null, callMethodResult)
+  })
+
+  let analogItemNode = addressSpace.addAnalogDataItem({
+    organizedBy: vendorName,
+    nodeId: 'ns=1;s=TemperatureAnalogItem',
+    browseName: 'TemperatureAnalogItem',
+    definition: '(tempA -25) + tempB',
+    valuePrecision: 0.5,
+    engineeringUnitsRange: {low: 100, high: 200},
+    instrumentRange: {low: -100, high: +200},
+    engineeringUnits: coreServer.core.nodeOPCUA.standardUnits.degree_celsius,
+    dataType: 'Double',
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          value: Math.random() + 19.0
+        })
+      }
+    }
+  })
+
+  let view = addressSpace.addView({
+    organizedBy: addressSpace.rootFolder.views,
+    browseName: 'RoyalView'
+  })
+
+  view.addReference({
+    referenceType: 'Organizes',
+    nodeId: analogItemNode.nodeId
   })
 }
 

@@ -13,7 +13,7 @@
     color: '#ABCDEF',
     defaults: {
       attributeId: {value: 0, required: true, validate: RED.validators.number()},
-      maxAge: {value: 0, validate: RED.validators.number()},
+      maxAge: {value: 1, validate: RED.validators.number()},
       depth: {value: 1, validate: RED.validators.number()},
       connector: {type: 'OPCUA-IIoT-Connector', required: true},
       name: {value: ''},
@@ -78,11 +78,11 @@
     </div>
     <div class="form-row">
         <label for="node-input-maxAge"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.maxAge"></span></label>
-        <input type="text" id="node-input-maxAge" placeholder="0">
+        <input type="text" id="node-input-maxAge" placeholder="1">
     </div>
     <div class="form-row" id="node-input-depth-row">
         <label for="node-input-depth"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.depth"></span></label>
-        <input type="text" id="node-input-depth" placeholder="0">
+        <input type="text" id="node-input-depth" placeholder="1">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>

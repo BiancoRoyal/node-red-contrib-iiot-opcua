@@ -28,85 +28,81 @@ let assert = require('better-assert')
 function constructAlarmAddressSpaceDemo (test, addressSpace) {
   addressSpace.installAlarmsAndConditionsService()
 
-  let tank = addressSpace.addObject({
-    browseName: 'Tank',
-    description: 'The Object representing the Tank',
+  let tanks = addressSpace.addObject({
+    browseName: 'Tanks',
+    description: 'The Object representing some tanks',
     organizedBy: addressSpace.rootFolder.objects,
     notifierOf: addressSpace.rootFolder.objects.server
   })
 
-  let tankLevel = addressSpace.addVariable({
-    browseName: 'TankLevel',
-    description: 'Fill level in percentage (0% to 100%) of the water tank',
-    propertyOf: tank,
+  let oilTankLevel = addressSpace.addVariable({
+    browseName: 'OilTankLevel',
+    displayName: 'Oil Tank Level',
+    description: 'Fill level in percentage (0% to 100%) of the oil tank',
+    propertyOf: tanks,
     dataType: 'Double',
-    eventSourceOf: tank
+    eventSourceOf: tanks
   })
 
   // ---------------------------------------------------------------------------------
   // Let's create a exclusive Limit Alarm that automatically raise itself
   // when the tank level is out of limit
   // ---------------------------------------------------------------------------------
-
   let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')
   assert(exclusiveLimitAlarmType != null)
 
-  let tankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {
-    componentOf: tank,
-    conditionSource: tankLevel,
-    browseName: 'TankLevelCondition',
-    conditionName: 'Test2',
+  let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {
+    componentOf: tanks,
+    conditionSource: oilTankLevel,
+    browseName: 'OilTankLevelCondition',
+    displayName: 'Oil Tank Level Condition',
+    description: 'ExclusiveLimitAlarmType Condition',
+    conditionName: 'OilLevelCondition',
     optionals: [
       'ConfirmedState', 'Confirm' // confirm state and confirm Method
     ],
-    inputNode: tankLevel,   // the letiable that will be monitored for change
+    inputNode: oilTankLevel,   // the letiable that will be monitored for change
     highHighLimit: 0.9,
     highLimit: 0.8,
     lowLimit: 0.2
   })
 
-  let tankTripCondition = null
-  // to
-  // ---------------------------
-  // create a retain condition
-  // xx tankLevelCondition.currentBranch().setRetain(true);
-  // xx tankLevelCondition.raiseNewCondition({message: "Tank is almost 70% full", severity: 100, quality: StatusCodes.Good});
-
   // --------------------------------------------------------------
   // Let's create a second letiable with no Exclusive alarm
   // --------------------------------------------------------------
-  let tankLevel2 = addressSpace.addVariable({
-    browseName: 'tankLevel2',
-    description: 'Fill level in percentage (0% to 100%) of the water tank',
-    propertyOf: tank,
+  let gasTankLevel = addressSpace.addVariable({
+    browseName: 'GasTankLevel',
+    displayName: 'Gas Tank Level',
+    description: 'Fill level in percentage (0% to 100%) of the gas tank',
+    propertyOf: tanks,
     dataType: 'Double',
-    eventSourceOf: tank
+    eventSourceOf: tanks
   })
 
   let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')
   assert(nonExclusiveLimitAlarmType != null)
 
-  let tankLevelCondition2 = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {
-    componentOf: tank,
-    conditionSource: tankLevel2,
-    browseName: 'TankLevelCondition2',
-    conditionName: 'Test',
+  let gasTankLevelCondition = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {
+    componentOf: tanks,
+    conditionSource: gasTankLevel,
+    browseName: 'GasTankLevelCondition',
+    displayName: 'Gas Tank Level Condition',
+    description: 'NonExclusiveLimitAlarmType Condition',
+    conditionName: 'GasLevelCondition',
     optionals: [
       'ConfirmedState', 'Confirm' // confirm state and confirm Method
     ],
-    inputNode: tankLevel2,   // the letiable that will be monitored for change
+    inputNode: gasTankLevel,   // the letiable that will be monitored for change
     highHighLimit: 0.9,
     highLimit: 0.8,
     lowLimit: 0.2
   })
 
-  test.tankLevel = tankLevel
-  test.tankLevelCondition = tankLevelCondition
+  test.tankLevel = oilTankLevel
+  test.tankLevelCondition = oilTankLevelCondition
 
-  test.tankLevel2 = tankLevel2
-  test.tankLevelCondition2 = tankLevelCondition2
-
-  test.tankTripCondition = tankTripCondition
+  test.tankLevel2 = gasTankLevel
+  test.tankLevelCondition2 = gasTankLevelCondition
 }
 
 exports.constructAlarmAddressSpaceDemo = constructAlarmAddressSpaceDemo

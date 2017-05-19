@@ -4,6 +4,7 @@
       "eventRoot": "Root Id",
       "eventType": "Event Type",
       "queueSize": "Queue Size",
+      "usingListener": "Listener",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors"
     }

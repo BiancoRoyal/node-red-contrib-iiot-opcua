@@ -79,14 +79,14 @@ module.exports = function (RED) {
     function initNewServer () {
       initialized = false
 
-      coreServer.name = 'NodeREDIIOTServer'
+      coreServer.name = 'NodeREDIIoTServer'
 
       let serverOptions = {
         port: node.port,
         nodeset_filename: xmlFiles,
-        resourcePath: node.endpoint || 'UA/NodeREDIIOTServer',
+        resourcePath: node.endpoint || 'UA/NodeREDIIoTServer',
         buildInfo: {
-          productName: node.name.concat(' IIoT Server'),
+          productName: node.name || 'NodeOPCUA IIoT Server',
           buildNumber: '160417',
           buildDate: new Date(2017, 4, 16)
         },
@@ -109,7 +109,7 @@ module.exports = function (RED) {
         allowAnonymous: node.allowAnonymous,
         certificateFile: node.publicCertificateFile,
         privateKeyFile: node.privateCertificateFile,
-        alternateHostname: node.alternateHostname,
+        alternateHostname: node.alternateHostname || '',
         userManager: {
           isValidUser: node.checkUser
         },
@@ -121,20 +121,7 @@ module.exports = function (RED) {
 
       server.initialize(postInitialize)
 
-      let hostname = os.hostname()
-
-      if (hostname) {
-        let discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
-        coreServer.internalDebugLog('registering server to :' + discoveryEndpointUrl)
-
-        server.registerServer(discoveryEndpointUrl, function (err) {
-          if (err) {
-            coreServer.internalDebugLog('Register Server Error' + err)
-          } else {
-            coreServer.internalDebugLog('Discovery Setup Done')
-          }
-        })
-      }
+      node.registerDiscovery()
 
       server.on('newChannel', function (channel) {
         coreServer.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
@@ -168,6 +155,8 @@ module.exports = function (RED) {
             coreServer.internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
 
             setNodeStatusTo('active')
+
+            coreServer.internalDebugLog(JSON.stringify(server.serverInfo))
 
             server.on('newChannel', function (channel) {
               coreServer.internalDebugLog('Client connected with address = ' +
@@ -203,6 +192,34 @@ module.exports = function (RED) {
         })
       } else {
         coreServer.internalDebugLog('Server Is Not Valid')
+      }
+    }
+
+    node.registerDiscovery = function () {
+      let hostname = os.hostname()
+
+      if (hostname) {
+        let discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
+        coreServer.internalDebugLog('registering server to ' + discoveryEndpointUrl)
+
+        server.registerServer(discoveryEndpointUrl, function (err) {
+          if (err) {
+            coreServer.internalDebugLog('Register Server Error' + err)
+          } else {
+            coreServer.internalDebugLog('Discovery Setup Done')
+          }
+        })
+
+        discoveryEndpointUrl = 'opc.tcp://localhost:4840/UADiscovery'
+        coreServer.internalDebugLog('registering server to ' + discoveryEndpointUrl)
+
+        server.registerServer(discoveryEndpointUrl, function (err) {
+          if (err) {
+            coreServer.internalDebugLog('Register Server Error' + err)
+          } else {
+            coreServer.internalDebugLog('Discovery Setup Done')
+          }
+        })
       }
     }
 

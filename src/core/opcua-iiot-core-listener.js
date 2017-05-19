@@ -22,25 +22,16 @@ de.biancoroyal.opcua.iiot.core.listener.internalDebugLog = de.biancoroyal.opcua.
 de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog = de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog || require('debug')('opcuaIIoT:listener:subscribe') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.eventDebugLog = de.biancoroyal.opcua.iiot.core.listener.eventDebugLog || require('debug')('opcuaIIoT:listener:event') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.MAX_LISTENER_INTERVAL = 3600000 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
-/*
- Options defaults node-opcua
-
- options.requestedPublishingInterval = options.requestedPublishingInterval || 100;
- options.requestedLifetimeCount      = options.requestedLifetimeCount || 60;
- options.requestedMaxKeepAliveCount  = options.requestedMaxKeepAliveCount || 2;
- options.maxNotificationsPerPublish  = options.maxNotificationsPerPublish || 2;
- options.publishingEnabled           = options.publishingEnabled ? true : false;
- options.priority                    = options.priority || 1;
- */
 
 de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = function (timeMilliseconds) {
   return {
     requestedPublishingInterval: timeMilliseconds || 100,
-    requestedLifetimeCount: 120,
-    requestedMaxKeepAliveCount: 3,
+    requestedLifetimeCount: 60,
+    requestedMaxKeepAliveCount: 10,
     maxNotificationsPerPublish: 4,
     publishingEnabled: true,
     priority: 1
@@ -50,8 +41,8 @@ de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = functio
 de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (timeMilliseconds) {
   return {
     requestedPublishingInterval: timeMilliseconds || 100,
-    requestedLifetimeCount: 30,
-    requestedMaxKeepAliveCount: 3,
+    requestedLifetimeCount: 1000,
+    requestedMaxKeepAliveCount: 12,
     maxNotificationsPerPublish: 10,
     publishingEnabled: true,
     priority: 10
@@ -173,7 +164,6 @@ de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
     'SourceNode',
     'BranchId',
     'EventType',
-    'SourceName',
     'ReceiveTime',
     'Severity',
     'Message',
@@ -201,6 +191,22 @@ de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
   ]
 }
 
+de.biancoroyal.opcua.iiot.core.listener.getConditionEventFields = function () {
+  return [
+    'ConditionName',
+    'ConditionType',
+    'ConditionClassId',
+    'ConditionClassName',
+    'ConditionVariableType',
+    'Message',
+    'SourceName',
+    'SourceNode',
+    'BranchId',
+    'EventType',
+    'ReceiveTime'
+  ]
+}
+
 de.biancoroyal.opcua.iiot.core.listener.MonitoredItemSet = function () {
   let Set = require('collections/set')
   return new Set(null, function (a, b) {
@@ -214,8 +220,8 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
   let interval
   let queueSize
 
-  if (typeof msg.payload === 'number') {
-    interval = parseInt(msg.payload)
+  if (typeof msg.payload.interval === 'number' && msg.payload.interval < this.MAX_LISTENER_INTERVAL) {
+    interval = parseInt(msg.payload.interval)
   } else {
     interval = this.SUBSCRIBE_DEFAULT_INTERVAL
   }
@@ -245,8 +251,8 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
   let interval
   let queueSize
 
-  if (typeof msg.payload === 'number') {
-    interval = parseInt(msg.payload)
+  if (typeof msg.payload.interval === 'number' && msg.payload.interval < this.MAX_LISTENER_INTERVAL) {
+    interval = parseInt(msg.payload.interval)
   } else {
     interval = this.EVENT_DEFAULT_INTERVAL
   }
