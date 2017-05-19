@@ -3,9 +3,19 @@
 As in Node-RED we have some guidelines for the OPC UA IIoT contribution package.
 We welcome contributions, but request you follow these guidelines.
 
+ - [Coding rules](#coding-rules)
  - [Raising issues](#raising-issues)
  - [Feature requests](#feature-requests)
  - [Pull-Requests](#pull-requests)
+
+## Coding rules
+
+1. Code for one another, and use tools to perform mechanical optimizations.
+2. Keep it simple; compactness != succinctness.
+3. Just because you can doesn’t mean you should.
+4. Utilize familiar paradigms and patterns.
+5. Consistency is king.
+6. Lay good foundations. Be mindful of evolutionary complexity.
 
 ## Raising issues
 
