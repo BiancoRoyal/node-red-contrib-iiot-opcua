@@ -1,104 +1,133 @@
 [
   {
-    "id": "ef98d8e1.2acef8",
+    "id": "17f29557.91811b",
     "type": "OPCUA-IIoT-Write",
-    "z": "85fe3dba.c9555",
-    "connector": "a9f2b342.7fec4",
+    "z": "e1aa872f.8c2da8",
+    "connector": "ad67d93b.313ac8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
-    "x": 430,
-    "y": 320,
+    "x": 470,
+    "y": 740,
     "wires": [
       [
-        "e162044e.e5e3e8",
-        "d2faafe4.a1a4b",
-        "c97d750d.1fb828"
+        "fadbd756.c69778",
+        "d674077e.d67238",
+        "ca8abbe6.6d98b8",
+        "ac2e529.4770cb"
       ]
     ]
   },
   {
-    "id": "53290e33.5827b",
+    "id": "c596f886.2f83c8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "85fe3dba.c9555",
-    "payload": "2",
+    "z": "e1aa872f.8c2da8",
+    "payload": "",
     "payloadType": "num",
-    "topic": "ns=1;s=TestReadWrite",
+    "topic": "ns=4;s=TestReadWrite",
     "datatype": "Double",
-    "repeat": "1",
+    "repeat": "0.5",
     "crontab": "",
     "once": false,
     "name": "TestReadWrite",
     "x": 160,
-    "y": 320,
+    "y": 740,
     "wires": [
       [
-        "f715a4dc.b24068"
+        "5a2a99cf.7f47c8"
       ]
     ]
   },
   {
-    "id": "e162044e.e5e3e8",
-    "type": "OPCUA-IIoT-Response",
-    "z": "85fe3dba.c9555",
-    "name": "",
-    "showStatusActivities": false,
-    "showErrors": false,
-    "x": 600,
-    "y": 340,
-    "wires": [
-      []
-    ]
-  },
-  {
-    "id": "d2faafe4.a1a4b",
-    "type": "debug",
-    "z": "85fe3dba.c9555",
-    "name": "",
-    "active": false,
-    "console": "false",
-    "complete": "true",
-    "x": 590,
-    "y": 300,
-    "wires": []
-  },
-  {
-    "id": "c97d750d.1fb828",
-    "type": "debug",
-    "z": "85fe3dba.c9555",
-    "name": "",
-    "active": true,
-    "console": "false",
-    "complete": "false",
-    "x": 610,
-    "y": 260,
-    "wires": []
-  },
-  {
-    "id": "f715a4dc.b24068",
+    "id": "5a2a99cf.7f47c8",
     "type": "data-generator",
-    "z": "85fe3dba.c9555",
+    "z": "e1aa872f.8c2da8",
     "name": "dGen",
     "field": "payload",
     "fieldType": "msg",
     "syntax": "json",
     "template": "{{int 1 65000}}",
-    "x": 310,
-    "y": 320,
+    "x": 330,
+    "y": 740,
     "wires": [
       [
-        "ef98d8e1.2acef8"
+        "17f29557.91811b"
       ]
     ]
   },
   {
-    "id": "a9f2b342.7fec4",
+    "id": "68b7a01c.a0028",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "false",
+    "x": 830,
+    "y": 740,
+    "wires": []
+  },
+  {
+    "id": "fadbd756.c69778",
+    "type": "function",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "func": "msg.payload = msg.payload[0].value\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 630,
+    "y": 740,
+    "wires": [
+      [
+        "68b7a01c.a0028"
+      ]
+    ]
+  },
+  {
+    "id": "d674077e.d67238",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "diagnostics",
+    "x": 660,
+    "y": 780,
+    "wires": []
+  },
+  {
+    "id": "ca8abbe6.6d98b8",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "payload",
+    "x": 650,
+    "y": 820,
+    "wires": []
+  },
+  {
+    "id": "ac2e529.4770cb",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "true",
+    "x": 630,
+    "y": 860,
+    "wires": []
+  },
+  {
+    "id": "ad67d93b.313ac8",
     "type": "OPCUA-IIoT-Connector",
-    "z": "85fe3dba.c9555",
-    "endpoint": "opc.tcp://localhost:55388/",
+    "z": "",
+    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIoTServer",
+    "keepSessionAlive": true,
     "loginEnabled": true,
-    "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityPolicy": "Basic256",
+    "securityMode": "SIGNANDENCRYPT",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false

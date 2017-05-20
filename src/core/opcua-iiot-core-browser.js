@@ -43,7 +43,7 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
         if (err) {
           reject(err, diagnostics)
         } else {
-          resolve(browseResult, diagnostics)
+          resolve({ browseResult: browseResult, diagnostics: diagnostics })
         }
       })
     }

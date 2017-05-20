@@ -1,0 +1,137 @@
+[
+  {
+    "id": "37bbb23e.0cec3e",
+    "type": "OPCUA-IIoT-Listener",
+    "z": "e1aa872f.8c2da8",
+    "connector": "ad67d93b.313ac8",
+    "action": "events",
+    "queueSize": "100",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "x": 440,
+    "y": 320,
+    "wires": [
+      [
+        "cea9aca.0a3ef5",
+        "a20daceb.3127e"
+      ],
+      [
+        "6e0f8f67.71c5"
+      ]
+    ]
+  },
+  {
+    "id": "cf6e7c1.298628",
+    "type": "inject",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "topic": "",
+    "payload": "0.2",
+    "payloadType": "num",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 150,
+    "y": 320,
+    "wires": [
+      [
+        "65aecf7c.ea77a"
+      ]
+    ]
+  },
+  {
+    "id": "cea9aca.0a3ef5",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "false",
+    "x": 630,
+    "y": 320,
+    "wires": []
+  },
+  {
+    "id": "a20daceb.3127e",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 610,
+    "y": 280,
+    "wires": []
+  },
+  {
+    "id": "6e0f8f67.71c5",
+    "type": "OPCUA-IIoT-Response",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "x": 620,
+    "y": 360,
+    "wires": [
+      [
+        "a6ca9b3a.f91378",
+        "9be7e817.459898"
+      ]
+    ]
+  },
+  {
+    "id": "a6ca9b3a.f91378",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 780,
+    "y": 360,
+    "wires": []
+  },
+  {
+    "id": "9be7e817.459898",
+    "type": "debug",
+    "z": "e1aa872f.8c2da8",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "false",
+    "x": 800,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "65aecf7c.ea77a",
+    "type": "OPCUA-IIoT-Event",
+    "z": "e1aa872f.8c2da8",
+    "eventRoot": "i=2253",
+    "eventType": "i=2041",
+    "queueSize": "1000",
+    "usingListener": true,
+    "name": "",
+    "x": 290,
+    "y": 320,
+    "wires": [
+      [
+        "37bbb23e.0cec3e"
+      ]
+    ]
+  },
+  {
+    "id": "ad67d93b.313ac8",
+    "type": "OPCUA-IIoT-Connector",
+    "z": "",
+    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIoTServer",
+    "keepSessionAlive": true,
+    "loginEnabled": true,
+    "securityPolicy": "Basic256",
+    "securityMode": "SIGNANDENCRYPT",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false
+  }
+]

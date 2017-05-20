@@ -61,33 +61,34 @@ module.exports = function (RED) {
         } else {
           let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
 
-          coreClient.write(session, nodesToWrite).then(function (resultsConverted, results, diagnostics) {
+          coreClient.write(session, nodesToWrite).then(function (writeResult) {
             node.setNodeStatusTo('active')
 
-            if (results) {
-              results.forEach(function (result) {
-                node.verboseLog('write result: ' + JSON.stringify(result))
+            if (writeResult.results) {
+              writeResult.results.forEach(function (result) {
+                coreClient.writeDebugLog('Write Result: ' + JSON.stringify(result))
               })
             }
 
-            if (diagnostics) {
-              diagnostics.forEach(function (diagnostic) {
-                node.verboseLog('write diagnostic: ' + JSON.stringify(diagnostic))
+            if (writeResult.diagnostics) {
+              writeResult.diagnostics.forEach(function (diagnostic) {
+                coreClient.writeDebugLog('Write Diagnostic: ' + JSON.stringify(diagnostic))
               })
             }
 
             let message = {
-              payload: resultsConverted,
-              nodesToWrite: nodesToWrite,
+              payload: writeResult.resultsConverted,
+              nodesToWrite: JSON.stringify(nodesToWrite),
               input: msg,
-              resultsConverted: resultsConverted,
-              results: results,
-              diagnostics: diagnostics,
+              resultsConverted: writeResult.resultsConverted,
+              /* results: writeResult.results, */
+              diagnostics: writeResult.diagnostics,
               nodetype: 'write'
             }
-
+            coreClient.writeDebugLog('Write Send Message: ' + JSON.stringify(message))
             node.send(message)
           }).catch(function (err) {
+            coreClient.writeDebugLog(err)
             node.handleWriteError(err, msg)
           })
         }
@@ -115,11 +116,11 @@ module.exports = function (RED) {
     }
 
     node.startOPCUASession = function (opcuaClient) {
-      node.verboseLog('Write Start OPC UA Session')
+      coreClient.writeDebugLog('Write Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT, 'Write Node').then(function (session) {
         node.opcuaSession = session
-        node.verboseLog('Session Connected')
+        coreClient.writeDebugLog('Session Connected')
         node.setNodeStatusTo('connected')
       }).catch(node.handleSessionError)
     }
@@ -134,7 +135,7 @@ module.exports = function (RED) {
       if (node.opcuaSession) {
         node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
-            node.verboseLog('Error On Close Session ' + err)
+            coreClient.writeDebugLog('Error On Close Session ' + err)
           }
           node.opcuaSession = null
           done()

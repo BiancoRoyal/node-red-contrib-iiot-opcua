@@ -174,14 +174,18 @@ module.exports = function (RED) {
 
         monitoredItem.on('changed', function (eventFieldResponse) {
           coreListener.eventDebugLog('Monitored Event Changed Message ' + JSON.stringify(msg))
-          coreListener.eventDebugLog('Monitored Event Changed Response' + JSON.stringify(eventFieldResponse))
+          coreListener.eventDebugLog('Monitored Event Changed Response ' + JSON.stringify(eventFieldResponse))
 
           node.setNodeStatusTo('active ' + '(' + monitoredItems.length + ')')
 
           coreListener.analyzeEvent(node.opcuaSession, node.getBrowseName, msg.payload.eventFields, eventFieldResponse)
-            .then(function (message, eventFieldMessage) {
+            .then(function (result) {
               coreListener.eventDebugLog('Successful Event Call')
-              node.send([message, eventFieldMessage])
+
+              coreListener.eventDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
+              coreListener.eventDebugLog('Monitored Event Field Message ' + JSON.stringify(result.variantMsg))
+
+              node.send([result.message, result.variantMsg])
             }).catch(node.errorHandling)
         })
 

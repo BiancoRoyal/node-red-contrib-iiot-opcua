@@ -39,7 +39,7 @@ de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite) {
               }
             }
 
-            resolve(resultsConverted, statusCodes, diagnostics)
+            resolve({resultsConverted: resultsConverted, statusCodes: statusCodes, diagnostics: diagnostics})
           }
         })
       } else {
@@ -67,7 +67,7 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge) {
               }
             }
 
-            resolve(resultsConverted, nodesToRead, results, diagnostics)
+            resolve({ resultsConverted: resultsConverted, nodesToRead: nodesToRead, results: results, diagnostics: diagnostics })
           }
         })
       } else {
@@ -99,7 +99,7 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, ite
               resultsConverted.push(core.buildMsgPayloadByDataValue(results))
             }
 
-            resolve(resultsConverted, results, diagnostics)
+            resolve({ resultsConverted: resultsConverted, results: results, diagnostic: diagnostics })
           }
         })
       } else {
@@ -213,7 +213,7 @@ de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, ite
               }
             }
 
-            resolve(resultsConverted, nodesToRead, results, diagnostics)
+            resolve({ resultsConverted: resultsConverted, nodesToRead: nodesToRead, results: results, diagnostics: diagnostics })
           }
         })
       } else {
