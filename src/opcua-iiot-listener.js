@@ -20,7 +20,7 @@ module.exports = function (RED) {
   function OPCUAIIoTListener (config) {
     RED.nodes.createNode(this, config)
     this.action = config.action
-    this.queueSize = config.queueSize
+    this.queueSize = config.queueSize || 1
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
