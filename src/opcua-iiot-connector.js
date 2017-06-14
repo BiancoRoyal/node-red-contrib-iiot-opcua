@@ -15,6 +15,7 @@
  */
 module.exports = function (RED) {
   let coreConnector = require('./core/opcua-iiot-core-connector')
+
   // let OPCUADiscoveryServer = require('lib/server/opcua_discovery_server').OPCUADiscoveryServer
 
   function OPCUAIIoTConnectorConfiguration (config) {
@@ -160,8 +161,14 @@ module.exports = function (RED) {
             coreConnector.internalDebugLog('sessionId :' + session.sessionId)
             coreConnector.internalDebugLog('authenticationToken :' + session.authenticationToken)
             coreConnector.internalDebugLog('timeout :' + session.timeout)
-            coreConnector.internalDebugLog('serverNonce :' + session.serverNonce.toString('hex'))
-            coreConnector.internalDebugLog('serverCertificate :' + session.serverCertificate.toString('base64'))
+
+            if (session.serverNonce) {
+              coreConnector.internalDebugLog('serverNonce :' + session.serverNonce.toString('hex') | 'none')
+            }
+
+            if (session.serverCertificate) {
+              coreConnector.internalDebugLog('serverCertificate :' + session.serverCertificate.toString('base64') | 'none')
+            }
             coreConnector.internalDebugLog('serverSignature :' + session.serverSignature)
             coreConnector.internalDebugLog('lastRequestSentTime :' + new Date(session.lastRequestSentTime).toISOString() + ' ' + now - session.lastRequestSentTime)
             coreConnector.internalDebugLog('lastResponseReceivedTime :' + new Date(session.lastResponseReceivedTime).toISOString() + ' ' + now - session.lastResponseReceivedTime)
