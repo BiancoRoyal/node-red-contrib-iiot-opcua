@@ -22,12 +22,15 @@ module.exports = function (RED) {
     this.maxAge = config.maxAge || 1
     this.depth = config.depth || 1
     this.name = config.name
+    this.multipleRequest = config.multipleRequest
+    this.metaDataInject = config.metaDataInject
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
     node.reconnectTimeout = 1000
+    node.sessionTimeout = null
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -74,7 +77,7 @@ module.exports = function (RED) {
 
           switch (parseInt(node.attributeId)) {
             case 0:
-              coreClient.readAllAttributes(session, itemsToRead).then(function (readResult) {
+              coreClient.readAllAttributes(session, itemsToRead, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
                 if (readResult.results) {
@@ -89,17 +92,37 @@ module.exports = function (RED) {
                   })
                 }
 
-                let message = {
-                  payload: readResult.resultsConverted,
-                  nodesToRead: JSON.stringify(itemsToRead),
-                  maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                  input: msg,
-                  resultsConverted: readResult.resultsConverted,
-                  /* results: readResult.results, */
-                  diagnostics: readResult.diagnostics,
-                  nodetype: 'read',
-                  readtype: 'AllAttributes',
-                  attributeId: node.attributeId
+                let message
+
+                if (node.multipleRequest) {
+                  message = {
+                    payload: readResult.resultsConverted,
+                    nodesToRead: itemsToRead,
+                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'AllAttributes',
+                    attributeId: node.attributeId
+                  }
+                } else {
+                  message = {
+                    payload: readResult.resultsConverted,
+                    nodesToRead: itemsToRead[0],
+                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'AllAttributes',
+                    attributeId: node.attributeId,
+                    topic: itemsToRead[0]
+                  }
                 }
 
                 node.send(message)
@@ -109,7 +132,7 @@ module.exports = function (RED) {
               })
               break
             case 13:
-              coreClient.readVariableValue(session, itemsToRead).then(function (readResult) {
+              coreClient.readVariableValue(session, itemsToRead, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
                 if (readResult.results) {
@@ -124,17 +147,37 @@ module.exports = function (RED) {
                   })
                 }
 
-                let message = {
-                  payload: readResult.resultsConverted,
-                  nodesToRead: JSON.stringify(itemsToRead),
-                  maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                  input: msg,
-                  resultsConverted: readResult.resultsConverted,
-                  /* results: readResult.results, */
-                  diagnostics: readResult.diagnostics,
-                  nodetype: 'read',
-                  readtype: 'VariableValue',
-                  attributeId: node.attributeId
+                let message
+
+                if (node.multipleRequest) {
+                  message = {
+                    payload: readResult.resultsConverted,
+                    nodesToRead: itemsToRead,
+                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'VariableValue',
+                    attributeId: node.attributeId
+                  }
+                } else {
+                  message = {
+                    payload: readResult.resultsConverted[0],
+                    nodesToRead: itemsToRead[0],
+                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'VariableValue',
+                    attributeId: node.attributeId,
+                    topic: itemsToRead[0]
+                  }
                 }
 
                 node.send(message)
@@ -156,15 +199,17 @@ module.exports = function (RED) {
 
                   let message = {
                     payload: meta.payload,
-                    nodesToRead: [JSON.stringify(element)],
+                    nodesToRead: [element],
                     maxAge: node.maxAge,
+                    multipleRequest: node.multipleRequest,
                     input: msg,
                     resultsConverted: meta,
                     /* results: meta, */
                     diagnostics: [],
                     nodetype: 'read',
                     readtype: 'Meta',
-                    attributeId: node.attributeId
+                    attributeId: node.attributeId,
+                    topic: element
                   }
 
                   node.send(message)
@@ -188,7 +233,7 @@ module.exports = function (RED) {
                 transformedItemsToRead.push(transformedItem)
               }
 
-              coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (readResult) {
+              coreClient.read(session, transformedItemsToRead, node.maxAge, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
                 if (readResult.results) {
@@ -203,17 +248,37 @@ module.exports = function (RED) {
                   })
                 }
 
-                let message = {
-                  payload: readResult.resultsConverted,
-                  nodesToRead: JSON.stringify(readResult.nodesToRead),
-                  maxAge: node.maxAge,
-                  input: msg,
-                  resultsConverted: readResult.resultsConverted,
-                  /* results: readResult.results, */
-                  diagnostics: readResult.diagnostics,
-                  nodetype: 'read',
-                  readtype: 'Default',
-                  attributeId: node.attributeId
+                let message
+
+                if (node.multipleRequest) {
+                  message = {
+                    payload: readResult.resultsConverted,
+                    nodesToRead: readResult.nodesToRead,
+                    maxAge: node.maxAge,
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'Default',
+                    attributeId: node.attributeId
+                  }
+                } else {
+                  message = {
+                    payload: readResult.resultsConverted[0],
+                    nodesToRead: readResult.nodesToRead[0],
+                    maxAge: node.maxAge,
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'Default',
+                    attributeId: node.attributeId,
+                    topic: readResult.nodesToRead[0]
+                  }
                 }
 
                 node.send(message)
@@ -256,8 +321,19 @@ module.exports = function (RED) {
       }).catch(node.handleSessionError)
     }
 
+    node.startOPCUASessionWithTimeout = function (opcuaClient) {
+      if (node.sessionTimeout !== null) {
+        clearTimeout(node.sessionTimeout)
+        node.sessionTimeout = null
+      }
+      coreClient.readDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
+      node.sessionTimeout = setTimeout(function () {
+        node.startOPCUASession(opcuaClient)
+      }, node.reconnectTimeout)
+    }
+
     if (node.connector) {
-      node.connector.on('connected', node.startOPCUASession)
+      node.connector.on('connected', node.startOPCUASessionWithTimeout)
     } else {
       throw new TypeError('Connector Not Valid')
     }

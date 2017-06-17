@@ -363,53 +363,72 @@ de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue)
 }
 
 de.biancoroyal.opcua.iiot.core.convertDataValue = function (value) {
+  return de.biancoroyal.opcua.iiot.core.convertDataValueByDataType(value, value.dataType)
+}
+
+de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dataType) {
   let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
   let convertedValue = null
 
   this.detailDebugLog('convertDataValue: ' + JSON.stringify(value))
 
-  switch (value.dataType) {
+  switch (dataType) {
+    case 'NodeId':
     case opcua.DataType.NodeId:
       convertedValue = value.value.toString()
       break
+    case 'NodeIdType':
     case opcua.DataType.NodeIdType:
       convertedValue = String.fromCharCode(value.value)
       break
+    case 'ByteString':
     case opcua.DataType.ByteString:
       convertedValue = String.fromCharCode(value.value)
       break
+    case 'Byte':
     case opcua.DataType.Byte:
       convertedValue = parseInt(value.value)
       break
     case opcua.DataType.QualifiedName:
       convertedValue = value.value.toString()
       break
+    case 'LocalizedText':
     case opcua.DataType.LocalizedText:
       convertedValue = value.value.text
       break
+    case 'Float':
     case opcua.DataType.Float:
       convertedValue = parseFloat(value.value)
       break
+    case 'Double':
     case opcua.DataType.Double:
       convertedValue = parseFloat(value.value)
       break
+    case 'UInt16':
     case opcua.DataType.UInt16:
       let uint16 = new Uint16Array([value.value])
       convertedValue = uint16[0]
       break
+    case 'UInt32':
     case opcua.DataType.UInt32:
       let uint32 = new Uint32Array([value.value])
       convertedValue = uint32[0]
       break
+    case 'Integer':
     case opcua.DataType.Integer:
+    case 'Int16':
     case opcua.DataType.Int16:
+    case 'Int32':
     case opcua.DataType.Int32:
+    case 'Int64':
     case opcua.DataType.Int64:
       convertedValue = parseInt(value.value)
       break
+    case 'Boolean':
     case opcua.DataType.Boolean:
       convertedValue = (value.value && value.value.toString().toLowerCase() !== 'false')
       break
+    case 'String':
     case opcua.DataType.String:
       if (value.value) {
         convertedValue = value.value.toString()
@@ -417,8 +436,16 @@ de.biancoroyal.opcua.iiot.core.convertDataValue = function (value) {
         convertedValue = JSON.stringify(value.value)
       }
       break
+    case 'Null':
+    case opcua.DataType.Null:
+      if (value.value) {
+        convertedValue = value.value
+      } else {
+        convertedValue = value
+      }
+      break
     default:
-      this.internalDebugLog('convertDataValue unused DataType: ' + value.dataType)
+      this.internalDebugLog('convertDataValue unused DataType: ' + dataType)
       if (value.value) {
         if (value.value.toString) {
           convertedValue = value.value.toString()

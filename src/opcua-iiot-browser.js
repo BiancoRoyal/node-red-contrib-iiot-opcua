@@ -31,6 +31,7 @@ module.exports = function (RED) {
     node.opcuaClient = null
     node.opcuaSession = null
     node.reconnectTimeout = 1000
+    node.sessionTimeout = null
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -193,6 +194,7 @@ module.exports = function (RED) {
     }
 
     node.startOPCUASession = function (opcuaClient) {
+      node.sessionTimeout = null
       coreBrowser.internalDebugLog('Browser Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT, 'Browser Node').then(function (session) {
@@ -202,9 +204,20 @@ module.exports = function (RED) {
       }).catch(node.handleSessionError)
     }
 
+    node.startOPCUASessionWithTimeout = function (opcuaClient) {
+      if (node.sessionTimeout !== null) {
+        clearTimeout(node.sessionTimeout)
+        node.sessionTimeout = null
+      }
+      coreBrowser.internalDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
+      node.sessionTimeout = setTimeout(function () {
+        node.startOPCUASession(opcuaClient)
+      }, node.reconnectTimeout)
+    }
+
     if (node.connector) {
       coreBrowser.internalDebugLog('Browser Start OPC UA Session')
-      node.connector.on('connected', node.startOPCUASession)
+      node.connector.on('connected', node.startOPCUASessionWithTimeout)
     } else {
       throw new TypeError('Connector Not Valid')
     }

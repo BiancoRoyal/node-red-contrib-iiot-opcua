@@ -22,12 +22,15 @@ module.exports = function (RED) {
     this.action = config.action
     this.queueSize = config.queueSize || 1
     this.name = config.name
+    this.multipleRequest = config.multipleRequest
+    this.metaDataInject = config.metaDataInject
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
     node.reconnectTimeout = 1000
+    node.sessionTimeout = null
     let subscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
@@ -111,8 +114,27 @@ module.exports = function (RED) {
 
         monitoredItem.on('changed', function (dataValue) {
           node.setNodeStatusTo('active ' + '(' + monitoredItems.length + ')')
-          msg.payload = coreListener.core.buildMsgPayloadByDataValue(dataValue)
-          node.send([{payload: msg.payload.value}, msg])
+          let result = coreListener.core.buildMsgPayloadByDataValue(dataValue)
+
+          let valueMsg = {
+            topic: msg.topic,
+            input: msg,
+            nodetype: 'listen',
+            readtype: 'subscribe',
+            result: result
+          }
+
+          if (result.hasOwnProperty('value') && result.value.hasOwnProperty('value')) {
+            valueMsg.payload = result.value.value
+          } else {
+            if (result.hasOwnProperty('value')) {
+              valueMsg.payload = result.value
+            } else {
+              valueMsg.payload = result
+            }
+          }
+
+          node.send([valueMsg, {payload: JSON.stringify(dataValue), valueMsg: valueMsg}])
         })
 
         monitoredItem.on('error', function (err) {
@@ -185,7 +207,16 @@ module.exports = function (RED) {
               coreListener.eventDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
               coreListener.eventDebugLog('Monitored Event Field Message ' + JSON.stringify(result.variantMsg))
 
-              node.send([result.message, result.variantMsg])
+              let valueMsg = {
+                payload: result.message,
+                topic: msg.topic,
+                result: result,
+                input: msg,
+                nodetype: 'listen',
+                readtype: 'event'
+              }
+
+              node.send([valueMsg, result.variantMsg])
             }).catch(node.errorHandling)
         })
 
@@ -334,8 +365,19 @@ module.exports = function (RED) {
       }).catch(node.handleSessionError)
     }
 
+    node.startOPCUASessionWithTimeout = function (opcuaClient) {
+      if (node.sessionTimeout !== null) {
+        clearTimeout(node.sessionTimeout)
+        node.sessionTimeout = null
+      }
+      coreListener.internalDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
+      node.sessionTimeout = setTimeout(function () {
+        node.startOPCUASession(opcuaClient)
+      }, node.reconnectTimeout)
+    }
+
     if (node.connector) {
-      node.connector.on('connected', node.startOPCUASession)
+      node.connector.on('connected', node.startOPCUASessionWithTimeout)
     } else {
       throw new TypeError('Connector Not Valid')
     }

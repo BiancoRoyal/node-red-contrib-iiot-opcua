@@ -25,6 +25,7 @@ module.exports = function (RED) {
 
     let node = this
     node.reconnectTimeout = 1000
+    node.sessionTimeout = null
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -125,8 +126,19 @@ module.exports = function (RED) {
       }).catch(node.handleSessionError)
     }
 
+    node.startOPCUASessionWithTimeout = function (opcuaClient) {
+      if (node.sessionTimeout !== null) {
+        clearTimeout(node.sessionTimeout)
+        node.sessionTimeout = null
+      }
+      coreClient.writeDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
+      node.sessionTimeout = setTimeout(function () {
+        node.startOPCUASession(opcuaClient)
+      }, node.reconnectTimeout)
+    }
+
     if (node.connector) {
-      node.connector.on('connected', node.startOPCUASession)
+      node.connector.on('connected', node.startOPCUASessionWithTimeout)
     } else {
       throw new TypeError('Connector Not Valid')
     }

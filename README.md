@@ -9,6 +9,8 @@
 
 [![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
 
+If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
+
 [Start your support membership now!][2]
 
 ## Install
@@ -43,6 +45,7 @@ DEBUG options opcuaIIoT:
     * core:details 
  * connector
  * browser
+ * filter
  * listener
     * listener:subscribe
     * listener:event
@@ -58,11 +61,17 @@ Examples:
     
     DEBUG=opcuaIIoT:client*,opcuaIIoT:listener*,opcauaIIoT:connector node-red -v
 
+    DEBUG=opcuaIIoT:filter node-red
+    
 ### Wiki
 
-Link to Wiki
+Follow the [white rabbit][4]!
 
 ## Package Information
+
+## Known Issues
+
+There is an [error issue][5] to fix in node-opcua 0.0.64 after installing.
 
 ### License
 
@@ -70,11 +79,10 @@ The BSD 3-Clause License
 
 [Klaus Landsdorf][1]
 
-### Members
-
-Stefanie Schima
-
 ### Features
 
-[1]:http://bianco-royal.de/
-[2]:http://bianco-royal.de/opcuaiiot/
+[1]:https://bianco-royal.cloud/
+[2]:https://bianco-royal.cloud/support/
+[3]:https://github.com/biancode/node-red-iiot-opcua
+[4]:https://github.com/biancode/node-red-iiot-opcua/wiki
+[5]:https://github.com/node-opcua/node-opcua/commit/fa0efb772353adbc901f47d8787a13597d595cd7

@@ -7,7 +7,9 @@
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "attributeId": "Attribute Id",
-      "queueSize": "Queue Size"
+      "queueSize": "Queue Size",
+      "multipleRequest": "Multiple Nodes",
+      "metaDataInject": "Meta Inject"
     }
   }
 }

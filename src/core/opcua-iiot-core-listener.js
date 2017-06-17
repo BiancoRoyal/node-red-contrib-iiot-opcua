@@ -235,7 +235,8 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
   return subscription.monitor(
     {
       nodeId: this.core.nodeOPCUA.resolveNodeId(msg.topic),
-      attributeId: this.core.nodeOPCUA.AttributeIds.Value
+      attributeId: this.core.nodeOPCUA.AttributeIds.Value,
+      origin: msg
     },
     {
       samplingInterval: interval,
@@ -266,7 +267,8 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
   return subscription.monitor(
     {
       nodeId: this.core.nodeOPCUA.resolveNodeId(msg.topic),
-      attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier
+      attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier,
+      origin: msg
     },
     {
       samplingInterval: interval,

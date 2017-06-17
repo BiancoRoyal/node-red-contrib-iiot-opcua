@@ -6,7 +6,9 @@
       "showErrors": "Show Errors",
       "attributeId": "Attribute Id",
       "maxAge": "Max. Age",
-      "depth": "Depth"
+      "depth": "Depth",
+      "multipleRequest": "Multiple Nodes",
+      "metaDataInject": "Meta Inject"
     }
   }
 }

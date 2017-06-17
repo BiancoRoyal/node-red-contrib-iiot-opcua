@@ -1,0 +1,10 @@
+
+Ideas
+- multiple data structure reading (see meta data request components)
+
+Errors
+- session closing?
+- connection reset on errors?
+- Sign error on private package
+- bad XYZ situations handling
+- Publish Engine Error

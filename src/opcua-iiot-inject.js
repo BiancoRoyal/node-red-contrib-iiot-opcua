@@ -26,6 +26,7 @@ module.exports = function (RED) {
     this.repeat = config.repeat
     this.crontab = config.crontab
     this.once = config.once
+    this.startDelay = config.startDelay | 15
     this.name = config.name
 
     let node = this
@@ -33,7 +34,7 @@ module.exports = function (RED) {
     node.cronjob = null
     node.REPEAT_FACTOR = 1000.0
     node.ONE_SECOND = 1000
-    node.INPUT_TIMEOUT_MILLISECONDS = 3000
+    node.INPUT_TIMEOUT_MILLISECONDS = 1000
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -51,7 +52,7 @@ module.exports = function (RED) {
         node.repeat = node.ONE_SECOND
       }
       node.verboseLog(RED._('opcuaiiotinject.repeat', node))
-      coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' sec.')
+      coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
       node.interval_id = setInterval(function () {
         node.emit('input', {})
@@ -68,7 +69,14 @@ module.exports = function (RED) {
     }
 
     if (node.once) {
-      setTimeout(function () { node.emit('input', {}) }, node.INPUT_TIMEOUT_MILLISECONDS)
+      let timeout = node.INPUT_TIMEOUT_MILLISECONDS * node.startDelay
+      coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout +
+        ' msec.'
+      )
+      setTimeout(function () {
+        coreInject.internalDebugLog('injecting once at start')
+        node.emit('input', {})
+      }, timeout)
     }
 
     node.on('input', function (msg) {

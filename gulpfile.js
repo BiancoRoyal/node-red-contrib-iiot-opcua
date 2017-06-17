@@ -93,12 +93,11 @@ gulp.task('opcua-iiot', function (cb) {
 //   )
 // })
 
+/*  */
+
 gulp.task('opcua-iiot', function (cb) {
-  let options = {
-    preserveComments: 'license'
-  }
   pump([
-    gulp.src('src/**/*.js').pipe(babel({presets: ['es2015']})).pipe(uglify(options)), gulp.dest('opcuaIIoT')],
+    gulp.src('src/**/*.js').pipe(babel({presets: ['es2015']})).pipe(uglify()), gulp.dest('opcuaIIoT')],
     cb
   )
 })

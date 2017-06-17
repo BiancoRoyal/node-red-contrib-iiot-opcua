@@ -124,12 +124,12 @@ module.exports = function (RED) {
         } else {
           servers.forEach(function (server) {
             coreConnector.internalDebugLog('Discovery Server')
-            coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri.cyan.bold)
-            coreConnector.internalDebugLog('         productUri:' + server.productUri.cyan.bold)
-            coreConnector.internalDebugLog('    applicationName:' + server.applicationName.text.cyan.bold)
-            coreConnector.internalDebugLog('               type:' + server.applicationType.key.cyan.bold)
-            coreConnector.internalDebugLog('   gatewayServerUri:' + server.gatewayServerUri ? server.gatewayServerUri.cyan.bold : '')
-            coreConnector.internalDebugLog('discoveryProfileUri:' + server.discoveryProfileUri ? server.discoveryProfileUri.cyan.bold : '')
+            coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri ? server.applicationUri.cyan.bold : 'none')
+            coreConnector.internalDebugLog('         productUri:' + server.productUri ? server.productUri.cyan.bold : 'none')
+            coreConnector.internalDebugLog('    applicationName:' + server.applicationName ? server.applicationName.text.cyan.bold : 'none')
+            coreConnector.internalDebugLog('               type:' + server.applicationType ? server.applicationType.key.cyan.bold : 'none')
+            coreConnector.internalDebugLog('   gatewayServerUri:' + server.gatewayServerUri ? server.gatewayServerUri.cyan.bold : 'none')
+            coreConnector.internalDebugLog('discoveryProfileUri:' + server.discoveryProfileUri ? server.discoveryProfileUri.cyan.bold : 'none')
             coreConnector.internalDebugLog('      discoveryUrls:')
 
             server.discoveryUrls.forEach(function (discoveryUrl) {
@@ -145,54 +145,64 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog('Request For New Session From ' + type)
       let now = Date.now()
 
-      return new Promise(
-        function (resolve, reject) {
-          coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (session) {
-            coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
+      try {
+        return new Promise(
+          function (resolve, reject) {
+            coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (session) {
+              coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
 
-            session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 10, 's')
-            if (node.keepSessionAlive) {
-              session.startKeepAliveManager()
-            }
-            session.on('error', node.handleError)
+              session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 10, 's')
+              if (node.keepSessionAlive) {
+                session.startKeepAliveManager()
+              }
+              session.on('error', node.handleError)
 
-            coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ', node.endpoint)
-            coreConnector.internalDebugLog('name :' + session.name)
-            coreConnector.internalDebugLog('sessionId :' + session.sessionId)
-            coreConnector.internalDebugLog('authenticationToken :' + session.authenticationToken)
-            coreConnector.internalDebugLog('timeout :' + session.timeout)
+              coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ', node.endpoint)
+              coreConnector.internalDebugLog('name :' + session.name)
+              coreConnector.internalDebugLog('sessionId :' + session.sessionId)
+              coreConnector.internalDebugLog('authenticationToken :' + session.authenticationToken)
+              coreConnector.internalDebugLog('timeout :' + session.timeout)
 
-            if (session.serverNonce) {
-              coreConnector.internalDebugLog('serverNonce :' + session.serverNonce.toString('hex') | 'none')
-            }
+              if (session.serverNonce) {
+                coreConnector.internalDebugLog('serverNonce :' + session.serverNonce ? session.serverNonce.toString('hex') : 'none')
+              }
 
-            if (session.serverCertificate) {
-              coreConnector.internalDebugLog('serverCertificate :' + session.serverCertificate.toString('base64') | 'none')
-            }
-            coreConnector.internalDebugLog('serverSignature :' + session.serverSignature)
-            coreConnector.internalDebugLog('lastRequestSentTime :' + new Date(session.lastRequestSentTime).toISOString() + ' ' + now - session.lastRequestSentTime)
-            coreConnector.internalDebugLog('lastResponseReceivedTime :' + new Date(session.lastResponseReceivedTime).toISOString() + ' ' + now - session.lastResponseReceivedTime)
+              if (session.serverCertificate) {
+                coreConnector.internalDebugLog('serverCertificate :' + session.serverCertificate ? session.serverCertificate.toString('base64') : 'none')
+              }
 
-            resolve(session)
-          }).catch(function (err) {
-            coreConnector.internalDebugLog('Session Start Error ' + err)
-            reject(err)
+              coreConnector.internalDebugLog('serverSignature :' + session.serverSignature)
+              coreConnector.internalDebugLog('lastRequestSentTime :' + session.lastRequestSentTime ? new Date(session.lastRequestSentTime).toISOString() + ' ' + now - session.lastRequestSentTime : 'none')
+              coreConnector.internalDebugLog('lastResponseReceivedTime :' + session.lastResponseReceivedTime ? new Date(session.lastResponseReceivedTime).toISOString() + ' ' + now - session.lastResponseReceivedTime : 'none')
+
+              resolve(session)
+            }).catch(function (err) {
+              coreConnector.internalDebugLog('Session Start Error ' + err)
+              reject(err)
+            })
           })
-        })
+      } catch (err) {
+        coreConnector.internalDebugLog(err)
+      }
     }
 
     node.closeSession = function (session, done) {
-      if (session) {
-        coreConnector.internalDebugLog('Close Session Id: ' + session.sessionId)
-        coreConnector.closeSession(session).then(function (done) {
-          coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
+      try {
+        if (session) {
+          coreConnector.internalDebugLog('Close Session Id: ' + session.sessionId)
+          coreConnector.closeSession(session).then(function (done) {
+            coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
+            done()
+          }).catch(function (err) {
+            coreConnector.internalDebugLog('Session Close Error ' + err)
+            done()
+          })
+        } else {
+          coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
           done()
-        }).catch(function (err) {
-          coreConnector.internalDebugLog('Session Close Error ' + err)
-          done()
-        })
-      } else {
-        coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
+        }
+      } catch (err) {
+        coreConnector.internalDebugLog(err)
         done()
       }
     }
@@ -206,7 +216,11 @@ module.exports = function (RED) {
     }
 
     node.setMaxListeners(UNLIMITED_LISTENERS)
-    setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
+    try {
+      setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
+    } catch (err) {
+      coreConnector.internalDebugLog(err)
+    }
 
     node.on('close', function () {
       coreConnector.internalDebugLog('Connector Close ' + node.endpoint)

@@ -35,6 +35,7 @@
       repeat: {value: ''},
       crontab: {value: ''},
       once: {value: false},
+      startDelay: {value: 15},
       name: {value: ''}
     },
     inputs: 0,
@@ -43,8 +44,12 @@
     label: function () {
       let suffix = ''
 
+      if (this.once) {
+        suffix = ' ¹';
+      }
+
       if (this.repeat || this.crontab) {
-        suffix = ' ↻'
+        suffix = ' ↻';
       }
 
       if (this.name) {
@@ -570,8 +575,13 @@
 
     <div class="form-row" id="node-once">
         <label>&nbsp</label>
-        <input type="checkbox" id="node-input-once" style="display: inline-block width: auto vertical-align: top">
-        <label for="node-input-once" style="width: 70%" data-i18n="opcuaiiotinject.onstart"></label>
+        <label for="node-input-once" style="width:140px">
+        <i class="fa fa-power-off"></i> <span data-i18n="opcuaiiotinject.onstart"></span></label>
+        <input type="checkbox" id="node-input-once">
+    </div>
+    <div class="form-row" id="node-delay">
+        <label for="node-input-startDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcuaiiotinject.startDelay"></span></label>
+        <input type="text" id="node-input-startDelay" placeholder="15" style="width:80px">
     </div>
 
     <div class="form-row">
@@ -627,4 +637,7 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">
     <h2>OPC UA IIoT Inject</h2>
     <p>Pressing the button on the left side of the node allows a request on a topic to be injected into the flow.</p>
+
+    <h3>Delay</h3>
+    <p>The delay has to be set to a minimum to start your OPC UA server.</p>
 </script>

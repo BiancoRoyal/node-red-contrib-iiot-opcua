@@ -1,6 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.1.0-psilon",
+  "version": "0.2.0-alpha",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -13,7 +13,7 @@
     "cron": "1.2.1",
     "debug": "<2.7",
     "easy-table": "1.1.0",
-    "node-opcua": "0.0.64",
+    "node-opcua": "0.0.65",
     "treeify": "1.0.1"
   },
   "keywords": [
@@ -47,7 +47,8 @@
       "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
       "OPCUA-IIoT-Server-ASO": "opcuaIIoT/opcua-iiot-server-aso.js",
       "OPCUA-IIoT-Server-Command": "opcuaIIoT/opcua-iiot-server-cmd.js",
-      "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js"
+      "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js",
+      "OPCUA-IIoT-Result-Filter": "opcuaIIoT/opcua-iiot-result-filter.js"
     }
   },
   "engines": {
@@ -65,14 +66,14 @@
   ],
   "devDependencies": {
     "babel-preset-es2015": "^6.24.1",
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "ci-publish": "^1.3.0",
-    "eslint": "^3.19.0",
+    "eslint": "^4.0.0",
     "eslint-config-standard": "^10.2.1",
-    "eslint-config-standard-jsx": "^4.0.1",
-    "eslint-plugin-mocha": "^4.9.0",
+    "eslint-config-standard-jsx": "^4.0.2",
+    "eslint-plugin-mocha": "^4.10.1",
     "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-react": "^7.0.0",
+    "eslint-plugin-react": "^7.1.0",
     "eslint-plugin-standard": "^3.0.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
@@ -81,18 +82,18 @@
     "gulp-javascript-obfuscator": "^1.1.2",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-obfuscate": "^0.2.9",
-    "gulp-uglify": "^2.1.2",
+    "gulp-uglify": "^3.0.0",
     "javascript-obfuscator": "^0.9.4",
     "jsdoc": "^3.4.3",
-    "mocha": "^3.3.0",
+    "mocha": "^3.4.2",
     "nock": "^9.0.13",
     "node-red": "^0.16.2",
-    "npm-check-updates": "^2.11.1",
+    "npm-check-updates": "^2.11.3",
     "pump": "^1.0.2",
-    "sinon": "^2.2.0",
+    "sinon": "^2.3.4",
     "standard": "^10.0.2",
     "supertest": "^3.0.0",
-    "uglify-js": "^3.0.4",
+    "uglify-js": "^3.0.17",
     "uglify-js-harmony": "^2.7.7",
     "when": "^3.7.8"
   },

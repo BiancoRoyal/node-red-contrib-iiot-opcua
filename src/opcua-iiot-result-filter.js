@@ -1,0 +1,169 @@
+/*
+ The BSD 3-Clause License
+
+ Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
+ All rights reserved.
+ node-red-iiot-opcua
+ */
+'use strict'
+
+/**
+ * OPC UA node representation for Node-RED OPC UA IIoT nodes.
+ *
+ * @param RED
+ */
+module.exports = function (RED) {
+  let coreFilter = require('./core/opcua-iiot-core-filter')
+
+  function OPCUAIIoTResultFilter (config) {
+    RED.nodes.createNode(this, config)
+    this.nodeId = config.nodeId
+    this.datatype = config.datatype
+    this.withPrecision = config.withPrecision
+    this.precision = parseInt(config.precision) | 2
+    this.entry = config.entry
+    this.minvalue = config.minvalue
+    this.maxvalue = config.maxvalue
+    this.defaultvalue = config.defaultvalue
+    this.name = config.name
+    this.usingListener = config.usingListener
+
+    let node = this
+    node.subscribed = false
+
+    node.status({fill: 'blue', shape: 'ring', text: 'new'})
+
+    node.on('input', function (msg) {
+      if (msg.topic !== node.nodeId) {
+        return
+      }
+
+      if (!msg.payload) {
+        coreFilter.internalDebugLog('filtering message without payload ' + JSON.stringify(msg))
+        return
+      }
+
+      msg.filtertype = 'filter'
+      let result = msg.payload
+
+      node.status({fill: 'green', shape: 'dot', text: 'active'})
+
+      switch (msg.nodetype) {
+        case 'read':
+          result = node.filterByReadType(msg)
+          break
+        case 'listen':
+          result = node.filterByListenType(msg)
+          break
+        default:
+          coreFilter.internalDebugLog('unknown node type inject to filter for ' + msg.nodetype)
+      }
+
+      let resultDataType = typeof result
+
+      if (resultDataType && resultDataType.toString() !== node.datatype.toString()) {
+        result = node.convertDataType(result)
+      }
+
+      if (result.hasOwnProperty('value')) {
+        result = result.value
+      }
+
+      if (!isNaN(result) && node.precision >= 0 && node.withPrecision) {
+        result = Number(result.toPrecision(node.precision))
+      }
+
+      coreFilter.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
+      coreFilter.internalDebugLog('sending result ' + result)
+      node.send([{payload: result}, msg])
+    })
+
+    node.filterByReadType = function (msg) {
+      let result = null
+
+      let minArraySize = node.entry
+      coreFilter.internalDebugLog('filter by read type ' + msg.readtype)
+
+      switch (msg.readtype) {
+        case 'Meta':
+          result = msg.payload // TODO: build an array structure for output
+          break
+        case 'read':
+          if (msg.multipleRequest && msg.payload.length >= minArraySize) {
+            result = msg.payload[node.entry - 1]
+          } else {
+            if (msg.payload.hasOwnProperty('value')) {
+              result = msg.payload.value
+            } else {
+              result = msg.payload
+            }
+          }
+          break
+        case 'VariableValue':
+          if (msg.multipleRequest && msg.payload.length >= minArraySize) {
+            result = msg.payload[node.entry - 1]
+          } else {
+            if (msg.payload.hasOwnProperty('value')) {
+              result = msg.payload.value
+            } else {
+              result = msg.payload
+            }
+          }
+          break
+        case 'AllAttributes':
+          result = msg.payload // TODO: build an array structure for output
+          break
+        default:
+          if (msg.payload.hasOwnProperty('value')) {
+            result = msg.payload.value
+          } else {
+            result = msg.payload
+          }
+          break
+      }
+
+      if (result.hasOwnProperty('value')) {
+        result = result.value
+      }
+
+      coreFilter.internalDebugLog('filter by read type result ' + JSON.stringify(result))
+
+      return result
+    }
+
+    node.filterByListenType = function (msg) {
+      let result = null
+
+      switch (msg.readtype) {
+        case 'subscribe':
+          if (msg.payload.hasOwnProperty('value')) {
+            result = msg.payload.value
+          } else {
+            result = msg.payload
+          }
+          break
+        case 'event':
+          result = msg.payload
+          break
+        default:
+          break
+      }
+
+      if (result.hasOwnProperty('value')) {
+        result = result.value
+      }
+
+      return result
+    }
+
+    node.convertDataType = function (result) {
+      coreFilter.internalDebugLog('data type convert for ' + node.nodeId)
+      return coreFilter.core.convertDataValueByDataType({value: result}, node.datatype)
+    }
+  }
+
+  RED.nodes.registerType('OPCUA-IIoT-Result-Filter', OPCUAIIoTResultFilter)
+
+  // DataType_Schema via REST
+}

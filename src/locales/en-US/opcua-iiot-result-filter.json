@@ -1,0 +1,17 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "nodeId": "Node-Id",
+      "datatype": "Data Type",
+      "withPrecision": "With precision",
+      "precision": "precision",
+      "entry": "Array Entry",
+      "minvalue": "Min Value",
+      "maxvalue": "Max Value",
+      "defaultvalue": "Default Value",
+      "usingListener": "Listener",
+      "showActivities": "Show Activities",
+      "showErrors": "Show Errors"
+    }
+  }
+}
