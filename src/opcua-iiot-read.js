@@ -51,14 +51,28 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
+    node.resetSession = function () {
+      if (!node.sessionTimeout && node.opcuaClient) {
+        coreClient.readDebugLog('Reset Session')
+        node.connector.closeSession(node.opcuaSession, function () {
+          node.startOPCUASessionWithTimeout(node.opcuaClient)
+        })
+      }
+    }
+
     node.handleReadError = function (err, msg) {
-      node.verboseLog('ERROR: ' + err)
+      node.verboseLog('Read Handle Error '.red + err)
 
       if (node.showErrors) {
         node.error(err, msg)
       }
 
+      coreClient.readDebugLog(err.message)
       node.setNodeStatusTo('error')
+
+      if (err.message && err.message.includes('BadSession')) {
+        node.resetSession()
+      }
     }
 
     node.readFromSession = function (session, itemsToRead, msg) {
@@ -69,10 +83,7 @@ module.exports = function (RED) {
 
       if (session) {
         if (session.sessionId === 'terminated') {
-          coreClient.readDebugLog('ERROR: Session Terminated')
-          if (node.showErrors) {
-            node.error(new Error('Session Terminated'), msg)
-          }
+          node.handleReadError(new Error('Session Terminated While Read'), msg)
         } else {
           coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
 
@@ -312,19 +323,21 @@ module.exports = function (RED) {
     })
 
     node.handleSessionError = function (err) {
+      coreClient.readDebugLog('Handle Session Error '.red + err)
+
       if (node.showErrors) {
-        node.error(err, {payload: 'Read Session Error'})
+        node.error(err, {payload: 'Read Handle Session Error'})
       }
 
-      coreClient.readDebugLog('Reconnect in ' + node.reconnectTimeout + ' msec.')
-      node.connector.closeSession(node.opcuaSession, function () {
-        setTimeout(function () {
-          node.startOPCUASession(node.opcuaClient)
-        }, node.reconnectTimeout)
-      })
+      node.resetSession()
     }
 
     node.startOPCUASession = function (opcuaClient) {
+      if (node.sessionTimeout) {
+        clearTimeout(node.sessionTimeout)
+        node.sessionTimeout = null
+      }
+
       coreClient.readDebugLog('Read Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT, 'Read Node').then(function (session) {
@@ -339,6 +352,7 @@ module.exports = function (RED) {
         clearTimeout(node.sessionTimeout)
         node.sessionTimeout = null
       }
+
       coreClient.readDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
       node.sessionTimeout = setTimeout(function () {
         node.startOPCUASession(opcuaClient)

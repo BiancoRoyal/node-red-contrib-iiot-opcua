@@ -45,14 +45,28 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
+    node.resetSession = function () {
+      if (!node.sessionTimeout && node.opcuaClient) {
+        coreClient.writeDebugLog('Reset Session')
+        node.connector.closeSession(node.opcuaSession, function () {
+          node.startOPCUASessionWithTimeout(node.opcuaClient)
+        })
+      }
+    }
+
     node.handleWriteError = function (err, msg) {
-      node.verboseLog('ERROR: ' + err)
+      node.verboseLog('Write Handle Error '.red + err)
 
       if (node.showErrors) {
         node.error(err, msg)
       }
 
+      coreClient.writeDebugLog(err.message)
       node.setNodeStatusTo('error')
+
+      if (err.message && err.message.includes('BadSession')) {
+        node.resetSession()
+      }
     }
 
     node.writeToSession = function (session, msg) {
@@ -104,16 +118,13 @@ module.exports = function (RED) {
     })
 
     node.handleSessionError = function (err) {
+      coreClient.writeDebugLog('Handle Session Error '.red + err)
+
       if (node.showErrors) {
         node.error(err, {payload: 'Write Session Error'})
       }
 
-      coreClient.internalDebugLog('Reconnect in ' + node.reconnectTimeout + ' msec.')
-      node.connector.closeSession(node.opcuaSession, function () {
-        setTimeout(function () {
-          node.startOPCUASession(node.opcuaClient)
-        }, node.reconnectTimeout)
-      })
+      node.resetSession()
     }
 
     node.startOPCUASession = function (opcuaClient) {

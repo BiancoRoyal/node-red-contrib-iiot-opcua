@@ -32,6 +32,7 @@ module.exports = function (RED) {
     let node = this
     node.reconnectTimeout = 1000
     node.sessionTimeout = null
+
     let subscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
@@ -53,6 +54,15 @@ module.exports = function (RED) {
       node.statusLog(statusValue)
       let statusParameter = coreListener.core.getNodeStatus(statusValue, node.showStatusActivities)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+    }
+
+    node.resetSession = function () {
+      if (!node.sessionTimeout && node.opcuaClient) {
+        coreListener.internalDebugLog('Reset Session')
+        node.connector.closeSession(node.opcuaSession, function () {
+          node.startOPCUASessionWithTimeout(node.opcuaClient)
+        })
+      }
     }
 
     node.createSubscription = function (msg, cb) {
@@ -263,10 +273,17 @@ module.exports = function (RED) {
     }
 
     node.errorHandling = function (err) {
-      coreListener.eventDebugLog('Error ' + err)
+      node.verboseLog('Listener Handle Error '.red + err)
 
       if (node.showErrors) {
         node.error(err)
+      }
+
+      coreListener.internalDebugLog(err.message)
+      node.setNodeStatusTo('error')
+
+      if (err.message && err.message.includes('BadSession')) {
+        node.resetSession()
       }
     }
 
@@ -345,12 +362,7 @@ module.exports = function (RED) {
         node.error('Listener Session Error')
       }
 
-      coreListener.internalDebugLog('Reconnect in ' + node.reconnectTimeout + ' msec.')
-      node.connector.closeSession(node.opcuaSession, function () {
-        setTimeout(function () {
-          node.startOPCUASession(node.opcuaClient)
-        }, node.reconnectTimeout)
-      })
+      node.resetSession()
     }
 
     node.startOPCUASession = function (opcuaClient) {
@@ -379,6 +391,7 @@ module.exports = function (RED) {
         clearTimeout(node.sessionTimeout)
         node.sessionTimeout = null
       }
+
       coreListener.internalDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
       node.sessionTimeout = setTimeout(function () {
         node.startOPCUASession(opcuaClient)

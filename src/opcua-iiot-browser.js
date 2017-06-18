@@ -51,6 +51,15 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
+    node.resetSession = function () {
+      if (!node.sessionTimeout && node.opcuaClient) {
+        coreBrowser.internalDebugLog('Reset Session')
+        node.connector.closeSession(node.opcuaSession, function () {
+          node.startOPCUASessionWithTimeout(node.opcuaClient)
+        })
+      }
+    }
+
     node.transformToEntry = function (reference) {
       if (reference) {
         return {
@@ -75,13 +84,17 @@ module.exports = function (RED) {
           nodeId: coreBrowser.core.OBJECTS_ROOT,
           browseName: 'Objects'
         })
-        node.verboseLog(err)
+        node.verboseLog('Browse Handle Error '.red + err)
 
         if (node.showErrors) {
           node.error(err, msg)
         }
         coreBrowser.internalDebugLog('Browser Error ' + err.message)
         node.status({fill: 'red', shape: 'dot', text: 'error'})
+
+        if (err.message && err.message.includes('BadSession')) {
+          node.resetSession()
+        }
       } else {
         results = itemList
         coreBrowser.internalDebugLog('Browse Done With Error: ' + results.length + ' item(s)')
@@ -181,16 +194,13 @@ module.exports = function (RED) {
     }
 
     node.handleSessionError = function (err) {
+      coreBrowser.internalDebugLog('Handle Session Error '.red + err)
+
       if (node.showErrors) {
         node.error(err, {payload: 'Browser Session Error'})
       }
 
-      coreBrowser.internalDebugLog('Reconnect in ' + node.reconnectTimeout + ' msec.')
-      node.connector.closeSession(node.opcuaSession, function () {
-        setTimeout(function () {
-          node.startOPCUASession(node.opcuaClient)
-        }, node.reconnectTimeout)
-      })
+      node.resetSession()
     }
 
     node.startOPCUASession = function (opcuaClient) {
