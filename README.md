@@ -5,13 +5,15 @@
 ![ES_Sourdce_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
 
-# node-red-iiot-opcua
+# node-red-iiot-opcua 
+
+## !!! PUBLIC BETA !!! PUBLIC BETA !!!
 
 [![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
 
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
-[Start your support membership now!][2]
+[Support the project now!][2]
 
 ## Install
 
@@ -72,8 +74,19 @@ Follow the [white rabbit][4]!
 
 ## Known Issues
 
-There is an [error issue][5] to fix in node-opcua 0.0.64 after installing.
+Ideas
+* converting in Result Filter is not finished yet
+* dynamic methods
+* dynamic IP for connector
 
+Errors
+* Connector
+    * session closing
+    * connection reset on errors
+* Sign error on private package
+* Bad XYZ situations handling
+* Publish Engine Error
+ 
 ### License
 
 The BSD 3-Clause License
@@ -83,7 +96,7 @@ The BSD 3-Clause License
 ### Features
 
 [1]:https://bianco-royal.cloud/
-[2]:https://bianco-royal.cloud/support/
+[2]:https://bianco-royal.cloud/supporter/
 [3]:https://github.com/biancode/node-red-iiot-opcua
 [4]:https://github.com/biancode/node-red-iiot-opcua/wiki
 [5]:https://github.com/node-opcua/node-opcua/commit/fa0efb772353adbc901f47d8787a13597d595cd7
