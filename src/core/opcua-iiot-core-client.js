@@ -67,7 +67,12 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge, m
               }
             }
 
-            resolve({ resultsConverted: resultsConverted, nodesToRead: nodesToRead, results: results, diagnostics: diagnostics })
+            resolve({
+              resultsConverted: resultsConverted,
+              nodesToRead: nodesToRead,
+              results: results,
+              diagnostics: diagnostics
+            })
           }
         })
       } else {
@@ -89,6 +94,8 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, ite
             let resultsConverted = []
             let dataValue = null
 
+            core.specialDebugLog('requested ' + items.length + ' results ' + results.length)
+
             if (results.length) {
               for (dataValue of results) {
                 if (dataValue) {
@@ -99,7 +106,7 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, ite
               resultsConverted.push(core.buildMsgPayloadByDataValue(results))
             }
 
-            resolve({ resultsConverted: resultsConverted, results: results, diagnostic: diagnostics })
+            resolve({resultsConverted: resultsConverted, results: results, diagnostic: diagnostics})
           }
         })
       } else {
@@ -213,7 +220,12 @@ de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, ite
               }
             }
 
-            resolve({ resultsConverted: resultsConverted, nodesToRead: nodesToRead, results: results, diagnostics: diagnostics })
+            resolve({
+              resultsConverted: resultsConverted,
+              nodesToRead: nodesToRead,
+              results: results,
+              diagnostics: diagnostics
+            })
           }
         })
       } else {

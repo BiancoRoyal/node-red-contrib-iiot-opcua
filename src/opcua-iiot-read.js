@@ -133,6 +133,8 @@ module.exports = function (RED) {
               })
               break
             case 13:
+              coreClient.core.specialDebugLog('requested Values ' + itemsToRead.length)
+
               coreClient.readVariableValue(session, itemsToRead, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
@@ -213,6 +215,15 @@ module.exports = function (RED) {
                     attributeId: node.attributeId,
                     topic: element
                   }
+
+                  if (node.metaDataInject) {
+                    message.resultsConverted.$components.forEach(function (element, index, array) {
+                      message.nodesToRead.push(element.nodeId)
+                    })
+                  }
+
+                  coreClient.core.specialDebugLog(message.nodesToRead)
+                  coreClient.core.specialDebugLog('Count Of Items To Read: ' + message.nodesToRead.length)
 
                   node.send(message)
                 }).catch(function (err) {
@@ -297,7 +308,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
+      node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg, node.multipleRequest), msg)
     })
 
     node.handleSessionError = function (err) {

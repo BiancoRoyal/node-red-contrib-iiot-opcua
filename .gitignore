@@ -2,3 +2,6 @@
 .idea
 node_modules/
 opcuaIIoT/
+*leifert*
+error*.txt
+.DS_Store

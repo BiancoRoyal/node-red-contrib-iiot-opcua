@@ -611,19 +611,28 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
   return nodesToWrite
 }
 
-de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
+de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest) {
   let nodesToRead = []
+  let item = null
 
   this.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(msg))
 
-  if (msg.payload.items) {
-    let item = null
-
-    for (item of msg.payload.items) {
-      nodesToRead.push(item.nodeId)
+  if (multipleRequest) {
+    if (msg.nodesToRead) {
+      for (item of msg.nodesToRead) {
+        nodesToRead.push(item.toString())
+      }
+    } else {
+      nodesToRead.push(msg.topic)
     }
   } else {
-    nodesToRead.push(msg.topic)
+    if (msg.payload.items) {
+      for (item of msg.payload.items) {
+        nodesToRead.push(item.nodeId)
+      }
+    } else {
+      nodesToRead.push(msg.topic)
+    }
   }
 
   this.internalDebugLog('buildNodesToRead output: ' + JSON.stringify(nodesToRead))

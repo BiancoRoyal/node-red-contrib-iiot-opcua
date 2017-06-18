@@ -43,6 +43,7 @@ DEBUG options opcuaIIoT:
  
  * core
     * core:details 
+    * core:special
  * connector
  * browser
  * filter

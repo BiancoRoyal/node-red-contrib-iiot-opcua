@@ -42,41 +42,32 @@ module.exports = function (RED) {
       }
     }
 
-    coreInject.internalDebugLog('Repeat Is ' + node.repeat)
-    coreInject.internalDebugLog('Crontab Is ' + node.crontab)
+    node.repeaterSetup = function () {
+      coreInject.internalDebugLog('Repeat Is ' + node.repeat)
+      coreInject.internalDebugLog('Crontab Is ' + node.crontab)
 
-    if (this.repeat !== '') {
-      node.repeat = parseFloat(config.repeat) * node.REPEAT_FACTOR
+      if (node.repeat !== '') {
+        node.repeat = parseFloat(config.repeat) * node.REPEAT_FACTOR
 
-      if (node.repeat === 0) {
-        node.repeat = node.ONE_SECOND
-      }
-      node.verboseLog(RED._('opcuaiiotinject.repeat', node))
-      coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
+        if (node.repeat === 0) {
+          node.repeat = node.ONE_SECOND
+        }
+        node.verboseLog(RED._('opcuaiiotinject.repeat', node))
+        coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
-      node.interval_id = setInterval(function () {
-        node.emit('input', {})
-      }, node.repeat)
-    } else if (node.crontab !== '') {
-      node.verboseLog(RED._('opcuaiiotinject.crontab', node))
-
-      node.cronjob = new cron.CronJob(node.crontab,
-        function () {
+        node.interval_id = setInterval(function () {
           node.emit('input', {})
-        },
-        null,
-        true)
-    }
+        }, node.repeat)
+      } else if (node.crontab !== '') {
+        node.verboseLog(RED._('opcuaiiotinject.crontab', node))
 
-    if (node.once) {
-      let timeout = node.INPUT_TIMEOUT_MILLISECONDS * node.startDelay
-      coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout +
-        ' msec.'
-      )
-      setTimeout(function () {
-        coreInject.internalDebugLog('injecting once at start')
-        node.emit('input', {})
-      }, timeout)
+        node.cronjob = new cron.CronJob(node.crontab,
+          function () {
+            node.emit('input', {})
+          },
+          null,
+          true)
+      }
     }
 
     node.on('input', function (msg) {
@@ -124,6 +115,20 @@ module.exports = function (RED) {
         }
       }
     })
+
+    if (node.once) {
+      let timeout = node.INPUT_TIMEOUT_MILLISECONDS * node.startDelay
+      coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout +
+        ' msec.'
+      )
+      setTimeout(function () {
+        coreInject.internalDebugLog('injecting once at start')
+        node.emit('input', {})
+        node.repeaterSetup()
+      }, timeout)
+    } else {
+      node.repeaterSetup()
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Inject', OPCUAIIoTInject)
