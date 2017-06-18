@@ -22,6 +22,7 @@ module.exports = function (RED) {
     this.action = config.action
     this.queueSize = config.queueSize || 1
     this.name = config.name
+    this.justValue = config.justValue
     this.multipleRequest = config.multipleRequest
     this.metaDataInject = config.metaDataInject
     this.showStatusActivities = config.showStatusActivities
@@ -134,7 +135,11 @@ module.exports = function (RED) {
             }
           }
 
-          node.send([valueMsg, {payload: JSON.stringify(dataValue), valueMsg: valueMsg}])
+          if (node.justValue) {
+            node.send([valueMsg, {payload: 'just value option active'}])
+          } else {
+            node.send([valueMsg, {payload: JSON.stringify(dataValue), valueMsg: valueMsg}])
+          }
         })
 
         monitoredItem.on('error', function (err) {
@@ -216,7 +221,11 @@ module.exports = function (RED) {
                 readtype: 'event'
               }
 
-              node.send([valueMsg, result.variantMsg])
+              if (node.justValue) {
+                node.send([valueMsg, {payload: 'just value option active'}])
+              } else {
+                node.send([valueMsg, result.variantMsg])
+              }
             }).catch(node.errorHandling)
         })
 

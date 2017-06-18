@@ -22,6 +22,7 @@ module.exports = function (RED) {
     this.maxAge = config.maxAge || 1
     this.depth = config.depth || 1
     this.name = config.name
+    this.justValue = config.justValue
     this.multipleRequest = config.multipleRequest
     this.metaDataInject = config.metaDataInject
     this.showStatusActivities = config.showStatusActivities
@@ -182,6 +183,7 @@ module.exports = function (RED) {
 
                 node.send(message)
               }).catch(function (err) {
+                coreClient.core.specialDebugLog(err)
                 coreClient.readDebugLog('Error Items To Read: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
               })

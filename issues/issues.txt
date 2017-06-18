@@ -1,6 +1,8 @@
 
 Ideas
 - multiple data structure reading (see meta data request components)
+- converting in Result Filter is not finished yet
+
 
 Errors
 - session closing?

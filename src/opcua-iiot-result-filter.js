@@ -34,14 +34,33 @@ module.exports = function (RED) {
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
-    node.on('input', function (msg) {
-      if (msg.topic !== node.nodeId) {
-        return
+    node.nodeIdToFilter = function (msg) {
+      let doFilter = true
+
+      if (msg.nodesToRead && msg.nodesToRead.length) {
+        doFilter = !msg.nodesToRead.some(function (element, index, array) {
+          return element.toString() === node.nodeId.toString()
+        })
       }
 
+      return doFilter
+    }
+
+    node.on('input', function (msg) {
       if (!msg.payload) {
         coreFilter.internalDebugLog('filtering message without payload ' + JSON.stringify(msg))
         return
+      }
+
+      if (msg.multipleRequest) {
+        if (node.nodeIdToFilter(msg)) {
+          return
+        }
+      } else {
+        // just if not multiple request!
+        if (msg.topic !== node.nodeId) {
+          return
+        }
       }
 
       msg.filtertype = 'filter'
@@ -91,35 +110,23 @@ module.exports = function (RED) {
           break
         case 'read':
           if (msg.multipleRequest && msg.payload.length >= minArraySize) {
-            result = msg.payload[node.entry - 1]
+            result = node.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
           } else {
-            if (msg.payload.hasOwnProperty('value')) {
-              result = msg.payload.value
-            } else {
-              result = msg.payload
-            }
+            result = node.extractValueFromOPCUAStructure(msg)
           }
           break
         case 'VariableValue':
           if (msg.multipleRequest && msg.payload.length >= minArraySize) {
-            result = msg.payload[node.entry - 1]
+            result = node.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
           } else {
-            if (msg.payload.hasOwnProperty('value')) {
-              result = msg.payload.value
-            } else {
-              result = msg.payload
-            }
+            result = node.extractValueFromOPCUAStructure(msg)
           }
           break
         case 'AllAttributes':
           result = msg.payload // TODO: build an array structure for output
           break
         default:
-          if (msg.payload.hasOwnProperty('value')) {
-            result = msg.payload.value
-          } else {
-            result = msg.payload
-          }
+          result = node.extractValueFromOPCUAStructure(msg)
           break
       }
 
@@ -128,6 +135,43 @@ module.exports = function (RED) {
       }
 
       coreFilter.internalDebugLog('filter by read type result ' + JSON.stringify(result))
+
+      return result
+    }
+
+    node.extractValueFromOPCUAArrayStructure = function (msg, entryIndex) {
+      let result = null
+      let payload = msg.payload[entryIndex]
+
+      if (!payload) {
+        return result
+      }
+
+      if (payload.hasOwnProperty('value')) {
+        if (payload.value.hasOwnProperty('value')) {
+          result = payload.value.value
+        } else {
+          result = payload.value
+        }
+      } else {
+        result = payload
+      }
+
+      return result
+    }
+
+    node.extractValueFromOPCUAStructure = function (msg) {
+      let result = null
+
+      if (msg.payload.hasOwnProperty('value')) {
+        if (msg.payload.value.hasOwnProperty('value')) {
+          result = msg.payload.value.value
+        } else {
+          result = msg.payload.value
+        }
+      } else {
+        result = msg.payload
+      }
 
       return result
     }
@@ -165,5 +209,5 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Result-Filter', OPCUAIIoTResultFilter)
 
-  // DataType_Schema via REST
+// DataType_Schema via REST
 }

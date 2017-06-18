@@ -8,6 +8,7 @@
       "showErrors": "Show Errors",
       "attributeId": "Attribute Id",
       "queueSize": "Queue Size",
+      "justValue": "Send Just Values",
       "multipleRequest": "Multiple Nodes",
       "metaDataInject": "Meta Inject"
     }

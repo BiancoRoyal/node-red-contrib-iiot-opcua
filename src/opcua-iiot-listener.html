@@ -16,6 +16,7 @@
       action: {value: 'subscribe', required: true},
       queueSize: {value: 10, required: true, validate: RED.validators.number()},
       name: {value: ''},
+      justValue: {value: true},
       multipleRequest: {value: false},
       metaDataInject: {value: false},
       showStatusActivities: {value: false},
@@ -55,6 +56,11 @@
         <input type="text" id="node-input-name" placeholder="">
     </div>
     <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
+        <input type="checkbox" id="node-input-justValue" style="max-width:30px">
+    </div>
     <div class="form-row">
         <label style="min-width:160px" for="node-input-multipleRequest"><i class="fa fa-th"></i>
         <span data-i18n="opcua-iiot-contrib.label.multipleRequest"></span></label>

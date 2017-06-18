@@ -20,6 +20,7 @@ de.biancoroyal.opcua.iiot.core.nodeOPCUA = de.biancoroyal.opcua.iiot.core.nodeOP
 de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua/lib/datamodel/nodeid') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT:core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.detailDebugLog = de.biancoroyal.opcua.iiot.core.detailDebugLog || require('debug')('opcuaIIoT:core:details') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.specialDebugLog = de.biancoroyal.opcua.iiot.core.specialDebugLog || require('debug')('opcuaIIoT:core:special') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT || 'ns=0;i=84' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
 
@@ -226,7 +227,6 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
 }
 
 de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue) {
-  let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
   let convertedValue = null
 
   this.internalDebugLog('buildMsgPayloadByDataValue: ' + JSON.stringify(dataValue))
@@ -235,130 +235,78 @@ de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue)
     convertedValue = this.convertDataValue(dataValue.value)
   }
 
-  /*
-      NodeId: 1,
-      NodeClass: 2,
-      BrowseName: 3,
-      DisplayName: 4,
-      Description: 5,
-      WriteMask: 6,
-      UserWriteMask: 7,
-      IsAbstract: 8,
-      Symmetric: 9,
-      InverseName: 10,
-      ContainsNoLoops: 11,
-      EventNotifier: 12,
-      Value: 13,
-      DataType: 14,
-      ValueRank: 15,
-      ArrayDimensions: 16,
-      AccessLevel: 17,
-      UserAccessLevel: 18,
-      MinimumSamplingInterval: 19,
-      Historizing: 20,
-      Executable: 21,
-      UserExecutable: 22,
-      INVALID: 999
-   */
+  if (dataValue.hasOwnProperty('value')) {
+    try {
+      let json = JSON.parse(JSON.stringify(dataValue.toJSON(dataValue)))
+      json.convertedValue = convertedValue
+      json.hasOverflowBit = false // TODO: fixes the error on send message - may not correct - to refactor
+      this.specialDebugLog('JSON WITH VALUE: ' + JSON.stringify(json))
+      return json
+    } catch (err) {
+      this.specialDebugLog(err)
 
-  /* AttributeIds */
-  switch (dataValue.attributeId) {
-    case opcua.AttributeIds.NodeId:
-      return {
-        value: convertedValue,
-        dataType: dataValue.dataType.toString(),
-        arrayType: dataValue.arrayType.toString(),
-        attributeId: dataValue.attributeId,
-        statusCode: {
-          value: dataValue.statusCode.value,
-          description: dataValue.statusCode.description,
-          name: dataValue.statusCode.name
-        },
-        sourcePicoseconds: dataValue.sourcePicoseconds,
-        serverPicoseconds: dataValue.serverPicoseconds
-      }
-    case opcua.AttributeIds.NodeClass:
-      return {
-        value: convertedValue,
-        dataType: dataValue.value.dataType.toString(),
-        arrayType: dataValue.value.arrayType.toString(),
-        attributeId: dataValue.attributeId,
-        statusCode: {
-          value: dataValue.statusCode.value,
-          description: dataValue.statusCode.description,
-          name: dataValue.statusCode.name
-        },
-        sourcePicoseconds: dataValue.sourcePicoseconds,
-        serverPicoseconds: dataValue.serverPicoseconds
-      }
-    case opcua.AttributeIds.BrowseName:
-      return {
-        value: convertedValue,
-        dataType: dataValue.value.dataType.toString(),
-        arrayType: dataValue.value.arrayType.toString(),
-        attributeId: dataValue.attributeId,
-        statusCode: {
-          value: dataValue.statusCode.value,
-          description: dataValue.statusCode.description,
-          name: dataValue.statusCode.name
-        },
-        sourcePicoseconds: dataValue.sourcePicoseconds,
-        serverPicoseconds: dataValue.serverPicoseconds
-      }
-    case opcua.AttributeIds.DisplayName:
-      return {
-        value: convertedValue,
-        dataType: dataValue.value.dataType.toString(),
-        arrayType: dataValue.value.arrayType.toString(),
-        attributeId: dataValue.attributeId,
-        statusCode: {
-          value: dataValue.statusCode.value,
-          description: dataValue.statusCode.description,
-          name: dataValue.statusCode.name
-        },
-        sourcePicoseconds: dataValue.sourcePicoseconds,
-        serverPicoseconds: dataValue.serverPicoseconds
-      }
-    default:
-      if (dataValue.value) {
-        if (dataValue.statusCode) {
-          return {
+      if (dataValue.statusCode) {
+        return {
+          value: {
+            value: convertedValue | null,
+            dataType: dataValue.value.dataType | null,
+            arrayType: dataValue.value.arrayType | null,
+            attributeId: dataValue.attributeId | null
+          },
+          statusCode: {
+            value: dataValue.statusCode.value,
+            description: dataValue.statusCode.description,
+            name: dataValue.statusCode.name
+          },
+          sourcePicoseconds: dataValue.sourcePicoseconds,
+          serverPicoseconds: dataValue.serverPicoseconds
+        }
+      } else {
+        return {
+          value: {
             value: convertedValue,
             dataType: dataValue.value.dataType,
             arrayType: dataValue.value.arrayType,
-            statusCode: {
-              value: dataValue.statusCode.value,
-              description: dataValue.statusCode.description,
-              name: dataValue.statusCode.name
-            },
-            sourcePicoseconds: dataValue.sourcePicoseconds,
-            serverPicoseconds: dataValue.serverPicoseconds
-          }
-        } else {
-          return {
-            value: convertedValue,
-            dataValueStringified: JSON.stringify(dataValue)
-          }
-        }
-      } else {
-        if (dataValue.statusCode) {
-          return {
-            value: null,
-            statusCode: {
-              value: dataValue.statusCode.value,
-              description: dataValue.statusCode.description,
-              name: dataValue.statusCode.name
-            },
-            sourcePicoseconds: dataValue.sourcePicoseconds,
-            serverPicoseconds: dataValue.serverPicoseconds
-          }
-        } else {
-          return {
-            value: convertedValue,
-            dataValueStringified: JSON.stringify(dataValue)
-          }
+            attributeId: dataValue.attributeId | null
+          },
+          dataValueStringified: JSON.stringify(dataValue)
         }
       }
+    }
+  } else {
+    try {
+      let json = JSON.parse(JSON.stringify(dataValue.toJSON(dataValue)))
+      json.convertedValue = convertedValue
+      json.hasOverflowBit = false // TODO: fixes the error on send message - may not correct - to refactor
+      this.specialDebugLog('JSON WITHOUT VALUE: ' + JSON.stringify(json))
+      return json
+    } catch (err) {
+      this.specialDebugLog(err)
+
+      if (dataValue.statusCode) {
+        return {
+          value: {
+            value: null,
+            attributeId: dataValue.attributeId | null
+          },
+          statusCode: {
+            value: dataValue.statusCode.value,
+            description: dataValue.statusCode.description,
+            name: dataValue.statusCode.name
+          },
+          sourcePicoseconds: dataValue.sourcePicoseconds,
+          serverPicoseconds: dataValue.serverPicoseconds
+        }
+      } else {
+        return {
+          value: {
+            value: null,
+            attributeId: dataValue.attributeId | null
+          },
+          dataValueStringified: JSON.stringify(dataValue)
+        }
+      }
+    }
   }
 }
 
@@ -370,93 +318,136 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
   let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
   let convertedValue = null
 
-  this.detailDebugLog('convertDataValue: ' + JSON.stringify(value))
+  if (!value.hasOwnProperty('value')) {
+    this.specialDebugLog('value has no value and that is not allowd' + JSON.stringify(value))
+    return convertedValue
+  }
 
-  switch (dataType) {
-    case 'NodeId':
-    case opcua.DataType.NodeId:
-      convertedValue = value.value.toString()
-      break
-    case 'NodeIdType':
-    case opcua.DataType.NodeIdType:
-      convertedValue = String.fromCharCode(value.value)
-      break
-    case 'ByteString':
-    case opcua.DataType.ByteString:
-      convertedValue = String.fromCharCode(value.value)
-      break
-    case 'Byte':
-    case opcua.DataType.Byte:
-      convertedValue = parseInt(value.value)
-      break
-    case opcua.DataType.QualifiedName:
-      convertedValue = value.value.toString()
-      break
-    case 'LocalizedText':
-    case opcua.DataType.LocalizedText:
-      convertedValue = value.value.text
-      break
-    case 'Float':
-    case opcua.DataType.Float:
-      convertedValue = parseFloat(value.value)
-      break
-    case 'Double':
-    case opcua.DataType.Double:
-      convertedValue = parseFloat(value.value)
-      break
-    case 'UInt16':
-    case opcua.DataType.UInt16:
-      let uint16 = new Uint16Array([value.value])
-      convertedValue = uint16[0]
-      break
-    case 'UInt32':
-    case opcua.DataType.UInt32:
-      let uint32 = new Uint32Array([value.value])
-      convertedValue = uint32[0]
-      break
-    case 'Integer':
-    case opcua.DataType.Integer:
-    case 'Int16':
-    case opcua.DataType.Int16:
-    case 'Int32':
-    case opcua.DataType.Int32:
-    case 'Int64':
-    case opcua.DataType.Int64:
-      convertedValue = parseInt(value.value)
-      break
-    case 'Boolean':
-    case opcua.DataType.Boolean:
-      convertedValue = (value.value && value.value.toString().toLowerCase() !== 'false')
-      break
-    case 'String':
-    case opcua.DataType.String:
-      if (value.value) {
+  let valueType = typeof value.value
+
+  this.detailDebugLog('convertDataValue: ' + JSON.stringify(value) +
+    ' value origin type ' + valueType + ' convert to' + ' ' + dataType)
+
+  try {
+    switch (dataType) {
+      case 'NodeId':
+      case opcua.DataType.NodeId:
         convertedValue = value.value.toString()
-      } else {
-        convertedValue = JSON.stringify(value.value)
-      }
-      break
-    case 'Null':
-    case opcua.DataType.Null:
-      if (value.value) {
-        convertedValue = value.value
-      } else {
-        convertedValue = value
-      }
-      break
-    default:
-      this.internalDebugLog('convertDataValue unused DataType: ' + dataType)
-      if (value.value) {
-        if (value.value.toString) {
+        break
+      case 'NodeIdType':
+      case opcua.DataType.NodeIdType:
+        if (value.value instanceof Buffer) {
           convertedValue = value.value.toString()
         } else {
           convertedValue = value.value
         }
-      } else {
-        this.internalDebugLog('convertDataValue no value - so we stringify: '.red + JSON.stringify(value))
-        convertedValue = value
-      }
-      break
+        break
+      case 'ByteString':
+      case opcua.DataType.ByteString:
+        convertedValue = value.value
+        break
+      case 'Byte':
+      case opcua.DataType.Byte:
+        if (valueType === 'Boolean') {
+          convertedValue = value.value ? 1 : 0
+        } else {
+          convertedValue = parseInt(value.value)
+        }
+        break
+      case opcua.DataType.QualifiedName:
+        convertedValue = value.value.toString()
+        break
+      case 'LocalizedText':
+      case opcua.DataType.LocalizedText:
+        convertedValue = value.value.text
+        break
+      case 'Float':
+      case opcua.DataType.Float:
+        if (isNaN(value.value)) {
+          convertedValue = value.value
+        } else {
+          convertedValue = parseFloat(value.value)
+        }
+        break
+      case 'Double':
+      case opcua.DataType.Double:
+        if (isNaN(value.value)) {
+          convertedValue = value.value
+        } else {
+          convertedValue = parseFloat(value.value)
+        }
+        break
+      case 'UInt16':
+      case opcua.DataType.UInt16:
+        let uint16 = new Uint16Array([value.value])
+        convertedValue = uint16[0]
+        break
+      case 'UInt32':
+      case opcua.DataType.UInt32:
+        let uint32 = new Uint32Array([value.value])
+        convertedValue = uint32[0]
+        break
+      case 'Integer':
+      case opcua.DataType.Integer:
+      case 'Int16':
+      case opcua.DataType.Int16:
+      case 'Int32':
+      case opcua.DataType.Int32:
+      case 'Int64':
+      case opcua.DataType.Int64:
+        if (valueType === 'Boolean') {
+          convertedValue = value.value ? 1 : 0
+        } else {
+          if (isNaN(value.value)) {
+            convertedValue = value.value
+          } else {
+            convertedValue = parseInt(value.value)
+          }
+        }
+        break
+      case 'Boolean':
+      case opcua.DataType.Boolean:
+        if (valueType === 'Boolean') {
+          convertedValue = value.value
+        } else {
+          if (isNaN(value.value)) {
+            convertedValue = (value.value && value.value.toString().toLowerCase() !== 'false')
+          } else {
+            if (value.value) {
+              convertedValue = true
+            } else {
+              convertedValue = false
+            }
+          }
+        }
+        break
+      case 'String':
+      case opcua.DataType.String:
+        if (value.hasOwnProperty('value')) {
+          convertedValue = value.value.toString()
+        } else {
+          convertedValue = JSON.stringify(value.value)
+        }
+        break
+      case 'Null':
+      case opcua.DataType.Null:
+        convertedValue = value.value
+        break
+      default:
+        this.internalDebugLog('convertDataValue unused DataType: ' + dataType)
+        if (value.hasOwnProperty('value')) {
+          if (value.value.toString) {
+            convertedValue = value.value.toString()
+          } else {
+            convertedValue = value.value
+          }
+        } else {
+          convertedValue = null
+        }
+        break
+    }
+  } catch (err) {
+    this.detailDebugLog('convertDataValue ' + err)
   }
 
   this.detailDebugLog('convertDataValue is: ' + convertedValue)
