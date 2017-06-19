@@ -47,7 +47,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (!msg.payload) {
+      if (!msg.hasOwnProperty('payload')) {
         coreFilter.internalDebugLog('filtering message without payload ' + JSON.stringify(msg))
         return
       }
