@@ -122,19 +122,44 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Read">
     <h2>OPC UA IIoT Read</h2>
-    <p>Results in message:</p>
-    <ul>
-        <li>payload</li>
-        <li>nodesToRead (Array)</li>
-        <li>maxAge</li>
-        <li>input (msg)</li>
-        <li>resultsConverted (Array)</li>
-        <li>results (Array)</li>
-        <li>diagnostics (Array)</li>
-        <li>nodetype</li>
-        <li>readtype</li>
-        <li>attributeId</li>
-    </ul>
 
-    <p>Please use the Result Filter node to handle the output of the Read node.
+    <p>The Read node is for polling data from the OPC UA server.
+    It handles single data and multiple data requests.
+    The multiple data requests will produce arrays.
+    The single data requests just a value.</p>
+
+    <div>
+        <p>Results of multiple request in message:</p>
+        <ul>
+            <li>payload (Array)</li>
+            <li>nodesToRead (Array)</li>
+            <li>maxAge</li>
+            <li>input (msg)</li>
+            <li>resultsConverted (Array)</li>
+            <li>results (Array)</li>
+            <li>diagnostics (Array)</li>
+            <li>nodetype</li>
+            <li>readtype</li>
+            <li>attributeId</li>
+        </ul>
+    </div>
+
+    <div>
+        <p>Results of multiple request in message:</p>
+        <ul>
+            <li>payload or payload (Array) based on read type</li>
+            <li>nodesToRead (Node-Id)</li>
+            <li>maxAge</li>
+            <li>input (msg)</li>
+            <li>resultsConverted (Array)</li>
+            <li>results (Array)</li>
+            <li>diagnostics (Array)</li>
+            <li>nodetype</li>
+            <li>readtype</li>
+            <li>attributeId</li>
+            <li>topic (Node-Id)</li>
+        </ul>
+    </div>
+
+    <p>Please use the Result Filter node to handle the output of the Read node.</p>
 </script>

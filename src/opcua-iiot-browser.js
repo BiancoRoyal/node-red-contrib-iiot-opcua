@@ -62,14 +62,20 @@ module.exports = function (RED) {
 
     node.transformToEntry = function (reference) {
       if (reference) {
-        return {
-          referenceTypeId: reference.referenceTypeId.toString(),
-          isForward: reference.isForward,
-          nodeId: reference.nodeId.toString(),
-          browseName: reference.browseName.toString(),
-          displayName: reference.displayName,
-          nodeClass: reference.nodeClass.toString(),
-          typeDefinition: reference.typeDefinition.toString()
+        try {
+          return reference.toJSON()
+        } catch (err) {
+          coreBrowser.internalDebugLog(err)
+
+          return {
+            referenceTypeId: reference.referenceTypeId.toString(),
+            isForward: reference.isForward,
+            nodeId: reference.nodeId.toString(),
+            browseName: reference.browseName.toString(),
+            displayName: reference.displayName,
+            nodeClass: reference.nodeClass.toString(),
+            typeDefinition: reference.typeDefinition.toString()
+          }
         }
       } else {
         coreBrowser.internalDebugLog('Empty Reference On Browse')
@@ -134,13 +140,14 @@ module.exports = function (RED) {
       let msg = {}
 
       msg.nodetype = 'browse'
+      msg.input = originMessage
+
       msg.payload = {
-        request: originMessage,
-        endpoint: node.connector.endpoint,
-        session: node.opcuaSession.name,
-        browseTopic: node.browseTopic,
+        browserItems: browserEntries,
         browserResultCount: browserEntries.length,
-        browserItems: browserEntries
+        browseTopic: node.browseTopic,
+        endpoint: node.connector.endpoint,
+        session: node.opcuaSession.name
       }
 
       node.send(msg)

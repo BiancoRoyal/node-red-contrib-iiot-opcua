@@ -11,8 +11,9 @@
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
+      injectTypeListener: {value: false},
       payload: {
-        value: '', validate: function (v) {
+        value: '1000', validate: function (v) {
           let ptype = $('#node-input-payloadType').val() || this.payloadType
           if (ptype === 'json') {
             try {
@@ -29,13 +30,13 @@
           return true
         }
       },
-      payloadType: {value: 'date'},
+      payloadType: {value: 'num'},
       topic: {value: ''},
       datatype: {value: '', required: true},
       repeat: {value: ''},
       crontab: {value: ''},
       once: {value: false},
-      startDelay: {value: 15},
+      startDelay: {value: ''},
       name: {value: ''}
     },
     inputs: 0,
@@ -115,9 +116,11 @@
 
         if ((id === 'none') || (id === 'interval')) {
           $('#node-once').show()
+          $('#node-delay').show()
         }
         else {
           $('#node-once').hide()
+          $('#node-delay').hide()
           $('#node-input-once').prop('checked', false)
         }
       })
@@ -300,12 +303,31 @@
 
       $('#opcuaiiotinject-time-type-select').change()
       $('#opcuaiiotinject-time-interval-time-start').change()
+
+      $('#node-input-once').change(function () {
+        if ($(this).is(":checked")) {
+          $('#node-delay').show()
+        } else {
+          $('#node-delay').hide()
+        }
+      })
+
+
+      $('#node-input-injectTypeListener').change(function () {
+        if ($(this).is(":checked")) {
+          $('#input-label-listener').show()
+          $('#input-label-payload').hide()
+
+        } else {
+          $('#input-label-payload').show()
+          $('#input-label-listener').hide()
+        }
+      })
     },
     oneditsave: function () {
       let repeat = ''
       let crontab = ''
       let type = $('#opcuaiiotinject-time-type-select').val()
-
 
       if (type === 'interval') {
         crontab = ''
@@ -448,8 +470,17 @@
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Inject">
-    <div class="form-row">
-        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="node-red:common.label.payload"></span></label>
+    <div class="form-row" id="node-inject-type">
+        <label for="node-input-injectTypeListener" style="width:140px">
+        <i class="fa fa-paper-plane-o"></i> <span data-i18n="opcuaiiotinject.injectTypeListener"></span></label>
+        <input type="checkbox" id="node-input-injectTypeListener" style="width:40px">
+    </div>
+
+    <div class="form-row" id="input-payload-row">
+        <label for="node-input-payload"><i class="fa fa-envelope"></i>
+        <span id="input-label-payload" data-i18n="opcuaiiotinject.label.payload"></span>
+        <span id="input-label-listener" data-i18n="opcuaiiotinject.label.interval"></span>
+        </label>
         <input type="text" id="node-input-payload" style="width:70%">
         <input type="hidden" id="node-input-payloadType">
     </div>
@@ -580,7 +611,7 @@
     </div>
     <div class="form-row" id="node-delay">
         <label for="node-input-startDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcuaiiotinject.startDelay"></span></label>
-        <input type="text" id="node-input-startDelay" placeholder="15" style="width:80px">
+        <input type="text" id="node-input-startDelay" placeholder="10" style="width:80px">
     </div>
 
     <div class="form-row">
@@ -589,6 +620,7 @@
     </div>
 
     <div class="form-tips" data-i18n="[html]opcuaiiotinject.tip"></div>
+
 
 
 
@@ -635,8 +667,32 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">
     <h2>OPC UA IIoT Inject</h2>
-    <p>Pressing the button on the left side of the node allows a request on a topic to be injected into the flow.</p>
+    
+    <p>Pressing the button on the left side of the node builds an inject object to read, browse, listen or write by
+    the OPC UA IIoT nodes.</p>
 
-    <h3>Delay</h3>
-    <p>The delay has to be set to a minimum to wait for starting your OPC UA server.</p>
+    <h3>Configuration</h3>
+
+    <strong>Listener Inject</strong>
+    <p>Set that option to checked if the Injects works as a Listener Inject.</p>
+
+    <strong>Interval</strong>
+    <p>If Listener Inject is checked, then the value will used as the interval for the monitored item.</p>
+
+    <strong>Payload</strong>
+    <p>If Listener Inject is not hecked, then the value is a normal payload to transport data.</p>
+
+    <strong>Node-Id</strong>
+    <p>The Node-Id has to be an OPC UA valid Node-Id like ns=0;i=85</p>
+
+    <strong>Data Type</strong>
+    <p>The Data Type setting is needed to do the converts of the node-opcua Variant type result(s).</p>
+    <p>In best practice do transformations with the Result Filter node.</p>
+
+    <strong>Inject once at start</strong>
+    <p>The 'Delay sec. at start' has to be set to a minimum for starting injects toward the OPC UA server.</p>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
+
 </script>

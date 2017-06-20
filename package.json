@@ -1,6 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.2.0-zeta",
+  "version": "0.2.0-eta",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -71,7 +71,7 @@
     "eslint": "^4.0.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-config-standard-jsx": "^4.0.2",
-    "eslint-plugin-mocha": "^4.10.1",
+    "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.1.0",
     "eslint-plugin-standard": "^3.0.1",
@@ -93,7 +93,7 @@
     "sinon": "^2.3.4",
     "standard": "^10.0.2",
     "supertest": "^3.0.0",
-    "uglify-js": "^3.0.17",
+    "uglify-js": "^3.0.18",
     "uglify-js-harmony": "^2.7.7",
     "when": "^3.7.8"
   },

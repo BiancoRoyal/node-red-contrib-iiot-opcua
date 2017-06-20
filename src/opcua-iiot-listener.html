@@ -82,8 +82,66 @@
         <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
         <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Listener">
     <h2>OPC UA IIoT Listener</h2>
+
+    <h3>Input</h3>
+    <div>
+        <strong>subscribe input:</strong>
+        <ul>
+            <li>payload (value/JSON)
+            <li>topic (Node-Id)
+            <li>datatype (node-opcua)
+        </ul>
+    </div>
+
+    <div>
+        <strong>event input:</strong>
+        <ul>
+            <li>payload (number/JSON)
+                <ul>
+                    <li>interval (number)
+                    <li>queueSize (number)
+                </ul>
+            <li>topic (Node-Id)
+            <li>datatype (node-opcua/OPC UA data type name)
+        </ul>
+    </div>
+
+    <h4>Inject payload JSON</h4>
+    <p>There is a option to send a JSON payload inject into the Listener.</p>
+    <p>Example:</p>
+    <p><pre>{ "interval": 500, "queueSize": 10 }</pre></p>
+
+    <h3>Output 1</h3>
+    <div>
+        <strong>Result in subscribe message:</strong>
+        <ul>
+            <li>payload (value)</li>
+            <li>topic (Node-Id)</li>
+            <li>input (msg)</li>
+            <li>nodetype (listen)</li>
+            <li>readtype (subscribe)</li>
+            <li>result (origin from node-opcua)</li>
+        </ul>
+    </div>
+    <div>
+        <strong>Result in event message:</strong>
+        <ul>
+            <li>payload (event message)</li>
+            <li>topic (Node-Id)</li>
+            <li>input (msg)</li>
+            <li>nodetype (listen)</li>
+            <li>readtype (event)</li>
+        </ul>
+    </div>
+
+    <h3>Output 2</h3>
+
+    <p>That output provides the origin from node-opcua as JSON stringified. It is to stringify, otherwise Node-RED
+    got errors and doesn't send anything.</p>
+
 </script>

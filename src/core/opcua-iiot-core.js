@@ -458,11 +458,15 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
 de.biancoroyal.opcua.iiot.core.buildMsgPayloadByStatusCode = function (statusCode) {
   this.detailDebugLog('buildMsgPayloadByStatusCode: ' + JSON.stringify(statusCode))
 
-  return {
-    value: statusCode.value,
-    description: statusCode.description,
-    name: statusCode.name,
-    statusCodeStringified: JSON.stringify(statusCode)
+  try {
+    return statusCode.toJSON()
+  } catch (err) {
+    return {
+      value: statusCode.value,
+      description: statusCode.description,
+      name: statusCode.name,
+      statusCodeStringified: JSON.stringify(statusCode)
+    }
   }
 }
 
