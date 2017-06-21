@@ -23,6 +23,8 @@ module.exports = function (RED) {
     this.withPrecision = config.withPrecision
     this.precision = parseInt(config.precision) | 2
     this.entry = config.entry
+    this.justValue = config.justValue
+    this.withValueCheck = config.withValueCheck
     this.minvalue = config.minvalue
     this.maxvalue = config.maxvalue
     this.defaultvalue = config.defaultvalue
@@ -31,6 +33,11 @@ module.exports = function (RED) {
 
     let node = this
     node.subscribed = false
+
+    if (node.withValueCheck) {
+      node.minvalue = node.convertDataType(node.minvalue)
+      node.maxvalue = node.convertDataType(node.minvalue)
+    }
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
@@ -93,9 +100,21 @@ module.exports = function (RED) {
         result = Number(result.toPrecision(node.precision))
       }
 
+      if (node.withValueCheck) {
+        if (result < node.minvalue || result > node.maxvalue) {
+          result = node.defaultvalue
+        }
+      }
+
       coreFilter.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
       coreFilter.internalDebugLog('sending result ' + result)
-      node.send([{payload: result}, msg])
+
+      if (node.justValue) {
+        node.send([{payload: result}, {payload: 'just value option active'}])
+      } else {
+        msg.filteredResult = result
+        node.send([{payload: result}, msg])
+      }
     })
 
     node.filterByReadType = function (msg) {

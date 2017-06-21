@@ -667,7 +667,9 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">
     <h2>OPC UA IIoT Inject</h2>
-    
+
+    <p>The modified Inject node is to provide some unique features that you need to build beautiful Flows.</p>
+
     <p>Pressing the button on the left side of the node builds an inject object to read, browse, listen or write by
     the OPC UA IIoT nodes.</p>
 
@@ -677,10 +679,11 @@
     <p>Set that option to checked if the Injects works as a Listener Inject.</p>
 
     <strong>Interval</strong>
-    <p>If Listener Inject is checked, then the value will used as the interval for the monitored item.</p>
+    <p>If the Listener Inject state configured to true,
+    then the value will be used as the interval for the monitored item.</p>
 
     <strong>Payload</strong>
-    <p>If Listener Inject is not hecked, then the value is a normal payload to transport data.</p>
+    <p>If the Listener Inject set to false, then the value is a standard payload to transport data.</p>
 
     <strong>Node-Id</strong>
     <p>The Node-Id has to be an OPC UA valid Node-Id like ns=0;i=85</p>
@@ -691,6 +694,7 @@
 
     <strong>Inject once at start</strong>
     <p>The 'Delay sec. at start' has to be set to a minimum for starting injects toward the OPC UA server.</p>
+    <p>All activities will start ever <strong>after</strong> the start inject is done.</p>
 
     <strong>Name</strong>
     <p>Name in the flow of Node-RED.</p>

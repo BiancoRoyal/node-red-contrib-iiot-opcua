@@ -622,15 +622,21 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
   this.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(msg))
 
   if (multipleRequest) {
-    if (msg.nodesToRead) {
+    if (msg.nodesToRead && msg.nodesToRead.length) {
       for (item of msg.nodesToRead) {
         nodesToRead.push(item.toString())
       }
     } else {
-      nodesToRead.push(msg.topic)
+      if (msg.payload.items && msg.payload.items.length) {
+        // browser compatibility for an easier set up
+        for (item of msg.payload.items) {
+          nodesToRead.push(item.nodeId)
+        }
+      }
     }
   } else {
     if (msg.payload.items) {
+      // browser compatibility for an easier set up
       for (item of msg.payload.items) {
         nodesToRead.push(item.nodeId)
       }

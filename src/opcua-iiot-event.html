@@ -71,4 +71,42 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Event">
     <h2>OPC UA IIoT Event</h2>
+
+    <p>
+        The Event node is to set up an event Listener with the right options.
+        It is to trigger by an Inject of Node-RED or by the OPC UA IIoT Inject.
+        It could also trigger with incoming events from other nodes.
+    </p>
+
+    <h3>Input</h3>
+
+    <div>
+        <strong>Event message:</strong>
+        <ul>
+            <li>payload (Number - interval in msec.)
+            <li>topic (Node-Id)
+        </ul>
+    </div>
+
+    <h3>Output</h3>
+    <div>
+        <strong>Event message:</strong>
+        <ul>
+            <li>payload
+            <ul>
+            <li>eventRoot (Node-Id)
+            <li>eventType (Condition/Basic)
+            <li>queueSize (Number of elements)
+            <li>eventFilter (Array)
+            <li>eventFields (Array)
+            <li>interval (Number msec.)
+            </ul>
+            <li>topic (Node-Id)
+            <li>nodetype (events)
+        </ul>
+    </div>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
+
 </script>

@@ -43,8 +43,8 @@
      <div class="form-row">
         <label for="node-input-action"><i class="fa fa-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.actiontype"></span></label>
         <select type="text" id="node-input-action" style="width:72%;">
-            <option value="subscribe" selected>SUBSCRIBE</option>
-            <option value="events">EVENTS</option>
+            <option value="subscribe" selected>Monitoring</option>
+            <option value="events">Alarm&amp;Events</option>
         </select>
     </div>
     <div class="form-row">
@@ -87,6 +87,11 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Listener">
     <h2>OPC UA IIoT Listener</h2>
+
+    <p>The Listener node is to set up monitoring to the address space or
+    Alarm&amp;Events of your OPC UA server.
+    It needs only one inject to set up start monitoring. For every inject, it
+    works like flip-flop - subscribe-unsubscribe monitoring or Alarm&amp;Events.</p>
 
     <h3>Input</h3>
     <div>
@@ -143,5 +148,8 @@
 
     <p>That output provides the origin from node-opcua as JSON stringified. It is to stringify, otherwise Node-RED
     got errors and doesn't send anything.</p>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
 
 </script>

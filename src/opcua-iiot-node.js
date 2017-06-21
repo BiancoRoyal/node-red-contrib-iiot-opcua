@@ -45,7 +45,7 @@ module.exports = function (RED) {
         node.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
 
-      if (node.value) {
+      if (node.value !== null) {
         msg.payload = node.value
       }
 

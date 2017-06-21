@@ -86,16 +86,39 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Node">
     <h2>OPC UA IIoT Node</h2>
 
-    <p>The Node is to set up with a Node-RED Inject node to give the OPC UA Node-Id and the data type.</p>
+    <p>The Node is to set up a flow with the Node-RED Inject node
+    to give the OPC UA Node-Id and the data type parameters.</p>
 
-    <strong>Node-Id</strong>
+    <h3>Input</h3>
+    <div>
+        <strong>Event message:</strong>
+        <ul>
+            <li>payload (Value)
+            <li>topic (Node-Id)
+        </ul>
+    </div>
 
-    <strong>DataType</strong>
+    <h3>Output</h3>
+    <div>
+        <strong>Event message:</strong>
+        <ul>
+            <li>payload (payload or value)
+            <li>topic (Node-Id)
+            <li>datatype (node-opcua/OPC UA data type string)
+            <li>nodetype (node)
+        </ul>
+    </div>
 
     <strong>Value</strong>
-    <p>The value input is for writing a fix value to the given OPC UA Node-Id.</p>
+    <p>The value input is for writing a fixed value to the given OPC UA Node-Id.
+    It overrides the given payload if it is not null. The value has to be in the ring of the data type.</p>
 
     <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
 
-    <strong>Listener</strong>
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span>
+    </strong>
+    <p>Please, set that option to true if it is an inject for the Listener node.
+    With that option, you will get the node subscribe or unsubscribe information.</p>
 </script>

@@ -161,7 +161,8 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Connector">
     <h2>OPC UA IIoT Connector</h2>
 
-    <p>The Connector starts the connecting to the OPC UA server instantly.
+    <p>The Connector is a pure configuration node and starts connecting 
+    to the OPC UA server instantly after 'Deploy' or start/restart.
     Please, keep in mind that the Connector will work if it is unused
     and open a connection to the endpoint, too.</p>
 
@@ -171,6 +172,10 @@
     the right bottom corner of the Connectors configuration view.
     The default is 'On all flows' -
     set it to the flow to get all deleted if you delete the flow.</p>
+
+    <p>The Connector is one connection to your OPC UA server, which handles multiple sessions.
+    If you need multiple connections use as many as Connectors you need.
+    With that you can build your idea of OPC UA connectivity.</p>
 
     <h3>Configuration</h3>
 
@@ -189,25 +194,27 @@
 
     <div>
         <ul style="margin-left:80px">
-            <li>None*</li>
-            <li>Basic128</li>
-            <li>Basic128Rsa15*</li>
-            <li>Basic192</li>
-            <li>Basic192Rsa15</li>
-            <li>Basic256*</li>
-            <li>Basic256Rsa15</li>
-            <li>Basic256Sha256</li>
+            <li>None*
+            <li>Basic128
+            <li>Basic128Rsa15*
+            <li>Basic192
+            <li>Basic192Rsa15
+            <li>Basic256*
+            <li>Basic256Rsa15
+            <li>Basic256Sha256
         </ul>
         <p>* supported by node-opcua for now</p>
     </div>
 
     <div>
         <ul style="margin-left:80px">
-            <li>None*</li>
-            <li>Sign</li>
-            <li>Sign&Encrypt*</li>
+            <li>None*
+            <li>Sign
+            <li>Sign&Encrypt*
         </ul>
         <p>* supported by node-opcua for now</p>
     </div>
 
+    <strong>Name</strong>
+    <p>Name in the selection of the endpoint configuration.</p>
 </script>

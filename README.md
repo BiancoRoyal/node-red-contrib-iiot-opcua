@@ -4,6 +4,7 @@
 ![Quality GitLab CI](http://b.repl.ca/v1/Quality-GitLab_CI_and_CD-green.png)
 ![ES_Sourdce_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
+![NodeJS_Version](http://b.repl.ca/v1/NodeJS-6.x-green.png)
 
 # node-red-iiot-opcua 
 
@@ -135,6 +136,9 @@ Errors
 The BSD 3-Clause License
 
 [Klaus Landsdorf][1]
+
+That is a whole new Node-RED package based on the node-opcua examples and the API documentation.
+The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED.
 
 ### Important
 
