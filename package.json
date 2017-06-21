@@ -1,6 +1,6 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.2.0-theta",
+  "version": "0.2.0-iota",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -82,6 +82,7 @@
     "gulp-javascript-obfuscator": "^1.1.2",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-obfuscate": "^0.2.9",
+    "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^3.0.0",
     "javascript-obfuscator": "^0.9.4",
     "jsdoc": "^3.4.3",
