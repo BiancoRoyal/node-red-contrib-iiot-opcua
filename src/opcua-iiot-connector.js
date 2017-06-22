@@ -129,17 +129,17 @@ module.exports = function (RED) {
           if (servers && servers.length) {
             servers.forEach(function (server) {
               coreConnector.internalDebugLog('Discovery Server')
-              coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri ? server.applicationUri.cyan.bold : 'none')
-              coreConnector.internalDebugLog('         productUri:' + server.productUri ? server.productUri.cyan.bold : 'none')
-              coreConnector.detailDebugLog('    applicationName:' + server.applicationName ? server.applicationName.text.cyan.bold : 'none')
-              coreConnector.detailDebugLog('               type:' + server.applicationType ? server.applicationType.key.cyan.bold : 'none')
-              coreConnector.detailDebugLog('   gatewayServerUri:' + server.gatewayServerUri ? server.gatewayServerUri.cyan.bold : 'none')
-              coreConnector.detailDebugLog('discoveryProfileUri:' + server.discoveryProfileUri ? server.discoveryProfileUri.cyan.bold : 'none')
+              coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri && server.applicationUri !== null ? server.applicationUri : 'none')
+              coreConnector.internalDebugLog('         productUri:' + server.productUri && server.productUri !== null ? server.productUri : 'none')
+              coreConnector.detailDebugLog('    applicationName:' + server.applicationName && server.applicationName !== null ? server.applicationName.text : 'none')
+              coreConnector.detailDebugLog('               type:' + server.applicationType && server.applicationType !== null ? server.applicationType.key : 'none')
+              coreConnector.detailDebugLog('   gatewayServerUri:' + server.gatewayServerUri && server.gatewayServerUri !== null ? server.gatewayServerUri : 'none')
+              coreConnector.detailDebugLog('discoveryProfileUri:' + server.discoveryProfileUri && server.discoveryProfileUri !== null ? server.discoveryProfileUri : 'none')
               coreConnector.detailDebugLog('      discoveryUrls:')
 
               if (server.discoveryUrls && server.discoveryUrls.length) {
                 server.discoveryUrls.forEach(function (discoveryUrl) {
-                  coreConnector.detailDebugLog('                    ' + discoveryUrl ? discoveryUrl.cyan.bold : 'none')
+                  coreConnector.detailDebugLog('                    ' + discoveryUrl && discoveryUrl !== null ? discoveryUrl : 'none')
                 })
               }
 
