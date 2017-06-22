@@ -458,11 +458,15 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
 de.biancoroyal.opcua.iiot.core.buildMsgPayloadByStatusCode = function (statusCode) {
   this.detailDebugLog('buildMsgPayloadByStatusCode: ' + JSON.stringify(statusCode))
 
-  return {
-    value: statusCode.value,
-    description: statusCode.description,
-    name: statusCode.name,
-    statusCodeStringified: JSON.stringify(statusCode)
+  try {
+    return statusCode.toJSON()
+  } catch (err) {
+    return {
+      value: statusCode.value,
+      description: statusCode.description,
+      name: statusCode.name,
+      statusCodeStringified: JSON.stringify(statusCode)
+    }
   }
 }
 
@@ -618,15 +622,21 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
   this.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(msg))
 
   if (multipleRequest) {
-    if (msg.nodesToRead) {
+    if (msg.nodesToRead && msg.nodesToRead.length) {
       for (item of msg.nodesToRead) {
         nodesToRead.push(item.toString())
       }
     } else {
-      nodesToRead.push(msg.topic)
+      if (msg.payload.items && msg.payload.items.length) {
+        // browser compatibility for an easier set up
+        for (item of msg.payload.items) {
+          nodesToRead.push(item.nodeId)
+        }
+      }
     }
   } else {
     if (msg.payload.items) {
+      // browser compatibility for an easier set up
       for (item of msg.payload.items) {
         nodesToRead.push(item.nodeId)
       }

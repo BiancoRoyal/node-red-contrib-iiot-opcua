@@ -17,6 +17,7 @@
 var de = de || {biancoroyal: {opcua: {iiot: {core: {browser: {}}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.core = de.biancoroyal.opcua.iiot.core.browser.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.internalDebugLog = de.biancoroyal.opcua.iiot.core.browser.internalDebugLog || require('debug')('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.browser.detailDebugLog = de.biancoroyal.opcua.iiot.core.browser.detailDebugLog || require('debug')('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
   return new Promise(

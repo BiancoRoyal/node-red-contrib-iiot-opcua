@@ -50,8 +50,14 @@ module.exports = function (RED) {
     let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
     let xmlFiles = [standardNodeSetFile, path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')]
 
-    node.publicCertificateFile = path.join(__dirname, '../node_modules/node-opcua/certificates/server_selfsigned_cert_2048.pem')
-    node.privateCertificateFile = path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
+    let nodeOPCUAPath = require.resolve('node-opcua')
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+    coreServer.internalDebugLog(nodeOPCUAPath)
+
+    node.publicCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_selfsigned_cert_2048.pem')
+    coreServer.detailDebugLog(node.publicCertificateFile)
+    node.privateCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_key_2048.pem')
+    coreServer.detailDebugLog(node.privateCertificateFile)
 
     setNodeStatusTo('waiting')
 
@@ -116,7 +122,7 @@ module.exports = function (RED) {
         isAuditing: node.isAuditing
       }
 
-      coreServer.internalDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+      coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       server = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
 
       server.initialize(postInitialize)
@@ -140,7 +146,7 @@ module.exports = function (RED) {
 
         server.start(function (err) {
           if (err) {
-            coreServer.internalDebugLog('Start Error ' + err)
+            coreServer.internalDebugLog('Start Error '.red + err)
           } else {
             server.endpoints.forEach(function (endpoint) {
               endpoint.endpointDescriptions().forEach(function (endpointDescription) {
@@ -156,7 +162,7 @@ module.exports = function (RED) {
 
             setNodeStatusTo('active')
 
-            coreServer.internalDebugLog(JSON.stringify(server.serverInfo))
+            coreServer.detailDebugLog(JSON.stringify(server.serverInfo))
 
             server.on('newChannel', function (channel) {
               coreServer.internalDebugLog('Client connected with address = ' +
@@ -171,18 +177,18 @@ module.exports = function (RED) {
             })
 
             server.on('create_session', function (session) {
-              coreServer.internalDebugLog(' SESSION CREATED')
-              coreServer.internalDebugLog('Client application URI:' + session.clientDescription.applicationUri)
-              coreServer.internalDebugLog('Client product URI:' + session.clientDescription.productUri)
-              coreServer.internalDebugLog('Client application name:' + session.clientDescription.applicationName.toString())
-              coreServer.internalDebugLog('Client application type:' + session.clientDescription.applicationType.toString())
+              coreServer.internalDebugLog('############## SESSION CREATED ##############')
+              coreServer.detailDebugLog('Client application URI:' + session.clientDescription.applicationUri)
+              coreServer.detailDebugLog('Client product URI:' + session.clientDescription.productUri)
+              coreServer.detailDebugLog('Client application name:' + session.clientDescription.applicationName.toString())
+              coreServer.detailDebugLog('Client application type:' + session.clientDescription.applicationType.toString())
               coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
               coreServer.internalDebugLog('Session timeout:' + session.sessionTimeout)
               coreServer.internalDebugLog('Session id:' + session.sessionId)
             })
 
             server.on('session_closed', function (session, reason) {
-              coreServer.internalDebugLog('SESSION CLOSED')
+              coreServer.internalDebugLog('############## SESSION CLOSED ##############')
               coreServer.internalDebugLog('reason:' + reason)
               coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
             })
@@ -191,7 +197,7 @@ module.exports = function (RED) {
           }
         })
       } else {
-        coreServer.internalDebugLog('Server Is Not Valid')
+        coreServer.internalDebugLog('Server Is Not Valid'.red)
       }
     }
 
@@ -204,9 +210,9 @@ module.exports = function (RED) {
 
         server.registerServer(discoveryEndpointUrl, function (err) {
           if (err) {
-            coreServer.internalDebugLog('Register Server Error' + err)
+            coreServer.internalDebugLog('Register Server Error'.red + err)
           } else {
-            coreServer.internalDebugLog('Discovery Setup Done')
+            coreServer.internalDebugLog('Discovery Setup Done'.green)
           }
         })
 
@@ -215,9 +221,9 @@ module.exports = function (RED) {
 
         server.registerServer(discoveryEndpointUrl, function (err) {
           if (err) {
-            coreServer.internalDebugLog('Register Server Error' + err)
+            coreServer.internalDebugLog('Register Server Error'.red + err)
           } else {
-            coreServer.internalDebugLog('Discovery Setup Done')
+            coreServer.internalDebugLog('Discovery Setup Done'.green)
           }
         })
       }
@@ -241,7 +247,7 @@ module.exports = function (RED) {
           executeOpcuaCommand(msg)
           break
         default:
-          node.error(new Error('Unknown Node Type ' + msg.nodetype), msg)
+          node.error(new Error('Unknown Node Type '.red + msg.nodetype), msg)
       }
 
       node.send([msg, {payload: addressSpaceMessages}])
@@ -253,7 +259,7 @@ module.exports = function (RED) {
           addObjectToAddressSpace(msg, 'Folder')
           break
         default:
-          addObjectToAddressSpace(msg, 'Unknown Object Type')
+          addObjectToAddressSpace(msg, 'Unknown Object Type'.red)
           break
       }
     }

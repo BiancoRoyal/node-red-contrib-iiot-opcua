@@ -19,8 +19,11 @@ var de = de || {biancoroyal: {opcua: {iiot: {core: {listener: {}}}}}} // eslint-
 de.biancoroyal.opcua.iiot.core.listener.core = de.biancoroyal.opcua.iiot.core.listener.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.client = de.biancoroyal.opcua.iiot.core.listener.client || require('./opcua-iiot-core-client') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.internalDebugLog = de.biancoroyal.opcua.iiot.core.listener.internalDebugLog || require('debug')('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.detailDebugLog = de.biancoroyal.opcua.iiot.core.listener.detailDebugLog || require('debug')('opcuaIIoT:listener:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog = de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog || require('debug')('opcuaIIoT:listener:subscribe') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.subscribeDetailDebugLog = de.biancoroyal.opcua.iiot.core.listener.subscribeDetailDebugLog || require('debug')('opcuaIIoT:listener:subscribe:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.eventDebugLog = de.biancoroyal.opcua.iiot.core.listener.eventDebugLog || require('debug')('opcuaIIoT:listener:event') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.eventDetailDebugLog = de.biancoroyal.opcua.iiot.core.listener.eventDetailDebugLog || require('debug')('opcuaIIoT:listener:event:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_INTERVAL = 1000 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.MIN_LISTENER_INTERVAL = 100 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.MAX_LISTENER_INTERVAL = 3600000 // eslint-disable-line no-use-before-define
@@ -53,102 +56,110 @@ de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (ti
 de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, key, value) {
   let eventInformation = {}
 
+  this.eventDetailDebugLog('collectAlarmFields -> field: ' + field + ' key: ' + key + ' value: ' + JSON.stringify(value))
+
   switch (field) {
     // Common fields
     case 'EventId':
-      eventInformation.EventId = value
+      eventInformation.eventId = value
       break
     case 'EventType':
-      eventInformation.EventType = value
+      eventInformation.eventType = value
       break
     case 'SourceNode':
-      eventInformation.SourceNode = value
+      eventInformation.ssourceNode = value
       break
     case 'SourceName':
-      eventInformation.SourceName = value
+      eventInformation.sourceName = value
       break
     case 'Time':
-      eventInformation.Time = value
+      eventInformation.time = value
       break
     case 'ReceiveTime':
-      eventInformation.ReceiveTime = value
+      eventInformation.receiveTime = value
       break
     case 'Message':
-      eventInformation.Message = value.text
+      eventInformation.message = value.text
       break
     case 'Severity':
-      eventInformation.Severity = value
+      eventInformation.severity = value
       break
 
     // ConditionType
     case 'ConditionClassId':
-      eventInformation.ConditionClassId = value
+      eventInformation.conditionClassId = value
       break
     case 'ConditionClassName':
-      eventInformation.ConditionClassNameName = value
+      eventInformation.conditionClassNameName = value
       break
     case 'ConditionName':
-      eventInformation.ConditionName = value
+      eventInformation.conditionName = value
       break
     case 'BranchId':
-      eventInformation.BranchId = value
+      eventInformation.branchId = value
       break
     case 'Retain':
-      eventInformation.Retain = value
+      eventInformation.retain = value
       break
     case 'EnabledState':
-      eventInformation.EnabledState = value.text
+      eventInformation.enabledState = value.text
       break
     case 'Quality':
-      eventInformation.Quality = value
+      eventInformation.quality = value
       break
     case 'LastSeverity':
-      eventInformation.LastSeverity = value
+      eventInformation.lastSeverity = value
       break
     case 'Comment':
-      eventInformation.Comment = value.text
+      eventInformation.comment = value.text
       break
     case 'ClientUserId':
-      eventInformation.ClientUserId = value
+      eventInformation.clientUserId = value
       break
 
     // AcknowledgeConditionType
     case 'AckedState':
-      eventInformation.AckedState = value.text
+      eventInformation.ackedState = value.text
       break
     case 'ConfirmedState':
-      eventInformation.ConfirmedState = value.text
+      eventInformation.confirmedState = value.text
       break
 
     // AlarmConditionType
     case 'ActiveState':
-      eventInformation.ActiveState = value.text
+      eventInformation.activeState = value.text
       break
     case 'InputNode':
-      eventInformation.InputNode = value
+      eventInformation.inputNode = value
       break
     case 'SupressedState':
-      eventInformation.SupressedState = value.text
+      eventInformation.supressedState = value.text
       break
 
     // Limits
     case 'HighHighLimit':
-      eventInformation.HighHighLimit = value
+      eventInformation.highHighLimit = value
       break
     case 'HighLimit':
-      eventInformation.HighLimit = value
+      eventInformation.highLimit = value
       break
     case 'LowLimit':
-      eventInformation.LowLimit = value
+      eventInformation.lowLimit = value
       break
     case 'LowLowLimit':
-      eventInformation.LowLowLimit = value
+      eventInformation.lowLowLimit = value
       break
     case 'Value':
-      eventInformation.Value = value
+      eventInformation.value = value
       break
     default:
-      eventInformation = 'Unknown Collected Alarm Field ' + field
+      eventInformation.field = {}
+      eventInformation.field.name = field
+      eventInformation.field.value = value
+
+      if (value.text) {
+        eventInformation.field.value.text = value.text
+      }
       break
   }
 
@@ -320,35 +331,41 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
         reject(new Error('Event Response Not Valid'))
       } else {
         let index = 0
-        let eventInformation
+        let eventInformation = {}
         let variantMsg = {payload: []}
         let msg = {payload: []}
 
         response.forEach(function (variant) {
           coreListener.eventDebugLog('variant entry: ' + variant.toString())
 
-          if (variant.dataType && variant.value) {
-            eventInformation = coreListener.collectAlarmFields(eventFields[index], variant.dataType.key.toString(), variant.value)
+          try {
+            if (variant.dataType && variant.value) {
+              eventInformation = coreListener.collectAlarmFields(eventFields[index], variant.dataType.key.toString(), variant.value)
 
-            if (variant.dataType === core.nodeOPCUA.DataType.NodeId) {
-              browseForBrowseName(session, variant.value, function (err, browseName) {
-                if (err) {
-                  reject(err)
-                } else {
-                  eventInformation.browseName = browseName
-                  msg.payload.push(eventInformation)
-                  variantMsg.payload.push({dataType: variant.dataType.key.toString(), value: variant.value})
-                }
-              })
-            } else {
-              msg.payload.push(eventInformation)
-              variantMsg.payload.push({dataType: variant.dataType.key.toString(), value: variant.value})
+              if (variant.dataType === core.nodeOPCUA.DataType.NodeId) {
+                browseForBrowseName(session, variant.value, function (err, browseName) {
+                  if (err) {
+                    reject(err)
+                  } else {
+                    eventInformation.browseName = browseName
+                    msg.payload.push(eventInformation)
+                    variantMsg.payload.push(variant.toJSON())
+                  }
+                })
+              } else {
+                msg.payload.push(eventInformation)
+                variantMsg.payload.push(variant.toJSON())
+              }
             }
+            index++
+          } catch (err) {
+            eventInformation = {error: err}
+            msg.payload.push(eventInformation)
+            variantMsg.payload.push(variant.toJSON())
           }
-          index++
         })
 
-        resolve({msg: msg, variantMsg: variantMsg})
+        resolve({message: msg, variantMsg: variantMsg})
       }
     }
   )

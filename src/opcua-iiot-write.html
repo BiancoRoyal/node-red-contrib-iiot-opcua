@@ -54,13 +54,30 @@
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Write">
     <h2>OPC UA IIoT Write</h2>
+
+    <p>The Write node is for sending data to the OPC UA server.
+    It handles a single data request and multiple data requests.
+    All write requests will produce an array of StatusCodes for writing
+    in amount as applied for and responded.</p>
+
+    <h3>Input</h3>
+
+    <ul>
+      <li>payload (value to write)</li>
+      <li>topic (Node-Id)</li>
+      <li>datatype (node-opcua/OPC UA data type string)</li>
+      <li>diagnostics (Array)</li>
+      <li>nodetype (inject)</li>
+    </ul>
+
+    <h3>Output</h3>
+
     <p>Results in message:</p>
     <ul>
-      <li>payload</li>
-      <li>nodesToWrite (Array)</li>
+      <li>payload (Array of StatusCodes)</li>
+      <li>nodesToWrite (Array of Node-Id)</li>
       <li>input (msg)</li>
-      <li>resultsConverted (array)</li>
       <li>diagnostics (Array)</li>
-      <li>nodetype</li>
+      <li>nodetype (write)</li>
     </ul>
 </script>

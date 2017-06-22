@@ -94,13 +94,13 @@ module.exports = function (RED) {
 
                 if (readResult.results) {
                   readResult.results.forEach(function (result) {
-                    coreClient.readDebugLog('Read All Attributes Result: ' + JSON.stringify(result))
+                    coreClient.readDetailsDebugLog('Read All Attributes Result: ' + JSON.stringify(result))
                   })
                 }
 
                 if (readResult.diagnostics) {
                   readResult.diagnostics.forEach(function (diagnostic) {
-                    coreClient.readDebugLog('Read All Attributes Diagnostic: ' + JSON.stringify(diagnostic))
+                    coreClient.readDetailsDebugLog('Read All Attributes Diagnostic: ' + JSON.stringify(diagnostic))
                   })
                 }
 
@@ -151,13 +151,13 @@ module.exports = function (RED) {
 
                 if (readResult.results) {
                   readResult.results.forEach(function (result) {
-                    coreClient.readDebugLog('Read Variable Value Result: ' + JSON.stringify(result))
+                    coreClient.readDetailsDebugLog('Read Variable Value Result: ' + JSON.stringify(result))
                   })
                 }
 
                 if (readResult.diagnostics) {
                   readResult.diagnostics.forEach(function (diagnostic) {
-                    coreClient.readDebugLog('Read Variable Value Diagnostic: ' + JSON.stringify(diagnostic))
+                    coreClient.readDetailsDebugLog('Read Variable Value Diagnostic: ' + JSON.stringify(diagnostic))
                   })
                 }
 
@@ -210,7 +210,7 @@ module.exports = function (RED) {
                   meta.payload.index = index + 1
                   meta.payload.requested = array.length
 
-                  coreClient.readDebugLog('Meta Payload ' + meta.payload)
+                  coreClient.readDetailsDebugLog('Meta Payload ' + meta.payload)
 
                   let message = {
                     payload: meta.payload,
@@ -262,13 +262,13 @@ module.exports = function (RED) {
 
                 if (readResult.results) {
                   readResult.results.forEach(function (result) {
-                    coreClient.readDebugLog('Read Result: ' + JSON.stringify(result))
+                    coreClient.readDetailsDebugLog('Read Result: ' + JSON.stringify(result))
                   })
                 }
 
                 if (readResult.diagnostics) {
                   readResult.diagnostics.forEach(function (diagnostic) {
-                    coreClient.readDebugLog('Read Diagnostic: ' + JSON.stringify(diagnostic))
+                    coreClient.readDetailsDebugLog('Read Diagnostic: ' + JSON.stringify(diagnostic))
                   })
                 }
 
