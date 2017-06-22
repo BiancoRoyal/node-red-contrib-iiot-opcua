@@ -6,6 +6,8 @@
       "withPrecision": "With precision",
       "precision": "precision",
       "entry": "Array Entry",
+      "justValue": "Send Just Values",
+      "withValueCheck": "With Value Check",
       "minvalue": "Min Value",
       "maxvalue": "Max Value",
       "defaultvalue": "Default Value",
