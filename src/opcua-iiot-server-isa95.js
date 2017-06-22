@@ -43,8 +43,14 @@ module.exports = function (RED) {
       securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
     }
 
-    node.publicCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_cert_2048.pem')
-    node.privateCertificate = path.join(__dirname, '../node_modules/node-opcua/certificates/server_key_2048.pem')
+    let nodeOPCUAPath = require.resolve('node-opcua')
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+    coreServer.internalDebugLog(nodeOPCUAPath)
+
+    node.publicCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_selfsigned_cert_2048.pem')
+    coreServer.detailDebugLog(node.publicCertificateFile)
+    node.privateCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_key_2048.pem')
+    coreServer.detailDebugLog(node.privateCertificateFile)
 
     setNodeStatusTo('waiting')
 

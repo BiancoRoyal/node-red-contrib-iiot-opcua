@@ -148,7 +148,15 @@ module.exports = function (RED) {
           if (node.justValue) {
             node.send([valueMsg, {payload: 'just value option active'}])
           } else {
-            node.send([valueMsg, {payload: JSON.stringify(dataValue), valueMsg: valueMsg}])
+            try {
+              let dataValueJSON = {
+                payload: JSON.parse(JSON.stringify(dataValue.toJSON(dataValue)))
+              }
+              node.send([valueMsg, dataValueJSON])
+            } catch (err) {
+              coreListener.subscribeDetailDebugLog(err + ' sending stringified')
+              node.send([valueMsg, {payload: JSON.stringify(dataValue)}])
+            }
           }
         })
 
@@ -210,23 +218,16 @@ module.exports = function (RED) {
         })
 
         monitoredItem.on('changed', function (eventFieldResponse) {
-          coreListener.eventDebugLog('Monitored Event Changed Message ' + JSON.stringify(msg))
-          coreListener.eventDebugLog('Monitored Event Changed Response ' + JSON.stringify(eventFieldResponse))
-
           node.setNodeStatusTo('active ' + '(' + monitoredItems.length + ')')
 
           coreListener.analyzeEvent(node.opcuaSession, node.getBrowseName, msg.payload.eventFields, eventFieldResponse)
             .then(function (result) {
-              coreListener.eventDebugLog('Successful Event Call')
-
-              coreListener.eventDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
-              coreListener.eventDebugLog('Monitored Event Field Message ' + JSON.stringify(result.variantMsg))
+              coreListener.eventDetailDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
+              coreListener.eventDetailDebugLog('Monitored Event Field Message ' + JSON.stringify(result.variantMsg))
 
               let valueMsg = {
-                payload: result.message,
+                payload: JSON.parse(JSON.stringify(result.message)),
                 topic: msg.topic,
-                result: result,
-                input: msg,
                 nodetype: 'listen',
                 readtype: 'event'
               }
@@ -234,7 +235,15 @@ module.exports = function (RED) {
               if (node.justValue) {
                 node.send([valueMsg, {payload: 'just value option active'}])
               } else {
-                node.send([valueMsg, result.variantMsg])
+                try {
+                  let dataValueJSON = {
+                    payload: JSON.parse(JSON.stringify(result.variantMsg))
+                  }
+                  node.send([valueMsg, dataValueJSON])
+                } catch (err) {
+                  coreListener.eventDetailDebugLog(err + ' sending stringified')
+                  node.send([valueMsg, JSON.stringify(result.variantMsg)])
+                }
               }
             }).catch(node.errorHandling)
         })
@@ -405,7 +414,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      node.verboseLog(node.action + ' listener input ' + JSON.stringify(msg))
+      coreListener.detailDebugLog(node.action + ' listener input ' + JSON.stringify(msg))
 
       switch (node.action) {
         case 'subscribe':

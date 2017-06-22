@@ -26,7 +26,7 @@ module.exports = function (RED) {
     this.repeat = config.repeat
     this.crontab = config.crontab
     this.once = config.once
-    this.startDelay = config.startDelay | 15
+    this.startDelay = parseInt(config.startDelay) | 10
     this.name = config.name
 
     let node = this

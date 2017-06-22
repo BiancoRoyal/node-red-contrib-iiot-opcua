@@ -42,7 +42,7 @@
         let url = '/opcuaIIoT/browser/' + node.id + '/rootid/' + rootid
         console.log('url: ' + url)
 
-        $.getJSON(url, function(data) {
+        $.getJSON(url, function (data) {
           nodeIdLookupField.removeClass('disabled')
           node.lookupItems = []
 
@@ -127,8 +127,56 @@
         </div>
     </div>
     <!-- TODO: ReferenceTypeIds List to add or remove reference types tp browse for -->
+
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Browser">
     <h2>OPC UA IIoT Browser</h2>
+
+    <p>The Browser is to browse your OPC UA address space.
+    It could start with the root folder by OPC UA Node-Id like ns=0;i=85
+    and it could configure to start ever at a special root in the address space.</p>
+
+    <h3>Configuration</h3>
+
+    <p>The browser inside configuration is to set a default starting OPC UA Node-Id.
+    The request could never reach OPC UA address space objects above that OPC UA Node-Id.</p>
+    <p>Try out the lookup button and delete input text to start at the root.</p>
+
+    <h3>Input</h3>
+
+    <p>The input is to inject an OPC UA Node-Id to set a starting point to browse.</p>
+
+    <h3>Output</h3>
+
+    <p>The output is a structured JSON object with the requested data or
+    it sends the Errors from node-opcua.</p>
+
+    <h3>Examples</h3>
+    <a href="https://github.com/biancode/node-red-iiot-opcua/blob/master/examples/"
+    target="_blank">GitHub Browser example flow</a>
+
+    <p>Please, download examples from a branch as your version is. It could change over time.</p>
+
+    <h3>Output</h3>
+
+    <div>
+        <strong>Result in subscribe message:</strong>
+        <ul>
+            <li>payload (value)
+            <ul>
+                <li>browserItems (Array)
+                <li>browserResultCount
+                <li>browseTopic
+                <li>endpoint
+                <li>session
+            </ul>
+            <li>nodetype (browse)
+            <li>input (msg)
+            <li>result (origin from node-opcua)
+        </ul>
+    </div>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
 </script>

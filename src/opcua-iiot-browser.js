@@ -62,14 +62,20 @@ module.exports = function (RED) {
 
     node.transformToEntry = function (reference) {
       if (reference) {
-        return {
-          referenceTypeId: reference.referenceTypeId.toString(),
-          isForward: reference.isForward,
-          nodeId: reference.nodeId.toString(),
-          browseName: reference.browseName.toString(),
-          displayName: reference.displayName,
-          nodeClass: reference.nodeClass.toString(),
-          typeDefinition: reference.typeDefinition.toString()
+        try {
+          return reference.toJSON()
+        } catch (err) {
+          coreBrowser.internalDebugLog(err)
+
+          return {
+            referenceTypeId: reference.referenceTypeId.toString(),
+            isForward: reference.isForward,
+            nodeId: reference.nodeId.toString(),
+            browseName: reference.browseName.toString(),
+            displayName: reference.displayName,
+            nodeClass: reference.nodeClass.toString(),
+            typeDefinition: reference.typeDefinition.toString()
+          }
         }
       } else {
         coreBrowser.internalDebugLog('Empty Reference On Browse')
@@ -108,11 +114,11 @@ module.exports = function (RED) {
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
 
       if (session) {
-        coreBrowser.browse(session, node.browseTopic).then(function (browseResult) {
+        coreBrowser.browse(session, node.browseTopic).then(function (browserResult) {
           coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' +
             session.name + ' Id: ' + session.sessionId)
 
-          browseResult.browseResult.forEach(function (result) {
+          browserResult.browseResult.forEach(function (result) {
             result.references.forEach(function (reference) {
               coreBrowser.internalDebugLog('Add Reference To List :' + reference)
               browserEntries.push(node.transformToEntry(reference))
@@ -134,13 +140,14 @@ module.exports = function (RED) {
       let msg = {}
 
       msg.nodetype = 'browse'
+      msg.input = originMessage
+
       msg.payload = {
-        request: originMessage,
-        endpoint: node.connector.endpoint,
-        session: node.opcuaSession.name,
-        browseTopic: node.browseTopic,
+        browserItems: browserEntries,
         browserResultCount: browserEntries.length,
-        browserItems: browserEntries
+        browseTopic: node.browseTopic,
+        endpoint: node.connector.endpoint,
+        session: node.opcuaSession.name
       }
 
       node.send(msg)
@@ -184,12 +191,12 @@ module.exports = function (RED) {
     }
 
     node.browseByItem = function (nodeId) {
-      coreBrowser.internalDebugLog('Browse To Parent ' + nodeId)
+      coreBrowser.detailDebugLog('Browse To Parent ' + nodeId)
       return nodeId
     }
 
     node.browseToRoot = function () {
-      coreBrowser.internalDebugLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
+      coreBrowser.detailDebugLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
       return coreBrowser.core.OBJECTS_ROOT
     }
 
@@ -259,11 +266,15 @@ module.exports = function (RED) {
     if (node.opcuaSession && nodeRootId) {
       coreBrowser.internalDebugLog('Session Is Valid And NodeId Is ' + nodeRootId)
 
-      coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browseResult) {
-        browseResult.forEach(function (result) {
-          result.references.forEach(function (reference) {
-            entries.push(node.transformToEntry(reference))
-          })
+      coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browserResult) {
+        browserResult.browseResult.forEach(function (result) {
+          if (result.references && result.references.length) {
+            result.references.forEach(function (reference) {
+              entries.push(node.transformToEntry(reference))
+            })
+          } else {
+            coreBrowser.detailDebugLog(JSON.stringify(result))
+          }
         })
         res.json(entries)
         browserEntries = entries
@@ -271,6 +282,7 @@ module.exports = function (RED) {
         if (err) {
           node.verboseLog(err)
         }
+
         entries.push({
           displayName: {text: 'Objects'},
           nodeId: coreBrowser.core.OBJECTS_ROOT,
@@ -287,8 +299,8 @@ module.exports = function (RED) {
   }
 
   RED.httpAdmin.get('/opcuaIIoT/browser/:id/rootid/:rid', RED.auth.needsPermission('opcuaIIoT.browser.write'), function (req, res) {
-    coreBrowser.internalDebugLog(browserEntries.length + ' Items In List On HTTP Request Body: ' + JSON.stringify(req.body))
-    coreBrowser.internalDebugLog(browserEntries.length + ' Items In List On HTTP Request Params: ' + JSON.stringify(req.params))
+    coreBrowser.detailDebugLog(browserEntries.length + ' Items In List On HTTP Request Body: ' + JSON.stringify(req.body))
+    coreBrowser.detailDebugLog(browserEntries.length + ' Items In List On HTTP Request Params: ' + JSON.stringify(req.params))
     let node = RED.nodes.getNode(req.params.id)
     node.browseFromSettings(node, req.params.rid, res)
   })

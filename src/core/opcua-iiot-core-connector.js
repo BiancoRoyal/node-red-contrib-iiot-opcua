@@ -17,7 +17,8 @@
 var de = de || {biancoroyal: {opcua: {iiot: {core: {connector: {}}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.core = de.biancoroyal.opcua.iiot.core.connector.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.internalDebugLog = de.biancoroyal.opcua.iiot.core.connector.internalDebugLog || require('debug')('opcuaIIoT:connector') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.connector.libDebugLog = de.biancoroyal.opcua.iiot.core.connector.libDebugLog || require('debug')('opcuaIIoT:connector:libDebugLog') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.connector.detailDebugLog = de.biancoroyal.opcua.iiot.core.connector.detailDebugLog || require('debug')('opcuaIIoT:connector:details') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.connector.libDebugLog = de.biancoroyal.opcua.iiot.core.connector.libDebugLog || require('debug')('opcuaIIoT:connector:nodeopcua') // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
   let coreConnector = this
@@ -70,35 +71,43 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
           } else {
             // coreConnector.internalDebugLog(treeify.asTree(endpoints, true))
 
+            coreConnector.internalDebugLog('endpoint: ' + endpoints[0].endpointUrl)
+            coreConnector.internalDebugLog('Application URI: ' + endpoints[0].server.applicationUri)
+            coreConnector.detailDebugLog('Security Mode: ' + endpoints[0].securityMode.toString())
+            coreConnector.detailDebugLog('securityPolicyUri: ' + endpoints[0].securityPolicyUri)
+
+            let nodeOPCUAPath = require.resolve('node-opcua')
+            nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+
             endpoints.forEach(function (endpoint, i) {
-              coreConnector.internalDebugLog('endpoint:' + endpoint.endpointUrl)
-              coreConnector.internalDebugLog('Application URI:' + endpoint.server.applicationUri)
-              coreConnector.internalDebugLog('Product URI:' + endpoint.server.productUri)
-              coreConnector.internalDebugLog('Application Name:' + endpoint.server.applicationName.text)
-              coreConnector.internalDebugLog('Security Mode:' + endpoint.securityMode.toString())
-              coreConnector.internalDebugLog('securityPolicyUri:' + endpoint.securityPolicyUri)
-              coreConnector.internalDebugLog('Type:' + endpoint.server.applicationType.key)
-              coreConnector.internalDebugLog('discoveryUrls:' + endpoint.server.discoveryUrls.join(' - '))
+              coreConnector.detailDebugLog('endpoint: ' + endpoint.endpointUrl)
+              coreConnector.detailDebugLog('Application URI: ' + endpoint.server.applicationUri)
+              coreConnector.detailDebugLog('Product URI: ' + endpoint.server.productUri)
+              coreConnector.detailDebugLog('Application Name: ' + endpoint.server.applicationName.text)
+              coreConnector.detailDebugLog('Security Mode: ' + endpoint.securityMode.toString())
+              coreConnector.detailDebugLog('securityPolicyUri: ' + endpoint.securityPolicyUri)
+              coreConnector.detailDebugLog('Type: ' + endpoint.server.applicationType.key)
+              coreConnector.detailDebugLog('discoveryUrls: ' + endpoint.server.discoveryUrls.join(' - '))
 
               options.serverCertificate = endpoint.serverCertificate
-              coreConnector.internalDebugLog('serverCertificate:' + hexDump(endpoint.serverCertificate).yellow)
-              options.defaultSecureTokenLifetime = 40000 // 40 sec.
+              coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
+              options.defaultSecureTokenLifetime = 60000 // 1 min.
 
-              let certificateFilename = path.join(__dirname,
-                '../../node_modules/node-opcua/certificates/PKI/server_certificate' + i + '.pem')
+              let certificateFilename = path.join(nodeOPCUAPath, '/certificates/PKI/server_certificate' + i + '.pem')
+              coreConnector.detailDebugLog(certificateFilename)
               fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'))
             })
 
             endpoints.forEach(function (endpoint, i) {
-              coreConnector.internalDebugLog('Identify Token for : Security Mode=' +
+              coreConnector.detailDebugLog('Identify Token for : Security Mode=' +
                 endpoint.securityMode.toString() + ' Policy=' + endpoint.securityPolicyUri)
 
               endpoint.userIdentityTokens.forEach(function (token) {
-                coreConnector.internalDebugLog('policyId:' + token.policyId)
-                coreConnector.internalDebugLog('tokenType:' + token.tokenType.toString())
-                coreConnector.internalDebugLog('issuedTokenType:' + token.issuedTokenType)
-                coreConnector.internalDebugLog('issuerEndpointUrl:' + token.issuerEndpointUrl)
-                coreConnector.internalDebugLog('securityPolicyUri:' + token.securityPolicyUri)
+                coreConnector.detailDebugLog('policyId: ' + token.policyId)
+                coreConnector.detailDebugLog('tokenType: ' + token.tokenType.toString())
+                coreConnector.detailDebugLog('issuedTokenType: ' + token.issuedTokenType)
+                coreConnector.detailDebugLog('issuerEndpointUrl: ' + token.issuerEndpointUrl)
+                coreConnector.detailDebugLog('securityPolicyUri: ' + token.securityPolicyUri)
               })
 
               resolve(opcuaClient)

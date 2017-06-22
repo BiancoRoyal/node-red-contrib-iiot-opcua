@@ -118,23 +118,103 @@
         <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
         <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Read">
     <h2>OPC UA IIoT Read</h2>
-    <p>Results in message:</p>
-    <ul>
-        <li>payload</li>
-        <li>nodesToRead (Array)</li>
-        <li>maxAge</li>
-        <li>input (msg)</li>
-        <li>resultsConverted (Array)</li>
-        <li>results (Array)</li>
-        <li>diagnostics (Array)</li>
-        <li>nodetype</li>
-        <li>readtype</li>
-        <li>attributeId</li>
-    </ul>
 
-    <p>Please use the Result Filter node to handle the output of the Read node.
+    <p>The Read-Node is for polling data from the OPC UA server.
+    It handles a single data request and multiple data requests.
+    The multiple Node-Id inject will request and produce an array of address space data.
+    An individual Node-Id inject reads just a value and sends it via payload.</p>
+
+    <h3>Input individual read</h3>
+    <div>
+        <p>Results of multiple request in message:</p>
+        <ul>
+            <li>payload (Array)
+            <li>topic (Node-Id)
+            <li>data type (node-opcua/OPC UA data type)
+        </ul>
+    </div>
+
+    <h3>Input multiple read</h3>
+    <div>
+        <p>Results of multiple request in message:</p>
+        <ul>
+            <li>payload (Array)
+            <li>nodesToRead (Array)
+        </ul>
+    </div>
+
+    <h3>Output</h3>
+
+    <p>Please use the Result Filter node to handle the output of the Read node.</p>
+
+    <div>
+        <p>Results of multiple request in message:</p>
+        <ul>
+            <li>payload (Array)
+            <li>nodesToRead (Array)
+            <li>maxAge
+            <li>input (msg)
+            <li>resultsConverted (Array)
+            <li>results (Array)
+            <li>diagnostics (Array)
+            <li>nodetype
+            <li>readtype
+            <li>attributeId
+        </ul>
+    </div>
+
+    <div>
+        <p>Results of multiple request in message:</p>
+        <ul>
+            <li>payload or payload (Array) based on read type
+            <li>nodesToRead (Node-Id)
+            <li>maxAge
+            <li>input (msg)
+            <li>resultsConverted (Array)
+            <li>results (Array)
+            <li>diagnostics (Array)
+            <li>nodetype
+            <li>readtype
+            <li>attributeId
+            <li>topic (Node-Id)
+        </ul>
+    </div>
+
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.maxAge"></span>
+    </strong>
+    <p>
+    Maximum age of the value to be read in milliseconds. (see
+    <a href="http://node-opcua.github.io/api_doc/classes/ReadRequest.html" target="_blank">node-opcua API</a>)
+    </p>
+
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.depth"></span>
+    </strong>
+    <p>The depth to read for example components. (see node-opcua API)</p>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
+
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.justValue"></span>
+    </strong>
+    <p>With that option, the node does not send an object on out two for less CPU load.</p>
+
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.multipleRequest"></span>
+    </strong>
+    <p>With that option, the node handles incoming messages as multiple requests.</p>
+
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.metaDataInject"></span>
+    </strong>
+    <p>With that option, the node buids a special out message
+    to inject in another Read node to read structures.</p>
+
 </script>

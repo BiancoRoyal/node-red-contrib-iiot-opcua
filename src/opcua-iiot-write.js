@@ -87,20 +87,18 @@ module.exports = function (RED) {
 
             if (writeResult.diagnostics) {
               writeResult.diagnostics.forEach(function (diagnostic) {
-                coreClient.writeDebugLog('Write Diagnostic: ' + JSON.stringify(diagnostic))
+                coreClient.writeDetailsDebugLog('Write Diagnostic: ' + JSON.stringify(diagnostic))
               })
             }
 
             let message = {
               payload: writeResult.resultsConverted,
-              nodesToWrite: JSON.stringify(nodesToWrite),
+              nodesToWrite: JSON.parse(JSON.stringify(nodesToWrite)),
               input: msg,
-              resultsConverted: writeResult.resultsConverted,
-              /* results: writeResult.results, */
               diagnostics: writeResult.diagnostics,
               nodetype: 'write'
             }
-            coreClient.writeDebugLog('Write Send Message: ' + JSON.stringify(message))
+            coreClient.writeDetailsDebugLog('Write Send Message: ' + JSON.stringify(message))
             node.send(message)
           }).catch(function (err) {
             coreClient.writeDebugLog(err)

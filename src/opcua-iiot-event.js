@@ -54,12 +54,14 @@ module.exports = function (RED) {
 
       let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(eventFields)
 
-      msg.topic = node.eventRoot
+      if (node.eventRoot) {
+        msg.topic = node.eventRoot
+      }
 
       let interval = 1000
 
       if (typeof msg.payload === 'number') {
-        interval = msg.payload * 1000 // msec.
+        interval = msg.payload // msec.
       }
 
       msg.nodetype = 'events'

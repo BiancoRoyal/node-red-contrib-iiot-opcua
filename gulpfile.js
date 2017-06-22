@@ -14,6 +14,7 @@ const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
 const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
+const sourcemaps = require('gulp-sourcemaps')
 const pump = require('pump')
 // const obfuscate = require('gulp-obfuscate')
 // const javascriptObfuscator = require('gulp-javascript-obfuscator')
@@ -97,7 +98,11 @@ gulp.task('opcua-iiot', function (cb) {
 
 gulp.task('opcua-iiot', function (cb) {
   pump([
-    gulp.src('src/**/*.js').pipe(babel({presets: ['es2015']})).pipe(uglify()), gulp.dest('opcuaIIoT')],
+    gulp.src('src/**/*.js')
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(babel({presets: ['es2015']}))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('../maps')), gulp.dest('opcuaIIoT')],
     cb
   )
 })

@@ -1,134 +1,146 @@
 [
   {
-    "id": "17f29557.91811b",
+    "id": "e21b0481.4b9478",
     "type": "OPCUA-IIoT-Write",
-    "z": "e1aa872f.8c2da8",
-    "connector": "ad67d93b.313ac8",
+    "z": "7cd87ec8.b3f94",
+    "connector": "5bd83411.6bfc0c",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
     "x": 470,
-    "y": 740,
+    "y": 560,
     "wires": [
       [
-        "fadbd756.c69778",
-        "d674077e.d67238",
-        "ca8abbe6.6d98b8",
-        "ac2e529.4770cb"
+        "dc1037e8.5c7ea8",
+        "e3866fb4.9270e",
+        "f6922461.968da8",
+        "944d959.8fb6d68"
       ]
     ]
   },
   {
-    "id": "c596f886.2f83c8",
+    "id": "c8394d27.4b084",
     "type": "OPCUA-IIoT-Inject",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
+    "injectTypeListener": false,
     "payload": "",
     "payloadType": "num",
     "topic": "ns=4;s=TestReadWrite",
     "datatype": "Double",
-    "repeat": "0.5",
+    "repeat": "1",
     "crontab": "",
-    "once": false,
+    "once": true,
+    "startDelay": "",
     "name": "TestReadWrite",
     "x": 160,
-    "y": 740,
+    "y": 560,
     "wires": [
       [
-        "5a2a99cf.7f47c8"
+        "aeb3d995.7de418"
       ]
     ]
   },
   {
-    "id": "5a2a99cf.7f47c8",
+    "id": "aeb3d995.7de418",
     "type": "data-generator",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "name": "dGen",
     "field": "payload",
     "fieldType": "msg",
     "syntax": "json",
     "template": "{{int 1 65000}}",
-    "x": 330,
-    "y": 740,
+    "x": 310,
+    "y": 560,
     "wires": [
       [
-        "17f29557.91811b"
+        "e21b0481.4b9478",
+        "1b84b539.bc221b"
       ]
     ]
   },
   {
-    "id": "68b7a01c.a0028",
+    "id": "944d959.8fb6d68",
     "type": "debug",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "name": "",
     "active": false,
     "console": "false",
     "complete": "false",
-    "x": 830,
-    "y": 740,
+    "x": 650,
+    "y": 660,
     "wires": []
   },
   {
-    "id": "fadbd756.c69778",
-    "type": "function",
-    "z": "e1aa872f.8c2da8",
-    "name": "",
-    "func": "msg.payload = msg.payload[0].value\nreturn msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 630,
-    "y": 740,
-    "wires": [
-      [
-        "68b7a01c.a0028"
-      ]
-    ]
-  },
-  {
-    "id": "d674077e.d67238",
+    "id": "dc1037e8.5c7ea8",
     "type": "debug",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "name": "",
     "active": false,
     "console": "false",
     "complete": "diagnostics",
     "x": 660,
-    "y": 780,
+    "y": 620,
     "wires": []
   },
   {
-    "id": "ca8abbe6.6d98b8",
+    "id": "e3866fb4.9270e",
     "type": "debug",
-    "z": "e1aa872f.8c2da8",
-    "name": "",
-    "active": false,
-    "console": "false",
-    "complete": "payload",
-    "x": 650,
-    "y": 820,
-    "wires": []
-  },
-  {
-    "id": "ac2e529.4770cb",
-    "type": "debug",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "name": "",
     "active": false,
     "console": "false",
     "complete": "true",
     "x": 630,
-    "y": 860,
+    "y": 700,
     "wires": []
   },
   {
-    "id": "ad67d93b.313ac8",
+    "id": "1b84b539.bc221b",
+    "type": "debug",
+    "z": "7cd87ec8.b3f94",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "true",
+    "x": 470,
+    "y": 620,
+    "wires": []
+  },
+  {
+    "id": "f6922461.968da8",
+    "type": "OPCUA-IIoT-Response",
+    "z": "7cd87ec8.b3f94",
+    "name": "",
+    "x": 640,
+    "y": 560,
+    "wires": [
+      [
+        "50035c83.e184e4"
+      ]
+    ]
+  },
+  {
+    "id": "50035c83.e184e4",
+    "type": "debug",
+    "z": "7cd87ec8.b3f94",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "false",
+    "x": 830,
+    "y": 560,
+    "wires": []
+  },
+  {
+    "id": "5bd83411.6bfc0c",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
-    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIoTServer",
-    "keepSessionAlive": true,
+    "endpoint": "opc.tcp://localhost:55388/",
+    "keepSessionAlive": false,
     "loginEnabled": true,
-    "securityPolicy": "Basic256",
-    "securityMode": "SIGNANDENCRYPT",
-    "name": "",
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "SERVER ONE",
     "showStatusActivities": false,
     "showErrors": false
   }

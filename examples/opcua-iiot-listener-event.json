@@ -1,136 +1,127 @@
 [
   {
-    "id": "37bbb23e.0cec3e",
+    "id": "e2fc2d3.37762d",
     "type": "OPCUA-IIoT-Listener",
-    "z": "e1aa872f.8c2da8",
-    "connector": "ad67d93b.313ac8",
+    "z": "7cd87ec8.b3f94",
+    "connector": "7fb455ed.ab197c",
     "action": "events",
-    "queueSize": "100",
+    "queueSize": "1000",
     "name": "",
+    "justValue": false,
+    "multipleRequest": false,
+    "metaDataInject": false,
     "showStatusActivities": false,
     "showErrors": false,
-    "x": 440,
-    "y": 320,
+    "x": 420,
+    "y": 1100,
     "wires": [
       [
-        "cea9aca.0a3ef5",
-        "a20daceb.3127e"
+        "70e2a1dd.f5fbc",
+        "b8deb34c.40316"
       ],
       [
-        "6e0f8f67.71c5"
+        "e09f5732.f40d38",
+        "ae6ab1bd.38da4"
       ]
     ]
   },
   {
-    "id": "cf6e7c1.298628",
-    "type": "inject",
-    "z": "e1aa872f.8c2da8",
-    "name": "",
-    "topic": "",
-    "payload": "0.2",
-    "payloadType": "num",
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "x": 150,
-    "y": 320,
-    "wires": [
-      [
-        "65aecf7c.ea77a"
-      ]
-    ]
-  },
-  {
-    "id": "cea9aca.0a3ef5",
+    "id": "70e2a1dd.f5fbc",
     "type": "debug",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "name": "",
-    "active": true,
+    "active": false,
     "console": "false",
     "complete": "false",
-    "x": 630,
-    "y": 320,
-    "wires": []
-  },
-  {
-    "id": "a20daceb.3127e",
-    "type": "debug",
-    "z": "e1aa872f.8c2da8",
-    "name": "",
-    "active": true,
-    "console": "false",
-    "complete": "true",
     "x": 610,
-    "y": 280,
+    "y": 1100,
     "wires": []
   },
   {
-    "id": "6e0f8f67.71c5",
-    "type": "OPCUA-IIoT-Response",
-    "z": "e1aa872f.8c2da8",
-    "name": "",
-    "showStatusActivities": false,
-    "showErrors": false,
-    "x": 620,
-    "y": 360,
-    "wires": [
-      [
-        "a6ca9b3a.f91378",
-        "9be7e817.459898"
-      ]
-    ]
-  },
-  {
-    "id": "a6ca9b3a.f91378",
+    "id": "b8deb34c.40316",
     "type": "debug",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "name": "",
-    "active": true,
+    "active": false,
     "console": "false",
     "complete": "true",
-    "x": 780,
-    "y": 360,
+    "x": 590,
+    "y": 1060,
     "wires": []
   },
   {
-    "id": "9be7e817.459898",
+    "id": "e09f5732.f40d38",
     "type": "debug",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "name": "",
-    "active": true,
+    "active": false,
+    "console": "false",
+    "complete": "true",
+    "x": 590,
+    "y": 1140,
+    "wires": []
+  },
+  {
+    "id": "ae6ab1bd.38da4",
+    "type": "debug",
+    "z": "7cd87ec8.b3f94",
+    "name": "",
+    "active": false,
     "console": "false",
     "complete": "false",
-    "x": 800,
-    "y": 400,
+    "x": 610,
+    "y": 1180,
     "wires": []
   },
   {
-    "id": "65aecf7c.ea77a",
+    "id": "12f36465.9946fc",
     "type": "OPCUA-IIoT-Event",
-    "z": "e1aa872f.8c2da8",
+    "z": "7cd87ec8.b3f94",
     "eventRoot": "i=2253",
     "eventType": "i=2041",
-    "queueSize": "1000",
+    "queueSize": "100",
     "usingListener": true,
     "name": "",
-    "x": 290,
-    "y": 320,
+    "x": 270,
+    "y": 1100,
     "wires": [
       [
-        "37bbb23e.0cec3e"
+        "e2fc2d3.37762d"
       ]
     ]
   },
   {
-    "id": "ad67d93b.313ac8",
+    "id": "196f437e.aba05d",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "7cd87ec8.b3f94",
+    "injectTypeListener": true,
+    "payload": "200",
+    "payloadType": "num",
+    "topic": "",
+    "datatype": "NodeId",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "",
+    "name": "",
+    "x": 140,
+    "y": 1100,
+    "wires": [
+      [
+        "12f36465.9946fc"
+      ]
+    ]
+  },
+  {
+    "id": "7fb455ed.ab197c",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
-    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIoTServer",
-    "keepSessionAlive": true,
+    "endpoint": "opc.tcp://localhost:55388/",
+    "keepSessionAlive": false,
     "loginEnabled": true,
-    "securityPolicy": "Basic256",
-    "securityMode": "SIGNANDENCRYPT",
-    "name": "",
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "SERVER TWO",
     "showStatusActivities": false,
     "showErrors": false
   }

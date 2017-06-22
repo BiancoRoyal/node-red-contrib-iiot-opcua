@@ -17,6 +17,8 @@
       withPrecision: {value: false},
       precision: {value: 2},
       entry: {value: 1, validate: RED.validators.number()},
+      justValue: {value: true},
+      withValueCheck: {value: false},
       minvalue: {value: null},
       maxvalue: {value: null},
       defaultvalue: {value: null},
@@ -32,6 +34,17 @@
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+
+      $('#node-input-withValueCheck').change(function () {
+        if ($(this).is(":checked")) {
+          $('#node-value-changes').show()
+
+        } else {
+          $('#node-value-changes').hide()
+        }
+      })
     }
   });
 </script>
@@ -89,21 +102,34 @@
         <span data-i18n="opcua-iiot-contrib.label.entry"></span></label>
         <input type="text" id="node-input-entry" placeholder="1">
     </div>
-    <!-- <div class="form-row">
-        <label for="node-input-minvalue"><i class="icon-tag"></i>
-        <span data-i18n="opcua-iiot-contrib.label.minvalue"></span></label>
-        <input type="text" id="node-input-minvalue" placeholder="">
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
+        <input type="checkbox" id="node-input-justValue" style="max-width:30px">
     </div>
     <div class="form-row">
-        <label for="node-input-maxvalue"><i class="icon-tag"></i>
-        <span data-i18n="opcua-iiot-contrib.label.maxvalue"></span></label>
-        <input type="text" id="node-input-maxvalue" placeholder="">
+        <label style="min-width:160px" for="node-input-withValueCheck"><i class="fa fa-optin-monster"></i>
+        <span data-i18n="opcua-iiot-contrib.label.withValueCheck"></span></label>
+        <input type="checkbox" id="node-input-withValueCheck" style="max-width:30px">
     </div>
-    <div class="form-row">
-        <label for="node-input-defaultvalue"><i class="icon-tag"></i>
-        <span data-i18n="opcua-iiot-contrib.label.defaultvalue"></span></label>
-        <input type="text" id="node-input-defaultvalue" placeholder="">
-    </div> -->
+    <div class="form-row" id="node-value-changes">
+        <div class="form-row">
+            <label for="node-input-minvalue"><i class="icon-tag"></i>
+            <span data-i18n="opcua-iiot-contrib.label.minvalue"></span></label>
+            <input type="text" id="node-input-minvalue" placeholder="minimum">
+        </div>
+        <div class="form-row">
+            <label for="node-input-maxvalue"><i class="icon-tag"></i>
+            <span data-i18n="opcua-iiot-contrib.label.maxvalue"></span></label>
+            <input type="text" id="node-input-maxvalue" placeholder="maximum">
+        </div>
+        <div class="form-row">
+            <label for="node-input-defaultvalue"><i class="icon-tag"></i>
+            <span data-i18n="opcua-iiot-contrib.label.defaultvalue"></span></label>
+            <input type="text" id="node-input-defaultvalue" placeholder="out of range value">
+        </div>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
@@ -114,7 +140,6 @@
         <span data-i18n="opcua-iiot-contrib.label.usingListener"></span></label>
         <input type="checkbox" id="node-input-usingListener" style="max-width:30px">
     </div>
-
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Result-Filter">
@@ -125,10 +150,42 @@
     and provides the value at the first out and a complex object at the second out.
     </p>
 
+    <h3>Input</h3>
+    <p>The input works with message objects from Read or Listener node.</p>
+
+    <h3>Output 1</h3>
+    <div>
+        <p>Event message:</p>
+        <ul>
+            <li>payload (filtered and converted result)
+        </ul>
+    </div>
+
+    <h3>Output 2</h3>
+    <p>To switch off that output check <span data-i18n="opcua-iiot-contrib.label.justValue"></span>.</p>
+    <div>
+        <p>Event message:</p>
+        <ul>
+            <li>msg (incoming msg)
+            <li>filteredResult (filtered and converted result)
+        </ul>
+    </div>
+
     <p>With the precision you can setup for Number objects.</p>
 
-    <p>Output 1: converted payload</p>
-    <p>Output 2: origin payload</p>
-
     <p>If there is nothing to convert (data type, precision), then Output 1 and 2 will equal.</p>
+
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.justValue"></span>
+    </strong>
+    <p>With that option, the node does not send an object on out two for less CPU load.</p>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
+
+    <strong>
+        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span>
+    </strong>
+    <p>Please, set that option to true if it is an inject for the Listener node.</p>
+
 </script>

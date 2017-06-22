@@ -1,5 +1,6 @@
 {
   "opcuaiiotinject": {
+    "injectTypeListener": "Listener Inject",
     "inject": "inject",
     "opcuaiiotinject": "inject",
     "inject": "inject",
@@ -8,8 +9,10 @@
     "stopped": "stopped",
     "failed": "Inject failed: __error__",
     "label": {
+      "payload": "Payload",
+      "interval": "Interval",
       "repeat": "Repeat",
-      "datatype": "Datatype",
+      "datatype": "Data Type",
       "nodeid": "Node-Id"
     },
     "timestamp": "timestamp",

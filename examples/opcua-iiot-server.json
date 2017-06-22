@@ -17,12 +17,12 @@
     "isAuditing": false,
     "users": [
       {
-        "name": "klaus",
+        "name": "test",
         "password": "test"
       },
       {
         "name": "peter",
-        "password": "meier"
+        "password": "peter"
       }
     ],
     "x": 290,

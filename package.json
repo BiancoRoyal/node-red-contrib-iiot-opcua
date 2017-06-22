@@ -1,11 +1,11 @@
 {
   "name": "@biancoroyal/node-red-iiot-opcua",
-  "version": "0.2.0-epsilon",
+  "version": "0.2.0-lambda",
   "private": false,
   "description": "IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/biancode/node-red-iiot-opcua.git"
+    "url": "git+https://github.com/biancode/node-red-iiot-opcua-publicbeta.git"
   },
   "dependencies": {
     "better-assert": "1.0.2",
@@ -31,7 +31,7 @@
   "author": "Klaus Landsdorf <klaus.landsdorf@bianco-royal.de>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/biancode/node-red-iiot-opcua/issues"
+    "url": "https://github.com/biancode/node-red-iiot-opcua-publicbeta/issues"
   },
   "node-red": {
     "nodes": {
@@ -54,7 +54,7 @@
   "engines": {
     "node": ">=4.7"
   },
-  "homepage": "https://github.com/biancode/node-red-iiot-opcua#readme",
+  "homepage": "https://github.com/biancode/node-red-iiot-opcua-publicbeta#readme",
   "scripts": {
     "test": "standard --fix && mocha test/*",
     "build": "standard --fix && gulp clean && gulp publish",
@@ -71,7 +71,7 @@
     "eslint": "^4.0.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-config-standard-jsx": "^4.0.2",
-    "eslint-plugin-mocha": "^4.10.1",
+    "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.1.0",
     "eslint-plugin-standard": "^3.0.1",
@@ -82,6 +82,7 @@
     "gulp-javascript-obfuscator": "^1.1.2",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-obfuscate": "^0.2.9",
+    "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^3.0.0",
     "javascript-obfuscator": "^0.9.4",
     "jsdoc": "^3.4.3",
@@ -93,7 +94,7 @@
     "sinon": "^2.3.4",
     "standard": "^10.0.2",
     "supertest": "^3.0.0",
-    "uglify-js": "^3.0.17",
+    "uglify-js": "^3.0.18",
     "uglify-js-harmony": "^2.7.7",
     "when": "^3.7.8"
   },

@@ -11,6 +11,7 @@
     "examples/",
     "opcua-iiot/",
     "docs",
-    "src/public/"
+    "src/public/",
+    "maps/"
   ]
 }

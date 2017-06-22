@@ -41,12 +41,12 @@ module.exports = function (RED) {
     node.opcuaClientOptions = {
       securityPolicy: node.securityPolicy || 'None',
       securityMode: node.messageSecurityMode || 'NONE',
-      defaultSecureTokenLifetime: 40000,
+      defaultSecureTokenLifetime: 60000,
       keepSessionAlive: true,
       connectionStrategy: {
-        maxRetry: 10,
-        initialDelay: 2000,
-        maxDelay: 10000
+        maxRetry: 15,
+        initialDelay: 3000,
+        maxDelay: 15000
       }
     }
 
@@ -65,23 +65,27 @@ module.exports = function (RED) {
 
     // TODO: refactor code!
     node.connectOPCUAEndpoint = function () {
-      coreConnector.internalDebugLog('Connecting On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
+      coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
+      coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
       node.opcuaClient = null
 
       coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
         coreConnector.internalDebugLog('Connected On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
 
         coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (opcuaClient) {
-          coreConnector.internalDebugLog('Setup Certified Options For ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
+          coreConnector.internalDebugLog('Setup Certified Options For ' + node.endpoint)
+          coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
           delete node.opcuaClientOptions.keepSessionAlive
 
           coreConnector.disconnect(opcuaClient).then(function () {
-            coreConnector.internalDebugLog('Disconnected From ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
+            coreConnector.internalDebugLog('Disconnected From ' + node.endpoint)
+            coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
 
             node.opcuaClient = null
 
             coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
-              coreConnector.internalDebugLog('Secured Connected On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
+              coreConnector.internalDebugLog('Secured Connected On ' + node.endpoint)
+              coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
 
               node.opcuaClient = opcuaClient
 
@@ -89,7 +93,7 @@ module.exports = function (RED) {
                 if (err) {
                   coreConnector.internalDebugLog('Get Endpoints Request Error' + err)
                 } else {
-                  coreConnector.internalDebugLog('Emit Connected Event')
+                  coreConnector.internalDebugLog('Emit Connected Event'.white.bgGreen)
                   node.emit('connected', node.opcuaClient)
                 }
               })
@@ -122,28 +126,32 @@ module.exports = function (RED) {
         if (err) {
           coreConnector.internalDebugLog('Discovery Error ' + err)
         } else {
-          servers.forEach(function (server) {
-            coreConnector.internalDebugLog('Discovery Server')
-            coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri ? server.applicationUri.cyan.bold : 'none')
-            coreConnector.internalDebugLog('         productUri:' + server.productUri ? server.productUri.cyan.bold : 'none')
-            coreConnector.internalDebugLog('    applicationName:' + server.applicationName ? server.applicationName.text.cyan.bold : 'none')
-            coreConnector.internalDebugLog('               type:' + server.applicationType ? server.applicationType.key.cyan.bold : 'none')
-            coreConnector.internalDebugLog('   gatewayServerUri:' + server.gatewayServerUri ? server.gatewayServerUri.cyan.bold : 'none')
-            coreConnector.internalDebugLog('discoveryProfileUri:' + server.discoveryProfileUri ? server.discoveryProfileUri.cyan.bold : 'none')
-            coreConnector.internalDebugLog('      discoveryUrls:')
+          if (servers && servers.length) {
+            servers.forEach(function (server) {
+              coreConnector.internalDebugLog('Discovery Server')
+              coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri && server.applicationUri !== null ? server.applicationUri : 'none')
+              coreConnector.internalDebugLog('         productUri:' + server.productUri && server.productUri !== null ? server.productUri : 'none')
+              coreConnector.detailDebugLog('    applicationName:' + server.applicationName && server.applicationName !== null ? server.applicationName.text : 'none')
+              coreConnector.detailDebugLog('               type:' + server.applicationType && server.applicationType !== null ? server.applicationType.key : 'none')
+              coreConnector.detailDebugLog('   gatewayServerUri:' + server.gatewayServerUri && server.gatewayServerUri !== null ? server.gatewayServerUri : 'none')
+              coreConnector.detailDebugLog('discoveryProfileUri:' + server.discoveryProfileUri && server.discoveryProfileUri !== null ? server.discoveryProfileUri : 'none')
+              coreConnector.detailDebugLog('      discoveryUrls:')
 
-            server.discoveryUrls.forEach(function (discoveryUrl) {
-              coreConnector.internalDebugLog('                    ' + discoveryUrl.cyan.bold)
+              if (server.discoveryUrls && server.discoveryUrls.length) {
+                server.discoveryUrls.forEach(function (discoveryUrl) {
+                  coreConnector.detailDebugLog('                    ' + discoveryUrl && discoveryUrl !== null ? discoveryUrl : 'none')
+                })
+              }
+
+              coreConnector.detailDebugLog('--------------------------------------')
             })
-            coreConnector.internalDebugLog('--------------------------------------')
-          })
+          }
         }
       })
     }
 
     node.startSession = function (timeoutSeconds, type) {
       coreConnector.internalDebugLog('Request For New Session From ' + type)
-      let now = Date.now()
 
       try {
         return new Promise(
@@ -157,23 +165,33 @@ module.exports = function (RED) {
               }
               session.on('error', node.handleError)
 
-              coreConnector.internalDebugLog(type + ' Session ' + session.sessionId + ' Started On ', node.endpoint)
-              coreConnector.internalDebugLog('name :' + session.name)
-              coreConnector.internalDebugLog('sessionId :' + session.sessionId)
-              coreConnector.internalDebugLog('authenticationToken :' + session.authenticationToken)
+              coreConnector.internalDebugLog(type + ' ' + session.name + ' Session ' +
+                session.sessionId + ' Started' + ' On' + ' ', node.endpoint)
+
+              coreConnector.detailDebugLog('name :' + session.name)
+              coreConnector.detailDebugLog('sessionId :' + session.sessionId)
+              coreConnector.detailDebugLog('authenticationToken :' + session.authenticationToken)
               coreConnector.internalDebugLog('timeout :' + session.timeout)
 
               if (session.serverNonce) {
-                coreConnector.internalDebugLog('serverNonce :' + session.serverNonce ? session.serverNonce.toString('hex') : 'none')
+                coreConnector.detailDebugLog('serverNonce :' + session.serverNonce ? session.serverNonce.toString('hex') : 'none')
               }
 
               if (session.serverCertificate) {
-                coreConnector.internalDebugLog('serverCertificate :' + session.serverCertificate ? session.serverCertificate.toString('base64') : 'none')
+                coreConnector.detailDebugLog('serverCertificate :' + session.serverCertificate ? session.serverCertificate.toString('base64') : 'none')
               }
 
-              coreConnector.internalDebugLog('serverSignature :' + session.serverSignature)
-              coreConnector.internalDebugLog('lastRequestSentTime :' + session.lastRequestSentTime ? new Date(session.lastRequestSentTime).toISOString() + ' ' + now - session.lastRequestSentTime : 'none')
-              coreConnector.internalDebugLog('lastResponseReceivedTime :' + session.lastResponseReceivedTime ? new Date(session.lastResponseReceivedTime).toISOString() + ' ' + now - session.lastResponseReceivedTime : 'none')
+              coreConnector.detailDebugLog('serverSignature :' + session.serverSignature)
+
+              if (session.lastRequestSentTime) {
+                coreConnector.detailDebugLog('lastRequestSentTime : ' + session.lastRequestSentTime)
+                coreConnector.internalDebugLog('lastRequestSentTime converted :' + session.lastRequestSentTime ? new Date(session.lastRequestSentTime).toISOString() : 'none')
+              }
+
+              if (session.lastResponseReceivedTime) {
+                coreConnector.detailDebugLog('lastResponseReceivedTime : ' + session.lastResponseReceivedTime)
+                coreConnector.internalDebugLog('lastResponseReceivedTime converted :' + session.lastResponseReceivedTime ? new Date(session.lastResponseReceivedTime).toISOString() : 'none')
+              }
 
               resolve(session)
             }).catch(function (err) {
