@@ -23,7 +23,28 @@ de.biancoroyal.opcua.iiot.core.detailDebugLog = de.biancoroyal.opcua.iiot.core.d
 de.biancoroyal.opcua.iiot.core.specialDebugLog = de.biancoroyal.opcua.iiot.core.specialDebugLog || require('debug')('opcuaIIoT:core:special') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT || 'ns=0;i=84' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.os = de.biancoroyal.opcua.iiot.core.os || require('os') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.isWindows = de.biancoroyal.opcua.iiot.core.isWindows || /^win/.test(de.biancoroyal.opcua.iiot.core.os.platform()) // eslint-disable-line no-use-before-define
 
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.endianness())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.hostname())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.platform())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.type())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.arch())
+
+de.biancoroyal.opcua.iiot.core.getNodeOPCUAPath = function () {
+  let nodeOPCUAPath = require.resolve('node-opcua')
+
+  if (this.isWindows) {
+    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
+  } else {
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+  }
+
+  this.internalDebugLog(nodeOPCUAPath)
+
+  return nodeOPCUAPath
+}
 de.biancoroyal.opcua.iiot.core.getTimeUnitName = function (unit) {
   let unitAbbreviation = ''
 

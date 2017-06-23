@@ -76,9 +76,6 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
             coreConnector.detailDebugLog('Security Mode: ' + endpoints[0].securityMode.toString())
             coreConnector.detailDebugLog('securityPolicyUri: ' + endpoints[0].securityPolicyUri)
 
-            let nodeOPCUAPath = require.resolve('node-opcua')
-            nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
-
             endpoints.forEach(function (endpoint, i) {
               coreConnector.detailDebugLog('endpoint: ' + endpoint.endpointUrl)
               coreConnector.detailDebugLog('Application URI: ' + endpoint.server.applicationUri)
@@ -93,7 +90,7 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
               coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
               options.defaultSecureTokenLifetime = 60000 // 1 min.
 
-              let certificateFilename = path.join(nodeOPCUAPath, '/certificates/PKI/server_certificate' + i + '.pem')
+              let certificateFilename = path.join(coreConnector.core.getNodeOPCUAPath(), '/certificates/PKI/server_certificate' + i + '.pem')
               coreConnector.detailDebugLog(certificateFilename)
               fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'))
             })
