@@ -1,0 +1,103 @@
+[
+  {
+    "id": "68721815.781b78",
+    "type": "debug",
+    "z": "95bfdf8a.be38e",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "false",
+    "x": 610,
+    "y": 800,
+    "wires": []
+  },
+  {
+    "id": "287f35a5.4c14ba",
+    "type": "debug",
+    "z": "95bfdf8a.be38e",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 590,
+    "y": 840,
+    "wires": []
+  },
+  {
+    "id": "b651e0e9.bc4f2",
+    "type": "inject",
+    "z": "95bfdf8a.be38e",
+    "name": "Call Bark Method",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 160,
+    "y": 840,
+    "wires": [
+      [
+        "e8f6529c.18edc"
+      ]
+    ]
+  },
+  {
+    "id": "e8f6529c.18edc",
+    "type": "OPCUA-IIoT-Method-Caller",
+    "z": "95bfdf8a.be38e",
+    "connector": "9acc3c36.df0ed",
+    "objectId": "ns=4;i=1234",
+    "methodId": "ns=4;i=12345",
+    "methodtype": "basic",
+    "value": "",
+    "name": "",
+    "inputArguments": [
+      {
+        "name": "barks",
+        "dataType": "UInt32",
+        "value": "3"
+      },
+      {
+        "name": "volume",
+        "dataType": "UInt32",
+        "value": "6"
+      }
+    ],
+    "x": 360,
+    "y": 840,
+    "wires": [
+      [
+        "68721815.781b78",
+        "287f35a5.4c14ba",
+        "e44e58b.d849da8"
+      ]
+    ]
+  },
+  {
+    "id": "e44e58b.d849da8",
+    "type": "OPCUA-IIoT-Response",
+    "z": "95bfdf8a.be38e",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "x": 600,
+    "y": 880,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "9acc3c36.df0ed",
+    "type": "OPCUA-IIoT-Connector",
+    "z": "",
+    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIOTServer",
+    "keepSessionAlive": true,
+    "loginEnabled": false,
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "Local Server",
+    "showStatusActivities": false,
+    "showErrors": false
+  }
+]

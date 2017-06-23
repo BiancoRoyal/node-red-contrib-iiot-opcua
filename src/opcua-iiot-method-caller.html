@@ -1,0 +1,354 @@
+<!--
+ The BSD 3-Clause License
+
+ Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ All rights reserved.
+ node-red-iiot-opcua
+-->
+
+<script type="text/javascript">
+  RED.nodes.registerType('OPCUA-IIoT-Method-Caller', {
+    category: 'IIoT',
+    color: "#ABCDEF",
+    defaults: {
+      connector: {type: "OPCUA-IIoT-Connector", required: true},
+      objectId: {value: ""},
+      methodId: {value: ""},
+      methodtype: {value: "basic", required: true},
+      value: {value: null},
+      name: {value: ""},
+      inputArguments: {value: []}
+    },
+    inputs: 1,
+    outputs: 1,
+    align: "right",
+    icon: "opcuaiiot.png",
+    label: function () {
+      return this.name || "Method Caller";
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+      let node = this
+      node.lookupItems = []
+      let nodeIdLookupField = $("#node-lookup-nodeId")
+      let nodeIdField = $("#node-input-nodeId")
+      let cacheItemCount = node.inputArguments.length
+
+      nodeIdLookupField.click(function () {
+        nodeIdLookupField.addClass('disabled')
+
+        let url = '/opcuaIIoT/object/' + node.objectId + '/method/' + nodeIdField.val()
+        console.log('url: ' + url)
+
+        $.getJSON(url, function (data) {
+          nodeIdLookupField.removeClass('disabled')
+          node.lookupItems = []
+
+          $.each(data, function (i, entry) {
+            node.lookupItems.push({value: entry.nodeId, label: entry.displayName.text})
+          })
+
+          nodeIdField.autocomplete({
+            source: node.lookupItems,
+            minLength: 0,
+            focus: function (event, ui) {
+              nodeIdField.val(ui.item.label);
+              return false;
+            },
+            select: function (event, ui) {
+              nodeIdField.val(ui.item.value)
+              return false;
+            },
+            close: function (event, ui) {
+              nodeIdField.autocomplete("destroy")
+            }
+          }).autocomplete("search", "")
+        })
+      })
+
+      let tabs = RED.tabs.create({
+        id: "node-input-method-tabs",
+        onchange: function (tab) {
+          $("#node-input-method-tabs-content").children().hide()
+          $("#" + tab.id).show()
+        }
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-method-tab-settings",
+        label: this._("opcua-iiot-contrib.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-method-tab-argument",
+        label: this._("opcua-iiot-contrib.tabs-label.argument")
+      })
+
+      // Argument Management
+      node.inputArguments.forEach(function (element, index, array) {
+        generateArgumentEntry(element, index);
+      })
+
+      function resizeButton (container, width) {
+        let lastField = container.find(".node-input-method-argument-value")
+        // lastField.width(width - 120);
+      }
+
+      function generateArgumentEntry (argument, id) {
+        console.log('argument ' + JSON.stringify(argument) + ' id: ' + id)
+
+        let container = $('<li/>', {
+          style:
+            "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"
+        })
+        let row = $('<div id="row' + id + '"/>').appendTo(container)
+
+        $('<i style="color: #eee; cursor: move;" class="node-input-method-argument-handle fa fa-bars"></i>').appendTo(row)
+
+        let nameField = $('<input/>', {
+          id: "node-input-method-argument-name",
+          type: "text",
+          style: "margin-left:5px;width:40%;",
+          placeholder: 'name'
+        }).appendTo(row)
+
+        var datatypeField = $('<select/>', {
+          id: "node-input-method-argument-dataType",
+          type: "text",
+          style: "margin-left:5px;width:25%;",
+        }).appendTo(row);
+
+        url = '/opcuaIIoT/method/basicDataTypesForSelect'
+        console.log('url: ' + url)
+
+        $.getJSON(url, function (data) {
+          $(data).each(function () {
+            datatypeField.append($("<option>").attr('value', this).text(this));
+          });
+
+          datatypeField.val(argument.dataType)
+        })
+
+        let valueField = $('<input/>', {
+          id: "node-input-method-argument-value",
+          type: "text",
+          style: "margin-left:5px;width:25%;",
+          placeholder: 'value'
+        }).appendTo(row)
+
+        nameField.val(argument.name)
+        datatypeField.val(argument.dataType)
+        valueField.val(argument.value)
+
+        let finalspan = $('<span/>', {style: "float: right;margin-right: 10px;"}).appendTo(row)
+
+        let removeArgumentButton = $('<a/>', {
+          href: "#",
+          class: "editor-button editor-button-small",
+          style: "margin-top: 7px; margin-left: 5px;"
+        }).appendTo(finalspan)
+
+        $('<i/>', {class: "fa fa-remove"}).appendTo(removeArgumentButton)
+
+        removeArgumentButton.click(function () {
+          container.css({"background": "#fee"})
+          container.fadeOut(300, function () {
+            console.log('remove argument ' + JSON.stringify($(this)))
+            $(this).remove()
+          });
+        });
+
+        $("#node-input-method-argument-container").append(container)
+        let width = $("#node-input-method-argument-container").width()
+        resizeButton(container, width)
+      }
+
+      $("#node-input-method-argument-container").sortable({
+        axis: "y",
+        handle: ".node-input-method-argument-handle",
+        cursor: "move"
+      });
+
+      $("#node-input-method-argument-container .node-input-method-argument-handle").disableSelection()
+
+      $("#node-input-method-argument-add").click(function () {
+        cacheItemCount++
+        console.log('add argument ' + cacheItemCount)
+        generateArgumentEntry({name: '', dataType: '', value: ''}, cacheItemCount)
+        // length is every time one more than index
+        $("#node-input-method-argument-container-div").scrollTop($("#node-input-method-argument-container-div").get(0).scrollHeight)
+      })
+
+      // dialog handling
+      function switchDialogResize () {
+        let rows = $("#dialog-form>div:not(.node-input-method-argument-container-row)")
+        let height = $("#dialog-form").height()
+
+        rows.each(function (index, row) {
+          height -= row.outerHeight(true)
+        })
+
+        let editorRow = $("#dialog-form>div.node-input-method-argument-container-row")
+        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
+        $("#node-input-method-argument-container-div").css("height", height + "px")
+
+        let argumentsContainerChildren = $("#node-input-method-argument-container").children()
+        let newWidth = $("#node-input-method-argument-container").width()
+        argumentsContainerChildren.each(function (index, containerChild) {
+          resizeButton(containerChild, newWidth)
+        })
+      }
+
+      $("#dialog").on("dialogresize", switchDialogResize)
+
+      $("#dialog").one("dialogopen", function (ev) {
+        let size = $("#dialog").dialog('option', 'sizeCache-switch')
+        if (size) {
+          $("#dialog").dialog('option', 'width', size.width)
+          $("#dialog").dialog('option', 'height', size.height)
+          switchDialogResize()
+        } else {
+          setTimeout(switchDialogResize, 10)
+        }
+      })
+
+      $("#dialog").one("dialogclose", function (ev, ui) {
+        $("#dialog").off("dialogresize", switchDialogResize)
+      })
+    },
+    oneditsave: function () {
+      let cacheArguments = $("#node-input-method-argument-container").children()
+      let node = this
+      node.inputArguments = []
+      let argumentIndex = 0
+
+      cacheArguments.each(function () {
+        let argumentEntry = $(this)
+
+        node.inputArguments.push({
+          name: argumentEntry.find("#node-input-method-argument-name").val(),
+          dataType: argumentEntry.find("#node-input-method-argument-dataType").val(),
+          value: argumentEntry.find("#node-input-method-argument-value").val()
+        })
+
+        argumentIndex++
+      })
+
+      console.log('save input arguments: ' + JSON.stringify(node.inputArguments))
+    }
+
+  });
+</script>
+
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Method-Caller">
+    <div class="form-row">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-method-tabs"></ul>
+    </div>
+    <div id="node-input-method-tabs-content" style="min-height: 170px;">
+        <div id="opcuaiiot-method-tab-settings" style="display:none">
+            <div class="form-row" style="min-width:640px">
+                <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
+                <input type="text" id="node-input-connector">
+            </div>
+            <div class="form-row">
+                <label for="node-input-objectId"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.objectId"></span></label>
+                <input type="text" id="node-input-objectId" placeholder="ns=0;s=Server or ns=0;i=2253">
+            </div>
+            <div class="form-row">
+                <label for="node-input-methodId"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.methodId"></span></label>
+                <input type="text" id="node-input-methodId" placeholder="ns=4;s=Bark or ns=4;i=VendorName-Bark">
+            </div>
+            <div class="form-row">
+                <label for="node-input-methodtype"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.methodtype"></span></label>
+                <select type="text" id="node-input-methodtype">
+                    <option value="basic">Basic</option>
+                    <option value="complex">Complex</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="node-input-value"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.value"></span></label>
+                <input type="text" id="node-input-value" placeholder="">
+            </div>
+            <div class="form-row">
+                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <input type="text" id="node-input-name" placeholder="">
+            </div>
+        </div>
+        <div id="opcuaiiot-method-tab-argument" style="display:none">
+            <div class="form-row node-input-method-argument-container-row" style="margin-bottom: 0px;">
+                <div id="node-input-method-argument-container-div"
+                    style="box-sizing: border-box; border-radius: 5px;
+                    height: 210px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+                    <ol id="node-input-method-argument-container" style=" list-style-type:none; margin: 0;"></ol>
+                </div>
+            </div>
+            <div class="form-row">
+                <a href="#" class="editor-button editor-button-small" id="node-input-method-argument-add"
+                style="margin-top: 4px;"><i class="fa fa-plus"></i>
+                <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Method-Caller">
+    <h2>OPC UA IIoT Method Caller</h2>
+
+    <p>The Node is to call a basic or complex method on the OPC UA server.</p>
+
+    <h3>Input</h3>
+
+    <p>If the settings of the node are filled, then a simple inject will work,
+    otherwise the incoming has to receive a complex message with all parameters.</p>
+
+    <p>The settings in that node will override incoming data if the field value of the node is not empty.</p>
+
+    <div>
+        <strong>Simple event message:</strong>
+        <ul>
+            <li>payload (Object-Id, inputArguments (Array))
+            <li>topic (Method-Id)
+        </ul>
+    </div>
+
+    <div>
+        <strong>Complex event message:</strong>
+        <ul>
+            <li>objectId (Object-Id)
+            <li>methodId (Method-Id)
+            <li>inputArguments (Array)
+            <ul>
+                <li>dataType
+                <li>value
+            </ul>
+            <li>nodetype
+            <li>methodtype
+        </ul>
+    </div>
+
+    <h3>Output</h3>
+    <div>
+        <strong>Event message:</strong>
+        <ul>
+            <li>payload (Array)
+            <ul>
+                <li>statusCode
+                <li>inputArgumentResults (Array)
+                <li>inputArgumentDiagnosticInfos (Array)
+                <li>outputArguments (Array)
+            </ul>
+            <li>definitionResults
+            <ul>
+                <li>methodId
+                <li>methodDefinition
+            </ul>
+            <li>nodetype (method)
+            <li>methodtype
+        </ul>
+    </div>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
+</script>

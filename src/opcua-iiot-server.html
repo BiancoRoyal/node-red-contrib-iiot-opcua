@@ -38,6 +38,7 @@
     },
     oneditprepare: function () {
       let node = this
+      let cacheItemCount = node.users.length
 
       let tabs = RED.tabs.create({
         id: "node-input-server-tabs",
@@ -80,14 +81,14 @@
         $('<i style="color: #eee; cursor: move;" class="node-input-server-users-handle fa fa-bars"></i>').appendTo(row)
 
         let userField = $('<input/>', {
-          id: "node-input-server-users-name" + id,
+          id: "node-input-server-users-name",
           type: "text",
           style: "margin-left:5px;width:120px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let passwordField = $('<input/>', {
-          id: "node-input-server-users-password" + id,
+          id: "node-input-server-users-password",
           type: "password",
           style: "margin-left:5px;width:200px;",
           placeholder: 'password'
@@ -109,7 +110,7 @@
         removeUserButton.click(function () {
           container.css({"background": "#fee"})
           container.fadeOut(300, function () {
-            console.log('add user ' + $(this))
+            console.log('remove user ' + $(this))
             $(this).remove()
           });
         });
@@ -129,7 +130,8 @@
 
       $("#node-input-server-users-add").click(function () {
         console.log('add user')
-        generateUserEntry({ name: '', password: '' }, node.users.length) // length is every time one more than index
+        cacheItemCount++
+        generateUserEntry({ name: '', password: '' }, cacheItemCount) // length is every time one more than index
         $("#node-input-server-users-container-div").scrollTop($("#node-input-server-users-container-div").get(0).scrollHeight)
       })
 
@@ -176,15 +178,12 @@
       node.users = []
       let userIndex = 0
 
-      cacheUsers.each(function (index, userEntry) {
-        console.log('save user: ' + JSON.stringify(userEntry))
-
-        let userFieldValue = $(this).find("#node-input-server-users-name" + userIndex).val()
-        let passwordFieldValue = $(this).find("#node-input-server-users-password" + userIndex).val()
+      cacheUsers.each(function () {
+        console.log('save user: ' + JSON.stringify($(this)))
 
         node.users.push({
-          name: userFieldValue,
-          password: passwordFieldValue
+          name: $(this).find("#node-input-server-users-name").val(),
+          password: $(this).find("#node-input-server-users-password").val()
         })
 
         userIndex++

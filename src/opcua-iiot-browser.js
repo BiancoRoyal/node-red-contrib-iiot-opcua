@@ -16,6 +16,7 @@
 module.exports = function (RED) {
   let coreBrowser = require('./core/opcua-iiot-core-browser')
   let browserEntries = []
+  let nodesToRead = []
 
   function OPCUAIIoTBrowser (config) {
     RED.nodes.createNode(this, config)
@@ -111,6 +112,7 @@ module.exports = function (RED) {
 
     node.browse = function (session, msg) {
       browserEntries = []
+      nodesToRead = []
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
 
       if (session) {
@@ -122,6 +124,9 @@ module.exports = function (RED) {
             result.references.forEach(function (reference) {
               coreBrowser.internalDebugLog('Add Reference To List :' + reference)
               browserEntries.push(node.transformToEntry(reference))
+              if (reference.nodeId) {
+                nodesToRead.push(reference.nodeId.toString())
+              }
             })
           })
 
@@ -149,6 +154,9 @@ module.exports = function (RED) {
         endpoint: node.connector.endpoint,
         session: node.opcuaSession.name
       }
+
+      msg.nodesToRead = nodesToRead
+      msg.nodesToReadCount = nodesToRead.length
 
       node.send(msg)
     }
