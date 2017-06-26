@@ -170,7 +170,8 @@ module.exports = function (RED) {
       }
 
       node.browseTopic = node.extractBrowserTopic(msg)
-      if (node.browseTopic) {
+
+      if (node.browseTopic !== '') {
         node.browse(node.opcuaSession, msg)
       } else {
         node.error(new Error('No Topic To Browse'), msg)
@@ -188,7 +189,7 @@ module.exports = function (RED) {
           rootNodeId = node.nodeId
         }
       } else {
-        if (msg.topic) {
+        if (msg.topic && node.nodeId === '') {
           rootNodeId = msg.topic
         } else {
           rootNodeId = node.nodeId
