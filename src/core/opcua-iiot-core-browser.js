@@ -2,6 +2,7 @@
  The BSD 3-Clause License
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-iiot-opcua
  */

@@ -18,13 +18,4 @@
 
 #### Listener
 
-* Events can not be monitored
-
-#### Server 
-
-* Security is not complete implemented
-* Signed or encrypted connection stops Node-RED
- 
-#### Connector
-
-* Security is not complete implemented
+* Events can not be monitored (error node-opcua maxAge)

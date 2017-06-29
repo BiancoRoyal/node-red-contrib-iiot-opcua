@@ -96,7 +96,7 @@
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
-    "name": "Local Server",
+    "name": "Method Server",
     "showStatusActivities": false,
     "showErrors": false
   }
