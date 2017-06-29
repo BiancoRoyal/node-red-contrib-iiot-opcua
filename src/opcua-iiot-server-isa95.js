@@ -43,9 +43,7 @@ module.exports = function (RED) {
       securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
     }
 
-    let nodeOPCUAPath = require.resolve('node-opcua')
-    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
-    coreServer.internalDebugLog(nodeOPCUAPath)
+    let nodeOPCUAPath = coreServer.core.getNodeOPCUAPath()
 
     node.publicCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_selfsigned_cert_2048.pem')
     coreServer.detailDebugLog(node.publicCertificateFile)

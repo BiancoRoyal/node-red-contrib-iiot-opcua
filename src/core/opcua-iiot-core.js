@@ -23,7 +23,28 @@ de.biancoroyal.opcua.iiot.core.detailDebugLog = de.biancoroyal.opcua.iiot.core.d
 de.biancoroyal.opcua.iiot.core.specialDebugLog = de.biancoroyal.opcua.iiot.core.specialDebugLog || require('debug')('opcuaIIoT:core:special') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT || 'ns=0;i=84' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.os = de.biancoroyal.opcua.iiot.core.os || require('os') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.isWindows = de.biancoroyal.opcua.iiot.core.isWindows || /^win/.test(de.biancoroyal.opcua.iiot.core.os.platform()) // eslint-disable-line no-use-before-define
 
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.endianness())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.hostname())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.platform())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.type())
+de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.arch())
+
+de.biancoroyal.opcua.iiot.core.getNodeOPCUAPath = function () {
+  let nodeOPCUAPath = require.resolve('node-opcua')
+
+  if (this.isWindows) {
+    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
+  } else {
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+  }
+
+  this.internalDebugLog(nodeOPCUAPath)
+
+  return nodeOPCUAPath
+}
 de.biancoroyal.opcua.iiot.core.getTimeUnitName = function (unit) {
   let unitAbbreviation = ''
 
@@ -224,6 +245,154 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
   this.detailDebugLog('buildNewVariant variantValue: ' + JSON.stringify(variantValue))
 
   return variantValue
+}
+
+de.biancoroyal.opcua.iiot.core.getBasicDataTypes = function () {
+  let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
+
+  return [{name: 'Null', dataType: opcua.DataType.Null},
+    {name: 'Boolean', dataType: opcua.DataType.Boolean},
+    {name: 'SByte', dataType: opcua.DataType.SByte},
+    {name: 'Byte', dataType: opcua.DataType.Byte},
+    {name: 'Int16', dataType: opcua.DataType.Int16},
+    {name: 'UInt16', dataType: opcua.DataType.UInt16},
+    {name: 'Int32', dataType: opcua.DataType.Int32},
+    {name: 'UInt32', dataType: opcua.DataType.UInt32},
+    {name: 'Int64', dataType: opcua.DataType.Int64},
+    {name: 'UInt64', dataType: opcua.DataType.UInt64},
+    {name: 'Float', dataType: opcua.DataType.Float},
+    {name: 'Double', dataType: opcua.DataType.Double},
+    {name: 'DateTime', dataType: opcua.DataType.DateTime},
+    {name: 'String', dataType: opcua.DataType.String},
+    {name: 'Guid', dataType: opcua.DataType.Guid},
+    {name: 'ByteString', dataType: opcua.DataType.ByteString},
+    {name: 'XmlElement', dataType: opcua.DataType.XmlElement},
+    {name: 'NodeId', dataType: opcua.DataType.NodeId},
+    {name: 'ExpandedNodeId', dataType: opcua.DataType.ExpandedNodeId},
+    {name: 'StatusCode', dataType: opcua.DataType.StatusCode},
+    {name: 'LocalizedText', dataType: opcua.DataType.LocalizedText},
+    {name: 'ExtensionObject', dataType: opcua.DataType.ExtensionObject},
+    {name: 'DataValue', dataType: opcua.DataType.DataValue},
+    {name: 'Variant', dataType: opcua.DataType.Variant},
+    {name: 'DiagnosticInfo', dataType: opcua.DataType.DiagnosticInfo}]
+}
+
+de.biancoroyal.opcua.iiot.core.getBasicDataTypesForSelect = function () {
+  return ['Null',
+    'Boolean',
+    'SByte',
+    'Byte',
+    'Int16',
+    'UInt16',
+    'Int32',
+    'UInt32',
+    'Int64',
+    'UInt64',
+    'Float',
+    'Double',
+    'DateTime',
+    'String',
+    'Guid',
+    'ByteString',
+    'XmlElement',
+    'NodeId',
+    'ExpandedNodeId',
+    'StatusCode',
+    'LocalizedText',
+    'ExtensionObject',
+    'DataValue',
+    'Variant',
+    'DiagnosticInfo']
+}
+
+de.biancoroyal.opcua.iiot.core.convertToDataType = function (datatype) {
+  let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
+  let coerceNodeId = opcua.coerceNodeId
+  this.detailDebugLog('convertToDataValue datatype: ' + datatype)
+
+  switch (datatype) {
+    case 'Null':
+    case opcua.DataType.Null:
+      return opcua.DataType.Null
+    case 'Boolean':
+    case opcua.DataType.Boolean:
+      return opcua.DataType.Boolean
+    case 'SByte':
+    case opcua.DataType.SByte:
+      return opcua.DataType.SByte
+    case 'Byte':
+    case opcua.DataType.Byte:
+      return opcua.DataType.Byte
+    case 'Int16':
+    case opcua.DataType.Int16:
+      return opcua.DataType.Int16
+    case 'UInt16':
+    case opcua.DataType.UInt16:
+      return opcua.DataType.UInt16
+    case 'Int32':
+    case opcua.DataType.Int32:
+      return opcua.DataType.Int32
+    case 'UInt32':
+    case opcua.DataType.UInt32:
+      return opcua.DataType.UInt32
+    case 'Int64':
+    case opcua.DataType.Int64:
+      return opcua.DataType.Int64
+    case 'UInt64':
+    case opcua.DataType.UInt64:
+      return opcua.DataType.UInt64
+    case 'Float':
+    case opcua.DataType.Float:
+      return opcua.DataType.Float
+    case 'Double':
+    case opcua.DataType.Double:
+      return opcua.DataType.Double
+    case 'DateTime':
+    case opcua.DataType.DateTime:
+      return opcua.DataType.DateTime
+    case 'String':
+    case opcua.DataType.String:
+      return opcua.DataType.String
+    case 'Guid':
+    case opcua.DataType.Guid:
+      return opcua.DataType.Guid
+    case 'ByteString':
+    case opcua.DataType.ByteString:
+      return opcua.DataType.ByteString
+    case 'XmlElement':
+    case opcua.DataType.XmlElement:
+      return opcua.DataType.XmlElement
+    case 'NodeId':
+    case opcua.DataType.NodeId:
+      return opcua.DataType.NodeId
+    case 'ExpandedNodeId':
+    case opcua.DataType.ExpandedNodeId:
+      return opcua.DataType.ExpandedNodeId
+    case 'StatusCode':
+    case opcua.DataType.StatusCode:
+      return opcua.DataType.StatusCode
+    case 'LocalizedText':
+    case opcua.DataType.LocalizedText:
+      return opcua.DataType.LocalizedText
+    case 'ExtensionObject':
+    case opcua.DataType.ExtensionObject:
+      return opcua.DataType.ExtensionObject
+    case 'DataValue':
+    case opcua.DataType.DataValue:
+      return opcua.DataType.DataValue
+    case 'Variant':
+    case opcua.DataType.Variant:
+      return opcua.DataType.Variant
+    case 'DiagnosticInfo':
+    case opcua.DataType.DiagnosticInfo:
+      return opcua.DataType.DiagnosticInfo
+    default:
+      if (datatype && datatype.includes('=')) {
+        return coerceNodeId(datatype)
+      } else {
+        return datatype
+      }
+  }
 }
 
 de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue) {

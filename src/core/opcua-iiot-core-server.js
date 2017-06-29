@@ -55,7 +55,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
 
   let vendorName = addressSpace.addObject({
     organizedBy: addressSpace.rootFolder.objects,
-    nodeId: 'ns=4;s=VendorName',
+    nodeId: 'ns=4;i=1234',
     browseName: 'BiancoRoyal',
     displayName: 'Bianco Royal'
   })
@@ -278,24 +278,28 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
 
   let method = addressSpace.addMethod(
     vendorName, {
+      nodeId: 'ns=4;i=12345',
       browseName: 'Bark',
 
       inputArguments: [
         {
-          name: 'nbBarks',
-          description: {text: 'specifies the number of time I should bark'},
-          dataType: coreServer.core.nodeOPCUA.DataType.UInt32
+          name: 'barks',
+          dataType: coreServer.core.convertToDataType('UInt32'),
+          arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Scalar,
+          description: {text: 'specifies the number of time I should bark'}
         }, {
           name: 'volume',
-          description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'},
-          dataType: coreServer.core.nodeOPCUA.DataType.UInt32
+          dataType: coreServer.core.convertToDataType('UInt32'),
+          arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Scalar,
+          description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'}
         }
       ],
 
       outputArguments: [{
         name: 'Barks',
+        dataType: coreServer.core.convertToDataType('String'),
+        arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
         description: {text: 'the generated barks'},
-        dataType: coreServer.core.nodeOPCUA.DataType.String,
         valueRank: 1
       }]
     })

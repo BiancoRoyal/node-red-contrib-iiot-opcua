@@ -131,39 +131,41 @@
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Browser">
-    <h2>OPC UA IIoT Browser</h2>
+ <h2>OPC UA IIoT Browser</h2>
 
-    <p>The Browser is to browse your OPC UA address space.
-    It could start with the root folder by OPC UA Node-Id like ns=0;i=85
-    and it could configure to start ever at a special root in the address space.</p>
+ <p>Use the Browser to browse your OPC UA address space.
+ It normally starts with the root folder by using an OPC UA Node-Id like ns=0;i=85.
+ It also can be configured to start at any desired Node-Id as root within the address space.</p>
 
-    <h3>Configuration</h3>
+ <h3>Configuration</h3>
 
-    <p>The browser inside configuration is to set a default starting OPC UA Node-Id.
-    The request could never reach OPC UA address space objects above that OPC UA Node-Id.</p>
-    <p>Try out the lookup button and delete input text to start at the root.</p>
+ <p>The browser tab inside the configuration section is used to set a default starting OPC UA Node-Id.
+ Important!
+ The request could never reach OPC UA address space objects above that OPC UA Node-Id.</p>
 
-    <h3>Input</h3>
+ <p>Use the lookup button to browse for Node-Id's.
+ Empty the input text box to start from root again.</p>
 
-    <p>The input is to inject an OPC UA Node-Id to set a starting point to browse.</p>
+ <h3>Examples</h3>
+ <a href='https://github.com/biancode/node-red-iiot-opcua/blob/master/examples/' target='_blank'>GitHub Browser example flow</a>
 
-    <h3>Output</h3>
+ <p>Please download the examples from a branch matching your current version.
+ It could change over time.</p>
 
-    <p>The output is a structured JSON object with the requested data or
-    it sends the Errors from node-opcua.</p>
+ <h3>Input</h3>
 
-    <h3>Examples</h3>
-    <a href="https://github.com/biancode/node-red-iiot-opcua/blob/master/examples/"
-    target="_blank">GitHub Browser example flow</a>
+ <p>The input expects an OPC UA Node-Id to set a starting point to browse from.</p>
 
-    <p>Please, download examples from a branch as your version is. It could change over time.</p>
+ <h3>Output</h3>
 
-    <h3>Output</h3>
+ <p>The output returns either a structured JSON object with the
+ requested data or the error messages from node-opcua.</p>
 
-    <div>
-        <strong>Result in subscribe message:</strong>
-        <ul>
-            <li>payload (value)
+ <div>
+    <strong>Content of a subscribed message:</strong>
+
+    <ul>
+        <li>payload (value)
             <ul>
                 <li>browserItems (Array)
                 <li>browserResultCount
@@ -171,12 +173,15 @@
                 <li>endpoint
                 <li>session
             </ul>
-            <li>nodetype (browse)
-            <li>input (msg)
-            <li>result (origin from node-opcua)
-        </ul>
-    </div>
+        <li>nodesToRead (Array)
+        <li>nodesToReadCount
+        <li>nodetype (browse)
+        <li>input (origin msg)
+        <li>result (origin from node-opcua)
+    </ul>
+ </div>
 
-    <strong>Name</strong>
-    <p>Name in the flow of Node-RED.</p>
+ <strong>Name</strong>
+ <p>Name in the flow of Node-RED.</p>
+
 </script>

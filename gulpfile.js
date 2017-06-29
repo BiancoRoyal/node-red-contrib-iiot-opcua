@@ -16,8 +16,6 @@ const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
 const sourcemaps = require('gulp-sourcemaps')
 const pump = require('pump')
-// const obfuscate = require('gulp-obfuscate')
-// const javascriptObfuscator = require('gulp-javascript-obfuscator')
 
 gulp.task('default', function () {
   // place code for your default task here
@@ -27,7 +25,7 @@ gulp.task('docs', ['doc', 'docIcons', 'docExamples', 'docImages'])
 gulp.task('websites', ['opcua-iiot-web'])
 gulp.task('nodejs', ['opcua-iiot'])
 gulp.task('build', ['nodejs', 'websites', 'locale'])
-gulp.task('publish', ['build', 'public', 'icons', 'docs'])
+gulp.task('publish', ['build', 'public', 'icons', 'docs', 'releaseExamples'])
 
 gulp.task('icons', function () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
@@ -39,6 +37,10 @@ gulp.task('docIcons', function () {
 
 gulp.task('docExamples', function () {
   return gulp.src('examples/**/*').pipe(gulp.dest('docs/gen/examples'))
+})
+
+gulp.task('releaseExamples', function () {
+  return gulp.src('examples/**/*').pipe(gulp.dest('opcuaIIoT/examples'))
 })
 
 gulp.task('docImages', function () {
@@ -74,27 +76,6 @@ gulp.task('opcua-iiot-web', function () {
     }))
     .pipe(gulp.dest('opcuaIIoT'))
 })
-
-/*
-gulp.task('opcua-iiot', function (cb) {
-  pump([
-    gulp.src('src/!**!/!*.js').pipe(javascriptObfuscator()),
-    gulp.dest('opcuaIIoT')
-  ],
-    cb
-  )
-})
-*/
-
-// gulp.task('opcua-iiot', function (cb) {
-//   pump([gulp.src('src/**/*.js')
-//       .pipe(babel({presets: ['es2015']}))
-//       .pipe(obfuscate(/*{ replaceMethod: obfuscate.ZALGO} */)), gulp.dest('opcuaIIoT')],
-//     cb
-//   )
-// })
-
-/*  */
 
 gulp.task('opcua-iiot', function (cb) {
   pump([

@@ -9,13 +9,18 @@
 # node-red-iiot-opcua 
 
 ## !!! PUBLIC BETA !!! PUBLIC BETA !!!
-
+### We start to work on issues from August - Have a great summer time!
 
 [![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
 
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
-[Support the project now!][2]
+## [Support via Kickstarter][9]
+## [Support for the project straight away!][2]
+
+## Code Release GitHub
+
+The release of the source code will follow later at the end of the year.
 
 ## Install
 
@@ -31,11 +36,10 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
     
-## Usage
+## Contributing
 
-### OPC UA Server
-
-### OPC UA Client
+Let's work together! 
+Please read and accepted [CONTRIBUTING](CONTRIBUTING.md) by your sign and send it via E-Mail.
 
 ### Debug
 
@@ -138,7 +142,7 @@ The BSD 3-Clause License
 [Klaus Landsdorf][1]
 
 That is a whole new Node-RED package based on the node-opcua examples and the API documentation.
-The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED.
+The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED and OPC UA.
 
 ### Important
 
@@ -152,9 +156,10 @@ for the node-opcua packages and very special for the node-opcua-isa95 package!
 
 [1]:https://bianco-royal.cloud/
 [2]:https://bianco-royal.cloud/supporter/
-[3]:https://github.com/biancode/node-red-iiot-opcua
-[4]:https://github.com/biancode/node-red-iiot-opcua/wiki
+[3]:https://github.com/biancode/node-red-iiot-opcua-publicbeta
+[4]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki
 [5]:https://github.com/node-opcua/node-opcua/commit/fa0efb772353adbc901f47d8787a13597d595cd7
 [6]:https://github.com/erossignon
-[7]:https://github.com/biancode/node-red-iiot-opcua/wiki/DEBUG
+[7]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki/DEBUG
 [8]:https://github.com/node-opcua/node-opcua/issues/340
+[9]:https://www.kickstarter.com/projects/biancode/node-red-iiot-opc-ua-package

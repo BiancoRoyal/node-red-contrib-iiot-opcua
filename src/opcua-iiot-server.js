@@ -50,9 +50,7 @@ module.exports = function (RED) {
     let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
     let xmlFiles = [standardNodeSetFile, path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')]
 
-    let nodeOPCUAPath = require.resolve('node-opcua')
-    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
-    coreServer.internalDebugLog(nodeOPCUAPath)
+    let nodeOPCUAPath = coreServer.core.getNodeOPCUAPath()
 
     node.publicCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_selfsigned_cert_2048.pem')
     coreServer.detailDebugLog(node.publicCertificateFile)

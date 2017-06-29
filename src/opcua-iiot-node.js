@@ -45,8 +45,12 @@ module.exports = function (RED) {
         node.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
 
-      if (node.value !== null) {
-        msg.payload = node.value
+      if (node.value !== '') {
+        if (node.datatype) {
+          msg.payload = core.convertDataValueByDataType({value: node.value}, node.datatype)
+        } else {
+          msg.payload = node.value
+        }
       }
 
       core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))

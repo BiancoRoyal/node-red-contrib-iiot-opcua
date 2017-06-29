@@ -43,6 +43,10 @@ module.exports = function (RED) {
               node.analyzeListenerResults(msg)
               break
 
+            case 'method':
+              node.analyzeMethodResults(msg)
+              break
+
             default:
               coreResponse.internalDebugLog('unknown node type: '.orange + JSON.stringify(msg.nodetype))
               if (msg && msg.payload) {
@@ -88,6 +92,21 @@ module.exports = function (RED) {
 
         case 'event':
           node.analyzeEventResultStatus(msg)
+          break
+
+        default:
+          break
+      }
+    }
+
+    node.analyzeMethodResults = function (msg) {
+      switch (msg.methodtype) {
+        case 'basic':
+          node.handlePayloadStatusCode(msg)
+          break
+
+        case 'complex':
+          node.handlePayloadStatusCode(msg)
           break
 
         default:
