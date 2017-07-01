@@ -4,7 +4,7 @@
  Copyright 2016, 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2013, 2016 IBM Corp. (node-red)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  **/
 'use strict'
 

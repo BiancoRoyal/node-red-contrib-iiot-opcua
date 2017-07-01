@@ -6,12 +6,9 @@
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-6.x-green.png)
 
-# node-red-iiot-opcua 
+# node-red-contrib-iiot-opcua 
 
-## !!! PUBLIC BETA !!! PUBLIC BETA !!!
-### We start to work on issues from August - Have a great summer time!
-
-[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
+[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua )
 
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
@@ -26,11 +23,11 @@ The release of the source code will follow later at the end of the year.
 
 Run command on Node-RED installation directory.
 
-	npm install node-red-iiot-opcua
+	npm install node-red-contrib-iiot-opcua 
 
 or run command for global installation.
 
-	npm install -g node-red-iiot-opcua
+	npm install -g node-red-contrib-iiot-opcua 
 
 try these options on npm install to build, if you have problems to install
 
