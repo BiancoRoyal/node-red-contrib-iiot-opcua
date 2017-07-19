@@ -6,5 +6,4 @@ opcuaIIoT/
 error*.txt
 .DS_Store
 maps/
-
-maps/
+docs/gen/
