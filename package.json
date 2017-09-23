@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-iiot-opcua",
-  "version": "0.4.0",
+  "version": "1.0.1-alpha.0",
   "private": false,
   "description": "The IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -13,7 +13,7 @@
     "cron": "1.2.1",
     "debug": "<2.7",
     "easy-table": "1.1.0",
-    "node-opcua": "0.0.65",
+    "node-opcua": "^0.1.0-6",
     "treeify": "1.0.1"
   },
   "keywords": [
@@ -57,14 +57,15 @@
     }
   },
   "engines": {
-    "node": ">=4.7"
+    "node": ">=8.5.0"
   },
   "homepage": "https://github.com/biancode/node-red-iiot-opcua-publicbeta#readme",
   "scripts": {
-    "test": "standard --fix && mocha test/*",
+    "test": "standard --fix && mocha test/* --reporter dot",
     "build": "standard --fix && gulp clean && gulp publish",
     "prepublish": "standard --fix && npm run build && npm test",
-    "ci-publish": "ci-publish"
+    "ci-publish": "ci-publish",
+    "release": "standard-version"
   },
   "files": [
     "opcuaIIoT"
@@ -98,6 +99,7 @@
     "pump": "^1.0.2",
     "sinon": "^2.3.8",
     "standard": "^10.0.2",
+    "standard-version": "^4.2.0",
     "supertest": "^3.0.0",
     "uglify-js": "^3.0.25",
     "uglify-js-harmony": "^2.7.7",
