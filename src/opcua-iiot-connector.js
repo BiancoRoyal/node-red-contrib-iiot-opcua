@@ -121,7 +121,7 @@ module.exports = function (RED) {
       //   }
       // })
 
-      let findServersRequest = require('node-opcua/lib/findservers').perform_findServersRequest
+      let findServersRequest = require('node-opcua').perform_findServersRequest
       findServersRequest('opc.tcp://localhost:4840/UADiscovery', function (err, servers) {
         if (err) {
           coreConnector.internalDebugLog('Discovery Error ' + err)

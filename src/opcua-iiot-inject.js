@@ -28,6 +28,8 @@ module.exports = function (RED) {
     this.once = config.once
     this.startDelay = parseInt(config.startDelay) | 10
     this.name = config.name
+    this.setupMultipleItems = config.setupMultipleItems
+    this.addressSpaceItems = config.addressSpaceItems
 
     let node = this
     node.interval_id = null

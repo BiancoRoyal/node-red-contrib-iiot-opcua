@@ -45,6 +45,12 @@
     "errors": {
       "failed": "inject failed, see log for details"
     },
-    "startDelay": "Delay sec. at start"
+    "startDelay": "Delay sec. at start",
+    "addButton": "Add",
+    "tabs-label": {
+      "addressSpaceItems": "OPC UA",
+      "settings": "Settings",
+      "security": "Security"
+    }
   }
 }

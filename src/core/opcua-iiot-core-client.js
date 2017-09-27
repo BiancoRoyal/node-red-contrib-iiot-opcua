@@ -147,16 +147,14 @@ de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, o
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        let UAProxyManager = require('node-opcua/lib/client/proxy').UAProxyManager
-        let coerceNodeId = require('node-opcua/lib/datamodel/nodeid').coerceNodeId
+        let coerceNodeId = require('node-opcua').coerceNodeId
         let nodeId
-        let proxyManager = new UAProxyManager(session)
 
         try {
           nodeId = coerceNodeId(element)
           let dataTypeName
 
-          session.readVariableValue(nodeId, function (err, dataValue) {
+          session.read(nodeId, function (err, dataValue) {
             coreClient.internalDebugLog('Read VariableValue For Proxy ' + dataValue)
 
             if (err) {
@@ -166,7 +164,11 @@ de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, o
                 dataTypeName = dataValue.value.dataType.toString()
               }
 
-              proxyManager.getObject(nodeId, function (err, data) {
+              let msgObject = {payload: {dataTypeName: dataTypeName}}
+              coreClient.internalDebugLog('Read Get Object ' + dataValue)
+              resolve(msgObject)
+
+              /* proxyManager.getObject(nodeId, function (err, data) {
                 if (err) {
                   reject(err)
                 } else {
@@ -194,6 +196,7 @@ de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, o
                   resolve(msgObject)
                 }
               }, options)
+              */
             }
           })
         } catch (err) {

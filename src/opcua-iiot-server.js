@@ -18,7 +18,7 @@ module.exports = function (RED) {
   let path = require('path')
   let os = require('os')
   let Map = require('collections/map')
-  let LocalizedText = require('node-opcua/lib/datamodel/localized_text').LocalizedText
+  let LocalizedText = require('node-opcua').LocalizedText
 
   function OPCUAIIoTServer (config) {
     let initialized = false
@@ -50,11 +50,11 @@ module.exports = function (RED) {
     let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
     let xmlFiles = [standardNodeSetFile, path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')]
 
-    let nodeOPCUAPath = coreServer.core.getNodeOPCUAPath()
+    let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
 
-    node.publicCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_selfsigned_cert_2048.pem')
+    node.publicCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
     coreServer.detailDebugLog(node.publicCertificateFile)
-    node.privateCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_key_2048.pem')
+    node.privateCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
     coreServer.detailDebugLog(node.privateCertificateFile)
 
     setNodeStatusTo('waiting')
@@ -263,6 +263,12 @@ module.exports = function (RED) {
     }
 
     function addObjectToAddressSpace (msg, humanReadableType) {
+      let addressSpace = server.engine.addressSpace
+      if (addressSpace === undefined) {
+        coreServer.internalDebugLog('addressSpace undefinded')
+        return false
+      }
+
       let rootFolder = server.engine.addressSpace.findNode(msg.payload.referenceNodeId)
 
       if (rootFolder) {

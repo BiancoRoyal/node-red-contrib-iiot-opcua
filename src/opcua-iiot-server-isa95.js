@@ -43,11 +43,11 @@ module.exports = function (RED) {
       securityMode: coreServer.core.nodeOPCUA.MessageSecurityMode[node.messageSecurityMode] || coreServer.core.nodeOPCUA.MessageSecurityMode.NONE
     }
 
-    let nodeOPCUAPath = coreServer.core.getNodeOPCUAPath()
+    let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
 
-    node.publicCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_selfsigned_cert_2048.pem')
+    node.publicCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
     coreServer.detailDebugLog(node.publicCertificateFile)
-    node.privateCertificateFile = path.join(nodeOPCUAPath, '/certificates/server_key_2048.pem')
+    node.privateCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
     coreServer.detailDebugLog(node.privateCertificateFile)
 
     setNodeStatusTo('waiting')

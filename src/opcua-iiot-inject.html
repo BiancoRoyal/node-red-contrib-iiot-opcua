@@ -37,7 +37,11 @@
       crontab: {value: ''},
       once: {value: false},
       startDelay: {value: ''},
-      name: {value: ''}
+      name: {value: ''},
+      setupMultipleItems : { value: false},
+      addressSpaceItems: {
+        value: []
+      }
     },
     inputs: 0,
     outputs: 1,
@@ -87,6 +91,32 @@
       return this.name ? 'node_label_italic' : ''
     },
     oneditprepare: function () {
+      let node = this
+      let cacheItemCount = node.addressSpaceItems.length
+
+      let tabs = RED.tabs.create({
+        id: "node-input-inject-tabs",
+        onchange: function (tab) {
+          $("#node-input-tabs-content").children().hide()
+          $("#" + tab.id).show()
+        }
+      })
+
+      tabs.addTab({
+        id: "opcuaiiotinject-tab-settings",
+        label: this._("opcuaiiotinject.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiotinject-tab-addressSpaceItems",
+        label: this._("opcuaiiotinject.tabs-label.addressSpaceItems")
+      })
+
+      // User Management
+      node.addressSpaceItems.forEach(function(element, index, array) {
+        // generateUserEntry(element, index);
+      })
+
       let fieldPayloadType = $('#node-input-payloadType')
 
       if (this.payloadType === null) {
@@ -470,162 +500,177 @@
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Inject">
-    <div class="form-row" id="node-inject-type">
-        <label for="node-input-injectTypeListener" style="width:140px">
-        <i class="fa fa-paper-plane-o"></i> <span data-i18n="opcuaiiotinject.injectTypeListener"></span></label>
-        <input type="checkbox" id="node-input-injectTypeListener" style="width:40px">
-    </div>
-
-    <div class="form-row" id="input-payload-row">
-        <label for="node-input-payload"><i class="fa fa-envelope"></i>
-        <span id="input-label-payload" data-i18n="opcuaiiotinject.label.payload"></span>
-        <span id="input-label-listener" data-i18n="opcuaiiotinject.label.interval"></span>
-        </label>
-        <input type="text" id="node-input-payload" style="width:70%">
-        <input type="hidden" id="node-input-payloadType">
-    </div>
-
     <div class="form-row">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="opcuaiiotinject.label.nodeid"></span></label>
-        <input type="text" id="node-input-topic">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-inject-tabs"></ul>
     </div>
+    <div id="node-input-inject-tabs-content" style="min-height: 170px;">
+        <div id="opcuaiiotinject-tab-settings" style="display:none">
+            <div class="form-row" id="node-inject-type">
+                <label for="node-input-injectTypeListener" style="width:140px">
+                <i class="fa fa-paper-plane-o"></i> <span data-i18n="opcuaiiotinject.injectTypeListener"></span></label>
+                <input type="checkbox" id="node-input-injectTypeListener" style="width:40px">
+            </div>
 
-    <div class="form-row">
-        <!-- DataType_Schema via REST to select from -->
-        <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcuaiiotinject.label.datatype"></span></label>
-        <select type="text" id="node-input-datatype">
-            <option value="Null">Null</option>
-            <option value="Boolean">Boolean</option>
-            <option value="SByte">SByte</option>
-            <option value="Byte">Byte</option>
-            <option value="Int16">Int16</option>
-            <option value="UInt16">UInt16</option>
-            <option value="Int32">Int32</option>
-            <option value="UInt32">UInt32</option>
-            <option value="Int64">Int64</option>
-            <option value="UInt64">UInt64</option>
-            <option value="Float">Float</option>
-            <option value="Double">Double</option>
-            <option value="String">String</option>
-            <option value="DateTime">DateTime</option>
-            <option value="Guid">Guid</option>
-            <option value="ByteString">ByteString</option>
-            <option value="XmlElement">XmlElement</option>
-            <option value="NodeId">NodeId</option>
-            <option value="ExpandedNodeId">ExpandedNodeId</option>
-            <option value="StatusCode">StatusCode</option>
-            <option value="LocalizedText">LocalizedText</option>
-            <option value="ExtensionObject">ExtensionObject</option>
-            <option value="DataValue" selected>DataValue</option>
-            <option value="Variant">Variant</option>
-            <option value="DiagnosticInfo">DiagnosticInfo</option>
-        </select>
-    </div>
+            <div class="form-row" id="input-payload-row">
+                <label for="node-input-payload"><i class="fa fa-envelope"></i>
+                <span id="input-label-payload" data-i18n="opcuaiiotinject.label.payload"></span>
+                <span id="input-label-listener" data-i18n="opcuaiiotinject.label.interval"></span>
+                </label>
+                <input type="text" id="node-input-payload" style="width:70%">
+                <input type="hidden" id="node-input-payloadType">
+            </div>
 
-    <div class="form-row">
-        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="opcuaiiotinject.label.repeat"></span></label>
-        <select id="opcuaiiotinject-time-type-select">
-            <option value="none" data-i18n="opcuaiiotinject.none"></option>
-            <option value="interval" data-i18n="opcuaiiotinject.interval"></option>
-            <option value="interval-time" data-i18n="opcuaiiotinject.interval-time"></option>
-            <option value="time" data-i18n="opcuaiiotinject.time"></option>
-        </select>
-        <input type="hidden" id="node-input-repeat">
-        <input type="hidden" id="node-input-crontab">
-    </div>
+            <div class="form-row">
+                <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="opcuaiiotinject.label.nodeid"></span></label>
+                <input type="text" id="node-input-topic">
+            </div>
 
-    <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-interval">
-        <span data-i18n="opcuaiiotinject.every"></span>
-        <input id="opcuaiiotinject-time-interval-count" class="opcuaiiotinject-time-count" value="500"></input>
-        <select style="width:140px" id="opcuaiiotinject-time-interval-units">
-            <option value="n" data-i18n="opcuaiiotinject.milliseconds"></option>
-            <option value="s" data-i18n="opcuaiiotinject.seconds"></option>
-            <option value="m" data-i18n="opcuaiiotinject.minutes"></option>
-            <option value="h" data-i18n="opcuaiiotinject.hours"></option>
-        </select><br/>
-    </div>
+            <div class="form-row">
+                <!-- DataType_Schema via REST to select from -->
+                <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcuaiiotinject.label.datatype"></span></label>
+                <select type="text" id="node-input-datatype">
+                    <option value="Null">Null</option>
+                    <option value="Boolean">Boolean</option>
+                    <option value="SByte">SByte</option>
+                    <option value="Byte">Byte</option>
+                    <option value="Int16">Int16</option>
+                    <option value="UInt16">UInt16</option>
+                    <option value="Int32">Int32</option>
+                    <option value="UInt32">UInt32</option>
+                    <option value="Int64">Int64</option>
+                    <option value="UInt64">UInt64</option>
+                    <option value="Float">Float</option>
+                    <option value="Double">Double</option>
+                    <option value="String">String</option>
+                    <option value="DateTime">DateTime</option>
+                    <option value="Guid">Guid</option>
+                    <option value="ByteString">ByteString</option>
+                    <option value="XmlElement">XmlElement</option>
+                    <option value="NodeId">NodeId</option>
+                    <option value="ExpandedNodeId">ExpandedNodeId</option>
+                    <option value="StatusCode">StatusCode</option>
+                    <option value="LocalizedText">LocalizedText</option>
+                    <option value="ExtensionObject">ExtensionObject</option>
+                    <option value="DataValue" selected>DataValue</option>
+                    <option value="Variant">Variant</option>
+                    <option value="DiagnosticInfo">DiagnosticInfo</option>
+                </select>
+            </div>
 
-    <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-interval-time">
-        <span data-i18n="opcuaiiotinject.every"></span> <select style="width:90px" id="opcuaiiotinject-time-interval-time-units" class="opcuaiiotinject-time-int-count" value="1">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="10">10</option>
-            <option value="12">12</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="0">60</option>
-        </select> <span data-i18n="opcuaiiotinject.minutes"></span><br/>
-        <span data-i18n="opcuaiiotinject.between"></span> <select id="opcuaiiotinject-time-interval-time-start" class="opcuaiiotinject-time-times"></select>
-        <span data-i18n="opcuaiiotinject.and"></span> <select id="opcuaiiotinject-time-interval-time-end" class="opcuaiiotinject-time-times"></select><br/>
-        <div id="opcuaiiotinject-time-interval-time-days" class="opcuaiiotinject-time-days">
-            <div style="display: inline-block vertical-align: topmargin-right:5px" data-i18n="opcuaiiotinject.on">on</div>
-            <div style="display:inline-block">
-                <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="opcuaiiotinject.days.0"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="opcuaiiotinject.days.1"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="opcuaiiotinject.days.2"></span></label>
+            <div class="form-row">
+                <label for=""><i class="fa fa-repeat"></i> <span data-i18n="opcuaiiotinject.label.repeat"></span></label>
+                <select id="opcuaiiotinject-time-type-select">
+                    <option value="none" data-i18n="opcuaiiotinject.none"></option>
+                    <option value="interval" data-i18n="opcuaiiotinject.interval"></option>
+                    <option value="interval-time" data-i18n="opcuaiiotinject.interval-time"></option>
+                    <option value="time" data-i18n="opcuaiiotinject.time"></option>
+                </select>
+                <input type="hidden" id="node-input-repeat">
+                <input type="hidden" id="node-input-crontab">
+            </div>
+
+            <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-interval">
+                <span data-i18n="opcuaiiotinject.every"></span>
+                <input id="opcuaiiotinject-time-interval-count" class="opcuaiiotinject-time-count" value="500"></input>
+                <select style="width:140px" id="opcuaiiotinject-time-interval-units">
+                    <option value="n" data-i18n="opcuaiiotinject.milliseconds"></option>
+                    <option value="s" data-i18n="opcuaiiotinject.seconds"></option>
+                    <option value="m" data-i18n="opcuaiiotinject.minutes"></option>
+                    <option value="h" data-i18n="opcuaiiotinject.hours"></option>
+                </select><br/>
+            </div>
+
+            <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-interval-time">
+                <span data-i18n="opcuaiiotinject.every"></span> <select style="width:90px" id="opcuaiiotinject-time-interval-time-units" class="opcuaiiotinject-time-int-count" value="1">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="0">60</option>
+                </select> <span data-i18n="opcuaiiotinject.minutes"></span><br/>
+                <span data-i18n="opcuaiiotinject.between"></span> <select id="opcuaiiotinject-time-interval-time-start" class="opcuaiiotinject-time-times"></select>
+                <span data-i18n="opcuaiiotinject.and"></span> <select id="opcuaiiotinject-time-interval-time-end" class="opcuaiiotinject-time-times"></select><br/>
+                <div id="opcuaiiotinject-time-interval-time-days" class="opcuaiiotinject-time-days">
+                    <div style="display: inline-block vertical-align: topmargin-right:5px" data-i18n="opcuaiiotinject.on">on</div>
+                    <div style="display:inline-block">
+                        <div>
+                            <label><input type='checkbox' checked value='1'/> <span data-i18n="opcuaiiotinject.days.0"></span></label>
+                            <label><input type='checkbox' checked value='2'/> <span data-i18n="opcuaiiotinject.days.1"></span></label>
+                            <label><input type='checkbox' checked value='3'/> <span data-i18n="opcuaiiotinject.days.2"></span></label>
+                        </div>
+                        <div>
+                            <label><input type='checkbox' checked value='4'/> <span data-i18n="opcuaiiotinject.days.3"></span></label>
+                            <label><input type='checkbox' checked value='5'/> <span data-i18n="opcuaiiotinject.days.4"></span></label>
+                            <label><input type='checkbox' checked value='6'/> <span data-i18n="opcuaiiotinject.days.5"></span></label>
+                        </div>
+                        <div>
+                            <label><input type='checkbox' checked value='0'/> <span data-i18n="opcuaiiotinject.days.6"></span></label>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="opcuaiiotinject.days.3"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="opcuaiiotinject.days.4"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="opcuaiiotinject.days.5"></span></label>
+            </div>
+
+            <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-time">
+                <span data-i18n="opcuaiiotinject.at"></span> <input id="opcuaiiotinject-time-time" value="12:00"></input><br/>
+                <div id="opcuaiiotinject-time-time-days" class="opcuaiiotinject-time-days">
+                    <div style="display: inline-block vertical-align: topmargin-right: 5px">on </div>
+                    <div style="display:inline-block">
+                        <div>
+                            <label><input type='checkbox' checked value='1'/> <span data-i18n="opcuaiiotinject.days.0"></span></label>
+                            <label><input type='checkbox' checked value='2'/> <span data-i18n="opcuaiiotinject.days.1"></span></label>
+                            <label><input type='checkbox' checked value='3'/> <span data-i18n="opcuaiiotinject.days.2"></span></label>
+                        </div>
+                        <div>
+                            <label><input type='checkbox' checked value='4'/> <span data-i18n="opcuaiiotinject.days.3"></span></label>
+                            <label><input type='checkbox' checked value='5'/> <span data-i18n="opcuaiiotinject.days.4"></span></label>
+                            <label><input type='checkbox' checked value='6'/> <span data-i18n="opcuaiiotinject.days.5"></span></label>
+                        </div>
+                        <div>
+                            <label><input type='checkbox' checked value='0'/> <span data-i18n="opcuaiiotinject.days.6"></span></label>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="opcuaiiotinject.days.6"></span></label>
+            </div>
+
+            <div class="form-row" id="node-once">
+                <label for="node-input-once" style="width:140px">
+                <i class="fa fa-power-off"></i> <span data-i18n="opcuaiiotinject.onstart"></span></label>
+                <input type="checkbox" id="node-input-once" style="width:40px">
+            </div>
+            <div class="form-row" id="node-delay">
+                <label for="node-input-startDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcuaiiotinject.startDelay"></span></label>
+                <input type="text" id="node-input-startDelay" placeholder="10" style="width:80px">
+            </div>
+
+            <div class="form-row">
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+            </div>
+
+            <div class="form-tips" data-i18n="[html]opcuaiiotinject.tip"></div>
+        </div>
+        <div id="opcuaiiotinject-tab-addressSpaceItems" style="display:none">
+            <div class="form-row node-input-addressSpaceItems-container-row" style="margin-bottom: 0px;">
+                <div id="node-input-addressSpaceItems-container-div"
+                    style="box-sizing: border-box; border-radius: 5px;
+                    height: 210px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+                    <ol id="node-input-addressSpaceItems-container" style=" list-style-type:none; margin: 0;"></ol>
                 </div>
+            </div>
+            <div class="form-row">
+                <a href="#" class="editor-button editor-button-small" id="node-input-addressSpaceItems-add"
+                style="margin-top: 4px;"><i class="fa fa-plus"></i>
+                <span data-i18n="opcuaiiotinject.label.addButton"></span></a>
             </div>
         </div>
     </div>
-
-    <div class="form-row opcuaiiotinject-time-row hidden" id="opcuaiiotinject-time-row-time">
-        <span data-i18n="opcuaiiotinject.at"></span> <input id="opcuaiiotinject-time-time" value="12:00"></input><br/>
-        <div id="opcuaiiotinject-time-time-days" class="opcuaiiotinject-time-days">
-            <div style="display: inline-block vertical-align: topmargin-right: 5px">on </div>
-            <div style="display:inline-block">
-                <div>
-                    <label><input type='checkbox' checked value='1'/> <span data-i18n="opcuaiiotinject.days.0"></span></label>
-                    <label><input type='checkbox' checked value='2'/> <span data-i18n="opcuaiiotinject.days.1"></span></label>
-                    <label><input type='checkbox' checked value='3'/> <span data-i18n="opcuaiiotinject.days.2"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='4'/> <span data-i18n="opcuaiiotinject.days.3"></span></label>
-                    <label><input type='checkbox' checked value='5'/> <span data-i18n="opcuaiiotinject.days.4"></span></label>
-                    <label><input type='checkbox' checked value='6'/> <span data-i18n="opcuaiiotinject.days.5"></span></label>
-                </div>
-                <div>
-                    <label><input type='checkbox' checked value='0'/> <span data-i18n="opcuaiiotinject.days.6"></span></label>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="form-row" id="node-once">
-        <label for="node-input-once" style="width:140px">
-        <i class="fa fa-power-off"></i> <span data-i18n="opcuaiiotinject.onstart"></span></label>
-        <input type="checkbox" id="node-input-once" style="width:40px">
-    </div>
-    <div class="form-row" id="node-delay">
-        <label for="node-input-startDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcuaiiotinject.startDelay"></span></label>
-        <input type="text" id="node-input-startDelay" placeholder="10" style="width:80px">
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
-    </div>
-
-    <div class="form-tips" data-i18n="[html]opcuaiiotinject.tip"></div>
-
-
-
-
-
-
 </script>
 
 <style>

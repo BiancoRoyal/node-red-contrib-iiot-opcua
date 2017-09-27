@@ -17,7 +17,7 @@
  */
 var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.nodeOPCUA = de.biancoroyal.opcua.iiot.core.nodeOPCUA || require('node-opcua') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua/lib/datamodel/nodeid') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua-nodeid') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT:core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.detailDebugLog = de.biancoroyal.opcua.iiot.core.detailDebugLog || require('debug')('opcuaIIoT:core:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.specialDebugLog = de.biancoroyal.opcua.iiot.core.specialDebugLog || require('debug')('opcuaIIoT:core:special') // eslint-disable-line no-use-before-define
@@ -34,6 +34,32 @@ de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.o
 
 de.biancoroyal.opcua.iiot.core.getNodeOPCUAPath = function () {
   let nodeOPCUAPath = require.resolve('node-opcua')
+
+  if (this.isWindows) {
+    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
+  } else {
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+  }
+
+  this.internalDebugLog(nodeOPCUAPath)
+
+  return nodeOPCUAPath
+}
+de.biancoroyal.opcua.iiot.core.getNodeOPCUAClientPath = function () {
+  let nodeOPCUAPath = require.resolve('node-opcua-client')
+
+  if (this.isWindows) {
+    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
+  } else {
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+  }
+
+  this.internalDebugLog(nodeOPCUAPath)
+
+  return nodeOPCUAPath
+}
+de.biancoroyal.opcua.iiot.core.getNodeOPCUAServerPath = function () {
+  let nodeOPCUAPath = require.resolve('node-opcua-server')
 
   if (this.isWindows) {
     nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
