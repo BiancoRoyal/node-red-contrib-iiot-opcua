@@ -20,7 +20,6 @@ module.exports = function (RED) {
   function OPCUAIIoTInject (config) {
     RED.nodes.createNode(this, config)
     this.topic = config.topic
-    this.datatype = config.datatype
     this.payload = config.payload
     this.payloadType = config.payloadType
     this.repeat = config.repeat
@@ -75,8 +74,8 @@ module.exports = function (RED) {
     node.on('input', function (msg) {
       try {
         msg.topic = node.topic
-        msg.datatype = node.datatype
         msg.nodetype = 'inject'
+        msg.addressSpaceItems = node.addressSpaceItems
 
         switch (node.payloadType) {
           case 'none':

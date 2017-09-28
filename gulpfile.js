@@ -12,7 +12,7 @@ const gulp = require('gulp')
 const htmlmin = require('gulp-htmlmin')
 const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
-const uglify = require('gulp-uglify')
+// const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
 const sourcemaps = require('gulp-sourcemaps')
 const pump = require('pump')
@@ -82,7 +82,7 @@ gulp.task('opcua-iiot', function (cb) {
     gulp.src('src/**/*.js')
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(babel({presets: ['es2015']}))
-        .pipe(uglify())
+        // .pipe(uglify())
         .pipe(sourcemaps.write('../maps')), gulp.dest('opcuaIIoT')],
     cb
   )

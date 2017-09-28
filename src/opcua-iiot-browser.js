@@ -141,6 +141,37 @@ module.exports = function (RED) {
       }
     }
 
+    node.browseNodeList = function (session, msg) {
+      browserEntries = []
+      nodesToRead = []
+      coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
+
+      if (session) {
+        msg.addressSpaceItems.map((entry) => (coreBrowser.browse(session, entry.nodeid).then(function (browserResult) {
+          coreBrowser.internalDebugLog('Browse ' + entry.nodeid + ' on ' +
+            session.name + ' Id: ' + session.sessionId)
+
+          browserResult.browseResult.forEach(function (result) {
+            result.references.forEach(function (reference) {
+              coreBrowser.internalDebugLog('Add Reference To List :' + reference)
+              browserEntries.push(node.transformToEntry(reference))
+              if (reference.nodeId) {
+                nodesToRead.push(reference.nodeId.toString())
+              }
+            })
+          })
+
+          node.status({fill: 'green', shape: 'dot', text: 'active'})
+          node.sendMessage(msg)
+        }).catch(function (err) {
+          browserEntries = node.browseErrorHandling(err, msg, browserEntries)
+          node.sendMessage(msg)
+        })))
+      } else {
+        coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
+      }
+    }
+
     node.sendMessage = function (originMessage) {
       let msg = {}
 
@@ -174,7 +205,11 @@ module.exports = function (RED) {
       if (node.browseTopic !== '') {
         node.browse(node.opcuaSession, msg)
       } else {
-        node.error(new Error('No Topic To Browse'), msg)
+        if (msg.addressSpaceItems) {
+          node.browseNodeList(node.opcuaSession, msg)
+        } else {
+          node.error(new Error('No Topic To Browse'), msg)
+        }
       }
     })
 
@@ -184,19 +219,19 @@ module.exports = function (RED) {
       if (msg.payload.actiontype === 'browse') { // event driven browsing
         if (msg.payload.root && msg.payload.root.nodeId) {
           coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
-          rootNodeId = node.browseByItem(msg.payload.root.nodeId)
+          rootNodeId = node.browseByItem(msg.payload.root.nodeId) || node.browseToRoot()
         } else {
-          rootNodeId = node.nodeId
+          rootNodeId = node.nodeId || node.browseToRoot()
         }
       } else {
-        if (msg.topic && node.nodeId === '') {
-          rootNodeId = msg.topic
+        if (msg.topic !== '' && msg.topic.includes('=')) {
+          rootNodeId = msg.topic // backward compatibles to v0.x
         } else {
           rootNodeId = node.nodeId
         }
       }
 
-      return rootNodeId || node.browseToRoot()
+      return rootNodeId
     }
 
     node.browseByItem = function (nodeId) {
