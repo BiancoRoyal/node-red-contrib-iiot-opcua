@@ -359,7 +359,7 @@
       }
 
       function resizeButton(container, width) {
-        let lastField = container.find(".node-input-addressSpaceItems-nodeid")
+        let lastField = container.find(".node-input-addressSpaceItems-datatype")
         // lastField.width(width - 120);
       }
 
@@ -373,19 +373,27 @@
         let itemNameField = $('<input/>', {
           id: "node-input-addressSpaceItems-name",
           type: "text",
-          style: "margin-left:5px;width:200px;",
+          style: "margin-left:5px;width:120px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let itemNodIdField = $('<input/>', {
           id: "node-input-addressSpaceItems-nodeid",
           type: "text",
-          style: "margin-left:5px;width:300px;",
+          style: "margin-left:5px;width:240px;",
+          placeholder: 'ns=0;i=85'
+        }).appendTo(row)
+
+        let itemDatatypeField = $('<input/>', {
+          id: "node-input-addressSpaceItems-datatype",
+          type: "text",
+          style: "margin-left:5px;width:180px;",
           placeholder: 'ns=0;i=85'
         }).appendTo(row)
 
         itemNameField.val(opcuaItem.name)
         itemNodIdField.val(opcuaItem.nodeid)
+        itemDatatypeField.val(opcuaItem.datatype)
 
         let finalspan = $('<span/>', {style: "float: right;margin-right: 10px;"}).appendTo(row)
 
@@ -421,7 +429,7 @@
       $("#node-input-addressSpaceItems-add").click(function () {
         console.log('add item')
         cacheItemCount++
-        generateItemsEntry({ name: '', nodeid: '' }, cacheItemCount) // length is every time one more than index
+        generateItemsEntry({ name: '', nodeid: '', datatype: '' }, cacheItemCount) // length is every time one more than index
         $("#node-input-addressSpaceItems-container-div").scrollTop($("#node-input-addressSpaceItems-container-div").get(0).scrollHeight)
       })
 
@@ -576,7 +584,8 @@
 
         node.addressSpaceItems.push({
           name: $(this).find("#node-input-addressSpaceItems-name").val(),
-          nodeid: $(this).find("#node-input-addressSpaceItems-nodeid").val()
+          nodeid: $(this).find("#node-input-addressSpaceItems-nodeid").val(),
+          datatype: $(this).find("#node-input-addressSpaceItems-datatype").val()
         })
 
         itemIndex++
@@ -654,6 +663,7 @@
                 <!-- DataType_Schema via REST to select from -->
                 <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcuaiiotinject.label.datatype"></span></label>
                 <select type="text" id="node-input-datatype">
+                    <option value=""></option>
                     <option value="Null">Null</option>
                     <option value="Boolean">Boolean</option>
                     <option value="SByte">SByte</option>
@@ -785,7 +795,7 @@
             <div class="form-row node-input-addressSpaceItems-container-row" style="margin-bottom: 0px;">
                 <div id="node-input-addressSpaceItems-container-div"
                     style="box-sizing: border-box; border-radius: 5px;
-                    height: 210px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+                    height: 610px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
                     <ol id="node-input-addressSpaceItems-container" style=" list-style-type:none; margin: 0;"></ol>
                 </div>
             </div>
