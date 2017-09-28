@@ -39,9 +39,7 @@
       startDelay: {value: ''},
       name: {value: ''},
       setupMultipleItems : { value: false},
-      addressSpaceItems: {
-        value: []
-      }
+      addressSpaceItems: { value: [] }
     },
     inputs: 0,
     outputs: 1,
@@ -92,30 +90,6 @@
     },
     oneditprepare: function () {
       let node = this
-      let cacheItemCount = node.addressSpaceItems.length
-
-      let tabs = RED.tabs.create({
-        id: "node-input-inject-tabs",
-        onchange: function (tab) {
-          $("#node-input-tabs-content").children().hide()
-          $("#" + tab.id).show()
-        }
-      })
-
-      tabs.addTab({
-        id: "opcuaiiotinject-tab-settings",
-        label: this._("opcuaiiotinject.tabs-label.settings")
-      })
-
-      tabs.addTab({
-        id: "opcuaiiotinject-tab-addressSpaceItems",
-        label: this._("opcuaiiotinject.tabs-label.addressSpaceItems")
-      })
-
-      // User Management
-      node.addressSpaceItems.forEach(function(element, index, array) {
-        // generateUserEntry(element, index);
-      })
 
       let fieldPayloadType = $('#node-input-payloadType')
 
@@ -353,8 +327,143 @@
           $('#input-label-listener').hide()
         }
       })
+      
+      // Tabs
+      let tabs = RED.tabs.create({
+        id: "node-input-inject-tabs",
+        onchange: function (tab) {
+          $("#node-input-inject-tabs-content").children().hide()
+          $("#" + tab.id).show()
+        }
+      })
+
+      tabs.addTab({
+        id: "opcuaiiotinject-tab-settings",
+        label: this._("opcuaiiotinject.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiotinject-tab-addressSpaceItems",
+        label: this._("opcuaiiotinject.tabs-label.addressSpaceItems")
+      })
+
+      // Item Management
+      let cacheItemCount = 0
+
+      if(node.addressSpaceItems !== undefined) {
+        cacheItemCount = node.addressSpaceItems.length
+
+        node.addressSpaceItems.forEach(function(element, index, array) {
+          generateItemsEntry(element, index);
+        })
+      }
+
+      function resizeButton(container, width) {
+        let lastField = container.find(".node-input-addressSpaceItems-nodeid")
+        // lastField.width(width - 120);
+      }
+
+      function generateItemsEntry(opcuaItem, id) {
+        let container = $('<li/>', {style:
+          "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"})
+        let row = $('<div id="row' + id + '"/>').appendTo(container)
+
+        $('<i style="color: #eee; cursor: move;" class="node-input-addressSpaceItems-handle fa fa-bars"></i>').appendTo(row)
+
+        let itemNameField = $('<input/>', {
+          id: "node-input-addressSpaceItems-name",
+          type: "text",
+          style: "margin-left:5px;width:200px;",
+          placeholder: 'name'
+        }).appendTo(row)
+
+        let itemNodIdField = $('<input/>', {
+          id: "node-input-addressSpaceItems-nodeid",
+          type: "text",
+          style: "margin-left:5px;width:300px;",
+          placeholder: 'ns=0;i=85'
+        }).appendTo(row)
+
+        itemNameField.val(opcuaItem.name)
+        itemNodIdField.val(opcuaItem.nodeid)
+
+        let finalspan = $('<span/>', {style: "float: right;margin-right: 10px;"}).appendTo(row)
+
+        let removeItemButton = $('<a/>', {
+          href: "#",
+          class: "editor-button editor-button-small",
+          style: "margin-top: 7px; margin-left: 5px;"
+        }).appendTo(finalspan)
+
+        $('<i/>', {class: "fa fa-remove"}).appendTo(removeItemButton)
+
+        removeItemButton.click(function () {
+          container.css({"background": "#fee"})
+          container.fadeOut(300, function () {
+            console.log('remove item ' + $(this))
+            $(this).remove()
+          });
+        });
+
+        $("#node-input-addressSpaceItems-container").append(container)
+        let width = $("#node-input-addressSpaceItems-container").width()
+        resizeButton(container, width)
+      }
+
+      $("#node-input-addressSpaceItems-container").sortable({
+        axis: "y",
+        handle: ".node-input-addressSpaceItems-handle",
+        cursor: "move"
+      });
+
+      $("#node-input-addressSpaceItems-container .node-input-addressSpaceItems-handle").disableSelection()
+
+      $("#node-input-addressSpaceItems-add").click(function () {
+        console.log('add item')
+        cacheItemCount++
+        generateItemsEntry({ name: '', nodeid: '' }, cacheItemCount) // length is every time one more than index
+        $("#node-input-addressSpaceItems-container-div").scrollTop($("#node-input-addressSpaceItems-container-div").get(0).scrollHeight)
+      })
+
+      // dialog handling
+      function switchDialogResize() {
+        let rows = $("#dialog-form>div:not(.node-input-addressSpaceItems-container-row)")
+        let height = $("#dialog-form").height()
+
+        rows.each(function (index, row) {
+          height -= row.outerHeight(true)
+        })
+
+        let editorRow = $("#dialog-form>div.node-input-addressSpaceItems-container-row")
+        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
+        $("#node-input-addressSpaceItems-container-div").css("height", height + "px")
+
+        let itemsContainerChildren = $("#node-input-addressSpaceItems-container").children()
+        let newWidth = $("#node-input-addressSpaceItems-container").width()
+        itemsContainerChildren.each(function (index, containerChild) {
+          resizeButton(containerChild, newWidth)
+        })
+      }
+
+      $("#dialog").on("dialogresize", switchDialogResize)
+
+      $("#dialog").one("dialogopen", function (ev) {
+        let size = $("#dialog").dialog('option', 'sizeCache-switch')
+        if (size) {
+          $("#dialog").dialog('option', 'width', size.width)
+          $("#dialog").dialog('option', 'height', size.height)
+          switchDialogResize()
+        } else {
+          setTimeout(switchDialogResize, 10)
+        }
+      })
+
+      $("#dialog").one("dialogclose", function (ev, ui) {
+        $("#dialog").off("dialogresize", switchDialogResize)
+      })
     },
     oneditsave: function () {
+      let node = this
       let repeat = ''
       let crontab = ''
       let type = $('#opcuaiiotinject-time-type-select').val()
@@ -456,6 +565,22 @@
 
       $('#node-input-repeat').val(repeat)
       $('#node-input-crontab').val(crontab)
+
+      // Items
+      let cacheItems = $("#node-input-addressSpaceItems-container").children()
+      node.addressSpaceItems = []
+      let itemIndex = 0
+
+      cacheItems.each(function () {
+        console.log('save item: ' + JSON.stringify($(this)))
+
+        node.addressSpaceItems.push({
+          name: $(this).find("#node-input-addressSpaceItems-name").val(),
+          nodeid: $(this).find("#node-input-addressSpaceItems-nodeid").val()
+        })
+
+        itemIndex++
+      })
     },
     button: {
       onclick: function () {

@@ -48,7 +48,7 @@
     "startDelay": "Delay sec. at start",
     "addButton": "Add",
     "tabs-label": {
-      "addressSpaceItems": "OPC UA",
+      "addressSpaceItems": "OPC UA Nodes",
       "settings": "Settings",
       "security": "Security"
     }
