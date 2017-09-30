@@ -61,7 +61,7 @@
   },
   "homepage": "https://github.com/biancode/node-red-iiot-opcua-publicbeta#readme",
   "scripts": {
-    "test": "standard --fix && mocha test/*",
+    "test": "standard --fix && mocha test/* --reporter dot",
     "build": "standard --fix && gulp clean && gulp publish",
     "prepublish": "standard --fix && npm run build && npm test",
     "ci-publish": "ci-publish",

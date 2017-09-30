@@ -3,7 +3,7 @@
     "injectTypeListener": "Listener Inject",
     "inject": "inject",
     "opcuaiiotinject": "inject",
-    "inject": "inject",
+    "injectType": "Type",
     "repeat": "repeat = __repeat__",
     "crontab": "crontab = __crontab__",
     "stopped": "stopped",
@@ -13,7 +13,8 @@
       "interval": "Interval",
       "repeat": "Repeat",
       "datatype": "Data Type",
-      "nodeid": "Node-Id"
+      "nodeid": "Node-Id",
+      "injectType": "Type"
     },
     "timestamp": "timestamp",
     "none": "none",
@@ -51,6 +52,11 @@
       "addressSpaceItems": "OPC UA Nodes",
       "settings": "Settings",
       "security": "Security"
+    },
+    "type-label":{
+      "read": "read",
+      "write": "write",
+      "listen": "listen"
     }
   }
 }

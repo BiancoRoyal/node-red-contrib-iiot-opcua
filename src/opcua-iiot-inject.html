@@ -6,12 +6,49 @@
  All rights reserved.
  node-red-contrib-iiot-opcua
 -->
+
+<style>
+    .opcuaiiotinject-time-row {
+        padding-left: 110px
+    }
+
+    .opcuaiiotinject-time-row select {
+        margin: 3px 0
+    }
+
+    .opcuaiiotinject-time-days label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: top;
+        width: 100px
+    }
+
+    .opcuaiiotinject-time-days input {
+        width: auto
+    }
+
+    .opcuaiiotinject-time-times {
+        width: 90px
+    }
+
+    #opcuaiiotinject-time-time {
+        width: 75px
+    }
+
+    .opcuaiiotinject-time-count {
+        width: 40px !important
+    }
+</style>
+
 <script type="text/javascript">
   RED.nodes.registerType('OPCUA-IIoT-Inject', {
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      injectTypeListener: {value: false},
+      injectType: {value: 'read'},
       payload: {
         value: '1000', validate: function (v) {
           let ptype = $('#node-input-payloadType').val() || this.payloadType
@@ -37,590 +74,622 @@
       once: {value: false},
       startDelay: {value: ''},
       name: {value: ''},
-      setupMultipleItems : { value: false},
-      addressSpaceItems: { value: [] }
+      addressSpaceItems: {value: []}
     },
     inputs: 0,
     outputs: 1,
-    icon: 'opcuaiiot.png',
-    label: function () {
-      let suffix = ''
+    icon: 'opcuaiiot.png'
+  })
+</script>
 
-      if (this.once) {
-        suffix = ' ¹';
+<script type="text/javascript">
+  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
+  injectNode.button = {
+    onclick: function () {
+      let label = (this.name || this.payload).replace(/&/g, '&amp').replace(/</g, '&lt').replace(/>/g, '&gt')
+
+      if (this.payloadType === 'date') {
+        label = this._('opcuaiiotinject.timestamp')
       }
 
-      if (this.repeat || this.crontab) {
-        suffix = ' ↻';
+      if (this.payloadType === 'none') {
+        label = this._('opcuaiiotinject.blank')
       }
 
-      if (this.name) {
-        return this.name + suffix
-      }
-
-      switch (this.payloadType) {
-        case 'string':
-        case 'str':
-        case 'num':
-        case 'bool':
-        case 'json':
-          if (this.topic !== '' && (this.topic.length + this.payload.length) <= 32) {
-            return this.topic + ':' + this.payload + suffix
-          } else if (this.payload.length > 0 && this.payload.length < 24) {
-            return this.payload + suffix
-          }
-          return this._('opcuaiiotinject.inject') + suffix
-        case 'date':
-          if (this.topic !== '' && this.topic.length <= 16) {
-            return this.topic + ':' + this._('opcuaiiotinject.timestamp') + suffix
-          }
-          return this._('opcuaiiotinject.timestamp') + suffix
-        default:
-          if (this.payloadType === 'flow' && this.payload.length < 19) {
-            return 'flow.' + this.payload + suffix
-          } else if (this.payloadType === 'global' && this.payload.length < 17) {
-            return 'global.' + this.payload + suffix
-          }
-          return this._('opcuaiiotinject.inject') + suffix
-      }
-    },
-    labelStyle: function () {
-      return this.name ? 'node_label_italic' : ''
-    },
-    oneditprepare: function () {
       let node = this
 
-      let fieldPayloadType = $('#node-input-payloadType')
-
-      if (this.payloadType === null) {
-        if (this.payload === '') {
-          this.payloadType = 'date'
-        } else {
-          this.payloadType = 'str'
+      $.ajax({
+        url: 'opcuaIIoT/inject/' + this.id,
+        type: 'POST',
+        success: function (resp) {
+          RED.notify(node._('opcuaiiotinject.success', {label: label}), 'success')
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          if (jqXHR.status === 404) {
+            RED.notify(node._('common.notification.error', {message: node._('common.notification.errors.not-deployed')}), 'error')
+          } else if (jqXHR.status === 500) {
+            RED.notify(node._('common.notification.error', {message: node._('opcuaiiotinject.errors.failed')}), 'error')
+          } else if (jqXHR.status === 0) {
+            RED.notify(node._('common.notification.error', {message: node._('common.notification.errors.no-response')}), 'error')
+          } else {
+            RED.notify(node._('common.notification.error', {
+              message: node._('common.notification.errors.unexpected', {
+                status: jqXHR.status,
+                message: textStatus
+              })
+            }), 'error')
+          }
         }
-      } else if (this.payloadType === 'string' || this.payloadType === 'none') {
+      })
+    }
+  }
+</script>
+
+<script type="text/javascript">
+  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
+  injectNode.oneditprepare = function () {
+    let node = this
+    let fieldPayloadType = $('#node-input-payloadType')
+
+    if (this.payloadType === null) {
+      if (this.payload === '') {
+        this.payloadType = 'date'
+      } else {
         this.payloadType = 'str'
       }
+    } else if (this.payloadType === 'string' || this.payloadType === 'none') {
+      this.payloadType = 'str'
+    }
 
-      fieldPayloadType.val(this.payloadType)
+    fieldPayloadType.val(this.payloadType)
 
-      $('#node-input-payload').typedInput({
-        default: 'str',
-        typeField: fieldPayloadType,
-        types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'date']
-      })
+    $('#node-input-payload').typedInput({
+      default: 'str',
+      typeField: fieldPayloadType,
+      types: ['flow', 'global', 'str', 'num', 'bool', 'json', 'date']
+    })
 
-      $('#opcuaiiotinject-time-type-select').change(function () {
-        $('#node-input-crontab').val('')
-        let id = $('#opcuaiiotinject-time-type-select').val()
-
-        $('.opcuaiiotinject-time-row').hide()
-        $('#opcuaiiotinject-time-row-' + id).show()
-
-        if ((id === 'none') || (id === 'interval')) {
-          $('#node-once').show()
-          $('#node-delay').show()
-        }
-        else {
-          $('#node-once').hide()
-          $('#node-delay').hide()
-          $('#node-input-once').prop('checked', false)
-        }
-      })
-
-      $('.opcuaiiotinject-time-times').each(function () {
-        for (let i = 0; i < 24; i++) {
-          let l = (i < 10 ? '0' : '') + i + ':00'
-          $(this).append($('<option></option>').val(i).text(l))
-        }
-      })
-      $('<option></option>').val(24).text('00:00').appendTo('#opcuaiiotinject-time-interval-time-end')
-
-      $('#opcuaiiotinject-time-interval-time-start').change(function () {
-        let start = Number($('#opcuaiiotinject-time-interval-time-start').val())
-        let end = Number($('#opcuaiiotinject-time-interval-time-end').val())
-
-        $('#opcuaiiotinject-time-interval-time-end option').remove()
-
-        for (let i = start + 1; i < 25; i++) {
-          let l = (i < 10 ? '0' : '') + i + ':00'
-          if (i === 24) {
-            l = '00:00'
-          }
-          let opt = $('<option></option>').val(i).text(l).appendTo('#opcuaiiotinject-time-interval-time-end')
-          if (i === end) {
-            opt.attr('selected', 'selected')
-          }
-        }
-      })
-
-      $('.opcuaiiotinject-time-count').spinner({
-        min: 1
-      })
-
-      $.widget('ui.injecttimespinner', $.ui.spinner, {
-        options: {
-          // seconds
-          step: 60 * 1000,
-          // hours
-          page: 60
-        },
-        _parse: function (value) {
-          if (typeof value === 'string') {
-            // already a timestamp
-            if (Number(value) === value) {
-              return Number(value)
-            }
-            let p = value.split(':')
-            let offset = new Date().getTimezoneOffset()
-            return ((Number(p[0]) * 60) + Number(p[1]) + offset) * 60 * 1000
-          }
-          return value
-        },
-        _format: function (value) {
-          let d = new Date(value)
-          let h = d.getHours()
-          let m = d.getMinutes()
-          return ((h < 10) ? '0' : '') + h + ':' + ((m < 10) ? '0' : '') + m
-        }
-      })
-
-      $('#opcuaiiotinject-time-time').injecttimespinner()
-
-      let repeattype = 'none'
-
-      if (this.repeat !== '') {
-        repeattype = 'interval'
-
-        let units = 's'
-        let timeRange = this.repeat
-
-        if (this.repeat % 60 === 0) {
-          units = 'm'
-          timeRange = timeRange / 60
-        }
-
-        if (this.repeat % 1440 === 0) {
-          units = 'h'
-          timeRange = timeRange / 60
-        }
-
-        console.log('interval timeRange:' + timeRange + ' units:' + units)
-
-        $('#opcuaiiotinject-time-interval-count').val(timeRange)
-        $('#opcuaiiotinject-time-interval-units').val(units)
-        $('#opcuaiiotinject-time-interval-days').prop('disabled', 'disabled')
-      } else if (this.crontab !== '') {
-        let cronparts = this.crontab.split(' ')
-        let days = cronparts[4]
-
-        if (!isNaN(cronparts[0]) && !isNaN(cronparts[1])) {
-          repeattype = 'time'
-          // Fixed time
-          let time = cronparts[1] + ':' + cronparts[0]
-
-          $('#opcuaiiotinject-time-time').val(time)
-          $('#opcuaiiotinject-time-type-select').val('s')
-
-          console.log('crontab time:' + time + ' units: s')
-
-          if (days === '*') {
-            $('#opcuaiiotinject-time-time-days input[type=checkbox]').prop('checked', true)
-          } else {
-            $('#opcuaiiotinject-time-time-days input[type=checkbox]').removeAttr('checked')
-            days.split(',').forEach(function (v) {
-              $('#opcuaiiotinject-time-time-days [value=' + v + ']').prop('checked', true)
-            })
-          }
-        } else {
-          repeattype = 'interval-time'
-          // interval - time period
-          let minutes = cronparts[0].slice(2)
-
-          if (minutes === '') {
-            minutes = '0'
-          }
-
-          $('#opcuaiiotinject-time-interval-time-units').val(minutes)
-
-          if (days === '*') {
-            $('#opcuaiiotinject-time-interval-time-days input[type=checkbox]').prop('checked', true)
-          } else {
-            $('#opcuaiiotinject-time-interval-time-days input[type=checkbox]').removeAttr('checked')
-
-            days.split(',').forEach(function (v) {
-              $('#opcuaiiotinject-time-interval-time-days [value=' + v + ']').prop('checked', true)
-            })
-          }
-
-          let time = cronparts[1]
-          let timeparts = time.split(',')
-          let start
-          let end
-
-          if (timeparts.length === 1) {
-            // 0 or 0-10
-            let hours = timeparts[0].split('-')
-
-            if (hours.length === 1) {
-              if (hours[0] === '') {
-                start = '0'
-                end = '0'
-              }
-              else {
-                start = hours[0]
-                end = Number(hours[0]) + 1
-              }
-            } else {
-              start = hours[0]
-              end = Number(hours[1]) + 1
-            }
-          } else {
-            // 23,0 or 17-23,0-10 or 23,0-2 or 17-23,0
-            let startparts = timeparts[0].split('-')
-            start = startparts[0]
-
-            let endparts = timeparts[1].split('-')
-            if (endparts.length === 1) {
-              end = Number(endparts[0]) + 1
-            } else {
-              end = Number(endparts[1]) + 1
-            }
-          }
-
-          $('#opcuaiiotinject-time-interval-time-end').val(end)
-          $('#opcuaiiotinject-time-interval-time-start').val(start)
-        }
-      } else {
-        repeattype = 'none'
-      }
-
-      console.log('Inject Type: ' + repeattype)
+    $('#opcuaiiotinject-time-type-select').change(function () {
+      $('#node-input-crontab').val('')
+      let id = $('#opcuaiiotinject-time-type-select').val()
 
       $('.opcuaiiotinject-time-row').hide()
+      $('#opcuaiiotinject-time-row-' + id).show()
 
-      $('#opcuaiiotinject-time-type-select').val(repeattype)
-      $('#opcuaiiotinject-time-row-' + repeattype).show()
+      if ((id === 'none') || (id === 'interval')) {
+        $('#node-once').show()
+        $('#node-delay').show()
+      }
+      else {
+        $('#node-once').hide()
+        $('#node-delay').hide()
+        $('#node-input-once').prop('checked', false)
+      }
+    })
 
-      $('#node-input-payload').typedInput('type', this.payloadType)
+    $('.opcuaiiotinject-time-times').each(function () {
+      for (let i = 0; i < 24; i++) {
+        let l = (i < 10 ? '0' : '') + i + ':00'
+        $(this).append($('<option></option>').val(i).text(l))
+      }
+    })
+    $('<option></option>').val(24).text('00:00').appendTo('#opcuaiiotinject-time-interval-time-end')
 
-      $('#opcuaiiotinject-time-type-select').change()
-      $('#opcuaiiotinject-time-interval-time-start').change()
+    $('#opcuaiiotinject-time-interval-time-start').change(function () {
+      let start = Number($('#opcuaiiotinject-time-interval-time-start').val())
+      let end = Number($('#opcuaiiotinject-time-interval-time-end').val())
 
-      $('#node-input-once').change(function () {
-        if ($(this).is(":checked")) {
-          $('#node-delay').show()
+      $('#opcuaiiotinject-time-interval-time-end option').remove()
+
+      for (let i = start + 1; i < 25; i++) {
+        let l = (i < 10 ? '0' : '') + i + ':00'
+        if (i === 24) {
+          l = '00:00'
+        }
+        let opt = $('<option></option>').val(i).text(l).appendTo('#opcuaiiotinject-time-interval-time-end')
+        if (i === end) {
+          opt.attr('selected', 'selected')
+        }
+      }
+    })
+
+    $('.opcuaiiotinject-time-count').spinner({
+      min: 1
+    })
+
+    $.widget('ui.injecttimespinner', $.ui.spinner, {
+      options: {
+        // seconds
+        step: 60 * 1000,
+        // hours
+        page: 60
+      },
+      _parse: function (value) {
+        if (typeof value === 'string') {
+          // already a timestamp
+          if (Number(value) === value) {
+            return Number(value)
+          }
+          let p = value.split(':')
+          let offset = new Date().getTimezoneOffset()
+          return ((Number(p[0]) * 60) + Number(p[1]) + offset) * 60 * 1000
+        }
+        return value
+      },
+      _format: function (value) {
+        let d = new Date(value)
+        let h = d.getHours()
+        let m = d.getMinutes()
+        return ((h < 10) ? '0' : '') + h + ':' + ((m < 10) ? '0' : '') + m
+      }
+    })
+
+    $('#opcuaiiotinject-time-time').injecttimespinner()
+
+    let repeattype = 'none'
+
+    if (this.repeat !== '') {
+      repeattype = 'interval'
+
+      let units = 's'
+      let timeRange = this.repeat
+
+      if (this.repeat % 60 === 0) {
+        units = 'm'
+        timeRange = timeRange / 60
+      }
+
+      if (this.repeat % 1440 === 0) {
+        units = 'h'
+        timeRange = timeRange / 60
+      }
+
+      $('#opcuaiiotinject-time-interval-count').val(timeRange)
+      $('#opcuaiiotinject-time-interval-units').val(units)
+      $('#opcuaiiotinject-time-interval-days').prop('disabled', 'disabled')
+
+    } else if (this.crontab !== '') {
+      let cronparts = this.crontab.split(' ')
+      let days = cronparts[4]
+
+      if (!isNaN(cronparts[0]) && !isNaN(cronparts[1])) {
+        repeattype = 'time'
+        // Fixed time
+        let time = cronparts[1] + ':' + cronparts[0]
+
+        $('#opcuaiiotinject-time-time').val(time)
+        $('#opcuaiiotinject-time-type-select').val('s')
+
+        if (days === '*') {
+          $('#opcuaiiotinject-time-time-days input[type=checkbox]').prop('checked', true)
         } else {
-          $('#node-delay').hide()
+          $('#opcuaiiotinject-time-time-days input[type=checkbox]').removeAttr('checked')
+          days.split(',').forEach(function (v) {
+            $('#opcuaiiotinject-time-time-days [value=' + v + ']').prop('checked', true)
+          })
         }
-      })
+      } else {
+        repeattype = 'interval-time'
+        // interval - time period
+        let minutes = cronparts[0].slice(2)
 
+        if (minutes === '') {
+          minutes = '0'
+        }
 
-      $('#node-input-injectTypeListener').change(function () {
-        if ($(this).is(":checked")) {
-          $('#input-label-listener').show()
-          $('#input-label-payload').hide()
+        $('#opcuaiiotinject-time-interval-time-units').val(minutes)
 
+        if (days === '*') {
+          $('#opcuaiiotinject-time-interval-time-days input[type=checkbox]').prop('checked', true)
         } else {
-          $('#input-label-payload').show()
-          $('#input-label-listener').hide()
+          $('#opcuaiiotinject-time-interval-time-days input[type=checkbox]').removeAttr('checked')
+
+          days.split(',').forEach(function (v) {
+            $('#opcuaiiotinject-time-interval-time-days [value=' + v + ']').prop('checked', true)
+          })
         }
-      })
-      
-      // Tabs
-      let tabs = RED.tabs.create({
-        id: "node-input-inject-tabs",
-        onchange: function (tab) {
-          $("#node-input-inject-tabs-content").children().hide()
-          $("#" + tab.id).show()
-        }
-      })
 
-      tabs.addTab({
-        id: "opcuaiiotinject-tab-settings",
-        label: this._("opcuaiiotinject.tabs-label.settings")
-      })
+        let time = cronparts[1]
+        let timeparts = time.split(',')
+        let start
+        let end
 
-      tabs.addTab({
-        id: "opcuaiiotinject-tab-addressSpaceItems",
-        label: this._("opcuaiiotinject.tabs-label.addressSpaceItems")
-      })
+        if (timeparts.length === 1) {
+          // 0 or 0-10
+          let hours = timeparts[0].split('-')
 
-      // Item Management
-      let cacheItemCount = 0
-
-      if(node.addressSpaceItems !== undefined) {
-        cacheItemCount = node.addressSpaceItems.length
-
-        node.addressSpaceItems.forEach(function(element, index, array) {
-          generateItemsEntry(element, index);
-        })
-      }
-
-      function resizeButton(container, width) {
-        let lastField = container.find(".node-input-addressSpaceItems-nodeid")
-        // lastField.width(width - 120);
-      }
-
-      function generateItemsEntry(opcuaItem, id) {
-        let container = $('<li/>', {style:
-          "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"})
-        let row = $('<div id="row' + id + '"/>').appendTo(container)
-
-        $('<i style="color: #eee; cursor: move;" class="node-input-addressSpaceItems-handle fa fa-bars"></i>').appendTo(row)
-
-        let itemNameField = $('<input/>', {
-          id: "node-input-addressSpaceItems-name",
-          type: "text",
-          style: "margin-left:5px;width:120px;",
-          placeholder: 'name'
-        }).appendTo(row)
-
-        let itemNodIdField = $('<input/>', {
-          id: "node-input-addressSpaceItems-nodeid",
-          type: "text",
-          style: "margin-left:5px;width:200px;",
-          placeholder: 'ns=0;i=85'
-        }).appendTo(row)
-
-        itemNameField.val(opcuaItem.name)
-        itemNodIdField.val(opcuaItem.nodeid)
-
-        let finalspan = $('<span/>', {style: "float: right;margin-right: 10px;"}).appendTo(row)
-
-        let removeItemButton = $('<a/>', {
-          href: "#",
-          class: "editor-button editor-button-small",
-          style: "margin-top: 7px; margin-left: 5px;"
-        }).appendTo(finalspan)
-
-        $('<i/>', {class: "fa fa-remove"}).appendTo(removeItemButton)
-
-        removeItemButton.click(function () {
-          container.css({"background": "#fee"})
-          container.fadeOut(300, function () {
-            console.log('remove item ' + $(this))
-            $(this).remove()
-          });
-        });
-
-        $("#node-input-addressSpaceItems-container").append(container)
-        let width = $("#node-input-addressSpaceItems-container").width()
-        resizeButton(container, width)
-      }
-
-      $("#node-input-addressSpaceItems-container").sortable({
-        axis: "y",
-        handle: ".node-input-addressSpaceItems-handle",
-        cursor: "move"
-      });
-
-      $("#node-input-addressSpaceItems-container .node-input-addressSpaceItems-handle").disableSelection()
-
-      $("#node-input-addressSpaceItems-add").click(function () {
-        console.log('add item')
-        cacheItemCount++
-        generateItemsEntry({ name: '', nodeid: '' }, cacheItemCount) // length is every time one more than index
-        $("#node-input-addressSpaceItems-container-div").scrollTop($("#node-input-addressSpaceItems-container-div").get(0).scrollHeight)
-      })
-
-      // dialog handling
-      function switchDialogResize() {
-        let rows = $("#dialog-form>div:not(.node-input-addressSpaceItems-container-row)")
-        let height = $("#dialog-form").height()
-
-        rows.each(function (index, row) {
-          height -= row.outerHeight(true)
-        })
-
-        let editorRow = $("#dialog-form>div.node-input-addressSpaceItems-container-row")
-        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
-        $("#node-input-addressSpaceItems-container-div").css("height", height + "px")
-
-        let itemsContainerChildren = $("#node-input-addressSpaceItems-container").children()
-        let newWidth = $("#node-input-addressSpaceItems-container").width()
-        itemsContainerChildren.each(function (index, containerChild) {
-          resizeButton(containerChild, newWidth)
-        })
-      }
-
-      $("#dialog").on("dialogresize", switchDialogResize)
-
-      $("#dialog").one("dialogopen", function (ev) {
-        let size = $("#dialog").dialog('option', 'sizeCache-switch')
-        if (size) {
-          $("#dialog").dialog('option', 'width', size.width)
-          $("#dialog").dialog('option', 'height', size.height)
-          switchDialogResize()
+          if (hours.length === 1) {
+            if (hours[0] === '') {
+              start = '0'
+              end = '0'
+            }
+            else {
+              start = hours[0]
+              end = Number(hours[0]) + 1
+            }
+          } else {
+            start = hours[0]
+            end = Number(hours[1]) + 1
+          }
         } else {
-          setTimeout(switchDialogResize, 10)
+          // 23,0 or 17-23,0-10 or 23,0-2 or 17-23,0
+          let startparts = timeparts[0].split('-')
+          start = startparts[0]
+
+          let endparts = timeparts[1].split('-')
+          if (endparts.length === 1) {
+            end = Number(endparts[0]) + 1
+          } else {
+            end = Number(endparts[1]) + 1
+          }
         }
+
+        $('#opcuaiiotinject-time-interval-time-end').val(end)
+        $('#opcuaiiotinject-time-interval-time-start').val(start)
+      }
+    } else {
+      repeattype = 'none'
+    }
+
+    $('.opcuaiiotinject-time-row').hide()
+    $('#opcuaiiotinject-time-type-select').val(repeattype)
+    $('#opcuaiiotinject-time-row-' + repeattype).show()
+
+    $('#node-input-payload').typedInput('type', this.payloadType)
+
+    $('#opcuaiiotinject-time-type-select').change()
+    $('#opcuaiiotinject-time-interval-time-start').change()
+
+    $('#node-input-injectType').change(function () {
+      if ($(this).val() === 'listen') {
+        $('#input-label-listener').show()
+        $('#input-label-payload').hide()
+      } else {
+        $('#input-label-payload').show()
+        $('#input-label-listener').hide()
+      }
+    })
+
+    $('#node-input-once').change(function () {
+      if ($(this).is(':checked')) {
+        $('#node-delay').show()
+      } else {
+        $('#node-delay').hide()
+      }
+    })
+
+    let tabs = RED.tabs.create({
+      id: 'node-input-inject-tabs',
+      onchange: function (tab) {
+        $('#node-input-inject-tabs-content').children().hide()
+        $('#' + tab.id).show()
+      }
+    })
+
+    tabs.addTab({
+      id: 'opcuaiiotinject-tab-settings',
+      label: this._('opcuaiiotinject.tabs-label.settings')
+    })
+
+    tabs.addTab({
+      id: 'opcuaiiotinject-tab-addressSpaceItems',
+      label: this._('opcuaiiotinject.tabs-label.addressSpaceItems')
+    })
+
+    let cacheItemCount = 0
+    if (node.addressSpaceItems !== undefined) {
+      cacheItemCount = node.addressSpaceItems.length
+      node.addressSpaceItems.forEach(function (element, index, array) {
+        generateItemsEntry(element, index)
+      })
+    }
+
+    function generateItemsEntry (opcuaItem, id) {
+      let container = $('<li/>', {
+        style:
+          'background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;'
+      })
+      let row = $('<div id="row' + id + '"/>').appendTo(container)
+
+      $('<i style="color: #eee; cursor: move;" class="node-input-addressSpaceItems-handle fa fa-bars"></i>').appendTo(row)
+
+      let itemNameField = $('<input/>', {
+        id: 'node-input-addressSpaceItems-name' + id,
+        type: 'text',
+        style: 'margin-left:5px;width:120px;',
+        placeholder: 'Name'
+      }).appendTo(row)
+
+      let itemNodIdField = $('<input/>', {
+        id: 'node-input-addressSpaceItems-nodeid' + id,
+        type: 'text',
+        style: 'margin-left:5px;width:200px;',
+        placeholder: 'ns=0;i=85'
+      }).appendTo(row)
+
+      let itemDatatypeField = $('<input/>', {
+        id: 'node-input-addressSpaceItems-datatype' + id,
+        type: 'text',
+        style: 'margin-left:5px;width:140px;',
+        placeholder: 'Double'
+      }).appendTo(row)
+
+      itemNameField.val(opcuaItem.name)
+      itemNodIdField.val(opcuaItem.nodeid)
+      itemDatatypeField.val(opcuaItem.datatypeName)
+
+      let finalspan = $('<span/>', {style: 'float: right;margin-right: 10px;'}).appendTo(row)
+
+      let lookupItemButton = $('<a/>', {
+        href: '#',
+        id: 'node-button-inject-datatypes' + id,
+        class: 'editor-button editor-button-small',
+        style: 'margin-top: 7px; margin-left: 5px;'
+      }).appendTo(finalspan)
+
+      lookupItemButton.click(function () {
+        $('#node-button-inject-datatypes' + id).addClass('disabled')
+
+        $.getJSON('datatypes', function (data) {
+          console.log('datatypes requested response: ' + data.length)
+
+          $('#node-button-inject-datatypes' + id).removeClass('disabled')
+          node.datatypeNames = []
+
+          $.each(data, function (i, datatypeName) {
+            node.datatypeNames.push(datatypeName)
+          })
+
+          $('#node-input-addressSpaceItems-datatype' + id).autocomplete({
+            source: node.datatypeNames,
+            minLength: 0,
+            close: function (event, ui) {
+              $('#node-input-addressSpaceItems-datatype' + id).autocomplete('destroy')
+            }
+          }).autocomplete('search', '')
+        })
       })
 
-      $("#dialog").one("dialogclose", function (ev, ui) {
-        $("#dialog").off("dialogresize", switchDialogResize)
-      })
-    },
-    oneditsave: function () {
-      let node = this
-      let repeat = ''
-      let crontab = ''
-      let type = $('#opcuaiiotinject-time-type-select').val()
+      $('<i/>', {class: 'fa fa-search'}).appendTo(lookupItemButton)
 
-      if (type === 'interval') {
+      let removeItemButton = $('<a/>', {
+        href: '#',
+        id: 'node-button-inject-remove' + id,
+        class: 'editor-button editor-button-small',
+        style: 'margin-top: 7px; margin-left: 5px;'
+      }).appendTo(finalspan)
+
+      $('<i/>', {class: 'fa fa-remove'}).appendTo(removeItemButton)
+
+      removeItemButton.click(function () {
+        container.fadeOut(300, function () {
+          $(this).remove()
+        })
+      })
+
+      $('#node-input-addressSpaceItems-container').append(container)
+    }
+
+    try {
+      $('#node-input-addressSpaceItems-datatype').autocomplete('destroy')
+    }
+    catch (err) {
+    }
+
+    $('#node-input-addressSpaceItems-container').sortable({
+      axis: 'y',
+      handle: '.node-input-addressSpaceItems-handle',
+      cursor: 'move'
+    })
+
+    $('#node-input-addressSpaceItems-container .node-input-addressSpaceItems-handle').disableSelection()
+
+    $('#node-input-addressSpaceItems-add').click(function () {
+      cacheItemCount++
+      generateItemsEntry({name: '', nodeid: '', datatypeName: ''}, cacheItemCount) // length is every time one more than index
+      $('#node-input-addressSpaceItems-container-div').scrollTop($('#node-input-addressSpaceItems-container-div').get(0).scrollHeight)
+    })
+
+    function switchDialogResize () {
+      let rows = $('#dialog-form>div:not(.node-input-addressSpaceItems-container-row)')
+      let height = $('#dialog-form').height()
+
+      rows.each(function (index, row) {
+        height -= row.outerHeight(true)
+      })
+
+      let editorRow = $('#dialog-form>div.node-input-addressSpaceItems-container-row')
+      height -= (parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom')))
+      $('#node-input-addressSpaceItems-container-div').css('height', height + 'px')
+    }
+
+    $('#dialog').on('dialogresize', switchDialogResize)
+
+    $('#dialog').one('dialogopen', function (ev) {
+      let size = $('#dialog').dialog('option', 'sizeCache-switch')
+      if (size) {
+        $('#dialog').dialog('option', 'width', size.width)
+        $('#dialog').dialog('option', 'height', size.height)
+        switchDialogResize()
+      } else {
+        setTimeout(switchDialogResize, 10)
+      }
+    })
+
+    $('#dialog').one('dialogclose', function (ev, ui) {
+      $('#dialog').off('dialogresize', switchDialogResize)
+    })
+
+    console.log('well done editprepare ...')
+  }
+</script>
+
+<script type="text/javascript">
+  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
+  injectNode.oneditsave = function () {
+    let node = this
+    let repeat = ''
+    let crontab = ''
+    let injectType = $('#node-input-inject-injectType').val()
+    let type = $('#opcuaiiotinject-time-type-select').val()
+
+    if (type === 'interval') {
+      crontab = ''
+      let count = $('#opcuaiiotinject-time-interval-count').val()
+      let units = $('#opcuaiiotinject-time-interval-units').val()
+
+      if (units === 's') {
+        repeat = count
+      } else {
+        if (units === 'n') {
+          repeat = count / 1000
+        } else if (units === 'm') {
+          repeat = count * 60
+        } else if (units === 'h') {
+          repeat = count * 60 * 60
+        }
+      }
+    } else if (type === 'interval-time') {
+      repeat = ''
+      let count = $('#opcuaiiotinject-time-interval-time-units').val()
+      let startTime = Number($('#opcuaiiotinject-time-interval-time-start').val())
+      let endTime = Number($('#opcuaiiotinject-time-interval-time-end').val())
+
+      let days = $('#opcuaiiotinject-time-interval-time-days  input[type=checkbox]:checked').map(function (_, el) {
+        return $(el).val()
+      }).get()
+
+      if (days.length === 0) {
         crontab = ''
-        let count = $('#opcuaiiotinject-time-interval-count').val()
-        let units = $('#opcuaiiotinject-time-interval-units').val()
-
-        if (units === 's') {
-          repeat = count
+      } else {
+        if (days.length === 7) {
+          days = '*'
         } else {
-          if (units === 'n') {
-            repeat = count / 1000
-          } else if (units === 'm') {
-            repeat = count * 60
-          } else if (units === 'h') {
-            repeat = count * 60 * 60
-          }
+          days = days.join(',')
         }
 
-        console.log('save interval repeat:' + repeat + ' units:' + units)
+        let timerange = ''
 
-      } else if (type === 'interval-time') {
-        repeat = ''
-        let count = $('#opcuaiiotinject-time-interval-time-units').val()
-        let startTime = Number($('#opcuaiiotinject-time-interval-time-start').val())
-        let endTime = Number($('#opcuaiiotinject-time-interval-time-end').val())
-
-        let days = $('#opcuaiiotinject-time-interval-time-days  input[type=checkbox]:checked').map(function (_, el) {
-          return $(el).val()
-        }).get()
-
-        if (days.length === 0) {
-          crontab = ''
+        if (endTime === 0) {
+          timerange = startTime + '-23'
+        } else if (startTime + 1 < endTime) {
+          timerange = startTime + '-' + (endTime - 1)
+        } else if (startTime + 1 === endTime) {
+          timerange = startTime
         } else {
-          if (days.length === 7) {
-            days = '*'
+          let startpart = ''
+          let endpart = ''
+
+          if (startTime === 23) {
+            startpart = '23'
           } else {
-            days = days.join(',')
+            startpart = startTime + '-23'
           }
 
-          let timerange = ''
-
-          if (endTime === 0) {
-            timerange = startTime + '-23'
-          } else if (startTime + 1 < endTime) {
-            timerange = startTime + '-' + (endTime - 1)
-          } else if (startTime + 1 === endTime) {
-            timerange = startTime
+          if (endTime === 1) {
+            endpart = '0'
           } else {
-            let startpart = ''
-            let endpart = ''
-
-            if (startTime === 23) {
-              startpart = '23'
-            } else {
-              startpart = startTime + '-23'
-            }
-
-            if (endTime === 1) {
-              endpart = '0'
-            } else {
-              endpart = '0-' + (endTime - 1)
-            }
-
-            timerange = startpart + ',' + endpart
+            endpart = '0-' + (endTime - 1)
           }
 
-          if (count === '0') {
-            crontab = count + ' ' + timerange + ' * * ' + days
-          } else {
-            crontab = '*/' + count + ' ' + timerange + ' * * ' + days
-          }
+          timerange = startpart + ',' + endpart
         }
-      } else if (type === 'time') {
-        let time = $('#opcuaiiotinject-time-time').val()
 
-        let days = $('#opcuaiiotinject-time-time-days  input[type=checkbox]:checked').map(function (_, el) {
-          return $(el).val()
-        }).get()
-
-        if (days.length === 0) {
-          crontab = ''
+        if (count === '0') {
+          crontab = count + ' ' + timerange + ' * * ' + days
         } else {
-          if (days.length === 7) {
-            days = '*'
-          } else {
-            days = days.join(',')
-          }
-
-          let parts = time.split(':')
-          repeat = ''
-          crontab = parts[1] + ' ' + parts[0] + ' * * ' + days
+          crontab = '*/' + count + ' ' + timerange + ' * * ' + days
         }
       }
+    } else if (type === 'time') {
+      let time = $('#opcuaiiotinject-time-time').val()
+      let days = $('#opcuaiiotinject-time-time-days  input[type=checkbox]:checked').map(function (_, el) {
+        return $(el).val()
+      }).get()
 
-      console.log('save repeat:' + repeat + ' crontab:' + crontab)
-
-      $('#node-input-repeat').val(repeat)
-      $('#node-input-crontab').val(crontab)
-
-      // Items
-      let cacheItems = $("#node-input-addressSpaceItems-container").children()
-      node.addressSpaceItems = []
-      let itemIndex = 0
-
-      cacheItems.each(function () {
-        console.log('save item: ' + JSON.stringify($(this)))
-
-        node.addressSpaceItems.push({
-          name: $(this).find("#node-input-addressSpaceItems-name").val(),
-          nodeid: $(this).find("#node-input-addressSpaceItems-nodeid").val()
-        })
-
-        itemIndex++
-      })
-    },
-    button: {
-      onclick: function () {
-        let label = (this.name || this.payload).replace(/&/g, '&amp').replace(/</g, '&lt').replace(/>/g, '&gt')
-
-        if (this.payloadType === 'date') {
-          label = this._('opcuaiiotinject.timestamp')
+      if (days.length === 0) {
+        crontab = ''
+      } else {
+        if (days.length === 7) {
+          days = '*'
+        } else {
+          days = days.join(',')
         }
 
-        if (this.payloadType === 'none') {
-          label = this._('opcuaiiotinject.blank')
-        }
-
-        let node = this
-
-        $.ajax({
-          url: 'opcuaIIoT/inject/' + this.id,
-          type: 'POST',
-          success: function (resp) {
-            RED.notify(node._('opcuaiiotinject.success', {label: label}), 'success')
-          },
-          error: function (jqXHR, textStatus, errorThrown) {
-            if (jqXHR.status === 404) {
-              RED.notify(node._('common.notification.error', {message: node._('common.notification.errors.not-deployed')}), 'error')
-            } else if (jqXHR.status === 500) {
-              RED.notify(node._('common.notification.error', {message: node._('opcuaiiotinject.errors.failed')}), 'error')
-            } else if (jqXHR.status === 0) {
-              RED.notify(node._('common.notification.error', {message: node._('common.notification.errors.no-response')}), 'error')
-            } else {
-              RED.notify(node._('common.notification.error', {
-                message: node._('common.notification.errors.unexpected', {
-                  status: jqXHR.status,
-                  message: textStatus
-                })
-              }), 'error')
-            }
-          }
-        })
+        let parts = time.split(':')
+        repeat = ''
+        crontab = parts[1] + ' ' + parts[0] + ' * * ' + days
       }
     }
-  })
+
+    $('#node-input-repeat').val(repeat)
+    $('#node-input-crontab').val(crontab)
+
+    let cacheItems = $('#node-input-addressSpaceItems-container').children()
+    node.addressSpaceItems = []
+    let itemIndex = 0
+
+    cacheItems.each(function () {
+      node.addressSpaceItems.push({
+        name: $(this).find('#node-input-addressSpaceItems-name' + itemIndex).val(),
+        nodeid: $(this).find('#node-input-addressSpaceItems-nodeid' + itemIndex).val(),
+        datatypeName: $(this).find('#node-input-addressSpaceItems-datatype' + itemIndex).val()
+      })
+      itemIndex++
+    })
+
+    console.log('well done editsave ...')
+  }
+
+</script>
+
+<script type="text/javascript">
+  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
+  injectNode.label = function () {
+    let suffix = ''
+
+    if (this.once) {
+      suffix = ' ¹'
+    }
+
+    if (this.repeat || this.crontab) {
+      suffix = ' ↻'
+    }
+
+    if (this.name) {
+      return this.name + suffix
+    }
+
+    switch (this.payloadType) {
+      case 'string':
+      case 'str':
+      case 'num':
+      case 'bool':
+      case 'json':
+        if (this.topic !== '' && (this.topic.length + this.payload.length) <= 32) {
+          return this.topic + ':' + this.payload + suffix
+        } else if (this.payload.length > 0 && this.payload.length < 24) {
+          return this.payload + suffix
+        }
+        return this._('opcuaiiotinject.inject') + suffix
+      case 'date':
+        if (this.topic !== '' && this.topic.length <= 16) {
+          return this.topic + ':' + this._('opcuaiiotinject.timestamp') + suffix
+        }
+        return this._('opcuaiiotinject.timestamp') + suffix
+      default:
+        if (this.payloadType === 'flow' && this.payload.length < 19) {
+          return 'flow.' + this.payload + suffix
+        } else if (this.payloadType === 'global' && this.payload.length < 17) {
+          return 'global.' + this.payload + suffix
+        }
+        return this._('opcuaiiotinject.inject') + suffix
+    }
+  }
+
+  injectNode.labelStyle = function () {
+    return this.name ? 'node_label_italic' : ''
+  }
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Inject">
@@ -630,9 +699,12 @@
     <div id="node-input-inject-tabs-content" style="min-height: 170px;">
         <div id="opcuaiiotinject-tab-settings" style="display:none">
             <div class="form-row" id="node-inject-type">
-                <label for="node-input-injectTypeListener" style="width:140px">
-                <i class="fa fa-paper-plane-o"></i> <span data-i18n="opcuaiiotinject.injectTypeListener"></span></label>
-                <input type="checkbox" id="node-input-injectTypeListener" style="width:40px">
+                <label for=""><i class="fa fa-repeat"></i> <span data-i18n="opcuaiiotinject.label.injectType"></span></label>
+                <select id="node-input-injectType" type="text" style="width:140px;">
+                    <option value="read" data-i18n="opcuaiiotinject.type-label.read"></option>
+                    <option value="write" data-i18n="opcuaiiotinject.type-label.write"></option>
+                    <option value="listen" data-i18n="opcuaiiotinject.type-label.listen"></option>
+                </select>
             </div>
 
             <div class="form-row" id="input-payload-row">
@@ -763,44 +835,8 @@
             </div>
         </div>
     </div>
+
 </script>
-
-<style>
-    .opcuaiiotinject-time-row {
-        padding-left: 110px
-    }
-
-    .opcuaiiotinject-time-row select {
-        margin: 3px 0
-    }
-
-    .opcuaiiotinject-time-days label {
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        vertical-align: top;
-        width: 100px
-    }
-
-    .opcuaiiotinject-time-days input {
-        width: auto
-    }
-
-    .opcuaiiotinject-time-times {
-        width: 90px
-    }
-
-    #opcuaiiotinject-time-time {
-        width: 75px
-    }
-
-    .opcuaiiotinject-time-count {
-        width: 40px !important
-    }
-</style>
-
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">
     <h2>OPC UA IIoT Inject</h2>
