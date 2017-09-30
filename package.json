@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-iiot-opcua",
-  "version": "1.0.1-alpha.0",
+  "version": "1.0.1-alpha.1",
   "private": true,
   "description": "The IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
@@ -13,7 +13,7 @@
     "cron": "1.2.1",
     "debug": "3.1.0",
     "easy-table": "1.1.0",
-    "node-opcua": "^0.1.0-6",
+    "node-opcua": "^0.1.0-7",
     "treeify": "1.0.1"
   },
   "keywords": [
