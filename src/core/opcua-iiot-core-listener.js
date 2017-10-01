@@ -228,7 +228,7 @@ de.biancoroyal.opcua.iiot.core.listener.MonitoredItemSet = function () {
   })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, subscription, handleErrorCallback) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId, msg, subscription, handleErrorCallback) {
   let interval
   let queueSize
 
@@ -248,7 +248,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (msg, s
 
   return subscription.monitor(
     {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(msg.topic),
+      nodeId: this.core.nodeOPCUA.resolveNodeId(nodeId),
       attributeId: this.core.nodeOPCUA.AttributeIds.Value,
       origin: msg
     },
