@@ -852,7 +852,10 @@
     <p>Set that type to prepare the correct vaule for injects.</p>
 
     <strong>Payload/Interval</strong>
-    <p>If the Inject-Type is set to listen, then the value will be used as the interval for the monitored item.</p>
+    <p>
+    If the Inject-Type is set to listen, then the value will be used as the interval for the monitored item.
+     Example listener options: <pre>{ "interval": 1000, "queueSize": 10000 }</pre>
+    </p>
     <p>If the Inject-Type is set to read/write, then the value is a standard payload to transport your data.</p>
 
     <strong>Topic</strong>
