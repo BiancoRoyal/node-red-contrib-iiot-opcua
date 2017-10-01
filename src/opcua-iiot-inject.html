@@ -406,7 +406,7 @@
       }).appendTo(row)
 
       let itemNodIdField = $('<input/>', {
-        id: 'node-input-addressSpaceItems-nodeid' + id,
+        id: 'node-input-addressSpaceItems-nodeId' + id,
         type: 'text',
         style: 'margin-left:5px;width:200px;',
         placeholder: 'ns=0;i=85'
@@ -420,7 +420,7 @@
       }).appendTo(row)
 
       itemNameField.val(opcuaItem.name)
-      itemNodIdField.val(opcuaItem.nodeid)
+      itemNodIdField.val(opcuaItem.nodeId)
       itemDatatypeField.val(opcuaItem.datatypeName)
 
       let finalspan = $('<span/>', {style: 'float: right;margin-right: 10px;'}).appendTo(row)
@@ -485,7 +485,7 @@
 
     $('#node-input-addressSpaceItems-add').click(function () {
       cacheItemCount++
-      generateItemsEntry({name: '', nodeid: '', datatypeName: ''}, cacheItemCount) // length is every time one more than index
+      generateItemsEntry({name: '', nodeId: '', datatypeName: ''}, cacheItemCount) // length is every time one more than index
       $('#node-input-addressSpaceItems-container-div').scrollTop($('#node-input-addressSpaceItems-container-div').get(0).scrollHeight)
     })
 
@@ -630,7 +630,7 @@
     cacheItems.each(function () {
       node.addressSpaceItems.push({
         name: $(this).find('#node-input-addressSpaceItems-name' + itemIndex).val(),
-        nodeid: $(this).find('#node-input-addressSpaceItems-nodeid' + itemIndex).val(),
+        nodeId: $(this).find('#node-input-addressSpaceItems-nodeId' + itemIndex).val(),
         datatypeName: $(this).find('#node-input-addressSpaceItems-datatype' + itemIndex).val()
       })
       itemIndex++

@@ -11,12 +11,12 @@
   RED.nodes.registerType('OPCUA-IIoT-Connector', {
     category: 'config',
     defaults: {
-      endpoint: {value: "", required: true},
+      endpoint: {value: "opc.tcp://localhost:55388/", required: true},
       keepSessionAlive: {value: true},
       loginEnabled: {value: false},
       securityPolicy: {value: 'None', required: true},
       securityMode: {value: 'NONE', required: true},
-      name: {value: ""},
+      name: {value: "LOCAL SERVER"},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },

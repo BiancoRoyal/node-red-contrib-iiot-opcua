@@ -171,6 +171,32 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
   })
   addressSpace.installHistoricalDataNode(counterVariable)
 
+  let fullcounterValue = 0
+  setInterval(function () {
+    if (fullcounterValue < 100000) {
+      fullcounterValue += 1
+    } else {
+      fullcounterValue = -100000
+    }
+  }, 1000)
+
+  let fullcounterVariable = addressSpace.addVariable({
+    componentOf: vendorName,
+    nodeId: 'ns=4;s=FullCounter',
+    browseName: 'FullCounter',
+    dataType: coreServer.core.nodeOPCUA.DataType.Int32,
+
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Int32,
+          value: fullcounterValue
+        })
+      }
+    }
+  })
+  addressSpace.installHistoricalDataNode(fullcounterVariable)
+
   var externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
     value: new coreServer.core.nodeOPCUA.Variant({dataType: coreServer.core.nodeOPCUA.DataType.Double, value: 10.0}),
     sourceTimestamp: null,

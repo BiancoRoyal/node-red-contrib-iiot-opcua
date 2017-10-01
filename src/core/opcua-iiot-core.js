@@ -788,8 +788,8 @@ de.biancoroyal.opcua.iiot.core.newOPCUANodeIdListFromMsgItems = function (msg) {
   let item = null
   let itemsToRead = []
 
-  if (msg.payload.items) {
-    for (item of msg.payload.items) {
+  if (msg.addressSpaceItems) {
+    for (item of msg.addressSpaceItems) {
       itemsToRead.push(this.newOPCUANodeIdFromItemNodeId(item))
     }
   }
@@ -819,24 +819,32 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
 
   this.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
 
-  if (msg.payload.items) {
+  if (msg.addressSpaceItems) {
+    if (msg.valuesToWrite) {
+      let item = null
+      let index = 0
+
+      for (item of msg.addressSpaceItems) {
+        nodesToWrite.push({
+          nodeId: this.newOPCUANodeIdFromItemNodeId(item),
+          attributeId: opcua.AttributeIds.Value,
+          indexRange: null,
+          value: {value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++])}
+        })
+      }
+    } else {
+    }
+  } else {
     let item = null
 
-    for (item of msg.payload.items) {
+    for (item of msg.addressSpaceItems) {
       nodesToWrite.push({
         nodeId: this.newOPCUANodeIdFromItemNodeId(item),
         attributeId: opcua.AttributeIds.Value,
         indexRange: null,
-        value: {value: this.buildNewVariant(item.datatype, item.value)}
+        value: {value: this.buildNewVariant(item.datatypeName, item.value)}
       })
     }
-  } else {
-    nodesToWrite.push({
-      nodeId: this.newOPCUANodeIdFromMsgTopic(msg),
-      attributeId: opcua.AttributeIds.Value,
-      indexRange: null,
-      value: {value: this.buildNewVariant(msg.datatype, msg.payload)}
-    })
   }
 
   this.internalDebugLog('buildNodesToWrite output: ' + JSON.stringify(nodesToWrite))
@@ -859,7 +867,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
       if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
         // browser compatibility for an easier set up
         for (item of msg.addressSpaceItems) {
-          nodesToRead.push(item.nodeid)
+          nodesToRead.push(item.nodeId)
         }
       }
     }
@@ -867,7 +875,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
     if (msg.addressSpaceItems) {
       // browser compatibility for an easier set up
       for (item of msg.addressSpaceItems) {
-        nodesToRead.push(item.nodeid)
+        nodesToRead.push(item.nodeId)
       }
     } else {
       nodesToRead.push(msg.topic)
