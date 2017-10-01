@@ -243,6 +243,68 @@ module.exports = function (RED) {
                 })
               })
               break
+            case 130:
+              coreClient.core.specialDebugLog('requested History ' + itemsToRead.length)
+
+              let historyDate = new Date()
+              node.historyStart = new Date(historyDate.getDate() - 1)
+              node.historyEnd = historyDate
+
+              coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd, node.multipleRequest).then(function (readResult) {
+                node.setNodeStatusTo('active')
+
+                if (readResult.results) {
+                  readResult.results.forEach(function (result) {
+                    coreClient.readDetailsDebugLog('Read History Value Result: ' + JSON.stringify(result))
+                  })
+                }
+
+                if (readResult.diagnostics) {
+                  readResult.diagnostics.forEach(function (diagnostic) {
+                    coreClient.readDetailsDebugLog('Read History Value Diagnostic: ' + JSON.stringify(diagnostic))
+                  })
+                }
+
+                let message
+
+                if (node.multipleRequest) {
+                  message = {
+                    payload: readResult.resultsConverted,
+                    nodesToRead: itemsToRead,
+                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'VariableValue',
+                    attributeId: node.attributeId
+                  }
+                } else {
+                  message = {
+                    payload: readResult.resultsConverted[0],
+                    nodesToRead: itemsToRead[0],
+                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
+                    multipleRequest: node.multipleRequest,
+                    input: msg,
+                    resultsConverted: readResult.resultsConverted,
+                    /* results: readResult.results, */
+                    diagnostics: readResult.diagnostics,
+                    nodetype: 'read',
+                    readtype: 'VariableValue',
+                    attributeId: node.attributeId,
+                    topic: itemsToRead[0]
+                  }
+                }
+
+                node.send(message)
+              }).catch(function (err) {
+                coreClient.core.specialDebugLog(err)
+                coreClient.readDebugLog('Error Items To Read: ' + JSON.stringify(itemsToRead))
+                node.handleReadError(err, msg)
+              })
+              break
             default:
               let item = null
               let transformedItem = null

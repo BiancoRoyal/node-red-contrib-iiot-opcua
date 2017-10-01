@@ -127,7 +127,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     }
   })
 
-  addressSpace.addVariable({
+  let memoryVariable = addressSpace.addVariable({
     componentOf: vendorName,
     nodeId: 'ns=4;s=free_memory',
     browseName: 'FreeMemory',
@@ -143,6 +143,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
       }
     }
   })
+  addressSpace.installHistoricalDataNode(memoryVariable)
 
   let counterValue = 0
   setInterval(function () {
@@ -153,7 +154,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     }
   }, 1000)
 
-  addressSpace.addVariable({
+  let counterVariable = addressSpace.addVariable({
     componentOf: vendorName,
     nodeId: 'ns=4;s=Counter',
     browseName: 'Counter',
@@ -168,6 +169,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
       }
     }
   })
+  addressSpace.installHistoricalDataNode(counterVariable)
 
   var externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
     value: new coreServer.core.nodeOPCUA.Variant({dataType: coreServer.core.nodeOPCUA.DataType.Double, value: 10.0}),

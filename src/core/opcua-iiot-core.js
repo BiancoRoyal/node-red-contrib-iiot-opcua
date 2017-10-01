@@ -421,6 +421,40 @@ de.biancoroyal.opcua.iiot.core.convertToDataType = function (datatype) {
   }
 }
 
+de.biancoroyal.opcua.iiot.core.extractString = function (attribute, dataValue) {
+  let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
+  let _ = require('underscore')
+
+  if (!dataValue.value || !dataValue.value.hasOwnProperty('value')) {
+    return '<null>'
+  }
+
+  switch (attribute) {
+    case opcua.AttributeIds.DataType:
+      return _.invert(opcua.DataTypeIds)[dataValue.value.value.value] + ' (' + dataValue.value.value.toString() + ')'
+    case opcua.AttributeIds.NodeClass:
+      return opcua.NodeClass.get(dataValue.value.value).key + ' (' + dataValue.value.value + ')'
+    case opcua.AttributeIds.WriteMask:
+    case opcua.AttributeIds.UserWriteMask:
+      return ' (' + dataValue.value.value + ')'
+    case opcua.AttributeIds.UserAccessLevel:
+    case opcua.AttributeIds.AccessLevel:
+      return opcua.AccessLevelFlag.get(dataValue.value.value).key + ' (' + dataValue.value.value + ')'
+    default:
+      if (!dataValue.value || dataValue.value.value === null) {
+        return '<???> : ' + dataValue.statusCode.toString()
+      }
+      switch (dataValue.value.arrayType) {
+        case opcua.VariantArrayType.Scalar:
+          return dataValue.value.value.toString()
+        case opcua.VariantArrayType.Array:
+          return 'l= ' + dataValue.value.value.length + ' [ ' + dataValue.value.value[0] + ' ... ]'
+      }
+  }
+
+  return ''
+}
+
 de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue) {
   let convertedValue = null
 

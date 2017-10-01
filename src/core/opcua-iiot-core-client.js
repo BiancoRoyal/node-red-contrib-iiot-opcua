@@ -208,6 +208,39 @@ de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, o
     })
 }
 
+de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, items, start, end) {
+  let core = de.biancoroyal.opcua.iiot.core.client.core
+  return new Promise(
+    function (resolve, reject) {
+      if (session) {
+        session.readHistoryValue(items, start, end, function (err, results, diagnostics) {
+          if (err) {
+            reject(err)
+          } else {
+            let resultsConverted = []
+            let dataValue = null
+
+            for (dataValue of results) {
+              if (dataValue) {
+                resultsConverted.push(core.buildMsgPayloadByDataValue(dataValue))
+              }
+            }
+
+            resolve({
+              resultsConverted: resultsConverted,
+              nodesToRead: items,
+              results: results,
+              diagnostics: diagnostics
+            })
+          }
+        })
+      } else {
+        reject(new Error('Session Not Valid To Read All Attributes'))
+      }
+    }
+  )
+}
+
 de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, items, multipleRequest) {
   let core = de.biancoroyal.opcua.iiot.core.client.core
   return new Promise(
