@@ -1,12 +1,12 @@
 {
   "opcua-iiot-contrib": {
     "label": {
-      "eventRoot": "Root Id",
       "eventType": "Event Type",
       "queueSize": "Queue Size",
       "usingListener": "Listener",
       "showActivities": "Show Activities",
-      "showErrors": "Show Errors"
+      "showErrors": "Show Errors",
+      "lookupUseHint": "You can use the lookup or give a NodeId of your event."
     }
   }
 }
