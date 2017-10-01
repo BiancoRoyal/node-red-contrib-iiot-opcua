@@ -378,7 +378,7 @@
 
     let cacheItemCount = 0
     if (node.addressSpaceItems !== undefined) {
-      cacheItemCount = node.addressSpaceItems.length
+      cacheItemCount = node.addressSpaceItems.length - 1
       node.addressSpaceItems.forEach(function (element, index, array) {
         generateItemsEntry(element, index)
       })
@@ -470,12 +470,6 @@
       $('#node-input-addressSpaceItems-container').append(container)
     }
 
-    try {
-      $('#node-input-addressSpaceItems-datatype').autocomplete('destroy')
-    }
-    catch (err) {
-    }
-
     $('#node-input-addressSpaceItems-container').sortable({
       axis: 'y',
       handle: '.node-input-addressSpaceItems-handle',
@@ -530,7 +524,6 @@
     let node = this
     let repeat = ''
     let crontab = ''
-    let injectType = $('#node-input-inject-injectType').val()
     let type = $('#opcuaiiotinject-time-type-select').val()
 
     if (type === 'interval') {

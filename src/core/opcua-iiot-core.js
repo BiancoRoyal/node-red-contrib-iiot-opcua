@@ -822,18 +822,18 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
         nodesToRead.push(item.toString())
       }
     } else {
-      if (msg.payload.items && msg.payload.items.length) {
+      if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
         // browser compatibility for an easier set up
-        for (item of msg.payload.items) {
-          nodesToRead.push(item.nodeId)
+        for (item of msg.addressSpaceItems) {
+          nodesToRead.push(item.nodeid)
         }
       }
     }
   } else {
-    if (msg.payload.items) {
+    if (msg.addressSpaceItems) {
       // browser compatibility for an easier set up
-      for (item of msg.payload.items) {
-        nodesToRead.push(item.nodeId)
+      for (item of msg.addressSpaceItems) {
+        nodesToRead.push(item.nodeid)
       }
     } else {
       nodesToRead.push(msg.topic)
