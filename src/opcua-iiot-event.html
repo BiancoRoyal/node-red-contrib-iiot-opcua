@@ -38,12 +38,7 @@
 
       eventTypeLookupField.click(function () {
         eventTypeLookupField.addClass('disabled')
-
-        let rootid = eventTypeField.val() || 'i=2041'
-        let url = '/opcuaIIoT/event/types'
-        console.log('url: ' + url)
-
-        $.getJSON(url, function (data) {
+        $.getJSON('/opcuaIIoT/event/types', function (data) {
           eventTypeLookupField.removeClass('disabled')
           node.lookupItems = []
 

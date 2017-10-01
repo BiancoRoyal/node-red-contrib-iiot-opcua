@@ -435,7 +435,7 @@
       lookupItemButton.click(function () {
         $('#node-button-inject-datatypes' + id).addClass('disabled')
 
-        $.getJSON('datatypes', function (data) {
+        $.getJSON('/opcuaIIoT/data/types', function (data) {
           console.log('datatypes requested response: ' + data.length)
 
           $('#node-button-inject-datatypes' + id).removeClass('disabled')

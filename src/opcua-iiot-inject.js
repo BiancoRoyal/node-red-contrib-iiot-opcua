@@ -17,6 +17,7 @@
 module.exports = function (RED) {
   let coreInject = require('./core/opcua-iiot-core-inject')
   let cron = require('cron')
+  let _ = require('underscore')
 
   function OPCUAIIoTInject (config) {
     RED.nodes.createNode(this, config)
@@ -165,34 +166,7 @@ module.exports = function (RED) {
     }
   })
 
-  RED.httpAdmin.get('/datatypes', RED.auth.needsPermission('opcua.datatypes'), function (req, res) {
-    let dataTypes = [
-      'Null',
-      'Boolean',
-      'SByte',
-      'Byte',
-      'Int16',
-      'UInt16',
-      'Int32',
-      'UInt32',
-      'Int64',
-      'UInt64',
-      'Float',
-      'Double',
-      'String',
-      'DateTime',
-      'Guid',
-      'ByteString',
-      'XmlElement',
-      'NodeId',
-      'ExpandedNodeId',
-      'StatusCode',
-      'LocalizedText',
-      'ExtensionObject',
-      'DataValue',
-      'Variant',
-      'DiagnosticInfo']
-
-    res.json(dataTypes)
+  RED.httpAdmin.get('/opcuaIIoT/data/types', RED.auth.needsPermission('opcua.datatypes'), function (req, res) {
+    res.json(_.toArray(_.invert(require('node-opcua').DataTypeIds)))
   })
 }

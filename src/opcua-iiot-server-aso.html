@@ -33,6 +33,100 @@
     },
     oneditprepare: function () {
       let node = this
+      node.lookupItems = []
+
+      let objecttypeLookupField = $("#node-lookup-objecttype")
+      let objecttypeField = $("#node-input-objecttype")
+
+      objecttypeLookupField.click(function () {
+        objecttypeLookupField.addClass('disabled')
+        $.getJSON('/opcuaIIoT/object/InstanceTypes', function (data) {
+          objecttypeLookupField.removeClass('disabled')
+          node.lookupItems = []
+
+          $.each(data, function (i, entry) {
+            node.lookupItems.push({value: entry.nodeId, label: entry.label})
+          })
+
+          objecttypeField.autocomplete({
+            source: node.lookupItems,
+            minLength: 0,
+            focus: function (event, ui) {
+              objecttypeField.val(ui.item.label);
+              return false;
+            },
+            select: function (event, ui) {
+              objecttypeField.val(ui.item.value)
+              return false;
+            },
+            close: function (event, ui) {
+              objecttypeField.autocomplete("destroy")
+            }
+          }).autocomplete("search", "")
+        })
+      })
+
+      let datatypeLookupField = $("#node-lookup-datatype")
+      let datatypeField = $("#node-input-datatype")
+
+      datatypeLookupField.click(function () {
+        datatypeLookupField.addClass('disabled')
+        $.getJSON('/opcuaIIoT/object/DataTypeIds', function (data) {
+          datatypeLookupField.removeClass('disabled')
+          node.lookupItems = []
+
+          $.each(data, function (i, entry) {
+            node.lookupItems.push({value: entry.nodeId, label: entry.label})
+          })
+
+          datatypeField.autocomplete({
+            source: node.lookupItems,
+            minLength: 0,
+            focus: function (event, ui) {
+              datatypeField.val(ui.item.label);
+              return false;
+            },
+            select: function (event, ui) {
+              datatypeField.val(ui.item.value)
+              return false;
+            },
+            close: function (event, ui) {
+              datatypeField.autocomplete("destroy")
+            }
+          }).autocomplete("search", "")
+        })
+      })
+
+      let referencetypeLookupField = $("#node-lookup-referencetype")
+      let referencetypeField = $("#node-input-referencetype")
+
+      referencetypeLookupField.click(function () {
+        referencetypeLookupField.addClass('disabled')
+        $.getJSON('/opcuaIIoT/object/ReferenceTypeIds', function (data) {
+          referencetypeLookupField.removeClass('disabled')
+          node.lookupItems = []
+
+          $.each(data, function (i, entry) {
+            node.lookupItems.push({value: entry.nodeId, label: entry.label})
+          })
+
+          referencetypeField.autocomplete({
+            source: node.lookupItems,
+            minLength: 0,
+            focus: function (event, ui) {
+              referencetypeField.val(ui.item.label);
+              return false;
+            },
+            select: function (event, ui) {
+              referencetypeField.val(ui.item.value)
+              return false;
+            },
+            close: function (event, ui) {
+              referencetypeField.autocomplete("destroy")
+            }
+          }).autocomplete("search", "")
+        })
+      })
 
       let objectTypeCheckbox = $("#node-input-objecttype")
       let dataTypeRow = $("#node-input-datatype-row")
@@ -71,48 +165,14 @@
         <input type="text" id="node-input-displayname" placeholder="">
     </div>
     <div class="form-row">
-        <!-- ObjectTypeIds, VariableTypeIds via REST -->
-        <label for="node-input-objecttype"><i class="icon-tasks"></i>
-        <span data-i18n="opcua-iiot-contrib.label.objecttype"></span></label>
-        <select type="text" id="node-input-objecttype">
-            <option value="58">BaseObjectType</option>
-            <option value="61">FolderType</option>
-            <option value="62">BaseVariableType</option>
-            <option value="63">BaseDataVariableType</option>
-            <option value="69">DataTypeDescriptionType</option>
-            <option value="72">DataTypeDictionaryType</option>
-            <option value="63">BaseDataVariableType</option>
-        </select>
+        <label for="node-input-objecttype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.objecttype"></span></label>
+        <input type="text" id="node-input-objecttype" style="width:40%;" placeholder="i=2041">
+        <a id="node-lookup-objecttype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
-    <div class="form-row" id="node-input-datatype-row">
-        <!-- DataType_Schema via REST -->
-        <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
-        <select type="text" id="node-input-datatype">
-            <option value="Null">Null</option>
-            <option value="SByte">SByte</option>
-            <option value="Byte">Byte</option>
-            <option value="Int16">Int16</option>
-            <option value="UInt16">UInt16</option>
-            <option value="Int32">Int32</option>
-            <option value="UInt32">UInt32</option>
-            <option value="Int64">Int64</option>
-            <option value="UInt64">UInt64</option>
-            <option value="Float">Float</option>
-            <option value="Double">Double</option>
-            <option value="String">String</option>
-            <option value="DateTime">DateTime</option>
-            <option value="Guid">Guid</option>
-            <option value="ByteString">ByteString</option>
-            <option value="XmlElement">XmlElement</option>
-            <option value="NodeId">NodeId</option>
-            <option value="ExpandedNodeId">ExpandedNodeId</option>
-            <option value="StatusCode">StatusCode</option>
-            <option value="LocalizedText">LocalizedText</option>
-            <option value="ExtensionObject">ExtensionObject</option>
-            <option value="DataValue" selected>DataValue</option>
-            <option value="Variant">Variant</option>
-            <option value="DiagnosticInfo">DiagnosticInfo</option>
-        </select>
+    <div class="form-row">
+        <label for="node-input-datatype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
+        <input type="text" id="node-input-datatype" style="width:40%;" placeholder="i=2041">
+        <a id="node-lookup-datatype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
         <label for="node-input-value"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.value"></span></label>
@@ -124,19 +184,10 @@
         <span data-i18n="opcua-iiot-contrib.label.referenceNodeId"></span></label>
         <input type="text" id="node-input-referenceNodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
     </div>
-    <div class="form-row" id="node-input-referencetype-row">
-        <!-- ReferenceTypeIds via REST -->
-        <label for="node-input-referencetype"><i class="icon-tasks"></i>
-        <span data-i18n="opcua-iiot-contrib.label.referencetype"></span></label>
-        <select type="text" id="node-input-referencetype">
-            <option value="35">Organizes</option>
-            <option value="44">Aggregates</option>
-            <option value="47">HasComponent</option>
-            <option value="63">BaseDataVariableType</option>
-            <option value="69">DataTypeDescriptionType</option>
-            <option value="72">DataTypeDictionaryType</option>
-            <option value="63">BaseDataVariableType</option>
-        </select>
+    <div class="form-row">
+        <label for="node-input-referencetype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.referencetype"></span></label>
+        <input type="text" id="node-input-referencetype" style="width:40%;" placeholder="i=2041">
+        <a id="node-lookup-referencetype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
     <hr>
     <div class="form-row">
