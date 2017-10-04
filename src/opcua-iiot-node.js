@@ -47,11 +47,12 @@ module.exports = function (RED) {
       msg.addressSpaceItems = msg.addressSpaceItems || [] // eslint-disable-line
       msg.valuesToWrite = msg.valuesToWrite || [] // eslint-disable-line
 
+      msg.addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
+
       if (node.value !== '') {
         if (node.datatype) {
-          msg.addressSpaceItems.push(core.convertDataValueByDataType({value: node.value}, node.datatype))
+          msg.valuesToWrite.push(core.convertDataValueByDataType({value: node.value}, node.datatype))
         } else {
-          msg.addressSpaceItems.push(node.nodeId)
           msg.valuesToWrite.push(node.value)
         }
       }

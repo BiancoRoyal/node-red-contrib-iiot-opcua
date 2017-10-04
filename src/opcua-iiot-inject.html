@@ -345,7 +345,7 @@
         $('#input-label-listener').show()
         $('#input-label-payload').hide()
 
-        if(fieldPayloadType.val() !== 'num') {
+        if(fieldPayloadType.val() !== 'num' && fieldPayloadType.val() !== 'json') {
             $('#node-input-payload').typedInput('type', 'num')
             $('#node-input-payload').val('1000')
         }

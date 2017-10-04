@@ -167,7 +167,8 @@ de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, ke
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
-  return [
+  return ['EventId', 'SourceName', 'Message', 'ReceiveTime']
+  /* return [
     'EventId',
     'ConditionName',
     'ConditionClassName',
@@ -200,22 +201,22 @@ de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
     'LimitState.Id',
     'ActiveState',
     'ActiveState.Id'
-  ]
+  ] */
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getConditionEventFields = function () {
   return [
+    'EventId',
+    'SourceName',
+    'Message',
+    'ReceiveTime',
     'ConditionName',
     'ConditionType',
     'ConditionClassId',
     'ConditionClassName',
     'ConditionVariableType',
-    'Message',
-    'SourceName',
     'SourceNode',
-    'BranchId',
-    'EventType',
-    'ReceiveTime'
+    'BranchId'
   ]
 }
 
@@ -228,7 +229,7 @@ de.biancoroyal.opcua.iiot.core.listener.MonitoredItemSet = function () {
   })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId, msg, subscription, handleErrorCallback) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addressSpaceItem, msg, subscription, handleErrorCallback) {
   let interval
   let queueSize
 
@@ -248,7 +249,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
 
   return subscription.monitor(
     {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(nodeId),
+      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
       attributeId: this.core.nodeOPCUA.AttributeIds.Value,
       origin: msg
     },
@@ -258,11 +259,13 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
       queueSize: queueSize
     },
     this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
-    handleErrorCallback
+    function (err) {
+      handleErrorCallback(err, addressSpaceItem, msg)
+    }
   )
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subscription, handleErrorCallback) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpaceItem, msg, subscription, handleErrorCallback) {
   let interval
   let queueSize
 
@@ -280,7 +283,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
 
   return subscription.monitor(
     {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(msg.topic),
+      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
       attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier,
       origin: msg
     },
@@ -291,7 +294,9 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (msg, subsc
       filter: msg.payload.eventFilter
     },
     this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
-    handleErrorCallback
+    function (err) {
+      handleErrorCallback(err, addressSpaceItem, msg)
+    }
   )
 }
 
@@ -303,9 +308,9 @@ de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session, ca
   let browseEventTypes = {
     nodeId: makeNodeId(ObjectTypeIds.BaseEventType),
     referenceTypeId: this.core.nodeOPCUA.resolveNodeId('HasSubtype'),
-    browseDirection: this.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+    browseDirection: this.core.nodeOPCUA.BrowseDirection.Forward,
     includeSubtypes: true,
-    nodeClassMask: this.core.nodeOPCUA.browse_service.NodeClassMask.ObjectType,
+    nodeClassMask: this.core.nodeOPCUA.NodeClassMask.ObjectType,
     resultMask: 63 // All ResultMask_Schema
   }
 

@@ -44,21 +44,13 @@ module.exports = function (RED) {
       }
 
       let eventFields
-
-      switch (node.eventType) {
-        case 'Condition':
-          eventFields = coreListener.getConditionEventFields()
-          break
-        default:
-          eventFields = coreListener.getBasicEventFields()
+      if (node.eventType.indexOf('Condition')) {
+        eventFields = coreListener.getConditionEventFields()
+      } else {
+        eventFields = coreListener.getBasicEventFields()
       }
 
       let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(eventFields)
-
-      if (node.eventRoot) {
-        msg.topic = node.eventRoot
-      }
-
       let interval = 1000
 
       if (typeof msg.payload === 'number') {

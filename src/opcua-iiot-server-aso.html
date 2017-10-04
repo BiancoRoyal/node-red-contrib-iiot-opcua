@@ -56,7 +56,7 @@
               return false;
             },
             select: function (event, ui) {
-              objecttypeField.val(ui.item.value)
+              objecttypeField.val(ui.item.label)
               return false;
             },
             close: function (event, ui) {
@@ -87,7 +87,7 @@
               return false;
             },
             select: function (event, ui) {
-              datatypeField.val(ui.item.value)
+              datatypeField.val(ui.item.label)
               return false;
             },
             close: function (event, ui) {
@@ -118,7 +118,7 @@
               return false;
             },
             select: function (event, ui) {
-              referencetypeField.val(ui.item.value)
+              referencetypeField.val(ui.item.label)
               return false;
             },
             close: function (event, ui) {
@@ -166,12 +166,12 @@
     </div>
     <div class="form-row">
         <label for="node-input-objecttype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.objecttype"></span></label>
-        <input type="text" id="node-input-objecttype" style="width:40%;" placeholder="i=2041">
+        <input type="text" id="node-input-objecttype" style="width:40%;" placeholder="">
         <a id="node-lookup-objecttype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
         <label for="node-input-datatype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
-        <input type="text" id="node-input-datatype" style="width:40%;" placeholder="i=2041">
+        <input type="text" id="node-input-datatype" style="width:40%;" placeholder="">
         <a id="node-lookup-datatype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
@@ -186,7 +186,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-referencetype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.referencetype"></span></label>
-        <input type="text" id="node-input-referencetype" style="width:40%;" placeholder="i=2041">
+        <input type="text" id="node-input-referencetype" style="width:40%;" placeholder="">
         <a id="node-lookup-referencetype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
     <hr>
