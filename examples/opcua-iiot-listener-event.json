@@ -1,9 +1,16 @@
 [
   {
-    "id": "e2fc2d3.37762d",
+    "id": "cba43db7.197ff",
+    "type": "tab",
+    "label": "IIoT OPC UA Events",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "5fee50d3.b244f",
     "type": "OPCUA-IIoT-Listener",
-    "z": "7cd87ec8.b3f94",
-    "connector": "7fb455ed.ab197c",
+    "z": "cba43db7.197ff",
+    "connector": "823d2dee.6d0b6",
     "action": "events",
     "queueSize": "1000",
     "name": "",
@@ -12,116 +19,101 @@
     "metaDataInject": false,
     "showStatusActivities": false,
     "showErrors": false,
-    "x": 420,
-    "y": 1100,
+    "x": 590,
+    "y": 120,
     "wires": [
       [
-        "70e2a1dd.f5fbc",
-        "b8deb34c.40316"
+        "8d2750f4.adef6"
       ],
       [
-        "e09f5732.f40d38",
-        "ae6ab1bd.38da4"
+        "ee5afa8e.501e98"
       ]
     ]
   },
   {
-    "id": "70e2a1dd.f5fbc",
+    "id": "8d2750f4.adef6",
     "type": "debug",
-    "z": "7cd87ec8.b3f94",
+    "z": "cba43db7.197ff",
     "name": "",
-    "active": false,
-    "console": "false",
-    "complete": "false",
-    "x": 610,
-    "y": 1100,
-    "wires": []
-  },
-  {
-    "id": "b8deb34c.40316",
-    "type": "debug",
-    "z": "7cd87ec8.b3f94",
-    "name": "",
-    "active": false,
+    "active": true,
     "console": "false",
     "complete": "true",
-    "x": 590,
-    "y": 1060,
+    "x": 740,
+    "y": 100,
     "wires": []
   },
   {
-    "id": "e09f5732.f40d38",
+    "id": "ee5afa8e.501e98",
     "type": "debug",
-    "z": "7cd87ec8.b3f94",
+    "z": "cba43db7.197ff",
     "name": "",
-    "active": false,
+    "active": true,
     "console": "false",
     "complete": "true",
-    "x": 590,
-    "y": 1140,
+    "x": 740,
+    "y": 140,
     "wires": []
   },
   {
-    "id": "ae6ab1bd.38da4",
-    "type": "debug",
-    "z": "7cd87ec8.b3f94",
-    "name": "",
-    "active": false,
-    "console": "false",
-    "complete": "false",
-    "x": 610,
-    "y": 1180,
-    "wires": []
-  },
-  {
-    "id": "12f36465.9946fc",
+    "id": "2c145c92.e7fb84",
     "type": "OPCUA-IIoT-Event",
-    "z": "7cd87ec8.b3f94",
-    "eventRoot": "i=2253",
-    "eventType": "i=2041",
-    "queueSize": "100",
+    "z": "cba43db7.197ff",
+    "eventType": "BaseEventType",
+    "eventTypeLabel": "BaseEventType (i=2041)",
+    "queueSize": "1000",
     "usingListener": true,
-    "name": "",
-    "x": 270,
-    "y": 1100,
+    "name": "Base Events",
+    "x": 420,
+    "y": 120,
     "wires": [
       [
-        "e2fc2d3.37762d"
+        "5fee50d3.b244f"
       ]
     ]
   },
   {
-    "id": "196f437e.aba05d",
+    "id": "ce52e27f.ec2b9",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7cd87ec8.b3f94",
-    "injectTypeListener": true,
+    "z": "cba43db7.197ff",
+    "injectType": "listen",
     "payload": "200",
     "payloadType": "num",
     "topic": "",
-    "datatype": "NodeId",
     "repeat": "",
     "crontab": "",
     "once": true,
     "startDelay": "",
-    "name": "",
-    "x": 140,
-    "y": 1100,
+    "name": "listen with 200 ms",
+    "addressSpaceItems": [
+      {
+        "name": "Tanks",
+        "nodeId": "ns=1;i=1000",
+        "datatypeName": ""
+      },
+      {
+        "name": "Server",
+        "nodeId": "ns=0;i=2253",
+        "datatypeName": ""
+      }
+    ],
+    "x": 230,
+    "y": 120,
     "wires": [
       [
-        "12f36465.9946fc"
+        "2c145c92.e7fb84"
       ]
     ]
   },
   {
-    "id": "7fb455ed.ab197c",
+    "id": "823d2dee.6d0b6",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "endpoint": "opc.tcp://localhost:55388/",
-    "keepSessionAlive": false,
-    "loginEnabled": true,
+    "keepSessionAlive": true,
+    "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
-    "name": "SERVER TWO",
+    "name": "LOCAL SERVER",
     "showStatusActivities": false,
     "showErrors": false
   }

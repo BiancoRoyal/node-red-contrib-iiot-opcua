@@ -48,7 +48,7 @@
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      injectType: {value: 'read'},
+      injectType: {value: 'inject'},
       payload: {
         value: '', validate: function (v) {
           let ptype = $('#node-input-payloadType').val() || this.payloadType
@@ -382,8 +382,8 @@
     })
 
     let cacheItemCount = 0
-    if (node.addressSpaceItems !== undefined) {
-      cacheItemCount = node.addressSpaceItems.length - 1
+    if (node.addressSpaceItems !== undefined && node.addressSpaceItems.length > 0) {
+      cacheItemCount = node.addressSpaceItems.length
       node.addressSpaceItems.forEach(function (element, index, array) {
         generateItemsEntry(element, index)
       })
@@ -484,8 +484,10 @@
     $('#node-input-addressSpaceItems-container .node-input-addressSpaceItems-handle').disableSelection()
 
     $('#node-input-addressSpaceItems-add').click(function () {
-      cacheItemCount++
-      generateItemsEntry({name: '', nodeId: '', datatypeName: ''}, cacheItemCount) // length is every time one more than index
+      if(!cacheItemCount || cacheItemCount < 0) {
+        cacheItemCount = 0
+      }
+      generateItemsEntry({name: '', nodeId: '', datatypeName: ''}, cacheItemCount++) // length is every time one more than index
       $('#node-input-addressSpaceItems-container-div').scrollTop($('#node-input-addressSpaceItems-container-div').get(0).scrollHeight)
     })
 
@@ -699,6 +701,7 @@
             <div class="form-row" id="node-inject-type">
                 <label for=""><i class="fa fa-repeat"></i> <span data-i18n="opcuaiiotinject.label.injectType"></span></label>
                 <select id="node-input-injectType" type="text" style="width:140px;">
+                    <option value="inject" data-i18n="opcuaiiotinject.type-label.inject"></option>
                     <option value="read" data-i18n="opcuaiiotinject.type-label.read"></option>
                     <option value="write" data-i18n="opcuaiiotinject.type-label.write"></option>
                     <option value="listen" data-i18n="opcuaiiotinject.type-label.listen"></option>

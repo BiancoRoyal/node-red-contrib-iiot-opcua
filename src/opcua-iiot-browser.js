@@ -147,8 +147,10 @@ module.exports = function (RED) {
       coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
 
       if (session) {
-        msg.addressSpaceItems.map((entry) => (coreBrowser.browse(session, entry.nodeid).then(function (browserResult) {
-          coreBrowser.internalDebugLog('Browse ' + entry.nodeid + ' on ' +
+        msg.addressSpaceItems.map((entry) => (coreBrowser.browse(session, entry.nodeId).then(function (browserResult) {
+          browserEntries = []
+          nodesToRead = []
+          coreBrowser.internalDebugLog('Browse ' + entry.nodeId + ' on ' +
             session.name + ' Id: ' + session.sessionId)
 
           browserResult.browseResult.forEach(function (result) {
@@ -202,7 +204,7 @@ module.exports = function (RED) {
 
       node.browseTopic = node.extractBrowserTopic(msg)
 
-      if (node.browseTopic !== '') {
+      if (node.browseTopic && node.browseTopic !== '') {
         node.browse(node.opcuaSession, msg)
       } else {
         if (msg.addressSpaceItems) {
@@ -284,7 +286,7 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      if (node.opcuaSession) {
+      if (node.opcuaSession && node.connector.opcuaClient) {
         node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
             coreBrowser.internalDebugLog('Error On Close Session ' + err)

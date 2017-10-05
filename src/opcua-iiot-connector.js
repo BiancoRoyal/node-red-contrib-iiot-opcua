@@ -240,8 +240,18 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog(err)
     }
 
-    node.on('close', function () {
+    node.on('close', function (done) {
       coreConnector.internalDebugLog('Connector Close ' + node.endpoint)
+
+      if (node.opcuaClient) {
+        coreConnector.disconnect(node.opcuaClient).then(function () {
+          node.opcuaClient = null
+          done()
+        }).catch(function (err) {
+          node.error(new Error('Error On Close Server', err))
+          done()
+        })
+      }
     })
   }
 

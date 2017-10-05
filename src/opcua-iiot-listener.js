@@ -229,7 +229,7 @@ module.exports = function (RED) {
         if (!monitoredItem) {
           coreListener.eventDebugLog('Monitored Event Item ' + addressSpaceItem.nodeId)
 
-          monitoredItem = coreListener.buildNewEventItem(addressSpaceItem.nodeId, msg, subscription, function (err, addressSpaceItem, msg) {
+          monitoredItem = coreListener.buildNewEventItem(addressSpaceItem, msg, subscription, function (err, addressSpaceItem, msg) {
             if (err) {
               coreListener.eventDebugLog(err.message)
               if (node.showErrors) {
@@ -461,7 +461,7 @@ module.exports = function (RED) {
         subscription.terminate()
       }
 
-      if (node.opcuaSession) {
+      if (node.opcuaSession && node.connector.opcuaClient) {
         node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
             node.verboseLog('Error On Close Session ' + err)

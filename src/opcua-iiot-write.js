@@ -153,7 +153,7 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      if (node.opcuaSession) {
+      if (node.opcuaSession && node.connector.opcuaClient) {
         node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
             coreClient.writeDebugLog('Error On Close Session ' + err)

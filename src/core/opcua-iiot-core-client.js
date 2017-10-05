@@ -143,60 +143,21 @@ de.biancoroyal.opcua.iiot.core.client.fillMessageObjectList = function (variantL
 
 de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, options) {
   let coreClient = de.biancoroyal.opcua.iiot.core.client
+  let NodeCrawler = coreClient.nodeOPCUA.NodeCrawler
 
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        let coerceNodeId = require('node-opcua').coerceNodeId
-        let nodeId
-
         try {
-          nodeId = coerceNodeId(element)
-          let dataTypeName
+          let nodeCrawler = new NodeCrawler(session)
 
-          session.read(nodeId, function (err, dataValue) {
-            coreClient.internalDebugLog('Read VariableValue For Proxy ' + dataValue)
+          nodeCrawler.read(element, function (err, object) {
+            coreClient.internalDebugLog('Read by NodeCrawler ' + object)
 
             if (err) {
               reject(err)
             } else {
-              if (dataValue.value) {
-                dataTypeName = dataValue.value.dataType.toString()
-              }
-
-              let msgObject = {payload: {dataTypeName: dataTypeName}}
-              coreClient.internalDebugLog('Read Get Object ' + dataValue)
-              resolve(msgObject)
-
-              /* proxyManager.getObject(nodeId, function (err, data) {
-                if (err) {
-                  reject(err)
-                } else {
-                  let msgObject = {payload: {}}
-                  coreClient.internalDebugLog('Proxy Get Object ' + data)
-
-                  if (options.depth && parseInt(options.depth) > 1) {
-                    msgObject.$components = coreClient.fillMessageObjectList(data.$components) // array of ObjectExplorer
-                    msgObject.$organizes = coreClient.fillMessageObjectList(data.$organizes) // array of ObjectExplorer
-                    // msgObject.$properties = coreClient.fillMessageObjectList(data.$properties) // map key = name
-                    // msgObject.$methods = coreClient.fillMessageObjectList(data.$methods) // array of method objects
-                  }
-
-                  msgObject.payload.dataType = coreClient.fillMessageObjectPayloadEntry(dataTypeName)
-                  msgObject.payload.nodeId = coreClient.fillMessageObjectPayloadEntry(data.nodeId)
-                  msgObject.payload.attributeId = coreClient.fillMessageObjectPayloadEntry(data.attributeId)
-                  msgObject.payload.browseName = coreClient.fillMessageObjectPayloadEntry(data.browseName.name)
-                  msgObject.payload.nodeClass = coreClient.fillMessageObjectPayloadEntry(data.nodeClass)
-                  msgObject.payload.description = coreClient.fillMessageObjectPayloadEntry(data.description)
-                  msgObject.payload.userAccessLevel = coreClient.fillMessageObjectPayloadEntry(data.userAccessLevel)
-                  msgObject.payload.accessLevel = coreClient.fillMessageObjectPayloadEntry(data.accessLevel)
-                  msgObject.payload.typeDefinition = coreClient.fillMessageObjectPayloadEntry(data.typeDefinition)
-                  msgObject.payload.requestedDepth = parseInt(options.depth)
-
-                  resolve(msgObject)
-                }
-              }, options)
-              */
+              resolve(object)
             }
           })
         } catch (err) {

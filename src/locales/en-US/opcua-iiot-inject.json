@@ -54,6 +54,7 @@
       "security": "Security"
     },
     "type-label":{
+      "inject": "inject",
       "read": "read",
       "write": "write",
       "listen": "listen"

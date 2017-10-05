@@ -1,8 +1,15 @@
 [
   {
-    "id": "2de03fdd.477c2",
+    "id": "353c56f7.3ec1ea",
+    "type": "tab",
+    "label": "IIoT OPC UA Server",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "9646082c.d173e8",
     "type": "OPCUA-IIoT-Server",
-    "z": "e1aa872f.8c2da8",
+    "z": "353c56f7.3ec1ea",
     "port": "55388",
     "endpoint": "",
     "acceptExternalCommands": true,
@@ -10,7 +17,7 @@
     "maxConnectionsPerEndpoint": "",
     "maxAllowedSubscriptionNumber": "",
     "alternateHostname": "",
-    "name": "",
+    "name": "LOCAL SERVER",
     "showStatusActivities": false,
     "showErrors": false,
     "allowAnonymous": true,
@@ -25,8 +32,8 @@
         "password": "peter"
       }
     ],
-    "x": 290,
-    "y": 200,
+    "x": 360,
+    "y": 150,
     "wires": [
       [],
       []

@@ -14,6 +14,7 @@
  */
 module.exports = function (RED) {
   let coreFilter = require('./core/opcua-iiot-core-filter')
+  let _ = require('underscore')
 
   function OPCUAIIoTResultFilter (config) {
     RED.nodes.createNode(this, config)
@@ -63,9 +64,19 @@ module.exports = function (RED) {
           return
         }
       } else {
-        // just if not multiple request!
-        if (msg.topic !== node.nodeId) {
-          return
+        if (msg.addressSpaceItems) {
+          let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry) {
+            return entry.nodeId === node.nodeId
+          })
+
+          if (filteredNodeIds.length < 1) {
+            return
+          }
+        } else {
+          // just if not multiple request!
+          if (msg.topic !== node.nodeId) {
+            return
+          }
         }
       }
 
@@ -77,6 +88,9 @@ module.exports = function (RED) {
       switch (msg.nodetype) {
         case 'read':
           result = node.filterByReadType(msg)
+          break
+        case 'write':
+          result = node.filterByWriteType(msg)
           break
         case 'listen':
           result = node.filterByListenType(msg)
@@ -189,6 +203,22 @@ module.exports = function (RED) {
         }
       } else {
         result = msg.payload
+      }
+
+      return result
+    }
+
+    node.filterByWriteType = function (msg) {
+      let result = null
+
+      if (msg.payload.hasOwnProperty('value')) {
+        result = msg.payload.value
+      } else {
+        result = msg.payload
+      }
+
+      if (result && result.hasOwnProperty('value')) {
+        result = result.value
       }
 
       return result

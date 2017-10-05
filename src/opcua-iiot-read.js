@@ -207,14 +207,11 @@ module.exports = function (RED) {
                   node.setNodeStatusTo('active')
                   coreClient.readDebugLog('Read Meta Information ' + index + 1 + ' of ' + array.length)
 
-                  meta.payload.index = index + 1
-                  meta.payload.requested = array.length
-
-                  coreClient.readDetailsDebugLog('Meta Payload ' + meta.payload)
-
                   let message = {
-                    payload: meta.payload,
+                    payload: meta,
                     nodesToRead: [element],
+                    index: index + 1,
+                    requested: array.length,
                     maxAge: node.maxAge,
                     multipleRequest: node.multipleRequest,
                     input: msg,
@@ -428,7 +425,7 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      if (node.opcuaSession) {
+      if (node.opcuaSession && node.connector.opcuaClient) {
         node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
             coreClient.readDebugLog('ERROR: on close session ' + err)

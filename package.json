@@ -13,7 +13,7 @@
     "cron": "1.2.1",
     "debug": "3.1.0",
     "easy-table": "1.1.0",
-    "node-opcua": "^0.1.0-7",
+    "node-opcua": "0.1.0-7",
     "treeify": "1.0.1",
     "underscore": "1.8.3"
   },
@@ -64,7 +64,8 @@
   "scripts": {
     "test": "standard --fix && mocha test/* --reporter dot",
     "build": "standard --fix && gulp clean && gulp publish",
-    "prepublish": "standard --fix && npm run build && npm test",
+    "preinstall": "standard --fix && npm run build && npm test",
+    "prepublishOnly": "standard --fix && npm run build && npm test",
     "ci-publish": "ci-publish",
     "release": "standard-version"
   },
@@ -86,12 +87,10 @@
     "gulp-babel": "^6.1.2",
     "gulp-clean": "^0.3.2",
     "gulp-htmlmin": "^3.0.0",
-    "gulp-javascript-obfuscator": "^1.1.2",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-obfuscate": "^0.2.9",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^3.0.0",
-    "javascript-obfuscator": "^0.9.4",
     "jsdoc": "^3.5.3",
     "mocha": "^3.4.2",
     "nock": "^9.0.14",
