@@ -89,6 +89,14 @@ module.exports = function (RED) {
 
               node.opcuaClient = opcuaClient
 
+              node.opcuaClient.on('close', function () {
+                node.emit('server_connection_close')
+              })
+
+              opcuaClient.on('after_reconnection', function (opcuaClient) {
+                node.emit('after_reconnection', opcuaClient)
+              })
+
               node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
                 if (err) {
                   coreConnector.internalDebugLog('Get Endpoints Request Error' + err)
@@ -164,6 +172,7 @@ module.exports = function (RED) {
                 session.startKeepAliveManager()
               }
               session.on('error', node.handleError)
+              session.on('close', node.handleSessionClose)
 
               coreConnector.internalDebugLog(type + ' ' + session.name + ' Session ' +
                 session.sessionId + ' Started' + ' On' + ' ', node.endpoint)
@@ -196,11 +205,25 @@ module.exports = function (RED) {
               resolve(session)
             }).catch(function (err) {
               coreConnector.internalDebugLog('Session Start Error ' + err)
+              if (err.message === 'OPC UA Client Is Not Valid') {
+                try {
+                  setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
+                } catch (err) {
+                  coreConnector.internalDebugLog(err)
+                }
+              }
               reject(err)
             })
           })
       } catch (err) {
         coreConnector.internalDebugLog(err)
+        if (err.message === 'OPC UA Client Is Not Valid') {
+          try {
+            setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
+          } catch (err) {
+            coreConnector.internalDebugLog(err)
+          }
+        }
       }
     }
 
@@ -234,6 +257,14 @@ module.exports = function (RED) {
         node.error(err, {payload: 'Connector Error'})
       } else {
         coreConnector.internalDebugLog('Error on ' + node.endpoint)
+      }
+    }
+
+    node.handleSessionClose = function (err) {
+      if (err) {
+        node.error(err, {payload: 'Closed Session With Error'})
+      } else {
+        coreConnector.internalDebugLog('Closed Session')
       }
     }
 

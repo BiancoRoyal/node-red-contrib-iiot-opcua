@@ -35,6 +35,13 @@ de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
           }
         })
 
+        opcuaClient.on('close', function (err) {
+          if (err) {
+            coreConnector.internalDebugLog(err.message)
+          }
+          coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
+        })
+
         opcuaClient.on('backoff', function (number, delay) {
           coreConnector.internalDebugLog('backoff  attempt #'.bgWhite.yellow, number, ' retrying in ', delay / 1000.0, ' seconds')
         })
@@ -44,7 +51,11 @@ de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
         })
 
         opcuaClient.on('start_reconnection', function () {
-          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  Starting Reconnection !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
+          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  Starting Reconnection !!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
+        })
+
+        opcuaClient.on('after_reconnection', function () {
+          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!        Reconnected     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
         })
       } else {
         reject(new Error('URL Endpoint Is Not Valid'))

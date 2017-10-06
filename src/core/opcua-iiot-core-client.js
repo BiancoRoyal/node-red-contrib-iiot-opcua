@@ -142,22 +142,33 @@ de.biancoroyal.opcua.iiot.core.client.fillMessageObjectList = function (variantL
 }
 
 de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, options) {
-  let coreClient = de.biancoroyal.opcua.iiot.core.client
-  let NodeCrawler = coreClient.nodeOPCUA.NodeCrawler
-
   return new Promise(
     function (resolve, reject) {
       if (session) {
+        let core = require('./opcua-iiot-core')
         try {
-          let nodeCrawler = new NodeCrawler(session)
+          const structure = [
+            {
+              nodeId: element.nodeId,
+              referenceTypeId: 'Organizes',
+              includeSubtypes: true,
+              browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+              resultMask: 0x3f
+            },
+            {
+              nodeId: element.nodeId,
+              referenceTypeId: 'Aggregates',
+              includeSubtypes: true,
+              browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+              resultMask: 0x3f
+            }
+          ]
 
-          nodeCrawler.read(element, function (err, object) {
-            coreClient.internalDebugLog('Read by NodeCrawler ' + object)
-
+          session.browse(structure, function (err, results) {
             if (err) {
               reject(err)
             } else {
-              resolve(object)
+              resolve(results)
             }
           })
         } catch (err) {
@@ -203,27 +214,30 @@ de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, item
 }
 
 de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, items, multipleRequest) {
-  let core = de.biancoroyal.opcua.iiot.core.client.core
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.readAllAttributes(items, function (err, nodesToRead, results, diagnostics) {
+        let core = require('./opcua-iiot-core')
+
+        session.readAllAttributes(items, function (err, nodesToRead, dataValues, diagnostics) {
           if (err) {
             reject(err)
           } else {
             let resultsConverted = []
-            let dataValue = null
 
-            for (dataValue of results) {
-              if (dataValue) {
-                resultsConverted.push(core.buildMsgPayloadByDataValue(dataValue))
+            for (let i = 0; i < nodesToRead.length; i++) {
+              const nodeToRead = nodesToRead[i]
+              const dataValue = dataValues[i]
+              if (dataValue.statusCode !== core.nodeOPCUA.StatusCodes.Good) {
+                continue
               }
+              resultsConverted.push(core.dataValuetoString(nodeToRead.attributeId, dataValue))
             }
 
             resolve({
               resultsConverted: resultsConverted,
               nodesToRead: nodesToRead,
-              results: results,
+              results: dataValues,
               diagnostics: diagnostics
             })
           }

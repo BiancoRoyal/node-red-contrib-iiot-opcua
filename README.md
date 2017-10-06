@@ -46,7 +46,11 @@ provides interesting points in different abstractions if IDE or console debuggin
 
 Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 
-    DEBUG=opcuaIIoT:* node-red -v
+    DEBUG=opcuaIIoT* node-red -v 1>nodeREDIIoTOPCUA.log 2>&1
+
+    or
+
+    DEBUG=opcuaIIoT:*server* node-red -v 1>nodeREDIIoTOPCUAServer.log 2>&1
 
 Please, read the [Wiki article][7]
 
@@ -116,7 +120,7 @@ Follow the [white rabbit][4]!
 
 ## Package Information
 
-### Known Issues
+### Known Issues and TODO's
 
 Ideas
 * converting in Result Filter is not finished yet
@@ -127,11 +131,12 @@ Errors
 * Connector
     * session closing
     * connection reset on errors
-* Sign error on private package
 * Bad XYZ situations handling
 * Publish Engine Error
 * Events doesn't work sometimes see [node-opcua issue][8]
 
+Deprecated
+* [DEP0013] DeprecationWarning: Calling an asynchronous function without callback is deprecated.
 
 ### License
 
@@ -139,7 +144,7 @@ The BSD 3-Clause License
 
 [Klaus Landsdorf][1]
 
-That is a whole new Node-RED package based on the node-opcua examples and the API documentation.
+That is a whole new Node-RED package started in 2017 based on the node-opcua v1.x and the API documentation.
 The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED and OPC UA.
 
 ### Important

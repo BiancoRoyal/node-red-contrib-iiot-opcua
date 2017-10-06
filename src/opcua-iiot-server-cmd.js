@@ -25,17 +25,29 @@ module.exports = function (RED) {
 
     node.on('input', function (msg) {
       if (msg.nodetype === 'inject') {
-        node.nodeId = msg.topic || node.nodeId
+        let addressSpaceItem
+        for (addressSpaceItem of msg.addressSpaceItems) {
+          msg = {payload: {}} // clean message
+          msg.topic = 'ServerCommand'
+          msg.nodetype = 'CMD'
+          msg.payload.commandtype = node.commandtype
+          msg.payload.nodeId = addressSpaceItem.nodeId
+
+          if (msg.payload.nodeId) {
+            core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
+            node.send(msg)
+          }
+        }
+      } else {
+        msg = {payload: {}} // clean message
+        msg.topic = 'ServerCommand'
+        msg.nodetype = 'CMD'
+        msg.payload.commandtype = node.commandtype
+        msg.payload.nodeId = node.nodeId
+
+        core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
+        node.send(msg)
       }
-
-      msg = {payload: {}} // clean message
-      msg.topic = 'ServerCommand'
-      msg.nodetype = 'CMD'
-      msg.payload.commandtype = node.commandtype
-      msg.payload.nodeId = node.nodeId
-
-      core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-      node.send(msg)
     })
   }
 

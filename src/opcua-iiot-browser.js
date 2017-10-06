@@ -250,7 +250,7 @@ module.exports = function (RED) {
       coreBrowser.internalDebugLog('Handle Session Error '.red + err)
 
       if (node.showErrors) {
-        node.error(err, {payload: 'Browser Session Error'})
+        node.error(err, {payload: 'Session Error'})
       }
 
       node.resetSession()
@@ -258,7 +258,7 @@ module.exports = function (RED) {
 
     node.startOPCUASession = function (opcuaClient) {
       node.sessionTimeout = null
-      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
+      coreBrowser.internalDebugLog('Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT, 'Browser Node').then(function (session) {
         node.opcuaSession = session
@@ -278,9 +278,17 @@ module.exports = function (RED) {
       }, node.reconnectTimeout)
     }
 
+    node.connectorShutdown = function (opcuaClient) {
+      coreBrowser.internalDebugLog('Connector Shutdown')
+      if (opcuaClient) {
+        node.opcuaClient = opcuaClient
+      }
+      // node.startOPCUASessionWithTimeout(node.opcuaClient)
+    }
+
     if (node.connector) {
-      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
       node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }

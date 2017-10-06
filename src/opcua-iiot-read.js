@@ -24,7 +24,6 @@ module.exports = function (RED) {
     this.name = config.name
     this.justValue = config.justValue
     this.multipleRequest = config.multipleRequest
-    this.metaDataInject = config.metaDataInject
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -199,45 +198,6 @@ module.exports = function (RED) {
                 coreClient.core.specialDebugLog(err)
                 coreClient.readDebugLog('Error Items To Read: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
-              })
-              break
-            case 99:
-              itemsToRead.forEach(function (element, index, array) {
-                coreClient.readObject(session, element, {depth: node.depth}).then(function (meta) {
-                  node.setNodeStatusTo('active')
-                  coreClient.readDebugLog('Read Meta Information ' + index + 1 + ' of ' + array.length)
-
-                  let message = {
-                    payload: meta,
-                    nodesToRead: [element],
-                    index: index + 1,
-                    requested: array.length,
-                    maxAge: node.maxAge,
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    resultsConverted: meta,
-                    /* results: meta, */
-                    diagnostics: [],
-                    nodetype: 'read',
-                    readtype: 'Meta',
-                    attributeId: node.attributeId,
-                    topic: element
-                  }
-
-                  if (node.metaDataInject) {
-                    message.resultsConverted.$components.forEach(function (element, index, array) {
-                      message.nodesToRead.push(element.nodeId)
-                    })
-                  }
-
-                  coreClient.core.specialDebugLog(message.nodesToRead)
-                  coreClient.core.specialDebugLog('Count Of Items To Read: ' + message.nodesToRead.length)
-
-                  node.send(message)
-                }).catch(function (err) {
-                  coreClient.readDebugLog('Error Read Meta Information ' + element)
-                  node.handleReadError(err, msg)
-                })
               })
               break
             case 130:
@@ -418,8 +378,17 @@ module.exports = function (RED) {
       }, node.reconnectTimeout)
     }
 
+    node.connectorShutdown = function (opcuaClient) {
+      coreClient.readDebugLog('Connector Shutdown')
+      if (opcuaClient) {
+        node.opcuaClient = opcuaClient
+      }
+      // node.startOPCUASessionWithTimeout(node.opcuaClient)
+    }
+
     if (node.connector) {
       node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }

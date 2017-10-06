@@ -80,7 +80,7 @@ module.exports = function (RED) {
     node.resetSubscription = function () {
       subscription = null
       monitoredItems.clear()
-      node.setNodeStatusTo('reset')
+      node.setNodeStatusTo('waiting')
     }
 
     node.subscribeActionInput = function (msg) {
@@ -402,11 +402,21 @@ module.exports = function (RED) {
       node.resetSession()
     }
 
+    node.handleSessionClose = function (err) {
+      coreListener.internalDebugLog('Handle Session Close Wit Error '.red + err)
+
+      if (node.showErrors) {
+        node.error(new Error('Listener Session Close'), {payload: ''})
+      }
+    }
+
     node.startOPCUASession = function (opcuaClient) {
       node.verboseLog('Listener Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreListener.core.TEN_SECONDS_TIMEOUT, 'Listener Node').then(function (session) {
         node.opcuaSession = session
+        node.opcuaSession.on('close', node.handleSessionClose)
+
         node.verboseLog('Session Connected')
         node.setNodeStatusTo('connected')
 
@@ -435,8 +445,18 @@ module.exports = function (RED) {
       }, node.reconnectTimeout)
     }
 
+    node.connectorShutdown = function (opcuaClient) {
+      coreListener.internalDebugLog('Connector Shutdown')
+      if (opcuaClient) {
+        node.opcuaClient = opcuaClient
+      }
+      node.resetSubscription()
+      // node.startOPCUASessionWithTimeout(node.opcuaClient)
+    }
+
     if (node.connector) {
       node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }
