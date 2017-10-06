@@ -206,21 +206,25 @@ module.exports = function (RED) {
 
     node.closeSession = function (session, done) {
       try {
-        if (session) {
+        if (session && node.opcuaClient) {
           coreConnector.internalDebugLog('Close Session Id: ' + session.sessionId)
           coreConnector.closeSession(session).then(function (done) {
             coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
+            session = null
             done()
           }).catch(function (err) {
             coreConnector.internalDebugLog('Session Close Error ' + err)
+            session = null
             done()
           })
         } else {
           coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
+          session = null
           done()
         }
       } catch (err) {
         coreConnector.internalDebugLog(err)
+        session = null
         done()
       }
     }
@@ -245,10 +249,11 @@ module.exports = function (RED) {
 
       if (node.opcuaClient) {
         coreConnector.disconnect(node.opcuaClient).then(function () {
+          coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
           node.opcuaClient = null
           done()
         }).catch(function (err) {
-          node.error(new Error('Error On Close Server', err))
+          node.error(new Error('Error On Close Disconnect Server', err))
           done()
         })
       }
