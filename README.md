@@ -16,6 +16,10 @@ If you like that contributor's package for OPC UA, then please give us your star
 
 ## [Support for the project straight away!][2]
 
+* tested with Node 6.x LTS
+* tested with Node 8.0.6
+* based on node-opcua v1.x
+
 ## Code Release GitHub
 
 The release of the source code will follow later at the end of the year.
