@@ -254,14 +254,45 @@ module.exports = function (RED) {
     })
 
     node.changeAddressSpace = function (msg) { // TODO: refactor to work with the new OPC UA type list
-      switch (parseInt(msg.payload.objecttype)) {
-        case 61: // FolderType
-        case 'FolderType':
-          node.addObjectToAddressSpace(msg, 'Folder')
-          break
-        default:
-          node.addObjectToAddressSpace(msg, msg.payload.objecttype)
-          break
+      if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
+        node.addVariableToAddressSpace(msg, msg.payload.objecttype)
+      } else {
+        node.addObjectToAddressSpace(msg, msg.payload.objecttype)
+      }
+    }
+
+    node.addVariableToAddressSpace = function (msg, humanReadableType) {
+      let addressSpace = node.opcuaServer.engine.addressSpace
+      if (!addressSpace) {
+        node.error(new Error('Server AddressSpace Not Valid'), msg)
+      }
+
+      let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
+      let variableData = msg.payload.value
+
+      if (rootFolder) {
+        addressSpace.addVariable({
+          componentOf: rootFolder,
+          nodeId: msg.payload.nodeId,
+          browseName: msg.payload.browsename,
+          displayName: new LocalizedText({locale: null, text: msg.payload.displayname}),
+          dataType: msg.payload.datatype,
+          value: {
+            get: function () {
+              return new coreServer.core.nodeOPCUA.Variant({
+                dataType: coreServer.core.nodeOPCUA.DataType[msg.payload.datatype],
+                value: variableData
+              })
+            },
+            set: function (variant) {
+              variableData = variant.value
+              return coreServer.core.nodeOPCUA.StatusCodes.Good
+            }
+          }
+        })
+        coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
+      } else {
+        node.error(new Error('Root Reference Not Found'), msg)
       }
     }
 

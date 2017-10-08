@@ -44,7 +44,7 @@ module.exports = function (RED) {
       }
 
       let eventFields
-      if (node.eventType.indexOf('Condition')) {
+      if (node.eventType.indexOf('Condition') > -1) {
         eventFields = coreListener.getConditionEventFields()
       } else {
         eventFields = coreListener.getBasicEventFields()

@@ -180,9 +180,9 @@ module.exports = function (RED) {
               entryStatus[1] += 1
               break
             default:
-              if (entry.statusCode.name.indexOf('Good')) {
+              if (entry.statusCode.name.indexOf('Good') > -1) {
                 entryStatus[0] += 1
-              } else if (entry.statusCode.name.indexOf('Bad')) {
+              } else if (entry.statusCode.name.indexOf('Bad') > -1) {
                 entryStatus[1] += 1
               } else {
                 coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.statusCode.name))
@@ -208,9 +208,9 @@ module.exports = function (RED) {
               entryStatus[1] += 1
               break
             default:
-              if (msg.result.statusCode.name.indexOf('Good')) {
+              if (msg.result.statusCode.name.indexOf('Good') > -1) {
                 entryStatus[0] += 1
-              } else if (msg.result.statusCode.name.indexOf('Bad')) {
+              } else if (msg.result.statusCode.name.indexOf('Bad') > -1) {
                 entryStatus[1] += 1
               } else {
                 coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(msg.result.statusCode.name))
@@ -236,9 +236,9 @@ module.exports = function (RED) {
               entryStatus[1] += 1
               break
             default:
-              if (entry.name.indexOf('Good')) {
+              if (entry.name.indexOf('Good') > -1) {
                 entryStatus[0] += 1
-              } else if (entry.name.indexOf('Bad')) {
+              } else if (entry.name.indexOf('Bad') > -1) {
                 entryStatus[1] += 1
               } else {
                 coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.name))

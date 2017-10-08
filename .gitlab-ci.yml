@@ -1,7 +1,9 @@
-image: node:6
+image: node:8
 
 before_script:
   - npm install
+  - npm install -g gulp
+  - npm install -g gulp-cli
 stages:
   - test
   - deploy
