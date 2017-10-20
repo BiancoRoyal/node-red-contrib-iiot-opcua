@@ -101,6 +101,7 @@ module.exports = function (RED) {
           }
         },
         serverInfo: {
+          // applicationType: ApplicationType.CLIENTANDSERVER,
           applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), 'NodeRED-IIoT-Server'),
           productUri: 'NodeRED-IIoT-Server',
           applicationName: {text: 'NodeRED', locale: 'en'},
@@ -123,8 +124,6 @@ module.exports = function (RED) {
       coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
       node.opcuaServer.initialize(node.postInitialize)
-
-      // node.registerDiscovery()  // TODO: discovery should work
 
       node.opcuaServer.on('newChannel', function (channel) {
         coreServer.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
@@ -158,6 +157,7 @@ module.exports = function (RED) {
             coreServer.internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
 
             node.setNodeStatusTo('active')
+            node.registerDiscovery()
 
             coreServer.detailDebugLog(JSON.stringify(node.opcuaServer.serverInfo))
 
@@ -191,6 +191,7 @@ module.exports = function (RED) {
             })
 
             coreServer.internalDebugLog('Server Initialized')
+            coreServer.detailDebugLog('serverInfo after start:' + JSON.stringify(node.opcuaServer.serverInfo))
           }
         })
       } else {
@@ -201,30 +202,31 @@ module.exports = function (RED) {
 
     node.registerDiscovery = function () {
       let hostname = os.hostname()
+      let discoveryEndpointUrl
 
       if (hostname) {
-        let discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
+        discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
         coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
 
         node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
           if (err) {
-            coreServer.internalDebugLog('Register Server Error'.red + err)
+            coreServer.internalDebugLog('Register Server Discovery Error'.red + err)
           } else {
-            coreServer.internalDebugLog('Discovery Setup Done'.green)
-          }
-        })
-
-        discoveryEndpointUrl = 'opc.tcp://localhost:4840/UADiscovery'
-        coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
-
-        node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
-          if (err) {
-            coreServer.internalDebugLog('Register Server Error'.red + err)
-          } else {
-            coreServer.internalDebugLog('Discovery Setup Done'.green)
+            coreServer.internalDebugLog('Discovery Setup Discovery Done'.green)
           }
         })
       }
+
+      discoveryEndpointUrl = 'opc.tcp://localhost:4840/UADiscovery'
+      coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
+
+      node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
+        if (err) {
+          coreServer.internalDebugLog('Register Server Discovery Error'.red + err)
+        } else {
+          coreServer.internalDebugLog('Discovery Setup Discovery Done'.green)
+        }
+      })
     }
 
     node.initNewServer()
