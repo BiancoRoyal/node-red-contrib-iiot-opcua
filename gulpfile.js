@@ -55,7 +55,7 @@ gulp.task('public', function () {
 })
 
 gulp.task('clean', function () {
-  return gulp.src(['opcuaIIoT', 'docs/gen'])
+  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps'])
     .pipe(clean({force: true}))
 })
 
