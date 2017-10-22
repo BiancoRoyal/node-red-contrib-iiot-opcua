@@ -55,7 +55,7 @@ module.exports = function (RED) {
         core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
         node.send(msg)
       } else {
-        node.error(new Error('ASO NodeId Is Not Valid', msg))
+        node.error(new Error('ASO NodeId Is Not Valid'), msg)
       }
     })
   }

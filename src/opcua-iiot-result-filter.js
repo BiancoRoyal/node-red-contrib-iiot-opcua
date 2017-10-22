@@ -28,6 +28,7 @@ module.exports = function (RED) {
     this.minvalue = config.minvalue
     this.maxvalue = config.maxvalue
     this.defaultvalue = config.defaultvalue
+    this.topic = config.topic
     this.name = config.name
     this.usingListener = config.usingListener
 
@@ -123,10 +124,11 @@ module.exports = function (RED) {
       coreFilter.internalDebugLog('sending result ' + result)
 
       if (node.justValue) {
-        node.send([{payload: result}, {payload: 'just value option active'}])
+        node.send([{payload: result, topic: node.topic || msg.topic}, {payload: 'just value option active'}])
       } else {
         msg.filteredResult = result
-        node.send([{payload: result}, msg])
+        msg.topic = node.topic || msg.topic
+        node.send([{payload: result, topic: node.topic || msg.topic}, msg])
       }
     })
 

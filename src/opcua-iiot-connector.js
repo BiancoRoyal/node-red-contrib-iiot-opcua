@@ -284,7 +284,7 @@ module.exports = function (RED) {
           node.opcuaClient = null
           done()
         }).catch(function (err) {
-          node.error(new Error('Error On Close Disconnect Server', err))
+          node.error(err, {payload: ''})
           done()
         })
       }

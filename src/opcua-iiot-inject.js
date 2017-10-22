@@ -30,6 +30,7 @@ module.exports = function (RED) {
     this.once = config.once
     this.startDelay = parseInt(config.startDelay) || 10
     this.name = config.name
+    this.injectType = config.injectType || 'inject'
 
     this.addressSpaceItems = config.addressSpaceItems
 
@@ -78,6 +79,7 @@ module.exports = function (RED) {
       try {
         msg.topic = node.topic
         msg.nodetype = 'inject'
+        msg.injectType = node.injectType
         msg.addressSpaceItems = node.addressSpaceItems
 
         switch (node.payloadType) {

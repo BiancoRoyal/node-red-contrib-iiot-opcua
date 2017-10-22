@@ -249,7 +249,7 @@ module.exports = function (RED) {
           node.executeOpcuaCommand(msg)
           break
         default:
-          node.error(new Error('Unknown Node Type '.red + msg.nodetype), msg)
+          node.error(new Error('Unknown Node Type ' + msg.nodetype), msg)
       }
 
       node.send([msg, {payload: node.addressSpaceMessages}])

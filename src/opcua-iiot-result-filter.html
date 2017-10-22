@@ -22,6 +22,7 @@
       maxvalue: {value: null},
       defaultvalue: {value: null},
       usingListener: {value: false},
+      topic: {value:""},
       name: {value: ""}
     },
     inputs: 1,
@@ -135,6 +136,10 @@
             <span data-i18n="opcua-iiot-contrib.label.defaultvalue"></span></label>
             <input type="text" id="node-input-defaultvalue" placeholder="out of range value">
         </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>

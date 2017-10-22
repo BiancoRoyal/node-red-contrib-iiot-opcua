@@ -88,7 +88,6 @@ module.exports = function (RED) {
         node.createSubscription(msg, node.subscribeMonitoredItem)
       } else {
         if (subscription.subscriptionId !== 'terminated') {
-          node.setNodeStatusTo('active')
           node.subscribeMonitoredItem(subscription, msg)
         } else {
           node.resetSubscription()
@@ -107,7 +106,6 @@ module.exports = function (RED) {
         return
       }
 
-      let monitoredItem
       let addressSpaceItem
       for (addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
@@ -116,7 +114,7 @@ module.exports = function (RED) {
         }
 
         coreListener.subscribeDebugLog('Register Monitored Subscription NodeId ' + addressSpaceItem.nodeId)
-        monitoredItem = monitoredItems.get(addressSpaceItem.nodeId)
+        let monitoredItem = monitoredItems.get(addressSpaceItem.nodeId)
 
         if (!monitoredItem) {
           coreListener.subscribeDebugLog('Monitored Item Subscribe ' + addressSpaceItem.nodeId)
@@ -128,17 +126,17 @@ module.exports = function (RED) {
               if (node.showErrors) {
                 node.error('Subscription Monitor for Subscribe', msg)
               }
+              node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
             } else {
               coreListener.subscribeDebugLog('New Subscription ' + addressSpaceItem.nodeId)
+              monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
+              node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
 
               monitoredItem.on('initialized', function () {
-                node.setNodeStatusTo('subscribed')
+                node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
               })
 
-              monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
-
               monitoredItem.on('changed', function (dataValue) {
-                node.setNodeStatusTo('active ' + '(' + monitoredItems.length + ')')
                 let result = coreListener.core.buildMsgPayloadByDataValue(dataValue)
 
                 let valueMsg = {
@@ -186,7 +184,7 @@ module.exports = function (RED) {
                   node.error(err, msg)
                 }
 
-                node.setNodeStatusTo('error')
+                node.setNodeStatusTo('error' + ' (' + monitoredItems.length + ')')
 
                 if (err.message.includes('BadSession')) {
                   node.handleSessionError(err)
@@ -198,6 +196,7 @@ module.exports = function (RED) {
 
                 if (monitoredItems.get(addressSpaceItem.nodeId)) {
                   monitoredItems.delete(addressSpaceItem.nodeId)
+                  node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
                 }
               })
             }
@@ -215,7 +214,6 @@ module.exports = function (RED) {
         return
       }
 
-      let monitoredItem
       let addressSpaceItem
       for (addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
@@ -224,7 +222,7 @@ module.exports = function (RED) {
         }
 
         coreListener.eventDebugLog('Register Monitored Event NodeId ' + addressSpaceItem.nodeId)
-        monitoredItem = monitoredItems.get(addressSpaceItem.nodeId)
+        let monitoredItem = monitoredItems.get(addressSpaceItem.nodeId)
 
         if (!monitoredItem) {
           coreListener.eventDebugLog('Monitored Event Item ' + addressSpaceItem.nodeId)
@@ -235,17 +233,17 @@ module.exports = function (RED) {
               if (node.showErrors) {
                 node.error(err, msg)
               }
+              node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
             } else {
               coreListener.eventDebugLog('Event New Subscription ' + addressSpaceItem.nodeId)
               monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
+              node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
 
               monitoredItem.on('initialized', function () {
-                node.setNodeStatusTo('listening')
+                node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
               })
 
               monitoredItem.on('changed', function (eventFieldResponse) {
-                node.setNodeStatusTo('active ' + '(' + monitoredItems.length + ')')
-
                 coreListener.analyzeEvent(node.opcuaSession, node.getBrowseName, msg.payload.eventFields, eventFieldResponse)
                   .then(function (result) {
                     coreListener.eventDetailDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
@@ -286,7 +284,7 @@ module.exports = function (RED) {
                   node.error(err, msg)
                 }
 
-                node.setNodeStatusTo('error')
+                node.setNodeStatusTo('error' + ' (' + monitoredItems.length + ')')
 
                 if (err.message.includes('BadSession')) {
                   node.handleSessionError(err)
@@ -298,6 +296,7 @@ module.exports = function (RED) {
 
                 if (monitoredItems.get(addressSpaceItem.nodeId)) {
                   monitoredItems.delete(addressSpaceItem.nodeId)
+                  node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
                 }
               })
             }
@@ -317,7 +316,7 @@ module.exports = function (RED) {
       }
 
       coreListener.internalDebugLog(err.message)
-      node.setNodeStatusTo('error')
+      node.setNodeStatusTo('error' + ' (' + monitoredItems.length + ')')
 
       if (err.message && err.message.includes('BadSession')) {
         node.resetSession()
@@ -327,10 +326,8 @@ module.exports = function (RED) {
     node.subscribeEventsInput = function (msg) {
       if (!subscription) {
         node.createSubscription(msg, node.subscribeMonitoredEvent)
-        node.setNodeStatusTo('active')
       } else {
         if (subscription.subscriptionId !== 'terminated') {
-          node.setNodeStatusTo('active')
           node.subscribeMonitoredEvent(subscription, msg)
         } else {
           node.resetSubscription()
@@ -363,10 +360,6 @@ module.exports = function (RED) {
         node.setNodeStatusTo('started')
         monitoredItems.clear()
         callback(newSubscription, msg)
-      })
-
-      newSubscription.on('keepalive', function () {
-        node.setNodeStatusTo('keepalive')
       })
 
       newSubscription.on('terminated', function () {

@@ -317,12 +317,25 @@ de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session, ca
   let nodesToBrowse = [browseEventTypes]
 
   session.browse(nodesToBrowse, function (err, results, diagnostics) {
-    if (err) { callback(err) }
-    results[0].references.forEach(function (reference) {
-      entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
-    })
+    if (err) {
+      callback(err)
+    } else {
+      if (results) {
+        if (results.length > 0) {
+          results[0].references.forEach(function (reference) {
+            entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
+          })
+        } else {
+          if (results.references) {
+            results.references.forEach(function (reference) {
+              entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
+            })
+          }
+        }
+      }
 
-    callback(null, entries, diagnostics)
+      callback(null, entries, diagnostics)
+    }
   })
 }
 
