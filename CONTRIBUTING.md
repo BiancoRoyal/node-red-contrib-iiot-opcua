@@ -33,7 +33,7 @@ At a minimum, please include:
 
  - Version of node.js? (should be >=v8.5.0)
  - Version of Node-RED? (should be >=v0.17.5)
- - Version of node-red-contrib-iiot-opcua? (should be >=v1.0.0)
+ - Version of node-red-contrib-iiot-opcua? (should be >=v1.0.9)
  
  - What is your platform? (Linux, macOS, ...)
  - What does `DEBUG=opcuaIIoT:* node-red -v` say? (log files are welcome)

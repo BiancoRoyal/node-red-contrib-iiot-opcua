@@ -17,8 +17,8 @@ If you like that contributor's package for OPC UA, then please give us your star
 ## [Support for the project straight away!][2]
 
 * tested with Node 6 LTS
-* tested with Node 8.6.x next LTS
-* based on node-opcua v1.0.x
+* tested with Node 8
+* based on node-opcua v0.1.x
 
 ## Code Release GitHub
 
@@ -38,6 +38,8 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
     
+![Flow Example](images/opcua-iiot-v109s2.png)
+  
 ## Contributing
 
 Let's work together! 
@@ -52,71 +54,13 @@ Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 
     DEBUG=opcuaIIoT* node-red -v 1>nodeREDIIoTOPCUA.log 2>&1
 
-    or
+or on local Node-RED
+    
+    DEBUG=opcuaIIoT* node red.js -v 1>nodeREDIIoTOPCUAServer.log 2>&1
 
-    DEBUG=opcuaIIoT:*server* node-red -v 1>nodeREDIIoTOPCUAServer.log 2>&1
+#### Debug Options
 
 Please, read the [Wiki article][7]
-
-#### options
-
-console DEBUG=opcuaIIoT:{option},opcuaIIoT:{option},...
- 
- * core
-    * core:details 
-    * core:special
- * connector
-    * connector:details
-    * connector:nodeopcua
- * inject
-    * inject:details
- * browser
-    * browser:details
- * filter
-    * filter:details
- * listener
-    * listener:details
-    * listener:subscribe
-        * listener:subscribe:details
-    * listener:event
-        * listener:event:details
- * client
-    * client:details
-    * client:read
-        * client:read:details
-    * client:write
-        * client:write:details
- * server
-    * server:details
-    * server:nodeopcua
-    * server:ISA95
-        * server:ISA95:details
- * response
-    * response:details
-
-#### verbose examples
-
-    DEBUG=opcuaIIoT:client:*,opcuaIIoT:connector,opcuaIIoT:browser,opcuaIIoT:listener:*,opcuaIIoT:server node-red -v
-
-    DEBUG=opcuaIIoT:client*,opcuaIIoT:client:read*,opcauaIIoT:connector* node-red -v
-    
-    DEBUG=opcuaIIoT:client*,opcuaIIoT:listener*,opcauaIIoT:connector node-red -v
-
-    DEBUG=opcuaIIoT:filter node-red
-
-    DEBUG=opcuaIIoT:connector* node-red
-
-#### moderate examples
-
-    DEBUG=opcuaIIoT:client,opcuaIIoT:client:read,opcuaIIoT:client:write,opcuaIIoT:connector,opcuaIIoT:server node-red
-
-    DEBUG=opcuaIIoT:client,opcuaIIoT:client:read,opcauaIIoT:connector node-red
-
-    DEBUG=opcuaIIoT:client,opcuaIIoT:client:read,opcuaIIoT:listener,opcuaIIoT:listener:subscribe,opcauaIIoT:connector node-red
-
-    DEBUG=opcuaIIoT:filter node-red
-
-    DEBUG=opcuaIIoT:connector node-red
     
 ### Wiki
 
@@ -135,12 +79,11 @@ Errors
 * Connector
     * session closing
     * connection reset on errors
-* Bad XYZ situations handling
+* more Bad status situations handling
 * Publish Engine Error
 * Events doesn't work sometimes see [node-opcua issue][8]
 
-Deprecated
-* [DEP0013] DeprecationWarning: Calling an asynchronous function without callback is deprecated.
+![Flow Example](images/opcua-iiot-v109.png)
 
 ### License
 
