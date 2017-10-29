@@ -17,7 +17,6 @@ module.exports = function (RED) {
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
   let os = require('os')
-  let Map = require('collections/map')
   let LocalizedText = require('node-opcua').LocalizedText
 
   function OPCUAIIoTServer (config) {
@@ -42,7 +41,6 @@ module.exports = function (RED) {
     let node = this
     node.initialized = false
     node.opcuaServer = null
-    node.addressSpaceMessages = new Map()
 
     coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
     let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
@@ -237,9 +235,6 @@ module.exports = function (RED) {
         return false
       }
 
-      node.addressSpaceMessages.clear()
-      node.addressSpaceMessages.set(msg.nodetype, msg.payload)
-
       switch (msg.nodetype) {
         case 'ASO':
           node.changeAddressSpace(msg)
@@ -252,7 +247,7 @@ module.exports = function (RED) {
           node.error(new Error('Unknown Node Type ' + msg.nodetype), msg)
       }
 
-      node.send([msg, {payload: node.addressSpaceMessages}])
+      node.send(msg)
     })
 
     node.changeAddressSpace = function (msg) { // TODO: refactor to work with the new OPC UA type list

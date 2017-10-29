@@ -103,7 +103,10 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
 
               let certificateFilename = path.join(coreConnector.core.getNodeOPCUAClientPath(), '/certificates/PKI/server_certificate' + i + '.pem')
               coreConnector.detailDebugLog(certificateFilename)
-              fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'))
+              fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'), (err) => {
+                if (err) throw err;
+                coreConnector.detailDebugLog('The certificate file ' + certificateFilename + ' has been saved!');
+              })
             })
 
             endpoints.forEach(function (endpoint, i) {
