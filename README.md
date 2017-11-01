@@ -91,7 +91,7 @@ The BSD 3-Clause License
 
 [Klaus Landsdorf][1]
 
-That is a whole new Node-RED package started in 2017 based on the node-opcua v1.x and the API documentation.
+That is a whole new Node-RED package started in 2017 based on the node-opcua v0.1.x and the API documentation.
 The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED and OPC UA.
 
 ### Important
