@@ -5,6 +5,8 @@
 ![ES_Sourdce_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-6.x-green.png)
+![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)
+![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)
 
 # node-red-contrib-iiot-opcua 
 

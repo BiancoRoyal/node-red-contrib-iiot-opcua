@@ -98,7 +98,7 @@
     "node-red": "^0.17.5",
     "npm-check-updates": "^2.13.0",
     "pump": "^1.0.2",
-    "sinon": "^4.0.2",
+    "sinon": "^4.1.1",
     "standard": "^10.0.3",
     "standard-version": "^4.2.0",
     "supertest": "^3.0.0",
