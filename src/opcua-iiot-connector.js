@@ -189,7 +189,7 @@ module.exports = function (RED) {
               if (session.serverCertificate) {
                 coreConnector.detailDebugLog('serverCertificate :' + session.serverCertificate ? session.serverCertificate.toString('base64') : 'none')
               } else {
-                session.serverCertificate = Buffer.alloc(0)
+                coreConnector.detailDebugLog('serverCertificate : None'.red)
               }
 
               coreConnector.detailDebugLog('serverSignature :' + session.serverSignature ? session.serverSignature : 'none')
