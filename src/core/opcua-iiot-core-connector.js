@@ -97,16 +97,20 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
               coreConnector.detailDebugLog('Type: ' + endpoint.server.applicationType.key)
               coreConnector.detailDebugLog('discoveryUrls: ' + endpoint.server.discoveryUrls.join(' - '))
 
-              options.serverCertificate = endpoint.serverCertificate
-              coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
-              options.defaultSecureTokenLifetime = 60000 // 1 min.
+              if (endpoint.serverCertificate) {
+                options.serverCertificate = endpoint.serverCertificate
+                coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
+                options.defaultSecureTokenLifetime = 60000 // 1 min.
 
-              let certificateFilename = path.join(coreConnector.core.getNodeOPCUAClientPath(), '/certificates/PKI/server_certificate' + i + '.pem')
-              coreConnector.detailDebugLog(certificateFilename)
-              fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'), (err) => {
-                if (err) throw err
-                coreConnector.detailDebugLog('The certificate file ' + certificateFilename + ' has been saved!')
-              })
+                let certificateFilename = path.join(coreConnector.core.getNodeOPCUAClientPath(), '/certificates/PKI/server_certificate' + i + '.pem')
+                coreConnector.detailDebugLog(certificateFilename)
+                fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'), (err) => {
+                  if (err) throw err
+                  coreConnector.detailDebugLog('The certificate file ' + certificateFilename + ' has been saved!')
+                })
+              } else {
+                coreConnector.detailDebugLog('serverCertificate: None'.red)
+              }
             })
 
             endpoints.forEach(function (endpoint, i) {
