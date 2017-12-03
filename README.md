@@ -22,10 +22,6 @@ If you like that contributor's package for OPC UA, then please give us your star
 * tested with Node 8 LTS
 * based on node-opcua v0.1.x
 
-## Code Release GitHub
-
-The release of the source code will follow later at the end of the year.
-
 ## Install
 
 Run command on Node-RED installation directory.
