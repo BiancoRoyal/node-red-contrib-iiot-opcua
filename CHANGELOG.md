@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file. See [standa
 <a name="1.0.16"></a>
 ## [1.0.16](https://github.com/biancode/node-red-iiot-opcua-publicbeta/compare/v1.0.15...v1.0.16) (2017-12-03)
 
-
+GitHub release
 
 <a name="1.0.15"></a>
 ## [1.0.15](https://github.com/biancode/node-red-iiot-opcua-publicbeta/compare/v1.0.14...v1.0.15) (2017-11-09)
