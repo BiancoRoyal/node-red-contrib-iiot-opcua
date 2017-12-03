@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -89,6 +89,14 @@ module.exports = function (RED) {
 
               node.opcuaClient = opcuaClient
 
+              node.opcuaClient.on('close', function () {
+                node.emit('server_connection_close')
+              })
+
+              opcuaClient.on('after_reconnection', function (opcuaClient) {
+                node.emit('after_reconnection', opcuaClient)
+              })
+
               node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
                 if (err) {
                   coreConnector.internalDebugLog('Get Endpoints Request Error' + err)
@@ -121,7 +129,7 @@ module.exports = function (RED) {
       //   }
       // })
 
-      let findServersRequest = require('node-opcua/lib/findservers').perform_findServersRequest
+      let findServersRequest = require('node-opcua').perform_findServersRequest
       findServersRequest('opc.tcp://localhost:4840/UADiscovery', function (err, servers) {
         if (err) {
           coreConnector.internalDebugLog('Discovery Error ' + err)
@@ -164,6 +172,7 @@ module.exports = function (RED) {
                 session.startKeepAliveManager()
               }
               session.on('error', node.handleError)
+              session.on('close', node.handleSessionClose)
 
               coreConnector.internalDebugLog(type + ' ' + session.name + ' Session ' +
                 session.sessionId + ' Started' + ' On' + ' ', node.endpoint)
@@ -179,9 +188,11 @@ module.exports = function (RED) {
 
               if (session.serverCertificate) {
                 coreConnector.detailDebugLog('serverCertificate :' + session.serverCertificate ? session.serverCertificate.toString('base64') : 'none')
+              } else {
+                coreConnector.detailDebugLog('serverCertificate : None'.red)
               }
 
-              coreConnector.detailDebugLog('serverSignature :' + session.serverSignature)
+              coreConnector.detailDebugLog('serverSignature :' + session.serverSignature ? session.serverSignature : 'none')
 
               if (session.lastRequestSentTime) {
                 coreConnector.detailDebugLog('lastRequestSentTime : ' + session.lastRequestSentTime)
@@ -196,31 +207,49 @@ module.exports = function (RED) {
               resolve(session)
             }).catch(function (err) {
               coreConnector.internalDebugLog('Session Start Error ' + err)
+              if (err.message === 'OPC UA Client Is Not Valid') {
+                try {
+                  setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
+                } catch (err) {
+                  coreConnector.internalDebugLog(err)
+                }
+              }
               reject(err)
             })
           })
       } catch (err) {
         coreConnector.internalDebugLog(err)
+        if (err.message === 'OPC UA Client Is Not Valid') {
+          try {
+            setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
+          } catch (err) {
+            coreConnector.internalDebugLog(err)
+          }
+        }
       }
     }
 
     node.closeSession = function (session, done) {
       try {
-        if (session) {
+        if (session && node.opcuaClient) {
           coreConnector.internalDebugLog('Close Session Id: ' + session.sessionId)
           coreConnector.closeSession(session).then(function (done) {
             coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
+            session = null
             done()
           }).catch(function (err) {
             coreConnector.internalDebugLog('Session Close Error ' + err)
+            session = null
             done()
           })
         } else {
           coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
+          session = null
           done()
         }
       } catch (err) {
         coreConnector.internalDebugLog(err)
+        session = null
         done()
       }
     }
@@ -233,6 +262,14 @@ module.exports = function (RED) {
       }
     }
 
+    node.handleSessionClose = function (err) {
+      if (err) {
+        node.error(err, {payload: 'Closed Session With Error'})
+      } else {
+        coreConnector.internalDebugLog('Closed Session')
+      }
+    }
+
     node.setMaxListeners(UNLIMITED_LISTENERS)
     try {
       setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
@@ -240,8 +277,19 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog(err)
     }
 
-    node.on('close', function () {
+    node.on('close', function (done) {
       coreConnector.internalDebugLog('Connector Close ' + node.endpoint)
+
+      if (node.opcuaClient) {
+        coreConnector.disconnect(node.opcuaClient).then(function () {
+          coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
+          node.opcuaClient = null
+          done()
+        }).catch(function (err) {
+          node.error(err, {payload: ''})
+          done()
+        })
+      }
     })
   }
 

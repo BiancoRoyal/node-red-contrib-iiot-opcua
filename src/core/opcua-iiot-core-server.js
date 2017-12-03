@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -127,7 +127,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     }
   })
 
-  addressSpace.addVariable({
+  let memoryVariable = addressSpace.addVariable({
     componentOf: vendorName,
     nodeId: 'ns=4;s=free_memory',
     browseName: 'FreeMemory',
@@ -143,6 +143,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
       }
     }
   })
+  addressSpace.installHistoricalDataNode(memoryVariable)
 
   let counterValue = 0
   setInterval(function () {
@@ -153,7 +154,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     }
   }, 1000)
 
-  addressSpace.addVariable({
+  let counterVariable = addressSpace.addVariable({
     componentOf: vendorName,
     nodeId: 'ns=4;s=Counter',
     browseName: 'Counter',
@@ -168,6 +169,33 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
       }
     }
   })
+  addressSpace.installHistoricalDataNode(counterVariable)
+
+  let fullcounterValue = 0
+  setInterval(function () {
+    if (fullcounterValue < 100000) {
+      fullcounterValue += 1
+    } else {
+      fullcounterValue = -100000
+    }
+  }, 1000)
+
+  let fullcounterVariable = addressSpace.addVariable({
+    componentOf: vendorName,
+    nodeId: 'ns=4;s=FullCounter',
+    browseName: 'FullCounter',
+    dataType: coreServer.core.nodeOPCUA.DataType.Int32,
+
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.Int32,
+          value: fullcounterValue
+        })
+      }
+    }
+  })
+  addressSpace.installHistoricalDataNode(fullcounterVariable)
 
   var externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
     value: new coreServer.core.nodeOPCUA.Variant({dataType: coreServer.core.nodeOPCUA.DataType.Double, value: 10.0}),

@@ -4,7 +4,7 @@
  Copyright 2016, 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2013, 2016 IBM Corp. (node-red)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  **/
 'use strict'
 
@@ -13,21 +13,26 @@
  *
  * @param RED
  */
+
 module.exports = function (RED) {
   let coreInject = require('./core/opcua-iiot-core-inject')
   let cron = require('cron')
+  let _ = require('underscore')
 
   function OPCUAIIoTInject (config) {
     RED.nodes.createNode(this, config)
+
     this.topic = config.topic
-    this.datatype = config.datatype
     this.payload = config.payload
     this.payloadType = config.payloadType
     this.repeat = config.repeat
     this.crontab = config.crontab
     this.once = config.once
-    this.startDelay = parseInt(config.startDelay) | 10
+    this.startDelay = parseInt(config.startDelay) || 10
     this.name = config.name
+    this.injectType = config.injectType || 'inject'
+
+    this.addressSpaceItems = config.addressSpaceItems
 
     let node = this
     node.interval_id = null
@@ -73,8 +78,9 @@ module.exports = function (RED) {
     node.on('input', function (msg) {
       try {
         msg.topic = node.topic
-        msg.datatype = node.datatype
         msg.nodetype = 'inject'
+        msg.injectType = node.injectType
+        msg.addressSpaceItems = node.addressSpaceItems
 
         switch (node.payloadType) {
           case 'none':
@@ -160,5 +166,9 @@ module.exports = function (RED) {
     } else {
       res.sendStatus(404)
     }
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/data/types', RED.auth.needsPermission('opcua.datatypes'), function (req, res) {
+    res.json(_.toArray(_.invert(require('node-opcua').DataTypeIds)))
   })
 }

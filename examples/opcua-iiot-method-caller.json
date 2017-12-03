@@ -1,52 +1,28 @@
 [
   {
-    "id": "68721815.781b78",
-    "type": "debug",
-    "z": "95bfdf8a.be38e",
-    "name": "",
-    "active": true,
-    "console": "false",
-    "complete": "false",
-    "x": 610,
-    "y": 800,
-    "wires": []
+    "id": "64c15b68.b979e4",
+    "type": "tab",
+    "label": "IIoT OPC UA Method Call",
+    "disabled": false,
+    "info": ""
   },
   {
-    "id": "287f35a5.4c14ba",
+    "id": "362943eb.cb30ec",
     "type": "debug",
-    "z": "95bfdf8a.be38e",
+    "z": "64c15b68.b979e4",
     "name": "",
     "active": true,
     "console": "false",
     "complete": "true",
-    "x": 590,
-    "y": 840,
+    "x": 600,
+    "y": 80,
     "wires": []
   },
   {
-    "id": "b651e0e9.bc4f2",
-    "type": "inject",
-    "z": "95bfdf8a.be38e",
-    "name": "Call Bark Method",
-    "topic": "",
-    "payload": "",
-    "payloadType": "date",
-    "repeat": "",
-    "crontab": "",
-    "once": false,
-    "x": 160,
-    "y": 840,
-    "wires": [
-      [
-        "e8f6529c.18edc"
-      ]
-    ]
-  },
-  {
-    "id": "e8f6529c.18edc",
+    "id": "384f6740.8acfc8",
     "type": "OPCUA-IIoT-Method-Caller",
-    "z": "95bfdf8a.be38e",
-    "connector": "9acc3c36.df0ed",
+    "z": "64c15b68.b979e4",
+    "connector": "176c2c60.d3d714",
     "objectId": "ns=4;i=1234",
     "methodId": "ns=4;i=12345",
     "methodtype": "basic",
@@ -64,31 +40,66 @@
         "value": "6"
       }
     ],
-    "x": 360,
-    "y": 840,
+    "x": 430,
+    "y": 120,
     "wires": [
       [
-        "68721815.781b78",
-        "287f35a5.4c14ba",
-        "e44e58b.d849da8"
+        "362943eb.cb30ec",
+        "ba8300de.f87ed"
       ]
     ]
   },
   {
-    "id": "e44e58b.d849da8",
+    "id": "ba8300de.f87ed",
     "type": "OPCUA-IIoT-Response",
-    "z": "95bfdf8a.be38e",
+    "z": "64c15b68.b979e4",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
-    "x": 600,
-    "y": 880,
+    "x": 610,
+    "y": 120,
     "wires": [
-      []
+      [
+        "578d9e8b.d4462"
+      ]
     ]
   },
   {
-    "id": "9acc3c36.df0ed",
+    "id": "578d9e8b.d4462",
+    "type": "debug",
+    "z": "64c15b68.b979e4",
+    "name": "",
+    "active": true,
+    "console": "false",
+    "complete": "true",
+    "x": 750,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "7e44d53c.a7435c",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "64c15b68.b979e4",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 250,
+    "y": 120,
+    "wires": [
+      [
+        "384f6740.8acfc8"
+      ]
+    ]
+  },
+  {
+    "id": "176c2c60.d3d714",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIOTServer",

@@ -1,7 +1,9 @@
-image: node:6
+image: node:8
 
 before_script:
   - npm install
+  - npm install -g gulp
+  - npm install -g gulp-cli
 stages:
   - test
   - deploy
@@ -12,8 +14,10 @@ npm_test:
     - npm test
 release:
   stage: deploy
+  only:
+    - master
   script:
-    - export NPM_TOKEN="097cdf5c-9d2b-4c55-99ba-5af0c5582d08"
+    - export NPM_TOKEN="16692e96-1c65-4b79-be86-2aa72683dbe1"
     - echo running build
     - npm run build
     - echo running release

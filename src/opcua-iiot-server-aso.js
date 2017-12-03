@@ -3,7 +3,7 @@
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -14,6 +14,7 @@
  */
 module.exports = function (RED) {
   let core = require('./core/opcua-iiot-core')
+  let _ = require('underscore')
 
   function OPCUAIIoTASO (config) {
     RED.nodes.createNode(this, config)
@@ -54,31 +55,68 @@ module.exports = function (RED) {
         core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
         node.send(msg)
       } else {
-        node.error(new Error('ASO NodeId Is Not Valid', msg))
+        node.error(new Error('ASO NodeId Is Not Valid'), msg)
       }
     })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Server-ASO', OPCUAIIoTASO)
 
-  // opcua_node_ids.js - node-opcua
+  RED.httpAdmin.get('/opcuaIIoT/object/InstanceTypes', RED.auth.needsPermission('opcuaIIoT.ASO.read'), function (req, res) {
+    let typeList = require('node-opcua').ObjectTypeIds
+    let variabletypeList = require('node-opcua').VariableTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let invertedVariableTypeList = _.toArray(_.invert(variabletypeList))
+    let resultTypeList = []
 
-  // ObjectTypeIds, VariableTypeIds via REST
-  RED.httpAdmin.get('/opcuaIIoT/object/ObjectTypeIds', RED.auth.needsPermission('opcuaIIoT.ASO.read'), function (req, res) {
-    res.json(core.nodeOPCUA.ObjectTypeIds)
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    for (typelistEntry of invertedVariableTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
   })
 
   RED.httpAdmin.get('/opcuaIIoT/object/VariableTypeIds', RED.auth.needsPermission('opcuaIIoT.ASO.read'), function (req, res) {
-    res.json(core.nodeOPCUA.VariableTypeIds)
+    let typeList = require('node-opcua').VariableTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
   })
 
-  // ReferenceTypeIds via REST
   RED.httpAdmin.get('/opcuaIIoT/object/ReferenceTypeIds', RED.auth.needsPermission('opcuaIIoT.ASO.read'), function (req, res) {
-    res.json(core.nodeOPCUA.ReferenceTypeIds)
+    let typeList = require('node-opcua').ReferenceTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
   })
 
-  // DataTypeIds via REST
   RED.httpAdmin.get('/opcuaIIoT/object/DataTypeIds', RED.auth.needsPermission('opcuaIIoT.ASO.read'), function (req, res) {
-    res.json(core.nodeOPCUA.DataTypeIds)
+    let typeList = require('node-opcua').DataTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
   })
 }

@@ -3,7 +3,7 @@
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -35,6 +35,13 @@ de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
           }
         })
 
+        opcuaClient.on('close', function (err) {
+          if (err) {
+            coreConnector.internalDebugLog(err.message)
+          }
+          coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
+        })
+
         opcuaClient.on('backoff', function (number, delay) {
           coreConnector.internalDebugLog('backoff  attempt #'.bgWhite.yellow, number, ' retrying in ', delay / 1000.0, ' seconds')
         })
@@ -44,7 +51,11 @@ de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
         })
 
         opcuaClient.on('start_reconnection', function () {
-          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  Starting Reconnection !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
+          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  Starting Reconnection !!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
+        })
+
+        opcuaClient.on('after_reconnection', function () {
+          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!        Reconnected     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
         })
       } else {
         reject(new Error('URL Endpoint Is Not Valid'))
@@ -59,10 +70,10 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
   return new Promise(
     function (resolve, reject) {
       if (opcuaClient) {
-        let cryptoUtils = require('node-opcua/lib/misc/crypto_utils')
+        let cryptoUtils = require('node-opcua').crypto_utils
         let fs = require('fs')
         let path = require('path')
-        let hexDump = require('node-opcua/lib/misc/utils').hexDump
+        let hexDump = require('node-opcua').hexDump
         // let treeify = require('treeify')
 
         opcuaClient.getEndpointsRequest(function (err, endpoints) {
@@ -86,13 +97,20 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
               coreConnector.detailDebugLog('Type: ' + endpoint.server.applicationType.key)
               coreConnector.detailDebugLog('discoveryUrls: ' + endpoint.server.discoveryUrls.join(' - '))
 
-              options.serverCertificate = endpoint.serverCertificate
-              coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
-              options.defaultSecureTokenLifetime = 60000 // 1 min.
+              if (endpoint.serverCertificate) {
+                options.serverCertificate = endpoint.serverCertificate
+                coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
+                options.defaultSecureTokenLifetime = 60000 // 1 min.
 
-              let certificateFilename = path.join(coreConnector.core.getNodeOPCUAPath(), '/certificates/PKI/server_certificate' + i + '.pem')
-              coreConnector.detailDebugLog(certificateFilename)
-              fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'))
+                let certificateFilename = path.join(coreConnector.core.getNodeOPCUAClientPath(), '/certificates/PKI/server_certificate' + i + '.pem')
+                coreConnector.detailDebugLog(certificateFilename)
+                fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'), (err) => {
+                  if (err) throw err
+                  coreConnector.detailDebugLog('The certificate file ' + certificateFilename + ' has been saved!')
+                })
+              } else {
+                coreConnector.detailDebugLog('serverCertificate: None'.red)
+              }
             })
 
             endpoints.forEach(function (endpoint, i) {

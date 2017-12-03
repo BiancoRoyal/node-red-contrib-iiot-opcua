@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -15,6 +15,7 @@
  */
 module.exports = function (RED) {
   let core = require('./core/opcua-iiot-core')
+  let _ = require('underscore')
 
   function OPCUAIIoTNode (config) {
     RED.nodes.createNode(this, config)
@@ -30,8 +31,6 @@ module.exports = function (RED) {
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     node.on('input', function (msg) {
-      msg.topic = node.nodeId
-      msg.datatype = node.datatype
       msg.nodetype = 'node'
       node.subscribed = !node.subscribed
 
@@ -45,11 +44,16 @@ module.exports = function (RED) {
         node.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
 
+      msg.addressSpaceItems = msg.addressSpaceItems || [] // eslint-disable-line
+      msg.valuesToWrite = msg.valuesToWrite || [] // eslint-disable-line
+
+      msg.addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
+
       if (node.value !== '') {
         if (node.datatype) {
-          msg.payload = core.convertDataValueByDataType({value: node.value}, node.datatype)
+          msg.valuesToWrite.push(core.convertDataValueByDataType({value: node.value}, node.datatype))
         } else {
-          msg.payload = node.value
+          msg.valuesToWrite.push(node.value)
         }
       }
 
@@ -60,5 +64,16 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Node', OPCUAIIoTNode)
 
-  // DataType_Schema via REST
+  RED.httpAdmin.get('/opcuaIIoT/object/DataTypeIds', RED.auth.needsPermission('opcuaIIoT.node.read'), function (req, res) {
+    let typeList = require('node-opcua').DataTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
+  })
 }

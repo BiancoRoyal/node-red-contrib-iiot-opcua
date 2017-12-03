@@ -1,10 +1,10 @@
 language: node_js
 node_js:
-    - 7
     - 6
-    - 4
+    - 8
 before_script:
   - npm install -g gulp
+  - npm install -g gulp-cli
   - npm install
   - npm test
 script:

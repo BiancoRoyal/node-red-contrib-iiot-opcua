@@ -3,7 +3,7 @@
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
 -->
 
 <script type="text/javascript">
@@ -22,6 +22,7 @@
       maxvalue: {value: null},
       defaultvalue: {value: null},
       usingListener: {value: false},
+      topic: {value:""},
       name: {value: ""}
     },
     inputs: 1,
@@ -35,6 +36,39 @@
       return this.name ? "node_label_italic" : "";
     },
     oneditprepare: function () {
+      let node = this
+      node.lookupItems = []
+
+      let datatypeLookupField = $("#node-lookup-datatype")
+      let datatypeField = $("#node-input-datatype")
+
+      datatypeLookupField.click(function () {
+        datatypeLookupField.addClass('disabled')
+        $.getJSON('/opcuaIIoT/object/DataTypeIds', function (data) {
+          datatypeLookupField.removeClass('disabled')
+          node.lookupItems = []
+
+          $.each(data, function (i, entry) {
+            node.lookupItems.push({value: entry.nodeId, label: entry.label})
+          })
+
+          datatypeField.autocomplete({
+            source: node.lookupItems,
+            minLength: 0,
+            focus: function (event, ui) {
+              datatypeField.val(ui.item.label);
+              return false;
+            },
+            select: function (event, ui) {
+              datatypeField.val(ui.item.label)
+              return false;
+            },
+            close: function (event, ui) {
+              datatypeField.autocomplete("destroy")
+            }
+          }).autocomplete("search", "")
+        })
+      })
 
       $('#node-input-withValueCheck').change(function () {
         if ($(this).is(":checked")) {
@@ -54,35 +88,9 @@
         <input type="text" id="node-input-nodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
     </div>
     <div class="form-row">
-        <!-- DataType_Schema via REST -->
-        <label for="node-input-datatype"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
-        <select type="text" id="node-input-datatype">
-            <option value="Null">Null</option>
-            <option value="Boolean">Boolean</option>
-            <option value="SByte">SByte</option>
-            <option value="Byte">Byte</option>
-            <option value="Int16">Int16</option>
-            <option value="UInt16">UInt16</option>
-            <option value="Int32">Int32</option>
-            <option value="UInt32">UInt32</option>
-            <option value="Int64">Int64</option>
-            <option value="UInt64">UInt64</option>
-            <option value="Float">Float</option>
-            <option value="Double">Double</option>
-            <option value="String">String</option>
-            <option value="DateTime">DateTime</option>
-            <option value="Guid">Guid</option>
-            <option value="ByteString">ByteString</option>
-            <option value="XmlElement">XmlElement</option>
-            <option value="NodeId">NodeId</option>
-            <option value="ExpandedNodeId">ExpandedNodeId</option>
-            <option value="StatusCode">StatusCode</option>
-            <option value="LocalizedText">LocalizedText</option>
-            <option value="ExtensionObject">ExtensionObject</option>
-            <option value="DataValue" selected>DataValue</option>
-            <option value="Variant">Variant</option>
-            <option value="DiagnosticInfo">DiagnosticInfo</option>
-        </select>
+        <label for="node-input-datatype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
+        <input type="text" id="node-input-datatype" style="width:40%;" placeholder="i=2041">
+        <a id="node-lookup-datatype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
     </div>
     <hr>
     <div class="form-row">
@@ -128,6 +136,10 @@
             <span data-i18n="opcua-iiot-contrib.label.defaultvalue"></span></label>
             <input type="text" id="node-input-defaultvalue" placeholder="out of range value">
         </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>

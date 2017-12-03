@@ -3,7 +3,7 @@
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -14,6 +14,7 @@
  */
 module.exports = function (RED) {
   let coreFilter = require('./core/opcua-iiot-core-filter')
+  let _ = require('underscore')
 
   function OPCUAIIoTResultFilter (config) {
     RED.nodes.createNode(this, config)
@@ -27,6 +28,7 @@ module.exports = function (RED) {
     this.minvalue = config.minvalue
     this.maxvalue = config.maxvalue
     this.defaultvalue = config.defaultvalue
+    this.topic = config.topic
     this.name = config.name
     this.usingListener = config.usingListener
 
@@ -63,9 +65,19 @@ module.exports = function (RED) {
           return
         }
       } else {
-        // just if not multiple request!
-        if (msg.topic !== node.nodeId) {
-          return
+        if (msg.addressSpaceItems) {
+          let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry) {
+            return entry.nodeId === node.nodeId
+          })
+
+          if (filteredNodeIds.length < 1) {
+            return
+          }
+        } else {
+          // just if not multiple request!
+          if (msg.topic !== node.nodeId) {
+            return
+          }
         }
       }
 
@@ -77,6 +89,9 @@ module.exports = function (RED) {
       switch (msg.nodetype) {
         case 'read':
           result = node.filterByReadType(msg)
+          break
+        case 'write':
+          result = node.filterByWriteType(msg)
           break
         case 'listen':
           result = node.filterByListenType(msg)
@@ -109,10 +124,11 @@ module.exports = function (RED) {
       coreFilter.internalDebugLog('sending result ' + result)
 
       if (node.justValue) {
-        node.send([{payload: result}, {payload: 'just value option active'}])
+        node.send([{payload: result, topic: node.topic || msg.topic}, {payload: 'just value option active'}])
       } else {
         msg.filteredResult = result
-        node.send([{payload: result}, msg])
+        msg.topic = node.topic || msg.topic
+        node.send([{payload: result, topic: node.topic || msg.topic}, msg])
       }
     })
 
@@ -194,6 +210,22 @@ module.exports = function (RED) {
       return result
     }
 
+    node.filterByWriteType = function (msg) {
+      let result = null
+
+      if (msg.payload.hasOwnProperty('value')) {
+        result = msg.payload.value
+      } else {
+        result = msg.payload
+      }
+
+      if (result && result.hasOwnProperty('value')) {
+        result = result.value
+      }
+
+      return result
+    }
+
     node.filterByListenType = function (msg) {
       let result = null
 
@@ -227,5 +259,16 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Result-Filter', OPCUAIIoTResultFilter)
 
-// DataType_Schema via REST
+  RED.httpAdmin.get('/opcuaIIoT/object/DataTypeIds', RED.auth.needsPermission('opcuaIIoT.node.read'), function (req, res) {
+    let typeList = require('node-opcua').DataTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
+  })
 }

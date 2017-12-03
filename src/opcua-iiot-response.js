@@ -3,7 +3,7 @@
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -23,6 +23,12 @@ module.exports = function (RED) {
     this.showErrors = config.showErrors
 
     let node = this
+
+    node.status({
+      fill: 'blue',
+      shape: 'ring',
+      text: '...'
+    })
 
     node.on('input', function (msg) {
       coreResponse.internalDebugLog(msg)
@@ -174,8 +180,14 @@ module.exports = function (RED) {
               entryStatus[1] += 1
               break
             default:
-              coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.statusCode.name))
-              entryStatus[2] += 1
+              if (entry.statusCode.name.indexOf('Good') > -1) {
+                entryStatus[0] += 1
+              } else if (entry.statusCode.name.indexOf('Bad') > -1) {
+                entryStatus[1] += 1
+              } else {
+                coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.statusCode.name))
+                entryStatus[2] += 1
+              }
           }
         }
       }
@@ -196,8 +208,14 @@ module.exports = function (RED) {
               entryStatus[1] += 1
               break
             default:
-              coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(msg.result.statusCode.name))
-              entryStatus[2] += 1
+              if (msg.result.statusCode.name.indexOf('Good') > -1) {
+                entryStatus[0] += 1
+              } else if (msg.result.statusCode.name.indexOf('Bad') > -1) {
+                entryStatus[1] += 1
+              } else {
+                coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(msg.result.statusCode.name))
+                entryStatus[2] += 1
+              }
           }
         }
       }
@@ -218,8 +236,14 @@ module.exports = function (RED) {
               entryStatus[1] += 1
               break
             default:
-              coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.statusCode.name))
-              entryStatus[2] += 1
+              if (entry.name.indexOf('Good') > -1) {
+                entryStatus[0] += 1
+              } else if (entry.name.indexOf('Bad') > -1) {
+                entryStatus[1] += 1
+              } else {
+                coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.name))
+                entryStatus[2] += 1
+              }
           }
         }
       }

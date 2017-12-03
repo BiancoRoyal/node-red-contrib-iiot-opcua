@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -142,58 +142,33 @@ de.biancoroyal.opcua.iiot.core.client.fillMessageObjectList = function (variantL
 }
 
 de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, options) {
-  let coreClient = de.biancoroyal.opcua.iiot.core.client
-
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        let UAProxyManager = require('node-opcua/lib/client/proxy').UAProxyManager
-        let coerceNodeId = require('node-opcua/lib/datamodel/nodeid').coerceNodeId
-        let nodeId
-        let proxyManager = new UAProxyManager(session)
-
+        let core = require('./opcua-iiot-core')
         try {
-          nodeId = coerceNodeId(element)
-          let dataTypeName
+          const structure = [
+            {
+              nodeId: element.nodeId,
+              referenceTypeId: 'Organizes',
+              includeSubtypes: true,
+              browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+              resultMask: 0x3f
+            },
+            {
+              nodeId: element.nodeId,
+              referenceTypeId: 'Aggregates',
+              includeSubtypes: true,
+              browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+              resultMask: 0x3f
+            }
+          ]
 
-          session.readVariableValue(nodeId, function (err, dataValue) {
-            coreClient.internalDebugLog('Read VariableValue For Proxy ' + dataValue)
-
+          session.browse(structure, function (err, results) {
             if (err) {
               reject(err)
             } else {
-              if (dataValue.value) {
-                dataTypeName = dataValue.value.dataType.toString()
-              }
-
-              proxyManager.getObject(nodeId, function (err, data) {
-                if (err) {
-                  reject(err)
-                } else {
-                  let msgObject = {payload: {}}
-                  coreClient.internalDebugLog('Proxy Get Object ' + data)
-
-                  if (options.depth && parseInt(options.depth) > 1) {
-                    msgObject.$components = coreClient.fillMessageObjectList(data.$components) // array of ObjectExplorer
-                    msgObject.$organizes = coreClient.fillMessageObjectList(data.$organizes) // array of ObjectExplorer
-                    // msgObject.$properties = coreClient.fillMessageObjectList(data.$properties) // map key = name
-                    // msgObject.$methods = coreClient.fillMessageObjectList(data.$methods) // array of method objects
-                  }
-
-                  msgObject.payload.dataType = coreClient.fillMessageObjectPayloadEntry(dataTypeName)
-                  msgObject.payload.nodeId = coreClient.fillMessageObjectPayloadEntry(data.nodeId)
-                  msgObject.payload.attributeId = coreClient.fillMessageObjectPayloadEntry(data.attributeId)
-                  msgObject.payload.browseName = coreClient.fillMessageObjectPayloadEntry(data.browseName.name)
-                  msgObject.payload.nodeClass = coreClient.fillMessageObjectPayloadEntry(data.nodeClass)
-                  msgObject.payload.description = coreClient.fillMessageObjectPayloadEntry(data.description)
-                  msgObject.payload.userAccessLevel = coreClient.fillMessageObjectPayloadEntry(data.userAccessLevel)
-                  msgObject.payload.accessLevel = coreClient.fillMessageObjectPayloadEntry(data.accessLevel)
-                  msgObject.payload.typeDefinition = coreClient.fillMessageObjectPayloadEntry(data.typeDefinition)
-                  msgObject.payload.requestedDepth = parseInt(options.depth)
-
-                  resolve(msgObject)
-                }
-              }, options)
+              resolve(results)
             }
           })
         } catch (err) {
@@ -205,12 +180,12 @@ de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, o
     })
 }
 
-de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, items, multipleRequest) {
+de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, items, start, end) {
   let core = de.biancoroyal.opcua.iiot.core.client.core
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.readAllAttributes(items, function (err, nodesToRead, results, diagnostics) {
+        session.readHistoryValue(items, start, end, function (err, results, diagnostics) {
           if (err) {
             reject(err)
           } else {
@@ -225,8 +200,44 @@ de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, ite
 
             resolve({
               resultsConverted: resultsConverted,
-              nodesToRead: nodesToRead,
+              nodesToRead: items,
               results: results,
+              diagnostics: diagnostics
+            })
+          }
+        })
+      } else {
+        reject(new Error('Session Not Valid To Read All Attributes'))
+      }
+    }
+  )
+}
+
+de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, items, multipleRequest) {
+  return new Promise(
+    function (resolve, reject) {
+      if (session) {
+        let core = require('./opcua-iiot-core')
+
+        session.readAllAttributes(items, function (err, nodesToRead, dataValues, diagnostics) {
+          if (err) {
+            reject(err)
+          } else {
+            let resultsConverted = []
+
+            for (let i = 0; i < nodesToRead.length; i++) {
+              const nodeToRead = nodesToRead[i]
+              const dataValue = dataValues[i]
+              if (dataValue.statusCode !== core.nodeOPCUA.StatusCodes.Good) {
+                continue
+              }
+              resultsConverted.push(core.dataValuetoString(nodeToRead.attributeId, dataValue))
+            }
+
+            resolve({
+              resultsConverted: resultsConverted,
+              nodesToRead: nodesToRead,
+              results: dataValues,
               diagnostics: diagnostics
             })
           }

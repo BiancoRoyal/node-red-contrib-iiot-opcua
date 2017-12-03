@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
 -->
 
 <script type="text/javascript">
@@ -19,7 +19,6 @@
       name: {value: ''},
       justValue: {value: true},
       multipleRequest: {value: false},
-      metaDataInject: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -76,7 +75,7 @@
             <option value="3">Browse-Name</option>
             <option value="4">Display-Name</option>
             <option value="13">Value</option>
-            <option value="99">Meta</option>
+            <option value="130">History</option>
         </select>
     </div>
     <div class="form-row">
@@ -101,11 +100,6 @@
         <label style="min-width:160px" for="node-input-multipleRequest"><i class="fa fa-th"></i>
         <span data-i18n="opcua-iiot-contrib.label.multipleRequest"></span></label>
         <input type="checkbox" id="node-input-multipleRequest" style="max-width:30px">
-    </div>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-metaDataInject"><i class="fa fa-th"></i>
-        <span data-i18n="opcua-iiot-contrib.label.metaDataInject"></span></label>
-        <input type="checkbox" id="node-input-metaDataInject" style="max-width:30px">
     </div>
     <hr>
     <div class="form-row">

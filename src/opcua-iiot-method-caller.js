@@ -3,7 +3,7 @@
 
  Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -173,14 +173,23 @@ module.exports = function (RED) {
       }, node.reconnectTimeout)
     }
 
+    node.connectorShutdown = function (opcuaClient) {
+      coreMethod.internalDebugLog('Connector Shutdown')
+      if (opcuaClient) {
+        node.opcuaClient = opcuaClient
+      }
+      // node.startOPCUASessionWithTimeout(node.opcuaClient)
+    }
+
     if (node.connector) {
       node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }
 
     node.on('close', function (done) {
-      if (node.opcuaSession) {
+      if (node.opcuaSession && node.connector.opcuaClient) {
         node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
             coreMethod.internalDebugLog('Error On Close Session ' + err)

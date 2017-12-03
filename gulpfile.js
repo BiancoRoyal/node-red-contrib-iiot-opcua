@@ -3,7 +3,7 @@
 
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 
 'use strict'
@@ -14,6 +14,7 @@ const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
 const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
+const sequence = require('gulp-sequence')
 const sourcemaps = require('gulp-sourcemaps')
 const pump = require('pump')
 
@@ -21,11 +22,9 @@ gulp.task('default', function () {
   // place code for your default task here
 })
 
-gulp.task('docs', ['doc', 'docIcons', 'docExamples', 'docImages'])
-gulp.task('websites', ['opcua-iiot-web'])
-gulp.task('nodejs', ['opcua-iiot'])
-gulp.task('build', ['nodejs', 'websites', 'locale'])
-gulp.task('publish', ['build', 'public', 'icons', 'docs', 'releaseExamples'])
+gulp.task('docs', sequence('doc', 'docIcons', 'docExamples', 'docImages'))
+gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale'))
+gulp.task('publish', sequence('build', 'public', 'icons', 'docs', 'releaseExamples'))
 
 gulp.task('icons', function () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
@@ -56,11 +55,11 @@ gulp.task('public', function () {
 })
 
 gulp.task('clean', function () {
-  return gulp.src(['opcuaIIoT', 'docs/gen'])
+  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps'])
     .pipe(clean({force: true}))
 })
 
-gulp.task('opcua-iiot-web', function () {
+gulp.task('web', function () {
   return gulp.src('src/*.htm*')
     .pipe(htmlmin({
       minifyJS: true,
@@ -77,7 +76,7 @@ gulp.task('opcua-iiot-web', function () {
     .pipe(gulp.dest('opcuaIIoT'))
 })
 
-gulp.task('opcua-iiot', function (cb) {
+gulp.task('nodejs', function (cb) {
   pump([
     gulp.src('src/**/*.js')
         .pipe(sourcemaps.init({loadMaps: true}))

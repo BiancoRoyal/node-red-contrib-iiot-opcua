@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -17,7 +17,7 @@
  */
 var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.nodeOPCUA = de.biancoroyal.opcua.iiot.core.nodeOPCUA || require('node-opcua') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua/lib/datamodel/nodeid') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua-nodeid') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT:core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.detailDebugLog = de.biancoroyal.opcua.iiot.core.detailDebugLog || require('debug')('opcuaIIoT:core:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.specialDebugLog = de.biancoroyal.opcua.iiot.core.specialDebugLog || require('debug')('opcuaIIoT:core:special') // eslint-disable-line no-use-before-define
@@ -34,6 +34,32 @@ de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.o
 
 de.biancoroyal.opcua.iiot.core.getNodeOPCUAPath = function () {
   let nodeOPCUAPath = require.resolve('node-opcua')
+
+  if (this.isWindows) {
+    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
+  } else {
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+  }
+
+  this.internalDebugLog(nodeOPCUAPath)
+
+  return nodeOPCUAPath
+}
+de.biancoroyal.opcua.iiot.core.getNodeOPCUAClientPath = function () {
+  let nodeOPCUAPath = require.resolve('node-opcua-client')
+
+  if (this.isWindows) {
+    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
+  } else {
+    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
+  }
+
+  this.internalDebugLog(nodeOPCUAPath)
+
+  return nodeOPCUAPath
+}
+de.biancoroyal.opcua.iiot.core.getNodeOPCUAServerPath = function () {
+  let nodeOPCUAPath = require.resolve('node-opcua-server')
 
   if (this.isWindows) {
     nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
@@ -395,6 +421,40 @@ de.biancoroyal.opcua.iiot.core.convertToDataType = function (datatype) {
   }
 }
 
+de.biancoroyal.opcua.iiot.core.extractString = function (attribute, dataValue) {
+  let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
+  let _ = require('underscore')
+
+  if (!dataValue.value || !dataValue.value.hasOwnProperty('value')) {
+    return '<null>'
+  }
+
+  switch (attribute) {
+    case opcua.AttributeIds.DataType:
+      return _.invert(opcua.DataTypeIds)[dataValue.value.value.value] + ' (' + dataValue.value.value.toString() + ')'
+    case opcua.AttributeIds.NodeClass:
+      return opcua.NodeClass.get(dataValue.value.value).key + ' (' + dataValue.value.value + ')'
+    case opcua.AttributeIds.WriteMask:
+    case opcua.AttributeIds.UserWriteMask:
+      return ' (' + dataValue.value.value + ')'
+    case opcua.AttributeIds.UserAccessLevel:
+    case opcua.AttributeIds.AccessLevel:
+      return opcua.AccessLevelFlag.get(dataValue.value.value).key + ' (' + dataValue.value.value + ')'
+    default:
+      if (!dataValue.value || dataValue.value.value === null) {
+        return '<???> : ' + dataValue.statusCode.toString()
+      }
+      switch (dataValue.value.arrayType) {
+        case opcua.VariantArrayType.Scalar:
+          return dataValue.value.value.toString()
+        case opcua.VariantArrayType.Array:
+          return 'l= ' + dataValue.value.value.length + ' [ ' + dataValue.value.value[0] + ' ... ]'
+      }
+  }
+
+  return ''
+}
+
 de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue) {
   let convertedValue = null
 
@@ -728,8 +788,8 @@ de.biancoroyal.opcua.iiot.core.newOPCUANodeIdListFromMsgItems = function (msg) {
   let item = null
   let itemsToRead = []
 
-  if (msg.payload.items) {
-    for (item of msg.payload.items) {
+  if (msg.addressSpaceItems) {
+    for (item of msg.addressSpaceItems) {
       itemsToRead.push(this.newOPCUANodeIdFromItemNodeId(item))
     }
   }
@@ -759,24 +819,32 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
 
   this.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
 
-  if (msg.payload.items) {
+  if (msg.addressSpaceItems) {
+    if (msg.valuesToWrite) {
+      let item = null
+      let index = 0
+
+      for (item of msg.addressSpaceItems) {
+        nodesToWrite.push({
+          nodeId: this.newOPCUANodeIdFromItemNodeId(item),
+          attributeId: opcua.AttributeIds.Value,
+          indexRange: null,
+          value: {value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++])}
+        })
+      }
+    } else {
+    }
+  } else {
     let item = null
 
-    for (item of msg.payload.items) {
+    for (item of msg.addressSpaceItems) {
       nodesToWrite.push({
         nodeId: this.newOPCUANodeIdFromItemNodeId(item),
         attributeId: opcua.AttributeIds.Value,
         indexRange: null,
-        value: {value: this.buildNewVariant(item.datatype, item.value)}
+        value: {value: this.buildNewVariant(item.datatypeName, item.value)}
       })
     }
-  } else {
-    nodesToWrite.push({
-      nodeId: this.newOPCUANodeIdFromMsgTopic(msg),
-      attributeId: opcua.AttributeIds.Value,
-      indexRange: null,
-      value: {value: this.buildNewVariant(msg.datatype, msg.payload)}
-    })
   }
 
   this.internalDebugLog('buildNodesToWrite output: ' + JSON.stringify(nodesToWrite))
@@ -796,17 +864,17 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
         nodesToRead.push(item.toString())
       }
     } else {
-      if (msg.payload.items && msg.payload.items.length) {
+      if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
         // browser compatibility for an easier set up
-        for (item of msg.payload.items) {
+        for (item of msg.addressSpaceItems) {
           nodesToRead.push(item.nodeId)
         }
       }
     }
   } else {
-    if (msg.payload.items) {
+    if (msg.addressSpaceItems) {
       // browser compatibility for an easier set up
-      for (item of msg.payload.items) {
+      for (item of msg.addressSpaceItems) {
         nodesToRead.push(item.nodeId)
       }
     } else {
@@ -817,6 +885,60 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
   this.internalDebugLog('buildNodesToRead output: ' + JSON.stringify(nodesToRead))
 
   return nodesToRead
+}
+
+de.biancoroyal.opcua.iiot.core.dataValuetoString = function (attribute, dataValue) {
+  if (!dataValue || !dataValue.value || !dataValue.value.hasOwnProperty('value')) {
+    return '<null>'
+  }
+
+  let opcua = this.nodeOPCUA
+  let _ = require('underscore')
+  const NodeClass = opcua.NodeClass
+  const DataTypeIdsToString = _.invert(opcua.DataTypeIds)
+
+  switch (attribute) {
+    case opcua.AttributeIds.DataType:
+      return { datatype: DataTypeIdsToString[dataValue.value.value.value], data: JSON.parse(JSON.stringify(dataValue.value.value)) }
+    case opcua.AttributeIds.NodeClass:
+      return { class: NodeClass.get(dataValue.value.value).key, data: JSON.parse(JSON.stringify(dataValue.value.value)) }
+    case opcua.AttributeIds.WriteMask:
+    case opcua.AttributeIds.UserWriteMask:
+      return dataValue.value.value
+    case opcua.AttributeIds.NodeId:
+    case opcua.AttributeIds.BrowseName:
+    case opcua.AttributeIds.DisplayName:
+    case opcua.AttributeIds.Description:
+    case opcua.AttributeIds.EventNotifier:
+    case opcua.AttributeIds.ValueRank:
+    case opcua.AttributeIds.ArrayDimensions:
+    case opcua.AttributeIds.Historizing:
+    case opcua.AttributeIds.Executable:
+    case opcua.AttributeIds.UserExecutable:
+    case opcua.AttributeIds.MinimumSamplingInterval:
+      if (!dataValue.value.value) {
+        return 'null'
+      }
+      return JSON.parse(JSON.stringify(dataValue.value.value))
+    case opcua.AttributeIds.UserAccessLevel:
+    case opcua.AttributeIds.AccessLevel:
+      if (!dataValue.value.value) {
+        return 'null'
+      }
+      return { accessLevelFlaq: opcua.AccessLevelFlag.get(dataValue.value.value).key, data: JSON.parse(JSON.stringify(dataValue.value.value)) }
+    default:
+      if (!dataValue.value || dataValue.value.value === null) {
+        return '<???> : ' + dataValue.statusCode.toString()
+      }
+      switch (dataValue.value.arrayType) {
+        case opcua.VariantArrayType.Scalar:
+          return JSON.parse(JSON.stringify(dataValue))
+        case opcua.VariantArrayType.Array:
+          return JSON.parse(JSON.stringify(dataValue))
+        default:
+          return ''
+      }
+  }
 }
 
 de.biancoroyal.opcua.iiot.core.availableMemory = function () {

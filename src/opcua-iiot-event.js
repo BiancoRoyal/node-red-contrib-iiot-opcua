@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -15,6 +15,7 @@
  */
 module.exports = function (RED) {
   let coreListener = require('./core/opcua-iiot-core-listener')
+  let _ = require('underscore')
 
   function OPCUAIIoTEvent (config) {
     RED.nodes.createNode(this, config)
@@ -43,21 +44,13 @@ module.exports = function (RED) {
       }
 
       let eventFields
-
-      switch (node.eventType) {
-        case 'Condition':
-          eventFields = coreListener.getConditionEventFields()
-          break
-        default:
-          eventFields = coreListener.getBasicEventFields()
+      if (node.eventType.indexOf('Condition') > -1) {
+        eventFields = coreListener.getConditionEventFields()
+      } else {
+        eventFields = coreListener.getBasicEventFields()
       }
 
       let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(eventFields)
-
-      if (node.eventRoot) {
-        msg.topic = node.eventRoot
-      }
-
       let interval = 1000
 
       if (typeof msg.payload === 'number') {
@@ -67,7 +60,6 @@ module.exports = function (RED) {
       msg.nodetype = 'events'
 
       msg.payload = {
-        eventRoot: node.eventRoot,
         eventType: node.eventType,
         queueSize: node.queueSize,
         eventFilter: eventFilter,
@@ -80,5 +72,19 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Event', OPCUAIIoTEvent)
 
-  // ObjectTypeIds via REST with Filter *EventType
+  RED.httpAdmin.get('/opcuaIIoT/event/types', RED.auth.needsPermission('opcua.event.types'), function (req, res) {
+    let objectTypeIds = require('node-opcua').ObjectTypeIds
+    let invertedObjectTypeIds = _.invert(objectTypeIds)
+    let eventTypes = _.filter(invertedObjectTypeIds, function (objectTypeId) {
+      return objectTypeId.indexOf('Event') > -1
+    })
+
+    let typelistEntry
+    let eventTypesResults = []
+    for (typelistEntry of eventTypes) {
+      eventTypesResults.push({ nodeId: 'i=' + objectTypeIds[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(eventTypesResults)
+  })
 }

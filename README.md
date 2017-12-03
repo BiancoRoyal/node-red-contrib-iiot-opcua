@@ -5,18 +5,22 @@
 ![ES_Sourdce_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-6.x-green.png)
+[![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
+[![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 
-# node-red-iiot-opcua 
+# node-red-contrib-iiot-opcua 
 
-## !!! PUBLIC BETA !!! PUBLIC BETA !!!
-### We start to work on issues from August - Have a great summer time!
+## The IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.
 
-[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-iiot-opcua)
+[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua )
 
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
-## [Support via Kickstarter][9]
-## [Support for the project straight away!][2]
+## [Become a backer of the project straight away!][2]
+
+* tested with Node 6 LTS
+* tested with Node 8
+* based on node-opcua v0.1.x
 
 ## Code Release GitHub
 
@@ -26,16 +30,18 @@ The release of the source code will follow later at the end of the year.
 
 Run command on Node-RED installation directory.
 
-	npm install node-red-iiot-opcua
+	npm install node-red-contrib-iiot-opcua 
 
 or run command for global installation.
 
-	npm install -g node-red-iiot-opcua
+	npm install -g node-red-contrib-iiot-opcua 
 
 try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
     
+![Flow Example](images/opcua-iiot-v109s2.png)
+  
 ## Contributing
 
 Let's work together! 
@@ -48,69 +54,15 @@ provides interesting points in different abstractions if IDE or console debuggin
 
 Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 
-    DEBUG=opcuaIIoT:* node-red -v
+    DEBUG=opcuaIIoT* node-red -v 1>nodeREDIIoTOPCUA.log 2>&1
+
+or on local Node-RED
+    
+    DEBUG=opcuaIIoT* node red.js -v 1>nodeREDIIoTOPCUAServer.log 2>&1
+
+#### Debug Options
 
 Please, read the [Wiki article][7]
-
-#### options
-
-console DEBUG=opcuaIIoT:{option},opcuaIIoT:{option},...
- 
- * core
-    * core:details 
-    * core:special
- * connector
-    * connector:details
-    * connector:nodeopcua
- * inject
-    * inject:details
- * browser
-    * browser:details
- * filter
-    * filter:details
- * listener
-    * listener:details
-    * listener:subscribe
-        * listener:subscribe:details
-    * listener:event
-        * listener:event:details
- * client
-    * client:details
-    * client:read
-        * client:read:details
-    * client:write
-        * client:write:details
- * server
-    * server:details
-    * server:nodeopcua
-    * server:ISA95
-        * server:ISA95:details
- * response
-    * response:details
-
-#### verbose examples
-
-    DEBUG=opcuaIIoT:client:*,opcuaIIoT:connector,opcuaIIoT:browser,opcuaIIoT:listener:*,opcuaIIoT:server node-red -v
-
-    DEBUG=opcuaIIoT:client*,opcuaIIoT:client:read*,opcauaIIoT:connector* node-red -v
-    
-    DEBUG=opcuaIIoT:client*,opcuaIIoT:listener*,opcauaIIoT:connector node-red -v
-
-    DEBUG=opcuaIIoT:filter node-red
-
-    DEBUG=opcuaIIoT:connector* node-red
-
-#### moderate examples
-
-    DEBUG=opcuaIIoT:client,opcuaIIoT:client:read,opcuaIIoT:client:write,opcuaIIoT:connector,opcuaIIoT:server node-red
-
-    DEBUG=opcuaIIoT:client,opcuaIIoT:client:read,opcauaIIoT:connector node-red
-
-    DEBUG=opcuaIIoT:client,opcuaIIoT:client:read,opcuaIIoT:listener,opcuaIIoT:listener:subscribe,opcauaIIoT:connector node-red
-
-    DEBUG=opcuaIIoT:filter node-red
-
-    DEBUG=opcuaIIoT:connector node-red
     
 ### Wiki
 
@@ -118,7 +70,7 @@ Follow the [white rabbit][4]!
 
 ## Package Information
 
-### Known Issues
+### Known Issues and TODO's
 
 Ideas
 * converting in Result Filter is not finished yet
@@ -129,11 +81,11 @@ Errors
 * Connector
     * session closing
     * connection reset on errors
-* Sign error on private package
-* Bad XYZ situations handling
+* more Bad status situations handling
 * Publish Engine Error
 * Events doesn't work sometimes see [node-opcua issue][8]
 
+![Flow Example](images/opcua-iiot-v109.png)
 
 ### License
 
@@ -141,7 +93,7 @@ The BSD 3-Clause License
 
 [Klaus Landsdorf][1]
 
-That is a whole new Node-RED package based on the node-opcua examples and the API documentation.
+That is a whole new Node-RED package started in 2017 based on the node-opcua v0.1.x and the API documentation.
 The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED and OPC UA.
 
 ### Important
@@ -162,4 +114,3 @@ for the node-opcua packages and very special for the node-opcua-isa95 package!
 [6]:https://github.com/erossignon
 [7]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki/DEBUG
 [8]:https://github.com/node-opcua/node-opcua/issues/340
-[9]:https://www.kickstarter.com/projects/biancode/node-red-iiot-opc-ua-package

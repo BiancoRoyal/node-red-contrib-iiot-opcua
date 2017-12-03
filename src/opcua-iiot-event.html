@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
 -->
 
 <script type="text/javascript">
@@ -12,8 +12,8 @@
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      eventRoot: {value: '', required: true},
-      eventType: {value: '', required: true},
+      eventType: {value: 'i=2041', required: true},
+      eventTypeLabel: {value: 'BaseTypeEvent'},
       queueSize: {value: 1, required: true, validate: RED.validators.number()},
       usingListener: {value: false},
       name: {value: ''}
@@ -27,31 +27,56 @@
     },
     labelStyle: function () {
       return this.name ? 'node_label_italic' : ''
+    },
+    oneditprepare: function () {
+      let node = this
+      node.lookupItems = []
+
+      let eventTypeLookupField = $("#node-lookup-eventType")
+      let eventTypeField = $("#node-input-eventType")
+      let eventTypeLabelField = $("#node-input-eventTypeLabel")
+
+      eventTypeLookupField.click(function () {
+        eventTypeLookupField.addClass('disabled')
+        $.getJSON('/opcuaIIoT/event/types', function (data) {
+          eventTypeLookupField.removeClass('disabled')
+          node.lookupItems = []
+
+          $.each(data, function (i, entry) {
+            node.lookupItems.push({value: entry.nodeId, label: entry.label})
+          })
+
+          eventTypeField.autocomplete({
+            source: node.lookupItems,
+            minLength: 0,
+            focus: function (event, ui) {
+              eventTypeField.val(ui.item.label);
+              return false;
+            },
+            select: function (event, ui) {
+              eventTypeField.val(ui.item.label)
+              eventTypeLabelField.val(ui.item.label + ' (' + ui.item.value + ')')
+              return false;
+            },
+            close: function (event, ui) {
+              eventTypeField.autocomplete("destroy")
+            }
+          }).autocomplete("search", "")
+        })
+      })
     }
   })
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Event">
     <div class="form-row">
-        <label for="node-input-eventRoot"><i class="icon-tasks"></i>
-        <span data-i18n="opcua-iiot-contrib.label.eventRoot"></span></label>
-        <input type="text" id="node-input-eventRoot" placeholder="i=2253"> <!-- i=2253 is Server ns=0;i=2253 -->
-    </div>
-    <div class="form-row">
-        <!-- ObjectTypeIds via REST with Filter *EventType -->
-        <label for="node-input-eventType"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.eventType"></span></label>
-        <select type="text" id="node-input-eventType" style="display: inline-block; vertical-align: middle; width:60%;">
-            <option selected value="i=2041">All</option>
-            <option value="i=2052">Audit</option>
-            <option value="i=2058">Audit Security</option>
-            <option value="i=2059">Audit Channel</option>
-            <option value="i=2131">Device Failure</option>
-            <option value="i=2132">Base Model Change</option>
-            <option value="i=2782">Condition</option>
-            <option value="i=3035">Queue Overflow</option>
-            <option value="i=11436">Progress</option>
-			<option value="i=2130">System</option>
-        </select>
+        <label for="node-input-eventType"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.eventType"></span></label>
+        <input type="text" id="node-input-eventType" style="width:40%;" placeholder="i=2041">
+        <a id="node-lookup-eventType" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
+        <div style='margin: 20px auto;margin-left: 103px'>
+            <p><input type="text" id='node-input-eventTypeLabel' style='width: 80%' readonly></p>
+            <p><span data-i18n="opcua-iiot-contrib.label.lookupUseHint"></span></p>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-input-queueSize"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.queueSize"></span></label>

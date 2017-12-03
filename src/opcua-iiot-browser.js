@@ -4,7 +4,7 @@
  Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
- node-red-iiot-opcua
+ node-red-contrib-iiot-opcua
  */
 'use strict'
 
@@ -141,6 +141,39 @@ module.exports = function (RED) {
       }
     }
 
+    node.browseNodeList = function (session, msg) {
+      browserEntries = []
+      nodesToRead = []
+      coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
+
+      if (session) {
+        msg.addressSpaceItems.map((entry) => (coreBrowser.browse(session, entry.nodeId).then(function (browserResult) {
+          browserEntries = []
+          nodesToRead = []
+          coreBrowser.internalDebugLog('Browse ' + entry.nodeId + ' on ' +
+            session.name + ' Id: ' + session.sessionId)
+
+          browserResult.browseResult.forEach(function (result) {
+            result.references.forEach(function (reference) {
+              coreBrowser.internalDebugLog('Add Reference To List :' + reference)
+              browserEntries.push(node.transformToEntry(reference))
+              if (reference.nodeId) {
+                nodesToRead.push(reference.nodeId.toString())
+              }
+            })
+          })
+
+          node.status({fill: 'green', shape: 'dot', text: 'active'})
+          node.sendMessage(msg)
+        }).catch(function (err) {
+          browserEntries = node.browseErrorHandling(err, msg, browserEntries)
+          node.sendMessage(msg)
+        })))
+      } else {
+        coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
+      }
+    }
+
     node.sendMessage = function (originMessage) {
       let msg = {}
 
@@ -171,10 +204,14 @@ module.exports = function (RED) {
 
       node.browseTopic = node.extractBrowserTopic(msg)
 
-      if (node.browseTopic !== '') {
+      if (node.browseTopic && node.browseTopic !== '') {
         node.browse(node.opcuaSession, msg)
       } else {
-        node.error(new Error('No Topic To Browse'), msg)
+        if (msg.addressSpaceItems) {
+          node.browseNodeList(node.opcuaSession, msg)
+        } else {
+          node.error(new Error('No Topic To Browse'), msg)
+        }
       }
     })
 
@@ -184,19 +221,19 @@ module.exports = function (RED) {
       if (msg.payload.actiontype === 'browse') { // event driven browsing
         if (msg.payload.root && msg.payload.root.nodeId) {
           coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
-          rootNodeId = node.browseByItem(msg.payload.root.nodeId)
+          rootNodeId = node.browseByItem(msg.payload.root.nodeId) || node.browseToRoot()
         } else {
-          rootNodeId = node.nodeId
+          rootNodeId = node.nodeId || node.browseToRoot()
         }
       } else {
-        if (msg.topic && node.nodeId === '') {
-          rootNodeId = msg.topic
+        if (msg.topic !== '' && msg.topic.includes('=')) {
+          rootNodeId = msg.topic // backward compatibles to v0.x
         } else {
           rootNodeId = node.nodeId
         }
       }
 
-      return rootNodeId || node.browseToRoot()
+      return rootNodeId
     }
 
     node.browseByItem = function (nodeId) {
@@ -213,7 +250,7 @@ module.exports = function (RED) {
       coreBrowser.internalDebugLog('Handle Session Error '.red + err)
 
       if (node.showErrors) {
-        node.error(err, {payload: 'Browser Session Error'})
+        node.error(err, {payload: 'Session Error'})
       }
 
       node.resetSession()
@@ -221,7 +258,7 @@ module.exports = function (RED) {
 
     node.startOPCUASession = function (opcuaClient) {
       node.sessionTimeout = null
-      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
+      coreBrowser.internalDebugLog('Start OPC UA Session')
       node.opcuaClient = opcuaClient
       node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT, 'Browser Node').then(function (session) {
         node.opcuaSession = session
@@ -241,15 +278,23 @@ module.exports = function (RED) {
       }, node.reconnectTimeout)
     }
 
+    node.connectorShutdown = function (opcuaClient) {
+      coreBrowser.internalDebugLog('Connector Shutdown')
+      if (opcuaClient) {
+        node.opcuaClient = opcuaClient
+      }
+      // node.startOPCUASessionWithTimeout(node.opcuaClient)
+    }
+
     if (node.connector) {
-      coreBrowser.internalDebugLog('Browser Start OPC UA Session')
       node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }
 
     node.on('close', function (done) {
-      if (node.opcuaSession) {
+      if (node.opcuaSession && node.connector.opcuaClient) {
         node.connector.closeSession(node.opcuaSession, function (err) {
           if (err) {
             coreBrowser.internalDebugLog('Error On Close Session ' + err)
