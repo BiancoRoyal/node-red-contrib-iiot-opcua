@@ -86,7 +86,7 @@ gulp.task('nodejs', function (cb) {
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(babel({presets: ['es2015']}))
         .pipe(uglify())
-        .pipe(sourcemaps.write('../maps')), gulp.dest('opcuaIIoT')],
+        .pipe(sourcemaps.write('maps')), gulp.dest('opcuaIIoT')],
     cb
   )
 })
