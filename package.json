@@ -1,11 +1,11 @@
 {
   "name": "node-red-contrib-iiot-opcua",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "private": false,
   "description": "The next evolution IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/biancode/node-red-iiot-opcua-publicbeta.git"
+    "url": "git+https://github.com/biancode/node-red-contrib-iiot-opcua.git"
   },
   "dependencies": {
     "better-assert": "1.0.2",
@@ -13,7 +13,7 @@
     "cron": "1.3.0",
     "debug": "3.1.0",
     "easy-table": "1.1.0",
-    "node-opcua": "0.1.0-12",
+    "node-opcua": "0.1.0-13",
     "treeify": "1.0.1",
     "underscore": "1.8.3"
   },
@@ -36,7 +36,7 @@
   "author": "Klaus Landsdorf <klaus.landsdorf@bianco-royal.de>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/biancode/node-red-iiot-opcua-publicbeta/issues"
+    "url": "https://github.com/biancode/node-red-contrib-iiot-opcua/issues"
   },
   "node-red": {
     "nodes": {
@@ -60,7 +60,7 @@
   "engines": {
     "node": "6.x || 8.x"
   },
-  "homepage": "https://github.com/biancode/node-red-iiot-opcua-publicbeta#readme",
+  "homepage": "https://github.com/biancode/node-red-contrib-iiot-opcua#readme",
   "scripts": {
     "test": "standard --fix && mocha test/* --reporter dot",
     "build": "standard --fix && gulp publish",
@@ -76,12 +76,12 @@
     "babel-preset-es2015": "^6.24.1",
     "chai": "^4.1.2",
     "ci-publish": "^1.3.0",
-    "eslint": "^4.10.0",
+    "eslint": "^4.12.1",
     "eslint-config-standard": "^10.2.1",
     "eslint-config-standard-jsx": "^4.0.2",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-react": "^7.4.0",
+    "eslint-plugin-react": "^7.5.1",
     "eslint-plugin-standard": "^3.0.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
@@ -94,15 +94,15 @@
     "gulp-uglify": "^3.0.0",
     "jsdoc": "^3.5.5",
     "mocha": "^4.0.1",
-    "nock": "^9.0.27",
+    "nock": "^9.1.4",
     "node-red": "^0.17.5",
     "npm-check-updates": "^2.13.0",
-    "pump": "^1.0.2",
-    "sinon": "^4.1.1",
+    "pump": "^2.0.0",
+    "sinon": "^4.1.2",
     "standard": "^10.0.3",
     "standard-version": "^4.2.0",
     "supertest": "^3.0.0",
-    "uglify-js": "^3.1.6",
+    "uglify-js": "^3.2.1",
     "uglify-js-harmony": "^2.7.7",
     "when": "^3.7.8"
   },
