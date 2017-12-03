@@ -24,7 +24,7 @@ gulp.task('default', function () {
 
 gulp.task('docs', sequence('doc', 'docIcons', 'docExamples', 'docImages'))
 gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale'))
-gulp.task('publish', sequence('build', 'public', 'icons', 'docs', 'releaseExamples'))
+gulp.task('publish', sequence('build', 'maps', 'public', 'icons', 'docs', 'releaseExamples'))
 
 gulp.task('icons', function () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
@@ -52,6 +52,10 @@ gulp.task('locale', function () {
 
 gulp.task('public', function () {
   return gulp.src('src/public/**/*').pipe(gulp.dest('opcuaIIoT/public'))
+})
+
+gulp.task('maps', function () {
+  return gulp.src('maps/**/*').pipe(gulp.dest('opcuaIIoT/maps'))
 })
 
 gulp.task('clean', function () {

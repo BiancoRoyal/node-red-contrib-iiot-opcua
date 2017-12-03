@@ -5,7 +5,7 @@
   "description": "The next evolution IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/biancode/node-red-iiot-opcua-publicbeta.git"
+    "url": "git+https://github.com/biancode/node-red-contrib-iiot-opcua.git"
   },
   "dependencies": {
     "better-assert": "1.0.2",
@@ -36,7 +36,7 @@
   "author": "Klaus Landsdorf <klaus.landsdorf@bianco-royal.de>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/biancode/node-red-iiot-opcua-publicbeta/issues"
+    "url": "https://github.com/biancode/node-red-contrib-iiot-opcua/issues"
   },
   "node-red": {
     "nodes": {
@@ -60,7 +60,7 @@
   "engines": {
     "node": "6.x || 8.x"
   },
-  "homepage": "https://github.com/biancode/node-red-iiot-opcua-publicbeta#readme",
+  "homepage": "https://github.com/biancode/node-red-contrib-iiot-opcua#readme",
   "scripts": {
     "test": "standard --fix && mocha test/* --reporter dot",
     "build": "standard --fix && gulp publish",

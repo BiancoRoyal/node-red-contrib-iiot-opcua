@@ -12,16 +12,3 @@ npm_test:
   script:
     - npm run build
     - npm test
-release:
-  stage: deploy
-  only:
-    - master
-  script:
-    - export NPM_TOKEN="16692e96-1c65-4b79-be86-2aa72683dbe1"
-    - echo running build
-    - npm run build
-    - echo running release
-    - npm run ci-publish || true
-
-
-
