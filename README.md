@@ -7,6 +7,7 @@
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-6.x-green.png)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
+[![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
 
 # node-red-contrib-iiot-opcua 
 
