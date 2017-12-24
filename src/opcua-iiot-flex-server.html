@@ -25,7 +25,38 @@
       allowAnonymous: {value: true, required: true},
       isAuditing: {value: false},
       users: { value: [] },
-      addressSpaceScript: { value: ''}
+      addressSpaceScript: { value: "function constructAlarmAddressSpace(flexCore, addressSpace, eventObjects) {\n  " +
+        "flexCore.internalDebugLog('init dynamic address space')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    " +
+        "let tanks = addressSpace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        " +
+        "organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    " +
+        "\n    let oilTankLevel = addressSpace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: 'Oil Tank Level',\n        " +
+        "description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        " +
+        "eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    " +
+        "// Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    " +
+        "// ---------------------------------------------------------------------------------\n    " +
+        "let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.assert(exclusiveLimitAlarmType !== null)\n    " +
+        "\n    let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        " +
+        "conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: 'Oil Tank Level Condition',\n        " +
+        "description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          " +
+        "'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   " +
+        "// the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n   " +
+        " \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    " +
+        "// --------------------------------------------------------------\n    let gasTankLevel = addressSpace.addVariable({\n        " +
+        "browseName: 'GasTankLevel',\n        displayName: 'Gas Tank Level',\n        " +
+        "description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        " +
+        "propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    " +
+        "\n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    " +
+        "node.assert(nonExclusiveLimitAlarmType !== null)\n    \n    " +
+        "let gasTankLevelCondition = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        " +
+        "componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        " +
+        "displayName: 'Gas Tank Level Condition',\n        description: 'NonExclusiveLimitAlarmType Condition',\n        " +
+        "conditionName: 'GasLevelCondition',\n        optionals: [\n          " +
+        "'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        " +
+        "inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        " +
+        "highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    " +
+        "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    " +
+        "eventObjects.gasTankLevelCondition = gasTankLevelCondition\n}"
+      }
     },
     inputs: 1,
     outputs: 1,
@@ -238,7 +269,7 @@
             </div>
             <div class="form-row">
                 <label for="node-input-endpoint"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.endpoint"></span></label>
-                <input type="text" id="node-input-endpoint" placeholder="UA/NodeREDIIoTServer">
+                <input type="text" id="node-input-endpoint" placeholder="UA/NodeREDFlexIIoTServer">
             </div>
             <div class="form-row">
                 <label for="node-input-maxAllowedSessionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSessionNumber"></span></label>

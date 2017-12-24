@@ -17,8 +17,7 @@ module.exports = function (RED) {
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
   let os = require('os')
-  let LocalizedText = require('node-opcua').LocalizedText
-  const {VM, VMScript} = require('vm2')
+  const {VM} = require('vm2')
 
   function OPCUAIIoTFlexServer (config) {
     RED.nodes.createNode(this, config)
@@ -38,16 +37,20 @@ module.exports = function (RED) {
     this.users = config.users
     // Audit
     this.isAuditing = config.isAuditing
-    // address space
-    this.addressSpaceScript = new VMScript(config.addressSpaceScript).compile()
 
     let node = this
     node.initialized = false
     node.opcuaServer = null
 
+    node.assert = require('better-assert')
+
     const vm = new VM({
       sandbox: {node}
     })
+
+    node.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
+      server.internalDebugLog('Init Function Block Flex Server')
+    }
 
     vm.run('node.constructAddressSpaceScript = ' + config.addressSpaceScript)
 
@@ -90,16 +93,16 @@ module.exports = function (RED) {
     node.initNewServer = function () {
       node.initialized = false
 
-      coreServer.name = 'NodeREDIIoTServer'
+      coreServer.name = 'NodeREDFlexIIoTServer'
 
       let serverOptions = {
         port: node.port,
         nodeset_filename: xmlFiles,
-        resourcePath: node.endpoint || 'UA/NodeREDIIoTServer',
+        resourcePath: node.endpoint || 'UA/NodeREDFlexIIoTServer',
         buildInfo: {
-          productName: node.name || 'NodeOPCUA IIoT Server',
-          buildNumber: '160417',
-          buildDate: new Date(2017, 4, 16)
+          productName: node.name || 'Node-RED Flex IIoT Server',
+          buildNumber: '24122017',
+          buildDate: new Date(2017, 12, 24)
         },
         serverCapabilities: {
           operationLimits: {
@@ -109,8 +112,8 @@ module.exports = function (RED) {
         },
         serverInfo: {
           // applicationType: ApplicationType.CLIENTANDSERVER,
-          applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), 'NodeRED-IIoT-Server'),
-          productUri: 'NodeRED-IIoT-Server',
+          applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), 'NodeRED-Flex-IIoT-Server'),
+          productUri: 'NodeRED-Flex-IIoT-Server',
           applicationName: {text: 'NodeRED', locale: 'en'},
           gatewayServerUri: null,
           discoveryProfileUri: null,
@@ -246,10 +249,6 @@ module.exports = function (RED) {
       }
 
       switch (msg.nodetype) {
-        case 'ASO':
-          node.changeAddressSpace(msg)
-          break
-
         case 'CMD':
           node.executeOpcuaCommand(msg)
           break
@@ -259,70 +258,6 @@ module.exports = function (RED) {
 
       node.send(msg)
     })
-
-    node.changeAddressSpace = function (msg) { // TODO: refactor to work with the new OPC UA type list
-      if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
-        node.addVariableToAddressSpace(msg, msg.payload.objecttype)
-      } else {
-        node.addObjectToAddressSpace(msg, msg.payload.objecttype)
-      }
-    }
-
-    node.addVariableToAddressSpace = function (msg, humanReadableType) {
-      let addressSpace = node.opcuaServer.engine.addressSpace
-      if (!addressSpace) {
-        node.error(new Error('Server AddressSpace Not Valid'), msg)
-      }
-
-      let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
-      let variableData = msg.payload.value
-
-      if (rootFolder) {
-        addressSpace.addVariable({
-          componentOf: rootFolder,
-          nodeId: msg.payload.nodeId,
-          browseName: msg.payload.browsename,
-          displayName: new LocalizedText({locale: null, text: msg.payload.displayname}),
-          dataType: msg.payload.datatype,
-          value: {
-            get: function () {
-              return new coreServer.core.nodeOPCUA.Variant({
-                dataType: coreServer.core.nodeOPCUA.DataType[msg.payload.datatype],
-                value: variableData
-              })
-            },
-            set: function (variant) {
-              variableData = variant.value
-              return coreServer.core.nodeOPCUA.StatusCodes.Good
-            }
-          }
-        })
-        coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
-      } else {
-        node.error(new Error('Root Reference Not Found'), msg)
-      }
-    }
-
-    node.addObjectToAddressSpace = function (msg, humanReadableType) {
-      let addressSpace = node.opcuaServer.engine.addressSpace
-      if (!addressSpace) {
-        node.error(new Error('Server AddressSpace Not Valid'), msg)
-      }
-
-      let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
-
-      if (rootFolder) {
-        addressSpace.addObject({
-          organizedBy: rootFolder,
-          nodeId: msg.payload.nodeId,
-          browseName: msg.payload.browsename,
-          displayName: new LocalizedText({locale: null, text: msg.payload.displayname})
-        })
-        coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
-      } else {
-        node.error(new Error('Root Reference Not Found'), msg)
-      }
-    }
 
     node.executeOpcuaCommand = function (msg) {
       let addressSpace = node.opcuaServer.engine.addressSpace
