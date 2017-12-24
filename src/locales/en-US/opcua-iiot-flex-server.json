@@ -1,0 +1,29 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "port": "Port",
+      "endpoint": "Endpoint",
+      "showActivities": "Show Activities",
+      "showErrors": "Show Errors",
+      "stateLogEnabled": "Log State",
+      "statusLog": "Log Status",
+      "securityPolicy": "Security Policies",
+      "securityMode": "Security Modes",
+      "addButton": "Add",
+      "removeButton": "Remove",
+      "maxAllowedSessionNumber": "Max Sessions",
+      "maxConnectionsPerEndpoint": "Max Connections Per Endpoint",
+      "maxAllowedSubscriptionNumber": "Max Subscriptions",
+      "alternateHostname": "Alternate Hostname",
+      "allowAnonymous": "Allow Anonymous",
+      "isAuditing": "Auditing",
+      "function": "Address Space Script"
+    },
+    "tabs-label": {
+      "users": "Users",
+      "settings": "Settings",
+      "security": "Security",
+      "ass": "Address Space"
+    }
+  }
+}

@@ -8,11 +8,11 @@
 -->
 
 <script type="text/javascript">
-  RED.nodes.registerType('OPCUA-IIoT-Server', {
+  RED.nodes.registerType('OPCUA-IIoT-Flex-Server', {
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      port: {value: '55388', required: true},
+      port: {value: '55380', required: true},
       endpoint: {value: ''},
       acceptExternalCommands: {value: true, required: true},
       maxAllowedSessionNumber: {value: ''},
@@ -24,14 +24,46 @@
       showErrors: {value: false},
       allowAnonymous: {value: true, required: true},
       isAuditing: {value: false},
-      users: { value: [] }
+      users: { value: [] },
+      addressSpaceScript: { value: "function constructAlarmAddressSpace(flexCore, addressSpace, eventObjects) {\n  " +
+        "flexCore.internalDebugLog('init dynamic address space')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    " +
+        "let tanks = addressSpace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        " +
+        "organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    " +
+        "\n    let oilTankLevel = addressSpace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: 'Oil Tank Level',\n        " +
+        "description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        " +
+        "eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    " +
+        "// Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    " +
+        "// ---------------------------------------------------------------------------------\n    " +
+        "let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.assert(exclusiveLimitAlarmType !== null)\n    " +
+        "\n    let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        " +
+        "conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: 'Oil Tank Level Condition',\n        " +
+        "description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          " +
+        "'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   " +
+        "// the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n   " +
+        " \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    " +
+        "// --------------------------------------------------------------\n    let gasTankLevel = addressSpace.addVariable({\n        " +
+        "browseName: 'GasTankLevel',\n        displayName: 'Gas Tank Level',\n        " +
+        "description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        " +
+        "propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    " +
+        "\n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    " +
+        "node.assert(nonExclusiveLimitAlarmType !== null)\n    \n    " +
+        "let gasTankLevelCondition = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        " +
+        "componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        " +
+        "displayName: 'Gas Tank Level Condition',\n        description: 'NonExclusiveLimitAlarmType Condition',\n        " +
+        "conditionName: 'GasLevelCondition',\n        optionals: [\n          " +
+        "'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        " +
+        "inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        " +
+        "highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    " +
+        "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    " +
+        "eventObjects.gasTankLevelCondition = gasTankLevelCondition\n}"
+      }
     },
     inputs: 1,
     outputs: 1,
     align: 'right',
     icon: 'opcuaiiot.png',
     label: function () {
-      return this.name || 'Demo-Server'
+      return this.name || 'Flex-Server'
     },
     labelStyle: function () {
       return this.name ? 'node_label_italic' : ''
@@ -61,6 +93,11 @@
       tabs.addTab({
         id: "opcuaiiot-server-tab-users",
         label: this._("opcua-iiot-contrib.tabs-label.users")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-server-tab-ass",
+        label: this._("opcua-iiot-contrib.tabs-label.ass")
       })
 
       // User Management
@@ -171,6 +208,29 @@
       $("#dialog").one("dialogclose", function (ev, ui) {
         $("#dialog").off("dialogresize", switchDialogResize)
       })
+
+      // address space script
+      let editorGlobals = {
+        msg:true,
+        context:true,
+        RED: true,
+        util: true,
+        flow: true,
+        global: true,
+        console: true,
+        Buffer: true,
+        setTimeout: true,
+        clearTimeout: true,
+        setInterval: true,
+        clearInterval: true
+      }
+
+      this.editorAddressSpaceScript = RED.editor.createEditor({
+        id: 'node-input-func-editor-addressSpaceScript',
+        mode: 'ace/mode/javascript',
+        value: $("#node-input-addressSpaceScript").val(),
+        globals: editorGlobals
+      });
     },
     oneditsave: function () {
       let cacheUsers = $("#node-input-server-users-container").children()
@@ -188,11 +248,15 @@
 
         userIndex++
       })
+
+      $("#node-input-addressSpaceScript").val(this.editorAddressSpaceScript.getValue());
+      this.editorAddressSpaceScript.destroy();
+      delete this.editorAddressSpaceScript;
     }
   })
 </script>
 
-<script type="text/x-red" data-template-name="OPCUA-IIoT-Server">
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Flex-Server">
     <div class="form-row">
         <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-server-tabs"></ul>
     </div>
@@ -205,7 +269,7 @@
             </div>
             <div class="form-row">
                 <label for="node-input-endpoint"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.endpoint"></span></label>
-                <input type="text" id="node-input-endpoint" placeholder="UA/NodeREDIIoTServer">
+                <input type="text" id="node-input-endpoint" placeholder="UA/NodeREDFlexIIoTServer">
             </div>
             <div class="form-row">
                 <label for="node-input-maxAllowedSessionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSessionNumber"></span></label>
@@ -291,11 +355,20 @@
                 <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
             </div>
         </div>
+        <div id="opcuaiiot-server-tab-ass" style="display:none">
+            <div class="form-row" style="margin-bottom: 0px;">
+                <label for="node-input-addressSpaceScript"><i class="fa fa-wrench"></i> <span data-i18n="opcua-iiot-contrib.label.function"></span></label>
+                <input type="hidden" id="node-input-addressSpaceScript">
+            </div>
+            <div class="form-row node-text-editor-row">
+                <div style="height: 350px; min-height:150px;" class="node-text-editor" id="node-input-func-editor-addressSpaceScript"></div>
+            </div>
+        </div>
     </div>
 
 </script>
 
-<script type="text/x-red" data-help-name="OPCUA-IIoT-Server">
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Flex-Server">
     <h2>OPC UA IIoT Server</h2>
 
     <p>The Server node is an OPC UA server with a small information model.

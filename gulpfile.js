@@ -59,8 +59,8 @@ gulp.task('maps', function () {
 })
 
 gulp.task('clean', function () {
-  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps'])
-    .pipe(clean({force: true}))
+    return gulp.src(['opcuaIIoT', 'docs/gen', 'maps'])
+        .pipe(clean({force: true}))
 })
 
 gulp.task('web', function () {
