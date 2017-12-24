@@ -4,7 +4,7 @@
 ![Quality GitLab CI](http://b.repl.ca/v1/Quality-GitLab_CI_and_CD-green.png)
 ![ES_Sourdce_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
-![NodeJS_Version](http://b.repl.ca/v1/NodeJS-6.x-green.png)
+![NodeJS_Version](http://b.repl.ca/v1/NodeJS-8.x-green.png)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
@@ -42,7 +42,8 @@ try these options on npm install to build, if you have problems to install
 ## Contributing
 
 Let's work together! 
-Please read and accepted [CONTRIBUTING](CONTRIBUTING.md) by your sign and send it via E-Mail.
+Please read and in best case accept [CONTRIBUTING](CONTRIBUTING.md) by your sign and send it via E-Mail.
+You could also send just a pull request.
 
 ### Debug
 
