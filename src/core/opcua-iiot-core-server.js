@@ -40,6 +40,12 @@ de.biancoroyal.opcua.iiot.core.server.simulateVariation = function (data) {
   // de.biancoroyal.opcua.iiot.core.server.internalDebugLog('Simulation Tank Level ' + value)
 }
 
+de.biancoroyal.opcua.iiot.core.server.constructAddressSpaceFromScript = function (server, constructAddressSpaceScript, eventObjects) {
+  if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
+    constructAddressSpaceScript(de.biancoroyal.opcua.iiot.core.server, server.engine.addressSpace, eventObjects)
+  }
+}
+
 de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) {
   let coreServer = de.biancoroyal.opcua.iiot.core.server
   let addressSpace = server.engine.addressSpace

@@ -8,11 +8,11 @@
 -->
 
 <script type="text/javascript">
-  RED.nodes.registerType('OPCUA-IIoT-Server', {
+  RED.nodes.registerType('OPCUA-IIoT-Flex-Server', {
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      port: {value: '55388', required: true},
+      port: {value: '55380', required: true},
       endpoint: {value: ''},
       acceptExternalCommands: {value: true, required: true},
       maxAllowedSessionNumber: {value: ''},
@@ -24,14 +24,15 @@
       showErrors: {value: false},
       allowAnonymous: {value: true, required: true},
       isAuditing: {value: false},
-      users: { value: [] }
+      users: { value: [] },
+      addressSpaceScript: { value: ''}
     },
     inputs: 1,
     outputs: 1,
     align: 'right',
     icon: 'opcuaiiot.png',
     label: function () {
-      return this.name || 'Demo-Server'
+      return this.name || 'Flex-Server'
     },
     labelStyle: function () {
       return this.name ? 'node_label_italic' : ''
@@ -61,6 +62,11 @@
       tabs.addTab({
         id: "opcuaiiot-server-tab-users",
         label: this._("opcua-iiot-contrib.tabs-label.users")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-server-tab-ass",
+        label: this._("opcua-iiot-contrib.tabs-label.ass")
       })
 
       // User Management
@@ -171,6 +177,29 @@
       $("#dialog").one("dialogclose", function (ev, ui) {
         $("#dialog").off("dialogresize", switchDialogResize)
       })
+
+      // address space script
+      let editorGlobals = {
+        msg:true,
+        context:true,
+        RED: true,
+        util: true,
+        flow: true,
+        global: true,
+        console: true,
+        Buffer: true,
+        setTimeout: true,
+        clearTimeout: true,
+        setInterval: true,
+        clearInterval: true
+      }
+
+      this.editorAddressSpaceScript = RED.editor.createEditor({
+        id: 'node-input-func-editor-addressSpaceScript',
+        mode: 'ace/mode/javascript',
+        value: $("#node-input-addressSpaceScript").val(),
+        globals: editorGlobals
+      });
     },
     oneditsave: function () {
       let cacheUsers = $("#node-input-server-users-container").children()
@@ -188,11 +217,15 @@
 
         userIndex++
       })
+
+      $("#node-input-addressSpaceScript").val(this.editorAddressSpaceScript.getValue());
+      this.editorAddressSpaceScript.destroy();
+      delete this.editorAddressSpaceScript;
     }
   })
 </script>
 
-<script type="text/x-red" data-template-name="OPCUA-IIoT-Server">
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Flex-Server">
     <div class="form-row">
         <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-server-tabs"></ul>
     </div>
@@ -291,11 +324,20 @@
                 <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
             </div>
         </div>
+        <div id="opcuaiiot-server-tab-ass" style="display:none">
+            <div class="form-row" style="margin-bottom: 0px;">
+                <label for="node-input-addressSpaceScript"><i class="fa fa-wrench"></i> <span data-i18n="opcua-iiot-contrib.label.function"></span></label>
+                <input type="hidden" id="node-input-addressSpaceScript">
+            </div>
+            <div class="form-row node-text-editor-row">
+                <div style="height: 350px; min-height:150px;" class="node-text-editor" id="node-input-func-editor-addressSpaceScript"></div>
+            </div>
+        </div>
     </div>
 
 </script>
 
-<script type="text/x-red" data-help-name="OPCUA-IIoT-Server">
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Flex-Server">
     <h2>OPC UA IIoT Server</h2>
 
     <p>The Server node is an OPC UA server with a small information model.

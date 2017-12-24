@@ -15,7 +15,8 @@
     "easy-table": "1.1.0",
     "node-opcua": "0.1.0-13",
     "treeify": "1.0.1",
-    "underscore": "1.8.3"
+    "underscore": "1.8.3",
+    "vm2": "3.5.2"
   },
   "keywords": [
     "node-red",
@@ -50,6 +51,7 @@
       "OPCUA-IIoT-Response": "opcuaIIoT/opcua-iiot-response.js",
       "OPCUA-IIoT-Browser": "opcuaIIoT/opcua-iiot-browser.js",
       "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
+      "OPCUA-IIoT-Flex-Server": "opcuaIIoT/opcua-iiot-flex-server.js",
       "OPCUA-IIoT-Server-ASO": "opcuaIIoT/opcua-iiot-server-aso.js",
       "OPCUA-IIoT-Server-Command": "opcuaIIoT/opcua-iiot-server-cmd.js",
       "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js",
