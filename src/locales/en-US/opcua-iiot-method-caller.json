@@ -8,7 +8,7 @@
       "connector": "Connector",
       "objectId": "Object-Id",
       "methodId": "Method-Id",
-      "methodtype": "Method Type",
+      "methodType": "Method Type",
       "value": "Value",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",

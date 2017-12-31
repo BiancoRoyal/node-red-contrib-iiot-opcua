@@ -106,7 +106,7 @@ module.exports = function (RED) {
     }
 
     node.analyzeMethodResults = function (msg) {
-      switch (msg.methodtype) {
+      switch (msg.methodType) {
         case 'basic':
           node.handlePayloadStatusCode(msg)
           break

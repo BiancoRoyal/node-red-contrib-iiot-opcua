@@ -19,7 +19,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.objectId = config.objectId
     this.methodId = config.methodId
-    this.methodtype = config.methodtype
+    this.methodType = config.methodType
     this.value = config.value
     this.name = config.name
     this.inputArguments = config.inputArguments
@@ -71,47 +71,38 @@ module.exports = function (RED) {
       }
     }
 
+    node.handleMethodWarn = function (message) {
+      if (node.showErrors) {
+        node.warn(message)
+      }
+
+      coreMethod.internalDebugLog(message)
+    }
+
     node.on('input', function (msg) {
       coreMethod.detailDebugLog(JSON.stringify(msg))
       let message = {}
 
-      if (node.objectId) {
-        message.objectId = node.objectId
-      } else {
-        if (!msg.payload.objectId) {
-          coreMethod.detailDebugLog('No Object-Id Found For Method Call')
-          return
-        } else {
-          message.objectId = msg.payload.objectId
-        }
-      }
-
-      if (node.methodId) {
-        message.methodId = node.methodId
-      } else {
-        if (!msg.topic && !msg.methodId) {
-          coreMethod.detailDebugLog('No Method-Id Found For Method Call')
-          return
-        } else {
-          if (!msg.methodId) {
-            message.methodId = msg.topic // Inject
-          }
-        }
-      }
-
-      if (node.inputArguments && node.inputArguments.length) {
-        message.inputArguments = node.inputArguments
-      } else {
-        if (!msg.payload.inputArguments) {
-          coreMethod.detailDebugLog('No Input Arguments Found For Method Call')
-          return
-        } else {
-          message.inputArguments = msg.payload.inputArguments
-        }
-      }
-
-      message.methodtype = node.methodtype
+      message.objectId = msg.payload.objectId || node.objectId
+      message.methodId = msg.payload.methodId || node.methodId
+      message.methodType = msg.payload.methodType || node.methodType
+      message.inputArguments = msg.payload.inputArguments || node.inputArguments
       message.nodetype = 'method'
+
+      if (!message.objectId) {
+        node.handleMethodWarn('No Object-Id Found For Method Call')
+        return
+      }
+
+      if (!message.methodId) {
+        node.handleMethodWarn('No Method-Id Found For Method Call')
+        return
+      }
+
+      if (!message.inputArguments) {
+        node.handleMethodWarn('No Input Arguments Found For Method Call')
+        return
+      }
 
       if (node.opcuaSession) {
         node.callMethodOnSession(message)
@@ -137,7 +128,7 @@ module.exports = function (RED) {
           definitionResults: JSON.parse(JSON.stringify(definitionResults)),
           input: msg,
           nodetype: 'method',
-          methodtype: node.methodtype
+          methodType: msg.methodType || node.methodType
         })
       })
     }

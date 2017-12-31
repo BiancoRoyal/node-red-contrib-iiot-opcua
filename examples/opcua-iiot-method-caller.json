@@ -1,31 +1,30 @@
 [
   {
-    "id": "64c15b68.b979e4",
+    "id": "9f1dab9d.97fac",
     "type": "tab",
     "label": "IIoT OPC UA Method Call",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "362943eb.cb30ec",
+    "id": "16840277.94e98e",
     "type": "debug",
-    "z": "64c15b68.b979e4",
+    "z": "9f1dab9d.97fac",
     "name": "",
     "active": true,
     "console": "false",
     "complete": "true",
-    "x": 600,
-    "y": 80,
+    "x": 790,
+    "y": 100,
     "wires": []
   },
   {
-    "id": "384f6740.8acfc8",
+    "id": "1dacbf1b.0b3f01",
     "type": "OPCUA-IIoT-Method-Caller",
-    "z": "64c15b68.b979e4",
-    "connector": "176c2c60.d3d714",
+    "z": "9f1dab9d.97fac",
+    "connector": "82f5412f.6564f8",
     "objectId": "ns=4;i=1234",
     "methodId": "ns=4;i=12345",
-    "methodtype": "basic",
     "value": "",
     "name": "",
     "inputArguments": [
@@ -40,46 +39,46 @@
         "value": "6"
       }
     ],
-    "x": 430,
-    "y": 120,
+    "x": 620,
+    "y": 140,
     "wires": [
       [
-        "362943eb.cb30ec",
-        "ba8300de.f87ed"
+        "16840277.94e98e",
+        "23c467db.f4287"
       ]
     ]
   },
   {
-    "id": "ba8300de.f87ed",
+    "id": "23c467db.f4287",
     "type": "OPCUA-IIoT-Response",
-    "z": "64c15b68.b979e4",
+    "z": "9f1dab9d.97fac",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
-    "x": 610,
-    "y": 120,
+    "x": 800,
+    "y": 140,
     "wires": [
       [
-        "578d9e8b.d4462"
+        "83f9aeba.fb88a"
       ]
     ]
   },
   {
-    "id": "578d9e8b.d4462",
+    "id": "83f9aeba.fb88a",
     "type": "debug",
-    "z": "64c15b68.b979e4",
+    "z": "9f1dab9d.97fac",
     "name": "",
-    "active": true,
+    "active": false,
     "console": "false",
     "complete": "true",
-    "x": 750,
-    "y": 120,
+    "x": 940,
+    "y": 140,
     "wires": []
   },
   {
-    "id": "7e44d53c.a7435c",
+    "id": "7b860fbc.baba08",
     "type": "OPCUA-IIoT-Inject",
-    "z": "64c15b68.b979e4",
+    "z": "9f1dab9d.97fac",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -90,16 +89,61 @@
     "startDelay": "",
     "name": "",
     "addressSpaceItems": [],
-    "x": 250,
-    "y": 120,
+    "x": 140,
+    "y": 140,
     "wires": [
       [
-        "384f6740.8acfc8"
+        "1dacbf1b.0b3f01"
       ]
     ]
   },
   {
-    "id": "176c2c60.d3d714",
+    "id": "5c0eb880.ae3358",
+    "type": "inject",
+    "z": "9f1dab9d.97fac",
+    "name": "",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 140,
+    "y": 200,
+    "wires": [
+      [
+        "e3999294.0851b"
+      ]
+    ]
+  },
+  {
+    "id": "e3999294.0851b",
+    "type": "function",
+    "z": "9f1dab9d.97fac",
+    "name": "bark six time with volume twelve",
+    "func": "msg.payload = {\n    objectId: 'ns=4;i=1234',\n    methodId: 'ns=4;i=12345',\n    inputArguments: [\n        {name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    methodType: 'basic'\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 350,
+    "y": 200,
+    "wires": [
+      [
+        "1dacbf1b.0b3f01"
+      ]
+    ]
+  },
+  {
+    "id": "94a2cfac.db9368",
+    "type": "comment",
+    "z": "9f1dab9d.97fac",
+    "name": "Information",
+    "info": "If you have none OPC UA server on other tabs, \nplease drag&drop an OPC UA Server \nfrom the package nodes on this tab!",
+    "x": 130,
+    "y": 80,
+    "wires": []
+  },
+  {
+    "id": "82f5412f.6564f8",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIOTServer",
