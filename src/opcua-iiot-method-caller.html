@@ -21,7 +21,7 @@
     },
     inputs: 1,
     outputs: 1,
-    align: "right",
+    align: "left",
     icon: "opcuaiiot.png",
     label: function () {
       return this.name || "Method Caller";
@@ -261,8 +261,8 @@
                 <input type="text" id="node-input-methodId" placeholder="ns=4;s=Bark or ns=4;i=VendorName-Bark">
             </div>
             <div class="form-row">
-                <label for="node-input-methodtype"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.methodtype"></span></label>
-                <select type="text" id="node-input-methodtype">
+                <label for="node-input-methodType"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.methodType"></span></label>
+                <select type="text" id="node-input-methodType">
                     <option value="basic">Basic</option>
                     <option value="complex">Complex</option>
                 </select>
@@ -303,15 +303,27 @@
     <p>If the settings of the node are filled, then a simple inject will work,
     otherwise the incoming has to receive a complex message with all parameters.</p>
 
-    <p>The settings in that node will override incoming data if the field value of the node is not empty.</p>
-
     <div>
-        <strong>Simple event message:</strong>
+        <strong>Simple event message payload could be a simple inject if the node parameters are filled or
+        you have to send the parameters via msg object like:
+        </strong>
+
+        <pre>msg.payload.</pre>
+
         <ul>
-            <li>payload (Object-Id, inputArguments (Array))
-            <li>topic (Method-Id)
+            <li>objectId (Object-Id)
+            <li>methodId (Method-Id)
+            <li>inputArguments (Array)
+                <ul>
+                    <li>name (just to name the method parameter - has no effect to later use for now)
+                    <li>dataType (all node-opcua DataTypes)
+                    <li>value (value or Variant as expected from node-opcua)
+                </ul>
+            <li>methodType (basic, complex)
         </ul>
     </div>
+
+    <p>The settings in that node will override incoming data if the msg property is empty or undefined.</p>
 
     <div>
         <strong>Complex event message:</strong>
@@ -323,8 +335,8 @@
                 <li>dataType
                 <li>value
             </ul>
+            <li>methodType
             <li>nodetype
-            <li>methodtype
         </ul>
     </div>
 
@@ -345,7 +357,7 @@
                 <li>methodDefinition
             </ul>
             <li>nodetype (method)
-            <li>methodtype
+            <li>methodType
         </ul>
     </div>
 
