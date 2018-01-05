@@ -18,6 +18,7 @@ module.exports = function (RED) {
   let path = require('path')
   let os = require('os')
   const {VM} = require('vm2')
+  let scriptObjects = {}
 
   function OPCUAIIoTFlexServer (config) {
     RED.nodes.createNode(this, config)
@@ -45,7 +46,7 @@ module.exports = function (RED) {
     node.assert = require('better-assert')
 
     const vm = new VM({
-      sandbox: {node}
+      sandbox: { node, coreServer, scriptObjects }
     })
 
     node.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
