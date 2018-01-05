@@ -25,37 +25,65 @@
       allowAnonymous: {value: true, required: true},
       isAuditing: {value: false},
       users: { value: [] },
-      addressSpaceScript: { value: "function constructAlarmAddressSpace(flexCore, addressSpace, eventObjects) {\n  " +
-        "flexCore.internalDebugLog('init dynamic address space')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    " +
-        "let tanks = addressSpace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        " +
-        "organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    " +
-        "\n    let oilTankLevel = addressSpace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: 'Oil Tank Level',\n        " +
-        "description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        " +
-        "eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    " +
-        "// Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    " +
+      addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects) {\n    " +
+        "coreServer.internalDebugLog('init dynamic address space')\n    \n    " +
+        "// from here - see the node-opcua docs how to build address sapces\n    " +
+        "let tanks = addressSpace.addObject({\n        browseName: 'Tanks',\n        " +
+        "description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        " +
+        "notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    " +
+        "let oilTankLevel = addressSpace.addVariable({\n        browseName: 'OilTankLevel',\n        " +
+        "displayName: 'Oil Tank Level',\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        " +
+        "propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    " +
         "// ---------------------------------------------------------------------------------\n    " +
-        "let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.assert(exclusiveLimitAlarmType !== null)\n    " +
-        "\n    let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        " +
-        "conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: 'Oil Tank Level Condition',\n        " +
-        "description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          " +
-        "'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   " +
-        "// the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n   " +
-        " \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    " +
-        "// --------------------------------------------------------------\n    let gasTankLevel = addressSpace.addVariable({\n        " +
-        "browseName: 'GasTankLevel',\n        displayName: 'Gas Tank Level',\n        " +
-        "description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        " +
-        "propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    " +
-        "\n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    " +
+        "// Let's create a exclusive Limit Alarm that automatically raise itself\n    " +
+        "// when the tank level is out of limit\n    " +
+        "// ---------------------------------------------------------------------------------\n    " +
+        "let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    " +
+        "node.assert(exclusiveLimitAlarmType !== null)\n    \n    " +
+        "let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        " +
+        "componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        " +
+        "displayName: 'Oil Tank Level Condition',\n        description: 'ExclusiveLimitAlarmType Condition',\n        " +
+        "conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' " +
+        "// confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   " +
+        "// the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        " +
+        "highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    " +
+        "// --------------------------------------------------------------\n    " +
+        "// Let's create a second letiable with no Exclusive alarm\n    " +
+        "// --------------------------------------------------------------\n    " +
+        "let gasTankLevel = addressSpace.addVariable({\n        browseName: 'GasTankLevel',\n        " +
+        "displayName: 'Gas Tank Level',\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        " +
+        "propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    " +
+        "let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    " +
         "node.assert(nonExclusiveLimitAlarmType !== null)\n    \n    " +
         "let gasTankLevelCondition = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        " +
         "componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        " +
         "displayName: 'Gas Tank Level Condition',\n        description: 'NonExclusiveLimitAlarmType Condition',\n        " +
-        "conditionName: 'GasLevelCondition',\n        optionals: [\n          " +
-        "'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        " +
-        "inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        " +
-        "highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    " +
-        "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    " +
-        "eventObjects.gasTankLevelCondition = gasTankLevelCondition\n}"
+        "conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' " +
+        "// confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   " +
+        "// the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        " +
+        "lowLimit: 0.2\n    })\n    \n    // variable with value\n    " +
+        "if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            " +
+        "scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = addressSpace.addObject({\n        " +
+        "browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        " +
+        "organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    " +
+        "if(coreServer.core) {\n        addressSpace.addVariable({\n            componentOf: myVariables,\n            " +
+        "nodeId: 'ns=4;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            " +
+        "displayName: 'Test Read and Write',\n            dataType: 'Double',\n            value: {\n                " +
+        "get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        " +
+        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                        " +
+        "value: scriptObjects.testReadWrite\n                    })\n                },\n                " +
+        "set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    " +
+        "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        " +
+        "})\n        \n        let memoryVariable = addressSpace.addVariable({\n            componentOf: myVariables,\n            " +
+        "nodeId: 'ns=4;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: 'Free Memory',\n            " +
+        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n            \n            value: {\n              " +
+        "get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                  " +
+        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                  value: coreServer.core.availableMemory()\n                " +
+        "})\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n        \n    " +
+        "} else {\n        coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    " +
+        "// hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    " +
+        "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    " +
+        "eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n}"
       }
     },
     inputs: 1,
