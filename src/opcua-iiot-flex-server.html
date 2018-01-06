@@ -250,15 +250,46 @@
         setTimeout: true,
         clearTimeout: true,
         setInterval: true,
-        clearInterval: true
+        clearInterval: true,
+        draggable: true
       }
 
-      this.editorAddressSpaceScript = RED.editor.createEditor({
+      node.editorAddressSpaceScript = RED.editor.createEditor({
         id: 'node-input-func-editor-addressSpaceScript',
         mode: 'ace/mode/javascript',
         value: $("#node-input-addressSpaceScript").val(),
         globals: editorGlobals
       });
+
+      let divEditor = document.getElementById('div-script-editor');
+      let element = document.getElementById('node-input-func-editor-addressSpaceScript');
+
+      let resizer = document.createElement('div');
+      resizer.className = 'resizer';
+      resizer.style.width = '12px';
+      resizer.style.height = '12px';
+      resizer.style.background = 'red';
+      resizer.style.position = 'absolute';
+      resizer.style.right = 0;
+      resizer.style.zIndex = 99;
+      resizer.style.bottom = 0;
+      resizer.style.cursor = 'se-resize';
+      element.appendChild(resizer);
+      resizer.addEventListener('mousedown', initScriptEditorResize, false);
+
+      function initScriptEditorResize(e) {
+        window.addEventListener('mousemove', resizeScriptEditor, false);
+        window.addEventListener('mouseup', stopScriptEditorResize, false);
+      }
+      function resizeScriptEditor(e) {
+        divEditor.style.height = (e.clientY - 40 - element.offsetTop) + 'px';
+        element.style.height = (e.clientY - 40 - element.offsetTop) + 'px';
+      }
+      function stopScriptEditorResize(e) {
+        window.removeEventListener('mousemove', resizeScriptEditor, false);
+        window.removeEventListener('mouseup', stopScriptEditorResize, false);
+        node.editorAddressSpaceScript.resize();
+      }
     },
     oneditsave: function () {
       let cacheUsers = $("#node-input-server-users-container").children()
@@ -388,7 +419,7 @@
                 <label for="node-input-addressSpaceScript"><i class="fa fa-wrench"></i> <span data-i18n="opcua-iiot-contrib.label.function"></span></label>
                 <input type="hidden" id="node-input-addressSpaceScript">
             </div>
-            <div class="form-row node-text-editor-row">
+            <div class="form-row node-text-editor-row" id="div-script-editor">
                 <div style="height: 350px; min-height:150px;" class="node-text-editor" id="node-input-func-editor-addressSpaceScript"></div>
             </div>
         </div>
