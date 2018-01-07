@@ -26,10 +26,18 @@
       isAuditing: {value: false},
       users: { value: [] },
       addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects) {\n    " +
-        "coreServer.internalDebugLog('init dynamic address space')\n    \n    " +
-        "// from here - see the node-opcua docs how to build address sapces\n    " +
-        "let tanks = addressSpace.addObject({\n        browseName: 'Tanks',\n        " +
-        "description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        " +
+        "// server = the created node-opcua server\n    // addressSpace = script placeholder\n    " +
+        "// eventObjects = to hold event variables in memory from this script\n    \n    " +
+        "// internal global sandbox objects are \n    // node = node of the flex server, \n    " +
+        "// coreServer = core iiot server object for debug and access to nodeOPCUA,\n    " +
+        "// and scriptObjects to hold variables and functions\n    \n    " +
+        "// globals are to find on node.context().global and should be initialized here\n    " +
+        "node.context().global.set(\"TestOPCUAVarValue\", {})\n    \n    " +
+        "coreServer.internalDebugLog('init dynamic address space')\n    " +
+        "node.warn('construct new address space for OPC UA')\n    \n    " +
+        "// from here - see the node-opcua docs how to build address sapces\n    let tanks = addressSpace.addObject({\n        " +
+        "browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        " +
+        "organizedBy: addressSpace.rootFolder.objects,\n        " +
         "notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    " +
         "let oilTankLevel = addressSpace.addVariable({\n        browseName: 'OilTankLevel',\n        " +
         "displayName: 'Oil Tank Level',\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        " +
@@ -73,17 +81,29 @@
         "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                        " +
         "value: scriptObjects.testReadWrite\n                    })\n                },\n                " +
         "set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    " +
-        "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        " +
-        "})\n        \n        let memoryVariable = addressSpace.addVariable({\n            componentOf: myVariables,\n            " +
+        "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        " +
+        "let memoryVariable = addressSpace.addVariable({\n            componentOf: myVariables,\n            " +
         "nodeId: 'ns=4;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: 'Free Memory',\n            " +
-        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n            \n            value: {\n              " +
-        "get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                  " +
-        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                  value: coreServer.core.availableMemory()\n                " +
-        "})\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n        \n    " +
-        "} else {\n        coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    " +
+        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n            \n            value: {\n              get: function () {\n                " +
+        "return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                  " +
+        "value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        " +
+        "addressSpace.installHistoricalDataNode(memoryVariable)\n        \n        " +
+        "let globalValue = node.context().global.get(\"TestOPCUAVarValue\")\n        if(globalValue) {\n            " +
+        "coreServer.internalDebugLog('init TestOPCUAVarValue in address space')\n            " +
+        "let testOPCUAVarValue = addressSpace.addVariable({\n                componentOf: myVariables,\n                " +
+        "nodeId: 'ns=4;s=TestOPCUAVarValue',\n                browseName: 'TestOPCUAVarValue',\n                " +
+        "displayName: 'Test OPC UA Variable Value',\n                " +
+        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                \n                value: {\n                  " +
+        "get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                      " +
+        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                      " +
+        "value: node.context().global.get(\"TestOPCUAVarValue\").value\n                    })\n                  },\n                  " +
+        "set: function (variant) {\n                      scriptObjects.testReadWrite = parseFloat(variant.value)\n                      " +
+        "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                  }\n                }\n            })\n            " +
+        "addressSpace.installHistoricalDataNode(memoryVariable)\n        }\n    \n    } else {\n        " +
+        "coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    " +
         "// hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    " +
-        "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    " +
-        "eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n}"
+        "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    " +
+        "eventObjects.gasTankLevelCondition = gasTankLevelCondition\n}"
       }
     },
     inputs: 1,
@@ -261,35 +281,17 @@
         globals: editorGlobals
       });
 
-      let divEditor = document.getElementById('div-script-editor');
+      $( function() {
+        $( "#node-input-func-editor-addressSpaceScript" ).resizable();
+      } );
+
       let element = document.getElementById('node-input-func-editor-addressSpaceScript');
+      element.addEventListener("mouseup", resizeScript, false);
 
-      let resizer = document.createElement('div');
-      resizer.className = 'resizer';
-      resizer.style.width = '12px';
-      resizer.style.height = '12px';
-      resizer.style.background = 'red';
-      resizer.style.position = 'absolute';
-      resizer.style.right = 0;
-      resizer.style.zIndex = 99;
-      resizer.style.bottom = 0;
-      resizer.style.cursor = 'se-resize';
-      element.appendChild(resizer);
-      resizer.addEventListener('mousedown', initScriptEditorResize, false);
+      function resizeScript () {
+        node.editorAddressSpaceScript.resize()
+      }
 
-      function initScriptEditorResize(e) {
-        window.addEventListener('mousemove', resizeScriptEditor, false);
-        window.addEventListener('mouseup', stopScriptEditorResize, false);
-      }
-      function resizeScriptEditor(e) {
-        divEditor.style.height = (e.clientY - 40 - element.offsetTop) + 'px';
-        element.style.height = (e.clientY - 40 - element.offsetTop) + 'px';
-      }
-      function stopScriptEditorResize(e) {
-        window.removeEventListener('mousemove', resizeScriptEditor, false);
-        window.removeEventListener('mouseup', stopScriptEditorResize, false);
-        node.editorAddressSpaceScript.resize();
-      }
     },
     oneditsave: function () {
       let cacheUsers = $("#node-input-server-users-container").children()
@@ -416,7 +418,7 @@
         </div>
         <div id="opcuaiiot-server-tab-ass" style="display:none">
             <div class="form-row" style="margin-bottom: 0px;">
-                <label for="node-input-addressSpaceScript"><i class="fa fa-wrench"></i> <span data-i18n="opcua-iiot-contrib.label.function"></span></label>
+                <label for="node-input-addressSpaceScript" style="width:50%;"><i class="fa fa-wrench"></i> <span data-i18n="opcua-iiot-contrib.label.function"></span></label>
                 <input type="hidden" id="node-input-addressSpaceScript">
             </div>
             <div class="form-row node-text-editor-row" id="div-script-editor">
@@ -428,11 +430,13 @@
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Flex-Server">
-    <h2>OPC UA IIoT Server</h2>
+    <h2>OPC UA IIoT Flex Server</h2>
 
-    <p>The Server node is an OPC UA server with a small information model.
-    The address space is to expand with the ASO nodes and commands are to send by the Command nodes.</p>
+    <p>The Flex Server node is an OPC UA server with a flexible address space to build your own information model.
+    The address space is to expand with JS script based on node-opcua API.
+    The Flex Server did not work with ASO request, but it works alsoo with the Command node.</p>
 
-    <p>Default enpoint: opc.tcp://localhost:55388</p>
-    <p>Default discovery: opc.tcp://localhost:4840/UADiscovery</p>
+    <p>Default enpoint: opc.tcp://localhost:55380/</p>
+    <p>Named enpoint: opc.tcp://localhost:55380/UA/NodeREDFlexIIoTServer</p>
+    <p>Default discovery: opc.tcp://localhost:4840/UAFlexDiscovery</p>
 </script>

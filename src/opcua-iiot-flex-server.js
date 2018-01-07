@@ -45,9 +45,7 @@ module.exports = function (RED) {
 
     node.assert = require('better-assert')
 
-    const vm = new VM({
-      sandbox: { node, coreServer, scriptObjects }
-    })
+    const vm = new VM({ sandbox: { node, coreServer, scriptObjects } })
 
     node.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
       server.internalDebugLog('Init Function Block Flex Server')
@@ -217,7 +215,7 @@ module.exports = function (RED) {
       let discoveryEndpointUrl
 
       if (hostname) {
-        discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
+        discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UAFlexDiscovery'
         coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
 
         node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
