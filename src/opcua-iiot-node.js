@@ -14,6 +14,7 @@
  * @param RED
  */
 module.exports = function (RED) {
+  // SOURCE-MAP-REQUIRED
   let core = require('./core/opcua-iiot-core')
   let _ = require('underscore')
 

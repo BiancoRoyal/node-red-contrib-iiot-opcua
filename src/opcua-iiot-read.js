@@ -14,6 +14,7 @@
  * @param RED
  */
 module.exports = function (RED) {
+  // SOURCE-MAP-REQUIRED
   let coreClient = require('./core/opcua-iiot-core-client')
 
   function OPCUAIIoTRead (config) {

@@ -13,6 +13,7 @@
  * @param RED
  */
 module.exports = function (RED) {
+  // SOURCE-MAP-REQUIRED
   let coreResponse = require('./core/opcua-iiot-core-response')
   const EMPTY_LIST = 0
 

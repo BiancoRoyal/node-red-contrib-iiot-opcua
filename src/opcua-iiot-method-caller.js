@@ -13,6 +13,7 @@
  * @param RED
  */
 module.exports = function (RED) {
+  // SOURCE-MAP-REQUIRED
   let coreMethod = require('./core/opcua-iiot-core-method')
 
   function OPCUAIIoTMethodCaller (config) {
