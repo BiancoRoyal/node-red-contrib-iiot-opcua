@@ -14,6 +14,7 @@
  * @param RED
  */
 module.exports = function (RED) {
+  // SOURCE-MAP-REQUIRED
   let coreConnector = require('./core/opcua-iiot-core-connector')
 
   // let OPCUADiscoveryServer = require('lib/server/opcua_discovery_server').OPCUADiscoveryServer

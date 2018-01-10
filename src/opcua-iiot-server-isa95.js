@@ -14,6 +14,7 @@
  * @param RED
  */
 module.exports = function (RED) {
+  // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
   let os = require('os')

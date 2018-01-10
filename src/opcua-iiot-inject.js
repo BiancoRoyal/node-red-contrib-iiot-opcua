@@ -15,6 +15,7 @@
  */
 
 module.exports = function (RED) {
+  // SOURCE-MAP-REQUIRED
   let coreInject = require('./core/opcua-iiot-core-inject')
   let cron = require('cron')
   let _ = require('underscore')

@@ -17,14 +17,15 @@ const babel = require('gulp-babel')
 const sequence = require('gulp-sequence')
 const sourcemaps = require('gulp-sourcemaps')
 const pump = require('pump')
+const replace = require('gulp-replace')
 
 gulp.task('default', function () {
   // place code for your default task here
 })
 
-gulp.task('docs', sequence('doc', 'docIcons', 'docExamples', 'docImages'))
+gulp.task('docs', sequence('doc', 'docIcons', 'docImages'))
 gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale'))
-gulp.task('publish', sequence('build', 'maps', 'public', 'icons', 'docs', 'releaseExamples'))
+gulp.task('publish', sequence('build', 'maps', 'public', 'icons', 'docs'))
 
 gulp.task('icons', function () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
@@ -32,14 +33,6 @@ gulp.task('icons', function () {
 
 gulp.task('docIcons', function () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('docs/gen/icons'))
-})
-
-gulp.task('docExamples', function () {
-  return gulp.src('examples/**/*').pipe(gulp.dest('docs/gen/examples'))
-})
-
-gulp.task('releaseExamples', function () {
-  return gulp.src('examples/**/*').pipe(gulp.dest('opcuaIIoT/examples'))
 })
 
 gulp.task('docImages', function () {
@@ -81,9 +74,12 @@ gulp.task('web', function () {
 })
 
 gulp.task('nodejs', function (cb) {
+  let anchor = '// SOURCE-MAP-REQUIRED'
+
   pump([
     gulp.src('src/**/*.js')
         .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(replace(anchor, 'require(\'source-map-support\').install()'))
         .pipe(babel({presets: ['es2015']}))
         .pipe(uglify())
         .pipe(sourcemaps.write('maps')), gulp.dest('opcuaIIoT')],

@@ -7,6 +7,7 @@
  node-red-contrib-iiot-opcua
  */
 'use strict'
+// SOURCE-MAP-REQUIRED
 
 /**
  * Nested namespace settings.
