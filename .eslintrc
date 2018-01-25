@@ -7,6 +7,7 @@
     "standard-jsx"
   ],
   "ignore": [
+    "code/",
     "node_modules/",
     "examples/",
     "opcua-iiot/",

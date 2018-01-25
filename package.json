@@ -119,6 +119,7 @@
   },
   "standard": {
     "ignore": [
+      "code/",
       "node_modules/",
       "examples/",
       "opcuaIIoT/",

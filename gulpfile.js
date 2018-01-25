@@ -24,7 +24,7 @@ gulp.task('default', function () {
 })
 
 gulp.task('docs', sequence('doc', 'docIcons', 'docImages'))
-gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale'))
+gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale', 'nodejsclearly'))
 gulp.task('publish', sequence('build', 'maps', 'public', 'icons', 'docs'))
 
 gulp.task('icons', function () {
@@ -85,6 +85,12 @@ gulp.task('nodejs', function (cb) {
         .pipe(sourcemaps.write('maps')), gulp.dest('opcuaIIoT')],
     cb
   )
+})
+
+gulp.task('nodejsclearly', function (cb) {
+  gulp.src('src/**/*.js')
+        .pipe(babel({presets: ['es2015']}))
+        .pipe(gulp.dest('code'))
 })
 
 gulp.task('doc', function (cb) {

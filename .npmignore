@@ -1,6 +1,7 @@
 .git
 .idea
 test
+code/
 node_modules
 .gitignore
 *.iml
