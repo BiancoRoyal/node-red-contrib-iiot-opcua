@@ -24,7 +24,7 @@ gulp.task('default', function () {
 })
 
 gulp.task('docs', sequence('doc', 'docIcons', 'docImages'))
-gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale', 'nodejsclearly'))
+gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale', 'code'))
 gulp.task('publish', sequence('build', 'maps', 'public', 'icons', 'docs'))
 
 gulp.task('icons', function () {
@@ -52,7 +52,7 @@ gulp.task('maps', function () {
 })
 
 gulp.task('clean', function () {
-  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps'])
+  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps', 'code'])
         .pipe(clean({force: true}))
 })
 
@@ -96,4 +96,10 @@ gulp.task('nodejsclearly', function (cb) {
 gulp.task('doc', function (cb) {
   gulp.src(['README.md', 'src/**/*.js'], {read: false})
     .pipe(jsdoc(cb))
+})
+
+gulp.task('code', function () {
+  gulp.src('src/**/*.js')
+    .pipe(babel({presets: ['es2015']}))
+    .pipe(gulp.dest('code'))
 })
