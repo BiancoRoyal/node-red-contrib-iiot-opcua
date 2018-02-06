@@ -98,38 +98,26 @@ module.exports = function (RED) {
                   })
                 }
 
-                if (readResult.diagnostics) {
-                  readResult.diagnostics.forEach(function (diagnostic) {
-                    coreClient.readDetailsDebugLog('Read All Attributes Diagnostic: ' + JSON.stringify(diagnostic))
-                  })
-                }
-
                 let message
 
                 if (node.multipleRequest) {
                   message = {
-                    payload: readResult.resultsConverted,
+                    payload: readResult.results,
                     nodesToRead: itemsToRead,
                     maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
                     multipleRequest: node.multipleRequest,
                     input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
                     nodetype: 'read',
                     readtype: 'AllAttributes',
                     attributeId: node.attributeId
                   }
                 } else {
                   message = {
-                    payload: readResult.resultsConverted,
+                    payload: readResult.results,
                     nodesToRead: itemsToRead[0],
                     maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
                     multipleRequest: node.multipleRequest,
                     input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
                     nodetype: 'read',
                     readtype: 'AllAttributes',
                     attributeId: node.attributeId,
@@ -137,9 +125,14 @@ module.exports = function (RED) {
                   }
                 }
 
-                node.send(message)
+                try {
+                  node.send(message)
+                } catch (err) {
+                  message.payload = JSON.stringify(readResult.results)
+                  node.send(message)
+                }
               }).catch(function (err) {
-                coreClient.readDebugLog('Error Items To Read: ' + JSON.stringify(itemsToRead))
+                coreClient.readDebugLog('Error Items To Read All Attributes: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
               })
               break
@@ -155,38 +148,26 @@ module.exports = function (RED) {
                   })
                 }
 
-                if (readResult.diagnostics) {
-                  readResult.diagnostics.forEach(function (diagnostic) {
-                    coreClient.readDetailsDebugLog('Read Variable Value Diagnostic: ' + JSON.stringify(diagnostic))
-                  })
-                }
-
                 let message
 
                 if (node.multipleRequest) {
                   message = {
-                    payload: readResult.resultsConverted,
+                    payload: readResult.results,
                     nodesToRead: itemsToRead,
                     maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
                     multipleRequest: node.multipleRequest,
                     input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
                     nodetype: 'read',
                     readtype: 'VariableValue',
                     attributeId: node.attributeId
                   }
                 } else {
                   message = {
-                    payload: readResult.resultsConverted[0],
+                    payload: readResult.results,
                     nodesToRead: itemsToRead[0],
                     maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
                     multipleRequest: node.multipleRequest,
                     input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
                     nodetype: 'read',
                     readtype: 'VariableValue',
                     attributeId: node.attributeId,
@@ -194,10 +175,15 @@ module.exports = function (RED) {
                   }
                 }
 
-                node.send(message)
+                try {
+                  node.send(message)
+                } catch (err) {
+                  message.payload = JSON.stringify(readResult.results)
+                  node.send(message)
+                }
               }).catch(function (err) {
                 coreClient.core.specialDebugLog(err)
-                coreClient.readDebugLog('Error Items To Read: ' + JSON.stringify(itemsToRead))
+                coreClient.readDebugLog('Error Items To Read Variable Value: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
               })
               break
@@ -259,7 +245,7 @@ module.exports = function (RED) {
                 node.send(message)
               }).catch(function (err) {
                 coreClient.core.specialDebugLog(err)
-                coreClient.readDebugLog('Error Items To Read: ' + JSON.stringify(itemsToRead))
+                coreClient.readDebugLog('Error Items To Read History Value: ' + JSON.stringify(itemsToRead))
                 node.handleReadError(err, msg)
               })
               break

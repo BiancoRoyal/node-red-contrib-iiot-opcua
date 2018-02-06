@@ -66,74 +66,84 @@ de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
 }
 
 de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (opcuaClient, options) {
-  let coreConnector = this
-
   return new Promise(
     function (resolve, reject) {
       if (opcuaClient) {
-        let cryptoUtils = require('node-opcua').crypto_utils
-        let fs = require('fs')
-        let path = require('path')
-        let hexDump = require('node-opcua').hexDump
-        // let treeify = require('treeify')
-
         opcuaClient.getEndpointsRequest(function (err, endpoints) {
           if (err) {
             reject(err)
           } else {
-            // coreConnector.internalDebugLog(treeify.asTree(endpoints, true))
+            if (endpoints && endpoints.length > 0) {
+              de.biancoroyal.opcua.iiot.core.connector.logEndpoints(options, endpoints)
+            }
 
-            coreConnector.internalDebugLog('endpoint: ' + endpoints[0].endpointUrl)
-            coreConnector.internalDebugLog('Application URI: ' + endpoints[0].server.applicationUri)
-            coreConnector.detailDebugLog('Security Mode: ' + endpoints[0].securityMode.toString())
-            coreConnector.detailDebugLog('securityPolicyUri: ' + endpoints[0].securityPolicyUri)
-
-            endpoints.forEach(function (endpoint, i) {
-              coreConnector.detailDebugLog('endpoint: ' + endpoint.endpointUrl)
-              coreConnector.detailDebugLog('Application URI: ' + endpoint.server.applicationUri)
-              coreConnector.detailDebugLog('Product URI: ' + endpoint.server.productUri)
-              coreConnector.detailDebugLog('Application Name: ' + endpoint.server.applicationName.text)
-              coreConnector.detailDebugLog('Security Mode: ' + endpoint.securityMode.toString())
-              coreConnector.detailDebugLog('securityPolicyUri: ' + endpoint.securityPolicyUri)
-              coreConnector.detailDebugLog('Type: ' + endpoint.server.applicationType.key)
-              coreConnector.detailDebugLog('discoveryUrls: ' + endpoint.server.discoveryUrls.join(' - '))
-
-              if (endpoint.serverCertificate) {
-                options.serverCertificate = endpoint.serverCertificate
-                coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
-                options.defaultSecureTokenLifetime = 60000 // 1 min.
-
-                let certificateFilename = path.join(coreConnector.core.getNodeOPCUAClientPath(), '/certificates/PKI/server_certificate' + i + '.pem')
-                coreConnector.detailDebugLog(certificateFilename)
-                fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'), (err) => {
-                  if (err) throw err
-                  coreConnector.detailDebugLog('The certificate file ' + certificateFilename + ' has been saved!')
-                })
-              } else {
-                coreConnector.detailDebugLog('serverCertificate: None'.red)
-              }
-            })
-
-            endpoints.forEach(function (endpoint, i) {
-              coreConnector.detailDebugLog('Identify Token for : Security Mode=' +
-                endpoint.securityMode.toString() + ' Policy=' + endpoint.securityPolicyUri)
-
-              endpoint.userIdentityTokens.forEach(function (token) {
-                coreConnector.detailDebugLog('policyId: ' + token.policyId)
-                coreConnector.detailDebugLog('tokenType: ' + token.tokenType.toString())
-                coreConnector.detailDebugLog('issuedTokenType: ' + token.issuedTokenType)
-                coreConnector.detailDebugLog('issuerEndpointUrl: ' + token.issuerEndpointUrl)
-                coreConnector.detailDebugLog('securityPolicyUri: ' + token.securityPolicyUri)
-              })
-
-              resolve(opcuaClient)
-            })
+            resolve(opcuaClient)
           }
         })
       } else {
         reject(new Error('OPC UA Client Is Not Valid'))
       }
     })
+}
+
+de.biancoroyal.opcua.iiot.core.connector.logEndpoints = function (options, endpoints) {
+  let coreConnector = this
+  let cryptoUtils = require('node-opcua').crypto_utils
+  let fs = require('fs')
+  let path = require('path')
+  let hexDump = require('node-opcua').hexDump
+
+  let treeify = require('treeify')
+  coreConnector.internalDebugLog(treeify.asTree(endpoints, true))
+
+  coreConnector.internalDebugLog('endpoint: ' + endpoints[0].endpointUrl)
+  coreConnector.internalDebugLog('Application URI: ' + endpoints[0].server.applicationUri)
+  coreConnector.detailDebugLog('Security Mode: ' + endpoints[0].securityMode.toString())
+  coreConnector.detailDebugLog('securityPolicyUri: ' + endpoints[0].securityPolicyUri)
+
+  endpoints.forEach(function (endpoint, i) {
+    coreConnector.detailDebugLog('endpoint: ' + endpoint.endpointUrl)
+    coreConnector.detailDebugLog('Application URI: ' + endpoint.server.applicationUri)
+    coreConnector.detailDebugLog('Product URI: ' + endpoint.server.productUri)
+    coreConnector.detailDebugLog('Application Name: ' + endpoint.server.applicationName.text)
+    coreConnector.detailDebugLog('Security Mode: ' + endpoint.securityMode.toString())
+    coreConnector.detailDebugLog('securityPolicyUri: ' + endpoint.securityPolicyUri)
+    coreConnector.detailDebugLog('Type: ' + endpoint.server.applicationType.key)
+
+    if (endpoint.server.discoveryUrls) {
+      coreConnector.detailDebugLog('discoveryUrls: ' + endpoint.server.discoveryUrls.join(' - '))
+    }
+
+    if (endpoint.serverCertificate) {
+      options.serverCertificate = endpoint.serverCertificate
+      coreConnector.detailDebugLog('serverCertificate: ' + hexDump(endpoint.serverCertificate).yellow)
+      options.defaultSecureTokenLifetime = 60000 // 1 min.
+
+      let certificateFilename = path.join(coreConnector.core.getNodeOPCUAClientPath(), '/certificates/PKI/server_certificate' + i + '.pem')
+      coreConnector.detailDebugLog(certificateFilename)
+      fs.writeFile(certificateFilename, cryptoUtils.toPem(endpoint.serverCertificate, 'CERTIFICATE'), (err) => {
+        if (err) throw err
+        coreConnector.detailDebugLog('The certificate file ' + certificateFilename + ' has been saved!')
+      })
+    } else {
+      coreConnector.detailDebugLog('serverCertificate: None'.red)
+    }
+  })
+
+  endpoints.forEach(function (endpoint, i) {
+    coreConnector.detailDebugLog('Identify Token for : Security Mode=' +
+      endpoint.securityMode.toString() + ' Policy=' + endpoint.securityPolicyUri)
+
+    if (endpoint.userIdentityTokens) {
+      endpoint.userIdentityTokens.forEach(function (token) {
+        coreConnector.detailDebugLog('policyId: ' + token.policyId)
+        coreConnector.detailDebugLog('tokenType: ' + token.tokenType.toString())
+        coreConnector.detailDebugLog('issuedTokenType: ' + token.issuedTokenType)
+        coreConnector.detailDebugLog('issuerEndpointUrl: ' + token.issuerEndpointUrl)
+        coreConnector.detailDebugLog('securityPolicyUri: ' + token.securityPolicyUri)
+      })
+    }
+  })
 }
 
 de.biancoroyal.opcua.iiot.core.connector.disconnect = function (opcuaClient) {

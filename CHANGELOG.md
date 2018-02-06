@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.1"></a>
+## [2.0.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v1.3.3...v2.0.1) (2018-02-05)
+
+- API changes in node-opcua 0.2.x - datatype as string and not object
+- address spaces definitions had to be changed - datatype changerd to string like 'Double', 'UInt16' ...
+
 <a name="1.3.3"></a>
 ## [1.3.3](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v1.3.1...v1.3.3) (2018-01-10)
 

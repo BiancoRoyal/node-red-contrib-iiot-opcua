@@ -214,32 +214,17 @@ de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, item
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, items, multipleRequest) {
+de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nodesToRead, multipleRequest) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        let core = require('./opcua-iiot-core')
-
-        session.readAllAttributes(items, function (err, nodesToRead, dataValues, diagnostics) {
+        session.readAllAttributes(nodesToRead, function (err, dataValues) {
           if (err) {
             reject(err)
           } else {
-            let resultsConverted = []
-
-            for (let i = 0; i < nodesToRead.length; i++) {
-              const nodeToRead = nodesToRead[i]
-              const dataValue = dataValues[i]
-              if (dataValue.statusCode !== core.nodeOPCUA.StatusCodes.Good) {
-                continue
-              }
-              resultsConverted.push(core.dataValuetoString(nodeToRead.attributeId, dataValue))
-            }
-
             resolve({
-              resultsConverted: resultsConverted,
               nodesToRead: nodesToRead,
-              results: dataValues,
-              diagnostics: diagnostics
+              results: dataValues
             })
           }
         })

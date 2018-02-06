@@ -78,14 +78,14 @@
         "nodeId: 'ns=4;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            " +
         "displayName: 'Test Read and Write',\n            dataType: 'Double',\n            value: {\n                " +
         "get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        " +
-        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                        " +
+        "dataType: 'Double',\n                        " +
         "value: scriptObjects.testReadWrite\n                    })\n                },\n                " +
         "set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    " +
         "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        " +
         "let memoryVariable = addressSpace.addVariable({\n            componentOf: myVariables,\n            " +
         "nodeId: 'ns=4;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: 'Free Memory',\n            " +
-        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n            \n            value: {\n              get: function () {\n                " +
-        "return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                  " +
+        "dataType: 'Double',\n            \n            value: {\n              get: function () {\n                " +
+        "return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  " +
         "value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        " +
         "addressSpace.installHistoricalDataNode(memoryVariable)\n        \n        " +
         "let globalValue = node.context().global.get(\"TestOPCUAVarValue\")\n        if(globalValue) {\n            " +
@@ -93,9 +93,9 @@
         "let testOPCUAVarValue = addressSpace.addVariable({\n                componentOf: myVariables,\n                " +
         "nodeId: 'ns=4;s=TestOPCUAVarValue',\n                browseName: 'TestOPCUAVarValue',\n                " +
         "displayName: 'Test OPC UA Variable Value',\n                " +
-        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                \n                value: {\n                  " +
+        "dataType: 'Double',\n                \n                value: {\n                  " +
         "get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                      " +
-        "dataType: coreServer.core.nodeOPCUA.DataType.Double,\n                      " +
+        "dataType: 'Double',\n                      " +
         "value: node.context().global.get(\"TestOPCUAVarValue\").value\n                    })\n                  },\n                  " +
         "set: function (variant) {\n                      scriptObjects.testReadWrite = parseFloat(variant.value)\n                      " +
         "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                  }\n                }\n            })\n            " +

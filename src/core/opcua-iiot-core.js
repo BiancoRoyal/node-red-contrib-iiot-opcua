@@ -890,6 +890,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
 
 de.biancoroyal.opcua.iiot.core.dataValuetoString = function (attribute, dataValue) {
   if (!dataValue || !dataValue.value || !dataValue.value.hasOwnProperty('value')) {
+    this.detailDebugLog('dataValuetoString input attribute:' + attribute + ' dataValue: ' + JSON.stringify(dataValue))
     return '<null>'
   }
 

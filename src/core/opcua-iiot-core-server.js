@@ -68,7 +68,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     organizedBy: addressSpace.rootFolder.objects,
     nodeId: 'ns=4;i=1234',
     browseName: 'BiancoRoyal',
-    displayName: 'Bianco Royal'
+    displayName: 'Bianco Royal',
+    description: 'Bianco Royal - Software Innovations®'
   })
 
   let variable1 = 1
@@ -88,7 +89,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           value: variable1
         })
       }
@@ -105,7 +106,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           value: variable2
         })
       },
@@ -127,7 +128,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           value: variable3
         })
       },
@@ -143,12 +144,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     nodeId: 'ns=4;s=free_memory',
     browseName: 'FreeMemory',
     displayName: 'Free Memory',
-    dataType: coreServer.core.nodeOPCUA.DataType.Double,
+    dataType: 'Double',
 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           value: coreServer.core.availableMemory()
         })
       }
@@ -169,12 +170,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     componentOf: vendorName,
     nodeId: 'ns=4;s=Counter',
     browseName: 'Counter',
-    dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
+    dataType: 'UInt16',
 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.UInt16,
+          dataType: 'UInt16',
           value: counterValue
         })
       }
@@ -195,12 +196,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     componentOf: vendorName,
     nodeId: 'ns=4;s=FullCounter',
     browseName: 'FullCounter',
-    dataType: coreServer.core.nodeOPCUA.DataType.Int32,
+    dataType: 'Int32',
 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Int32,
+          dataType: 'Int32',
           value: fullcounterValue
         })
       }
@@ -209,7 +210,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
   addressSpace.installHistoricalDataNode(fullcounterVariable)
 
   var externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
-    value: new coreServer.core.nodeOPCUA.Variant({dataType: coreServer.core.nodeOPCUA.DataType.Double, value: 10.0}),
+    value: new coreServer.core.nodeOPCUA.Variant({dataType: 'Double', value: 10.0}),
     sourceTimestamp: null,
     sourcePicoseconds: 0
   })
@@ -241,7 +242,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Matrix,
           dimensions: [3, 3],
           value: [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -260,7 +261,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
           value: [1, 2, 3, 4]
         })
@@ -277,7 +278,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           value: 200 + 100 * Math.sin(Date.now() / 10000)
         })
       }
@@ -305,12 +306,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     nodeId: 'ns=4;s=FanSpeed',
     browseName: 'FanSpeed',
     dataType: 'Double',
-    value: new coreServer.core.nodeOPCUA.Variant({dataType: coreServer.core.nodeOPCUA.DataType.Double, value: 1000.0})
+    value: new coreServer.core.nodeOPCUA.Variant({dataType: 'Double', value: 1000.0})
   })
 
   setInterval(function () {
     fanSpeed.setValueFromSource(new coreServer.core.nodeOPCUA.Variant({
-      dataType: coreServer.core.nodeOPCUA.DataType.Double,
+      dataType: 'Double',
       value: 1000.0 + (Math.random() * 100 - 50)
     }))
   }, 10)
@@ -377,7 +378,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     value: {
       get: function () {
         return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType.Double,
+          dataType: 'Double',
           value: Math.random() + 19.0
         })
       }

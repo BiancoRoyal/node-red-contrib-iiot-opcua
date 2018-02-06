@@ -48,7 +48,7 @@ de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (ti
     requestedPublishingInterval: timeMilliseconds || 100,
     requestedLifetimeCount: 1000,
     requestedMaxKeepAliveCount: 12,
-    maxNotificationsPerPublish: 10,
+    maxNotificationsPerPublish: 100,
     publishingEnabled: true,
     priority: 10
   }
