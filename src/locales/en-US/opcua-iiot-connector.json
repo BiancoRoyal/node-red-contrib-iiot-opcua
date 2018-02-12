@@ -16,7 +16,8 @@
       "keepSessionAlive": "Keep Session Alive",
       "publicCertificateFile": "Public",
       "privateKeyFile": "Private",
-      "defaultSecureTokenLifetime": "Secure TLT"
+      "defaultSecureTokenLifetime": "Secure TLT",
+      "certificateFiles": "Certificate Files"
     },
     "tabs-label": {
       "settings": "Settings",
