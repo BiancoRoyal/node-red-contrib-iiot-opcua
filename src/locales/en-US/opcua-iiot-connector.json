@@ -13,7 +13,10 @@
       "user": "User",
       "password": "Password",
       "credentials": "Use Login",
-      "keepSessionAlive": "Keep Session Alive"
+      "keepSessionAlive": "Keep Session Alive",
+      "publicCertificateFile": "Public",
+      "privateKeyFile": "Private",
+      "defaultSecureTokenLifetime": "Secure TLT"
     },
     "tabs-label": {
       "settings": "Settings",

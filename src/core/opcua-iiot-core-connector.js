@@ -93,22 +93,28 @@ de.biancoroyal.opcua.iiot.core.connector.logEndpoints = function (options, endpo
   let path = require('path')
   let hexDump = require('node-opcua').hexDump
 
-  let treeify = require('treeify')
-  coreConnector.internalDebugLog(treeify.asTree(endpoints, true))
+  // let treeify = require('treeify')
+  // coreConnector.internalDebugLog(treeify.asTree(endpoints, true))
 
-  coreConnector.internalDebugLog('endpoint: ' + endpoints[0].endpointUrl)
-  coreConnector.internalDebugLog('Application URI: ' + endpoints[0].server.applicationUri)
-  coreConnector.detailDebugLog('Security Mode: ' + endpoints[0].securityMode.toString())
-  coreConnector.detailDebugLog('securityPolicyUri: ' + endpoints[0].securityPolicyUri)
+  if (endpoints[0]) {
+    coreConnector.internalDebugLog('endpoint: ' + endpoints[0].endpointUrl)
+    coreConnector.internalDebugLog('Application URI: ' + (endpoints[0].server) ? endpoints[0].server.applicationUri : 'unknown')
+    coreConnector.detailDebugLog('Security Mode: ' + (endpoints[0].securityMode) ? endpoints[0].securityMode.toString() : 'none')
+    coreConnector.detailDebugLog('securityPolicyUri: ' + endpoints[0].securityPolicyUri)
+  }
 
   endpoints.forEach(function (endpoint, i) {
     coreConnector.detailDebugLog('endpoint: ' + endpoint.endpointUrl)
-    coreConnector.detailDebugLog('Application URI: ' + endpoint.server.applicationUri)
-    coreConnector.detailDebugLog('Product URI: ' + endpoint.server.productUri)
-    coreConnector.detailDebugLog('Application Name: ' + endpoint.server.applicationName.text)
-    coreConnector.detailDebugLog('Security Mode: ' + endpoint.securityMode.toString())
+
+    if (endpoint.server) {
+      coreConnector.detailDebugLog('Application URI: ' + endpoint.server.applicationUri)
+      coreConnector.detailDebugLog('Product URI: ' + endpoint.server.productUri)
+      coreConnector.detailDebugLog('Application Name: ' + endpoint.server.applicationName.text)
+      coreConnector.detailDebugLog('Type: ' + endpoint.server.applicationType.key)
+    }
+
+    coreConnector.detailDebugLog('Security Mode: ' + (endpoint.securityMode) ? endpoint.securityMode.toString() : 'none')
     coreConnector.detailDebugLog('securityPolicyUri: ' + endpoint.securityPolicyUri)
-    coreConnector.detailDebugLog('Type: ' + endpoint.server.applicationType.key)
 
     if (endpoint.server.discoveryUrls) {
       coreConnector.detailDebugLog('discoveryUrls: ' + endpoint.server.discoveryUrls.join(' - '))

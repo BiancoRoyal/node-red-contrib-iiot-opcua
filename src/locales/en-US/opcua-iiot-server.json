@@ -16,7 +16,10 @@
       "maxAllowedSubscriptionNumber": "Max Subscriptions",
       "alternateHostname": "Alternate Hostname",
       "allowAnonymous": "Allow Anonymous",
-      "isAuditing": "Auditing"
+      "isAuditing": "Auditing",
+      "publicCertificateFile": "Public",
+      "privateCertificateFile": "Private",
+      "certificateFiles": "Certificate Files"
     },
     "tabs-label": {
       "users": "Users",

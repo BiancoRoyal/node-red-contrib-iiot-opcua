@@ -32,6 +32,8 @@ module.exports = function (RED) {
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.publicCertificateFile = config.publicCertificateFile
+    this.privateCertificateFile = config.privateCertificateFile
     // Security
     this.allowAnonymous = config.allowAnonymous
     // User Management
@@ -52,10 +54,17 @@ module.exports = function (RED) {
 
     let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
 
-    node.publicCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
-    coreServer.detailDebugLog(node.publicCertificateFile)
-    node.privateCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
-    coreServer.detailDebugLog(node.privateCertificateFile)
+    coreServer.detailDebugLog('config: ' + node.publicCertificateFile)
+    if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
+      node.publicCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
+      coreServer.detailDebugLog('default key: ' + node.publicCertificateFile)
+    }
+
+    coreServer.detailDebugLog('config: ' + node.privateCertificateFile)
+    if (node.privateCertificateFile === null || node.privateCertificateFile === '') {
+      node.privateCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
+      coreServer.detailDebugLog('default key: ' + node.privateCertificateFile)
+    }
 
     node.setNodeStatusTo = function (statusValue) {
       let statusParameter = coreServer.core.getNodeStatus(statusValue)
@@ -267,6 +276,10 @@ module.exports = function (RED) {
 
       let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
       let variableData = msg.payload.value
+
+      if (msg.payload.datatype === 'Boolean') {
+        variableData = (variableData === true || variableData === 'true')
+      }
 
       if (rootFolder) {
         addressSpace.addVariable({

@@ -16,7 +16,7 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreConnector = require('./core/opcua-iiot-core-connector')
-
+  let path = require('path')
   // let OPCUADiscoveryServer = require('lib/server/opcua_discovery_server').OPCUADiscoveryServer
 
   function OPCUAIIoTConnectorConfiguration (config) {
@@ -30,6 +30,9 @@ module.exports = function (RED) {
     this.name = config.name
     this.securityPolicy = config.securityPolicy
     this.messageSecurityMode = config.securityMode
+    this.publicCertificateFile = config.publicCertificateFile
+    this.privateKeyFile = config.privateKeyFile
+    this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 60000
 
     let node = this
     node.client = null
@@ -39,16 +42,27 @@ module.exports = function (RED) {
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
 
+    let nodeOPCUAClientPath = coreConnector.core.getNodeOPCUAClientPath()
+
+    coreConnector.detailDebugLog('config: ' + node.publicCertificateFile)
+    if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
+      node.publicCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/client_selfsigned_cert_1024.pem')
+      coreConnector.detailDebugLog('default key: ' + node.publicCertificateFile)
+    }
+
+    coreConnector.detailDebugLog('config: ' + node.privateCertificateFile)
+    if (node.privateCertificateFile === null || node.privateCertificateFile === '') {
+      node.privateCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/PKI/own/private/private_key.pem')
+      coreConnector.detailDebugLog('default key: ' + node.privateCertificateFile)
+    }
+
     node.opcuaClientOptions = {
       securityPolicy: node.securityPolicy || 'None',
       securityMode: node.messageSecurityMode || 'NONE',
-      defaultSecureTokenLifetime: 60000,
+      defaultSecureTokenLifetime: node.defaultSecureTokenLifetime,
       keepSessionAlive: true,
-      connectionStrategy: {
-        maxRetry: 15,
-        initialDelay: 3000,
-        maxDelay: 15000
-      }
+      certificateFile: node.certificateFile,
+      privateKeyFile: node.privateKeyFile
     }
 
     if (node.loginEnabled) {
