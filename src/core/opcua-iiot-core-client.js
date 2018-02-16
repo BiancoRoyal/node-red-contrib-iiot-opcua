@@ -26,24 +26,17 @@ de.biancoroyal.opcua.iiot.core.client.writeDebugLog = de.biancoroyal.opcua.iiot.
 de.biancoroyal.opcua.iiot.core.client.writeDetailsDebugLog = de.biancoroyal.opcua.iiot.core.client.writeDetailsDebugLog || require('debug')('opcuaIIoT:client:write:details') // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite) {
-  let core = de.biancoroyal.opcua.iiot.core.client.core
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.write(nodesToWrite, function (err, statusCodes, diagnostics) {
+        session.write(nodesToWrite, function (err, statusCodes) {
           if (err) {
             reject(err)
           } else {
-            let resultsConverted = []
-            let statusCode = null
-
-            for (statusCode of statusCodes) {
-              if (statusCode) {
-                resultsConverted.push(core.buildMsgPayloadByStatusCode(statusCode))
-              }
-            }
-
-            resolve({resultsConverted: resultsConverted, statusCodes: statusCodes, diagnostics: diagnostics})
+            resolve({
+              statusCodes: statusCodes,
+              nodesToWrite: nodesToWrite
+            })
           }
         })
       } else {
@@ -54,27 +47,16 @@ de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite) {
 }
 
 de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge, multipleRequest) {
-  let core = de.biancoroyal.opcua.iiot.core.client.core
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.read(items, maxAge, function (err, nodesToRead, results, diagnostics) {
+        session.read(items, maxAge, function (err, nodesToRead, dataValues, diagnostics) {
           if (err) {
             reject(err)
           } else {
-            let resultsConverted = []
-            let dataValue = null
-
-            for (dataValue of results) {
-              if (dataValue) {
-                resultsConverted.push(core.buildMsgPayloadByDataValue(dataValue))
-              }
-            }
-
             resolve({
-              resultsConverted: resultsConverted,
+              results: dataValues,
               nodesToRead: nodesToRead,
-              results: results,
               diagnostics: diagnostics
             })
           }
@@ -86,31 +68,19 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge, m
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, items, multipleRequest) {
-  let core = de.biancoroyal.opcua.iiot.core.client.core
+de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nodesToRead, multipleRequest) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.readVariableValue(items, function (err, results, diagnostics) {
+        session.readVariableValue(nodesToRead, function (err, dataValues, diagnostics) {
           if (err) {
             reject(err)
           } else {
-            let resultsConverted = []
-            let dataValue = null
-
-            core.specialDebugLog('requested ' + items.length + ' results ' + results.length)
-
-            if (results.length) {
-              for (dataValue of results) {
-                if (dataValue) {
-                  resultsConverted.push(core.buildMsgPayloadByDataValue(dataValue))
-                }
-              }
-            } else {
-              resultsConverted.push(core.buildMsgPayloadByDataValue(results))
-            }
-
-            resolve({resultsConverted: resultsConverted, results: results, diagnostic: diagnostics})
+            resolve({
+              results: dataValues,
+              nodesToRead: nodesToRead,
+              diagnostic: diagnostics
+            })
           }
         })
       } else {
@@ -181,28 +151,17 @@ de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, o
     })
 }
 
-de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, items, start, end) {
-  let core = de.biancoroyal.opcua.iiot.core.client.core
+de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, nodesToRead, start, end) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.readHistoryValue(items, start, end, function (err, results, diagnostics) {
+        session.readHistoryValue(nodesToRead, start, end, function (err, dataValues, diagnostics) {
           if (err) {
             reject(err)
           } else {
-            let resultsConverted = []
-            let dataValue = null
-
-            for (dataValue of results) {
-              if (dataValue) {
-                resultsConverted.push(core.buildMsgPayloadByDataValue(dataValue))
-              }
-            }
-
             resolve({
-              resultsConverted: resultsConverted,
-              nodesToRead: items,
-              results: results,
+              results: dataValues,
+              nodesToRead: nodesToRead,
               diagnostics: diagnostics
             })
           }
@@ -223,8 +182,8 @@ de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nod
             reject(err)
           } else {
             resolve({
-              nodesToRead: nodesToRead,
-              results: dataValues
+              results: dataValues,
+              nodesToRead: nodesToRead
             })
           }
         })
@@ -233,6 +192,10 @@ de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nod
       }
     }
   )
+}
+
+de.biancoroyal.opcua.iiot.core.client.stringifyFormatted = function (dataValues) {
+  return JSON.stringify(dataValues, null, 2)
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.client

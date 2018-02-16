@@ -461,6 +461,10 @@ de.biancoroyal.opcua.iiot.core.buildMsgPayloadByDataValue = function (dataValue)
 
   this.internalDebugLog('buildMsgPayloadByDataValue: ' + JSON.stringify(dataValue))
 
+  if (!dataValue.toJSON) {
+    return dataValue
+  }
+
   if (dataValue.value) {
     convertedValue = this.convertDataValue(dataValue.value)
   }
@@ -549,8 +553,8 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
   let convertedValue = null
 
   if (!value.hasOwnProperty('value')) {
-    this.specialDebugLog('value has no value and that is not allowd' + JSON.stringify(value))
-    return convertedValue
+    this.specialDebugLog('value has no value and that is not allowed ' + JSON.stringify(value))
+    return value
   }
 
   let valueType = typeof value.value

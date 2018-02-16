@@ -9,7 +9,8 @@
       "depth": "Depth",
       "justValue": "Send Just Values",
       "multipleRequest": "Multiple Nodes",
-      "metaDataInject": "Meta Inject"
+      "metaDataInject": "Meta Inject",
+      "parseStrings": "Parse Result"
     }
   }
 }

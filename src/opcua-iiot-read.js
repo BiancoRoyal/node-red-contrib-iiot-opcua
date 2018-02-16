@@ -27,6 +27,7 @@ module.exports = function (RED) {
     this.multipleRequest = config.multipleRequest
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.parseStrings = config.parseStrings
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
@@ -92,44 +93,10 @@ module.exports = function (RED) {
               coreClient.readAllAttributes(session, itemsToRead, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
-                if (readResult.results) {
-                  readResult.results.forEach(function (result) {
-                    coreClient.readDetailsDebugLog('Read All Attributes Result: ' + JSON.stringify(result))
-                  })
-                }
-
-                let message
-
-                if (node.multipleRequest) {
-                  message = {
-                    payload: readResult.results,
-                    nodesToRead: itemsToRead,
-                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    nodetype: 'read',
-                    readtype: 'AllAttributes',
-                    attributeId: node.attributeId
-                  }
-                } else {
-                  message = {
-                    payload: readResult.results,
-                    nodesToRead: itemsToRead[0],
-                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    nodetype: 'read',
-                    readtype: 'AllAttributes',
-                    attributeId: node.attributeId,
-                    topic: itemsToRead[0]
-                  }
-                }
-
                 try {
-                  node.send(message)
+                  node.send(node.buildResultMessage(msg, 'AllAttributes', readResult))
                 } catch (err) {
-                  message.payload = JSON.stringify(readResult.results)
-                  node.send(message)
+                  node.handleReadError(err, msg)
                 }
               }).catch(function (err) {
                 coreClient.readDebugLog('Error Items To Read All Attributes: ' + JSON.stringify(itemsToRead))
@@ -142,44 +109,11 @@ module.exports = function (RED) {
               coreClient.readVariableValue(session, itemsToRead, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
-                if (readResult.results) {
-                  readResult.results.forEach(function (result) {
-                    coreClient.readDetailsDebugLog('Read Variable Value Result: ' + JSON.stringify(result))
-                  })
-                }
-
-                let message
-
-                if (node.multipleRequest) {
-                  message = {
-                    payload: readResult.results,
-                    nodesToRead: itemsToRead,
-                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    nodetype: 'read',
-                    readtype: 'VariableValue',
-                    attributeId: node.attributeId
-                  }
-                } else {
-                  message = {
-                    payload: readResult.results,
-                    nodesToRead: itemsToRead[0],
-                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    nodetype: 'read',
-                    readtype: 'VariableValue',
-                    attributeId: node.attributeId,
-                    topic: itemsToRead[0]
-                  }
-                }
-
                 try {
+                  let message = node.buildResultMessage(msg, 'VariableValue', readResult)
                   node.send(message)
                 } catch (err) {
-                  message.payload = JSON.stringify(readResult.results)
-                  node.send(message)
+                  node.handleReadError(err, msg)
                 }
               }).catch(function (err) {
                 coreClient.core.specialDebugLog(err)
@@ -197,52 +131,14 @@ module.exports = function (RED) {
               coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
-                if (readResult.results) {
-                  readResult.results.forEach(function (result) {
-                    coreClient.readDetailsDebugLog('Read History Value Result: ' + JSON.stringify(result))
-                  })
+                try {
+                  let message = node.buildResultMessage(msg, 'HistoryValue', readResult)
+                  message.historyStart = node.historyStart
+                  message.historyEnd = node.historyEnd
+                  node.send(message)
+                } catch (err) {
+                  node.handleReadError(err, msg)
                 }
-
-                if (readResult.diagnostics) {
-                  readResult.diagnostics.forEach(function (diagnostic) {
-                    coreClient.readDetailsDebugLog('Read History Value Diagnostic: ' + JSON.stringify(diagnostic))
-                  })
-                }
-
-                let message
-
-                if (node.multipleRequest) {
-                  message = {
-                    payload: readResult.resultsConverted,
-                    nodesToRead: itemsToRead,
-                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
-                    nodetype: 'read',
-                    readtype: 'VariableValue',
-                    attributeId: node.attributeId
-                  }
-                } else {
-                  message = {
-                    payload: readResult.resultsConverted[0],
-                    nodesToRead: itemsToRead[0],
-                    maxAge: 0, /* default by node-opcua can not be changed v0.0.64 */
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
-                    nodetype: 'read',
-                    readtype: 'VariableValue',
-                    attributeId: node.attributeId,
-                    topic: itemsToRead[0]
-                  }
-                }
-
-                node.send(message)
               }).catch(function (err) {
                 coreClient.core.specialDebugLog(err)
                 coreClient.readDebugLog('Error Items To Read History Value: ' + JSON.stringify(itemsToRead))
@@ -257,7 +153,7 @@ module.exports = function (RED) {
               for (item of itemsToRead) {
                 transformedItem = {
                   nodeId: item,
-                  attributeId: Number(node.attributeId)
+                  attributeId: Number(node.attributeId) || null
                 }
                 coreClient.readDebugLog('Transformed Item: ' + JSON.stringify(transformedItem))
                 transformedItemsToRead.push(transformedItem)
@@ -266,52 +162,13 @@ module.exports = function (RED) {
               coreClient.read(session, transformedItemsToRead, node.maxAge, node.multipleRequest).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
-                if (readResult.results) {
-                  readResult.results.forEach(function (result) {
-                    coreClient.readDetailsDebugLog('Read Result: ' + JSON.stringify(result))
-                  })
+                try {
+                  let message = node.buildResultMessage(msg, 'Default', readResult)
+                  message.maxAge = node.maxAge
+                  node.send(message)
+                } catch (err) {
+                  node.handleReadError(err, msg)
                 }
-
-                if (readResult.diagnostics) {
-                  readResult.diagnostics.forEach(function (diagnostic) {
-                    coreClient.readDetailsDebugLog('Read Diagnostic: ' + JSON.stringify(diagnostic))
-                  })
-                }
-
-                let message
-
-                if (node.multipleRequest) {
-                  message = {
-                    payload: readResult.resultsConverted,
-                    nodesToRead: readResult.nodesToRead,
-                    maxAge: node.maxAge,
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
-                    nodetype: 'read',
-                    readtype: 'Default',
-                    attributeId: node.attributeId
-                  }
-                } else {
-                  message = {
-                    payload: readResult.resultsConverted[0],
-                    nodesToRead: readResult.nodesToRead[0],
-                    maxAge: node.maxAge,
-                    multipleRequest: node.multipleRequest,
-                    input: msg,
-                    resultsConverted: readResult.resultsConverted,
-                    /* results: readResult.results, */
-                    diagnostics: readResult.diagnostics,
-                    nodetype: 'read',
-                    readtype: 'Default',
-                    attributeId: node.attributeId,
-                    topic: readResult.nodesToRead[0]
-                  }
-                }
-
-                node.send(message)
               }).catch(function (err) {
                 coreClient.readDebugLog('Error Read Default itemsToRead: ' + JSON.stringify(itemsToRead))
                 coreClient.readDebugLog('Error Read Default transformedItemsToRead: ' + JSON.stringify(transformedItemsToRead))
@@ -322,6 +179,93 @@ module.exports = function (RED) {
       } else {
         node.handleReadError(new Error('Session Not Valid On Read'), msg)
       }
+    }
+
+    node.getItemsToRead = function (itemsToRead) {
+      return (node.multipleRequest) ? itemsToRead : itemsToRead[0]
+    }
+
+    node.getConvertedResult = function (msg, dataValues) {
+      let convertedDataValues = {}
+
+      if (dataValues) {
+        if (node.parseStrings) {
+          if (typeof dataValues === 'string') {
+            try {
+              convertedDataValues = JSON.parse(dataValues)
+            } catch (e) {
+              if (node.showErrors) {
+                node.warn('JSON not to parse for dataValues type ' + typeof dataValues)
+                node.error(e.message, msg)
+              }
+
+              try {
+                convertedDataValues = JSON.parse(JSON.stringify(dataValues, null, 2))
+              } catch (e) {
+                if (node.showErrors) {
+                  node.warn('JSON not to parse from string for dataValues type ' + typeof dataValues)
+                  node.error(e.message, msg)
+                }
+                convertedDataValues = coreClient.stringifyFormatted(dataValues)
+              }
+            }
+          } else if (typeof dataValues === 'object') {
+            convertedDataValues = dataValues
+          } else {
+            if (node.showErrors) {
+              node.warn('unknown dataValues type ' + typeof dataValues)
+            }
+            convertedDataValues = dataValues
+          }
+        } else {
+          convertedDataValues = coreClient.stringifyFormatted(dataValues)
+        }
+      } else {
+        if (node.showErrors) {
+          node.warn('dataValues are undefined')
+        }
+      }
+
+      return convertedDataValues
+    }
+
+    node.buildResultMessage = function (msg, readType, readResult) {
+      let message = {
+        payload: {},
+        topic: msg.topic,
+        multipleRequest: node.multipleRequest,
+        input: msg,
+        nodetype: 'read',
+        readtype: readType,
+        attributeId: node.attributeId,
+        resultsConverted: {}
+      }
+
+      try {
+        let dataValuesString = JSON.stringify(readResult, null, 2)
+        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
+      } catch (e) {
+        if (node.showErrors) {
+          node.warn('JSON not to parse from string for dataValues type ' + typeof readResult)
+          node.error(e.message, msg)
+          message.payload = JSON.stringify(readResult.results, null, 2)
+          message.error = e.message
+        }
+      }
+
+      try {
+        let dataValuesString = JSON.stringify(readResult.results, null, 2)
+        RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
+      } catch (e) {
+        if (node.showErrors) {
+          node.warn('JSON not to parse from string for dataValues type ' + typeof readResult.results)
+          node.error(e.message, msg)
+          message.resultsConverted = null
+          message.error = e.message
+        }
+      }
+
+      return message
     }
 
     node.on('input', function (msg) {

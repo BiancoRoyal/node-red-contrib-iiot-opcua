@@ -20,7 +20,8 @@
       justValue: {value: true},
       multipleRequest: {value: false},
       showStatusActivities: {value: false},
-      showErrors: {value: false}
+      showErrors: {value: false},
+      parseStrings: {value: false}
     },
     inputs: 1,
     outputs: 1,
@@ -92,6 +93,11 @@
     </div>
     <hr>
     <div class="form-row">
+        <label style="min-width:160px" for="node-input-parseStrings"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.parseStrings"></span></label>
+        <input type="checkbox" id="node-input-parseStrings" style="max-width:30px">
+    </div>
+    <div class="form-row">
         <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
         <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
         <input type="checkbox" id="node-input-justValue" style="max-width:30px">
@@ -123,59 +129,41 @@
     The multiple Node-Id inject will request and produce an array of address space data.
     An individual Node-Id inject reads just a value and sends it via payload.</p>
 
-    <h3>Input individual read</h3>
+    <h3>Input normal read</h3>
     <div>
-        <p>Results of multiple request in message:</p>
         <ul>
-            <li>payload (Array)
-            <li>topic (Node-Id)
-            <li>data type (node-opcua/OPC UA data type)
+            <li>addressSpaceItems (Array of Objects with property nodeId)
         </ul>
     </div>
 
     <h3>Input multiple read</h3>
     <div>
-        <p>Results of multiple request in message:</p>
         <ul>
-            <li>payload (Array)
-            <li>nodesToRead (Array)
+            <li>nodesToRead or addressSpaceItems (Array of Objects with property nodeId)
         </ul>
     </div>
+
+    <p>OPC UA results containing nodesToRead and Injects sending addressSpaceItems.</p>
 
     <h3>Output</h3>
 
     <p>Please use the Result Filter node to handle the output of the Read node.</p>
 
     <div>
-        <p>Results of multiple request in message:</p>
+        <p>Results of request in message:</p>
         <ul>
-            <li>payload (Array)
-            <li>nodesToRead (Array)
-            <li>maxAge
+            <li>payload (Array/Object or String if not to parse)
+            <ul>
+                <li>results
+                <li>nodesToRead
+                <li>diagnostics (some)
+            </ul>
+            <li>topic
             <li>input (msg)
-            <li>resultsConverted (Array)
-            <li>results (Array)
-            <li>diagnostics (Array)
             <li>nodetype
             <li>readtype
             <li>attributeId
-        </ul>
-    </div>
-
-    <div>
-        <p>Results of multiple request in message:</p>
-        <ul>
-            <li>payload or payload (Array) based on read type
-            <li>nodesToRead (Node-Id)
-            <li>maxAge
-            <li>input (msg)
-            <li>resultsConverted (Array)
-            <li>results (Array)
-            <li>diagnostics (Array)
-            <li>nodetype
-            <li>readtype
-            <li>attributeId
-            <li>topic (Node-Id)
+            <li>resultsConverted (Array/Object of results or null if not to parse)
         </ul>
     </div>
 
