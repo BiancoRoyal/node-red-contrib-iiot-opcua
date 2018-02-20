@@ -274,6 +274,39 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
   return variantValue
 }
 
+de.biancoroyal.opcua.iiot.core.getVariantValue = function (datatype, value) {
+  let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
+
+  switch (datatype) {
+    case 'Float':
+    case 'Double':
+    case opcua.DataType.Double:
+      return parseFloat(value)
+    case 'UInt16':
+    case opcua.DataType.UInt16:
+      let uint16 = new Uint16Array([value])
+      return uint16[0]
+    case 'UInt32':
+    case opcua.DataType.UInt32:
+      let uint32 = new Uint32Array([value])
+      return uint32[0]
+    case 'Integer':
+    case 'Int16':
+    case 'Int32':
+    case 'Int64':
+    case opcua.DataType.Int32:
+      return parseInt(value)
+    case 'Boolean':
+    case opcua.DataType.Boolean:
+      return (value && value !== 'false')
+    case 'DateTime':
+    case opcua.DataType.DateTime:
+      return new Date(value)
+    default:
+      return value
+  }
+}
+
 de.biancoroyal.opcua.iiot.core.getBasicDataTypes = function () {
   let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
 

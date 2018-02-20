@@ -275,11 +275,7 @@ module.exports = function (RED) {
       }
 
       let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
-      let variableData = msg.payload.value
-
-      if (msg.payload.datatype === 'Boolean') {
-        variableData = (variableData === true || variableData === 'true')
-      }
+      let variableData = coreServer.core.getVariantValue(msg.payload.datatype, msg.payload.value)
 
       if (rootFolder) {
         addressSpace.addVariable({
