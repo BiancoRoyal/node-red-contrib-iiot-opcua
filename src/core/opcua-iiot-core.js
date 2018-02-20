@@ -290,11 +290,13 @@ de.biancoroyal.opcua.iiot.core.getVariantValue = function (datatype, value) {
     case opcua.DataType.UInt32:
       let uint32 = new Uint32Array([value])
       return uint32[0]
-    case 'Integer':
     case 'Int16':
+    case opcua.DataType.Int16:
     case 'Int32':
-    case 'Int64':
+    case 'Integer':
     case opcua.DataType.Int32:
+    case 'Int64':
+    case opcua.DataType.Int64:
       return parseInt(value)
     case 'Boolean':
     case opcua.DataType.Boolean:
