@@ -40,6 +40,7 @@
   "bugs": {
     "url": "https://github.com/biancode/node-red-contrib-iiot-opcua/issues"
   },
+  "homepage": "https://biancode.github.io/node-red-contrib-iiot-opcua/",
   "node-red": {
     "nodes": {
       "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",
