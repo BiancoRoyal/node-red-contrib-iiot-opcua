@@ -17,7 +17,10 @@
       "alternateHostname": "Alternate Hostname",
       "allowAnonymous": "Allow Anonymous",
       "isAuditing": "Auditing",
-      "function": "Address Space Script"
+      "function": "Address Space Script",
+      "publicCertificateFile": "Public",
+      "privateCertificateFile": "Private",
+      "certificateFiles": "Certificate Files"
     },
     "tabs-label": {
       "users": "Users",

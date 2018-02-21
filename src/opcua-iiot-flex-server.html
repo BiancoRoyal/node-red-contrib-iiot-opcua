@@ -25,6 +25,8 @@
       allowAnonymous: {value: true, required: true},
       isAuditing: {value: false},
       users: { value: [] },
+      publicCertificateFile: {value: ''},
+      privateCertificateFile: {value: ''},
       addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects) {\n    " +
         "// server = the created node-opcua server\n    // addressSpace = script placeholder\n    " +
         "// eventObjects = to hold event variables in memory from this script\n    \n    " +
@@ -395,6 +397,22 @@
                     <li>Sign</li>
                     <li>Sign&Encrypt</li>
                 </ul>
+            </div>
+            <div class="form-row">
+                <label style="min-width:140px">
+                    <i class="fa fa-certificate"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.certificateFiles"></span>
+                </label>
+            </div>
+            <div class="form-row">
+                <label for="node-input-publicCertificateFile"><i class="fa fa-file"></i>
+                <span data-i18n="opcua-iiot-contrib.label.publicCertificateFile"></span></label>
+                <input type="text" id="node-input-publicCertificateFile" placeholder="./certificates/server_selfsigned_cert_2048.pem" style="min-width:480px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-privateCertificateFile"><i class="fa fa-file"></i>
+                <span data-i18n="opcua-iiot-contrib.label.privateCertificateFile"></span></label>
+                <input type="text" id="node-input-privateCertificateFile" placeholder="./certificates/PKI/own/private/private_key.pem" style="min-width:480px">
             </div>
             <div class="form-row">
                  <label for="node-input-allowAnonymous" style="min-width:140px"><i class="icon-lock"></i>
