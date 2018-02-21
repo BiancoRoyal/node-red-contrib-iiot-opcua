@@ -226,13 +226,6 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
         value: uint32[0]
       }
       break
-    case 'Integer':
-    case opcua.DataType.Integer:
-      variantValue = {
-        dataType: opcua.DataType.Integer,
-        value: parseInt(value)
-      }
-      break
     case 'Int32':
     case opcua.DataType.Int32:
       variantValue = {
@@ -244,6 +237,13 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
     case opcua.DataType.Int16:
       variantValue = {
         dataType: opcua.DataType.Int16,
+        value: parseInt(value)
+      }
+      break
+    case 'Int64':
+    case opcua.DataType.Int64:
+      variantValue = {
+        dataType: opcua.DataType.Int64,
         value: parseInt(value)
       }
       break
@@ -259,6 +259,20 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
           dataType: opcua.DataType.Boolean,
           value: false
         }
+      }
+      break
+    case 'LocalizedText':
+    case opcua.DataType.LocalizedText:
+      variantValue = {
+        dataType: opcua.DataType.LocalizedText,
+        value: JSON.parse(value) /* [{text:'Hello', locale:'en'}, {text:'Hallo', locale:'de'} ... ] */
+      }
+      break
+    case 'DateTime':
+    case opcua.DataType.DateTime:
+      variantValue = {
+        dataType: opcua.DataType.DateTime,
+        value: new Date(value)
       }
       break
     default:
@@ -628,7 +642,7 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
         break
       case 'LocalizedText':
       case opcua.DataType.LocalizedText:
-        convertedValue = value.value.text
+        convertedValue = value.value
         break
       case 'Float':
       case opcua.DataType.Float:
@@ -656,8 +670,6 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
         let uint32 = new Uint32Array([value.value])
         convertedValue = uint32[0]
         break
-      case 'Integer':
-      case opcua.DataType.Integer:
       case 'Int16':
       case opcua.DataType.Int16:
       case 'Int32':

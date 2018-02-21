@@ -301,6 +301,24 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
     }
   })
 
+  addressSpace.addVariable({
+    organizedBy: vendorName,
+    nodeId: 'ns=4;s=MultiLanguageText',
+    browseName: 'MultiLanguageText',
+    displayName: 'Multi Language Text',
+    dataType: 'LocalizedText',
+    value: {
+      get: function () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType.LocalizedText,
+          value: [{text: 'multilingual text', locale: 'en'},
+            {text: 'mehrsprachiger Text', locale: 'de'},
+            {text: 'texte multilingue', locale: 'fr'}]
+        })
+      }
+    }
+  })
+
   let fanSpeed = addressSpace.addVariable({
     organizedBy: vendorName,
     nodeId: 'ns=4;s=FanSpeed',

@@ -32,7 +32,9 @@
         "password": "peter"
       }
     ],
-    "x": 720,
+    "publicCertificateFile": "",
+    "privateCertificateFile": "",
+    "x": 800,
     "y": 340,
     "wires": [
       [],
@@ -466,6 +468,49 @@
     "wires": [
       [
         "95820bac.926b58"
+      ]
+    ]
+  },
+  {
+    "id": "c6e0421c.0ca2e",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "7c39e187.c246f",
+    "injectType": "inject",
+    "payload": "[{\"text\":\"Hallo Welt!\",\"locale\":\"de\"},{\"text\":\"Hello World!\",\"locale\":\"en\"},{\"text\":\"Bonjour Monde!\",\"locale\":\"fr\"}]",
+    "payloadType": "json",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "15",
+    "name": "JSON",
+    "addressSpaceItems": [],
+    "x": 270,
+    "y": 560,
+    "wires": [
+      [
+        "42b44b50.ebba14"
+      ]
+    ]
+  },
+  {
+    "id": "42b44b50.ebba14",
+    "type": "OPCUA-IIoT-Server-ASO",
+    "z": "7c39e187.c246f",
+    "nodeId": "ns=5;s=TestLocalizedText",
+    "browsename": "TestLocalizedText",
+    "displayname": "Test LocalizedText",
+    "objecttype": "BaseDataVariableType",
+    "datatype": "LocalizedText",
+    "value": "",
+    "referenceNodeId": "ns=5;s=TestVariables",
+    "referencetype": "Organizes",
+    "name": "LocalizedText",
+    "x": 520,
+    "y": 560,
+    "wires": [
+      [
+        "cf1c0b87.2f3da8"
       ]
     ]
   }
