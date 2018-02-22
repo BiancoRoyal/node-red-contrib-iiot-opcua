@@ -853,7 +853,7 @@ de.biancoroyal.opcua.iiot.core.newOPCUANodeIdFromItemNodeId = function (item) {
   let namespace = de.biancoroyal.opcua.iiot.core.parseNamspaceFromItemNodeId(item)
   let nodeIdentifier = de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId(item)
 
-  this.internalDebugLog('newOPCUANodeIdFromItemNodeId: ' + JSON.stringify(nodeIdentifier))
+  this.internalDebugLog('newOPCUANodeIdFromItemNodeId: ' + JSON.stringify(nodeIdentifier) + ' namespace:' + namespace)
   return new de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
@@ -870,12 +870,18 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
   let nodesToWrite = []
 
   this.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
+  let item = null
+
+  // compatible mode to nodesToWrite of node-opcua
+  if (!msg.addressSpaceItems || !msg.addressSpaceItems.length) {
+    if (msg.nodesToWrite && msg.nodesToWrite.length) {
+      msg.addressSpaceItems = msg.nodesToWrite
+    }
+  }
 
   if (msg.addressSpaceItems) {
+    let index = 0
     if (msg.valuesToWrite) {
-      let item = null
-      let index = 0
-
       for (item of msg.addressSpaceItems) {
         nodesToWrite.push({
           nodeId: this.newOPCUANodeIdFromItemNodeId(item),
@@ -885,17 +891,23 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
         })
       }
     } else {
-    }
-  } else {
-    let item = null
-
-    for (item of msg.addressSpaceItems) {
-      nodesToWrite.push({
-        nodeId: this.newOPCUANodeIdFromItemNodeId(item),
-        attributeId: opcua.AttributeIds.Value,
-        indexRange: null,
-        value: {value: this.buildNewVariant(item.datatypeName, item.value)}
-      })
+      for (item of msg.addressSpaceItems) {
+        if (item.value) {
+          nodesToWrite.push({
+            nodeId: this.newOPCUANodeIdFromItemNodeId(item),
+            attributeId: opcua.AttributeIds.Value,
+            indexRange: null,
+            value: {value: this.buildNewVariant(item.datatypeName, item.value)}
+          })
+        } else {
+          nodesToWrite.push({
+            nodeId: this.newOPCUANodeIdFromItemNodeId(item),
+            attributeId: opcua.AttributeIds.Value,
+            indexRange: null,
+            value: {value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload)}
+          })
+        }
+      }
     }
   }
 

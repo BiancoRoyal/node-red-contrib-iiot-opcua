@@ -43,7 +43,7 @@ try these options on npm install to build, if you have problems to install
 
 Let's work together! 
 Please read and in best case accept [CONTRIBUTING](CONTRIBUTING.md) by your sign and send it via E-Mail.
-You could also send just a pull request.
+You could also send just a pull request or issues while testing, please!
 
 ### Debug
 
@@ -66,6 +66,25 @@ Please, read the [Wiki article][7]
 
 Follow the [white rabbit][4]!
 
+### Your own address space model!
+
+With the flex server you could create your own information model with the OPC UA address space.
+
+![Flex server Example](images/opcua-iiot-flex-server-example.png)
+
+The server node contains demo objects and variables 
+to start playing with OPC UA method call, read and write operations.
+
+![Flow Example](images/opcua-iiot-v109.png)
+
+**... secure reading from OPC UA servers with your own key pairs ...**
+
+![Read Example](images/opcua-iiot-read-example.png)
+
+**... create your own variables and objects from events ...**
+
+![ASO Example](images/opcua-iiot-aso-example.png)
+
 ## Package Information
 
 ### Known Issues and TODO's
@@ -74,16 +93,13 @@ Ideas
 * converting in Result Filter is not finished yet
 * dynamic methods
 * dynamic IP for connector
+* individual import of XML to get more types and objects
 
 Errors
-* Connector
-    * session closing
-    * connection reset on errors
 * more Bad status situations handling
 * Publish Engine Error
-* Events doesn't work sometimes see [node-opcua issue][8]
+* API changes to 0.2.+ bring some errors - Please, test and report issues at GitHub!
 
-![Flow Example](images/opcua-iiot-v109.png)
 
 ### License
 
@@ -111,4 +127,3 @@ for the node-opcua packages and very special for the node-opcua-isa95 package!
 [5]:https://github.com/node-opcua/node-opcua/commit/fa0efb772353adbc901f47d8787a13597d595cd7
 [6]:https://github.com/erossignon
 [7]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki/DEBUG
-[8]:https://github.com/node-opcua/node-opcua/issues/340

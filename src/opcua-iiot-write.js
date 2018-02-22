@@ -80,27 +80,12 @@ module.exports = function (RED) {
           coreClient.write(session, nodesToWrite).then(function (writeResult) {
             node.setNodeStatusTo('active')
 
-            if (writeResult.results) {
-              writeResult.results.forEach(function (result) {
-                coreClient.writeDebugLog('Write Result: ' + JSON.stringify(result))
-              })
+            try {
+              let message = node.buildResultMessage(msg, writeResult)
+              node.send(message)
+            } catch (err) {
+              node.handleReadError(err, msg)
             }
-
-            if (writeResult.diagnostics) {
-              writeResult.diagnostics.forEach(function (diagnostic) {
-                coreClient.writeDetailsDebugLog('Write Diagnostic: ' + JSON.stringify(diagnostic))
-              })
-            }
-
-            let message = {
-              payload: writeResult.resultsConverted,
-              nodesToWrite: JSON.parse(JSON.stringify(nodesToWrite)),
-              input: msg,
-              diagnostics: writeResult.diagnostics,
-              nodetype: 'write'
-            }
-            coreClient.writeDetailsDebugLog('Write Send Message: ' + JSON.stringify(message))
-            node.send(message)
           }).catch(function (err) {
             coreClient.writeDebugLog(err)
             node.handleWriteError(err, msg)
@@ -109,6 +94,42 @@ module.exports = function (RED) {
       } else {
         node.handleWriteError(new Error('Session Not Valid On Write'), msg)
       }
+    }
+
+    node.buildResultMessage = function (msg, result) {
+      let message = {
+        payload: {},
+        topic: msg.topic,
+        input: msg,
+        nodetype: 'write',
+        resultsConverted: {}
+      }
+
+      try {
+        let dataValuesString = JSON.stringify(result, null, 2)
+        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
+      } catch (e) {
+        if (node.showErrors) {
+          node.warn('JSON not to parse from string for write result type ' + typeof result)
+          node.error(e.message, msg)
+          message.payload = JSON.stringify(result.results, null, 2)
+          message.error = e.message
+        }
+      }
+
+      try {
+        let dataValuesString = JSON.stringify(result.statusCodes, null, 2)
+        RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
+      } catch (e) {
+        if (node.showErrors) {
+          node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
+          node.error(e.message, msg)
+          message.resultsConverted = null
+          message.error = e.message
+        }
+      }
+
+      return message
     }
 
     node.on('input', function (msg) {

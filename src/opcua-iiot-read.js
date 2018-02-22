@@ -185,50 +185,6 @@ module.exports = function (RED) {
       return (node.multipleRequest) ? itemsToRead : itemsToRead[0]
     }
 
-    node.getConvertedResult = function (msg, dataValues) {
-      let convertedDataValues = {}
-
-      if (dataValues) {
-        if (node.parseStrings) {
-          if (typeof dataValues === 'string') {
-            try {
-              convertedDataValues = JSON.parse(dataValues)
-            } catch (e) {
-              if (node.showErrors) {
-                node.warn('JSON not to parse for dataValues type ' + typeof dataValues)
-                node.error(e.message, msg)
-              }
-
-              try {
-                convertedDataValues = JSON.parse(JSON.stringify(dataValues, null, 2))
-              } catch (e) {
-                if (node.showErrors) {
-                  node.warn('JSON not to parse from string for dataValues type ' + typeof dataValues)
-                  node.error(e.message, msg)
-                }
-                convertedDataValues = coreClient.stringifyFormatted(dataValues)
-              }
-            }
-          } else if (typeof dataValues === 'object') {
-            convertedDataValues = dataValues
-          } else {
-            if (node.showErrors) {
-              node.warn('unknown dataValues type ' + typeof dataValues)
-            }
-            convertedDataValues = dataValues
-          }
-        } else {
-          convertedDataValues = coreClient.stringifyFormatted(dataValues)
-        }
-      } else {
-        if (node.showErrors) {
-          node.warn('dataValues are undefined')
-        }
-      }
-
-      return convertedDataValues
-    }
-
     node.buildResultMessage = function (msg, readType, readResult) {
       let message = {
         payload: {},

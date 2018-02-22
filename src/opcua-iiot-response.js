@@ -156,7 +156,7 @@ module.exports = function (RED) {
     node.handlePayloadStatusCode = function (msg) {
       let entryStatus = [0, 0, 0]
 
-      if (msg.payload.length) {
+      if (msg.payload.length || msg.payload.results || msg.payload.statusCodes) {
         entryStatus = node.handlePayloadArrayOfObjects(msg)
       } else {
         entryStatus = node.handlePayloadObject(msg)
@@ -170,8 +170,17 @@ module.exports = function (RED) {
     node.handlePayloadArrayOfObjects = function (msg) {
       let entry = null
       let entryStatus = [0, 0, 0]
+      let results = []
 
-      for (entry of msg.payload) {
+      if (msg.payload.results) {
+        results = msg.payload.results
+      } else if (msg.payload.statusCodes) {
+        results = msg.payload.statusCodes
+      } else {
+        if (msg.payload.length) { results = msg.payload }
+      }
+
+      for (entry of results) {
         if (entry.statusCode && entry.statusCode.name) {
           switch (entry.statusCode.name) {
             case 'Good':
@@ -198,6 +207,10 @@ module.exports = function (RED) {
 
     node.handlePayloadObject = function (msg) {
       let entryStatus = [0, 0, 0]
+
+      if (msg.payload.results || msg.payload.statusCodes) {
+        entryStatus = node.handlePayloadArrayOfObjects(msg)
+      }
 
       if (msg.payload && msg.payload.statusCode) {
         if (msg.payload.statusCode.name) {
@@ -227,24 +240,26 @@ module.exports = function (RED) {
       let entry = null
       let entryStatus = [0, 0, 0]
 
-      for (entry of msg.payload) {
-        if (entry && entry.name) {
-          switch (entry.name) {
-            case 'Good':
-              entryStatus[0] += 1
-              break
-            case 'Bad':
-              entryStatus[1] += 1
-              break
-            default:
-              if (entry.name.indexOf('Good') > -1) {
+      if (msg.payload.statusCodes) {
+        for (entry of msg.payload.statusCodes) {
+          if (entry && entry.name) {
+            switch (entry.name) {
+              case 'Good':
                 entryStatus[0] += 1
-              } else if (entry.name.indexOf('Bad') > -1) {
+                break
+              case 'Bad':
                 entryStatus[1] += 1
-              } else {
-                coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.name))
-                entryStatus[2] += 1
-              }
+                break
+              default:
+                if (entry.name.indexOf('Good') > -1) {
+                  entryStatus[0] += 1
+                } else if (entry.name.indexOf('Bad') > -1) {
+                  entryStatus[1] += 1
+                } else {
+                  coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.name))
+                  entryStatus[2] += 1
+                }
+            }
           }
         }
       }
