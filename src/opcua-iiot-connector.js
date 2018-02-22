@@ -272,6 +272,7 @@ module.exports = function (RED) {
     node.handleError = function (err) {
       if (err) {
         node.error(err, {payload: 'Connector Error'})
+        coreConnector.internalDebugLog('Error on ' + node.endpoint + ' err:' + err.message)
       } else {
         coreConnector.internalDebugLog('Error on ' + node.endpoint)
       }

@@ -25,7 +25,7 @@ module.exports = function (RED) {
     this.name = config.name
     this.justValue = config.justValue
     this.multipleRequest = config.multipleRequest
-    this.metaDataInject = config.metaDataInject
+    this.metaDataInject = config.metaDataInject   /* TODO: not finished for now */
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -58,9 +58,10 @@ module.exports = function (RED) {
     }
 
     node.resetSession = function () {
-      if (!node.sessionTimeout && node.opcuaClient) {
+      if (!node.sessionTimeout && node.opcuaClient && node.opcuaSession) {
         coreListener.internalDebugLog('Reset Session')
         node.connector.closeSession(node.opcuaSession, function () {
+          node.opcuaSession = null
           node.startOPCUASessionWithTimeout(node.opcuaClient)
         })
       }

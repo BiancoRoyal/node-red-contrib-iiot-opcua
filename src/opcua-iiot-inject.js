@@ -61,6 +61,10 @@ module.exports = function (RED) {
         node.verboseLog(RED._('opcuaiiotinject.repeat', node))
         coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
+        if (node.interval_id) {
+          clearInterval(node.interval_id)
+        }
+
         node.interval_id = setInterval(function () {
           node.emit('input', {})
         }, node.repeat)
@@ -128,7 +132,7 @@ module.exports = function (RED) {
       coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout +
         ' msec.'
       )
-      setTimeout(function () {
+      node.onceTimeout = setTimeout(function () {
         coreInject.internalDebugLog('injecting once at start')
         node.emit('input', {})
         node.repeaterSetup()
@@ -143,10 +147,16 @@ module.exports = function (RED) {
   OPCUAIIoTInject.prototype.close = function () {
     let node = this
 
+    if (node.onceTimeout) {
+      clearTimeout(node.onceTimeout)
+    }
+
     if (node.interval_id) {
       clearInterval(node.interval_id)
       node.verboseLog(RED._('opcuaiiotinject.stopped'))
-    } else if (node.cronjob) {
+    }
+
+    if (node.cronjob) {
       node.cronjob.stop()
       node.verboseLog(RED._('opcuaiiotinject.stopped'))
       delete node.cronjob

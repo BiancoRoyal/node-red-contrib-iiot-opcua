@@ -54,9 +54,10 @@ module.exports = function (RED) {
     }
 
     node.resetSession = function () {
-      if (!node.sessionTimeout && node.opcuaClient) {
+      if (!node.sessionTimeout && node.opcuaClient && node.opcuaSession) {
         coreBrowser.internalDebugLog('Reset Session')
         node.connector.closeSession(node.opcuaSession, function () {
+          node.opcuaSession = null
           node.startOPCUASessionWithTimeout(node.opcuaClient)
         })
       }
