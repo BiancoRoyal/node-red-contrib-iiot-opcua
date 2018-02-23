@@ -122,8 +122,7 @@ for the node-opcua packages and very special for the node-opcua-isa95 package!
 
 [1]:https://bianco-royal.cloud/
 [2]:https://bianco-royal.cloud/supporter/
-[3]:https://github.com/biancode/node-red-iiot-opcua-publicbeta
-[4]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki
-[5]:https://github.com/node-opcua/node-opcua/commit/fa0efb772353adbc901f47d8787a13597d595cd7
+[3]:https://github.com/biancode/node-red-contrib-iiot-opcua
+[4]:https://github.com/biancode/node-red-contrib-iiot-opcua/wiki
 [6]:https://github.com/erossignon
 [7]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki/DEBUG
