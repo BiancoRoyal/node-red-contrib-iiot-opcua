@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.9"></a>
+## [2.0.9](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.8...v2.0.9) (2018-02-24)
+
+
+
 <a name="2.0.8"></a>
 ## [2.0.8](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.7...v2.0.8) (2018-02-22)
 
