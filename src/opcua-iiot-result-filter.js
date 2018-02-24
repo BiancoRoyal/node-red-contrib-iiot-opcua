@@ -56,7 +56,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (!msg.hasOwnProperty('payload')) {
+      if (!msg.hasOwnProperty('payload') || msg.payload === null || msg.payload === undefined) {
         coreFilter.internalDebugLog('filtering message without payload ' + JSON.stringify(msg))
         return
       }

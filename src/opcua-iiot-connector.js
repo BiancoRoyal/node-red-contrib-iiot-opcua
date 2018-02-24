@@ -50,10 +50,10 @@ module.exports = function (RED) {
       coreConnector.detailDebugLog('default key: ' + node.publicCertificateFile)
     }
 
-    coreConnector.detailDebugLog('config: ' + node.privateCertificateFile)
-    if (node.privateCertificateFile === null || node.privateCertificateFile === '') {
-      node.privateCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/PKI/own/private/private_key.pem')
-      coreConnector.detailDebugLog('default key: ' + node.privateCertificateFile)
+    coreConnector.detailDebugLog('config: ' + node.privateKeyFile)
+    if (node.privateKeyFile === null || node.privateKeyFile === '') {
+      node.privateKeyFile = path.join(nodeOPCUAClientPath, '/certificates/PKI/own/private/private_key.pem')
+      coreConnector.detailDebugLog('default key: ' + node.privateKeyFile)
     }
 
     node.opcuaClientOptions = {
@@ -61,7 +61,7 @@ module.exports = function (RED) {
       securityMode: node.messageSecurityMode || 'NONE',
       defaultSecureTokenLifetime: node.defaultSecureTokenLifetime,
       keepSessionAlive: true,
-      certificateFile: node.certificateFile,
+      certificateFile: node.publicCertificateFile,
       privateKeyFile: node.privateKeyFile
     }
 
