@@ -110,6 +110,7 @@
                 <ul>
                     <li>interval (number)
                     <li>queueSize (number)
+                    <li>options (optional object)
                 </ul>
             <li>topic (Node-Id)
             <li>datatype (node-opcua/OPC UA data type name)
@@ -120,6 +121,34 @@
     <p>There is a option to send a JSON payload inject into the Listener.</p>
     <p>Example:</p>
     <p><pre>{ "interval": 500, "queueSize": 10 }</pre></p>
+
+    <div>
+        <h5>msg.payload.options<h5>
+
+        <strong>event subscription parameters default:</stong>
+        <pre>
+        msg.payload.options = {
+            requestedPublishingInterval: 100,
+            requestedLifetimeCount: 60,
+            requestedMaxKeepAliveCount: 10,
+            maxNotificationsPerPublish: 4,
+            publishingEnabled: true,
+            priority: 1
+        }
+        </pre>
+
+        <strong>subscription parameters default:</stong>
+        <pre>
+        msg.payload.options = {
+            requestedPublishingInterval: 100,
+            requestedLifetimeCount: 1000,
+            requestedMaxKeepAliveCount: 12,
+            maxNotificationsPerPublish: 100,
+            publishingEnabled: true,
+            priority: 10
+        }
+        </pre>
+    </div>
 
     <h3>Output 1</h3>
     <div>

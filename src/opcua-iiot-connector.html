@@ -81,6 +81,8 @@
 
       let endpointsLookupField = $("#node-lookup-endpoint")
       let endpointField = $("#node-config-input-endpoint")
+      let securityPolicyField = $("#node-config-input-securityPolicy")
+      let securityModeField = $("#node-config-input-securityMode")
 
       endpointsLookupField.click(function () {
         endpointsLookupField.addClass('disabled')
@@ -90,7 +92,11 @@
 
           $.each(data, function (i, entry) {
             let security = entry.securityPolicyUri.split('#')
-            node.lookupItems.push({value: entry.endpointUrl, label: entry.endpointUrl + ' (' + entry.securityMode + ' ' + security[1] + ')'} )
+            node.lookupItems.push({
+              value: entry.endpointUrl,
+              label: entry.endpointUrl + ' (' + entry.securityMode + ' ' + security[1] + ')',
+              securityPolicy: security[1],
+              securityMode: entry.securityMode} )
           })
 
           endpointField.autocomplete({
@@ -98,10 +104,14 @@
             minLength: 0,
             focus: function (event, ui) {
               endpointField.val(ui.item.value);
+              securityPolicyField.val(ui.item.securityPolicy);
+              securityModeField.val(ui.item.securityMode);
               return false;
             },
             select: function (event, ui) {
               endpointField.val(ui.item.value)
+              securityPolicyField.val(ui.item.securityPolicy);
+              securityModeField.val(ui.item.securityMode);
               return false;
             },
             close: function (event, ui) {

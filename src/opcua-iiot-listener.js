@@ -68,14 +68,14 @@ module.exports = function (RED) {
     }
 
     node.createSubscription = function (msg, cb) {
-      let timeMilliseconds = msg.payload
+      let timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
 
       if (msg.nodetype !== 'events') {
         coreListener.internalDebugLog('create subscription')
-        subscription = node.makeSubscription(cb, msg, coreListener.getSubscriptionParameters(timeMilliseconds))
+        subscription = node.makeSubscription(cb, msg, msg.payload.options || coreListener.getSubscriptionParameters(timeMilliseconds))
       } else {
         coreListener.internalDebugLog('create events subscription')
-        subscription = node.makeSubscription(cb, msg, coreListener.getEventSubscribtionParameters(timeMilliseconds))
+        subscription = node.makeSubscription(cb, msg, msg.payload.options || coreListener.getEventSubscribtionParameters(timeMilliseconds))
       }
     }
 
@@ -133,6 +133,8 @@ module.exports = function (RED) {
               coreListener.subscribeDebugLog('New Subscription ' + addressSpaceItem.nodeId)
               monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
               node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
+
+              monitoredItem.addressSpaceItem = addressSpaceItem
 
               monitoredItem.on('initialized', function () {
                 node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
@@ -205,7 +207,15 @@ module.exports = function (RED) {
           })
         } else {
           coreListener.subscribeDebugLog('Monitored Item Unsubscribe')
-          monitoredItem.terminate()
+          monitoredItem.terminate(function (err) {
+            if (err) {
+              if (node.showErrors) {
+                node.error(err, msg)
+              }
+            } else {
+              coreListener.subscribeDebugLog('Unsubscribe Monitoring For ' + monitoredItem.addressSpaceItem.nodeId)
+            }
+          })
         }
       }
     }
@@ -240,6 +250,8 @@ module.exports = function (RED) {
               coreListener.eventDebugLog('Event New Subscription ' + addressSpaceItem.nodeId)
               monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
               node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
+
+              monitoredItem.addressSpaceItem = addressSpaceItem
 
               monitoredItem.on('initialized', function () {
                 node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
@@ -304,8 +316,15 @@ module.exports = function (RED) {
             }
           })
         } else {
-          coreListener.eventDebugLog('Monitored Event Unsubscribe')
-          monitoredItem.terminate()
+          monitoredItem.terminate(function (err) {
+            if (err) {
+              if (node.showErrors) {
+                node.error(err, msg)
+              }
+            } else {
+              coreListener.subscribeDebugLog('Unsubscribe Monitored Event For ' + monitoredItem.addressSpaceItem.nodeId)
+            }
+          })
         }
       }
     }

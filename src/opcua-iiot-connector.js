@@ -330,6 +330,7 @@ module.exports = function (RED) {
       try {
         coreConnector.connect(node.discoveryUrl || node.endpoint).then(function (opcuaClient) {
           coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (result) {
+            coreConnector.detailDebugLog('Endpoints ' + result.endpoints)
             res.json(result.endpoints || [])
           })
         }).catch(function (err) {
