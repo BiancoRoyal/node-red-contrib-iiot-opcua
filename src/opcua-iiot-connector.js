@@ -101,13 +101,15 @@ module.exports = function (RED) {
 
             node.opcuaClient = null
 
-            result.endpoints.forEach(function (endpoint, i) {
-              if (endpoint.securityMode === node.messageSecurityMode &&
-                endpoint.securityPolicyUri === node.securityPolicy) {
-                node.endpoint = endpoint.endpointUrl
-                coreConnector.internalDebugLog('Switch to Endpoint ' + JSON.stringify(node.endpoint))
-              }
-            })
+            if (result.endpoints) {
+              result.endpoints.forEach(function (endpoint, i) {
+                if (endpoint.securityMode === node.messageSecurityMode &&
+                  endpoint.securityPolicyUri === node.securityPolicy) {
+                  node.endpoint = endpoint.endpointUrl
+                  coreConnector.internalDebugLog('Switch to Endpoint ' + JSON.stringify(node.endpoint))
+                }
+              })
+            }
 
             coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
               coreConnector.internalDebugLog('Secured Connected On ' + node.endpoint)
