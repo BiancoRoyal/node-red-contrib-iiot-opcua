@@ -86,7 +86,7 @@ module.exports = function (RED) {
       coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
       node.opcuaClient = null
 
-      coreConnector.connect(node.discoveryUrl || node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
+      coreConnector.connect(node.discoveryUrl || node.endpoint).then(function (opcuaClient) {
         coreConnector.internalDebugLog('Connected On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
 
         coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (result) {
@@ -328,18 +328,13 @@ module.exports = function (RED) {
 
     if (node) {
       try {
-        if (node.opcuaClient) {
-          node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
-            if (err) {
-              coreConnector.internalDebugLog('Get Endpoints Request Error ' + err)
-            } else {
-              coreConnector.internalDebugLog('Get Endpoints Request Sending ' + endpoints)
-              res.json(endpoints)
-            }
+        coreConnector.connect(node.discoveryUrl || node.endpoint).then(function (opcuaClient) {
+          coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (result) {
+            res.json(result.endpoints || [])
           })
-        } else {
-          coreConnector.internalDebugLog('Get Endpoints Request None OPC UA Client ' + JSON.stringify(req.params))
-        }
+        }).catch(function (err) {
+          coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
+        })
       } catch (err) {
         coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
       }
