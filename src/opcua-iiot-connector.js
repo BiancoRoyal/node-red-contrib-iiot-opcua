@@ -24,6 +24,7 @@ module.exports = function (RED) {
     const UNLIMITED_LISTENERS = 0
 
     RED.nodes.createNode(this, config)
+    this.discoveryUrl = config.discoveryUrl || null
     this.endpoint = config.endpoint
     this.keepSessionAlive = config.keepSessionAlive
     this.loginEnabled = config.loginEnabled
@@ -36,6 +37,7 @@ module.exports = function (RED) {
 
     let node = this
     node.client = null
+    node.endpoints = []
     node.userIdentity = null
     node.opcuaClient = null
     node.discoveryServer = null
@@ -84,13 +86,14 @@ module.exports = function (RED) {
       coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
       node.opcuaClient = null
 
-      coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
+      coreConnector.connect(node.discoveryUrl || node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
         coreConnector.internalDebugLog('Connected On ' + node.endpoint + ' Options ' + JSON.stringify(node.opcuaClientOptions))
 
-        coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (opcuaClient) {
+        coreConnector.setupSecureConnectOptions(opcuaClient, node.opcuaClientOptions).then(function (result) {
           coreConnector.internalDebugLog('Setup Certified Options For ' + node.endpoint)
           coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
           delete node.opcuaClientOptions.keepSessionAlive
+          node.endpoints = result.endpoints
 
           coreConnector.disconnect(opcuaClient).then(function () {
             coreConnector.internalDebugLog('Disconnected From ' + node.endpoint)
@@ -98,11 +101,20 @@ module.exports = function (RED) {
 
             node.opcuaClient = null
 
+            result.endpoints.forEach(function (endpoint, i) {
+              if (endpoint.securityMode === node.messageSecurityMode &&
+                endpoint.securityPolicyUri === node.securityPolicy) {
+                node.endpoint = endpoint.endpointUrl
+                coreConnector.internalDebugLog('Switch to Endpoint ' + JSON.stringify(node.endpoint))
+              }
+            })
+
             coreConnector.connect(node.endpoint, node.opcuaClientOptions).then(function (opcuaClient) {
               coreConnector.internalDebugLog('Secured Connected On ' + node.endpoint)
               coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
 
               node.opcuaClient = opcuaClient
+              node.emit('connected', opcuaClient)
 
               node.opcuaClient.on('close', function () {
                 node.emit('server_connection_close')
@@ -111,15 +123,7 @@ module.exports = function (RED) {
               opcuaClient.on('after_reconnection', function (opcuaClient) {
                 node.emit('after_reconnection', opcuaClient)
               })
-
-              node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
-                if (err) {
-                  coreConnector.internalDebugLog('Get Endpoints Request Error' + err)
-                } else {
-                  coreConnector.internalDebugLog('Emit Connected Event'.white.bgGreen)
-                  node.emit('connected', node.opcuaClient)
-                }
-              })
+              node.endpoints = result.endpoints
             }).catch(function (err) {
               node.handleError(err)
             })
@@ -313,6 +317,32 @@ module.exports = function (RED) {
     credentials: {
       user: {type: 'text'},
       password: {type: 'password'}
+    }
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/client/endpoints/:id', RED.auth.needsPermission('opcua.endpoints'), function (req, res) {
+    let node = RED.nodes.getNode(req.params.id)
+    coreConnector.internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params))
+
+    if (node) {
+      try {
+        if (node.opcuaClient) {
+          node.opcuaClient.getEndpointsRequest(function (err, endpoints) {
+            if (err) {
+              coreConnector.internalDebugLog('Get Endpoints Request Error ' + err)
+            } else {
+              coreConnector.internalDebugLog('Get Endpoints Request Sending ' + endpoints)
+              res.json(endpoints)
+            }
+          })
+        } else {
+          coreConnector.internalDebugLog('Get Endpoints Request None OPC UA Client ' + JSON.stringify(req.params))
+        }
+      } catch (err) {
+        coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
+      }
+    } else {
+      coreConnector.internalDebugLog('Get Endpoints Request None Node ' + JSON.stringify(req.params))
     }
   })
 

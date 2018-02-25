@@ -1,6 +1,7 @@
 {
   "opcua-iiot-contrib": {
     "label": {
+      "discoveryUrl": "Discovery",
       "endpoint": "Endpoint",
       "connector": "Connector",
       "showActivities": "Show Activities",

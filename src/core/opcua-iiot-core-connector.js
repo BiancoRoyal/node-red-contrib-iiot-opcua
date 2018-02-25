@@ -77,7 +77,7 @@ de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (o
               de.biancoroyal.opcua.iiot.core.connector.logEndpoints(options, endpoints)
             }
 
-            resolve(opcuaClient)
+            resolve({opcuaClient: opcuaClient, endpoints: endpoints})
           }
         })
       } else {
