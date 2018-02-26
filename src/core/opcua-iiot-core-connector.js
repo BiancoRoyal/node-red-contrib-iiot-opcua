@@ -96,6 +96,10 @@ de.biancoroyal.opcua.iiot.core.connector.logEndpoints = function (options, endpo
   // let treeify = require('treeify')
   // coreConnector.internalDebugLog(treeify.asTree(endpoints, true))
 
+  if (!endpoints) {
+    coreConnector.internalDebugLog('Endpoints Not Valid To Log')
+  }
+
   if (endpoints[0]) {
     coreConnector.internalDebugLog('endpoint: ' + endpoints[0].endpointUrl)
     coreConnector.internalDebugLog('Application URI: ' + (endpoints[0].server) ? endpoints[0].server.applicationUri : 'unknown')

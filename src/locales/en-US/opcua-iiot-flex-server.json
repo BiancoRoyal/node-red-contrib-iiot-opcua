@@ -20,10 +20,12 @@
       "function": "Address Space Script",
       "publicCertificateFile": "Public",
       "privateCertificateFile": "Private",
-      "certificateFiles": "Certificate Files"
+      "certificateFiles": "Certificate Files",
+      "users": "Users",
+      "xmlsets": "XML-Sets"
     },
     "tabs-label": {
-      "users": "Users",
+      "users": "Users & Sets",
       "settings": "Settings",
       "security": "Security",
       "ass": "Address Space"

@@ -25,6 +25,7 @@
       allowAnonymous: {value: true, required: true},
       isAuditing: {value: false},
       users: { value: [] },
+      xmlsets: { value: [] },
       publicCertificateFile: {value: ''},
       privateCertificateFile: {value: ''},
       addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects) {\n    " +
@@ -121,6 +122,7 @@
     oneditprepare: function () {
       let node = this
       let cacheItemCount = node.users.length
+      let cacheItemCountSet = node.xmlsets.length
 
       let tabs = RED.tabs.create({
         id: "node-input-server-tabs",
@@ -155,8 +157,13 @@
         generateUserEntry(element, index);
       })
 
-      function resizeButton(container, width) {
-        let lastField = container.find(".node-input-server-users-password")
+      // XML-Set Management
+      node.xmlsets.forEach(function(element, index, array) {
+        generateXMLSetEntry(element, index);
+      })
+
+      function resizeButton(container, width, buttonName) {
+        let lastField = container.find()
         // lastField.width(width - 120);
       }
 
@@ -170,14 +177,14 @@
         let userField = $('<input/>', {
           id: "node-input-server-users-name",
           type: "text",
-          style: "margin-left:5px;width:120px;",
+          style: "margin-left:5px;width:160px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let passwordField = $('<input/>', {
           id: "node-input-server-users-password",
           type: "password",
-          style: "margin-left:5px;width:200px;",
+          style: "margin-left:5px;width:340px;",
           placeholder: 'password'
         }).appendTo(row)
 
@@ -204,7 +211,54 @@
 
         $("#node-input-server-users-container").append(container)
         let width = $("#node-input-server-users-container").width()
-        resizeButton(container, width)
+        resizeButton(container, width, ".node-input-server-users-password")
+      }
+
+      function generateXMLSetEntry(xmlset, id) {
+        let container = $('<li/>', {style:
+            "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"})
+        let row = $('<div id="row' + id + '"/>').appendTo(container)
+
+        $('<i style="color: #eee; cursor: move;" class="node-input-server-xmlsets-handle fa fa-bars"></i>').appendTo(row)
+
+        let nameField = $('<input/>', {
+          id: "node-input-server-xmlsets-name",
+          type: "text",
+          style: "margin-left:5px;width:80px;",
+          placeholder: 'name'
+        }).appendTo(row)
+
+        let pathField = $('<input/>', {
+          id: "node-input-server-xmlsets-path",
+          type: "text",
+          style: "margin-left:5px;width:430px;",
+          placeholder: 'public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml'
+        }).appendTo(row)
+
+        nameField.val(xmlset.name)
+        pathField.val(xmlset.path)
+
+        let finalspan = $('<span/>', {style: "float: right;margin-right: 10px;"}).appendTo(row)
+
+        let removeXMLSetButton = $('<a/>', {
+          href: "#",
+          class: "editor-button editor-button-small",
+          style: "margin-top: 7px; margin-left: 5px;"
+        }).appendTo(finalspan)
+
+        $('<i/>', {class: "fa fa-remove"}).appendTo(removeXMLSetButton)
+
+        removeXMLSetButton.click(function () {
+          container.css({"background": "#fee"})
+          container.fadeOut(300, function () {
+            console.log('remove set ' + $(this))
+            $(this).remove()
+          });
+        });
+
+        $("#node-input-server-xmlsets-container").append(container)
+        let width = $("#node-input-server-xmlsets-container").width()
+        resizeButton(container, width, ".node-input-server-xmlsets-path")
       }
 
       $("#node-input-server-users-container").sortable({
@@ -213,13 +267,28 @@
         cursor: "move"
       });
 
+      $("#node-input-server-xmlsets-container").sortable({
+        axis: "y",
+        handle: ".node-input-server-xmlsets-handle",
+        cursor: "move"
+      });
+
       $("#node-input-server-users-container .node-input-server-users-handle").disableSelection()
+
+      $("#node-input-server-xmlsets-container .node-input-server-xmlsets-handle").disableSelection()
 
       $("#node-input-server-users-add").click(function () {
         console.log('add user')
         cacheItemCount++
         generateUserEntry({ name: '', password: '' }, cacheItemCount) // length is every time one more than index
         $("#node-input-server-users-container-div").scrollTop($("#node-input-server-users-container-div").get(0).scrollHeight)
+      })
+
+      $("#node-input-server-xmlsets-add").click(function () {
+        console.log('add set')
+        cacheItemCountSet++
+        generateXMLSetEntry({ name: '', path: '' }, cacheItemCountSet) // length is every time one more than index
+        $("#node-input-server-xmlsets-container-div").scrollTop($("#node-input-server-xmlsets-container-div").get(0).scrollHeight)
       })
 
       // dialog handling
@@ -238,7 +307,7 @@
         let usersContainerChildren = $("#node-input-server-users-container").children()
         let newWidth = $("#node-input-server-users-container").width()
         usersContainerChildren.each(function (index, containerChild) {
-          resizeButton(containerChild, newWidth)
+          resizeButton(containerChild, newWidth, ".node-input-server-users-password")
         })
       }
 
@@ -257,6 +326,43 @@
 
       $("#dialog").one("dialogclose", function (ev, ui) {
         $("#dialog").off("dialogresize", switchDialogResize)
+      })
+
+      // dialog handling
+      function switchDialogSetResize() {
+        let rows = $("#dialogSet-form>div:not(.node-input-server-xmlsets-container-row)")
+        let height = $("#dialogSet-form").height()
+
+        rows.each(function (index, row) {
+          height -= row.outerHeight(true)
+        })
+
+        let editorRow = $("#dialogSet-form>div.node-input-server-xmlsets-container-row")
+        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
+        $("#node-input-server-xmlsets-container-div").css("height", height + "px")
+
+        let xmlsetContainerChildren = $("#node-input-server-xmlsets-container").children()
+        let newWidth = $("#node-input-server-xmlsets-container").width()
+        xmlsetContainerChildren.each(function (index, containerChild) {
+          resizeButton(containerChild, newWidth, ".node-input-server-xmlsets-path")
+        })
+      }
+
+      $("#dialogSet").on("dialogresize", switchDialogSetResize)
+
+      $("#dialogSet").one("dialogopen", function (ev) {
+        let size = $("#dialogSet").dialog('option', 'sizeCache-switch')
+        if (size) {
+          $("#dialogSet").dialog('option', 'width', size.width)
+          $("#dialogSet").dialog('option', 'height', size.height)
+          switchDialogSetResize()
+        } else {
+          setTimeout(switchDialogSetResize, 10)
+        }
+      })
+
+      $("#dialogSet").one("dialogclose", function (ev, ui) {
+        $("#dialogSet").off("dialogresize", switchDialogSetResize)
       })
 
       // address space script
@@ -297,9 +403,12 @@
     },
     oneditsave: function () {
       let cacheUsers = $("#node-input-server-users-container").children()
+      let cacheXMLSets = $("#node-input-server-xmlsets-container").children()
       let node = this
       node.users = []
+      node.xmlsets = []
       let userIndex = 0
+      let setIndex = 0
 
       cacheUsers.each(function () {
         console.log('save user: ' + JSON.stringify($(this)))
@@ -311,6 +420,18 @@
 
         userIndex++
       })
+
+      cacheXMLSets.each(function () {
+        console.log('save set: ' + JSON.stringify($(this)))
+
+        node.xmlsets.push({
+          name: $(this).find("#node-input-server-xmlsets-name").val(),
+          path: $(this).find("#node-input-server-xmlsets-path").val()
+        })
+
+        setIndex++
+      })
+
 
       $("#node-input-addressSpaceScript").val(this.editorAddressSpaceScript.getValue());
       this.editorAddressSpaceScript.destroy();
@@ -421,6 +542,7 @@
             </div>
         </div>
         <div id="opcuaiiot-server-tab-users" style="display:none">
+            <h4><span data-i18n="opcua-iiot-contrib.label.users"></span></h4>
             <div class="form-row node-input-server-users-container-row" style="margin-bottom: 0px;">
                 <div id="node-input-server-users-container-div"
                     style="box-sizing: border-box; border-radius: 5px;
@@ -430,6 +552,19 @@
             </div>
             <div class="form-row">
                 <a href="#" class="editor-button editor-button-small" id="node-input-server-users-add"
+                style="margin-top: 4px;"><i class="fa fa-plus"></i>
+                <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
+            </div>
+            <h4><span data-i18n="opcua-iiot-contrib.label.xmlsets"></span></h4>
+            <div class="form-row node-input-server-xmlsets-container-row" style="margin-bottom: 0px;">
+                <div id="node-input-server-xmlsets-container-div"
+                    style="box-sizing: border-box; border-radius: 5px;
+                    height: 240px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+                    <ol id="node-input-server-xmlsets-container" style=" list-style-type:none; margin: 0;"></ol>
+                </div>
+            </div>
+            <div class="form-row">
+                <a href="#" class="editor-button editor-button-small" id="node-input-server-xmlsets-add"
                 style="margin-top: 4px;"><i class="fa fa-plus"></i>
                 <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
             </div>

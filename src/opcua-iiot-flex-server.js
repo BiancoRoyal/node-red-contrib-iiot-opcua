@@ -39,6 +39,8 @@ module.exports = function (RED) {
     this.allowAnonymous = config.allowAnonymous
     // User Management
     this.users = config.users
+    // XML-Set Management
+    this.xmlsets = config.xmlsets
     // Audit
     this.isAuditing = config.isAuditing
 
@@ -61,7 +63,16 @@ module.exports = function (RED) {
     let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
 
     let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
-    let xmlFiles = [standardNodeSetFile, path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')]
+    let xmlFiles = [standardNodeSetFile]
+
+    node.xmlsets.forEach(function (xmlsetFileName, i) {
+      coreServer.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
+      if (xmlsetFileName.path.startsWith('public/vendor/')) {
+        xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
+      } else {
+        xmlFiles.push(xmlsetFileName.path)
+      }
+    })
 
     let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
 
