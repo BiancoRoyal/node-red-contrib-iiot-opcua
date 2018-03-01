@@ -22,7 +22,8 @@
       "privateCertificateFile": "Private",
       "certificateFiles": "Certificate Files",
       "users": "Users",
-      "xmlsets": "XML-Sets"
+      "xmlsets": "XML-Sets",
+      "serverDiscovery": "Discovery"
     },
     "tabs-label": {
       "users": "Users & Sets",

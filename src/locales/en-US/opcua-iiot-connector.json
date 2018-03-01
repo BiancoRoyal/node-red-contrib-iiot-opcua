@@ -18,7 +18,8 @@
       "publicCertificateFile": "Public",
       "privateKeyFile": "Private",
       "defaultSecureTokenLifetime": "Secure TLT",
-      "certificateFiles": "Certificate Files"
+      "certificateFiles": "Certificate Files",
+      "endpointMusExist": "Endpoint must exist"
     },
     "tabs-label": {
       "settings": "Settings",

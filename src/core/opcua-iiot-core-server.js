@@ -209,7 +209,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
   })
   addressSpace.installHistoricalDataNode(fullcounterVariable)
 
-  var externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
+  let externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
     value: new coreServer.core.nodeOPCUA.Variant({dataType: 'Double', value: 10.0}),
     sourceTimestamp: null,
     sourcePicoseconds: 0

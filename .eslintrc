@@ -1,10 +1,15 @@
 {
   "plugins": [
-    "mocha"
+    "mocha",
+    "node"
   ],
+  "env": {
+    "node": true
+  },
   "extends": [
     "standard",
-    "standard-jsx"
+    "standard-jsx",
+    "eslint:recommended"
   ],
   "ignore": [
     "code/",

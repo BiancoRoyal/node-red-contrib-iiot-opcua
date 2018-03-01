@@ -26,6 +26,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.discoveryUrl = config.discoveryUrl || null
     this.endpoint = config.endpoint
+    this.endpointMusExist = config.endpointMusExist || false
     this.keepSessionAlive = config.keepSessionAlive
     this.loginEnabled = config.loginEnabled
     this.name = config.name
@@ -34,8 +35,10 @@ module.exports = function (RED) {
     this.publicCertificateFile = config.publicCertificateFile
     this.privateKeyFile = config.privateKeyFile
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 60000
+    this.endpointMusExist = config.endpointMusExist
 
     let node = this
+    node.setMaxListeners(UNLIMITED_LISTENERS)
     node.client = null
     node.endpoints = []
     node.userIdentity = null
@@ -64,7 +67,8 @@ module.exports = function (RED) {
       defaultSecureTokenLifetime: node.defaultSecureTokenLifetime,
       keepSessionAlive: true,
       certificateFile: node.publicCertificateFile,
-      privateKeyFile: node.privateKeyFile
+      privateKeyFile: node.privateKeyFile,
+      endpoint_must_exist: node.endpointMusExist
     }
 
     if (node.loginEnabled) {
@@ -292,7 +296,6 @@ module.exports = function (RED) {
       }
     }
 
-    node.setMaxListeners(UNLIMITED_LISTENERS)
     try {
       setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
     } catch (err) {

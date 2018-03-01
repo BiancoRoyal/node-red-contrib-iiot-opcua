@@ -24,6 +24,7 @@
       showErrors: {value: false},
       allowAnonymous: {value: true, required: true},
       isAuditing: {value: false},
+      serverDiscovery: {value: true},
       users: { value: [] },
       xmlsets: { value: [] },
       publicCertificateFile: {value: ''},
@@ -121,6 +122,7 @@
     },
     oneditprepare: function () {
       let node = this
+      node.xmlsetSelect = []
       let cacheItemCount = node.users.length
       let cacheItemCountSet = node.xmlsets.length
 
@@ -175,14 +177,14 @@
         $('<i style="color: #eee; cursor: move;" class="node-input-server-users-handle fa fa-bars"></i>').appendTo(row)
 
         let userField = $('<input/>', {
-          id: "node-input-server-users-name",
+          id: "node-input-server-users-name" + id,
           type: "text",
           style: "margin-left:5px;width:160px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let passwordField = $('<input/>', {
-          id: "node-input-server-users-password",
+          id: "node-input-server-users-password" + id,
           type: "password",
           style: "margin-left:5px;width:340px;",
           placeholder: 'password'
@@ -195,6 +197,7 @@
 
         let removeUserButton = $('<a/>', {
           href: "#",
+          id: 'node-button-user-remove' + id,
           class: "editor-button editor-button-small",
           style: "margin-top: 7px; margin-left: 5px;"
         }).appendTo(finalspan)
@@ -222,16 +225,16 @@
         $('<i style="color: #eee; cursor: move;" class="node-input-server-xmlsets-handle fa fa-bars"></i>').appendTo(row)
 
         let nameField = $('<input/>', {
-          id: "node-input-server-xmlsets-name",
+          id: "node-input-server-xmlsets-name" + id,
           type: "text",
-          style: "margin-left:5px;width:80px;",
+          style: "margin-left:5px;width:75px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let pathField = $('<input/>', {
-          id: "node-input-server-xmlsets-path",
+          id: "node-input-server-xmlsets-path" + id,
           type: "text",
-          style: "margin-left:5px;width:430px;",
+          style: "margin-left:5px;width:410px;",
           placeholder: 'public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml'
         }).appendTo(row)
 
@@ -240,8 +243,41 @@
 
         let finalspan = $('<span/>', {style: "float: right;margin-right: 10px;"}).appendTo(row)
 
+        let lookupItemButton = $('<a/>', {
+          href: '#',
+          id: 'node-button-xmlsets-lookup' + id,
+          class: 'editor-button editor-button-small',
+          style: 'margin-top: 7px; margin-left: 5px;'
+        }).appendTo(finalspan)
+
+        lookupItemButton.click(function () {
+          $('#node-button-xmlsets-lookup' + id).addClass('disabled')
+
+          $.getJSON('/opcuaIIoT/xmlsets/public', function (data) {
+            console.log('xmlsets requested response: ' + data.length)
+
+            $('#node-button-xmlsets-lookup' + id).removeClass('disabled')
+            node.xmlsetSelect = []
+
+            $.each(data, function (i, filename) {
+              node.xmlsetSelect.push(filename)
+            })
+
+            $('#node-input-server-xmlsets-path' + id).autocomplete({
+              source: node.xmlsetSelect,
+              minLength: 0,
+              close: function (event, ui) {
+                $('#node-input-server-xmlsets-path' + id).autocomplete('destroy')
+              }
+            }).autocomplete('search', '')
+          })
+        })
+
+        $('<i/>', {class: 'fa fa-search'}).appendTo(lookupItemButton)
+
         let removeXMLSetButton = $('<a/>', {
           href: "#",
+          id: 'node-button-xmlset-remove' + id,
           class: "editor-button editor-button-small",
           style: "margin-top: 7px; margin-left: 5px;"
         }).appendTo(finalspan)
@@ -414,8 +450,8 @@
         console.log('save user: ' + JSON.stringify($(this)))
 
         node.users.push({
-          name: $(this).find("#node-input-server-users-name").val(),
-          password: $(this).find("#node-input-server-users-password").val()
+          name: $(this).find("#node-input-server-users-name" + userIndex).val(),
+          password: $(this).find("#node-input-server-users-password" + userIndex).val()
         })
 
         userIndex++
@@ -425,8 +461,8 @@
         console.log('save set: ' + JSON.stringify($(this)))
 
         node.xmlsets.push({
-          name: $(this).find("#node-input-server-xmlsets-name").val(),
-          path: $(this).find("#node-input-server-xmlsets-path").val()
+          name: $(this).find("#node-input-server-xmlsets-name" + setIndex).val(),
+          path: $(this).find("#node-input-server-xmlsets-path" + setIndex).val()
         })
 
         setIndex++
@@ -539,6 +575,11 @@
                  <label for="node-input-allowAnonymous" style="min-width:140px"><i class="icon-lock"></i>
                  <span data-i18n="opcua-iiot-contrib.label.allowAnonymous"></span></label>
                 <input type="checkbox" id="node-input-allowAnonymous" style="max-width:35px">
+            </div>
+            <div class="form-row">
+                 <label for="node-input-serverDiscovery" style="min-width:140px"><i class="fa fa-cc-discover"></i>
+                 <span data-i18n="opcua-iiot-contrib.label.serverDiscovery"></span></label>
+                <input type="checkbox" id="node-input-serverDiscovery" style="max-width:35px">
             </div>
         </div>
         <div id="opcuaiiot-server-tab-users" style="display:none">

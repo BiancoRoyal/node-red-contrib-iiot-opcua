@@ -22,6 +22,8 @@ module.exports = function (RED) {
   let scriptObjects = {}
 
   function OPCUAIIoTFlexServer (config) {
+    const UNLIMITED_LISTENERS = 0
+
     RED.nodes.createNode(this, config)
 
     this.port = config.port
@@ -43,8 +45,11 @@ module.exports = function (RED) {
     this.xmlsets = config.xmlsets
     // Audit
     this.isAuditing = config.isAuditing
+    // discovery
+    this.disableDiscovery = !config.serverDiscovery
 
     let node = this
+    node.setMaxListeners(UNLIMITED_LISTENERS)
     node.initialized = false
     node.opcuaServer = null
 
@@ -67,10 +72,12 @@ module.exports = function (RED) {
 
     node.xmlsets.forEach(function (xmlsetFileName, i) {
       coreServer.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
-      if (xmlsetFileName.path.startsWith('public/vendor/')) {
-        xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
-      } else {
-        xmlFiles.push(xmlsetFileName.path)
+      if (xmlsetFileName.path) {
+        if (xmlsetFileName.path.startsWith('public/vendor/')) {
+          xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
+        } else {
+          xmlFiles.push(xmlsetFileName.path)
+        }
       }
     })
 
@@ -148,12 +155,18 @@ module.exports = function (RED) {
         userManager: {
           isValidUser: node.checkUser
         },
-        isAuditing: node.isAuditing
+        isAuditing: node.isAuditing,
+        disableDiscovery: node.disableDiscovery
       }
 
       coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
-      node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
-      node.opcuaServer.initialize(node.postInitialize)
+
+      try {
+        node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
+        node.opcuaServer.initialize(node.postInitialize)
+      } catch (err) {
+        node.error(err, {payload: 'Server Failure! Please, check the server settings!'})
+      }
 
       node.opcuaServer.on('newChannel', function (channel) {
         coreServer.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
@@ -349,4 +362,20 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Flex-Server', OPCUAIIoTFlexServer)
+
+  RED.httpAdmin.get('/opcuaIIoT/xmlsets/public', RED.auth.needsPermission('opcua.xmlsets'), function (req, res) {
+    let nodeOpcua = require('node-opcua')
+    let xmlset = []
+    xmlset.push(nodeOpcua.standard_nodeset_file)
+    xmlset.push(nodeOpcua.di_nodeset_filename)
+    xmlset.push(nodeOpcua.adi_nodeset_filename)
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml')
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Adi.NodeSet2.xml')
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Gds.NodeSet2.xml')
+    xmlset.push('public/vendor/harting/10_di.xml')
+    xmlset.push('public/vendor/harting/20_autoid.xml')
+    xmlset.push('public/vendor/harting/30_aim.xml')
+    res.json(xmlset)
+  })
 }

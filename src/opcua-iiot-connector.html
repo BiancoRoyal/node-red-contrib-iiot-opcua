@@ -22,7 +22,8 @@
       showErrors: {value: false},
       publicCertificateFile: {value: ''},
       privateKeyFile: {value: ''},
-      defaultSecureTokenLifetime: {value: 60000}
+      defaultSecureTokenLifetime: {value: 60000},
+      endpointMusExist: {value: true}
     },
     credentials: {
       user: {type: "text"},
@@ -33,6 +34,7 @@
     },
     oneditprepare: function () {
       let node = this
+      node.lookupItems = []
 
       let tabs = RED.tabs.create({
         id: "node-input-connector-tabs",
@@ -79,7 +81,7 @@
         this.error(err);
       }
 
-      let endpointsLookupField = $("#node-lookup-endpoint")
+      let endpointsLookupField = $("#node-config-lookup-endpoint")
       let endpointField = $("#node-config-input-endpoint")
       let securityPolicyField = $("#node-config-input-securityPolicy")
       let securityModeField = $("#node-config-input-securityMode")
@@ -139,7 +141,12 @@
                 <label for="node-config-input-endpoint"><i class="fa fa-external-link"></i>
                 <span data-i18n="opcua-iiot-contrib.label.endpoint"></span></label>
                 <input type="text" id="node-config-input-endpoint">
-                <a id="node-lookup-endpoint" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
+                <a id="node-config-lookup-endpoint" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-config-input-endpointMusExist"><i class="fa fa-cc-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.endpointMusExist"></span></label>
+                <input type="checkbox" id="node-config-input-endpointMusExist" style="max-width:30px">
             </div>
             <div class="form-row">
                  <label for="node-config-input-keepSessionAlive"><i class="fa fa-heart-o"></i>
