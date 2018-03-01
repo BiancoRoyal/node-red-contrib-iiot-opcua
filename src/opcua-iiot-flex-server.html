@@ -123,8 +123,8 @@
     oneditprepare: function () {
       let node = this
       node.xmlsetSelect = []
-      let cacheItemCount = node.users.length
-      let cacheItemCountSet = node.xmlsets.length
+      let cacheItemCount = 0
+      let cacheItemCountSet = 0
 
       let tabs = RED.tabs.create({
         id: "node-input-server-tabs",
@@ -155,14 +155,20 @@
       })
 
       // User Management
-      node.users.forEach(function(element, index, array) {
-        generateUserEntry(element, index);
-      })
+      if(node.users) {
+          cacheItemCount = node.users.length
+          node.users.forEach(function(element, index, array) {
+            generateUserEntry(element, index);
+          })
+      }
 
       // XML-Set Management
-      node.xmlsets.forEach(function(element, index, array) {
-        generateXMLSetEntry(element, index);
-      })
+      if(node.xmlsets) {
+          cacheItemCountSet = node.xmlsets.length
+          node.xmlsets.forEach(function(element, index, array) {
+            generateXMLSetEntry(element, index);
+          })
+      }
 
       function resizeButton(container, width, buttonName) {
         let lastField = container.find()
@@ -170,9 +176,10 @@
       }
 
       function generateUserEntry(user, id) {
+        console.log('generateUserEntry:' + JSON.stringify(user) + ' id:' + id)
         let container = $('<li/>', {style:
           "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"})
-        let row = $('<div id="row' + id + '"/>').appendTo(container)
+        let row = $('<div id="userRow' + id + '"/>').appendTo(container)
 
         $('<i style="color: #eee; cursor: move;" class="node-input-server-users-handle fa fa-bars"></i>').appendTo(row)
 
@@ -214,13 +221,14 @@
 
         $("#node-input-server-users-container").append(container)
         let width = $("#node-input-server-users-container").width()
-        resizeButton(container, width, ".node-input-server-users-password")
+        resizeButton(container, width, ".node-input-server-users-password" + id)
       }
 
       function generateXMLSetEntry(xmlset, id) {
+        console.log('generateXMLSetEntry:' + JSON.stringify(xmlset) + ' id:' + id)
         let container = $('<li/>', {style:
             "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"})
-        let row = $('<div id="row' + id + '"/>').appendTo(container)
+        let row = $('<div id="xmlsetRow' + id + '"/>').appendTo(container)
 
         $('<i style="color: #eee; cursor: move;" class="node-input-server-xmlsets-handle fa fa-bars"></i>').appendTo(row)
 
@@ -294,7 +302,7 @@
 
         $("#node-input-server-xmlsets-container").append(container)
         let width = $("#node-input-server-xmlsets-container").width()
-        resizeButton(container, width, ".node-input-server-xmlsets-path")
+        resizeButton(container, width, ".node-input-server-xmlsets-path" + id)
       }
 
       $("#node-input-server-users-container").sortable({
@@ -315,15 +323,19 @@
 
       $("#node-input-server-users-add").click(function () {
         console.log('add user')
-        cacheItemCount++
-        generateUserEntry({ name: '', password: '' }, cacheItemCount) // length is every time one more than index
+        if(!cacheItemCount || cacheItemCount < 0) {
+          cacheItemCount = 0
+        }
+        generateUserEntry({ name: '', password: '' }, cacheItemCount++) // length is every time one more than index
         $("#node-input-server-users-container-div").scrollTop($("#node-input-server-users-container-div").get(0).scrollHeight)
       })
 
       $("#node-input-server-xmlsets-add").click(function () {
         console.log('add set')
-        cacheItemCountSet++
-        generateXMLSetEntry({ name: '', path: '' }, cacheItemCountSet) // length is every time one more than index
+        if(!cacheItemCountSet || cacheItemCountSet < 0) {
+          cacheItemCountSet = 0
+        }
+        generateXMLSetEntry({ name: '', path: '' }, cacheItemCountSet++) // length is every time one more than index
         $("#node-input-server-xmlsets-container-div").scrollTop($("#node-input-server-xmlsets-container-div").get(0).scrollHeight)
       })
 
@@ -347,7 +359,7 @@
         })
       }
 
-      $("#dialog").on("dialogresize", switchDialogResize)
+      // $("#dialog").on("dialogresize", switchDialogResize)
 
       $("#dialog").one("dialogopen", function (ev) {
         let size = $("#dialog").dialog('option', 'sizeCache-switch')
@@ -361,7 +373,7 @@
       })
 
       $("#dialog").one("dialogclose", function (ev, ui) {
-        $("#dialog").off("dialogresize", switchDialogResize)
+        // $("#dialog").off("dialogresize", switchDialogResize)
       })
 
       // dialog handling
@@ -384,7 +396,7 @@
         })
       }
 
-      $("#dialogSet").on("dialogresize", switchDialogSetResize)
+      // $("#dialogSet").on("dialogresize", switchDialogSetResize)
 
       $("#dialogSet").one("dialogopen", function (ev) {
         let size = $("#dialogSet").dialog('option', 'sizeCache-switch')
@@ -398,7 +410,7 @@
       })
 
       $("#dialogSet").one("dialogclose", function (ev, ui) {
-        $("#dialogSet").off("dialogresize", switchDialogSetResize)
+        // $("#dialogSet").off("dialogresize", switchDialogSetResize)
       })
 
       // address space script
@@ -438,14 +450,11 @@
 
     },
     oneditsave: function () {
-      let cacheUsers = $("#node-input-server-users-container").children()
-      let cacheXMLSets = $("#node-input-server-xmlsets-container").children()
       let node = this
-      node.users = []
-      node.xmlsets = []
-      let userIndex = 0
-      let setIndex = 0
 
+      let cacheUsers = $("#node-input-server-users-container").children()
+      node.users = []
+      let userIndex = 0
       cacheUsers.each(function () {
         console.log('save user: ' + JSON.stringify($(this)))
 
@@ -453,21 +462,21 @@
           name: $(this).find("#node-input-server-users-name" + userIndex).val(),
           password: $(this).find("#node-input-server-users-password" + userIndex).val()
         })
-
         userIndex++
       })
 
-      cacheXMLSets.each(function () {
-        console.log('save set: ' + JSON.stringify($(this)))
+      let cacheItems = $('#node-input-server-xmlsets-container').children()
+      node.xmlsets = []
+      let itemIndex = 0
+      cacheItems.each(function () {
+        console.log('save xmlset: ' + JSON.stringify($(this)))
 
         node.xmlsets.push({
-          name: $(this).find("#node-input-server-xmlsets-name" + setIndex).val(),
-          path: $(this).find("#node-input-server-xmlsets-path" + setIndex).val()
+          name: $(this).find('#node-input-server-xmlsets-name' + itemIndex).val(),
+          path: $(this).find('#node-input-server-xmlsets-path' + itemIndex).val(),
         })
-
-        setIndex++
+        itemIndex++
       })
-
 
       $("#node-input-addressSpaceScript").val(this.editorAddressSpaceScript.getValue());
       this.editorAddressSpaceScript.destroy();

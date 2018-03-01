@@ -70,16 +70,19 @@ module.exports = function (RED) {
     let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
     let xmlFiles = [standardNodeSetFile]
 
-    node.xmlsets.forEach(function (xmlsetFileName, i) {
-      coreServer.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
-      if (xmlsetFileName.path) {
-        if (xmlsetFileName.path.startsWith('public/vendor/')) {
-          xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
-        } else {
-          xmlFiles.push(xmlsetFileName.path)
+    if (node.xmlsets) {
+      node.xmlsets.forEach(function (xmlsetFileName, i) {
+        coreServer.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
+        if (xmlsetFileName.path) {
+          if (xmlsetFileName.path.startsWith('public/vendor/')) {
+            xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
+          } else {
+            xmlFiles.push(xmlsetFileName.path)
+          }
         }
-      }
-    })
+      })
+      coreServer.detailDebugLog('append xmlFiles: ' + xmlFiles.toString())
+    }
 
     let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
 
@@ -101,7 +104,7 @@ module.exports = function (RED) {
     }
 
     node.setNodeStatusTo('waiting')
-    coreServer.internalDebugLog('node set:' + xmlFiles.toString())
+    coreServer.internalDebugLog('flex node sets:' + xmlFiles.toString())
 
     node.checkUser = function (userName, password) {
       let isValid = false
@@ -366,7 +369,6 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/opcuaIIoT/xmlsets/public', RED.auth.needsPermission('opcua.xmlsets'), function (req, res) {
     let nodeOpcua = require('node-opcua')
     let xmlset = []
-    xmlset.push(nodeOpcua.standard_nodeset_file)
     xmlset.push(nodeOpcua.di_nodeset_filename)
     xmlset.push(nodeOpcua.adi_nodeset_filename)
     xmlset.push('public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml')
