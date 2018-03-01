@@ -770,11 +770,12 @@ de.biancoroyal.opcua.iiot.core.parseNamspaceFromMsgTopic = function (msg) {
 
 de.biancoroyal.opcua.iiot.core.parseNamspaceFromItemNodeId = function (item) {
   let nodeNamespace = null
+  let nodeItem = item.nodeId || item
 
-  if (item && item.nodeId) {
+  if (nodeItem) {
     // TODO: real parsing instead of string operations
     // TODO: which type are relevant here? (String, Integer ...)
-    nodeNamespace = item.nodeId.substring(3, item.nodeId.indexOf(';'))
+    nodeNamespace = nodeItem.substring(3, nodeItem.indexOf(';'))
   }
 
   return nodeNamespace
@@ -810,23 +811,24 @@ de.biancoroyal.opcua.iiot.core.parseIdentifierFromMsgTopic = function (msg) {
 
 de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId = function (item) {
   let nodeIdentifier = null
+  let nodeItem = item.nodeId || item
 
-  if (item && item.nodeId) {
+  if (nodeItem) {
     // TODO: real parsing instead of string operations
-    if (item.nodeId.toString().includes(';i=')) {
+    if (nodeItem.includes(';i=')) {
       nodeIdentifier = {
-        identifier: parseInt(item.nodeId.substring(item.nodeId.indexOf(';i=') + 3)),
+        identifier: parseInt(nodeItem.substring(nodeItem.indexOf(';i=') + 3)),
         type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.NUMERIC
       }
     } else {
-      if (item.nodeId.toString().includes(';b=')) {
+      if (nodeItem.includes(';b=')) {
         nodeIdentifier = {
-          identifier: item.nodeId.substring(item.nodeId.indexOf(';b=') + 3),
+          identifier: nodeItem.substring(nodeItem.indexOf(';b=') + 3),
           type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
         }
       } else {
         nodeIdentifier = {
-          identifier: item.nodeId.substring(item.nodeId.indexOf(';s=') + 3),
+          identifier: nodeItem.substring(nodeItem.indexOf(';s=') + 3),
           type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
         }
       }
@@ -836,24 +838,33 @@ de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId = function (item) {
   return nodeIdentifier
 }
 
-de.biancoroyal.opcua.iiot.core.newOPCUANodeIdListFromMsgItems = function (msg) {
+de.biancoroyal.opcua.iiot.core.newOPCUANodeIdListFromMsgItems = function (addressSpaceItems) {
+  let core = this
   let item = null
-  let itemsToRead = []
+  let itemList = []
 
-  if (msg.addressSpaceItems) {
-    for (item of msg.addressSpaceItems) {
-      itemsToRead.push(this.newOPCUANodeIdFromItemNodeId(item))
+  if (addressSpaceItems && addressSpaceItems.length) {
+    for (item of addressSpaceItems) {
+      if (!item.nodeId) {
+        itemList.push(core.newOPCUANodeIdFromItemNodeId(item))
+      } else {
+        if (typeof item.nodeId === 'string') {
+          itemList.push(core.newOPCUANodeIdFromItemNodeId(item.nodeId))
+        } else {
+          itemList.push(item.nodeId)
+        }
+      }
     }
   }
 
-  return itemsToRead
+  return itemList
 }
 
 de.biancoroyal.opcua.iiot.core.newOPCUANodeIdFromItemNodeId = function (item) {
   let namespace = de.biancoroyal.opcua.iiot.core.parseNamspaceFromItemNodeId(item)
   let nodeIdentifier = de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId(item)
 
-  this.internalDebugLog('newOPCUANodeIdFromItemNodeId: ' + JSON.stringify(nodeIdentifier) + ' namespace:' + namespace)
+  this.internalDebugLog('newOPCUANodeIdFromItemNodeId: ' + JSON.stringify(item) + ' -> ' + JSON.stringify(nodeIdentifier) + ' namespace:' + namespace)
   return new de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
@@ -949,6 +960,21 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest
   this.internalDebugLog('buildNodesToRead output: ' + JSON.stringify(nodesToRead))
 
   return nodesToRead
+}
+
+de.biancoroyal.opcua.iiot.core.buildNodesToListen = function (msg) {
+  let addressSpaceItems = []
+  let item = null
+
+  if (msg.nodesToRead) {
+    for (item of msg.nodesToRead) {
+      addressSpaceItems.push({name: '', nodeId: item, datatype: ''})
+    }
+  } else {
+    addressSpaceItems = msg.addressSpaceItems
+  }
+
+  return addressSpaceItems
 }
 
 de.biancoroyal.opcua.iiot.core.dataValuetoString = function (attribute, dataValue) {
