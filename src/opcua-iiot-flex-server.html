@@ -184,14 +184,14 @@
         $('<i style="color: #eee; cursor: move;" class="node-input-server-users-handle fa fa-bars"></i>').appendTo(row)
 
         let userField = $('<input/>', {
-          id: "node-input-server-users-name" + id,
+          id: "node-input-server-users-name",
           type: "text",
           style: "margin-left:5px;width:160px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let passwordField = $('<input/>', {
-          id: "node-input-server-users-password" + id,
+          id: "node-input-server-users-password",
           type: "password",
           style: "margin-left:5px;width:340px;",
           placeholder: 'password'
@@ -221,7 +221,7 @@
 
         $("#node-input-server-users-container").append(container)
         let width = $("#node-input-server-users-container").width()
-        resizeButton(container, width, ".node-input-server-users-password" + id)
+        resizeButton(container, width, " #row" + id + " #node-input-server-users-password")
       }
 
       function generateXMLSetEntry(xmlset, id) {
@@ -233,14 +233,14 @@
         $('<i style="color: #eee; cursor: move;" class="node-input-server-xmlsets-handle fa fa-bars"></i>').appendTo(row)
 
         let nameField = $('<input/>', {
-          id: "node-input-server-xmlsets-name" + id,
+          id: "node-input-server-xmlsets-name",
           type: "text",
           style: "margin-left:5px;width:75px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let pathField = $('<input/>', {
-          id: "node-input-server-xmlsets-path" + id,
+          id: "node-input-server-xmlsets-path",
           type: "text",
           style: "margin-left:5px;width:410px;",
           placeholder: 'public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml'
@@ -259,23 +259,26 @@
         }).appendTo(finalspan)
 
         lookupItemButton.click(function () {
-          $('#node-button-xmlsets-lookup' + id).addClass('disabled')
+          let xmlsetLookupButton = $('#node-button-xmlsets-lookup' + id)
+          let xmlsetLookupField = $('#xmlsetRow' + id + ' #node-input-server-xmlsets-path')
+
+          xmlsetLookupButton.addClass('disabled')
 
           $.getJSON('/opcuaIIoT/xmlsets/public', function (data) {
             console.log('xmlsets requested response: ' + data.length)
 
-            $('#node-button-xmlsets-lookup' + id).removeClass('disabled')
+            xmlsetLookupButton.removeClass('disabled')
             node.xmlsetSelect = []
 
             $.each(data, function (i, filename) {
               node.xmlsetSelect.push(filename)
             })
 
-            $('#node-input-server-xmlsets-path' + id).autocomplete({
+            xmlsetLookupField.autocomplete({
               source: node.xmlsetSelect,
               minLength: 0,
               close: function (event, ui) {
-                $('#node-input-server-xmlsets-path' + id).autocomplete('destroy')
+                xmlsetLookupField.autocomplete('destroy')
               }
             }).autocomplete('search', '')
           })
@@ -302,7 +305,7 @@
 
         $("#node-input-server-xmlsets-container").append(container)
         let width = $("#node-input-server-xmlsets-container").width()
-        resizeButton(container, width, ".node-input-server-xmlsets-path" + id)
+        resizeButton(container, width, "#xmlsetRow" + id + " #node-input-server-xmlsets-path")
       }
 
       $("#node-input-server-users-container").sortable({
@@ -456,11 +459,9 @@
       node.users = []
       let userIndex = 0
       cacheUsers.each(function () {
-        console.log('save user: ' + JSON.stringify($(this)))
-
         node.users.push({
-          name: $(this).find("#node-input-server-users-name" + userIndex).val(),
-          password: $(this).find("#node-input-server-users-password" + userIndex).val()
+          name: $(this).find("#node-input-server-users-name").val(),
+          password: $(this).find("#node-input-server-users-password").val()
         })
         userIndex++
       })
@@ -469,11 +470,9 @@
       node.xmlsets = []
       let itemIndex = 0
       cacheItems.each(function () {
-        console.log('save xmlset: ' + JSON.stringify($(this)))
-
         node.xmlsets.push({
-          name: $(this).find('#node-input-server-xmlsets-name' + itemIndex).val(),
-          path: $(this).find('#node-input-server-xmlsets-path' + itemIndex).val(),
+          name: $(this).find('#node-input-server-xmlsets-name').val(),
+          path: $(this).find('#node-input-server-xmlsets-path').val(),
         })
         itemIndex++
       })
