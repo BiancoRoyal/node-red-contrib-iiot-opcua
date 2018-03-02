@@ -151,25 +151,49 @@
     </div>
 
     <h3>Output 1</h3>
+    <h4>All Mode</h4>
     <div>
         <strong>Result in subscribe message:</strong>
         <ul>
-            <li>payload (value)</li>
-            <li>topic (Node-Id)</li>
-            <li>input (msg)</li>
-            <li>nodetype (listen)</li>
-            <li>readtype (subscribe)</li>
-            <li>result (origin from node-opcua)</li>
+            <li>payload (object)
+            <li>topic
+            <li>input (msg)
+            <li>nodetype (listen)
+            <li>readtype (subscribe)
+            <li>result (origin from node-opcua)
         </ul>
     </div>
     <div>
         <strong>Result in event message:</strong>
         <ul>
-            <li>payload (event message)</li>
-            <li>topic (Node-Id)</li>
-            <li>input (msg)</li>
-            <li>nodetype (listen)</li>
-            <li>readtype (event)</li>
+            <li>payload (event object)
+            <li>topic
+            <li>input (msg)
+            <li>nodetype (listen)
+            <li>readtype (event)
+        </ul>
+    </div>
+
+    <h4>Value Mode</h4>
+    <div>
+        <strong>Result in subscribe message:</strong>
+        <ul>
+            <li>payload (value)
+            <li>topic
+            <li>nodeId 
+            <li>name
+            <li>readtype (subscribe)
+        </ul>
+    </div>
+    <div>
+        <strong>Result in event message:</strong>
+        <ul>
+            <li>payload (event message)
+            <li>variantMsg
+            <li>topic
+            <li>nodeId
+            <li>name
+            <li>readtype (event)
         </ul>
     </div>
 

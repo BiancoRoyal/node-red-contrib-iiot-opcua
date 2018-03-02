@@ -76,7 +76,7 @@ module.exports = function (RED) {
           }
         } else {
           // just if not multiple request!
-          if (msg.topic !== node.nodeId) {
+          if (msg.topic !== node.nodeId) { // TODO: that is very old and should be deleted
             return
           }
         }
@@ -101,18 +101,30 @@ module.exports = function (RED) {
           coreFilter.internalDebugLog('unknown node type inject to filter for ' + msg.nodetype)
       }
 
-      let resultDataType = typeof result
-
-      if (resultDataType && resultDataType.toString() !== node.datatype.toString()) {
-        result = node.convertDataType(result)
+      if (result === undefined || result === null) {
+        coreFilter.internalDebugLog('result null or undefined' + JSON.stringify(msg))
+        return
       }
+
+      let resultDataType = typeof result
 
       if (result.hasOwnProperty('value')) {
         result = result.value
       }
 
+      if (resultDataType && resultDataType.toString() !== node.datatype.toString()) {
+        result = node.convertDataType(result)
+      }
+
+      if (result === undefined || result === null) {
+        coreFilter.internalDebugLog('convert result null or undefined' + JSON.stringify(msg))
+      }
+
       if (!isNaN(result) && node.precision >= 0 && node.withPrecision) {
-        result = Number(result.toPrecision(node.precision))
+        result = Number(result)
+        if (result.toPrecision) {
+          result = Number(result.toPrecision(node.precision))
+        }
       }
 
       if (node.withValueCheck) {
@@ -122,7 +134,7 @@ module.exports = function (RED) {
       }
 
       coreFilter.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-      coreFilter.internalDebugLog('sending result ' + result)
+      coreFilter.internalDebugLog('sending result ' + JSON.stringify(result))
 
       if (node.justValue) {
         node.send([{payload: result, topic: node.topic || msg.topic}, {payload: 'just value option active'}])
@@ -130,7 +142,7 @@ module.exports = function (RED) {
         msg.filteredResult = result
         msg.topic = node.topic || msg.topic
         node.send([{payload: result, topic: node.topic || msg.topic}, msg])
-      }
+      } // here node topic first to overwrite for dashboard
     })
 
     node.filterByReadType = function (msg) {
@@ -232,7 +244,7 @@ module.exports = function (RED) {
 
       switch (msg.readtype) {
         case 'subscribe':
-          if (msg.payload.hasOwnProperty('value')) {
+          if (msg.payload && msg.payload.hasOwnProperty('value')) {
             result = msg.payload.value
           } else {
             result = msg.payload
@@ -245,7 +257,7 @@ module.exports = function (RED) {
           break
       }
 
-      if (result.hasOwnProperty('value')) {
+      if (result && result.hasOwnProperty('value')) {
         result = result.value
       }
 

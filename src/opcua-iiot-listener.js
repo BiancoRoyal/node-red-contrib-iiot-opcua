@@ -130,7 +130,85 @@ module.exports = function (RED) {
               }
               node.setNodeStatusTo('subscribed' + ' (' + node.monitoredItems.length + ')')
             } else {
-              coreListener.subscribeDebugLog('New Monitoring Subscription For ' + addressSpaceItem.nodeId)
+              coreListener.subscribeDebugLog('New Subscription ' + addressSpaceItem.nodeId)
+              monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
+              node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
+
+              monitoredItem.addressSpaceItem = addressSpaceItem
+
+              monitoredItem.on('initialized', function () {
+                node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
+              })
+
+              monitoredItem.on('changed', function (dataValue) {
+                let result = coreListener.core.buildMsgPayloadByDataValue(dataValue)
+
+                let valueMsg = {
+                  payload: {},
+                  topic: msg.topic,
+                  addressSpaceItems: [addressSpaceItem],
+                  nodetype: 'listen',
+                  readtype: 'subscribe',
+                  result: result
+                }
+
+                if (result.hasOwnProperty('value') && result.value.hasOwnProperty('value')) {
+                  valueMsg.payload = result.value.value
+                } else {
+                  if (result.hasOwnProperty('value')) {
+                    valueMsg.payload = result.value
+                  } else {
+                    valueMsg.payload = result
+                  }
+                }
+
+                let valueObject = {
+                  topic: valueMsg.topic,
+                  payload: {
+                    name: addressSpaceItem.name,
+                    nodeId: addressSpaceItem.nodeId,
+                    value: valueMsg.payload
+                  },
+                  nodetype: valueMsg.nodetype,
+                  readtype: valueMsg.readtype,
+                  addressSpaceItems: [addressSpaceItem]
+                }
+
+                if (node.justValue) {
+                  valueMsg.mode = 'value'
+                  node.send([valueObject, valueMsg])
+                } else {
+                  valueMsg.mode = 'all'
+                  node.send([valueMsg, valueObject])
+                }
+              })
+
+              monitoredItem.on('error', function (err) {
+                coreListener.subscribeDebugLog('Subscribe Error: ' + err + ' on ' + addressSpaceItem.nodeId)
+
+                if (monitoredItems.get(addressSpaceItem.nodeId)) {
+                  monitoredItems.delete(addressSpaceItem.nodeId)
+                }
+
+                if (node.showErrors) {
+                  node.error(err, msg)
+                }
+
+                node.setNodeStatusTo('error' + ' (' + monitoredItems.length + ')')
+
+                if (err.message.includes('BadSession')) {
+                  node.handleSessionError(err)
+                }
+              })
+
+              monitoredItem.on('terminated', function () {
+                coreListener.subscribeDebugLog('Subscribe Monitoring Terminated For ' + addressSpaceItem.nodeId)
+
+                if (monitoredItems.get(addressSpaceItem.nodeId)) {
+                  monitoredItems.delete(addressSpaceItem.nodeId)
+                  node.setNodeStatusTo('subscribed' + ' (' + monitoredItems.length + ')')
+                }
+              })
             }
           })
 
@@ -257,7 +335,94 @@ module.exports = function (RED) {
               }
               node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
             } else {
-              coreListener.eventDebugLog('New Event Subscription For ' + addressSpaceItem.nodeId)
+              coreListener.eventDebugLog('Event New Subscription ' + addressSpaceItem.nodeId)
+              monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
+              node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
+
+              monitoredItem.addressSpaceItem = addressSpaceItem
+
+              monitoredItem.on('initialized', function () {
+                node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
+              })
+
+              monitoredItem.on('changed', function (eventFieldResponse) {
+                coreListener.analyzeEvent(node.opcuaSession, node.getBrowseName, msg.payload.eventFields, eventFieldResponse)
+                  .then(function (result) {
+                    coreListener.eventDetailDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
+                    coreListener.eventDetailDebugLog('Monitored Event Field Message ' + JSON.stringify(result.variantMsg))
+
+                    let valueMsg = {
+                      payload: {},
+                      topic: msg.topic,
+                      addressSpaceItems: [addressSpaceItem],
+                      nodetype: 'listen',
+                      readtype: 'event'
+                    }
+
+                    try {
+                      valueMsg.payload = JSON.parse(JSON.stringify(result.message.payload))
+                    } catch (err) {
+                      coreListener.eventDetailDebugLog(err + ' sending message stringified')
+                      valueMsg.payload = JSON.stringify(result.message.payload)
+                    }
+
+                    let dataValueJSON = {}
+                    try {
+                      dataValueJSON = JSON.parse(JSON.stringify(result.variantMsg.payload))
+                    } catch (err) {
+                      coreListener.eventDetailDebugLog(err + ' sending variantMsg stringified')
+                      dataValueJSON = JSON.stringify(result.variantMsg.payload)
+                    }
+
+                    let valueObject = {
+                      topic: valueMsg.topic,
+                      payload: {
+                        name: addressSpaceItem.name,
+                        nodeId: addressSpaceItem.nodeId,
+                        value: valueMsg.payload
+                      },
+                      nodetype: valueMsg.nodetype,
+                      readtype: valueMsg.readtype,
+                      variantMsg: dataValueJSON,
+                      addressSpaceItems: [addressSpaceItem]
+                    }
+
+                    if (node.justValue) {
+                      valueMsg.mode = 'value'
+                      node.send([valueObject, valueMsg])
+                    } else {
+                      valueMsg.mode = 'all'
+                      node.send([valueMsg, valueObject])
+                    }
+                  }).catch(node.errorHandling)
+              })
+
+              monitoredItem.on('error', function (err) {
+                coreListener.eventDebugLog('Event Error: ' + err + ' for ' + addressSpaceItem.nodeId)
+
+                if (monitoredItems.get(addressSpaceItem.nodeId)) {
+                  monitoredItems.delete(addressSpaceItem.nodeId)
+                }
+
+                if (node.showErrors) {
+                  node.error(err, msg)
+                }
+
+                node.setNodeStatusTo('error' + ' (' + monitoredItems.length + ')')
+
+                if (err.message.includes('BadSession')) {
+                  node.handleSessionError(err)
+                }
+              })
+
+              monitoredItem.on('terminated', function () {
+                coreListener.eventDebugLog('Event Terminated For ' + addressSpaceItem.nodeId)
+
+                if (monitoredItems.get(addressSpaceItem.nodeId)) {
+                  monitoredItems.delete(addressSpaceItem.nodeId)
+                  node.setNodeStatusTo('listening' + ' (' + monitoredItems.length + ')')
+                }
+              })
             }
           })
 

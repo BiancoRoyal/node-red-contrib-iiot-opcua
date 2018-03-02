@@ -400,21 +400,21 @@
       $('<i style="color: #eee; cursor: move;" class="node-input-addressSpaceItems-handle fa fa-bars"></i>').appendTo(row)
 
       let itemNameField = $('<input/>', {
-        id: 'node-input-addressSpaceItems-name' + id,
+        id: 'node-input-addressSpaceItems-name',
         type: 'text',
         style: 'margin-left:5px;width:120px;',
         placeholder: 'Name'
       }).appendTo(row)
 
       let itemNodIdField = $('<input/>', {
-        id: 'node-input-addressSpaceItems-nodeId' + id,
+        id: 'node-input-addressSpaceItems-nodeId',
         type: 'text',
         style: 'margin-left:5px;width:200px;',
         placeholder: 'ns=0;i=85'
       }).appendTo(row)
 
       let itemDatatypeField = $('<input/>', {
-        id: 'node-input-addressSpaceItems-datatype' + id,
+        id: 'node-input-addressSpaceItems-datatype',
         type: 'text',
         style: 'margin-left:5px;width:140px;',
         placeholder: 'optional'
@@ -434,23 +434,26 @@
       }).appendTo(finalspan)
 
       lookupItemButton.click(function () {
-        $('#node-button-inject-datatypes' + id).addClass('disabled')
+        let datatypesLookupButton = $('#node-button-inject-datatypes' + id)
+        let datatypeLookupField = $('#row' + id + ' #node-input-addressSpaceItems-datatype')
+
+        datatypesLookupButton.addClass('disabled')
 
         $.getJSON('/opcuaIIoT/data/types', function (data) {
           console.log('datatypes requested response: ' + data.length)
 
-          $('#node-button-inject-datatypes' + id).removeClass('disabled')
+          datatypesLookupButton.removeClass('disabled')
           node.datatypeNames = []
 
           $.each(data, function (i, datatypeName) {
             node.datatypeNames.push(datatypeName)
           })
 
-          $('#node-input-addressSpaceItems-datatype' + id).autocomplete({
+          datatypeLookupField.autocomplete({
             source: node.datatypeNames,
             minLength: 0,
             close: function (event, ui) {
-              $('#node-input-addressSpaceItems-datatype' + id).autocomplete('destroy')
+              datatypeLookupField.autocomplete('destroy')
             }
           }).autocomplete('search', '')
         })
@@ -632,9 +635,9 @@
 
     cacheItems.each(function () {
       node.addressSpaceItems.push({
-        name: $(this).find('#node-input-addressSpaceItems-name' + itemIndex).val(),
-        nodeId: $(this).find('#node-input-addressSpaceItems-nodeId' + itemIndex).val(),
-        datatypeName: $(this).find('#node-input-addressSpaceItems-datatype' + itemIndex).val()
+        name: $(this).find('#node-input-addressSpaceItems-name').val(),
+        nodeId: $(this).find('#node-input-addressSpaceItems-nodeId').val(),
+        datatypeName: $(this).find('#node-input-addressSpaceItems-datatype').val()
       })
       itemIndex++
     })
