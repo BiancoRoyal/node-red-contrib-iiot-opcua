@@ -23,6 +23,7 @@ module.exports = function (RED) {
     this.nodeId = config.nodeId
     this.datatype = config.datatype
     this.value = config.value
+    this.topic = config.topic
     this.name = config.name
     this.usingListener = config.usingListener
 
@@ -45,6 +46,7 @@ module.exports = function (RED) {
         node.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
 
+      msg.topic = msg.topic || node.topic
       msg.addressSpaceItems = msg.addressSpaceItems || [] // eslint-disable-line
       msg.valuesToWrite = msg.valuesToWrite || [] // eslint-disable-line
 
