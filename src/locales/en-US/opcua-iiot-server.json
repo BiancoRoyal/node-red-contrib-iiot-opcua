@@ -19,10 +19,13 @@
       "isAuditing": "Auditing",
       "publicCertificateFile": "Public",
       "privateCertificateFile": "Private",
-      "certificateFiles": "Certificate Files"
+      "certificateFiles": "Certificate Files",
+      "xmlsets": "XML-Sets",
+      "asoDemo": "ASO Demo",
+      "serverDiscovery": "Discovery"
     },
     "tabs-label": {
-      "users": "Users",
+      "users": "Users & Sets",
       "settings": "Settings",
       "security": "Security"
     }

@@ -38,8 +38,14 @@ module.exports = function (RED) {
     this.allowAnonymous = config.allowAnonymous
     // User Management
     this.users = config.users
+    // XML-Set Management
+    this.xmlsets = config.xmlsets
     // Audit
     this.isAuditing = config.isAuditing
+    // address space objects demo
+    this.asoDemo = config.asoDemo
+    // discovery
+    this.disableDiscovery = !config.serverDiscovery
 
     let node = this
     node.initialized = false
@@ -50,7 +56,21 @@ module.exports = function (RED) {
     let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
 
     let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
-    let xmlFiles = [standardNodeSetFile, path.join(__dirname, 'public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')]
+    let xmlFiles = [standardNodeSetFile]
+
+    if (node.xmlsets) {
+      node.xmlsets.forEach(function (xmlsetFileName, i) {
+        coreServer.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
+        if (xmlsetFileName.path) {
+          if (xmlsetFileName.path.startsWith('public/vendor/')) {
+            xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
+          } else {
+            xmlFiles.push(xmlsetFileName.path)
+          }
+        }
+      })
+      coreServer.detailDebugLog('append xmlFiles: ' + xmlFiles.toString())
+    }
 
     let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
 
@@ -126,7 +146,8 @@ module.exports = function (RED) {
         userManager: {
           isValidUser: node.checkUser
         },
-        isAuditing: node.isAuditing
+        isAuditing: node.isAuditing,
+        disableDiscovery: node.disableDiscovery
       }
 
       coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))

@@ -395,28 +395,31 @@
         style:
           'background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;'
       })
-      let row = $('<div id="row' + id + '"/>').appendTo(container)
+      let row = $('<div class="row" id="row' + id + '" />').appendTo(container)
 
       $('<i style="color: #eee; cursor: move;" class="node-input-addressSpaceItems-handle fa fa-bars"></i>').appendTo(row)
 
       let itemNameField = $('<input/>', {
-        id: 'node-input-addressSpaceItems-name',
+        class: 'addressSpaceItemName',
+        id: 'node-input-addressSpaceItems-name' + id,
         type: 'text',
-        style: 'margin-left:5px;width:120px;',
+        style: 'margin: 0 auto;width:20%;min-width:60px;margin-left:5px',
         placeholder: 'Name'
       }).appendTo(row)
 
       let itemNodIdField = $('<input/>', {
-        id: 'node-input-addressSpaceItems-nodeId',
+        class: 'addressSpaceItemNodeId',
+        id: 'node-input-addressSpaceItems-nodeId' + id,
         type: 'text',
-        style: 'margin-left:5px;width:200px;',
+        style: 'margin: 0 auto;width:43%;min-width:60px;margin-left:5px',
         placeholder: 'ns=0;i=85'
       }).appendTo(row)
 
       let itemDatatypeField = $('<input/>', {
-        id: 'node-input-addressSpaceItems-datatype',
+        class: 'addressSpaceItemDatatype',
+        id: 'node-input-addressSpaceItems-datatype' + id,
         type: 'text',
-        style: 'margin-left:5px;width:140px;',
+        style: 'margin: 0 auto;width:18%;min-width:60px;margin-left:5px',
         placeholder: 'optional'
       }).appendTo(row)
 
@@ -429,13 +432,13 @@
       let lookupItemButton = $('<a/>', {
         href: '#',
         id: 'node-button-inject-datatypes' + id,
-        class: 'editor-button editor-button-small',
+        class: 'editor-button editor-button-small listButton',
         style: 'margin-top: 7px; margin-left: 5px;'
       }).appendTo(finalspan)
 
       lookupItemButton.click(function () {
         let datatypesLookupButton = $('#node-button-inject-datatypes' + id)
-        let datatypeLookupField = $('#row' + id + ' #node-input-addressSpaceItems-datatype')
+        let datatypeLookupField = $('#row' + id + ' #node-input-addressSpaceItems-datatype'  + id)
 
         datatypesLookupButton.addClass('disabled')
 
@@ -464,7 +467,7 @@
       let removeItemButton = $('<a/>', {
         href: '#',
         id: 'node-button-inject-remove' + id,
-        class: 'editor-button editor-button-small',
+        class: 'editor-button editor-button-small listButton',
         style: 'margin-top: 7px; margin-left: 5px;'
       }).appendTo(finalspan)
 
@@ -631,15 +634,13 @@
 
     let cacheItems = $('#node-input-addressSpaceItems-container').children()
     node.addressSpaceItems = []
-    let itemIndex = 0
 
     cacheItems.each(function () {
-      node.addressSpaceItems.push({
-        name: $(this).find('#node-input-addressSpaceItems-name').val(),
-        nodeId: $(this).find('#node-input-addressSpaceItems-nodeId').val(),
-        datatypeName: $(this).find('#node-input-addressSpaceItems-datatype').val()
-      })
-      itemIndex++
+        node.addressSpaceItems.push({
+          name: $(this).find('.addressSpaceItemName').val(),
+          nodeId: $(this).find('.addressSpaceItemNodeId').val(),
+          datatypeName: $(this).find('.addressSpaceItemDatatype').val()
+        })
     })
 
     console.log('well done editsave ...')
@@ -830,7 +831,7 @@
                 <div id="node-input-addressSpaceItems-container-div"
                     style="box-sizing: border-box; border-radius: 5px;
                     height: 580px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
-                    <ol id="node-input-addressSpaceItems-container" style=" list-style-type:none; margin: 0;"></ol>
+                    <ol id="node-input-addressSpaceItems-container" style="list-style-type:none;margin:0 auto;width:95%;margin-left:20px"></ol>
                 </div>
             </div>
             <div class="form-row">

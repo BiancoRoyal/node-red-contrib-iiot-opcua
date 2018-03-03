@@ -51,9 +51,19 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpaceFromScript = function
   }
 }
 
-de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) {
+de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, asoDemo) {
   let coreServer = de.biancoroyal.opcua.iiot.core.server
   let addressSpace = server.engine.addressSpace
+
+  let view = addressSpace.addView({
+    organizedBy: addressSpace.rootFolder.views,
+    browseName: 'BiancoRoyalView',
+    displayName: 'Bianco Royal View'
+  })
+
+  if (!asoDemo) {
+    return
+  }
 
   let constructAlarmAddressSpaceDemo = require('../helpers/alarms-and-conditions-demo').constructAlarmAddressSpaceDemo
   let data = {}
@@ -401,11 +411,6 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server) 
         })
       }
     }
-  })
-
-  let view = addressSpace.addView({
-    organizedBy: addressSpace.rootFolder.views,
-    browseName: 'RoyalView'
   })
 
   view.addReference({

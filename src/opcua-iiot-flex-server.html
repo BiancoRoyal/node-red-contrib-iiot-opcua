@@ -170,30 +170,26 @@
           })
       }
 
-      function resizeButton(container, width, buttonName) {
-        let lastField = container.find()
-        // lastField.width(width - 120);
-      }
-
       function generateUserEntry(user, id) {
-        console.log('generateUserEntry:' + JSON.stringify(user) + ' id:' + id)
         let container = $('<li/>', {style:
           "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"})
-        let row = $('<div id="userRow' + id + '"/>').appendTo(container)
+        let row = $('<div id="row' + id + '"/>').appendTo(container)
 
         $('<i style="color: #eee; cursor: move;" class="node-input-server-users-handle fa fa-bars"></i>').appendTo(row)
 
         let userField = $('<input/>', {
-          id: "node-input-server-users-name",
+          id: "node-input-server-users-name" + id,
+          class: 'opcuaUserName',
           type: "text",
           style: "margin-left:5px;width:160px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let passwordField = $('<input/>', {
-          id: "node-input-server-users-password",
+          id: "node-input-server-users-password" + id,
+          class: 'opcuaUserPassword',
           type: "password",
-          style: "margin-left:5px;width:340px;",
+          style: "margin: 0 auto;width:55%;min-width:60px;margin-left:5px",
           placeholder: 'password'
         }).appendTo(row)
 
@@ -214,18 +210,14 @@
         removeUserButton.click(function () {
           container.css({"background": "#fee"})
           container.fadeOut(300, function () {
-            console.log('remove user ' + $(this))
             $(this).remove()
           });
         });
 
         $("#node-input-server-users-container").append(container)
-        let width = $("#node-input-server-users-container").width()
-        resizeButton(container, width, " #row" + id + " #node-input-server-users-password")
       }
 
       function generateXMLSetEntry(xmlset, id) {
-        console.log('generateXMLSetEntry:' + JSON.stringify(xmlset) + ' id:' + id)
         let container = $('<li/>', {style:
             "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"})
         let row = $('<div id="xmlsetRow' + id + '"/>').appendTo(container)
@@ -233,16 +225,18 @@
         $('<i style="color: #eee; cursor: move;" class="node-input-server-xmlsets-handle fa fa-bars"></i>').appendTo(row)
 
         let nameField = $('<input/>', {
-          id: "node-input-server-xmlsets-name",
+          id: "node-input-server-xmlsets-name" + id,
           type: "text",
+          class: 'xmlsetName',
           style: "margin-left:5px;width:75px;",
           placeholder: 'name'
         }).appendTo(row)
 
         let pathField = $('<input/>', {
-          id: "node-input-server-xmlsets-path",
+          id: "node-input-server-xmlsets-path" + id,
+          class: 'xmlsetPath',
           type: "text",
-          style: "margin-left:5px;width:410px;",
+          style: "margin: 0 auto;width:68%;min-width:60px;margin-left:5px",
           placeholder: 'public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml'
         }).appendTo(row)
 
@@ -260,13 +254,11 @@
 
         lookupItemButton.click(function () {
           let xmlsetLookupButton = $('#node-button-xmlsets-lookup' + id)
-          let xmlsetLookupField = $('#xmlsetRow' + id + ' #node-input-server-xmlsets-path')
+          let xmlsetLookupField = $('#xmlsetRow' + id + ' #node-input-server-xmlsets-path' + id)
 
           xmlsetLookupButton.addClass('disabled')
 
           $.getJSON('/opcuaIIoT/xmlsets/public', function (data) {
-            console.log('xmlsets requested response: ' + data.length)
-
             xmlsetLookupButton.removeClass('disabled')
             node.xmlsetSelect = []
 
@@ -290,7 +282,7 @@
           href: "#",
           id: 'node-button-xmlset-remove' + id,
           class: "editor-button editor-button-small",
-          style: "margin-top: 7px; margin-left: 5px;"
+          style: "margin-top:7px;margin-left:5px;"
         }).appendTo(finalspan)
 
         $('<i/>', {class: "fa fa-remove"}).appendTo(removeXMLSetButton)
@@ -298,14 +290,11 @@
         removeXMLSetButton.click(function () {
           container.css({"background": "#fee"})
           container.fadeOut(300, function () {
-            console.log('remove set ' + $(this))
             $(this).remove()
           });
         });
 
         $("#node-input-server-xmlsets-container").append(container)
-        let width = $("#node-input-server-xmlsets-container").width()
-        resizeButton(container, width, "#xmlsetRow" + id + " #node-input-server-xmlsets-path")
       }
 
       $("#node-input-server-users-container").sortable({
@@ -325,7 +314,6 @@
       $("#node-input-server-xmlsets-container .node-input-server-xmlsets-handle").disableSelection()
 
       $("#node-input-server-users-add").click(function () {
-        console.log('add user')
         if(!cacheItemCount || cacheItemCount < 0) {
           cacheItemCount = 0
         }
@@ -334,7 +322,6 @@
       })
 
       $("#node-input-server-xmlsets-add").click(function () {
-        console.log('add set')
         if(!cacheItemCountSet || cacheItemCountSet < 0) {
           cacheItemCountSet = 0
         }
@@ -342,8 +329,13 @@
         $("#node-input-server-xmlsets-container-div").scrollTop($("#node-input-server-xmlsets-container-div").get(0).scrollHeight)
       })
 
-      // dialog handling
       function switchDialogResize() {
+        switchUserDialogResize()
+        switchXMLSetDialogSetResize()
+      }
+
+      // dialog User handling
+      function switchUserDialogResize() {
         let rows = $("#dialog-form>div:not(.node-input-server-users-container-row)")
         let height = $("#dialog-form").height()
 
@@ -354,15 +346,23 @@
         let editorRow = $("#dialog-form>div.node-input-server-users-container-row")
         height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
         $("#node-input-server-users-container-div").css("height", height + "px")
-
-        let usersContainerChildren = $("#node-input-server-users-container").children()
-        let newWidth = $("#node-input-server-users-container").width()
-        usersContainerChildren.each(function (index, containerChild) {
-          resizeButton(containerChild, newWidth, ".node-input-server-users-password")
-        })
       }
 
-      // $("#dialog").on("dialogresize", switchDialogResize)
+      // dialog XML-Set handling
+      function switchXMLSetDialogSetResize() {
+        let rows = $("#dialogSet-form>div:not(.node-input-server-xmlsets-container-row)")
+        let height = $("#dialogSet-form").height()
+
+        rows.each(function (index, row) {
+          height -= row.outerHeight(true)
+        })
+
+        let editorRow = $("#dialogSet-form>div.node-input-server-xmlsets-container-row")
+        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
+        $("#node-input-server-xmlsets-container-div").css("height", height + "px")
+      }
+
+      $("#dialog").on("dialogresize", switchDialogResize)
 
       $("#dialog").one("dialogopen", function (ev) {
         let size = $("#dialog").dialog('option', 'sizeCache-switch')
@@ -376,44 +376,7 @@
       })
 
       $("#dialog").one("dialogclose", function (ev, ui) {
-        // $("#dialog").off("dialogresize", switchDialogResize)
-      })
-
-      // dialog handling
-      function switchDialogSetResize() {
-        let rows = $("#dialogSet-form>div:not(.node-input-server-xmlsets-container-row)")
-        let height = $("#dialogSet-form").height()
-
-        rows.each(function (index, row) {
-          height -= row.outerHeight(true)
-        })
-
-        let editorRow = $("#dialogSet-form>div.node-input-server-xmlsets-container-row")
-        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
-        $("#node-input-server-xmlsets-container-div").css("height", height + "px")
-
-        let xmlsetContainerChildren = $("#node-input-server-xmlsets-container").children()
-        let newWidth = $("#node-input-server-xmlsets-container").width()
-        xmlsetContainerChildren.each(function (index, containerChild) {
-          resizeButton(containerChild, newWidth, ".node-input-server-xmlsets-path")
-        })
-      }
-
-      // $("#dialogSet").on("dialogresize", switchDialogSetResize)
-
-      $("#dialogSet").one("dialogopen", function (ev) {
-        let size = $("#dialogSet").dialog('option', 'sizeCache-switch')
-        if (size) {
-          $("#dialogSet").dialog('option', 'width', size.width)
-          $("#dialogSet").dialog('option', 'height', size.height)
-          switchDialogSetResize()
-        } else {
-          setTimeout(switchDialogSetResize, 10)
-        }
-      })
-
-      $("#dialogSet").one("dialogclose", function (ev, ui) {
-        // $("#dialogSet").off("dialogresize", switchDialogSetResize)
+        $("#dialog").off("dialogresize", switchDialogResize)
       })
 
       // address space script
@@ -457,29 +420,27 @@
 
       let cacheUsers = $("#node-input-server-users-container").children()
       node.users = []
-      let userIndex = 0
       cacheUsers.each(function () {
         node.users.push({
-          name: $(this).find("#node-input-server-users-name").val(),
-          password: $(this).find("#node-input-server-users-password").val()
+          name: $(this).find('.opcuaUserName').val(),
+          password: $(this).find('.opcuaUserPassword').val(),
         })
-        userIndex++
       })
 
-      let cacheItems = $('#node-input-server-xmlsets-container').children()
+      let cacheXMLSets = $('#node-input-server-xmlsets-container').children()
       node.xmlsets = []
-      let itemIndex = 0
-      cacheItems.each(function () {
+      cacheXMLSets.each(function () {
         node.xmlsets.push({
-          name: $(this).find('#node-input-server-xmlsets-name').val(),
-          path: $(this).find('#node-input-server-xmlsets-path').val(),
+          name: $(this).find('.xmlsetName').val(),
+          path: $(this).find('.xmlsetPath').val(),
         })
-        itemIndex++
       })
 
       $("#node-input-addressSpaceScript").val(this.editorAddressSpaceScript.getValue());
       this.editorAddressSpaceScript.destroy();
       delete this.editorAddressSpaceScript;
+
+      console.log('well done editsave ...')
     }
   })
 </script>
