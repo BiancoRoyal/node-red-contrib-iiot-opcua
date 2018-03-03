@@ -14,9 +14,11 @@
       connector: {type: "OPCUA-IIoT-Connector", required: true},
       objectId: {value: ""},
       methodId: {value: ""},
-      methodtype: {value: "basic", required: true},
+      methodType: {value: "basic", required: true},
       value: {value: null},
       name: {value: ""},
+      showStatusActivities: {value: false},
+      showErrors: {value: false},
       inputArguments: {value: []}
     },
     inputs: 1,
@@ -40,7 +42,6 @@
         nodeIdLookupField.addClass('disabled')
 
         let url = '/opcuaIIoT/object/' + node.objectId + '/method/' + nodeIdField.val()
-        console.log('url: ' + url)
 
         $.getJSON(url, function (data) {
           nodeIdLookupField.removeClass('disabled')
@@ -91,14 +92,7 @@
         generateArgumentEntry(element, index);
       })
 
-      function resizeButton (container, width) {
-        let lastField = container.find(".node-input-method-argument-value")
-        // lastField.width(width - 120);
-      }
-
       function generateArgumentEntry (argument, id) {
-        console.log('argument ' + JSON.stringify(argument) + ' id: ' + id)
-
         let container = $('<li/>', {
           style:
             "background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"
@@ -108,20 +102,21 @@
         $('<i style="color: #eee; cursor: move;" class="node-input-method-argument-handle fa fa-bars"></i>').appendTo(row)
 
         let nameField = $('<input/>', {
-          id: "node-input-method-argument-name",
+          id: "node-input-method-argument-name" + id,
+          class: 'methodArgumentName',
           type: "text",
           style: "margin-left:5px;width:40%;",
           placeholder: 'name'
         }).appendTo(row)
 
         var datatypeField = $('<select/>', {
-          id: "node-input-method-argument-dataType",
+          id: "node-input-method-argument-dataType" + id,
+          class: 'methodArgumentDatatype',
           type: "text",
           style: "margin-left:5px;width:25%;",
         }).appendTo(row);
 
         url = '/opcuaIIoT/method/basicDataTypesForSelect'
-        console.log('url: ' + url)
 
         $.getJSON(url, function (data) {
           $(data).each(function () {
@@ -132,7 +127,8 @@
         })
 
         let valueField = $('<input/>', {
-          id: "node-input-method-argument-value",
+          id: "node-input-method-argument-value" + id,
+          class: 'methodArgumentValue',
           type: "text",
           style: "margin-left:5px;width:25%;",
           placeholder: 'value'
@@ -155,14 +151,11 @@
         removeArgumentButton.click(function () {
           container.css({"background": "#fee"})
           container.fadeOut(300, function () {
-            console.log('remove argument ' + JSON.stringify($(this)))
             $(this).remove()
           });
         });
 
         $("#node-input-method-argument-container").append(container)
-        let width = $("#node-input-method-argument-container").width()
-        resizeButton(container, width)
       }
 
       $("#node-input-method-argument-container").sortable({
@@ -175,7 +168,6 @@
 
       $("#node-input-method-argument-add").click(function () {
         cacheItemCount++
-        console.log('add argument ' + cacheItemCount)
         generateArgumentEntry({name: '', dataType: '', value: ''}, cacheItemCount)
         // length is every time one more than index
         $("#node-input-method-argument-container-div").scrollTop($("#node-input-method-argument-container-div").get(0).scrollHeight)
@@ -193,12 +185,6 @@
         let editorRow = $("#dialog-form>div.node-input-method-argument-container-row")
         height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
         $("#node-input-method-argument-container-div").css("height", height + "px")
-
-        let argumentsContainerChildren = $("#node-input-method-argument-container").children()
-        let newWidth = $("#node-input-method-argument-container").width()
-        argumentsContainerChildren.each(function (index, containerChild) {
-          resizeButton(containerChild, newWidth)
-        })
       }
 
       $("#dialog").on("dialogresize", switchDialogResize)
@@ -219,24 +205,19 @@
       })
     },
     oneditsave: function () {
-      let cacheArguments = $("#node-input-method-argument-container").children()
       let node = this
+
+      let cacheArguments = $("#node-input-method-argument-container").children()
       node.inputArguments = []
-      let argumentIndex = 0
-
       cacheArguments.each(function () {
-        let argumentEntry = $(this)
-
         node.inputArguments.push({
-          name: argumentEntry.find("#node-input-method-argument-name").val(),
-          dataType: argumentEntry.find("#node-input-method-argument-dataType").val(),
-          value: argumentEntry.find("#node-input-method-argument-value").val()
+          name: $(this).find(".methodArgumentName").val(),
+          dataType: $(this).find(".methodArgumentDatatype").val(),
+          value: $(this).find(".methodArgumentValue").val()
         })
-
-        argumentIndex++
       })
 
-      console.log('save input arguments: ' + JSON.stringify(node.inputArguments))
+      // console.log('well done editsave ...')
     }
 
   });
@@ -274,6 +255,16 @@
             <div class="form-row">
                 <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" placeholder="">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+                <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+                <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
             </div>
         </div>
         <div id="opcuaiiot-method-tab-argument" style="display:none">

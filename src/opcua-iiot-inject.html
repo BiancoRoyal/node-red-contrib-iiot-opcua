@@ -443,8 +443,6 @@
         datatypesLookupButton.addClass('disabled')
 
         $.getJSON('/opcuaIIoT/data/types', function (data) {
-          console.log('datatypes requested response: ' + data.length)
-
           datatypesLookupButton.removeClass('disabled')
           node.datatypeNames = []
 
@@ -528,7 +526,7 @@
       $('#dialog').off('dialogresize', switchDialogResize)
     })
 
-    console.log('well done editprepare ...')
+    // console.log('well done editprepare ...')
   }
 </script>
 
@@ -643,7 +641,7 @@
         })
     })
 
-    console.log('well done editsave ...')
+    // console.log('well done editsave ...')
   }
 
 </script>

@@ -40,7 +40,6 @@
 
         let rootid = nodeIdField.val() || 'ns=0;i=84'
         let url = '/opcuaIIoT/browser/' + node.id + '/rootid/' + rootid
-        console.log('url: ' + url)
 
         $.getJSON(url, function (data) {
           nodeIdLookupField.removeClass('disabled')

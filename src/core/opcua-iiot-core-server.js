@@ -61,6 +61,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
     displayName: 'Bianco Royal View'
   })
 
+  if (asoDemo === undefined || asoDemo === null) { // TODO: cloud be deletet with next major version
+    asoDemo = true // stay compatible to old versions
+  }
+
   if (!asoDemo) {
     return
   }

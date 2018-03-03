@@ -165,7 +165,7 @@ module.exports = function (RED) {
 
     node.postInitialize = function () {
       if (node.opcuaServer) {
-        coreServer.constructAddressSpace(node.opcuaServer)
+        coreServer.constructAddressSpace(node.opcuaServer, node.asoDemo)
 
         node.opcuaServer.start(function (err) {
           if (err) {

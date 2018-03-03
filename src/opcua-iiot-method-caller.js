@@ -23,6 +23,8 @@ module.exports = function (RED) {
     this.methodType = config.methodType
     this.value = config.value
     this.name = config.name
+    this.showStatusActivities = config.showStatusActivities
+    this.showErrors = config.showErrors
     this.inputArguments = config.inputArguments
     this.connector = RED.nodes.getNode(config.connector)
 
@@ -106,8 +108,15 @@ module.exports = function (RED) {
         return
       }
 
+      if (!message.methodType) {
+        node.handleMethodWarn('No Method Type Found For Method Call')
+        return
+      }
+
       if (node.opcuaSession) {
         node.callMethodOnSession(message)
+      } else {
+        node.handleMethodWarn('Session Not Ready For Method Call')
       }
     })
 
@@ -123,14 +132,13 @@ module.exports = function (RED) {
     }
 
     node.callMethod = function (msg, definitionResults) {
-      coreMethod.callMethods(node.opcuaSession, msg).then(function (results) {
-        coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(results))
+      coreMethod.callMethods(node.opcuaSession, msg).then(function (data) {
+        coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
         node.send({
-          payload: JSON.parse(JSON.stringify(results)),
+          payload: JSON.parse(JSON.stringify(data.results)),
           definitionResults: JSON.parse(JSON.stringify(definitionResults)),
-          input: msg,
           nodetype: 'method',
-          methodType: msg.methodType || node.methodType
+          methodType: data.msg.methodType
         })
       })
     }

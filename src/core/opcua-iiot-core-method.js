@@ -78,7 +78,7 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
             if (err) {
               reject(err)
             } else {
-              resolve(results)
+              resolve({ results: results, msg: msg })
             }
           })
         } catch (err) {
