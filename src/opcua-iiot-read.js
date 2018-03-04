@@ -24,7 +24,6 @@ module.exports = function (RED) {
     this.depth = config.depth || 1
     this.name = config.name
     this.justValue = config.justValue
-    this.multipleRequest = config.multipleRequest
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.parseStrings = config.parseStrings
@@ -91,7 +90,7 @@ module.exports = function (RED) {
 
           switch (parseInt(node.attributeId)) {
             case 0:
-              coreClient.readAllAttributes(session, itemsToRead, node.multipleRequest).then(function (readResult) {
+              coreClient.readAllAttributes(session, itemsToRead).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
                 try {
@@ -107,7 +106,7 @@ module.exports = function (RED) {
             case 13:
               coreClient.core.specialDebugLog('requested Values ' + itemsToRead.length)
 
-              coreClient.readVariableValue(session, itemsToRead, node.multipleRequest).then(function (readResult) {
+              coreClient.readVariableValue(session, itemsToRead).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
                 try {
@@ -129,7 +128,7 @@ module.exports = function (RED) {
               node.historyStart = new Date(historyDate.getDate() - 1)
               node.historyEnd = historyDate
 
-              coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd, node.multipleRequest).then(function (readResult) {
+              coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
                 try {
@@ -160,7 +159,7 @@ module.exports = function (RED) {
                 transformedItemsToRead.push(transformedItem)
               }
 
-              coreClient.read(session, transformedItemsToRead, node.maxAge, node.multipleRequest).then(function (readResult) {
+              coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (readResult) {
                 node.setNodeStatusTo('active')
 
                 try {
@@ -182,43 +181,44 @@ module.exports = function (RED) {
       }
     }
 
-    node.getItemsToRead = function (itemsToRead) {
-      return (node.multipleRequest) ? itemsToRead : itemsToRead[0]
-    }
-
     node.buildResultMessage = function (msg, readType, readResult) {
       let message = {
         payload: {},
         topic: msg.topic,
-        multipleRequest: node.multipleRequest,
-        input: msg,
         nodetype: 'read',
         readtype: readType,
         attributeId: node.attributeId,
-        resultsConverted: {}
       }
 
       try {
-        let dataValuesString = JSON.stringify(readResult, null, 2)
+        let dataValuesString = {}
+        if (node.justValue) {
+          dataValuesString = JSON.stringify(readResult.results, null, 2)
+        } else {
+          dataValuesString = JSON.stringify(readResult, null, 2)
+        }
         RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
-      } catch (e) {
+      } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + typeof readResult)
-          node.error(e.message, msg)
+          node.error(err, msg)
           message.payload = JSON.stringify(readResult.results, null, 2)
-          message.error = e.message
+          message.error = err.message
         }
       }
 
-      try {
-        let dataValuesString = JSON.stringify(readResult.results, null, 2)
-        RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
-      } catch (e) {
-        if (node.showErrors) {
-          node.warn('JSON not to parse from string for dataValues type ' + typeof readResult.results)
-          node.error(e.message, msg)
-          message.resultsConverted = null
-          message.error = e.message
+      if (!node.justValue) {
+        try {
+          message.resultsConverted = {}
+          let dataValuesString = JSON.stringify(readResult.results, null, 2)
+          RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
+        } catch (err) {
+          if (node.showErrors) {
+            node.warn('JSON not to parse from string for dataValues type ' + typeof readResult.results)
+            node.error(err, msg)
+            message.resultsConverted = null
+            message.error = err.message
+          }
         }
       }
 
@@ -226,7 +226,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg, node.multipleRequest), msg)
+      node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
     })
 
     node.handleSessionError = function (err) {

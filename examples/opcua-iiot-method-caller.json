@@ -1,17 +1,17 @@
 [
   {
-    "id": "93430a9d.48e0d8",
+    "id": "9793b907.72bc18",
     "type": "tab",
     "label": "IIoT OPC UA Method Call",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "7f913a50.4c2484",
+    "id": "382a2032.f120f",
     "type": "debug",
-    "z": "93430a9d.48e0d8",
+    "z": "9793b907.72bc18",
     "name": "",
-    "active": true,
+    "active": false,
     "console": "false",
     "complete": "true",
     "x": 790,
@@ -19,14 +19,17 @@
     "wires": []
   },
   {
-    "id": "15af6265.abcf8e",
+    "id": "5c0872b0.14294c",
     "type": "OPCUA-IIoT-Method-Caller",
-    "z": "93430a9d.48e0d8",
-    "connector": "9f759b99.9d00e8",
+    "z": "9793b907.72bc18",
+    "connector": "f65000e.85f4f",
     "objectId": "ns=4;i=1234",
     "methodId": "ns=4;i=12345",
+    "methodType": "basic",
     "value": "",
     "name": "",
+    "showStatusActivities": false,
+    "showErrors": true,
     "inputArguments": [
       {
         "name": "barks",
@@ -43,15 +46,15 @@
     "y": 140,
     "wires": [
       [
-        "7f913a50.4c2484",
-        "bd612574.8702f8"
+        "382a2032.f120f",
+        "3b599c26.969294"
       ]
     ]
   },
   {
-    "id": "bd612574.8702f8",
+    "id": "3b599c26.969294",
     "type": "OPCUA-IIoT-Response",
-    "z": "93430a9d.48e0d8",
+    "z": "9793b907.72bc18",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -59,14 +62,14 @@
     "y": 140,
     "wires": [
       [
-        "edb93a1f.8c73f8"
+        "2709f681.00d3ea"
       ]
     ]
   },
   {
-    "id": "edb93a1f.8c73f8",
+    "id": "2709f681.00d3ea",
     "type": "debug",
-    "z": "93430a9d.48e0d8",
+    "z": "9793b907.72bc18",
     "name": "",
     "active": false,
     "console": "false",
@@ -76,9 +79,9 @@
     "wires": []
   },
   {
-    "id": "ee5f848e.12ee9",
+    "id": "9faaa6a4.508348",
     "type": "OPCUA-IIoT-Inject",
-    "z": "93430a9d.48e0d8",
+    "z": "9793b907.72bc18",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -93,14 +96,14 @@
     "y": 140,
     "wires": [
       [
-        "15af6265.abcf8e"
+        "5c0872b0.14294c"
       ]
     ]
   },
   {
-    "id": "1316bd2d.8c892b",
+    "id": "3142ceb0.b3b752",
     "type": "inject",
-    "z": "93430a9d.48e0d8",
+    "z": "9793b907.72bc18",
     "name": "",
     "topic": "",
     "payload": "",
@@ -112,14 +115,14 @@
     "y": 200,
     "wires": [
       [
-        "dc85d337.128bd8"
+        "dbeed8ac.ae5fb8"
       ]
     ]
   },
   {
-    "id": "dc85d337.128bd8",
+    "id": "dbeed8ac.ae5fb8",
     "type": "function",
-    "z": "93430a9d.48e0d8",
+    "z": "9793b907.72bc18",
     "name": "bark six times with volume twelve",
     "func": "msg.payload = {\n    objectId: 'ns=4;i=1234',\n    methodId: 'ns=4;i=12345',\n    inputArguments: [\n        {name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    methodType: 'basic'\n}\nreturn msg;",
     "outputs": 1,
@@ -128,14 +131,14 @@
     "y": 200,
     "wires": [
       [
-        "15af6265.abcf8e"
+        "5c0872b0.14294c"
       ]
     ]
   },
   {
-    "id": "818be5ef.f6e6e",
+    "id": "308a9c5.f179f64",
     "type": "comment",
-    "z": "93430a9d.48e0d8",
+    "z": "9793b907.72bc18",
     "name": "Information",
     "info": "If you have none OPC UA server on other tabs, \nplease drag&drop an OPC UA Server \nfrom the package nodes on this tab!",
     "x": 130,
@@ -143,16 +146,21 @@
     "wires": []
   },
   {
-    "id": "9f759b99.9d00e8",
+    "id": "f65000e.85f4f",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
-    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIOTServer",
+    "discoveryUrl": "opc.tcp://innoreactor.local:55388/",
+    "endpoint": "opc.tcp://innoreactor.local:55388/UA/NodeREDIIoTServer",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
-    "name": "Method Server",
+    "name": "LOCAL SERVER",
     "showStatusActivities": false,
-    "showErrors": false
+    "showErrors": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "",
+    "endpointMusExist": false
   }
 ]

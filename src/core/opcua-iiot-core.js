@@ -927,33 +927,40 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
   return nodesToWrite
 }
 
-de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg, multipleRequest) {
+de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
   let nodesToRead = []
   let item = null
 
   this.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(msg))
 
-  if (multipleRequest) {
-    if (msg.nodesToRead && msg.nodesToRead.length) {
-      for (item of msg.nodesToRead) {
+  let nodePayloadList = msg.payload.nodesToRead || msg.payload.nodesToWrite
+  if (nodePayloadList && nodePayloadList.length) {
+      // read to read
+    for (item of nodePayloadList) {
+      item = item.nodeId || item
+      nodesToRead.push(item.toString())
+    }
+  } else {
+    let nodeList = msg.nodesToRead || msg.nodesToWrite
+    if (nodeList && nodeList.length) {
+      // legacy
+      for (item of nodeList) {
+        item = item.nodeId || item
         nodesToRead.push(item.toString())
       }
     } else {
-      if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-        // browser compatibility for an easier set up
-        for (item of msg.addressSpaceItems) {
+      // new structure
+      if (msg.payload.addressSpaceItems && msg.payload.addressSpaceItems.length) {
+        for (item of msg.payload.addressSpaceItems) {
           nodesToRead.push(item.nodeId)
         }
+      } else {
+        if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
+          for (item of msg.addressSpaceItems) {
+            nodesToRead.push(item.nodeId)
+          }
+        }
       }
-    }
-  } else {
-    if (msg.addressSpaceItems) {
-      // browser compatibility for an easier set up
-      for (item of msg.addressSpaceItems) {
-        nodesToRead.push(item.nodeId)
-      }
-    } else {
-      nodesToRead.push(msg.topic)
     }
   }
 

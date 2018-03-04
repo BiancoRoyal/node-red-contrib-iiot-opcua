@@ -1,27 +1,29 @@
 [
   {
-    "id": "353c56f7.3ec1ea",
+    "id": "7d3bf7b2.7d72c8",
     "type": "tab",
     "label": "IIoT OPC UA Server",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "9646082c.d173e8",
+    "id": "d6e4f0a4.7b432",
     "type": "OPCUA-IIoT-Server",
-    "z": "353c56f7.3ec1ea",
+    "z": "7d3bf7b2.7d72c8",
     "port": "55388",
     "endpoint": "",
     "acceptExternalCommands": true,
-    "maxAllowedSessionNumber": "",
+    "maxAllowedSessionNumber": "20",
     "maxConnectionsPerEndpoint": "",
     "maxAllowedSubscriptionNumber": "",
     "alternateHostname": "",
     "name": "LOCAL SERVER",
     "showStatusActivities": false,
     "showErrors": false,
+    "asoDemo": true,
     "allowAnonymous": true,
     "isAuditing": false,
+    "serverDiscovery": true,
     "users": [
       {
         "name": "test",
@@ -32,11 +34,24 @@
         "password": "peter"
       }
     ],
-    "x": 360,
-    "y": 150,
+    "xmlsets": [],
+    "publicCertificateFile": "",
+    "privateCertificateFile": "",
+    "x": 220,
+    "y": 100,
     "wires": [
       [],
       []
     ]
+  },
+  {
+    "id": "e28cb22.24ee15",
+    "type": "comment",
+    "z": "7d3bf7b2.7d72c8",
+    "name": "information",
+    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
+    "x": 210,
+    "y": 60,
+    "wires": []
   }
 ]

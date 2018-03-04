@@ -101,7 +101,6 @@ module.exports = function (RED) {
       let message = {
         payload: {},
         topic: msg.topic,
-        input: msg,
         nodetype: 'write',
         resultsConverted: {}
       }

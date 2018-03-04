@@ -1,16 +1,16 @@
 [
   {
-    "id": "cba43db7.197ff",
+    "id": "9b93046e.95cbb8",
     "type": "tab",
     "label": "IIoT OPC UA Events",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "5fee50d3.b244f",
+    "id": "63a94271.67665c",
     "type": "OPCUA-IIoT-Listener",
-    "z": "cba43db7.197ff",
-    "connector": "823d2dee.6d0b6",
+    "z": "9b93046e.95cbb8",
+    "connector": "f65000e.85f4f",
     "action": "events",
     "queueSize": "1000",
     "name": "",
@@ -23,17 +23,17 @@
     "y": 120,
     "wires": [
       [
-        "8d2750f4.adef6"
+        "a510f666.7e5c38"
       ],
       [
-        "ee5afa8e.501e98"
+        "660bf7c6.79b8d8"
       ]
     ]
   },
   {
-    "id": "8d2750f4.adef6",
+    "id": "a510f666.7e5c38",
     "type": "debug",
-    "z": "cba43db7.197ff",
+    "z": "9b93046e.95cbb8",
     "name": "",
     "active": true,
     "console": "false",
@@ -43,9 +43,9 @@
     "wires": []
   },
   {
-    "id": "ee5afa8e.501e98",
+    "id": "660bf7c6.79b8d8",
     "type": "debug",
-    "z": "cba43db7.197ff",
+    "z": "9b93046e.95cbb8",
     "name": "",
     "active": true,
     "console": "false",
@@ -55,9 +55,9 @@
     "wires": []
   },
   {
-    "id": "2c145c92.e7fb84",
+    "id": "f2bcd2c.20b703",
     "type": "OPCUA-IIoT-Event",
-    "z": "cba43db7.197ff",
+    "z": "9b93046e.95cbb8",
     "eventType": "BaseEventType",
     "eventTypeLabel": "BaseEventType (i=2041)",
     "queueSize": "1000",
@@ -67,14 +67,14 @@
     "y": 120,
     "wires": [
       [
-        "5fee50d3.b244f"
+        "63a94271.67665c"
       ]
     ]
   },
   {
-    "id": "ce52e27f.ec2b9",
+    "id": "9d478c1c.99afc",
     "type": "OPCUA-IIoT-Inject",
-    "z": "cba43db7.197ff",
+    "z": "9b93046e.95cbb8",
     "injectType": "listen",
     "payload": "200",
     "payloadType": "num",
@@ -100,21 +100,26 @@
     "y": 120,
     "wires": [
       [
-        "2c145c92.e7fb84"
+        "f2bcd2c.20b703"
       ]
     ]
   },
   {
-    "id": "823d2dee.6d0b6",
+    "id": "f65000e.85f4f",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
-    "endpoint": "opc.tcp://localhost:55388/",
+    "discoveryUrl": "opc.tcp://innoreactor.local:55388/",
+    "endpoint": "opc.tcp://innoreactor.local:55388/UA/NodeREDIIoTServer",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
     "name": "LOCAL SERVER",
     "showStatusActivities": false,
-    "showErrors": false
+    "showErrors": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "",
+    "endpointMusExist": false
   }
 ]

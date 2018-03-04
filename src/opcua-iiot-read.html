@@ -18,7 +18,6 @@
       connector: {type: 'OPCUA-IIoT-Connector', required: true},
       name: {value: ''},
       justValue: {value: true},
-      multipleRequest: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false},
       parseStrings: {value: false}
@@ -102,11 +101,6 @@
         <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
         <input type="checkbox" id="node-input-justValue" style="max-width:30px">
     </div>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-multipleRequest"><i class="fa fa-th"></i>
-        <span data-i18n="opcua-iiot-contrib.label.multipleRequest"></span></label>
-        <input type="checkbox" id="node-input-multipleRequest" style="max-width:30px">
-    </div>
     <hr>
     <div class="form-row">
         <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
@@ -129,14 +123,7 @@
     The multiple Node-Id inject will request and produce an array of address space data.
     An individual Node-Id inject reads just a value and sends it via payload.</p>
 
-    <h3>Input normal read</h3>
-    <div>
-        <ul>
-            <li>addressSpaceItems (Array of Objects with property nodeId)
-        </ul>
-    </div>
-
-    <h3>Input multiple read</h3>
+    <h3>Input read</h3>
     <div>
         <ul>
             <li>nodesToRead or addressSpaceItems (Array of Objects with property nodeId)
@@ -156,7 +143,6 @@
             <ul>
                 <li>results
                 <li>nodesToRead
-                <li>diagnostics (some)
             </ul>
             <li>topic
             <li>input (msg)
@@ -187,16 +173,5 @@
         <span data-i18n="opcua-iiot-contrib.label.justValue"></span>
     </strong>
     <p>With that option, the node does not send an object on out two for less CPU load.</p>
-
-    <strong>
-        <span data-i18n="opcua-iiot-contrib.label.multipleRequest"></span>
-    </strong>
-    <p>With that option, the node handles incoming messages as multiple requests.</p>
-
-    <strong>
-        <span data-i18n="opcua-iiot-contrib.label.metaDataInject"></span>
-    </strong>
-    <p>With that option, the node buids a special out message
-    to inject in another Read node to read structures.</p>
 
 </script>

@@ -46,7 +46,7 @@ de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite) {
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge, multipleRequest) {
+de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
@@ -68,7 +68,7 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge, m
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nodesToRead, multipleRequest) {
+de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nodesToRead) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
@@ -173,7 +173,7 @@ de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, node
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nodesToRead, multipleRequest) {
+de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nodesToRead) {
   return new Promise(
     function (resolve, reject) {
       if (session) {

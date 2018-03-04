@@ -155,7 +155,7 @@
       })
 
       // User Management
-      if(node.users) {
+      if(node.users && node.users.length > 0) {
           cacheItemCount = node.users.length
           node.users.forEach(function(element, index, array) {
             generateUserEntry(element, index);
@@ -163,7 +163,7 @@
       }
 
       // XML-Set Management
-      if(node.xmlsets) {
+      if(node.xmlsets && node.xmlsets.length > 0) {
           cacheItemCountSet = node.xmlsets.length
           node.xmlsets.forEach(function(element, index, array) {
             generateXMLSetEntry(element, index);
@@ -557,7 +557,7 @@
                 <div id="node-input-server-users-container-div"
                     style="box-sizing: border-box; border-radius: 5px;
                     height: 210px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
-                    <ol id="node-input-server-users-container" style=" list-style-type:none; margin: 0;"></ol>
+                    <ol id="node-input-server-users-container" style="list-style-type:none; margin: 0;"></ol>
                 </div>
             </div>
             <div class="form-row">
@@ -570,7 +570,7 @@
                 <div id="node-input-server-xmlsets-container-div"
                     style="box-sizing: border-box; border-radius: 5px;
                     height: 240px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
-                    <ol id="node-input-server-xmlsets-container" style=" list-style-type:none; margin: 0;"></ol>
+                    <ol id="node-input-server-xmlsets-container" style="list-style-type:none; margin: 0;"></ol>
                 </div>
             </div>
             <div class="form-row">

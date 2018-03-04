@@ -17,7 +17,6 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreBrowser = require('./core/opcua-iiot-core-browser')
   let browserEntries = []
-  let nodesToRead = []
 
   function OPCUAIIoTBrowser (config) {
     RED.nodes.createNode(this, config)
@@ -114,7 +113,7 @@ module.exports = function (RED) {
 
     node.browse = function (session, msg) {
       browserEntries = []
-      nodesToRead = []
+      let nodesToRead = []
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
 
       if (session) {
@@ -133,10 +132,10 @@ module.exports = function (RED) {
           })
 
           node.status({fill: 'green', shape: 'dot', text: 'active'})
-          node.sendMessage(msg)
+          node.sendMessage(msg, nodesToRead)
         }).catch(function (err) {
           browserEntries = node.browseErrorHandling(err, msg, browserEntries)
-          node.sendMessage(msg)
+          node.sendMessage(msg, nodesToRead)
         })
       } else {
         coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
@@ -145,7 +144,7 @@ module.exports = function (RED) {
 
     node.browseNodeList = function (session, msg) {
       browserEntries = []
-      nodesToRead = []
+      let nodesToRead = []
       coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
 
       if (session) {
@@ -166,21 +165,21 @@ module.exports = function (RED) {
           })
 
           node.status({fill: 'green', shape: 'dot', text: 'active'})
-          node.sendMessage(msg)
+          node.sendMessage(msg, nodesToRead)
         }).catch(function (err) {
           browserEntries = node.browseErrorHandling(err, msg, browserEntries)
-          node.sendMessage(msg)
+          node.sendMessage(msg, nodesToRead)
         })))
       } else {
         coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
       }
     }
 
-    node.sendMessage = function (originMessage) {
+    node.sendMessage = function (originMessage, nodesToRead) {
       let msg = {}
 
       msg.nodetype = 'browse'
-      msg.input = originMessage
+      msg.topic = originMessage.topic || node.browseTopic
 
       msg.payload = {
         browserItems: browserEntries,

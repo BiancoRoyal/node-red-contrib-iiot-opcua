@@ -1,16 +1,16 @@
 [
   {
-    "id": "3c9d7aa6.1a6a4e",
+    "id": "dcb40bd0.5ccf68",
     "type": "tab",
     "label": "IIoT Browse And Read",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "eded6c05.9b7488",
+    "id": "83c382eb.e1af3",
     "type": "OPCUA-IIoT-Browser",
-    "z": "3c9d7aa6.1a6a4e",
-    "connector": "15b7d82c.f855e8",
+    "z": "dcb40bd0.5ccf68",
+    "connector": "f65000e.85f4f",
     "nodeId": "",
     "name": "",
     "showStatusActivities": false,
@@ -19,23 +19,23 @@
     "y": 120,
     "wires": [
       [
-        "1cb79501.d4d073",
-        "2c3a6754.8c07f",
-        "9891efa1.f529d",
-        "64bf9b56.6a4314",
-        "7768f1e2.af983"
+        "c87d70ba.207ab",
+        "24e44f33.ae782",
+        "92ef26be.4994d8",
+        "5cf1f9ad.0de328",
+        "14300cec.e7e493"
       ]
     ]
   },
   {
-    "id": "1cb79501.d4d073",
+    "id": "c87d70ba.207ab",
     "type": "ui_template",
-    "z": "3c9d7aa6.1a6a4e",
-    "group": "c2639dd.dc2c3e",
+    "z": "dcb40bd0.5ccf68",
+    "group": "36611ff8.e1d95",
     "name": "",
     "order": 0,
-    "width": "12",
-    "height": "14",
+    "width": "10",
+    "height": "9",
     "format": "<div layout=\"column\" layout-align=\"space-between\">\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <p>{{msg.payload.endpoint}}</p>\n    </div>\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <p>{{msg.payload.browseTopic}} with {{msg.payload.browserResultCount}} references</p>\n    </div>\n    <div layout=\"row\" layout-align=\"space-between center\">\n        <h1>Results</h1>\n    </div>\n    <div layout=\"row\" layout-align=\"space-between center\">\n        <select ng-model=\"item\" ng-options=\"item.displayName.text for item in msg.payload.browserItems\">\n            <option value=\"\">-- Root --</option>\n        </select>\n        <button ng-click=\"send({payload: {actiontype: 'browse', root: item}})\">Browse</button>\n    </div>\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <div>\n            <ul>\n                <li ng-repeat=\"item in msg.payload.browserItems\">\n                  {{item.displayName.text}} ( {{item.nodeId}} - {{item.browseName}})\n                </li>\n            </ul>\n        </div>\n    </div>\n</div>",
     "storeOutMessages": false,
     "fwdInMessages": false,
@@ -44,15 +44,15 @@
     "y": 60,
     "wires": [
       [
-        "eded6c05.9b7488",
-        "bf867198.787e"
+        "83c382eb.e1af3",
+        "52782d9c.dabe04"
       ]
     ]
   },
   {
-    "id": "2c3a6754.8c07f",
+    "id": "24e44f33.ae782",
     "type": "debug",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
     "active": false,
     "console": "false",
@@ -62,9 +62,9 @@
     "wires": []
   },
   {
-    "id": "8d125437.d8b9c",
+    "id": "56a5e62a.22cdd8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "injectType": "read",
     "payload": "",
     "payloadType": "date",
@@ -85,28 +85,28 @@
     "y": 120,
     "wires": [
       [
-        "eded6c05.9b7488",
-        "994bb92f.fe542"
+        "83c382eb.e1af3",
+        "73d51efc.1ac1d"
       ]
     ]
   },
   {
-    "id": "9891efa1.f529d",
+    "id": "92ef26be.4994d8",
     "type": "OPCUA-IIoT-Response",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
     "x": 520,
     "y": 100,
     "wires": [
       [
-        "2e112a95.9335b6"
+        "c1f4daea.829e78"
       ]
     ]
   },
   {
-    "id": "2e112a95.9335b6",
+    "id": "c1f4daea.829e78",
     "type": "debug",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
     "active": false,
     "console": "false",
@@ -116,30 +116,30 @@
     "wires": []
   },
   {
-    "id": "64bf9b56.6a4314",
+    "id": "5cf1f9ad.0de328",
     "type": "OPCUA-IIoT-Read",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "attributeId": "0",
     "maxAge": "0",
     "depth": 1,
-    "connector": "15b7d82c.f855e8",
+    "connector": "f65000e.85f4f",
     "name": "Read browsed All",
     "justValue": true,
-    "multipleRequest": true,
     "showStatusActivities": false,
     "showErrors": false,
+    "parseStrings": false,
     "x": 550,
     "y": 160,
     "wires": [
       [
-        "75c637c9.e0d658"
+        "800f63cb.e1b0f"
       ]
     ]
   },
   {
-    "id": "75c637c9.e0d658",
+    "id": "800f63cb.e1b0f",
     "type": "OPCUA-IIoT-Response",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -147,16 +147,16 @@
     "y": 160,
     "wires": [
       [
-        "ac316265.411448"
+        "5794f5a3.41b9ec"
       ]
     ]
   },
   {
-    "id": "ac316265.411448",
+    "id": "5794f5a3.41b9ec",
     "type": "debug",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
-    "active": true,
+    "active": false,
     "console": "false",
     "complete": "true",
     "x": 920,
@@ -164,9 +164,9 @@
     "wires": []
   },
   {
-    "id": "994bb92f.fe542",
+    "id": "73d51efc.1ac1d",
     "type": "debug",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
     "active": false,
     "console": "false",
@@ -176,9 +176,9 @@
     "wires": []
   },
   {
-    "id": "bf867198.787e",
+    "id": "52782d9c.dabe04",
     "type": "debug",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
     "active": false,
     "console": "false",
@@ -188,30 +188,30 @@
     "wires": []
   },
   {
-    "id": "7768f1e2.af983",
+    "id": "14300cec.e7e493",
     "type": "OPCUA-IIoT-Read",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "attributeId": "13",
     "maxAge": "0",
     "depth": 1,
-    "connector": "15b7d82c.f855e8",
+    "connector": "f65000e.85f4f",
     "name": "Read browsed Values",
     "justValue": true,
-    "multipleRequest": true,
     "showStatusActivities": false,
     "showErrors": false,
+    "parseStrings": false,
     "x": 560,
     "y": 220,
     "wires": [
       [
-        "643dacd2.5eb3ec"
+        "ab901436.5a3408"
       ]
     ]
   },
   {
-    "id": "643dacd2.5eb3ec",
+    "id": "ab901436.5a3408",
     "type": "OPCUA-IIoT-Response",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -219,16 +219,16 @@
     "y": 220,
     "wires": [
       [
-        "fe316356.54ec3"
+        "25b20ce1.5422c4"
       ]
     ]
   },
   {
-    "id": "fe316356.54ec3",
+    "id": "25b20ce1.5422c4",
     "type": "debug",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "",
-    "active": true,
+    "active": false,
     "console": "false",
     "complete": "true",
     "x": 920,
@@ -236,9 +236,9 @@
     "wires": []
   },
   {
-    "id": "134d7d71.9db4d3",
+    "id": "d788ea73.5746a8",
     "type": "comment",
-    "z": "3c9d7aa6.1a6a4e",
+    "z": "dcb40bd0.5ccf68",
     "name": "Please, check the port of LOCAL SERVER connector!",
     "info": "default ports: \n\n    55388 for the OPC UA IIoT Server\n\n    55380 for the OPC UA IIoT Flex Server",
     "x": 800,
@@ -246,32 +246,38 @@
     "wires": []
   },
   {
-    "id": "15b7d82c.f855e8",
+    "id": "f65000e.85f4f",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
-    "endpoint": "opc.tcp://localhost:55380/",
+    "discoveryUrl": "opc.tcp://innoreactor.local:55388/",
+    "endpoint": "opc.tcp://innoreactor.local:55388/UA/NodeREDIIoTServer",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
     "name": "LOCAL SERVER",
     "showStatusActivities": false,
-    "showErrors": false
+    "showErrors": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "",
+    "endpointMusExist": false
   },
   {
-    "id": "c2639dd.dc2c3e",
+    "id": "36611ff8.e1d95",
     "type": "ui_group",
     "z": "",
-    "name": "Default",
-    "tab": "835f160.4b91468",
+    "name": "Bianco Royal",
+    "tab": "34bd0e54.e03b82",
     "disp": true,
-    "width": "12"
+    "width": "12",
+    "collapse": false
   },
   {
-    "id": "835f160.4b91468",
+    "id": "34bd0e54.e03b82",
     "type": "ui_tab",
-    "z": "3c9d7aa6.1a6a4e",
-    "name": "Node-RED OPC UA IIoT",
+    "z": "",
+    "name": "Home",
     "icon": "dashboard"
   }
 ]

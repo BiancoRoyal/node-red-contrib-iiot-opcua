@@ -1,16 +1,16 @@
 [
   {
-    "id": "5c791f74.d0273",
+    "id": "f1453326.a8ea9",
     "type": "tab",
     "label": "IIoT OPC UA ASO",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "eb075f99.2d5af",
+    "id": "83dfd96a.7dd658",
     "type": "OPCUA-IIoT-Server",
-    "z": "5c791f74.d0273",
-    "port": "55388",
+    "z": "f1453326.a8ea9",
+    "port": "55390",
     "endpoint": "",
     "acceptExternalCommands": true,
     "maxAllowedSessionNumber": "",
@@ -20,8 +20,10 @@
     "name": "LOCAL SERVER",
     "showStatusActivities": false,
     "showErrors": false,
+    "asoDemo": true,
     "allowAnonymous": true,
-    "isAuditing": true,
+    "isAuditing": false,
+    "serverDiscovery": true,
     "users": [
       {
         "name": "test",
@@ -32,6 +34,8 @@
         "password": "peter"
       }
     ],
+    "publicCertificateFile": "",
+    "privateCertificateFile": "",
     "x": 640,
     "y": 100,
     "wires": [
@@ -40,9 +44,9 @@
     ]
   },
   {
-    "id": "dc3a1f73.cfd1f",
+    "id": "81aa4258.630af",
     "type": "OPCUA-IIoT-Server-Command",
-    "z": "5c791f74.d0273",
+    "z": "f1453326.a8ea9",
     "commandtype": "restart",
     "nodeId": "",
     "name": "",
@@ -50,16 +54,16 @@
     "y": 80,
     "wires": [
       [
-        "eb075f99.2d5af"
+        "83dfd96a.7dd658"
       ]
     ]
   },
   {
-    "id": "bf07be20.ec311",
+    "id": "78ec5af2.ee1fa4",
     "type": "ui_button",
-    "z": "5c791f74.d0273",
+    "z": "f1453326.a8ea9",
     "name": "",
-    "group": "af3390fa.0bd76",
+    "group": "66557d89.3a7074",
     "order": 0,
     "width": 0,
     "height": 0,
@@ -75,14 +79,14 @@
     "y": 80,
     "wires": [
       [
-        "dc3a1f73.cfd1f"
+        "81aa4258.630af"
       ]
     ]
   },
   {
-    "id": "4885a030.ce2dd",
+    "id": "70895eee.e5e09",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "5c791f74.d0273",
+    "z": "f1453326.a8ea9",
     "nodeId": "ns=5;s=TestFolder",
     "browsename": "TestFolder",
     "displayname": "Test Folder",
@@ -96,14 +100,14 @@
     "y": 140,
     "wires": [
       [
-        "eb075f99.2d5af"
+        "83dfd96a.7dd658"
       ]
     ]
   },
   {
-    "id": "c85dffa6.608da",
+    "id": "6a623f8.28157c",
     "type": "OPCUA-IIoT-Inject",
-    "z": "5c791f74.d0273",
+    "z": "f1453326.a8ea9",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -118,23 +122,33 @@
     "y": 140,
     "wires": [
       [
-        "4885a030.ce2dd"
+        "70895eee.e5e09"
       ]
     ]
   },
   {
-    "id": "af3390fa.0bd76",
+    "id": "a7187224.3ba1c",
+    "type": "comment",
+    "z": "f1453326.a8ea9",
+    "name": "information",
+    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
+    "x": 630,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "66557d89.3a7074",
     "type": "ui_group",
     "z": "",
     "name": "Default",
-    "tab": "8bc8aa27.cfac88",
+    "tab": "3842f189.ad1fde",
     "disp": true,
     "width": "10"
   },
   {
-    "id": "8bc8aa27.cfac88",
+    "id": "3842f189.ad1fde",
     "type": "ui_tab",
-    "z": "5c791f74.d0273",
+    "z": "f1453326.a8ea9",
     "name": "Node-RED OPC UA IIoT",
     "icon": "dashboard"
   }
