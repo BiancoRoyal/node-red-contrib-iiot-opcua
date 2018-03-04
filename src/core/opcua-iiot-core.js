@@ -885,8 +885,9 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
 
   // compatible mode to nodesToWrite of node-opcua
   if (!msg.addressSpaceItems || !msg.addressSpaceItems.length) {
-    if (msg.nodesToWrite && msg.nodesToWrite.length) {
-      msg.addressSpaceItems = msg.nodesToWrite
+    let itemList = msg.payload.nodesToWrite || msg.nodesToWrite
+    if (itemList && itemList.length) {
+      msg.addressSpaceItems = itemList
     }
   }
 

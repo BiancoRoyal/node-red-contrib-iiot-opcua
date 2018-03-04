@@ -63,21 +63,25 @@
     <h3>Input</h3>
 
     <ul>
-      <li>payload (value to write)</li>
-      <li>topic (Node-Id)</li>
-      <li>datatype (node-opcua/OPC UA data type string)</li>
-      <li>diagnostics (Array)</li>
+      <li>payload (value to write one or all)</li>
+      <li>topic</li>
+      <li>addressSpaceItems or nodesToWrite (Array of Node-Ids)
       <li>nodetype (inject)</li>
+      <li>injectType (write)
+      <li>valuesToWrite (Array of values or objects to write individual)</li>
     </ul>
 
     <h3>Output</h3>
 
     <p>Results in message:</p>
     <ul>
-      <li>payload (Array of StatusCodes)</li>
-      <li>nodesToWrite (Array of Node-Id)</li>
-      <li>input (msg)</li>
-      <li>diagnostics (Array)</li>
+      <li>payload</li>
+      <ul>
+        <li>statusCodes (Array of Status Codes)
+        <li>nodesToWrite (Array of Node-Id)</li>
+      </ul>
+      <li>topic
       <li>nodetype (write)</li>
+      <li>resultsConverted (Array)
     </ul>
 </script>
