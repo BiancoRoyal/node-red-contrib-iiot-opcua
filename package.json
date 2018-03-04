@@ -21,13 +21,13 @@
   },
   "keywords": [
     "node-red",
+    "opcua",
+    "iiot",
+    "opc ua",
     "OPC UA",
     "opc-ua",
-    "opcua",
-    "opc ua",
     "nodered opcua",
     "node-red opc ua",
-    "iiot",
     "IIoT",
     "unified automation",
     "opc foundation",
@@ -56,7 +56,6 @@
       "OPCUA-IIoT-Flex-Server": "opcuaIIoT/opcua-iiot-flex-server.js",
       "OPCUA-IIoT-Server-ASO": "opcuaIIoT/opcua-iiot-server-aso.js",
       "OPCUA-IIoT-Server-Command": "opcuaIIoT/opcua-iiot-server-cmd.js",
-      "OPCUA-IIoT-Server-ISA95": "opcuaIIoT/opcua-iiot-server-isa95.js",
       "OPCUA-IIoT-Result-Filter": "opcuaIIoT/opcua-iiot-result-filter.js",
       "OPCUA-IIoT-Method-Caller": "opcuaIIoT/opcua-iiot-method-caller.js"
     }
