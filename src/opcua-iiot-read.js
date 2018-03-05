@@ -187,7 +187,7 @@ module.exports = function (RED) {
         topic: msg.topic,
         nodetype: 'read',
         readtype: readType,
-        attributeId: node.attributeId,
+        attributeId: node.attributeId
       }
 
       try {
