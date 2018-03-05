@@ -127,26 +127,24 @@
     <div>
         <strong>Event message:</strong>
         <ul>
-            <li>payload (Number - interval in msec.)
-            <li>topic (Node-Id)
+
         </ul>
     </div>
 
     <h3>Output</h3>
     <div>
         <strong>Event message:</strong>
+
         <ul>
-            <li>payload
+            <li>payload (number/Object)
             <ul>
-                <li>eventRoot (Node-Id)
-                <li>eventType (Condition/Basic)
-                <li>queueSize (Number of elements)
-                <li>eventFilter (Array)
-                <li>eventFields (Array)
-                <li>interval (Number msec.)
-            </ul>
-            <li>topic (Node-Id)
-            <li>nodetype (events)
+                <li>eventType (ObjectTypeId)
+                <li>eventFilter (condition or event)
+                <li>eventFields (bytestring)
+                <li>queueSize (number)
+                <li>interval (number msec.)
+            <ul>
+            <li>topic
         </ul>
     </div>
 

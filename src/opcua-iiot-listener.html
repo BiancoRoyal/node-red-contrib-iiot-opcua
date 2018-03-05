@@ -132,26 +132,19 @@
     </div>
 
     <h3>Output 1</h3>
+
     <h4>All Mode</h4>
     <div>
-        <strong>Result in subscribe message:</strong>
+        <strong>Result in message:</strong>
         <ul>
             <li>payload (object)
             <li>topic
-            <li>input (msg)
-            <li>nodetype (listen)
-            <li>readtype (subscribe)
+            <li>addressSpaceItems (Array)
+            <li>nodetype
+            <li>injectType
+            <li>readtype
             <li>result (origin from node-opcua)
-        </ul>
-    </div>
-    <div>
-        <strong>Result in event message:</strong>
-        <ul>
-            <li>payload (event object)
-            <li>topic
-            <li>input (msg)
-            <li>nodetype (listen)
-            <li>readtype (event)
+            <li>mode (all/value)
         </ul>
     </div>
 
@@ -159,22 +152,17 @@
     <div>
         <strong>Result in subscribe message:</strong>
         <ul>
-            <li>payload (value)
+            <li>payload
+            <ul>
+                <li>name
+                <li>nodeId
+                <li>value
+            </ul>
             <li>topic
-            <li>nodeId 
-            <li>name
-            <li>readtype (subscribe)
-        </ul>
-    </div>
-    <div>
-        <strong>Result in event message:</strong>
-        <ul>
-            <li>payload (event message)
-            <li>variantMsg
-            <li>topic
-            <li>nodeId
-            <li>name
-            <li>readtype (event)
+            <li>addressSpaceItems (Array)
+            <li>injectType
+            <li>readtype
+            <li>mode (all/value)
         </ul>
     </div>
 
