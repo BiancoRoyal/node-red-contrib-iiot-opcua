@@ -176,10 +176,9 @@ module.exports = function (RED) {
     }
 
     node.sendMessage = function (originMessage, nodesToRead) {
-      let msg = {}
+      let msg = originMessage
 
       msg.nodetype = 'browse'
-      msg.topic = originMessage.topic || node.browseTopic
 
       msg.payload = {
         browserItems: browserEntries,

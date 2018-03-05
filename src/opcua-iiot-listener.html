@@ -83,25 +83,18 @@
 
     <h3>Input</h3>
     <div>
-        <strong>subscribe input:</strong>
+        <strong>Input:</strong>
         <ul>
-            <li>payload (value/JSON)
-            <li>topic (Node-Id)
-            <li>datatype (node-opcua)
-        </ul>
-    </div>
-
-    <div>
-        <strong>event input:</strong>
-        <ul>
-            <li>payload (number/JSON)
-                <ul>
-                    <li>interval (number)
-                    <li>queueSize (number)
-                    <li>options (optional object)
-                </ul>
-            <li>topic (Node-Id)
-            <li>datatype (node-opcua/OPC UA data type name)
+            <li>payload (number*/Object)
+            <ul>
+                <li>interval (number*)
+                <li>queueSize (number)
+                <li>options (Object)
+            </ul>
+            <li>topic
+            <li>nodetype (inject)
+            <li>injectType (listen)
+            <li>addressSpaceItems (Array)
         </ul>
     </div>
 

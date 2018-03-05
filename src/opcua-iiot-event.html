@@ -16,7 +16,10 @@
       eventTypeLabel: {value: 'BaseTypeEvent'},
       queueSize: {value: 1, required: true, validate: RED.validators.number()},
       usingListener: {value: false},
-      name: {value: ''}
+      name: {value: ''},
+      showStatusActivities: {value: false},
+      showErrors: {value: false},
+      parseStrings: {value: false}
     },
     inputs: 1,
     outputs: 1,
@@ -92,6 +95,22 @@
         <span data-i18n="opcua-iiot-contrib.label.usingListener"></span></label>
         <input type="checkbox" id="node-input-usingListener" style="max-width:30px">
     </div>
+    <!-- <div class="form-row">
+        <label style="min-width:160px" for="node-input-parseStrings"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.parseStrings"></span></label>
+        <input type="checkbox" id="node-input-parseStrings" style="max-width:30px">
+    </div> -->
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+    </div>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Event">
@@ -119,12 +138,12 @@
         <ul>
             <li>payload
             <ul>
-            <li>eventRoot (Node-Id)
-            <li>eventType (Condition/Basic)
-            <li>queueSize (Number of elements)
-            <li>eventFilter (Array)
-            <li>eventFields (Array)
-            <li>interval (Number msec.)
+                <li>eventRoot (Node-Id)
+                <li>eventType (Condition/Basic)
+                <li>queueSize (Number of elements)
+                <li>eventFilter (Array)
+                <li>eventFields (Array)
+                <li>interval (Number msec.)
             </ul>
             <li>topic (Node-Id)
             <li>nodetype (events)

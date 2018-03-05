@@ -25,6 +25,9 @@ module.exports = function (RED) {
     this.queueSize = config.queueSize
     this.usingListener = config.usingListener
     this.name = config.name
+    this.parseStrings = config.parseStrings
+    this.showStatusActivities = config.showStatusActivities
+    this.showErrors = config.showErrors
 
     let node = this
     node.subscribed = false
@@ -44,14 +47,14 @@ module.exports = function (RED) {
         node.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
 
-      let eventFields
+      let uaEventFields = null
       if (node.eventType.indexOf('Condition') > -1) {
-        eventFields = coreListener.getConditionEventFields()
+        uaEventFields = coreListener.getConditionEventFields()
       } else {
-        eventFields = coreListener.getBasicEventFields()
+        uaEventFields = coreListener.getBasicEventFields()
       }
 
-      let eventFilter = coreListener.core.nodeOPCUA.constructEventFilter(eventFields)
+      let uaEventFilter = coreListener.core.nodeOPCUA.constructEventFilter(uaEventFields)
       let interval = 1000
 
       if (typeof msg.payload === 'number') {
@@ -60,13 +63,17 @@ module.exports = function (RED) {
 
       msg.nodetype = 'events'
 
-      msg.payload = {
-        eventType: node.eventType,
-        queueSize: node.queueSize,
-        eventFilter: eventFilter,
-        eventFields: eventFields,
-        interval: interval
+      let eventSubscriptionPayload = {
+        eventType: msg.payload.eventType || node.eventType,
+        eventFilter: msg.payload.uaEventFilter || uaEventFilter,
+        eventFields: msg.payload.uaEventFields || uaEventFields,
+        queueSize: msg.payload.queueSize || node.queueSize,
+        interval: msg.payload.interval || interval
       }
+
+      // TODO: send works but it has a problem with debug node and ByteString
+      msg.payload = eventSubscriptionPayload
+
       node.send(msg)
     })
   }

@@ -6,6 +6,7 @@
       "usingListener": "Listener",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
+      "parseStrings": "Parse Output",
       "lookupUseHint": "You can use the lookup or give a NodeId of your event."
     }
   }
