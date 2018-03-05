@@ -1,10 +1,8 @@
 ![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
 ![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
-![Repository GitLab](http://b.repl.ca/v1/Repository-GitLab-orange.png)
-![Quality GitLab CI](http://b.repl.ca/v1/Quality-GitLab_CI_and_CD-green.png)
-![ES_Sourdce_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
+![ES_Source_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
-![NodeJS_Version](http://b.repl.ca/v1/NodeJS-8.x-green.png)
+![NodeJS_Version](http://b.repl.ca/v1/NodeJS-9.x-green.png)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
@@ -17,11 +15,11 @@
 
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
-## [Become a backer of the project straight away!][2]
+**[Become a backer of the project straight away!][2]**
 
-* tested with Node 6 LTS
 * tested with Node 8 LTS
-* based on node-opcua v0.1.x
+* tested with Node 9 LTS
+* based on node-opcua v0.2.x
 
 ## Install
 
@@ -40,6 +38,8 @@ try these options on npm install to build, if you have problems to install
 ![Flow Example](images/opcua-iiot-v109s2.png)
   
 ## Contributing
+
+**[Become a backer of the project straight away!][2]**
 
 Let's work together! 
 Please read and in best case accept [CONTRIBUTING](CONTRIBUTING.md) by your sign and send it via E-Mail.
