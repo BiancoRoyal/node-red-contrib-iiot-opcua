@@ -11,14 +11,16 @@
 
 ## The IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.
 
-[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua )
+[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua/)
+[![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
+[![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
 **[Become a backer of the project straight away!][2]**
 
 * tested with Node 8 LTS
-* tested with Node 9 LTS
+* tested with Node 9
 * based on node-opcua v0.2.x
 
 ## Install
@@ -112,7 +114,7 @@ The old copyrights by Mika Karaila are just to honor his pioneer work in the yea
 
 ### Important
 
-This is **not** an official product of the OPC Foundation.
+This is **not** an official product of the OPC Foundation or Plattform Industrie 4.0.
 It is just to provide OPC UA to Node-RED based on node-opcua.
 
 ### Contribution node-opcua
