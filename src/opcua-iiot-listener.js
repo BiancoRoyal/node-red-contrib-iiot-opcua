@@ -228,46 +228,40 @@ module.exports = function (RED) {
         monitoredItem.on('changed', function (dataValue) {
           let result = coreListener.core.buildMsgPayloadByDataValue(dataValue)
 
-          let valueMsg = {
-            payload: {},
-            topic: monitoredItem.topic,
-            addressSpaceItems: [monitoredItem.addressSpaceItem],
-            nodetype: monitoredItem.nodetype,
-            injectType: monitoredItem.injectType,
-            readtype: monitoredItem.readtype,
-            result: result
-          }
-
-          if (result.hasOwnProperty('value') && result.value.hasOwnProperty('value')) {
-            valueMsg.payload = result.value.value
-          } else {
-            if (result.hasOwnProperty('value')) {
-              valueMsg.payload = result.value
-            } else {
-              valueMsg.payload = result
-            }
-          }
-
           let valueObject = {
             payload: {
               name: monitoredItem.addressSpaceItem.name,
               nodeId: monitoredItem.addressSpaceItem.nodeId,
-              value: valueMsg.payload
+              datatype: monitoredItem.addressSpaceItem.datatypeName,
+              value: null
             },
-            topic: valueMsg.topic,
-            addressSpaceItems: valueMsg.addressSpaceItems,
-            nodetype: valueMsg.nodetype,
-            injectType: valueMsg.injectType,
-            readtype: valueMsg.readtype
+            topic: monitoredItem.topic,
+            addressSpaceItems: [monitoredItem.addressSpaceItem],
+            nodetype: monitoredItem.nodetype,
+            injectType: monitoredItem.injectType,
+            readtype: monitoredItem.readtype
+          }
+
+          if (result.hasOwnProperty('value') && result.value.hasOwnProperty('value')) {
+            valueObject.payload.value = result.value.value
+            valueObject.payload.datatype = result.value.dataType || monitoredItem.addressSpaceItem.datatypeName
+          } else {
+            if (result.hasOwnProperty('value')) {
+              valueObject.payload.value = result.value
+              valueObject.payload.datatype = result.dataType || monitoredItem.addressSpaceItem.datatypeName
+            } else {
+              valueObject.payload.value = result
+            }
           }
 
           if (node.justValue) {
-            valueMsg.mode = 'value'
-            node.send([valueObject, valueMsg])
+            valueObject.mode = 'value'
           } else {
-            valueMsg.mode = 'all'
-            node.send([valueMsg, valueObject])
+            valueObject.mode = 'all'
+            valueObject.result = result
           }
+
+          node.send(valueObject)
         })
       } else {
         monitoredItem.on('changed', function (eventFieldResponse) {
@@ -275,23 +269,6 @@ module.exports = function (RED) {
             .then(function (result) {
               coreListener.eventDetailDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
               coreListener.eventDetailDebugLog('Monitored Event Field Message ' + JSON.stringify(result.variantMsg))
-
-              let valueMsg = {
-                payload: {},
-                topic: monitoredItem.topic,
-                addressSpaceItems: [monitoredItem.addressSpaceItem],
-                nodetype: monitoredItem.nodetype,
-                injectType: monitoredItem.injectType,
-                readtype: monitoredItem.readtype,
-                result: result
-              }
-
-              try {
-                valueMsg.payload = JSON.parse(JSON.stringify(result.message.payload))
-              } catch (err) {
-                coreListener.eventDetailDebugLog(err + ' sending message stringified')
-                valueMsg.payload = JSON.stringify(result.message.payload)
-              }
 
               let dataValueJSON = {}
               try {
@@ -305,23 +282,33 @@ module.exports = function (RED) {
                 payload: {
                   name: monitoredItem.addressSpaceItem.name,
                   nodeId: monitoredItem.addressSpaceItem.nodeId,
-                  value: valueMsg.payload
+                  datatypeName: monitoredItem.addressSpaceItem.datatypeName,
+                  value: null
                 },
-                topic: valueMsg.topic,
-                addressSpaceItems: valueMsg.addressSpaceItems,
-                nodetype: valueMsg.nodetype,
-                injectType: valueMsg.injectType,
-                eventType: valueMsg.eventType,
-                variantMsg: dataValueJSON
+                topic: monitoredItem.topic,
+                addressSpaceItems: [monitoredItem.addressSpaceItem],
+                nodetype: monitoredItem.nodetype,
+                injectType: monitoredItem.injectType,
+                readtype: monitoredItem.readtype,
+                eventType: monitoredItem.eventType
+              }
+
+              try {
+                valueObject.payload.value = JSON.parse(JSON.stringify(result.message.payload))
+              } catch (err) {
+                coreListener.eventDetailDebugLog(err + ' sending message stringified')
+                valueObject.payload.value = JSON.stringify(result.message.payload)
               }
 
               if (node.justValue) {
-                valueMsg.mode = 'value'
-                node.send([valueObject, valueMsg])
+                valueObject.mode = 'value'
               } else {
-                valueMsg.mode = 'all'
-                node.send([valueMsg, valueObject])
+                valueObject.mode = 'all'
+                valueObject.result = result
+                valueObject.variantMsg = dataValueJSON
               }
+
+              node.send(valueObject)
             })
             .catch(node.errorHandling)
         })
@@ -525,23 +512,8 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', function (done) {
-      if (uaSubscription && uaSubscription.isActive()) {
-        uaSubscription.terminate()
-      }
-
-      if (node.opcuaSession && node.connector.opcuaClient) {
-        node.connector.closeSession(node.opcuaSession, function (err) {
-          if (err) {
-            node.verboseLog('Error On Close Session ' + err)
-          }
-          node.opcuaSession = null
-          done()
-        })
-      } else {
-        node.opcuaSession = null
-        done()
-      }
+    node.on('close', function () {
+      node.opcuaSession = null
     })
 
     node.setNodeStatusTo('waiting')

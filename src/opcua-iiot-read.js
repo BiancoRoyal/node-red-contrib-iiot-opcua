@@ -281,20 +281,8 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    node.on('close', function (done) {
-      if (node.opcuaSession && node.connector.opcuaClient) {
-        node.connector.closeSession(node.opcuaSession, function (err) {
-          if (err) {
-            coreClient.readDebugLog('ERROR: on close session ' + err)
-          }
-          node.opcuaSession = null
-          coreClient.readDebugLog('Session closed')
-          done()
-        })
-      } else {
-        node.opcuaSession = null
-        done()
-      }
+    node.on('close', function () {
+      node.opcuaSession = null
     })
 
     node.setNodeStatusTo(false)

@@ -43,6 +43,7 @@ module.exports = function (RED) {
     node.endpoints = []
     node.userIdentity = null
     node.opcuaClient = null
+    node.opcuaSessions = []
     node.discoveryServer = null
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
@@ -189,47 +190,48 @@ module.exports = function (RED) {
       try {
         return new Promise(
           function (resolve, reject) {
-            coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (session) {
+            coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (result) {
               coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
 
-              session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 10, 's')
+              result.session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 5, 's')
               if (node.keepSessionAlive) {
-                session.startKeepAliveManager()
+                result.session.startKeepAliveManager()
               }
-              session.on('error', node.handleError)
-              session.on('close', node.handleSessionClose)
+              result.session.on('error', node.handleError)
+              result.session.on('close', node.handleSessionClose)
 
-              coreConnector.internalDebugLog(type + ' ' + session.name + ' Session ' +
-                session.sessionId + ' Started' + ' On' + ' ', node.endpoint)
+              coreConnector.internalDebugLog(type + ' ' + result.session.name + ' Session ' +
+                result.session.sessionId + ' Started' + ' On' + ' ', node.endpoint)
 
-              coreConnector.detailDebugLog('name :' + session.name)
-              coreConnector.detailDebugLog('sessionId :' + session.sessionId)
-              coreConnector.detailDebugLog('authenticationToken :' + session.authenticationToken)
-              coreConnector.internalDebugLog('timeout :' + session.timeout)
+              coreConnector.detailDebugLog('name :' + result.session.name)
+              coreConnector.detailDebugLog('sessionId :' + result.session.sessionId)
+              coreConnector.detailDebugLog('authenticationToken :' + result.session.authenticationToken)
+              coreConnector.internalDebugLog('timeout :' + result.session.timeout)
 
-              if (session.serverNonce) {
-                coreConnector.detailDebugLog('serverNonce :' + session.serverNonce ? session.serverNonce.toString('hex') : 'none')
+              if (result.session.serverNonce) {
+                coreConnector.detailDebugLog('serverNonce :' + result.session.serverNonce ? result.session.serverNonce.toString('hex') : 'none')
               }
 
-              if (session.serverCertificate) {
-                coreConnector.detailDebugLog('serverCertificate :' + session.serverCertificate ? session.serverCertificate.toString('base64') : 'none')
+              if (result.session.serverCertificate) {
+                coreConnector.detailDebugLog('serverCertificate :' + result.session.serverCertificate ? result.session.serverCertificate.toString('base64') : 'none')
               } else {
                 coreConnector.detailDebugLog('serverCertificate : None'.red)
               }
 
-              coreConnector.detailDebugLog('serverSignature :' + session.serverSignature ? session.serverSignature : 'none')
+              coreConnector.detailDebugLog('serverSignature :' + result.session.serverSignature ? result.session.serverSignature : 'none')
 
-              if (session.lastRequestSentTime) {
-                coreConnector.detailDebugLog('lastRequestSentTime : ' + session.lastRequestSentTime)
-                coreConnector.internalDebugLog('lastRequestSentTime converted :' + session.lastRequestSentTime ? new Date(session.lastRequestSentTime).toISOString() : 'none')
+              if (result.session.lastRequestSentTime) {
+                coreConnector.detailDebugLog('lastRequestSentTime : ' + result.session.lastRequestSentTime)
+                coreConnector.internalDebugLog('lastRequestSentTime converted :' + result.session.lastRequestSentTime ? new Date(result.session.lastRequestSentTime).toISOString() : 'none')
               }
 
-              if (session.lastResponseReceivedTime) {
-                coreConnector.detailDebugLog('lastResponseReceivedTime : ' + session.lastResponseReceivedTime)
-                coreConnector.internalDebugLog('lastResponseReceivedTime converted :' + session.lastResponseReceivedTime ? new Date(session.lastResponseReceivedTime).toISOString() : 'none')
+              if (result.session.lastResponseReceivedTime) {
+                coreConnector.detailDebugLog('lastResponseReceivedTime : ' + result.session.lastResponseReceivedTime)
+                coreConnector.internalDebugLog('lastResponseReceivedTime converted :' + result.session.lastResponseReceivedTime ? new Date(result.session.lastResponseReceivedTime).toISOString() : 'none')
               }
 
-              resolve(session)
+              node.opcuaSessions.push(result.session)
+              resolve(result.session)
             }).catch(function (err) {
               coreConnector.internalDebugLog('Session Start Error ' + err)
               if (err.message === 'OPC UA Client Is Not Valid') {
@@ -258,7 +260,9 @@ module.exports = function (RED) {
       try {
         if (session && node.opcuaClient) {
           coreConnector.internalDebugLog('Close Session Id: ' + session.sessionId)
-          coreConnector.closeSession(session).then(function (done) {
+          coreConnector.removeFromList(node.opcuaSessions, session)
+
+          coreConnector.closeSession(session).then(function (session) {
             coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
             session = null
             done()
@@ -303,18 +307,16 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      coreConnector.internalDebugLog('Connector Close ' + node.endpoint)
-
-      if (node.opcuaClient) {
-        coreConnector.disconnect(node.opcuaClient).then(function () {
-          coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
-          node.opcuaClient = null
-          done()
-        }).catch(function (err) {
-          node.error(err, {payload: ''})
-          done()
-        })
-      }
+      coreConnector.internalDebugLog('Close Disconnecting From ' + node.endpoint)
+      coreConnector.disconnect(node.opcuaClient).then(function () {
+        coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
+        node.opcuaClient = null
+        done()
+      }).catch(function (err) {
+        node.error(err, {payload: ''})
+        node.opcuaClient = null
+        done()
+      })
     })
   }
 
