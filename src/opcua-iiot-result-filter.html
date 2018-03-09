@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
  node-red-contrib-iiot-opcua
 -->
@@ -13,6 +13,8 @@
     defaults: {
       nodeId: {value: "", required: true},
       datatype: {value: ""},
+      fixedValue: {value: false},
+      fixPoint: {value: 2},
       withPrecision: {value: false},
       precision: {value: 2},
       entry: {value: 1, validate: RED.validators.number()},
@@ -21,12 +23,12 @@
       minvalue: {value: null},
       maxvalue: {value: null},
       defaultvalue: {value: null},
-      usingListener: {value: false},
       topic: {value:""},
-      name: {value: ""}
+      name: {value: ""},
+      showErrors: {value: false}
     },
     inputs: 1,
-    outputs: 2,
+    outputs: 1,
     align: "left",
     icon: "opcuaiiot.png",
     label: function () {
@@ -38,6 +40,24 @@
     oneditprepare: function () {
       let node = this
       node.lookupItems = []
+
+      let tabs = RED.tabs.create({
+        id: "node-input-result-filter-tabs",
+        onchange: function (tab) {
+          $("#node-input-result-filter-tabs-content").children().hide()
+          $("#" + tab.id).show()
+        }
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-result-filter-tab-settings",
+        label: this._("opcua-iiot-contrib.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-result-filter-tab-convert",
+        label: this._("opcua-iiot-contrib.tabs-label.convert")
+      })
 
       let datatypeLookupField = $("#node-lookup-datatype")
       let datatypeField = $("#node-input-datatype")
@@ -84,72 +104,91 @@
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Result-Filter">
     <div class="form-row">
-        <label for="node-input-nodeId"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
-        <input type="text" id="node-input-nodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-result-filter-tabs"></ul>
     </div>
-    <div class="form-row">
-        <label for="node-input-datatype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
-        <input type="text" id="node-input-datatype" style="width:40%;" placeholder="i=2041">
-        <a id="node-lookup-datatype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
-    </div>
-    <hr>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-withPrecision"><i class="fa fa-eye-slash"></i>
-        <span data-i18n="opcua-iiot-contrib.label.withPrecision"></span></label>
-        <input type="checkbox" id="node-input-withPrecision" style="max-width:30px">
-    </div>
-    <div class="form-row">
-        <label for="node-input-precision"><i class="icon-tag"></i>
-        <span data-i18n="opcua-iiot-contrib.label.precision"></span></label>
-        <input type="text" id="node-input-precision" placeholder="2">
-    </div>
-    <hr>
-    <div class="form-row">
-        <label for="node-input-entry"><i class="icon-tag"></i>
-        <span data-i18n="opcua-iiot-contrib.label.entry"></span></label>
-        <input type="text" id="node-input-entry" placeholder="1">
-    </div>
-    <hr>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
-        <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
-        <input type="checkbox" id="node-input-justValue" style="max-width:30px">
-    </div>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-withValueCheck"><i class="fa fa-optin-monster"></i>
-        <span data-i18n="opcua-iiot-contrib.label.withValueCheck"></span></label>
-        <input type="checkbox" id="node-input-withValueCheck" style="max-width:30px">
-    </div>
-    <div class="form-row" id="node-value-changes">
-        <div class="form-row">
-            <label for="node-input-minvalue"><i class="icon-tag"></i>
-            <span data-i18n="opcua-iiot-contrib.label.minvalue"></span></label>
-            <input type="text" id="node-input-minvalue" placeholder="minimum">
+    <div id="node-input-result-filter-tabs-content" style="min-height: 170px;">
+        <div id="opcuaiiot-result-filter-tab-settings" style="display:none">
+            <div class="form-row">
+                <label for="node-input-nodeId"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
+                <input type="text" id="node-input-nodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
+            </div>
+            <div class="form-row">
+                <label for="node-input-datatype"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.datatype"></span></label>
+                <input type="text" id="node-input-datatype" style="width:40%;" placeholder="i=2041">
+                <a id="node-lookup-datatype" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
+            </div>
+            <hr>
+            <div class="form-row">
+                <label for="node-input-entry"><i class="icon-tag"></i>
+                <span data-i18n="opcua-iiot-contrib.label.entry"></span></label>
+                <input type="text" id="node-input-entry" placeholder="1">
+            </div>
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
+                <input type="checkbox" id="node-input-justValue" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-withValueCheck"><i class="fa fa-optin-monster"></i>
+                <span data-i18n="opcua-iiot-contrib.label.withValueCheck"></span></label>
+                <input type="checkbox" id="node-input-withValueCheck" style="max-width:30px">
+            </div>
+            <div class="form-row" id="node-value-changes">
+                <div class="form-row">
+                    <label for="node-input-minvalue"><i class="icon-tag"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.minvalue"></span></label>
+                    <input type="text" id="node-input-minvalue" placeholder="minimum">
+                </div>
+                <div class="form-row">
+                    <label for="node-input-maxvalue"><i class="icon-tag"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.maxvalue"></span></label>
+                    <input type="text" id="node-input-maxvalue" placeholder="maximum">
+                </div>
+                <div class="form-row">
+                    <label for="node-input-defaultvalue"><i class="icon-tag"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.defaultvalue"></span></label>
+                    <input type="text" id="node-input-defaultvalue" placeholder="out of range value">
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="node-input-topic"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+                <input type="text" id="node-input-topic" placeholder="">
+            </div>
+            <div class="form-row">
+                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <input type="text" id="node-input-name" placeholder="">
+            </div>
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+                <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+            </div>
         </div>
-        <div class="form-row">
-            <label for="node-input-maxvalue"><i class="icon-tag"></i>
-            <span data-i18n="opcua-iiot-contrib.label.maxvalue"></span></label>
-            <input type="text" id="node-input-maxvalue" placeholder="maximum">
+        <div id="opcuaiiot-result-filter-tab-convert" style="display:none">
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-fixedValue"><i class="fa fa-eye-slash"></i>
+                <span data-i18n="opcua-iiot-contrib.label.fixedValue"></span></label>
+                <input type="checkbox" id="node-input-fixedValue" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-fixPoint"><i class="icon-tag"></i>
+                <span data-i18n="opcua-iiot-contrib.label.fixPoint"></span></label>
+                <input type="text" id="node-input-fixPoint" placeholder="2">
+            </div>
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-withPrecision"><i class="fa fa-eye-slash"></i>
+                <span data-i18n="opcua-iiot-contrib.label.withPrecision"></span></label>
+                <input type="checkbox" id="node-input-withPrecision" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-precision"><i class="icon-tag"></i>
+                <span data-i18n="opcua-iiot-contrib.label.precision"></span></label>
+                <input type="text" id="node-input-precision" placeholder="2">
+            </div>
         </div>
-        <div class="form-row">
-            <label for="node-input-defaultvalue"><i class="icon-tag"></i>
-            <span data-i18n="opcua-iiot-contrib.label.defaultvalue"></span></label>
-            <input type="text" id="node-input-defaultvalue" placeholder="out of range value">
-        </div>
-    </div>
-    <div class="form-row">
-        <label for="node-input-topic"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" placeholder="">
-    </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" placeholder="">
-    </div>
-    <hr>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-usingListener"><i class="fa fa-assistive-listening-systems"></i>
-        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span></label>
-        <input type="checkbox" id="node-input-usingListener" style="max-width:30px">
     </div>
 </script>
 
@@ -164,23 +203,14 @@
     <h3>Input</h3>
     <p>The input works with message objects from Read or Listener node.</p>
 
-    <h3>Output 1</h3>
+    <h3>Output</h3>
     <div>
-        <p>Event message:</p>
         <ul>
             <li>payload (filtered and converted result)
         </ul>
     </div>
 
-    <h3>Output 2</h3>
-    <p>To switch off that output check <span data-i18n="opcua-iiot-contrib.label.justValue"></span>.</p>
-    <div>
-        <p>Event message:</p>
-        <ul>
-            <li>msg (incoming msg)
-            <li>filteredResult (filtered and converted result)
-        </ul>
-    </div>
+    <p>With the to fixed you can setup for Number objects.</p>
 
     <p>With the precision you can setup for Number objects.</p>
 
@@ -193,10 +223,5 @@
 
     <strong>Name</strong>
     <p>Name in the flow of Node-RED.</p>
-
-    <strong>
-        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span>
-    </strong>
-    <p>Please, set that option to true if it is an inject for the Listener node.</p>
 
 </script>

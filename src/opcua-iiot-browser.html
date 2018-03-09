@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -16,6 +16,7 @@
       connector: {type: "OPCUA-IIoT-Connector", required: true},
       nodeId: {value: ""},
       name: {value: ""},
+      browseAll: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -104,6 +105,11 @@
             </div>
             <hr>
             <div class="form-row">
+                <label style="min-width:160px" for="node-input-browseAll"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.browseAll"></span></label>
+                <input type="checkbox" id="node-input-browseAll" style="max-width:30px">
+            </div>
+            <div class="form-row">
                 <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
                 <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
@@ -146,7 +152,7 @@
  Empty the input text box to start from root again.</p>
 
  <h3>Examples</h3>
- <a href='https://github.com/biancode/node-red-contrib-iiot-opcua /blob/master/examples/' target='_blank'>GitHub Browser example flow</a>
+ <a href='https://github.com/biancode/node-red-contrib-iiot-opcua/blob/master/examples/' target='_blank'>GitHub Browser example flow</a>
 
  <p>Please download the examples from a branch matching your current version.
  It could change over time.</p>

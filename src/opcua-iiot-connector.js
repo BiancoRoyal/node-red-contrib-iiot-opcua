@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -22,6 +22,8 @@ module.exports = function (RED) {
   function OPCUAIIoTConnectorConfiguration (config) {
     const CONNECTION_START_DELAY = 2000 // 2 sec.
     const UNLIMITED_LISTENERS = 0
+    const SESSION_TIMEOUT = 3 // sec.
+    const MAX_SESSION_RETRIES = 20
 
     RED.nodes.createNode(this, config)
     this.discoveryUrl = config.discoveryUrl || null
@@ -40,10 +42,11 @@ module.exports = function (RED) {
     let node = this
     node.setMaxListeners(UNLIMITED_LISTENERS)
     node.client = null
+    node.sessionConnectRetries = 0
     node.endpoints = []
     node.userIdentity = null
     node.opcuaClient = null
-    node.opcuaSessions = []
+    node.opcuaSession = null
     node.discoveryServer = null
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
@@ -74,18 +77,16 @@ module.exports = function (RED) {
 
     if (node.loginEnabled) {
       if (node.credentials) {
-        // client.createSession({userName: "JoeDoe", password:"secret"}, function ...
         node.userIdentity = {
           userName: node.credentials.user,
           password: node.credentials.password
         }
         coreConnector.internalDebugLog('Connecting With Login Data On ' + node.endpoint)
       } else {
-        node.error(new Error('Login Enabled But No Credentials'))
+        node.error(new Error('Login Enabled But No Credentials'), {payload: ''})
       }
     }
 
-    // TODO: refactor code!
     node.connectOPCUAEndpoint = function () {
       coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
       coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
@@ -121,15 +122,19 @@ module.exports = function (RED) {
               coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
 
               node.opcuaClient = opcuaClient
+              node.startSession(SESSION_TIMEOUT)
               node.emit('connected', opcuaClient)
 
               node.opcuaClient.on('close', function () {
+                node.closeSession()
                 node.emit('server_connection_close')
               })
 
               opcuaClient.on('after_reconnection', function (opcuaClient) {
+                node.startSession(SESSION_TIMEOUT)
                 node.emit('after_reconnection', opcuaClient)
               })
+
               node.endpoints = result.endpoints
             }).catch(function (err) {
               node.handleError(err)
@@ -143,148 +148,98 @@ module.exports = function (RED) {
       }).catch(function (err) {
         node.handleError(err)
       })
+    }
 
-      // TODO: use discovery to find other servers
-      // node.discoveryServer = new OPCUADiscoveryServer()
-      // node.discoveryServerEndpointUrl = node.discoveryServer._get_endpoints()[0].endpointUrl
-      // node.discoveryServer.start(function (err) {
-      //   if (err) {
-      //     coreConnector.internalDebugLog('Discovery Server Error ' + err)
-      //   } else {
-      //     coreConnector.internalDebugLog('Discovery Server Started ' + node.discoveryServerEndpointUrl)
-      //   }
-      // })
+    node.startSession = function (timeoutSeconds) {
+      coreConnector.internalDebugLog('Request For New Session From')
 
-      let findServersRequest = require('node-opcua').perform_findServersRequest
-      findServersRequest('opc.tcp://localhost:4840/UADiscovery', function (err, servers) {
-        if (err) {
-          coreConnector.internalDebugLog('Discovery Error ' + err)
-        } else {
-          if (servers && servers.length) {
-            servers.forEach(function (server) {
-              coreConnector.internalDebugLog('Discovery Server')
-              coreConnector.internalDebugLog('     applicationUri:' + server.applicationUri && server.applicationUri !== null ? server.applicationUri : 'none')
-              coreConnector.internalDebugLog('         productUri:' + server.productUri && server.productUri !== null ? server.productUri : 'none')
-              coreConnector.detailDebugLog('    applicationName:' + server.applicationName && server.applicationName !== null ? server.applicationName.text : 'none')
-              coreConnector.detailDebugLog('               type:' + server.applicationType && server.applicationType !== null ? server.applicationType.key : 'none')
-              coreConnector.detailDebugLog('   gatewayServerUri:' + server.gatewayServerUri && server.gatewayServerUri !== null ? server.gatewayServerUri : 'none')
-              coreConnector.detailDebugLog('discoveryProfileUri:' + server.discoveryProfileUri && server.discoveryProfileUri !== null ? server.discoveryProfileUri : 'none')
-              coreConnector.detailDebugLog('      discoveryUrls:')
+      if (node.opcuaSession) {
+        coreConnector.internalDebugLog('Working Session On Start Request')
+        return
+      }
 
-              if (server.discoveryUrls && server.discoveryUrls.length) {
-                server.discoveryUrls.forEach(function (discoveryUrl) {
-                  coreConnector.detailDebugLog('                    ' + discoveryUrl && discoveryUrl !== null ? discoveryUrl : 'none')
-                })
-              }
+      coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (result) {
+        coreConnector.internalDebugLog('Starting Session On ' + node.endpoint)
 
-              coreConnector.detailDebugLog('--------------------------------------')
-            })
-          }
+        node.opcuaSession = result.session
+        node.opcuaSession.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 5, 's')
+
+        if (node.keepSessionAlive) {
+          node.opcuaSession.startKeepAliveManager()
         }
+
+        node.opcuaSession.on('error', node.handleSessionError)
+        node.opcuaSession.on('close', node.handleSessionClose)
+
+        node.logSessionInformation(node.opcuaSession)
+        node.emit('session_started', node.opcuaSession)
+        node.sessionConnectRetries = 0
+      }).catch(function (err) {
+        if (node.showErrors) {
+          node.error(err, {payload: ''})
+        }
+        node.opcuaSession = null
       })
     }
 
-    node.startSession = function (timeoutSeconds, type) {
-      coreConnector.internalDebugLog('Request For New Session From ' + type)
+    node.logSessionInformation = function (session) {
+      coreConnector.internalDebugLog('Session ' + session.name + ' Id: ' + session.sessionId + ' Started On ' + node.endpoint)
+      coreConnector.detailDebugLog('name :' + session.name)
+      coreConnector.detailDebugLog('sessionId :' + session.sessionId)
+      coreConnector.detailDebugLog('authenticationToken :' + session.authenticationToken)
+      coreConnector.internalDebugLog('timeout :' + session.timeout)
 
-      try {
-        return new Promise(
-          function (resolve, reject) {
-            coreConnector.createSession(node.opcuaClient, node.userIdentity).then(function (result) {
-              coreConnector.internalDebugLog(type + ' Starting Session On ' + node.endpoint)
+      if (session.serverNonce) {
+        coreConnector.detailDebugLog('serverNonce :' + session.serverNonce ? session.serverNonce.toString('hex') : 'none')
+      }
 
-              result.session.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 5, 's')
-              if (node.keepSessionAlive) {
-                result.session.startKeepAliveManager()
-              }
-              result.session.on('error', node.handleError)
-              result.session.on('close', node.handleSessionClose)
+      if (session.serverCertificate) {
+        coreConnector.detailDebugLog('serverCertificate :' + session.serverCertificate ? session.serverCertificate.toString('base64') : 'none')
+      } else {
+        coreConnector.detailDebugLog('serverCertificate : None'.red)
+      }
 
-              coreConnector.internalDebugLog(type + ' ' + result.session.name + ' Session ' +
-                result.session.sessionId + ' Started' + ' On' + ' ', node.endpoint)
+      coreConnector.detailDebugLog('serverSignature :' + session.serverSignature ? session.serverSignature : 'none')
 
-              coreConnector.detailDebugLog('name :' + result.session.name)
-              coreConnector.detailDebugLog('sessionId :' + result.session.sessionId)
-              coreConnector.detailDebugLog('authenticationToken :' + result.session.authenticationToken)
-              coreConnector.internalDebugLog('timeout :' + result.session.timeout)
+      if (session.lastRequestSentTime) {
+        coreConnector.detailDebugLog('lastRequestSentTime : ' + session.lastRequestSentTime)
+        coreConnector.internalDebugLog('lastRequestSentTime converted :' + session.lastRequestSentTime ? new Date(session.lastRequestSentTime).toISOString() : 'none')
+      }
 
-              if (result.session.serverNonce) {
-                coreConnector.detailDebugLog('serverNonce :' + result.session.serverNonce ? result.session.serverNonce.toString('hex') : 'none')
-              }
-
-              if (result.session.serverCertificate) {
-                coreConnector.detailDebugLog('serverCertificate :' + result.session.serverCertificate ? result.session.serverCertificate.toString('base64') : 'none')
-              } else {
-                coreConnector.detailDebugLog('serverCertificate : None'.red)
-              }
-
-              coreConnector.detailDebugLog('serverSignature :' + result.session.serverSignature ? result.session.serverSignature : 'none')
-
-              if (result.session.lastRequestSentTime) {
-                coreConnector.detailDebugLog('lastRequestSentTime : ' + result.session.lastRequestSentTime)
-                coreConnector.internalDebugLog('lastRequestSentTime converted :' + result.session.lastRequestSentTime ? new Date(result.session.lastRequestSentTime).toISOString() : 'none')
-              }
-
-              if (result.session.lastResponseReceivedTime) {
-                coreConnector.detailDebugLog('lastResponseReceivedTime : ' + result.session.lastResponseReceivedTime)
-                coreConnector.internalDebugLog('lastResponseReceivedTime converted :' + result.session.lastResponseReceivedTime ? new Date(result.session.lastResponseReceivedTime).toISOString() : 'none')
-              }
-
-              node.opcuaSessions.push(result.session)
-              resolve(result.session)
-            }).catch(function (err) {
-              coreConnector.internalDebugLog('Session Start Error ' + err)
-              if (err.message === 'OPC UA Client Is Not Valid') {
-                try {
-                  setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
-                } catch (err) {
-                  coreConnector.internalDebugLog(err)
-                }
-              }
-              reject(err)
-            })
-          })
-      } catch (err) {
-        coreConnector.internalDebugLog(err)
-        if (err.message === 'OPC UA Client Is Not Valid') {
-          try {
-            setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
-          } catch (err) {
-            coreConnector.internalDebugLog(err)
-          }
-        }
+      if (session.lastResponseReceivedTime) {
+        coreConnector.detailDebugLog('lastResponseReceivedTime : ' + session.lastResponseReceivedTime)
+        coreConnector.internalDebugLog('lastResponseReceivedTime converted :' + session.lastResponseReceivedTime ? new Date(session.lastResponseReceivedTime).toISOString() : 'none')
       }
     }
 
-    node.closeSession = function (session, done) {
-      try {
-        if (session && node.opcuaClient) {
-          coreConnector.internalDebugLog('Close Session Id: ' + session.sessionId)
-          coreConnector.removeFromList(node.opcuaSessions, session)
+    node.resetBadSession = function () {
+      coreConnector.internalDebugLog('Reset Bad Session')
+    }
 
-          coreConnector.closeSession(session).then(function (session) {
+    node.closeSession = function () {
+      try {
+        if (node.opcuaSession && node.opcuaClient) {
+          coreConnector.internalDebugLog('Close Session Id: ' + node.opcuaSession.sessionId)
+
+          coreConnector.closeSession(node.opcuaSession).then(function (session) {
             coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
-            session = null
-            done()
+            node.opcuaSession = null
           }).catch(function (err) {
-            coreConnector.internalDebugLog('Session Close Error ' + err)
-            session = null
-            done()
+            coreConnector.internalDebugLog('Session Close Error ' + err.message)
+            node.opcuaSession = null
           })
         } else {
           coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
-          session = null
-          done()
+          node.opcuaSession = null
         }
       } catch (err) {
-        coreConnector.internalDebugLog(err)
-        session = null
-        done()
+        coreConnector.internalDebugLog('Session Close Error ' + err.message)
+        node.opcuaSession = null
       }
     }
 
     node.handleError = function (err) {
-      if (err) {
+      if (err && node.showErrors) {
         node.error(err, {payload: 'Connector Error'})
         coreConnector.internalDebugLog('Error on ' + node.endpoint + ' err:' + err.message)
       } else {
@@ -292,12 +247,28 @@ module.exports = function (RED) {
       }
     }
 
+    node.handleSessionError = function (err) {
+      if (err && node.showErrors) {
+        node.error(err, {payload: 'Connector Error'})
+        coreConnector.internalDebugLog('Session Error on ' + node.endpoint + ' err:' + err.message)
+      } else {
+        coreConnector.internalDebugLog('Session Error on ' + node.endpoint)
+      }
+      node.opcuaSession = null
+      node.sessionConnectRetries += 1
+      if (node.sessionConnectRetries < MAX_SESSION_RETRIES) {
+        setTimeout(node.startSession(SESSION_TIMEOUT), CONNECTION_START_DELAY)
+      }
+    }
+
     node.handleSessionClose = function (err) {
-      if (err) {
+      if (err && node.showErrors) {
         node.error(err, {payload: 'Closed Session With Error'})
       } else {
         coreConnector.internalDebugLog('Closed Session')
       }
+      node.opcuaSession = null
+      setTimeout(node.startSession(SESSION_TIMEOUT), CONNECTION_START_DELAY)
     }
 
     try {
@@ -348,6 +319,4 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog('Get Endpoints Request None Node ' + JSON.stringify(req.params))
     }
   })
-
-// SecurityPolicy enum via REST
 }

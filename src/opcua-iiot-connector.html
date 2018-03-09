@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -91,9 +91,9 @@
         $.getJSON('/opcuaIIoT/client/endpoints/' + node.id, function (data) {
           endpointsLookupField.removeClass('disabled')
           node.lookupItems = []
-
+          let security = null
           $.each(data, function (i, entry) {
-            let security = entry.securityPolicyUri.split('#')
+            security = entry.securityPolicyUri.split('#')
             node.lookupItems.push({
               value: entry.endpointUrl,
               label: entry.endpointUrl + ' (' + entry.securityMode + ' ' + security[1] + ')',
@@ -253,14 +253,14 @@
     The default is 'On all flows' -
     set it to the flow to get all deleted if you delete the flow.</p>
 
-    <p>The Connector is one connection to your OPC UA server, which handles multiple sessions.
-    If you need multiple connections use as many as Connectors you need.
-    With that you can build your idea of OPC UA connectivity.</p>
+    <p>The Connector is one connection to your OPC UA server, which handles the session.
+    If you need multiple connections use as many Connectors as you need. With that you can build your idea of OPC UA connectivity.</p>
 
     <h3>Configuration</h3>
 
     <strong>Endpoint</strong>
     <p>The endpoint address (URI) to the OPC UA server like opc.tcp://localhost:55388/</p>
+    <p>The endpoint must exist as named if that option is activated.</p>
 
     <strong>Keep Session Alive</strong>
     <p>If the sessions should stay alive, then set that option to checked.

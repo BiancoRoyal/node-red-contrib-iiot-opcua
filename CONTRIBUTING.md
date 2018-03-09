@@ -31,9 +31,9 @@ relevant nodes, press Ctrl-E and copy the flow data from the Export dialog.
 
 At a minimum, please include:
 
- - Version of node.js? (should be >=v8.5.0)
- - Version of Node-RED? (should be >=v0.17.5)
- - Version of node-red-contrib-iiot-opcua? (should be >=v1.0.9)
+ - Version of node.js? (should be >=LTS)
+ - Version of Node-RED? (should be >=v0.18.0)
+ - Version of node-red-contrib-iiot-opcua? (should be >=v2.1.0)
  
  - What is your platform? (Linux, macOS, ...)
  - What does `DEBUG=opcuaIIoT:* node-red -v` say? (log files are welcome)
@@ -55,7 +55,7 @@ Some basic rules include:
 
  - all files must have the BSD 3-Clause license in the header.
  - indent with 2-spaces, no tabs. No arguments.
- - follow ES6 coding standards
+ - follow ES6 or above coding standards
  - follow standard.js coding standards
 
 ### Update

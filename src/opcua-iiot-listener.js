@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -31,6 +31,8 @@ module.exports = function (RED) {
     let node = this
     node.reconnectTimeout = 1000
     node.sessionTimeout = null
+    node.opcuaClient = null
+    node.opcuaSession = null
 
     let uaSubscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
@@ -55,16 +57,6 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.resetSession = function () {
-      if (!node.sessionTimeout && node.opcuaClient && node.opcuaSession) {
-        coreListener.internalDebugLog('Reset Session')
-        node.connector.closeSession(node.opcuaSession, function () {
-          node.opcuaSession = null
-          node.startOPCUASessionWithTimeout(node.opcuaClient)
-        })
-      }
-    }
-
     node.createSubscription = function (msg, cb) {
       let timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
 
@@ -80,7 +72,6 @@ module.exports = function (RED) {
     node.resetSubscription = function () {
       uaSubscription = null
       node.monitoredItems.clear()
-      node.setNodeStatusTo('waiting')
     }
 
     node.subscribeActionInput = function (msg) {
@@ -109,6 +100,11 @@ module.exports = function (RED) {
       return true
     }
 
+    node.updateSubscriptionStatus = function () {
+      coreListener.internalDebugLog('listening' + ' (' + node.monitoredItems.length + ')')
+      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
+    }
+
     node.subscribeMonitoredItem = function (subscription, msg) {
       let addressSpaceItem = null
       for (addressSpaceItem of msg.addressSpaceItems) {
@@ -122,25 +118,7 @@ module.exports = function (RED) {
 
         if (!monitoredItem) {
           coreListener.subscribeDebugLog('Monitored Item Subscribe ' + addressSpaceItem.nodeId)
-
-          monitoredItem = coreListener.buildNewMonitoredItem(addressSpaceItem, msg, subscription, function (err, addressSpaceItem, msg) {
-            if (err) {
-              coreListener.subscribeDebugLog('Subscribe Error: ' + err + ' on ' + addressSpaceItem.nodeId)
-
-              if (node.showErrors) {
-                node.error('Subscription Monitor for Subscribe', msg)
-              }
-              node.setNodeStatusTo('subscribed' + ' (' + node.monitoredItems.length + ')')
-            } else {
-              coreListener.subscribeDebugLog('New Monitoring Subscription For ' + addressSpaceItem.nodeId)
-            }
-          })
-
-          if (monitoredItem) {
-            node.setMonitoring(msg, monitoredItem, addressSpaceItem)
-          } else {
-            coreListener.subscribeDebugLog('Error monitoredItem Is Not Valid')
-          }
+          coreListener.buildNewMonitoredItem(addressSpaceItem, msg, subscription)
         } else {
           coreListener.subscribeDebugLog('Monitored Item Unsubscribe')
           monitoredItem.terminate(function (err) {
@@ -153,7 +131,7 @@ module.exports = function (RED) {
 
               if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
                 node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
-                node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
+                node.updateSubscriptionStatus()
               }
             }
           })
@@ -174,23 +152,7 @@ module.exports = function (RED) {
 
         if (!monitoredItem) {
           coreListener.eventDebugLog('Monitored Event Item ' + addressSpaceItem.nodeId)
-
-          monitoredItem = coreListener.buildNewEventItem(addressSpaceItem, msg, subscription, function (err, addressSpaceItem, msg) {
-            if (err) {
-              coreListener.eventDebugLog(err.message)
-              if (node.showErrors) {
-                node.error(err, msg)
-              }
-            } else {
-              coreListener.eventDebugLog('New Event Subscription For ' + addressSpaceItem.nodeId)
-            }
-          })
-
-          if (monitoredItem) {
-            node.setMonitoring(msg, monitoredItem, addressSpaceItem)
-          } else {
-            coreListener.subscribeDebugLog('Error monitoredItem Is Not Valid')
-          }
+          coreListener.buildNewEventItem(addressSpaceItem, msg, subscription)
         } else {
           monitoredItem.terminate(function (err) {
             if (err) {
@@ -202,7 +164,7 @@ module.exports = function (RED) {
 
               if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
                 node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
-                node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
+                node.updateSubscriptionStatus()
               }
             }
           })
@@ -214,15 +176,12 @@ module.exports = function (RED) {
       // fill up monitored item
       monitoredItem.addressSpaceItem = addressSpaceItem
       monitoredItem.topic = msg.topic || ''
-      monitoredItem.nodetype = msg.nodetype || 'none'
-      monitoredItem.injectType = msg.injectType || 'listen'
-      monitoredItem.readtype = msg.readtype || 'none'
+      monitoredItem.nodetype = 'listen'
+      monitoredItem.injectType = msg.injectType || 'none'
       monitoredItem.eventType = msg.eventType || 'none'
       node.monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
-
-      monitoredItem.on('initialized', function () {
-        node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
-      })
+      coreListener.internalDebugLog('setMonitoring node.monitoredItems.length:' + node.monitoredItems.length)
+      node.updateSubscriptionStatus()
 
       if (msg.nodetype !== 'events') {
         monitoredItem.on('changed', function (dataValue) {
@@ -319,16 +278,15 @@ module.exports = function (RED) {
 
         if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
           node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
+          node.updateSubscriptionStatus()
         }
 
         if (node.showErrors) {
           node.error(err, msg)
         }
 
-        node.setNodeStatusTo('error' + ' (' + node.monitoredItems.length + ')')
-
         if (err.message && err.message.includes('BadSession')) {
-          node.handleSessionError(err)
+          node.connector.resetBadSession()
         }
       })
 
@@ -337,12 +295,9 @@ module.exports = function (RED) {
 
         if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
           node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
+          node.updateSubscriptionStatus()
         }
-
-        node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
       })
-
-      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
     }
 
     node.errorHandling = function (err) {
@@ -353,10 +308,9 @@ module.exports = function (RED) {
       }
 
       coreListener.internalDebugLog(err.message)
-      node.setNodeStatusTo('error' + ' (' + node.monitoredItems.length + ')')
 
       if (err.message && err.message.includes('BadSession')) {
-        node.resetSession()
+        node.connector.resetBadSession()
       }
     }
 
@@ -390,7 +344,7 @@ module.exports = function (RED) {
       coreListener.subscribeDebugLog('New Subscription Created')
 
       newSubscription.on('initialized', function () {
-        node.setNodeStatusTo('initialize')
+        node.setNodeStatusTo('initialized')
       })
 
       newSubscription.on('started', function () {
@@ -400,13 +354,18 @@ module.exports = function (RED) {
       })
 
       newSubscription.on('terminated', function () {
+        node.setNodeStatusTo('terminated')
         node.resetSubscription()
+      })
+
+      newSubscription.on('item_added', function (monitoredItem) {
+        coreListener.subscribeDebugLog('New Monitoring At Subscription For ' + JSON.stringify(monitoredItem))
+        node.setMonitoring(msg, monitoredItem)
       })
 
       return newSubscription
     }
 
-    // TODO: clean code
     node.getBrowseName = function (session, nodeId, callback) {
       coreListener.client.read(session, [{
         nodeId: nodeId,
@@ -422,77 +381,11 @@ module.exports = function (RED) {
       })
     }
 
-    node.handleSessionError = function (err) {
-      coreListener.internalDebugLog('Handle Session Error '.red + err)
-
-      if (node.showErrors) {
-        node.error('Listener Session Error')
-      }
-
-      node.resetSession()
-    }
-
-    node.handleSessionClose = function (err) {
-      coreListener.internalDebugLog('Handle Session Close Wit Error '.red + err)
-
-      if (node.showErrors) {
-        node.error(new Error('Listener Session Close'), {payload: ''})
-      }
-    }
-
-    node.startOPCUASession = function (opcuaClient) {
-      node.verboseLog('Listener Start OPC UA Session')
-      node.opcuaClient = opcuaClient
-      node.connector.startSession(coreListener.core.TEN_SECONDS_TIMEOUT, 'Listener Node').then(function (session) {
-        node.opcuaSession = session
-        node.opcuaSession.on('close', node.handleSessionClose)
-
-        node.verboseLog('Session Connected')
-        node.setNodeStatusTo('connected')
-
-        coreListener.getAllEventTypes(session, function (err, entries) {
-          //  TODO: clean code
-          if (err) {
-            node.verboseLog(err)
-          } else {
-            entries.forEach(function (entry) {
-              node.verboseLog(entry.displayName + ' : ' + entry.nodeId)
-            })
-          }
-        })
-      }).catch(node.handleSessionError)
-    }
-
-    node.startOPCUASessionWithTimeout = function (opcuaClient) {
-      if (node.sessionTimeout !== null) {
-        clearTimeout(node.sessionTimeout)
-        node.sessionTimeout = null
-      }
-
-      coreListener.internalDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
-      node.sessionTimeout = setTimeout(function () {
-        node.startOPCUASession(opcuaClient)
-      }, node.reconnectTimeout)
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreListener.internalDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
-      }
-      node.resetSubscription()
-      // node.startOPCUASessionWithTimeout(node.opcuaClient)
-    }
-
-    if (node.connector) {
-      node.connector.on('connected', node.startOPCUASessionWithTimeout)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
-
     node.on('input', function (msg) {
-      coreListener.detailDebugLog(node.action + ' listener input ' + JSON.stringify(msg))
+      if (!node.opcuaSession) {
+        node.error(new Error('Session Not Ready To Listen'), msg)
+        return
+      }
 
       if (msg.nodetype === 'browse') { /* browse is just to address listening to many nodes */
         msg.nodetype = 'inject'
@@ -512,9 +405,30 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', function () {
-      node.opcuaSession = null
-    })
+    node.setOPCUAConnected = function (opcuaClient) {
+      node.opcuaClient = opcuaClient
+      node.setNodeStatusTo('connected')
+    }
+
+    node.opcuaSessionStarted = function (opcuaSession) {
+      node.opcuaSession = opcuaSession
+      node.setNodeStatusTo('active')
+    }
+
+    node.connectorShutdown = function (opcuaClient) {
+      coreListener.internalDebugLog('Connector Shutdown')
+      if (opcuaClient) {
+        node.opcuaClient = opcuaClient
+      }
+    }
+
+    if (node.connector) {
+      node.connector.on('connected', node.setOPCUAConnected)
+      node.connector.on('session_started', node.opcuaSessionStarted)
+      node.connector.on('after_reconnection', node.connectorShutdown)
+    } else {
+      throw new TypeError('Connector Not Valid')
+    }
 
     node.setNodeStatusTo('waiting')
   }

@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -22,6 +22,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.name = config.name
+    this.browseAll = config.browseAll
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -32,7 +33,6 @@ module.exports = function (RED) {
     node.opcuaClient = null
     node.opcuaSession = null
     node.reconnectTimeout = 1000
-    node.sessionTimeout = null
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -50,16 +50,6 @@ module.exports = function (RED) {
       node.statusLog(statusValue)
       let statusParameter = coreBrowser.core.getNodeStatus(statusValue, node.showStatusActivities)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
-
-    node.resetSession = function () {
-      if (!node.sessionTimeout && node.opcuaClient && node.opcuaSession) {
-        coreBrowser.internalDebugLog('Reset Session')
-        node.connector.closeSession(node.opcuaSession, function () {
-          node.opcuaSession = null
-          node.startOPCUASessionWithTimeout(node.opcuaClient)
-        })
-      }
     }
 
     node.transformToEntry = function (reference) {
@@ -101,7 +91,7 @@ module.exports = function (RED) {
         node.status({fill: 'red', shape: 'dot', text: 'error'})
 
         if (err.message && err.message.includes('BadSession')) {
-          node.resetSession()
+          node.connector.resetBadSession()
         }
       } else {
         results = itemList
@@ -185,7 +175,7 @@ module.exports = function (RED) {
         browserResultCount: browserEntries.length,
         browseTopic: node.browseTopic,
         endpoint: node.connector.endpoint,
-        session: node.opcuaSession.name
+        session: node.opcuaSession.name || 'unknown'
       }
 
       msg.nodesToRead = nodesToRead
@@ -246,36 +236,14 @@ module.exports = function (RED) {
       return coreBrowser.core.OBJECTS_ROOT
     }
 
-    node.handleSessionError = function (err) {
-      coreBrowser.internalDebugLog('Handle Session Error '.red + err)
-
-      if (node.showErrors) {
-        node.error(err, {payload: 'Session Error'})
-      }
-
-      node.resetSession()
-    }
-
-    node.startOPCUASession = function (opcuaClient) {
-      node.sessionTimeout = null
-      coreBrowser.internalDebugLog('Start OPC UA Session')
+    node.setOPCUAConnected = function (opcuaClient) {
       node.opcuaClient = opcuaClient
-      node.connector.startSession(coreBrowser.core.TEN_SECONDS_TIMEOUT, 'Browser Node').then(function (session) {
-        node.opcuaSession = session
-        coreBrowser.internalDebugLog('Session Connected')
-        node.setNodeStatusTo('connected')
-      }).catch(node.handleSessionError)
+      node.setNodeStatusTo('connected')
     }
 
-    node.startOPCUASessionWithTimeout = function (opcuaClient) {
-      if (node.sessionTimeout !== null) {
-        clearTimeout(node.sessionTimeout)
-        node.sessionTimeout = null
-      }
-      coreBrowser.internalDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
-      node.sessionTimeout = setTimeout(function () {
-        node.startOPCUASession(opcuaClient)
-      }, node.reconnectTimeout)
+    node.opcuaSessionStarted = function (opcuaSession) {
+      node.opcuaSession = opcuaSession
+      node.setNodeStatusTo('active')
     }
 
     node.connectorShutdown = function (opcuaClient) {
@@ -283,19 +251,15 @@ module.exports = function (RED) {
       if (opcuaClient) {
         node.opcuaClient = opcuaClient
       }
-      // node.startOPCUASessionWithTimeout(node.opcuaClient)
     }
 
     if (node.connector) {
-      node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('connected', node.setOPCUAConnected)
+      node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }
-
-    node.on('close', function () {
-      node.opcuaSession = null
-    })
 
     node.setNodeStatusTo('waiting')
   }

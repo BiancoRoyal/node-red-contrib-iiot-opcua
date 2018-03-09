@@ -1,7 +1,7 @@
 /**
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -230,7 +230,7 @@ de.biancoroyal.opcua.iiot.core.listener.MonitoredItemSet = function () {
   })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addressSpaceItem, msg, subscription, handleErrorCallback) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addressSpaceItem, msg, subscription) {
   let interval
   let queueSize
 
@@ -248,7 +248,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addres
     queueSize = this.SUBSCRIBE_DEFAULT_QUEUE_SIZE
   }
 
-  return subscription.monitor(
+  subscription.monitor(
     {
       nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
       attributeId: this.core.nodeOPCUA.AttributeIds.Value,
@@ -259,14 +259,11 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addres
       discardOldest: true,
       queueSize: queueSize
     },
-    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
-    function (err) {
-      handleErrorCallback(err, addressSpaceItem, msg)
-    }
+    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both
   )
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpaceItem, msg, subscription, handleErrorCallback) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpaceItem, msg, subscription) {
   let interval
   let queueSize
 
@@ -282,7 +279,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpa
     queueSize = this.EVENT_DEFAULT_QUEUE_SIZE
   }
 
-  return subscription.monitor(
+  subscription.monitor(
     {
       nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
       attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier,
@@ -294,10 +291,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpa
       queueSize: queueSize,
       filter: msg.payload.eventFilter
     },
-    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
-    function (err) {
-      handleErrorCallback(err, addressSpaceItem, msg)
-    }
+    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both
   )
 }
 

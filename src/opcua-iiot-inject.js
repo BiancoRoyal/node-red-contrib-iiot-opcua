@@ -1,7 +1,7 @@
 /**
  The BSD 3-Clause License
 
- Copyright 2016, 2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2013, 2016 IBM Corp. (node-red)
  All rights reserved.
  node-red-contrib-iiot-opcua

@@ -1,10 +1,16 @@
 {
   "opcua-iiot-contrib": {
+    "tabs-label":{
+      "settings": "Settings",
+      "convert": "Converts"
+    },
     "label": {
       "nodeId": "Node-Id",
       "datatype": "Data Type",
-      "withPrecision": "With precision",
-      "precision": "precision",
+      "withPrecision": "With Precision",
+      "precision": "Precision",
+      "fixedValue": "Fixed Value",
+      "fixPoint": "Fix",
       "entry": "Array Entry",
       "justValue": "Send Just Values",
       "withValueCheck": "With Value Check",

@@ -6,6 +6,7 @@
     },
     "label": {
       "connector": "Connector",
+      "browseAll": "Browse All",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "topic": "Topic",
