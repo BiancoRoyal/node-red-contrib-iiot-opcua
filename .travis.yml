@@ -16,3 +16,4 @@ branches:
   only:
   - master
   - develop
+  - 2.1
