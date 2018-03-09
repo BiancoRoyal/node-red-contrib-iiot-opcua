@@ -53,16 +53,25 @@ module.exports = function (RED) {
 
     let nodeOPCUAClientPath = coreConnector.core.getNodeOPCUAClientPath()
 
-    coreConnector.detailDebugLog('config: ' + node.publicCertificateFile)
-    if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
-      node.publicCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/client_selfsigned_cert_1024.pem')
-      coreConnector.detailDebugLog('default key: ' + node.publicCertificateFile)
-    }
+    node.securedCommunication = (node.securityPolicy && node.securityPolicy !== 'None' && node.messageSecurityMode && node.messageSecurityMode !== 'NONE')
 
+    coreConnector.detailDebugLog('config: ' + node.publicCertificateFile)
     coreConnector.detailDebugLog('config: ' + node.privateKeyFile)
-    if (node.privateKeyFile === null || node.privateKeyFile === '') {
-      node.privateKeyFile = path.join(nodeOPCUAClientPath, '/certificates/PKI/own/private/private_key.pem')
-      coreConnector.detailDebugLog('default key: ' + node.privateKeyFile)
+    coreConnector.detailDebugLog('securedCommunication: ' + node.securedCommunication.toString())
+
+    if (node.securedCommunication) {
+      if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
+        node.publicCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/client_selfsigned_cert_1024.pem')
+        coreConnector.detailDebugLog('default key: ' + node.publicCertificateFile)
+      }
+
+      if (node.privateKeyFile === null || node.privateKeyFile === '') {
+        node.privateKeyFile = path.join(nodeOPCUAClientPath, '/certificates/PKI/own/private/private_key.pem')
+        coreConnector.detailDebugLog('default key: ' + node.privateKeyFile)
+      }
+    } else {
+      node.publicCertificateFile = null
+      node.privateKeyFile = null
     }
 
     node.opcuaClientOptions = {
