@@ -19,7 +19,8 @@
       "privateKeyFile": "Private",
       "defaultSecureTokenLifetime": "Secure TLT",
       "certificateFiles": "Certificate Files",
-      "endpointMusExist": "Endpoint must exist"
+      "endpointMustExist": "Endpoint Must Exist",
+      "autoSelectRightEndpoint": "Auto Select Endpoint"
     },
     "tabs-label": {
       "settings": "Settings",

@@ -971,19 +971,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
 }
 
 de.biancoroyal.opcua.iiot.core.buildNodesToListen = function (msg) {
-  let addressSpaceItems = []
-
-  let nodeList = msg.nodesToRead || msg.nodesToWrite
-  if (nodeList) {
-    let item = null
-    for (item of nodeList) {
-      addressSpaceItems.push({name: '', nodeId: item, datatype: ''})
-    }
-  } else {
-    addressSpaceItems = msg.addressSpaceItems
-  }
-
-  return addressSpaceItems
+  return msg.addressItemsToRead || msg.addressSpaceItems
 }
 
 de.biancoroyal.opcua.iiot.core.dataValuetoString = function (attribute, dataValue) {

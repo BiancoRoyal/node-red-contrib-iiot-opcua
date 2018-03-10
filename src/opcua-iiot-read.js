@@ -174,13 +174,11 @@ module.exports = function (RED) {
     }
 
     node.buildResultMessage = function (msg, readType, readResult) {
-      let message = {
-        payload: {},
-        topic: msg.topic,
-        nodetype: 'read',
-        readtype: readType,
-        attributeId: node.attributeId
-      }
+      let message = msg
+      message.payload = {}
+      message.nodetype = 'read'
+      message.readtype = readType
+      message.attributeId = node.attributeId
 
       try {
         let dataValuesString = {}

@@ -17,18 +17,17 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreConnector = require('./core/opcua-iiot-core-connector')
   let path = require('path')
-  // let OPCUADiscoveryServer = require('lib/server/opcua_discovery_server').OPCUADiscoveryServer
 
   function OPCUAIIoTConnectorConfiguration (config) {
     const CONNECTION_START_DELAY = 2000 // 2 sec.
     const UNLIMITED_LISTENERS = 0
-    const SESSION_TIMEOUT = 3 // sec.
+    const SESSION_TIMEOUT = 15 // sec.
     const MAX_SESSION_RETRIES = 20
 
     RED.nodes.createNode(this, config)
     this.discoveryUrl = config.discoveryUrl || null
     this.endpoint = config.endpoint
-    this.endpointMusExist = config.endpointMusExist || false
+    this.endpointMustExist = config.endpointMustExist || false
     this.keepSessionAlive = config.keepSessionAlive
     this.loginEnabled = config.loginEnabled
     this.name = config.name
@@ -37,7 +36,7 @@ module.exports = function (RED) {
     this.publicCertificateFile = config.publicCertificateFile
     this.privateKeyFile = config.privateKeyFile
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 60000
-    this.endpointMusExist = config.endpointMusExist
+    this.autoSelectRightEndpoint = config.autoSelectRightEndpoint
 
     let node = this
     node.setMaxListeners(UNLIMITED_LISTENERS)
@@ -81,7 +80,7 @@ module.exports = function (RED) {
       keepSessionAlive: true,
       certificateFile: node.publicCertificateFile,
       privateKeyFile: node.privateKeyFile,
-      endpoint_must_exist: node.endpointMusExist
+      endpoint_must_exist: node.endpointMustExist
     }
 
     if (node.loginEnabled) {
@@ -116,7 +115,7 @@ module.exports = function (RED) {
 
             node.opcuaClient = null
 
-            if (result.endpoints) {
+            if (result.endpoints && node.autoSelectRightEndpoint) {
               result.endpoints.forEach(function (endpoint, i) {
                 if (endpoint.securityMode === node.messageSecurityMode &&
                   endpoint.securityPolicyUri === node.securityPolicy) {

@@ -23,7 +23,8 @@
       publicCertificateFile: {value: ''},
       privateKeyFile: {value: ''},
       defaultSecureTokenLifetime: {value: 60000},
-      endpointMusExist: {value: true}
+      endpointMustExist: {value: true},
+      autoSelectRightEndpoint: {value: true},
     },
     credentials: {
       user: {type: "text"},
@@ -144,9 +145,14 @@
                 <a id="node-config-lookup-endpoint" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
             </div>
             <div class="form-row">
-                <label style="min-width:160px" for="node-config-input-endpointMusExist"><i class="fa fa-cc-discover"></i>
-                <span data-i18n="opcua-iiot-contrib.label.endpointMusExist"></span></label>
-                <input type="checkbox" id="node-config-input-endpointMusExist" style="max-width:30px">
+                <label style="min-width:160px" for="node-config-input-endpointMustExist"><i class="fa fa-cc-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.endpointMustExist"></span></label>
+                <input type="checkbox" id="node-config-input-endpointMustExist" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-config-input-autoSelectRightEndpoint"><i class="fa fa-magic"></i>
+                <span data-i18n="opcua-iiot-contrib.label.autoSelectRightEndpoint"></span></label>
+                <input type="checkbox" id="node-config-input-autoSelectRightEndpoint" style="max-width:30px">
             </div>
             <div class="form-row">
                  <label for="node-config-input-keepSessionAlive"><i class="fa fa-heart-o"></i>

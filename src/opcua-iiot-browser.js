@@ -22,7 +22,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.name = config.name
-    this.browseAll = config.browseAll
+    // this.browseAll = config.browseAll
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -74,7 +74,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.browseErrorHandling = function (err, msg, itemList) {
+    node.browseErrorHandling = function (err, msg) {
       let results = []
       if (err) {
         results.push({
@@ -94,78 +94,73 @@ module.exports = function (RED) {
           node.connector.resetBadSession()
         }
       } else {
-        results = itemList
+        results = browserEntries
         coreBrowser.internalDebugLog('Browse Done With Error: ' + results.length + ' item(s)')
       }
 
-      return results
+      browserEntries = results
+    }
+
+    node.sendMessageBrowserResults = function (msg, session, browserResult) {
+      let nodesToRead = []
+      let addressItemsToRead = []
+
+      coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' + session.name + ' Id: ' + session.sessionId)
+
+      browserResult.browseResult.forEach(function (result) {
+        result.references.forEach(function (reference) {
+          coreBrowser.internalDebugLog('Add Reference To List :' + reference)
+          browserEntries.push(node.transformToEntry(reference))
+          if (reference.nodeId) {
+            nodesToRead.push(reference.nodeId.toString())
+            addressItemsToRead.push({ name: reference.browseName.name, nodeId: reference.nodeId.toString(), datatypeName: reference.typeDefinition.toString() })
+          }
+        })
+      })
+
+      node.status({fill: 'green', shape: 'dot', text: 'active'})
+      node.sendMessage(msg, nodesToRead, addressItemsToRead)
     }
 
     node.browse = function (session, msg) {
-      browserEntries = []
-      let nodesToRead = []
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
+      browserEntries = []
 
       if (session) {
         coreBrowser.browse(session, node.browseTopic).then(function (browserResult) {
-          coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' +
-            session.name + ' Id: ' + session.sessionId)
-
-          browserResult.browseResult.forEach(function (result) {
-            result.references.forEach(function (reference) {
-              coreBrowser.internalDebugLog('Add Reference To List :' + reference)
-              browserEntries.push(node.transformToEntry(reference))
-              if (reference.nodeId) {
-                nodesToRead.push(reference.nodeId.toString())
-              }
-            })
-          })
-
-          node.status({fill: 'green', shape: 'dot', text: 'active'})
-          node.sendMessage(msg, nodesToRead)
+          node.sendMessageBrowserResults(msg, session, browserResult)
         }).catch(function (err) {
-          browserEntries = node.browseErrorHandling(err, msg, browserEntries)
-          node.sendMessage(msg, nodesToRead)
+          node.browseErrorHandling(err, msg)
         })
       } else {
-        coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
+        node.sessionNotReady(msg)
       }
     }
 
     node.browseNodeList = function (session, msg) {
       browserEntries = []
-      let nodesToRead = []
       coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
 
       if (session) {
         msg.addressSpaceItems.map((entry) => (coreBrowser.browse(session, entry.nodeId).then(function (browserResult) {
           browserEntries = []
-          nodesToRead = []
-          coreBrowser.internalDebugLog('Browse ' + entry.nodeId + ' on ' +
-            session.name + ' Id: ' + session.sessionId)
-
-          browserResult.browseResult.forEach(function (result) {
-            result.references.forEach(function (reference) {
-              coreBrowser.internalDebugLog('Add Reference To List :' + reference)
-              browserEntries.push(node.transformToEntry(reference))
-              if (reference.nodeId) {
-                nodesToRead.push(reference.nodeId.toString())
-              }
-            })
-          })
-
-          node.status({fill: 'green', shape: 'dot', text: 'active'})
-          node.sendMessage(msg, nodesToRead)
+          node.sendMessageBrowserResults(msg, session, browserResult)
         }).catch(function (err) {
-          browserEntries = node.browseErrorHandling(err, msg, browserEntries)
-          node.sendMessage(msg, nodesToRead)
+          node.browseErrorHandling(err, msg)
         })))
       } else {
-        coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
+        node.sessionNotReady(msg)
       }
     }
 
-    node.sendMessage = function (originMessage, nodesToRead) {
+    node.sessionNotReady = function (msg) {
+      if (node.showErrors) {
+        node.error(new Error('Session To Browse Is Not Valid'), msg)
+      }
+      coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
+    }
+
+    node.sendMessage = function (originMessage, nodesToRead, addressItemsToRead) {
       let msg = originMessage
 
       msg.nodetype = 'browse'
@@ -178,8 +173,15 @@ module.exports = function (RED) {
         session: node.opcuaSession.name || 'unknown'
       }
 
-      msg.nodesToRead = nodesToRead
-      msg.nodesToReadCount = nodesToRead.length
+      if (nodesToRead) {
+        msg.nodesToRead = nodesToRead
+        msg.nodesToReadCount = nodesToRead.length
+      }
+
+      if (addressItemsToRead) {
+        msg.addressItemsToRead = addressItemsToRead
+        msg.addressItemsToReadCount = addressItemsToRead.length
+      }
 
       node.send(msg)
     }

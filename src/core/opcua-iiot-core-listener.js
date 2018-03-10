@@ -250,9 +250,8 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addres
 
   subscription.monitor(
     {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
-      attributeId: this.core.nodeOPCUA.AttributeIds.Value,
-      origin: msg
+      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
+      attributeId: this.core.nodeOPCUA.AttributeIds.Value
     },
     {
       samplingInterval: interval,
@@ -281,15 +280,36 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpa
 
   subscription.monitor(
     {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
-      attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier,
-      origin: msg
+      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
+      attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier
     },
     {
       samplingInterval: interval,
       discardOldest: true,
       queueSize: queueSize,
       filter: msg.payload.eventFilter
+    },
+    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both
+  )
+}
+
+de.biancoroyal.opcua.iiot.core.listener.buildNewEventFromMonitoredItem = function (addressSpaceItem, subscription) {
+  let interval
+  let queueSize
+
+  interval = this.EVENT_DEFAULT_INTERVAL
+  queueSize = this.EVENT_DEFAULT_QUEUE_SIZE
+
+  subscription.monitor(
+    {
+      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
+      attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier
+    },
+    {
+      samplingInterval: interval,
+      discardOldest: true,
+      queueSize: queueSize,
+      filter: addressSpaceItem.monitoringParameters.filter
     },
     this.core.nodeOPCUA.read_service.TimestampsToReturn.Both
   )
@@ -334,26 +354,25 @@ de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session, ca
   })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browseForBrowseName, eventFields, response) {
+de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browseForBrowseName, dataValue) {
   let core = de.biancoroyal.opcua.iiot.core.listener.core
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
   return new Promise(
     function (resolve, reject) {
-      if (!response) {
+      if (!dataValue) {
         reject(new Error('Event Response Not Valid'))
       } else {
         let index = 0
         let eventInformation = {}
-        let variantMsg = {payload: []}
-        let msg = {payload: []}
+        let eventResults = []
 
-        response.forEach(function (variant) {
+        dataValue.forEach(function (variant) {
           coreListener.eventDebugLog('variant entry: ' + variant.toString())
 
           try {
             if (variant.dataType && variant.value) {
-              eventInformation = coreListener.collectAlarmFields(eventFields[index], variant.dataType.key.toString(), variant.value)
+              eventInformation = coreListener.collectAlarmFields(dataValue.monitoringParameters.filter.selectClauses[index], variant.dataType.key.toString(), variant.value)
 
               if (variant.dataType === core.nodeOPCUA.DataType.NodeId) {
                 browseForBrowseName(session, variant.value, function (err, browseName) {
@@ -361,24 +380,21 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
                     reject(err)
                   } else {
                     eventInformation.browseName = browseName
-                    msg.payload.push(eventInformation)
-                    variantMsg.payload.push(variant.toJSON())
+                    eventResults.push({ eventInformation: eventInformation, eventData: variant.toJSON() })
                   }
                 })
               } else {
-                msg.payload.push(eventInformation)
-                variantMsg.payload.push(variant.toJSON())
+                eventResults.push({ eventInformation: eventInformation, eventData: variant.toJSON() })
               }
             }
             index++
           } catch (err) {
             eventInformation = {error: err}
-            msg.payload.push(eventInformation)
-            variantMsg.payload.push(variant.toJSON())
+            eventResults.push({ eventInformation: eventInformation, eventData: variant.toJSON() })
           }
         })
 
-        resolve({message: msg, variantMsg: variantMsg})
+        resolve(eventResults)
       }
     }
   )

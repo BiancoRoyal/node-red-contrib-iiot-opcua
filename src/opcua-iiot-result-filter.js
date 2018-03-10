@@ -132,10 +132,12 @@ module.exports = function (RED) {
         try {
           if (node.fixPoint >= 0 && node.fixedValue) {
             result = Number.parseFloat(result).toFixed(node.fixPoint)
+            result = parseFloat(result)
           }
 
           if (node.precision >= 0 && node.withPrecision) {
             result = Number.parseFloat(result).toPrecision(node.precision)
+            result = parseFloat(result)
           }
 
           if (node.withValueCheck) {
@@ -149,9 +151,6 @@ module.exports = function (RED) {
           }
         }
       }
-
-      coreFilter.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-      coreFilter.internalDebugLog('sending result ' + JSON.stringify(result))
 
       if (node.justValue) {
         node.send({payload: result, topic: node.topic || msg.topic, nodeId: node.nodeId})
@@ -257,19 +256,10 @@ module.exports = function (RED) {
     node.filterByListenType = function (msg) {
       let result = null
 
-      switch (msg.readtype) {
-        case 'subscribe':
-          if (msg.payload && msg.payload.hasOwnProperty('value')) {
-            result = msg.payload.value
-          } else {
-            result = msg.payload
-          }
-          break
-        case 'event':
-          result = msg.payload
-          break
-        default:
-          break
+      if (msg.payload && msg.payload.hasOwnProperty('value')) {
+        result = msg.payload.value
+      } else {
+        result = msg.payload
       }
 
       if (result && result.hasOwnProperty('value')) {
