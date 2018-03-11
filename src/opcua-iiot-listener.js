@@ -221,26 +221,23 @@ module.exports = function (RED) {
         injectType: 'subscribe'
       }
 
-      try {
-        let dataValuesString = {}
-        if (node.justValue) {
-          dataValuesString = JSON.stringify(dataValue, null, 2)
-        } else {
-          dataValuesString = JSON.stringify({ dataValue: dataValue, monitoredItem: monitoredItem }, null, 2)
-        }
+      let dataValuesString = {}
+      if (node.justValue) {
+        dataValuesString = JSON.stringify(dataValue, null, 2)
+      } else {
+        dataValuesString = JSON.stringify({ dataValue: dataValue, monitoredItem: monitoredItem }, null, 2)
+      }
 
+      try {
         RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
       } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for monitored item')
           node.error(err, msg)
-          if (node.justValue) {
-            msg.payload = JSON.stringify(dataValue, null, 2)
-          } else {
-            msg.payload = JSON.stringify({ dataValue: dataValue, monitoredItem: monitoredItem }, null, 2)
-          }
-          msg.error = err.message
         }
+
+        msg.payload = dataValuesString
+        msg.error = err.message
       }
 
       node.send(msg)
@@ -259,26 +256,23 @@ module.exports = function (RED) {
         .then(function (eventResults) {
           coreListener.eventDetailDebugLog('Monitored Event Results ' + eventResults)
 
-          try {
-            let dataValuesString = {}
-            if (node.justValue) {
-              dataValuesString = JSON.stringify({ dataValue: dataValue }, null, 2)
-            } else {
-              dataValuesString = JSON.stringify({ dataValue: dataValue, eventResults: eventResults, monitoredItem: monitoredItem }, null, 2)
-            }
+          let dataValuesString = {}
+          if (node.justValue) {
+            dataValuesString = JSON.stringify({ dataValue: dataValue }, null, 2)
+          } else {
+            dataValuesString = JSON.stringify({ dataValue: dataValue, eventResults: eventResults, monitoredItem: monitoredItem }, null, 2)
+          }
 
+          try {
             RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
           } catch (err) {
             if (node.showErrors) {
               node.warn('JSON not to parse from string for monitored item')
               node.error(err, msg)
-              if (node.justValue) {
-                msg.payload = JSON.stringify({ dataValue: dataValue }, null, 2)
-              } else {
-                msg.payload = JSON.stringify({ dataValue: dataValue, eventResults: eventResults, monitoredItem: monitoredItem }, null, 2)
-              }
-              msg.error = err.message
             }
+
+            msg.payload = dataValuesString
+            msg.error = err.message
           }
 
           node.send(msg)

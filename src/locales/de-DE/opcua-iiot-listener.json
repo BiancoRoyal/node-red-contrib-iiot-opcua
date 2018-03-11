@@ -7,7 +7,7 @@
       "actiontype": "Actionstyp",
       "attributeId": "Attribut Id",
       "queueSize": "Queue Umfang",
-      "justValue": "Send nur Werte"
+      "justValue": "Sende nur Werte"
     }
   }
 }

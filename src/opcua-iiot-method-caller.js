@@ -22,6 +22,7 @@ module.exports = function (RED) {
     this.methodId = config.methodId
     this.methodType = config.methodType
     this.value = config.value
+    this.justValue = config.justValue
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
@@ -124,12 +125,38 @@ module.exports = function (RED) {
     node.callMethod = function (msg, definitionResults) {
       coreMethod.callMethods(node.opcuaSession, msg).then(function (data) {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
-        node.send({
-          payload: JSON.parse(JSON.stringify(data.results)),
-          definitionResults: JSON.parse(JSON.stringify(definitionResults)),
+
+        let result = null
+        let outputArguments = []
+        let message = {
           nodetype: 'method',
+          injectType: 'call',
           methodType: data.msg.methodType
-        })
+        }
+
+        for (result of data.results) {
+          outputArguments.push({statusCode: result.statusCode, outputArguments: result.outputArguments})
+        }
+
+        let dataValuesString = {}
+        if (node.justValue) {
+          dataValuesString = JSON.stringify(outputArguments, null, 2)
+        } else {
+          dataValuesString = JSON.stringify(data.results, null, 2)
+        }
+
+        try {
+          RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
+        } catch (err) {
+          if (node.showErrors) {
+            node.warn('JSON not to parse from string for dataValues type ' + typeof readResult)
+            node.error(err, msg)
+          }
+          message.payload = dataValuesString
+          message.error = err.message
+        }
+
+        node.send(message)
       })
     }
 
