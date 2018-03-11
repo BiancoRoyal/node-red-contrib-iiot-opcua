@@ -1,0 +1,15 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "objecttype": "Objekttyp",
+      "referencetype": "Referenztyp",
+      "referenceNodeId": "Referenz-Id",
+      "datatype": "Datentyp",
+      "value": "Wert",
+      "showActivities": "Zeige Aktivitäten",
+      "showErrors": "Zeige Fehler",
+      "displayname": "Anzeigename",
+      "browsename": "Browse-Name"
+    }
+  }
+}

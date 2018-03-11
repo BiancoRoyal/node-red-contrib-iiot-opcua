@@ -2,6 +2,7 @@
   "opcua-iiot-contrib": {
     "label": {
       "connector": "Connector",
+      "justValue": "Send Just Values",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors"
     }

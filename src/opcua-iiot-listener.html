@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -21,7 +21,7 @@
       showErrors: {value: false}
     },
     inputs: 1,
-    outputs: 2,
+    outputs: 1,
     align: 'left',
     icon: 'opcuaiiot.png',
     label: function () {
@@ -93,8 +93,8 @@
             </ul>
             <li>topic
             <li>nodetype (inject)
-            <li>injectType (listen)
-            <li>addressSpaceItems (Array)
+            <li>injectType (listen/browse*)
+            <li>addressSpaceItems or addressItemsToRead* (Array of Objects)
         </ul>
     </div>
 

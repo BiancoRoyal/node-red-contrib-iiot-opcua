@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -20,6 +20,7 @@ module.exports = function (RED) {
   function OPCUAIIoTWrite (config) {
     RED.nodes.createNode(this, config)
     this.name = config.name
+    this.justValue = config.justValue
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -27,6 +28,8 @@ module.exports = function (RED) {
     let node = this
     node.reconnectTimeout = 1000
     node.sessionTimeout = null
+    node.opcuaClient = null
+    node.opcuaSession = null
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -46,16 +49,6 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.resetSession = function () {
-      if (!node.sessionTimeout && node.opcuaClient && node.opcuaSession) {
-        coreClient.writeDebugLog('Reset Session')
-        node.connector.closeSession(node.opcuaSession, function () {
-          node.opcuaSession = null
-          node.startOPCUASessionWithTimeout(node.opcuaClient)
-        })
-      }
-    }
-
     node.handleWriteError = function (err, msg) {
       node.verboseLog('Write Handle Error '.red + err)
 
@@ -67,7 +60,7 @@ module.exports = function (RED) {
       node.setNodeStatusTo('error')
 
       if (err.message && err.message.includes('BadSession')) {
-        node.resetSession()
+        node.connector.resetBadSession()
       }
     }
 
@@ -85,7 +78,7 @@ module.exports = function (RED) {
               let message = node.buildResultMessage(msg, writeResult)
               node.send(message)
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleWriteError(err, msg)
             }
           }).catch(function (err) {
             coreClient.writeDebugLog(err)
@@ -98,74 +91,55 @@ module.exports = function (RED) {
     }
 
     node.buildResultMessage = function (msg, result) {
-      let message = {
-        payload: {},
-        topic: msg.topic,
-        nodetype: 'write',
-        resultsConverted: {}
-      }
+      let message = msg
+      msg.nodetype = 'write'
 
-      try {
-        let dataValuesString = JSON.stringify(result, null, 2)
-        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
-      } catch (e) {
-        if (node.showErrors) {
-          node.warn('JSON not to parse from string for write result type ' + typeof result)
-          node.error(e.message, msg)
-          message.payload = JSON.stringify(result.results, null, 2)
-          message.error = e.message
+      let dataValuesString = {}
+      if (node.justValue) {
+        dataValuesString = JSON.stringify({
+          statusCodes: result.statusCodes
+        }, null, 2)
+
+        if (message.valuesToWrite) {
+          delete message['valuesToWrite']
         }
+      } else {
+        dataValuesString = JSON.stringify(result, null, 2)
       }
 
       try {
-        let dataValuesString = JSON.stringify(result.statusCodes, null, 2)
-        RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
-      } catch (e) {
+        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
+      } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
-          node.error(e.message, msg)
-          message.resultsConverted = null
-          message.error = e.message
+          node.error(err, msg)
         }
+        message.resultsConverted = dataValuesString
+        message.error = err.message
       }
 
       return message
     }
 
     node.on('input', function (msg) {
-      coreClient.writeDebugLog(JSON.stringify(msg))
-      node.writeToSession(node.opcuaSession, msg)
+      if (!node.opcuaSession) {
+        node.error(new Error('Session Not Ready To Write'), msg)
+        return
+      }
+
+      if (msg.injectType === 'write') {
+        node.writeToSession(node.opcuaSession, msg)
+      }
     })
 
-    node.handleSessionError = function (err) {
-      coreClient.writeDebugLog('Handle Session Error '.red + err)
-
-      if (node.showErrors) {
-        node.error(err, {payload: 'Write Session Error'})
-      }
-
-      node.resetSession()
-    }
-
-    node.startOPCUASession = function (opcuaClient) {
-      coreClient.writeDebugLog('Write Start OPC UA Session')
+    node.setOPCUAConnected = function (opcuaClient) {
       node.opcuaClient = opcuaClient
-      node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT, 'Write Node').then(function (session) {
-        node.opcuaSession = session
-        coreClient.writeDebugLog('Session Connected')
-        node.setNodeStatusTo('connected')
-      }).catch(node.handleSessionError)
+      node.setNodeStatusTo('connected')
     }
 
-    node.startOPCUASessionWithTimeout = function (opcuaClient) {
-      if (node.sessionTimeout !== null) {
-        clearTimeout(node.sessionTimeout)
-        node.sessionTimeout = null
-      }
-      coreClient.writeDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
-      node.sessionTimeout = setTimeout(function () {
-        node.startOPCUASession(opcuaClient)
-      }, node.reconnectTimeout)
+    node.opcuaSessionStarted = function (opcuaSession) {
+      node.opcuaSession = opcuaSession
+      node.setNodeStatusTo('active')
     }
 
     node.connectorShutdown = function (opcuaClient) {
@@ -173,30 +147,15 @@ module.exports = function (RED) {
       if (opcuaClient) {
         node.opcuaClient = opcuaClient
       }
-      // node.startOPCUASessionWithTimeout(node.opcuaClient)
     }
 
     if (node.connector) {
-      node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('connected', node.setOPCUAConnected)
+      node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }
-
-    node.on('close', function (done) {
-      if (node.opcuaSession && node.connector.opcuaClient) {
-        node.connector.closeSession(node.opcuaSession, function (err) {
-          if (err) {
-            coreClient.writeDebugLog('Error On Close Session ' + err)
-          }
-          node.opcuaSession = null
-          done()
-        })
-      } else {
-        node.opcuaSession = null
-        done()
-      }
-    })
 
     node.setNodeStatusTo('waiting')
   }

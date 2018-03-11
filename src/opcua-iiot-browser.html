@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -16,6 +16,10 @@
       connector: {type: "OPCUA-IIoT-Connector", required: true},
       nodeId: {value: ""},
       name: {value: ""},
+      // browseAll: {value: false},
+      justValue: {value: true},
+      sendNodesToRead: {value: false},
+      sendNodesToListener: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -103,6 +107,27 @@
                 <input type="text" id="node-input-name" placeholder="Name">
             </div>
             <hr>
+            <!-- <div class="form-row">
+                <label style="min-width:160px" for="node-input-browseAll"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.browseAll"></span></label>
+                <input type="checkbox" id="node-input-browseAll" style="max-width:30px">
+            </div> -->
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
+                <input type="checkbox" id="node-input-justValue" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-sendNodesToRead"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.sendNodesToRead"></span></label>
+                <input type="checkbox" id="node-input-sendNodesToRead" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-sendNodesToListener"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.sendNodesToListener"></span></label>
+                <input type="checkbox" id="node-input-sendNodesToListener" style="max-width:30px">
+            </div>
+            <hr>
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
@@ -138,22 +163,18 @@
 
  <h3>Configuration</h3>
 
- <p>The browser tab inside the configuration section is used to set a default starting OPC UA Node-Id.
- Important!
- The request could never reach OPC UA address space objects above that OPC UA Node-Id.</p>
+ <p>The browser tab inside the configuration section is used to set a default starting OPC UA Node-Id.<p>
 
- <p>Use the lookup button to browse for Node-Id's.
- Empty the input text box to start from root again.</p>
+ <p>Use the lookup button to browse for Node-Id's. (needs a deploy first) Empty the input text box to start from root again.</p>
 
  <h3>Examples</h3>
- <a href='https://github.com/biancode/node-red-contrib-iiot-opcua /blob/master/examples/' target='_blank'>GitHub Browser example flow</a>
+ <a href='https://github.com/biancode/node-red-contrib-iiot-opcua/blob/master/examples/' target='_blank'>GitHub Browser example flow</a>
 
- <p>Please download the examples from a branch matching your current version.
- It could change over time.</p>
+ <p>You'll find the examples under Node-RED menu > Import > Examples > iiot opcua</p>
 
  <h3>Input</h3>
 
- <p>The input expects an OPC UA Node-Id to set a starting point to browse from.</p>
+ <p>The input could be empty or should hold addressSpaceItems (Array of objects) to browse for.</p>
 
  <h3>Output</h3>
 
@@ -166,16 +187,23 @@
     <ul>
         <li>payload (value)
             <ul>
-                <li>browserItems (Array)
-                <li>browserResultCount
-                <li>browseTopic
+                <li>browserItems (Array of Objects)
+                <li>browserItemsCount
+                <li>browseTopic (Browser root to browse)
                 <li>endpoint
                 <li>session
             </ul>
-        <li>nodesToRead (Array)
-        <li>nodesToReadCount
+        <li>topic
         <li>nodetype (browse)
-        <li>result (origin from node-opcua)
+        <li>injectType (inject)
+        <li>addressSpaceItems (Array of Objects to browse)
+        <li>optional
+        <ul>
+            <li>nodesToRead (Array of String resluts)
+            <li>nodesToReadCount
+            <li>addressItemsToRead (Array of Object results)
+            <li>addressItemsToReadCount
+        </ul>
     </ul>
  </div>
 

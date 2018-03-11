@@ -2,8 +2,22 @@
   "opcua-iiot-contrib": {
     "label": {
       "type": "Typ",
+      "connector": "Verbindung",
+      "credentials": "Verwende Login",
+      "user": "Benutzer",
+      "password": "Kennwort",
+      "keepSessionAlive": "Halte Session aktiv",
+      "publicCertificateFile": "Öffentlich",
+      "privateKeyFile": "Privat",
+      "certificateFiles": "Zertifikatdateien",
+      "endpointMustExist": "Endpoint muss exakt sein",
+      "autoSelectRightEndpoint": "Automatische Endpoint-Auswahl",
       "showActivities": "Zeige Aktivitäten",
       "showErrors": "Zeige Fehler"
+    },
+    "tabs-label": {
+      "settings": "Einstellungen",
+      "security": "Sicherheit"
     }
   }
 }

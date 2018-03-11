@@ -6,6 +6,10 @@
     },
     "label": {
       "connector": "Connector",
+      "browseAll": "Browse All",
+      "justValue": "Send Just Values",
+      "sendNodesToRead": "Results To Read",
+      "sendNodesToListener": "Results To Listener",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "topic": "Topic",

@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -32,6 +32,8 @@ module.exports = function (RED) {
     let node = this
     node.reconnectTimeout = 1000
     node.sessionTimeout = null
+    node.opcuaClient = null
+    node.opcuaSession = null
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -51,16 +53,6 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.resetSession = function () {
-      if (!node.sessionTimeout && node.opcuaClient && node.opcuaSession) {
-        coreClient.readDebugLog('Reset Session')
-        node.connector.closeSession(node.opcuaSession, function () {
-          node.opcuaSession = null
-          node.startOPCUASessionWithTimeout(node.opcuaClient)
-        })
-      }
-    }
-
     node.handleReadError = function (err, msg) {
       node.verboseLog('Read Handle Error '.red + err)
 
@@ -72,7 +64,7 @@ module.exports = function (RED) {
       node.setNodeStatusTo('error')
 
       if (err.message && err.message.includes('BadSession')) {
-        node.resetSession()
+        node.connector.resetBadSession()
       }
     }
 
@@ -182,29 +174,29 @@ module.exports = function (RED) {
     }
 
     node.buildResultMessage = function (msg, readType, readResult) {
-      let message = {
-        payload: {},
-        topic: msg.topic,
-        nodetype: 'read',
-        readtype: readType,
-        attributeId: node.attributeId
+      let message = msg
+      message.payload = {}
+      message.nodetype = 'read'
+      message.readtype = readType
+      message.attributeId = node.attributeId
+
+      let dataValuesString = {}
+      if (node.justValue) {
+        dataValuesString = JSON.stringify(readResult.results, null, 2)
+      } else {
+        dataValuesString = JSON.stringify(readResult, null, 2)
       }
 
       try {
-        let dataValuesString = {}
-        if (node.justValue) {
-          dataValuesString = JSON.stringify(readResult.results, null, 2)
-        } else {
-          dataValuesString = JSON.stringify(readResult, null, 2)
-        }
         RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
       } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + typeof readResult)
           node.error(err, msg)
-          message.payload = JSON.stringify(readResult.results, null, 2)
-          message.error = err.message
         }
+
+        message.payload = dataValuesString
+        message.error = err.message
       }
 
       if (!node.justValue) {
@@ -216,9 +208,10 @@ module.exports = function (RED) {
           if (node.showErrors) {
             node.warn('JSON not to parse from string for dataValues type ' + typeof readResult.results)
             node.error(err, msg)
-            message.resultsConverted = null
-            message.error = err.message
           }
+
+          message.resultsConverted = null
+          message.error = err.message
         }
       }
 
@@ -226,44 +219,22 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      if (!node.opcuaSession) {
+        node.error(new Error('Session Not Ready To Read'), msg)
+        return
+      }
+
       node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
     })
 
-    node.handleSessionError = function (err) {
-      coreClient.readDebugLog('Handle Session Error '.red + err)
-
-      if (node.showErrors) {
-        node.error(err, {payload: 'Read Handle Session Error'})
-      }
-
-      node.resetSession()
-    }
-
-    node.startOPCUASession = function (opcuaClient) {
-      if (node.sessionTimeout) {
-        clearTimeout(node.sessionTimeout)
-        node.sessionTimeout = null
-      }
-
-      coreClient.readDebugLog('Read Start OPC UA Session')
+    node.setOPCUAConnected = function (opcuaClient) {
       node.opcuaClient = opcuaClient
-      node.connector.startSession(coreClient.core.TEN_SECONDS_TIMEOUT, 'Read Node').then(function (session) {
-        node.opcuaSession = session
-        coreClient.readDebugLog('Session Connected')
-        node.setNodeStatusTo('connected')
-      }).catch(node.handleSessionError)
+      node.setNodeStatusTo('connected')
     }
 
-    node.startOPCUASessionWithTimeout = function (opcuaClient) {
-      if (node.sessionTimeout !== null) {
-        clearTimeout(node.sessionTimeout)
-        node.sessionTimeout = null
-      }
-
-      coreClient.readDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
-      node.sessionTimeout = setTimeout(function () {
-        node.startOPCUASession(opcuaClient)
-      }, node.reconnectTimeout)
+    node.opcuaSessionStarted = function (opcuaSession) {
+      node.opcuaSession = opcuaSession
+      node.setNodeStatusTo('active')
     }
 
     node.connectorShutdown = function (opcuaClient) {
@@ -271,31 +242,15 @@ module.exports = function (RED) {
       if (opcuaClient) {
         node.opcuaClient = opcuaClient
       }
-      // node.startOPCUASessionWithTimeout(node.opcuaClient)
     }
 
     if (node.connector) {
-      node.connector.on('connected', node.startOPCUASessionWithTimeout)
+      node.connector.on('connected', node.setOPCUAConnected)
+      node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
     } else {
       throw new TypeError('Connector Not Valid')
     }
-
-    node.on('close', function (done) {
-      if (node.opcuaSession && node.connector.opcuaClient) {
-        node.connector.closeSession(node.opcuaSession, function (err) {
-          if (err) {
-            coreClient.readDebugLog('ERROR: on close session ' + err)
-          }
-          node.opcuaSession = null
-          coreClient.readDebugLog('Session closed')
-          done()
-        })
-      } else {
-        node.opcuaSession = null
-        done()
-      }
-    })
 
     node.setNodeStatusTo(false)
   }

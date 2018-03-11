@@ -1,57 +1,143 @@
 [
   {
-    "id": "7d3bf7b2.7d72c8",
+    "id": "41c7ae55.fa0ec",
     "type": "tab",
-    "label": "IIoT OPC UA Server",
+    "label": "IIoT OPC UA ASO",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "d6e4f0a4.7b432",
+    "id": "19d5a78.c9e0b59",
+    "type": "OPCUA-IIoT-Server-Command",
+    "z": "41c7ae55.fa0ec",
+    "commandtype": "restart",
+    "nodeId": "",
+    "name": "restart",
+    "x": 430,
+    "y": 80,
+    "wires": [
+      [
+        "f58b67e3.a0b96"
+      ]
+    ]
+  },
+  {
+    "id": "4cf671ce.942f08",
+    "type": "OPCUA-IIoT-Server-ASO",
+    "z": "41c7ae55.fa0ec",
+    "nodeId": "ns=5;s=TestFolder",
+    "browsename": "TestFolder",
+    "displayname": "Test Folder",
+    "objecttype": "FolderType",
+    "datatype": "",
+    "value": "",
+    "referenceNodeId": "ns=0;i=85",
+    "referencetype": "Organizes",
+    "name": "ASO Test Folder",
+    "x": 460,
+    "y": 140,
+    "wires": [
+      [
+        "f58b67e3.a0b96"
+      ]
+    ]
+  },
+  {
+    "id": "97c9c904.512c68",
+    "type": "comment",
+    "z": "41c7ae55.fa0ec",
+    "name": "information",
+    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
+    "x": 660,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "3431c067.1594a",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "41c7ae55.fa0ec",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 280,
+    "y": 80,
+    "wires": [
+      [
+        "19d5a78.c9e0b59"
+      ]
+    ]
+  },
+  {
+    "id": "7296cca2.d9f85c",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "41c7ae55.fa0ec",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 280,
+    "y": 140,
+    "wires": [
+      [
+        "4cf671ce.942f08"
+      ]
+    ]
+  },
+  {
+    "id": "f58b67e3.a0b96",
     "type": "OPCUA-IIoT-Server",
-    "z": "7d3bf7b2.7d72c8",
+    "z": "41c7ae55.fa0ec",
     "port": "55388",
     "endpoint": "",
     "acceptExternalCommands": true,
-    "maxAllowedSessionNumber": "20",
+    "maxAllowedSessionNumber": "",
     "maxConnectionsPerEndpoint": "",
     "maxAllowedSubscriptionNumber": "",
     "alternateHostname": "",
-    "name": "LOCAL SERVER",
+    "name": "",
     "showStatusActivities": false,
     "showErrors": false,
     "asoDemo": true,
     "allowAnonymous": true,
     "isAuditing": false,
     "serverDiscovery": true,
-    "users": [
-      {
-        "name": "test",
-        "password": "test"
-      },
-      {
-        "name": "peter",
-        "password": "peter"
-      }
-    ],
+    "users": [],
     "xmlsets": [],
     "publicCertificateFile": "",
     "privateCertificateFile": "",
-    "x": 220,
-    "y": 100,
+    "x": 670,
+    "y": 80,
     "wires": [
-      [],
-      []
+      [
+        "afd008d3.eb61c"
+      ]
     ]
   },
   {
-    "id": "e28cb22.24ee15",
-    "type": "comment",
-    "z": "7d3bf7b2.7d72c8",
-    "name": "information",
-    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
-    "x": 210,
-    "y": 60,
+    "id": "afd008d3.eb61c",
+    "type": "debug",
+    "z": "41c7ae55.fa0ec",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 830,
+    "y": 80,
     "wires": []
   }
 ]

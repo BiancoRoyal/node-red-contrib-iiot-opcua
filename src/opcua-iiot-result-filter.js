@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
  node-red-contrib-iiot-opcua
  */
@@ -21,6 +21,8 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.datatype = config.datatype
+    this.fixedValue = config.fixedValue
+    this.fixPoint = parseInt(config.fixPoint) | 2
     this.withPrecision = config.withPrecision
     this.precision = parseInt(config.precision) | 2
     this.entry = config.entry
@@ -31,24 +33,27 @@ module.exports = function (RED) {
     this.defaultvalue = config.defaultvalue
     this.topic = config.topic
     this.name = config.name
-    this.usingListener = config.usingListener
+    this.showErrors = config.showErrors
 
     let node = this
     node.subscribed = false
 
     if (node.withValueCheck) {
       node.minvalue = node.convertDataType(node.minvalue)
-      node.maxvalue = node.convertDataType(node.minvalue)
+      node.maxvalue = node.convertDataType(node.maxvalue)
     }
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     node.nodeIdToFilter = function (msg) {
       let doFilter = true
+      let nodeList = coreFilter.core.buildNodesToRead(msg)
+      let elementNodeId = null
 
-      if (msg.nodesToRead && msg.nodesToRead.length) {
-        doFilter = !msg.nodesToRead.some(function (element, index, array) {
-          return element.toString() === node.nodeId.toString()
+      if (nodeList && nodeList.length) {
+        doFilter = !nodeList.some(function (element, index, array) {
+          elementNodeId = element.nodeId || element
+          return elementNodeId.toString() === node.nodeId.toString()
         })
       }
 
@@ -61,24 +66,20 @@ module.exports = function (RED) {
         return
       }
 
-      if (msg.multipleRequest) {
-        if (node.nodeIdToFilter(msg)) {
+      if (node.nodeIdToFilter(msg)) {
+        return
+      } else if (msg.addressSpaceItems) {
+        let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry) {
+          return entry.nodeId === node.nodeId
+        })
+
+        if (filteredNodeIds.length < 1) {
           return
         }
       } else {
-        if (msg.addressSpaceItems) {
-          let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry) {
-            return entry.nodeId === node.nodeId
-          })
-
-          if (filteredNodeIds.length < 1) {
-            return
-          }
-        } else {
-          // just if not multiple request!
-          if (msg.topic !== node.nodeId) { // TODO: that is very old and should be deleted
-            return
-          }
+        // just if not multiple request!
+        if (msg.topic !== node.nodeId) { // TODO: that is very old and should be deleted
+          return
         }
       }
 
@@ -98,7 +99,10 @@ module.exports = function (RED) {
           result = node.filterByListenType(msg)
           break
         default:
-          coreFilter.internalDebugLog('unknown node type inject to filter for ' + msg.nodetype)
+          if (node.showErrors) {
+            node.error(new Error('unknown node type injected to filter for ' + msg.nodetype), msg)
+          }
+          coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
       }
 
       if (result === undefined || result === null) {
@@ -106,10 +110,13 @@ module.exports = function (RED) {
         return
       }
 
-      let resultDataType = typeof result
-
       if (result.hasOwnProperty('value')) {
         result = result.value
+      }
+
+      let resultDataType = typeof result
+      if (result.hasOwnProperty('datatype')) {
+        resultDataType = result.datatype || typeof result
       }
 
       if (resultDataType && resultDataType.toString() !== node.datatype.toString()) {
@@ -117,31 +124,38 @@ module.exports = function (RED) {
       }
 
       if (result === undefined || result === null) {
-        coreFilter.internalDebugLog('convert result null or undefined' + JSON.stringify(msg))
-      }
+        coreFilter.internalDebugLog('converted result null or undefined' + JSON.stringify(msg))
+        if (node.showErrors) {
+          node.error(new Error('converted result null or undefined'), msg)
+        }
+      } else {
+        try {
+          if (node.fixPoint >= 0 && node.fixedValue) {
+            result = Number.parseFloat(result).toFixed(node.fixPoint)
+            result = parseFloat(result)
+          }
 
-      if (!isNaN(result) && node.precision >= 0 && node.withPrecision) {
-        result = Number(result)
-        if (result.toPrecision) {
-          result = Number(result.toPrecision(node.precision))
+          if (node.precision >= 0 && node.withPrecision) {
+            result = Number.parseFloat(result).toPrecision(node.precision)
+            result = parseFloat(result)
+          }
+
+          if (node.withValueCheck) {
+            if (result < node.minvalue || result > node.maxvalue) {
+              result = node.defaultvalue
+            }
+          }
+        } catch (err) {
+          if (node.showErrors) {
+            node.error(err, msg)
+          }
         }
       }
-
-      if (node.withValueCheck) {
-        if (result < node.minvalue || result > node.maxvalue) {
-          result = node.defaultvalue
-        }
-      }
-
-      coreFilter.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-      coreFilter.internalDebugLog('sending result ' + JSON.stringify(result))
 
       if (node.justValue) {
-        node.send([{payload: result, topic: node.topic || msg.topic}, {payload: 'just value option active'}])
+        node.send({payload: result, topic: node.topic || msg.topic, nodeId: node.nodeId})
       } else {
-        msg.filteredResult = result
-        msg.topic = node.topic || msg.topic
-        node.send([{payload: result, topic: node.topic || msg.topic}, msg])
+        node.send({payload: result, topic: node.topic || msg.topic, nodeId: node.nodeId, input: msg})
       } // here node topic first to overwrite for dashboard
     })
 
@@ -242,19 +256,10 @@ module.exports = function (RED) {
     node.filterByListenType = function (msg) {
       let result = null
 
-      switch (msg.readtype) {
-        case 'subscribe':
-          if (msg.payload && msg.payload.hasOwnProperty('value')) {
-            result = msg.payload.value
-          } else {
-            result = msg.payload
-          }
-          break
-        case 'event':
-          result = msg.payload
-          break
-        default:
-          break
+      if (msg.payload && msg.payload.hasOwnProperty('value')) {
+        result = msg.payload.value
+      } else {
+        result = msg.payload
       }
 
       if (result && result.hasOwnProperty('value')) {

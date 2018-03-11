@@ -1,0 +1,8 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "showActivities": "Zeige Aktivitäten",
+      "showErrors": "Zeige Fehler"
+    }
+  }
+}

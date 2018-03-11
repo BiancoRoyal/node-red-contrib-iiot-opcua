@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  All rights reserved.
  node-red-contrib-iiot-opcua
 -->
@@ -16,6 +16,7 @@
       methodId: {value: ""},
       methodType: {value: "basic", required: true},
       value: {value: null},
+      justValue: {value: true},
       name: {value: ""},
       showStatusActivities: {value: false},
       showErrors: {value: false},
@@ -256,6 +257,13 @@
                 <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" placeholder="">
             </div>
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
+                <input type="checkbox" id="node-input-justValue" style="max-width:30px">
+            </div>
+            <hr>
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>

@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -31,6 +31,8 @@ module.exports = function (RED) {
     let node = this
     node.reconnectTimeout = 1000
     node.sessionTimeout = null
+    node.opcuaClient = null
+    node.opcuaSession = null
 
     let uaSubscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
@@ -55,16 +57,6 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.resetSession = function () {
-      if (!node.sessionTimeout && node.opcuaClient && node.opcuaSession) {
-        coreListener.internalDebugLog('Reset Session')
-        node.connector.closeSession(node.opcuaSession, function () {
-          node.opcuaSession = null
-          node.startOPCUASessionWithTimeout(node.opcuaClient)
-        })
-      }
-    }
-
     node.createSubscription = function (msg, cb) {
       let timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
 
@@ -79,8 +71,8 @@ module.exports = function (RED) {
 
     node.resetSubscription = function () {
       uaSubscription = null
+      node.send({payload: 'SUBSCRIPTION TERMINATED', monitoredItems: node.monitoredItems})
       node.monitoredItems.clear()
-      node.setNodeStatusTo('waiting')
     }
 
     node.subscribeActionInput = function (msg) {
@@ -109,53 +101,29 @@ module.exports = function (RED) {
       return true
     }
 
+    node.updateSubscriptionStatus = function () {
+      coreListener.internalDebugLog('listening' + ' (' + node.monitoredItems.length + ')')
+      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
+    }
+
     node.subscribeMonitoredItem = function (subscription, msg) {
       let addressSpaceItem = null
+
       for (addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
-          node.error(new Error('Subscription Address Item NodeId Not Valid'), msg)
+          coreListener.subscribeDebugLog('Address Space Item Not Valid to Monitor ' + addressSpaceItem)
           return
         }
 
-        coreListener.subscribeDebugLog('Register Monitored Subscription NodeId ' + addressSpaceItem.nodeId)
-        let monitoredItem = node.monitoredItems.get(addressSpaceItem.nodeId)
+        let monitoredItem = node.monitoredItems.get(addressSpaceItem.nodeId.toString())
 
         if (!monitoredItem) {
           coreListener.subscribeDebugLog('Monitored Item Subscribe ' + addressSpaceItem.nodeId)
-
-          monitoredItem = coreListener.buildNewMonitoredItem(addressSpaceItem, msg, subscription, function (err, addressSpaceItem, msg) {
-            if (err) {
-              coreListener.subscribeDebugLog('Subscribe Error: ' + err + ' on ' + addressSpaceItem.nodeId)
-
-              if (node.showErrors) {
-                node.error('Subscription Monitor for Subscribe', msg)
-              }
-              node.setNodeStatusTo('subscribed' + ' (' + node.monitoredItems.length + ')')
-            } else {
-              coreListener.subscribeDebugLog('New Monitoring Subscription For ' + addressSpaceItem.nodeId)
-            }
-          })
-
-          if (monitoredItem) {
-            node.setMonitoring(msg, monitoredItem, addressSpaceItem)
-          } else {
-            coreListener.subscribeDebugLog('Error monitoredItem Is Not Valid')
-          }
+          coreListener.buildNewMonitoredItem(addressSpaceItem.nodeId, msg, subscription)
         } else {
-          coreListener.subscribeDebugLog('Monitored Item Unsubscribe')
+          coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + addressSpaceItem.nodeId)
           monitoredItem.terminate(function (err) {
-            if (err) {
-              if (node.showErrors) {
-                node.error(err, msg)
-              }
-            } else {
-              coreListener.subscribeDebugLog('Unsubscribe Monitoring For ' + monitoredItem.addressSpaceItem.nodeId)
-
-              if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
-                node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
-                node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
-              }
-            }
+            node.monitoredItemTerminated(msg, monitoredItem, err)
           })
         }
       }
@@ -163,199 +131,152 @@ module.exports = function (RED) {
 
     node.subscribeMonitoredEvent = function (subscription, msg) {
       let addressSpaceItem = null
+
       for (addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
-          node.error(new Error('Event Address Item NodeId Not Valid'), msg)
+          coreListener.eventDebugLog('Address Space Item Not Valid to Monitor Event Of ' + addressSpaceItem)
           return
         }
 
-        coreListener.eventDebugLog('Register Monitored Event NodeId ' + addressSpaceItem.nodeId)
         let monitoredItem = node.monitoredItems.get(addressSpaceItem.nodeId)
 
         if (!monitoredItem) {
-          coreListener.eventDebugLog('Monitored Event Item ' + addressSpaceItem.nodeId)
-
-          monitoredItem = coreListener.buildNewEventItem(addressSpaceItem, msg, subscription, function (err, addressSpaceItem, msg) {
-            if (err) {
-              coreListener.eventDebugLog(err.message)
-              if (node.showErrors) {
-                node.error(err, msg)
-              }
-            } else {
-              coreListener.eventDebugLog('New Event Subscription For ' + addressSpaceItem.nodeId)
-            }
-          })
-
-          if (monitoredItem) {
-            node.setMonitoring(msg, monitoredItem, addressSpaceItem)
-          } else {
-            coreListener.subscribeDebugLog('Error monitoredItem Is Not Valid')
-          }
+          coreListener.eventDebugLog('Regsiter Event Item ' + addressSpaceItem.nodeId)
+          coreListener.buildNewEventItem(addressSpaceItem.nodeId, msg, subscription)
         } else {
+          coreListener.subscribeDebugLog('Terminate Event Item' + addressSpaceItem.nodeId)
           monitoredItem.terminate(function (err) {
-            if (err) {
-              if (node.showErrors) {
-                node.error(err, msg)
-              }
-            } else {
-              coreListener.subscribeDebugLog('Unsubscribe Monitored Event For ' + monitoredItem.addressSpaceItem.nodeId)
-
-              if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
-                node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
-                node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
-              }
-            }
+            node.monitoredItemTerminated(msg, monitoredItem, err)
           })
         }
       }
     }
 
-    node.setMonitoring = function (msg, monitoredItem, addressSpaceItem) {
-      // fill up monitored item
-      monitoredItem.addressSpaceItem = addressSpaceItem
-      monitoredItem.topic = msg.topic || ''
-      monitoredItem.nodetype = msg.nodetype || 'none'
-      monitoredItem.injectType = msg.injectType || 'listen'
-      monitoredItem.readtype = msg.readtype || 'none'
-      monitoredItem.eventType = msg.eventType || 'none'
-      node.monitoredItems.set(addressSpaceItem.nodeId, monitoredItem)
+    node.monitoredItemTerminated = function (msg, monitoredItem, err) {
+      coreListener.internalDebugLog('Terminate Monitored Item')
 
-      monitoredItem.on('initialized', function () {
-        node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
-      })
-
-      if (msg.nodetype !== 'events') {
-        monitoredItem.on('changed', function (dataValue) {
-          let result = coreListener.core.buildMsgPayloadByDataValue(dataValue)
-
-          let valueMsg = {
-            payload: {},
-            topic: monitoredItem.topic,
-            addressSpaceItems: [monitoredItem.addressSpaceItem],
-            nodetype: monitoredItem.nodetype,
-            injectType: monitoredItem.injectType,
-            readtype: monitoredItem.readtype,
-            result: result
-          }
-
-          if (result.hasOwnProperty('value') && result.value.hasOwnProperty('value')) {
-            valueMsg.payload = result.value.value
-          } else {
-            if (result.hasOwnProperty('value')) {
-              valueMsg.payload = result.value
-            } else {
-              valueMsg.payload = result
-            }
-          }
-
-          let valueObject = {
-            payload: {
-              name: monitoredItem.addressSpaceItem.name,
-              nodeId: monitoredItem.addressSpaceItem.nodeId,
-              value: valueMsg.payload
-            },
-            topic: valueMsg.topic,
-            addressSpaceItems: valueMsg.addressSpaceItems,
-            nodetype: valueMsg.nodetype,
-            injectType: valueMsg.injectType,
-            readtype: valueMsg.readtype
-          }
-
-          if (node.justValue) {
-            valueMsg.mode = 'value'
-            node.send([valueObject, valueMsg])
-          } else {
-            valueMsg.mode = 'all'
-            node.send([valueMsg, valueObject])
-          }
-        })
-      } else {
-        monitoredItem.on('changed', function (eventFieldResponse) {
-          coreListener.analyzeEvent(node.opcuaSession, node.getBrowseName, msg.payload.eventFields, eventFieldResponse)
-            .then(function (result) {
-              coreListener.eventDetailDebugLog('Monitored Event Message ' + JSON.stringify(result.message))
-              coreListener.eventDetailDebugLog('Monitored Event Field Message ' + JSON.stringify(result.variantMsg))
-
-              let valueMsg = {
-                payload: {},
-                topic: monitoredItem.topic,
-                addressSpaceItems: [monitoredItem.addressSpaceItem],
-                nodetype: monitoredItem.nodetype,
-                injectType: monitoredItem.injectType,
-                readtype: monitoredItem.readtype,
-                result: result
-              }
-
-              try {
-                valueMsg.payload = JSON.parse(JSON.stringify(result.message.payload))
-              } catch (err) {
-                coreListener.eventDetailDebugLog(err + ' sending message stringified')
-                valueMsg.payload = JSON.stringify(result.message.payload)
-              }
-
-              let dataValueJSON = {}
-              try {
-                dataValueJSON = JSON.parse(JSON.stringify(result.variantMsg.payload))
-              } catch (err) {
-                coreListener.eventDetailDebugLog(err + ' sending variantMsg stringified')
-                dataValueJSON = JSON.stringify(result.variantMsg.payload)
-              }
-
-              let valueObject = {
-                payload: {
-                  name: monitoredItem.addressSpaceItem.name,
-                  nodeId: monitoredItem.addressSpaceItem.nodeId,
-                  value: valueMsg.payload
-                },
-                topic: valueMsg.topic,
-                addressSpaceItems: valueMsg.addressSpaceItems,
-                nodetype: valueMsg.nodetype,
-                injectType: valueMsg.injectType,
-                eventType: valueMsg.eventType,
-                variantMsg: dataValueJSON
-              }
-
-              if (node.justValue) {
-                valueMsg.mode = 'value'
-                node.send([valueObject, valueMsg])
-              } else {
-                valueMsg.mode = 'all'
-                node.send([valueMsg, valueObject])
-              }
-            })
-            .catch(node.errorHandling)
-        })
-      }
-
-      monitoredItem.on('error', function (err) {
-        coreListener.internalDebugLog('Error: ' + err + ' on ' + monitoredItem.addressSpaceItem.nodeId)
-
-        if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
-          node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
-        }
-
+      if (err) {
+        coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.itemToMonitor.nodeId.toString())
         if (node.showErrors) {
           node.error(err, msg)
         }
+      }
 
-        node.setNodeStatusTo('error' + ' (' + node.monitoredItems.length + ')')
+      if (node.monitoredItems.get(monitoredItem.itemToMonitor.nodeId.toString())) {
+        node.monitoredItems.delete(monitoredItem.itemToMonitor.nodeId.toString())
+        node.updateSubscriptionStatus()
+      }
+    }
+
+    node.setMonitoring = function (monitoredItem) {
+      coreListener.internalDebugLog('add monitoredItem to list' + monitoredItem + ' keys: ' + Object.keys(monitoredItem))
+      node.monitoredItems.set(monitoredItem.itemToMonitor.nodeId.toString(), monitoredItem)
+
+      monitoredItem.on('changed', function (dataValue) {
+        coreListener.detailDebugLog('Changed Monitored Item Data Value ' + dataValue)
+        coreListener.detailDebugLog('Changed Monitored Item Node ' + monitoredItem)
+
+        if (!monitoredItem.monitoringParameters.filter) {
+          node.sendDataFromMonitoredItem(monitoredItem, dataValue)
+        } else {
+          node.sendDataFromEvent(monitoredItem, dataValue)
+        }
+      })
+
+      monitoredItem.on('error', function (err) {
+        coreListener.internalDebugLog('Error: ' + err + ' on ' + monitoredItem.itemToMonitor.nodeId.toString())
+
+        if (node.monitoredItems.get(monitoredItem.itemToMonitor.nodeId.toString())) {
+          node.monitoredItems.delete(monitoredItem.itemToMonitor.nodeId.toString())
+          node.updateSubscriptionStatus()
+        }
+
+        if (node.showErrors) {
+          node.error(err, {payload: ''})
+        }
 
         if (err.message && err.message.includes('BadSession')) {
-          node.handleSessionError(err)
+          node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
+          node.monitoredItems.clear()
+          node.connector.resetBadSession()
         }
       })
 
       monitoredItem.on('terminated', function () {
-        coreListener.internalDebugLog('Terminated For ' + monitoredItem.addressSpaceItem.nodeId)
+        coreListener.internalDebugLog('Terminated For ' + monitoredItem)
 
-        if (node.monitoredItems.get(monitoredItem.addressSpaceItem.nodeId)) {
-          node.monitoredItems.delete(monitoredItem.addressSpaceItem.nodeId)
+        if (node.monitoredItems.get(monitoredItem.itemToMonitor.nodeId.toString())) {
+          node.monitoredItems.delete(monitoredItem.itemToMonitor.nodeId.toString())
+          node.updateSubscriptionStatus()
+        }
+      })
+    }
+
+    node.sendDataFromMonitoredItem = function (monitoredItem, dataValue) {
+      let msg = {
+        payload: {},
+        topic: node.topic,
+        addressSpaceItems: [{name: '', nodeId: monitoredItem.itemToMonitor.nodeId.toString(), datatypeName: ''}],
+        nodetype: 'listen',
+        injectType: 'subscribe'
+      }
+
+      let dataValuesString = {}
+      if (node.justValue) {
+        dataValuesString = JSON.stringify(dataValue, null, 2)
+      } else {
+        dataValuesString = JSON.stringify({ dataValue: dataValue, monitoredItem: monitoredItem }, null, 2)
+      }
+
+      try {
+        RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
+      } catch (err) {
+        if (node.showErrors) {
+          node.warn('JSON not to parse from string for monitored item')
+          node.error(err, msg)
         }
 
-        node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
-      })
+        msg.payload = dataValuesString
+        msg.error = err.message
+      }
 
-      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
+      node.send(msg)
+    }
+
+    node.sendDataFromEvent = function (monitoredItem, dataValue) {
+      let msg = {
+        payload: {},
+        topic: node.topic,
+        addressSpaceItems: [{name: '', nodeId: monitoredItem.itemToMonitor.nodeId.toString(), datatypeName: ''}],
+        nodetype: 'listen',
+        injectType: 'event'
+      }
+
+      coreListener.analyzeEvent(node.opcuaSession, node.getBrowseName, dataValue)
+        .then(function (eventResults) {
+          coreListener.eventDetailDebugLog('Monitored Event Results ' + eventResults)
+
+          let dataValuesString = {}
+          if (node.justValue) {
+            dataValuesString = JSON.stringify({ dataValue: dataValue }, null, 2)
+          } else {
+            dataValuesString = JSON.stringify({ dataValue: dataValue, eventResults: eventResults, monitoredItem: monitoredItem }, null, 2)
+          }
+
+          try {
+            RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
+          } catch (err) {
+            if (node.showErrors) {
+              node.warn('JSON not to parse from string for monitored item')
+              node.error(err, msg)
+            }
+
+            msg.payload = dataValuesString
+            msg.error = err.message
+          }
+
+          node.send(msg)
+        }).catch(node.errorHandling)
     }
 
     node.errorHandling = function (err) {
@@ -366,10 +287,11 @@ module.exports = function (RED) {
       }
 
       coreListener.internalDebugLog(err.message)
-      node.setNodeStatusTo('error' + ' (' + node.monitoredItems.length + ')')
 
-      if (err.message && err.message.includes('BadSession')) {
-        node.resetSession()
+      if (err && err.message && err.message.includes('BadSession')) {
+        node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
+        node.monitoredItems.clear()
+        node.connector.resetBadSession()
       }
     }
 
@@ -385,8 +307,7 @@ module.exports = function (RED) {
       }
     }
 
-    // TODO: transform to promises
-    node.makeSubscription = function (callback, msg, parameters) {
+    node.makeSubscription = function (callback, cbParameters, parameters) {
       let newSubscription = null
 
       if (!node.opcuaSession) {
@@ -403,23 +324,29 @@ module.exports = function (RED) {
       coreListener.subscribeDebugLog('New Subscription Created')
 
       newSubscription.on('initialized', function () {
-        node.setNodeStatusTo('initialize')
+        node.setNodeStatusTo('initialized')
       })
 
       newSubscription.on('started', function () {
         node.setNodeStatusTo('started')
         node.monitoredItems.clear()
-        callback(newSubscription, msg)
+        callback(newSubscription, cbParameters)
       })
 
       newSubscription.on('terminated', function () {
+        node.setNodeStatusTo('terminated')
         node.resetSubscription()
+      })
+
+      newSubscription.on('item_added', function (monitoredItem) {
+        coreListener.subscribeDebugLog('New Monitoring For ' + monitoredItem)
+        node.setMonitoring(monitoredItem)
+        node.updateSubscriptionStatus()
       })
 
       return newSubscription
     }
 
-    // TODO: clean code
     node.getBrowseName = function (session, nodeId, callback) {
       coreListener.client.read(session, [{
         nodeId: nodeId,
@@ -435,77 +362,11 @@ module.exports = function (RED) {
       })
     }
 
-    node.handleSessionError = function (err) {
-      coreListener.internalDebugLog('Handle Session Error '.red + err)
-
-      if (node.showErrors) {
-        node.error('Listener Session Error')
-      }
-
-      node.resetSession()
-    }
-
-    node.handleSessionClose = function (err) {
-      coreListener.internalDebugLog('Handle Session Close Wit Error '.red + err)
-
-      if (node.showErrors) {
-        node.error(new Error('Listener Session Close'), {payload: ''})
-      }
-    }
-
-    node.startOPCUASession = function (opcuaClient) {
-      node.verboseLog('Listener Start OPC UA Session')
-      node.opcuaClient = opcuaClient
-      node.connector.startSession(coreListener.core.TEN_SECONDS_TIMEOUT, 'Listener Node').then(function (session) {
-        node.opcuaSession = session
-        node.opcuaSession.on('close', node.handleSessionClose)
-
-        node.verboseLog('Session Connected')
-        node.setNodeStatusTo('connected')
-
-        coreListener.getAllEventTypes(session, function (err, entries) {
-          //  TODO: clean code
-          if (err) {
-            node.verboseLog(err)
-          } else {
-            entries.forEach(function (entry) {
-              node.verboseLog(entry.displayName + ' : ' + entry.nodeId)
-            })
-          }
-        })
-      }).catch(node.handleSessionError)
-    }
-
-    node.startOPCUASessionWithTimeout = function (opcuaClient) {
-      if (node.sessionTimeout !== null) {
-        clearTimeout(node.sessionTimeout)
-        node.sessionTimeout = null
-      }
-
-      coreListener.internalDebugLog('starting OPC UA session with delay of ' + node.reconnectTimeout)
-      node.sessionTimeout = setTimeout(function () {
-        node.startOPCUASession(opcuaClient)
-      }, node.reconnectTimeout)
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreListener.internalDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
-      }
-      node.resetSubscription()
-      // node.startOPCUASessionWithTimeout(node.opcuaClient)
-    }
-
-    if (node.connector) {
-      node.connector.on('connected', node.startOPCUASessionWithTimeout)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
-
     node.on('input', function (msg) {
-      coreListener.detailDebugLog(node.action + ' listener input ' + JSON.stringify(msg))
+      if (!node.opcuaSession) {
+        node.error(new Error('Session Not Ready To Listen'), msg)
+        return
+      }
 
       if (msg.nodetype === 'browse') { /* browse is just to address listening to many nodes */
         msg.nodetype = 'inject'
@@ -525,26 +386,43 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', function (done) {
-      if (uaSubscription && uaSubscription.isActive()) {
-        uaSubscription.terminate()
-      }
+    node.setOPCUAConnected = function (opcuaClient) {
+      node.opcuaClient = opcuaClient
+      node.setNodeStatusTo('connected')
+    }
 
-      if (node.opcuaSession && node.connector.opcuaClient) {
-        node.connector.closeSession(node.opcuaSession, function (err) {
-          if (err) {
-            node.verboseLog('Error On Close Session ' + err)
-          }
-          node.opcuaSession = null
-          done()
-        })
-      } else {
-        node.opcuaSession = null
-        done()
+    node.opcuaSessionStarted = function (opcuaSession) {
+      node.opcuaSession = opcuaSession
+      node.setNodeStatusTo('active')
+    }
+
+    node.connectorShutdown = function (opcuaClient) {
+      coreListener.internalDebugLog('Connector Shutdown')
+      if (opcuaClient) {
+        node.opcuaClient = opcuaClient
       }
-    })
+    }
+
+    if (node.connector) {
+      node.connector.on('connected', node.setOPCUAConnected)
+      node.connector.on('session_started', node.opcuaSessionStarted)
+      node.connector.on('after_reconnection', node.connectorShutdown)
+    } else {
+      throw new TypeError('Connector Not Valid')
+    }
 
     node.setNodeStatusTo('waiting')
+
+    node.on('close', function () {
+      let monitoredItem = null
+      for (monitoredItem of node.monitoredItems) {
+        if (node.opcuaSession && node.opcuaSession.sessionId !== 'terminated' && monitoredItem.terminate) {
+          monitoredItem.terminate(function (err) {
+            node.monitoredItemTerminated({payload: 'close listener'}, monitoredItem, err)
+          })
+        }
+      }
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Listener', OPCUAIIoTListener)

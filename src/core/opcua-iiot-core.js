@@ -1,7 +1,7 @@
 /**
  The BSD 3-Clause License
 
- Copyright 2016,2017 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -936,7 +936,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
 
   let nodePayloadList = msg.payload.nodesToRead || msg.payload.nodesToWrite
   if (nodePayloadList && nodePayloadList.length) {
-      // read to read
+    // read to read
     for (item of nodePayloadList) {
       item = item.nodeId || item
       nodesToRead.push(item.toString())
@@ -971,19 +971,7 @@ de.biancoroyal.opcua.iiot.core.buildNodesToRead = function (msg) {
 }
 
 de.biancoroyal.opcua.iiot.core.buildNodesToListen = function (msg) {
-  let addressSpaceItems = []
-
-  let nodeList = msg.nodesToRead || msg.nodesToWrite
-  if (nodeList) {
-    let item = null
-    for (item of nodeList) {
-      addressSpaceItems.push({name: '', nodeId: item, datatype: ''})
-    }
-  } else {
-    addressSpaceItems = msg.addressSpaceItems
-  }
-
-  return addressSpaceItems
+  return msg.addressItemsToRead || msg.addressSpaceItems
 }
 
 de.biancoroyal.opcua.iiot.core.dataValuetoString = function (attribute, dataValue) {
