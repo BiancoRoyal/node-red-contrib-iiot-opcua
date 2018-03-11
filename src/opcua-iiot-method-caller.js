@@ -142,7 +142,10 @@ module.exports = function (RED) {
         if (node.justValue) {
           dataValuesString = JSON.stringify(outputArguments, null, 2)
         } else {
-          dataValuesString = JSON.stringify(data.results, null, 2)
+          dataValuesString = JSON.stringify({
+            results: data.results,
+            definition: definitionResults
+          }, null, 2)
         }
 
         try {
