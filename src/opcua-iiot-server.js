@@ -383,7 +383,7 @@ module.exports = function (RED) {
       coreServer.internalDebugLog('Restart OPC UA Server')
 
       if (node.opcuaServer) {
-        node.opcuaServer.shutdown(0, function () {
+        node.opcuaServer.shutdown(1, function () {
           node.opcuaServer = null
           node.emit('shutdown')
           node.initNewServer()
@@ -397,7 +397,7 @@ module.exports = function (RED) {
       if (node.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')
       } else {
-        coreServer.internalDebugLogr('Can not restart OPC UA Server')
+        coreServer.internalDebugLog('Can not restart OPC UA Server')
       }
     }
 
@@ -411,7 +411,8 @@ module.exports = function (RED) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        node.opcuaServer.shutdown(0, function () {
+        node.opcuaServer.shutdown(1, function () {
+          node.emit('shutdown')
           node.opcuaServer = null
         })
       } else {
