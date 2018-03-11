@@ -165,7 +165,6 @@ module.exports = function (RED) {
 
     node.sendMessage = function (originMessage, nodesToRead, addressItemsToRead) {
       let msg = originMessage
-
       msg.nodetype = 'browse'
 
       msg.payload = {

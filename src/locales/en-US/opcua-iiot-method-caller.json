@@ -13,7 +13,8 @@
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "addButton": "Add",
-      "removeButton": "Remove"
+      "removeButton": "Remove",
+      "justValue": "Send Just Values"
     }
   }
 }

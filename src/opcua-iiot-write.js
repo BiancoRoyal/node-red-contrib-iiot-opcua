@@ -20,6 +20,7 @@ module.exports = function (RED) {
   function OPCUAIIoTWrite (config) {
     RED.nodes.createNode(this, config)
     this.name = config.name
+    this.justValue = config.justValue
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -77,7 +78,7 @@ module.exports = function (RED) {
               let message = node.buildResultMessage(msg, writeResult)
               node.send(message)
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleWriteError(err, msg)
             }
           }).catch(function (err) {
             coreClient.writeDebugLog(err)
@@ -90,35 +91,31 @@ module.exports = function (RED) {
     }
 
     node.buildResultMessage = function (msg, result) {
-      let message = {
-        payload: {},
-        topic: msg.topic,
-        nodetype: 'write',
-        resultsConverted: {}
-      }
+      let message = msg
+      msg.nodetype = 'write'
 
-      try {
-        let dataValuesString = JSON.stringify(result, null, 2)
-        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
-      } catch (e) {
-        if (node.showErrors) {
-          node.warn('JSON not to parse from string for write result type ' + typeof result)
-          node.error(e.message, msg)
-          message.payload = JSON.stringify(result.results, null, 2)
-          message.error = e.message
+      let dataValuesString = {}
+      if (node.justValue) {
+        dataValuesString = JSON.stringify({
+          statusCodes: result.statusCodes
+        }, null, 2)
+
+        if (message.valuesToWrite) {
+          delete message['valuesToWrite']
         }
+      } else {
+        dataValuesString = JSON.stringify(result, null, 2)
       }
 
       try {
-        let dataValuesString = JSON.stringify(result.statusCodes, null, 2)
-        RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
-      } catch (e) {
+        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
+      } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
-          node.error(e.message, msg)
-          message.resultsConverted = null
-          message.error = e.message
+          node.error(err, msg)
         }
+        message.resultsConverted = dataValuesString
+        message.error = err.message
       }
 
       return message
@@ -130,7 +127,9 @@ module.exports = function (RED) {
         return
       }
 
-      node.writeToSession(node.opcuaSession, msg)
+      if (msg.injectType === 'write') {
+        node.writeToSession(node.opcuaSession, msg)
+      }
     })
 
     node.setOPCUAConnected = function (opcuaClient) {

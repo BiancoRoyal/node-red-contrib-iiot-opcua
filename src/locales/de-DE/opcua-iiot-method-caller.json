@@ -11,7 +11,8 @@
       "showActivities": "Zeige Aktivitäten",
       "showErrors": "Zeige Fehler",
       "addButton": "Neu",
-      "removeButton": "Entfernen"
+      "removeButton": "Entfernen",
+      "justValue": "Sende nur Werte"
     }
   }
 }

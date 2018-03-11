@@ -180,21 +180,23 @@ module.exports = function (RED) {
       message.readtype = readType
       message.attributeId = node.attributeId
 
+      let dataValuesString = {}
+      if (node.justValue) {
+        dataValuesString = JSON.stringify(readResult.results, null, 2)
+      } else {
+        dataValuesString = JSON.stringify(readResult, null, 2)
+      }
+
       try {
-        let dataValuesString = {}
-        if (node.justValue) {
-          dataValuesString = JSON.stringify(readResult.results, null, 2)
-        } else {
-          dataValuesString = JSON.stringify(readResult, null, 2)
-        }
         RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
       } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + typeof readResult)
           node.error(err, msg)
-          message.payload = JSON.stringify(readResult.results, null, 2)
-          message.error = err.message
         }
+
+        message.payload = dataValuesString
+        message.error = err.message
       }
 
       if (!node.justValue) {
@@ -206,9 +208,10 @@ module.exports = function (RED) {
           if (node.showErrors) {
             node.warn('JSON not to parse from string for dataValues type ' + typeof readResult.results)
             node.error(err, msg)
-            message.resultsConverted = null
-            message.error = err.message
           }
+
+          message.resultsConverted = null
+          message.error = err.message
         }
       }
 
