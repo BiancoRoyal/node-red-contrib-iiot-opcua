@@ -53,7 +53,7 @@ gulp.task('maps', function () {
 
 gulp.task('clean', function () {
   return gulp.src(['opcuaIIoT', 'docs/gen', 'maps', 'code'])
-        .pipe(clean({force: true}))
+    .pipe(clean({force: true}))
 })
 
 gulp.task('web', function () {
@@ -78,19 +78,19 @@ gulp.task('nodejs', function (cb) {
 
   pump([
     gulp.src('src/**/*.js')
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(replace(anchor, 'require(\'source-map-support\').install()'))
-        .pipe(babel({presets: ['es2015']}))
-        .pipe(uglify())
-        .pipe(sourcemaps.write('maps')), gulp.dest('opcuaIIoT')],
-    cb
+      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(replace(anchor, 'require(\'source-map-support\').install()'))
+      .pipe(babel({presets: ['es2015']}))
+      .pipe(uglify())
+      .pipe(sourcemaps.write('maps')), gulp.dest('opcuaIIoT')],
+  cb
   )
 })
 
 gulp.task('nodejsclearly', function (cb) {
   gulp.src('src/**/*.js')
-        .pipe(babel({presets: ['es2015']}))
-        .pipe(gulp.dest('code'))
+    .pipe(babel({presets: ['es2015']}))
+    .pipe(gulp.dest('code'))
 })
 
 gulp.task('doc', function (cb) {

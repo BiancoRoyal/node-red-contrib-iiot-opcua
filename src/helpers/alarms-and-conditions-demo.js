@@ -61,7 +61,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
     optionals: [
       'ConfirmedState', 'Confirm' // confirm state and confirm Method
     ],
-    inputNode: oilTankLevel,   // the letiable that will be monitored for change
+    inputNode: oilTankLevel, // the letiable that will be monitored for change
     highHighLimit: 0.9,
     highLimit: 0.8,
     lowLimit: 0.2
@@ -92,7 +92,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
     optionals: [
       'ConfirmedState', 'Confirm' // confirm state and confirm Method
     ],
-    inputNode: gasTankLevel,   // the letiable that will be monitored for change
+    inputNode: gasTankLevel, // the letiable that will be monitored for change
     highHighLimit: 0.9,
     highLimit: 0.8,
     lowLimit: 0.2

@@ -1,15 +1,15 @@
 [
   {
-    "id": "7bf1b5a6.0f9d1c",
+    "id": "c7d28ca1.795bb8",
     "type": "tab",
     "label": "OPC UA IIoT Tests",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "3f90636d.b7edf4",
+    "id": "a3372d2a.c26d5",
     "type": "OPCUA-IIoT-Server-Command",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "commandtype": "restart",
     "nodeId": "",
     "name": "restart",
@@ -17,14 +17,14 @@
     "y": 140,
     "wires": [
       [
-        "5f1154c2.69a134"
+        "bacf51fe.a33fc8"
       ]
     ]
   },
   {
-    "id": "78fbac5a.aaf11c",
+    "id": "467a2c2d.e5d9ec",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "nodeId": "ns=5;s=TestFolder",
     "browsename": "TestFolder",
     "displayname": "Test Folder",
@@ -38,14 +38,14 @@
     "y": 100,
     "wires": [
       [
-        "5f1154c2.69a134"
+        "bacf51fe.a33fc8"
       ]
     ]
   },
   {
-    "id": "85160b5c.eb628",
+    "id": "fe7c1977.732d5",
     "type": "OPCUA-IIoT-Server-Command",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "commandtype": "deleteNode",
     "nodeId": "ns=5;s=TestFolder",
     "name": "Delete",
@@ -53,14 +53,14 @@
     "y": 180,
     "wires": [
       [
-        "5f1154c2.69a134"
+        "bacf51fe.a33fc8"
       ]
     ]
   },
   {
-    "id": "2aa1f0e4.0b7248",
+    "id": "9e4c97f7.20ff",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -70,9 +70,9 @@
     "wires": []
   },
   {
-    "id": "16d104a9.3450fb",
+    "id": "63ea8cb2.f7d104",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -87,14 +87,14 @@
     "y": 100,
     "wires": [
       [
-        "78fbac5a.aaf11c"
+        "467a2c2d.e5d9ec"
       ]
     ]
   },
   {
-    "id": "ecce4c99.f334e8",
+    "id": "bdb1e0e8.d000f8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "read",
     "payload": "",
     "payloadType": "date",
@@ -120,18 +120,18 @@
     "y": 900,
     "wires": [
       [
-        "e4a95876.171ce"
+        "95548c3e.cf4fe"
       ]
     ]
   },
   {
-    "id": "10587d47.caec2b",
+    "id": "81628821.c97b6",
     "type": "OPCUA-IIoT-Read",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "attributeId": "0",
     "maxAge": 1,
     "depth": 1,
-    "connector": "60ab20b8.98b08",
+    "connector": "3c4657c6.2e3418",
     "name": "Read Structures",
     "justValue": false,
     "showStatusActivities": false,
@@ -141,14 +141,14 @@
     "y": 840,
     "wires": [
       [
-        "9a1f2f73.22929"
+        "50557ff0.8fab"
       ]
     ]
   },
   {
-    "id": "9a1f2f73.22929",
+    "id": "50557ff0.8fab",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -156,14 +156,14 @@
     "y": 840,
     "wires": [
       [
-        "b4ace22d.426bc"
+        "de2cf133.1de08"
       ]
     ]
   },
   {
-    "id": "b4ace22d.426bc",
+    "id": "de2cf133.1de08",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -173,34 +173,33 @@
     "wires": []
   },
   {
-    "id": "e4a95876.171ce",
+    "id": "95548c3e.cf4fe",
     "type": "OPCUA-IIoT-Browser",
-    "z": "7bf1b5a6.0f9d1c",
-    "connector": "60ab20b8.98b08",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
     "nodeId": "",
     "name": "",
-    "browseAll": false,
     "showStatusActivities": false,
     "showErrors": false,
     "x": 340,
     "y": 900,
     "wires": [
       [
-        "10587d47.caec2b",
-        "e577ca95.0816e",
-        "8b7362f4.bfb428",
-        "ae77db7b.bc36b"
+        "81628821.c97b6",
+        "f9cbad2.78e415",
+        "c745b718.3aa27",
+        "6e6d0628.26725"
       ]
     ]
   },
   {
-    "id": "e577ca95.0816e",
+    "id": "f9cbad2.78e415",
     "type": "OPCUA-IIoT-Read",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "attributeId": "13",
     "maxAge": 1,
     "depth": 1,
-    "connector": "60ab20b8.98b08",
+    "connector": "3c4657c6.2e3418",
     "name": "Read Structures",
     "justValue": true,
     "showStatusActivities": false,
@@ -210,14 +209,14 @@
     "y": 900,
     "wires": [
       [
-        "308874d3.164cac"
+        "5c976660.f99698"
       ]
     ]
   },
   {
-    "id": "308874d3.164cac",
+    "id": "5c976660.f99698",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -225,14 +224,14 @@
     "y": 900,
     "wires": [
       [
-        "1736d046.d11e48"
+        "34395166.7cfa76"
       ]
     ]
   },
   {
-    "id": "1736d046.d11e48",
+    "id": "34395166.7cfa76",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -242,13 +241,13 @@
     "wires": []
   },
   {
-    "id": "8b7362f4.bfb428",
+    "id": "c745b718.3aa27",
     "type": "OPCUA-IIoT-Read",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "attributeId": "130",
     "maxAge": 1,
     "depth": 1,
-    "connector": "60ab20b8.98b08",
+    "connector": "3c4657c6.2e3418",
     "name": "Read Structures",
     "justValue": false,
     "showStatusActivities": false,
@@ -258,14 +257,14 @@
     "y": 960,
     "wires": [
       [
-        "5e3d53ec.f95a34"
+        "e322e721.dcb98"
       ]
     ]
   },
   {
-    "id": "5e3d53ec.f95a34",
+    "id": "e322e721.dcb98",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -273,14 +272,14 @@
     "y": 960,
     "wires": [
       [
-        "145735d1.5832ca"
+        "a71c19d5.0c1d2"
       ]
     ]
   },
   {
-    "id": "145735d1.5832ca",
+    "id": "a71c19d5.0c1d2",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -290,9 +289,9 @@
     "wires": []
   },
   {
-    "id": "ae77db7b.bc36b",
+    "id": "6e6d0628.26725",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -302,9 +301,9 @@
     "wires": []
   },
   {
-    "id": "5f1154c2.69a134",
+    "id": "bacf51fe.a33fc8",
     "type": "OPCUA-IIoT-Server",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "port": "55388",
     "endpoint": "",
     "acceptExternalCommands": true,
@@ -327,14 +326,14 @@
     "y": 140,
     "wires": [
       [
-        "2aa1f0e4.0b7248"
+        "9e4c97f7.20ff"
       ]
     ]
   },
   {
-    "id": "eea57d30.e3d3f8",
+    "id": "407b5900.ff88d8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -349,14 +348,14 @@
     "y": 140,
     "wires": [
       [
-        "3f90636d.b7edf4"
+        "a3372d2a.c26d5"
       ]
     ]
   },
   {
-    "id": "3b8da441.6b7d24",
+    "id": "8694bce6.d30d78",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -371,14 +370,14 @@
     "y": 180,
     "wires": [
       [
-        "85160b5c.eb628"
+        "fe7c1977.732d5"
       ]
     ]
   },
   {
-    "id": "24e6ac2e.fe1904",
+    "id": "c5224a1f.d0bee8",
     "type": "OPCUA-IIoT-Event",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "eventType": "BaseEventType",
     "eventTypeLabel": "BaseEventType (i=2041)",
     "queueSize": "1000",
@@ -390,14 +389,14 @@
     "y": 300,
     "wires": [
       [
-        "ee85d45d.275ac8"
+        "9d794023.8ae678"
       ]
     ]
   },
   {
-    "id": "bec7659a.eed878",
+    "id": "d34103da.c644e",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -407,9 +406,9 @@
     "wires": []
   },
   {
-    "id": "7f811201.4f14e4",
+    "id": "5e0ae23a.e8bda4",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "listen",
     "payload": "200",
     "payloadType": "num",
@@ -435,15 +434,15 @@
     "y": 300,
     "wires": [
       [
-        "24e6ac2e.fe1904"
+        "c5224a1f.d0bee8"
       ]
     ]
   },
   {
-    "id": "ee85d45d.275ac8",
+    "id": "9d794023.8ae678",
     "type": "OPCUA-IIoT-Listener",
-    "z": "7bf1b5a6.0f9d1c",
-    "connector": "60ab20b8.98b08",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
     "action": "events",
     "queueSize": "100",
     "name": "",
@@ -454,15 +453,15 @@
     "y": 300,
     "wires": [
       [
-        "bec7659a.eed878"
+        "d34103da.c644e"
       ]
     ]
   },
   {
-    "id": "5c203220.a2eb44",
+    "id": "624b5f99.ac1b6",
     "type": "OPCUA-IIoT-Listener",
-    "z": "7bf1b5a6.0f9d1c",
-    "connector": "60ab20b8.98b08",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
     "action": "subscribe",
     "queueSize": 10,
     "name": "",
@@ -473,19 +472,19 @@
     "y": 620,
     "wires": [
       [
-        "496ce6e9.9178f8",
-        "93948e87.40d85",
-        "8650c341.fe7b18",
-        "d4df6202.3e04c",
-        "b03edd9e.f77b08",
-        "f71546bd.35f97"
+        "d5a4cdb.028e6b",
+        "2b2c08da.178af",
+        "9cdaaece.d9701",
+        "22542b4d.e01a74",
+        "dbec30ee.40c4b",
+        "d46e53f0.3d18c8"
       ]
     ]
   },
   {
-    "id": "3e8c6c.ba8cbb94",
+    "id": "b1dbcf69.993248",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "listen",
     "payload": "{ \"interval\": 500, \"queueSize\": 10 }",
     "payloadType": "json",
@@ -511,14 +510,14 @@
     "y": 620,
     "wires": [
       [
-        "5c203220.a2eb44"
+        "624b5f99.ac1b6"
       ]
     ]
   },
   {
-    "id": "93948e87.40d85",
+    "id": "2b2c08da.178af",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -528,9 +527,9 @@
     "wires": []
   },
   {
-    "id": "496ce6e9.9178f8",
+    "id": "d5a4cdb.028e6b",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -538,14 +537,14 @@
     "y": 440,
     "wires": [
       [
-        "bb024a0.8809f38"
+        "8c5501b9.702b9"
       ]
     ]
   },
   {
-    "id": "bb024a0.8809f38",
+    "id": "8c5501b9.702b9",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -555,9 +554,9 @@
     "wires": []
   },
   {
-    "id": "4498c0ff.4a1a28",
+    "id": "2aa4d06b.7b7d48",
     "type": "OPCUA-IIoT-Node",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "nodeId": "ns=0;i=2277",
     "datatype": "NodeId",
     "value": "",
@@ -567,14 +566,14 @@
     "y": 440,
     "wires": [
       [
-        "5c203220.a2eb44"
+        "624b5f99.ac1b6"
       ]
     ]
   },
   {
-    "id": "e5b388a4.c72d",
+    "id": "59bc099a.4816f8",
     "type": "OPCUA-IIoT-Node",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "nodeId": "ns=4;s=TestReadWrite",
     "datatype": "NodeId",
     "value": "",
@@ -584,14 +583,14 @@
     "y": 520,
     "wires": [
       [
-        "5c203220.a2eb44"
+        "624b5f99.ac1b6"
       ]
     ]
   },
   {
-    "id": "22a75255.1eaa76",
+    "id": "e1a2a338.ceb8a",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -601,9 +600,9 @@
     "wires": []
   },
   {
-    "id": "1fe9c590.b0212a",
+    "id": "c36a1096.63806",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -613,9 +612,9 @@
     "wires": []
   },
   {
-    "id": "ceb086fe.14ba8",
+    "id": "4dc20059.c8a76",
     "type": "inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "topic": "",
     "payload": "",
@@ -628,14 +627,14 @@
     "y": 440,
     "wires": [
       [
-        "4498c0ff.4a1a28"
+        "2aa4d06b.7b7d48"
       ]
     ]
   },
   {
-    "id": "68f53552.7835ac",
+    "id": "b19f0116.aebc08",
     "type": "inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "topic": "",
     "payload": "",
@@ -648,14 +647,14 @@
     "y": 520,
     "wires": [
       [
-        "e5b388a4.c72d"
+        "59bc099a.4816f8"
       ]
     ]
   },
   {
-    "id": "1b528131.b65bf7",
+    "id": "97ebe438.efd0d",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -665,9 +664,9 @@
     "wires": []
   },
   {
-    "id": "8650c341.fe7b18",
+    "id": "9cdaaece.d9701",
     "type": "OPCUA-IIoT-Result-Filter",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "nodeId": "ns=4;s=FullCounter",
     "datatype": "UInt32",
     "fixedValue": false,
@@ -687,14 +686,14 @@
     "y": 620,
     "wires": [
       [
-        "22a75255.1eaa76"
+        "e1a2a338.ceb8a"
       ]
     ]
   },
   {
-    "id": "d4df6202.3e04c",
+    "id": "22542b4d.e01a74",
     "type": "OPCUA-IIoT-Result-Filter",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "nodeId": "ns=0;i=2277",
     "datatype": "UInt32",
     "fixedValue": false,
@@ -714,14 +713,14 @@
     "y": 560,
     "wires": [
       [
-        "1b528131.b65bf7"
+        "97ebe438.efd0d"
       ]
     ]
   },
   {
-    "id": "b03edd9e.f77b08",
+    "id": "dbec30ee.40c4b",
     "type": "OPCUA-IIoT-Result-Filter",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "nodeId": "ns=4;s=TestReadWrite",
     "datatype": "Double",
     "fixedValue": true,
@@ -741,14 +740,14 @@
     "y": 500,
     "wires": [
       [
-        "1fe9c590.b0212a"
+        "c36a1096.63806"
       ]
     ]
   },
   {
-    "id": "f71546bd.35f97",
+    "id": "d46e53f0.3d18c8",
     "type": "OPCUA-IIoT-Result-Filter",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "nodeId": "ns=4;s=Counter",
     "datatype": "UInt16",
     "fixedValue": false,
@@ -768,14 +767,14 @@
     "y": 680,
     "wires": [
       [
-        "985d905f.5374b8"
+        "53045a16.7933fc"
       ]
     ]
   },
   {
-    "id": "985d905f.5374b8",
+    "id": "53045a16.7933fc",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -785,10 +784,10 @@
     "wires": []
   },
   {
-    "id": "aa6990bc.664578",
+    "id": "64dc7f91.fadff",
     "type": "OPCUA-IIoT-Write",
-    "z": "7bf1b5a6.0f9d1c",
-    "connector": "60ab20b8.98b08",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
     "name": "",
     "showStatusActivities": false,
     "showErrors": true,
@@ -796,17 +795,17 @@
     "y": 1460,
     "wires": [
       [
-        "5cfe754c.50174c",
-        "66f0d9bb.41b82",
-        "3ded7ded.fe200a",
-        "39fc0a13.dea31e"
+        "2e3f7846.d196c8",
+        "40b2c5d6.86f47c",
+        "d47759c9.03b2",
+        "29f8ef70.a9b9f"
       ]
     ]
   },
   {
-    "id": "4677042a.cfeb04",
+    "id": "fe026ab1.090f3",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "write",
     "payload": "",
     "payloadType": "date",
@@ -827,14 +826,14 @@
     "y": 1460,
     "wires": [
       [
-        "c491f8ff.828748"
+        "11b05169.19fcff"
       ]
     ]
   },
   {
-    "id": "3ded7ded.fe200a",
+    "id": "d47759c9.03b2",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -844,9 +843,9 @@
     "wires": []
   },
   {
-    "id": "5cfe754c.50174c",
+    "id": "2e3f7846.d196c8",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -856,9 +855,9 @@
     "wires": []
   },
   {
-    "id": "259ee368.f01544",
+    "id": "4dbbde67.b97a08",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -868,22 +867,22 @@
     "wires": []
   },
   {
-    "id": "66f0d9bb.41b82",
+    "id": "40b2c5d6.86f47c",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "x": 700,
     "y": 1460,
     "wires": [
       [
-        "d0fd388.9fe64c8"
+        "be603277.6d17a"
       ]
     ]
   },
   {
-    "id": "d0fd388.9fe64c8",
+    "id": "be603277.6d17a",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -895,27 +894,27 @@
     "wires": []
   },
   {
-    "id": "c491f8ff.828748",
+    "id": "11b05169.19fcff",
     "type": "data-generator",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "dGen",
     "field": "valuesToWrite",
     "fieldType": "msg",
     "syntax": "json",
-    "template": "[{{int 1 65000}}]",
+    "template": "[{{int -10000.44 12000.66}}]",
     "x": 370,
     "y": 1460,
     "wires": [
       [
-        "aa6990bc.664578",
-        "259ee368.f01544"
+        "64dc7f91.fadff",
+        "4dbbde67.b97a08"
       ]
     ]
   },
   {
-    "id": "7c7c1aef.cef0bc",
+    "id": "8f3bfb1f.4e1f48",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "install node-red-node-data-generator",
     "info": "",
     "x": 370,
@@ -923,13 +922,13 @@
     "wires": []
   },
   {
-    "id": "39fc0a13.dea31e",
+    "id": "29f8ef70.a9b9f",
     "type": "OPCUA-IIoT-Read",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "attributeId": "13",
     "maxAge": 1,
     "depth": 1,
-    "connector": "60ab20b8.98b08",
+    "connector": "3c4657c6.2e3418",
     "name": "",
     "justValue": true,
     "showStatusActivities": false,
@@ -939,14 +938,14 @@
     "y": 1400,
     "wires": [
       [
-        "d60a8cec.a5fb38"
+        "f8b72aff.9e9d78"
       ]
     ]
   },
   {
-    "id": "35a8b60c.401852",
+    "id": "e99fec77.bee88",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -958,9 +957,9 @@
     "wires": []
   },
   {
-    "id": "d60a8cec.a5fb38",
+    "id": "f8b72aff.9e9d78",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -968,14 +967,14 @@
     "y": 1400,
     "wires": [
       [
-        "35a8b60c.401852"
+        "e99fec77.bee88"
       ]
     ]
   },
   {
-    "id": "9cce4475.25eff",
+    "id": "c6bf3986.d6dd2",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "event listening",
     "info": "",
     "x": 890,
@@ -983,9 +982,9 @@
     "wires": []
   },
   {
-    "id": "5f486ad2.b55d2c",
+    "id": "4c5fb1e3.97032",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "server",
     "info": "",
     "x": 870,
@@ -993,27 +992,26 @@
     "wires": []
   },
   {
-    "id": "f430e1fe.00626",
+    "id": "457ab003.e24638",
     "type": "OPCUA-IIoT-Browser",
-    "z": "7bf1b5a6.0f9d1c",
-    "connector": "60ab20b8.98b08",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
     "nodeId": "",
     "name": "",
-    "browseAll": false,
     "showStatusActivities": false,
     "showErrors": false,
     "x": 280,
     "y": 1720,
     "wires": [
       [
-        "c751dcaa.7e429"
+        "c16d97a1.a083f8"
       ]
     ]
   },
   {
-    "id": "b0f9f5b6.ecc7c8",
+    "id": "972d92b.1a14df",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "read",
     "payload": "",
     "payloadType": "date",
@@ -1034,27 +1032,27 @@
     "y": 1720,
     "wires": [
       [
-        "f430e1fe.00626"
+        "457ab003.e24638"
       ]
     ]
   },
   {
-    "id": "c751dcaa.7e429",
+    "id": "c16d97a1.a083f8",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "x": 440,
     "y": 1720,
     "wires": [
       [
-        "307c2a84.e3575e"
+        "2c10ef4d.7f3778"
       ]
     ]
   },
   {
-    "id": "307c2a84.e3575e",
+    "id": "2c10ef4d.7f3778",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -1064,9 +1062,9 @@
     "wires": []
   },
   {
-    "id": "6192d6fa.1b393",
+    "id": "3a70568d.f35ab2",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "monitoring",
     "info": "",
     "x": 520,
@@ -1074,9 +1072,9 @@
     "wires": []
   },
   {
-    "id": "c50f7dbf.9a965",
+    "id": "578901d2.87b7c",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "browse and read",
     "info": "",
     "x": 320,
@@ -1084,9 +1082,9 @@
     "wires": []
   },
   {
-    "id": "67cf5e56.ee2198",
+    "id": "cbfdd9fc.6a3fa",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "write and read",
     "info": "",
     "x": 310,
@@ -1094,9 +1092,9 @@
     "wires": []
   },
   {
-    "id": "2e8e96c4.791952",
+    "id": "5e85f055.3e8a68",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "browse",
     "info": "",
     "x": 110,
@@ -1104,13 +1102,13 @@
     "wires": []
   },
   {
-    "id": "36fb9a9b.38ce66",
+    "id": "90ab3f6f.0d073",
     "type": "OPCUA-IIoT-Read",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "attributeId": "13",
     "maxAge": 1,
     "depth": 1,
-    "connector": "60ab20b8.98b08",
+    "connector": "3c4657c6.2e3418",
     "name": "",
     "justValue": false,
     "showStatusActivities": false,
@@ -1120,14 +1118,14 @@
     "y": 1160,
     "wires": [
       [
-        "df476cd.7ed0c1"
+        "d8ce89e.06f59f8"
       ]
     ]
   },
   {
-    "id": "efaa8a68.f2e7e8",
+    "id": "e6252fb8.23b818",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "read",
     "payload": "",
     "payloadType": "date",
@@ -1148,14 +1146,14 @@
     "y": 1160,
     "wires": [
       [
-        "36fb9a9b.38ce66"
+        "90ab3f6f.0d073"
       ]
     ]
   },
   {
-    "id": "df476cd.7ed0c1",
+    "id": "d8ce89e.06f59f8",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -1163,14 +1161,14 @@
     "y": 1160,
     "wires": [
       [
-        "e8e2f365.040fa"
+        "8abb0fc4.5661e8"
       ]
     ]
   },
   {
-    "id": "e8e2f365.040fa",
+    "id": "8abb0fc4.5661e8",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -1182,9 +1180,9 @@
     "wires": []
   },
   {
-    "id": "431fe1d9.ceafa",
+    "id": "4d3fb39a.190ab4",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "read",
     "payload": "",
     "payloadType": "date",
@@ -1205,18 +1203,18 @@
     "y": 1240,
     "wires": [
       [
-        "8ef47db1.96b0c8"
+        "962f0a7e.eb76"
       ]
     ]
   },
   {
-    "id": "8ef47db1.96b0c8",
+    "id": "962f0a7e.eb76",
     "type": "OPCUA-IIoT-Read",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "attributeId": "13",
     "maxAge": 1,
     "depth": 1,
-    "connector": "60ab20b8.98b08",
+    "connector": "3c4657c6.2e3418",
     "name": "Read just value",
     "justValue": true,
     "showStatusActivities": false,
@@ -1226,14 +1224,14 @@
     "y": 1240,
     "wires": [
       [
-        "4581b6cc.e4b5c8"
+        "75e569b1.b62f08"
       ]
     ]
   },
   {
-    "id": "4581b6cc.e4b5c8",
+    "id": "75e569b1.b62f08",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -1241,14 +1239,14 @@
     "y": 1240,
     "wires": [
       [
-        "a9ada474.43e538"
+        "a28db8d0.a69668"
       ]
     ]
   },
   {
-    "id": "a9ada474.43e538",
+    "id": "a28db8d0.a69668",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -1260,9 +1258,9 @@
     "wires": []
   },
   {
-    "id": "377ee628.c27dba",
+    "id": "10a3e85a.f8962",
     "type": "comment",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "read",
     "info": "",
     "x": 810,
@@ -1270,27 +1268,26 @@
     "wires": []
   },
   {
-    "id": "32d6c55f.70deaa",
+    "id": "96fdcd7.31302b",
     "type": "OPCUA-IIoT-Browser",
-    "z": "7bf1b5a6.0f9d1c",
-    "connector": "60ab20b8.98b08",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
     "nodeId": "ns=4;i=1234",
     "name": "Bianco Royal",
-    "browseAll": false,
     "showStatusActivities": false,
     "showErrors": false,
     "x": 290,
     "y": 1800,
     "wires": [
       [
-        "7a7026cc.fa5608"
+        "d0079574.4e29e8"
       ]
     ]
   },
   {
-    "id": "60c1bac8.319c8c",
+    "id": "ee2ee72a.48c578",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "injectType": "read",
     "payload": "",
     "payloadType": "date",
@@ -1305,27 +1302,27 @@
     "y": 1800,
     "wires": [
       [
-        "32d6c55f.70deaa"
+        "96fdcd7.31302b"
       ]
     ]
   },
   {
-    "id": "7a7026cc.fa5608",
+    "id": "d0079574.4e29e8",
     "type": "OPCUA-IIoT-Response",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "x": 440,
     "y": 1800,
     "wires": [
       [
-        "ab3ed784.7d732"
+        "70bd2061.afce58"
       ]
     ]
   },
   {
-    "id": "ab3ed784.7d732",
+    "id": "70bd2061.afce58",
     "type": "debug",
-    "z": "7bf1b5a6.0f9d1c",
+    "z": "c7d28ca1.795bb8",
     "name": "",
     "active": false,
     "console": "false",
@@ -1335,9 +1332,199 @@
     "wires": []
   },
   {
-    "id": "60ab20b8.98b08",
+    "id": "744ce49c.699994",
+    "type": "OPCUA-IIoT-Method-Caller",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
+    "objectId": "ns=4;i=1234",
+    "methodId": "ns=4;i=12345",
+    "methodType": "basic",
+    "value": "",
+    "justValue": true,
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": true,
+    "inputArguments": [
+      {
+        "name": "barks",
+        "dataType": "UInt32",
+        "value": "3"
+      },
+      {
+        "name": "volume",
+        "dataType": "UInt32",
+        "value": "6"
+      }
+    ],
+    "x": 300,
+    "y": 1900,
+    "wires": [
+      [
+        "9e739d00.c0dea",
+        "5ed89987.56a8c"
+      ]
+    ]
+  },
+  {
+    "id": "9e739d00.c0dea",
+    "type": "debug",
+    "z": "c7d28ca1.795bb8",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "true",
+    "x": 470,
+    "y": 1860,
+    "wires": []
+  },
+  {
+    "id": "5ed89987.56a8c",
+    "type": "OPCUA-IIoT-Response",
+    "z": "c7d28ca1.795bb8",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "x": 480,
+    "y": 1900,
+    "wires": [
+      [
+        "40553624.d22f08"
+      ]
+    ]
+  },
+  {
+    "id": "40553624.d22f08",
+    "type": "debug",
+    "z": "c7d28ca1.795bb8",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "true",
+    "x": 630,
+    "y": 1900,
+    "wires": []
+  },
+  {
+    "id": "9ad9d069.b990e8",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "c7d28ca1.795bb8",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 140,
+    "y": 1900,
+    "wires": [
+      [
+        "744ce49c.699994"
+      ]
+    ]
+  },
+  {
+    "id": "2892c13d.d61a96",
+    "type": "inject",
+    "z": "c7d28ca1.795bb8",
+    "name": "",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "x": 140,
+    "y": 2000,
+    "wires": [
+      [
+        "e054b44e.f822c"
+      ]
+    ]
+  },
+  {
+    "id": "e054b44e.f822c",
+    "type": "function",
+    "z": "c7d28ca1.795bb8",
+    "name": "call",
+    "func": "msg.payload = {\n    objectId: 'ns=4;i=1234',\n    methodId: 'ns=4;i=12345',\n    inputArguments: [\n        {name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    methodType: 'basic'\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 270,
+    "y": 2000,
+    "wires": [
+      [
+        "8e68c09e.997788"
+      ]
+    ]
+  },
+  {
+    "id": "8e68c09e.997788",
+    "type": "OPCUA-IIoT-Method-Caller",
+    "z": "c7d28ca1.795bb8",
+    "connector": "3c4657c6.2e3418",
+    "objectId": "ns=4;i=1234",
+    "methodId": "ns=4;i=12345",
+    "methodType": "basic",
+    "value": "",
+    "justValue": false,
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": true,
+    "inputArguments": [
+      {
+        "name": "barks",
+        "dataType": "UInt32",
+        "value": "3"
+      },
+      {
+        "name": "volume",
+        "dataType": "UInt32",
+        "value": "6"
+      }
+    ],
+    "x": 420,
+    "y": 2000,
+    "wires": [
+      [
+        "61307148.c82498"
+      ]
+    ]
+  },
+  {
+    "id": "61307148.c82498",
+    "type": "OPCUA-IIoT-Response",
+    "z": "c7d28ca1.795bb8",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "x": 580,
+    "y": 2000,
+    "wires": [
+      [
+        "70779c2e.5d94ac"
+      ]
+    ]
+  },
+  {
+    "id": "70779c2e.5d94ac",
+    "type": "debug",
+    "z": "c7d28ca1.795bb8",
+    "name": "",
+    "active": false,
+    "console": "false",
+    "complete": "true",
+    "x": 730,
+    "y": 2000,
+    "wires": []
+  },
+  {
+    "id": "3c4657c6.2e3418",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "c7d28ca1.795bb8",
     "discoveryUrl": "opc.tcp://localhost:55388/",
     "endpoint": "opc.tcp://innoreactor.local:55388/UA/NodeREDIIoTServer",
     "keepSessionAlive": true,
