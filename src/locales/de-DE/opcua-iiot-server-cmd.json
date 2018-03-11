@@ -1,7 +1,7 @@
 {
   "opcua-iiot-contrib": {
     "label": {
-      "connector": "Verbindung",
+      "commandtype": "Kommandotype",
       "showActivities": "Zeige Aktivitäten",
       "showErrors": "Zeige Fehler"
     }

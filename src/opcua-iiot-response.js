@@ -92,7 +92,7 @@ module.exports = function (RED) {
     }
 
     node.analyzeListenerResults = function (msg) {
-      switch (msg.readtype) {
+      switch (msg.injectType) {
         case 'subscribe':
           node.analyzeSubscribeResultStatus(msg)
           break
@@ -199,6 +199,8 @@ module.exports = function (RED) {
                 entryStatus[2] += 1
               }
           }
+        } else {
+          entryStatus[2] += 1
         }
       }
 
@@ -231,8 +233,13 @@ module.exports = function (RED) {
                 entryStatus[2] += 1
               }
           }
+        } else {
+          entryStatus[2] += 1
         }
+      } else {
+        entryStatus[2] += 1
       }
+
       return entryStatus
     }
 
@@ -260,8 +267,12 @@ module.exports = function (RED) {
                   entryStatus[2] += 1
                 }
             }
+          } else {
+            entryStatus[2] += 1
           }
         }
+      } else {
+        entryStatus[2] += 1
       }
 
       return entryStatus

@@ -1,7 +1,9 @@
 {
   "opcua-iiot-contrib": {
     "label": {
-      "connector": "Verbindung",
+      "nodeId": "Node-Id",
+      "datatype": "Datentyp",
+      "value": "Wert",
       "showActivities": "Zeige Aktivitäten",
       "showErrors": "Zeige Fehler"
     }

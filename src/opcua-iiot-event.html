@@ -117,19 +117,14 @@
     <h2>OPC UA IIoT Event</h2>
 
     <p>
-        The Event node is to set up an event Listener with the right options.
+        The Event node is to set up an event Listener with parameters.
         It is to trigger by an Inject of Node-RED or by the OPC UA IIoT Inject.
         It could also trigger with incoming events from other nodes.
     </p>
 
     <h3>Input</h3>
 
-    <div>
-        <strong>Event message:</strong>
-        <ul>
-
-        </ul>
-    </div>
+    <p>msg with addressSpaceItems</p>
 
     <h3>Output</h3>
     <div>
@@ -140,7 +135,7 @@
             <ul>
                 <li>eventType (ObjectTypeId)
                 <li>eventFilter (condition or event)
-                <li>eventFields (bytestring)
+                <li>eventFields (ByteString)
                 <li>queueSize (number)
                 <li>interval (number msec.)
             <ul>

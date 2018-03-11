@@ -1,0 +1,12 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "eventType": "Event Typ",
+      "queueSize": "Queue Umfang",
+      "showActivities": "Zeige Aktivitäten",
+      "showErrors": "Zeige Fehler",
+      "parseStrings": "Parse Daten",
+      "lookupUseHint": "Die Eventauswahl funktioniert via Auswahl und erneutem Klick auf Suche."
+    }
+  }
+}

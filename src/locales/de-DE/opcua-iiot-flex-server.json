@@ -1,0 +1,23 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "showActivities": "Zeige Aktivitäten",
+      "showErrors": "Zeige Fehler",
+      "stateLogEnabled": "Log Aktiv",
+      "addButton": "Neu",
+      "removeButton": "Entfernen",
+      "maxConnectionsPerEndpoint": "Max Verbindungen/Endpoint",
+      "alternateHostname": "Alternativer Hostname",
+      "allowAnonymous": "Erlaube Anonymous",
+      "publicCertificateFile": "Öffentlich",
+      "privateCertificateFile": "Privat",
+      "certificateFiles": "Zertifikatdateien",
+      "users": "Benutzer"
+    },
+    "tabs-label": {
+      "users": "Benutzer & Sets",
+      "settings": "Einstellungen",
+      "security": "Sicherheit"
+    }
+  }
+}

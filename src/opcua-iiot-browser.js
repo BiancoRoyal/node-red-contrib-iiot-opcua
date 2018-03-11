@@ -23,6 +23,9 @@ module.exports = function (RED) {
     this.nodeId = config.nodeId
     this.name = config.name
     // this.browseAll = config.browseAll
+    this.justValue = config.justValue
+    this.sendNodesToRead = config.sendNodesToRead
+    this.sendNodesToListener = config.sendNodesToListener
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -166,19 +169,25 @@ module.exports = function (RED) {
       msg.nodetype = 'browse'
 
       msg.payload = {
-        browserItems: browserEntries,
-        browserResultCount: browserEntries.length,
-        browseTopic: node.browseTopic,
-        endpoint: node.connector.endpoint,
-        session: node.opcuaSession.name || 'unknown'
+        browserItems: browserEntries
       }
 
-      if (nodesToRead) {
+      if (node.browseTopic && node.browseTopic !== '') {
+        msg.payload.browseTopic = node.browseTopic
+      }
+
+      if (!node.justValue) {
+        msg.payload.browserItemsCount = browserEntries.length
+        msg.payload.endpoint = node.connector.endpoint
+        msg.payload.session = node.opcuaSession.name || 'none'
+      }
+
+      if (node.sendNodesToRead && nodesToRead) {
         msg.nodesToRead = nodesToRead
         msg.nodesToReadCount = nodesToRead.length
       }
 
-      if (addressItemsToRead) {
+      if (node.sendNodesToListener && addressItemsToRead) {
         msg.addressItemsToRead = addressItemsToRead
         msg.addressItemsToReadCount = addressItemsToRead.length
       }

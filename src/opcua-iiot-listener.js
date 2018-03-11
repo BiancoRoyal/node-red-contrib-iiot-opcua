@@ -196,6 +196,8 @@ module.exports = function (RED) {
         }
 
         if (err.message && err.message.includes('BadSession')) {
+          node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
+          node.monitoredItems.clear()
           node.connector.resetBadSession()
         }
       })
@@ -293,6 +295,8 @@ module.exports = function (RED) {
       coreListener.internalDebugLog(err.message)
 
       if (err && err.message && err.message.includes('BadSession')) {
+        node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
+        node.monitoredItems.clear()
         node.connector.resetBadSession()
       }
     }
@@ -418,7 +422,7 @@ module.exports = function (RED) {
     node.on('close', function () {
       let monitoredItem = null
       for (monitoredItem of node.monitoredItems) {
-        if (monitoredItem.terminate) {
+        if (node.opcuaSession && node.opcuaSession.sessionId !== 'terminated' && monitoredItem.terminate) {
           monitoredItem.terminate(function (err) {
             node.monitoredItemTerminated({payload: 'close listener'}, monitoredItem, err)
           })

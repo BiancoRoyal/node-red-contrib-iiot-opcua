@@ -155,9 +155,9 @@
                 <input type="checkbox" id="node-config-input-autoSelectRightEndpoint" style="max-width:30px">
             </div>
             <div class="form-row">
-                 <label for="node-config-input-keepSessionAlive"><i class="fa fa-heart-o"></i>
+                 <label style="min-width:160px" for="node-config-input-keepSessionAlive"><i class="fa fa-heart-o"></i>
                  <span data-i18n="opcua-iiot-contrib.label.keepSessionAlive"></span></label>
-                <input type="checkbox" id="node-config-input-keepSessionAlive">
+                <input type="checkbox" id="node-config-input-keepSessionAlive" style="max-width:30px">
             </div>
             <div class="form-row">
                 <label for="node-config-input-name"><i class="icon-tag"></i>
@@ -248,7 +248,7 @@
     <h2>OPC UA IIoT Connector</h2>
 
     <p>The Connector is a pure configuration node and starts connecting 
-    to the OPC UA server instantly after 'Deploy' or start/restart.
+    to the OPC UA server with an OPC UA client instantly after 'Deploy' or start/restart.
     Please, keep in mind that the Connector will work if it is unused
     and open a connection to the endpoint, too.</p>
 
@@ -264,14 +264,26 @@
 
     <h3>Configuration</h3>
 
+    <strong>Dicovery (optional lookup)</strong>
+    <p>Some servers providing a discovery port, which is different from the endpoint port.
+    To discover that port set it to opc.tcp://myopcuaserver.local:4840/
+    </p>
+
+    <p><a href="https://opcfoundation.org/wp-content/uploads/2014/08/12_UA_Discovery.pdf" target="_blank">OPC UA Discovery and Endpoints</a></p>
+
+    <p>Discovery is just to provide some lookup. The connector uses just the endpoint to open the connection to server.</p>
+
     <strong>Endpoint</strong>
-    <p>The endpoint address (URI) to the OPC UA server like opc.tcp://localhost:55388/</p>
+    <p>The endpoint address (URI) to the OPC UA server like opc.tcp://localhost:55388/ or opc.tcp://mypcname.local:55388/</p>
     <p>The endpoint must exist as named if that option is activated.</p>
+
+    <p>Auto selecting for the right endpoint is optional and tries to find the correct enpoint to your security settings.</p>
 
     <strong>Keep Session Alive</strong>
     <p>If the sessions should stay alive, then set that option to checked.
-    Otherwise, it will be closed after for example 60 sec. in default mode.
-    With the keep alive the session will survive.</p>
+    Otherwise, it will close at session timeout and the first request will restart the session,
+    but you will not succeed with the first request.
+    With the keep alive the session will survive and every request succeeds.</p>
 
     <h3>Security</h3>
 
@@ -280,26 +292,35 @@
 
     <div>
         <ul style="margin-left:80px">
-            <li>None*
+            <li>None
             <li>Basic128
-            <li>Basic128Rsa15*
+            <li>Basic128Rsa15
             <li>Basic192
             <li>Basic192Rsa15
-            <li>Basic256*
+            <li>Basic256
             <li>Basic256Rsa15
             <li>Basic256Sha256
         </ul>
-        <p>* supported by node-opcua for now</p>
     </div>
 
     <div>
         <ul style="margin-left:80px">
-            <li>None*
+            <li>None
             <li>Sign
-            <li>Sign&Encrypt*
+            <li>Sign&Encrypt
         </ul>
-        <p>* supported by node-opcua for now</p>
     </div>
+
+    <h3>Certificates</h3>
+    <p>Use the node-opcua-pki package or other tools to build your individual key pair and set the path to file here.
+    Otherwise you get pre installed keys from node-opcua for secured communication.
+    </p>
+
+    <p>With None/NONE mode the keys are not in use.</p>
+
+    <h3>User Login</h3>
+
+    <p>The user login is for user authentication to the server. It is stored with Node-RED credentials best practice.</p>
 
     <strong>Name</strong>
     <p>Name in the selection of the endpoint configuration.</p>

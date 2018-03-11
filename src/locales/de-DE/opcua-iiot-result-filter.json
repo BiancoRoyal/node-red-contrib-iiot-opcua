@@ -1,0 +1,23 @@
+{
+  "opcua-iiot-contrib": {
+    "tabs-label":{
+      "settings": "Einstellungen",
+      "convert": "Umwandlung"
+    },
+    "label": {
+      "datatype": "Datentyp",
+      "withPrecision": "Max Stellen",
+      "precision": "Stellen",
+      "fixedValue": "Nachkommastellen",
+      "fixPoint": "Anzahl",
+      "entry": "Array Eintrag",
+      "justValue": "Sende nur Werte",
+      "withValueCheck": "Wertprüfung",
+      "minvalue": "Min Wert",
+      "maxvalue": "Max Wert",
+      "defaultvalue": "Default Wert",
+      "showActivities": "Zeige Aktivitäten",
+      "showErrors": "Zeige Fehler"
+    }
+  }
+}

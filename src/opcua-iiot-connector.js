@@ -49,6 +49,7 @@ module.exports = function (RED) {
     node.discoveryServer = null
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
+    node.sessionNotInRenewMode = true
 
     let nodeOPCUAClientPath = coreConnector.core.getNodeOPCUAClientPath()
 
@@ -221,7 +222,16 @@ module.exports = function (RED) {
     }
 
     node.resetBadSession = function () {
-      coreConnector.internalDebugLog('Reset Bad Session')
+      coreConnector.internalDebugLog('Reset Bad Session Id: ' + node.opcuaSession.sessionId)
+      if (node.opcuaSession && node.sessionNotInRenewMode && node.sessionConnectRetries < MAX_SESSION_RETRIES) {
+        node.sessionConnectRetries += 1
+        node.setSessionToRenewMode()
+        setTimeout(node.startSession(SESSION_TIMEOUT), CONNECTION_START_DELAY)
+      } else {
+        if (node.sessionConnectRetries === MAX_SESSION_RETRIES) {
+          node.sessionConnectRetries = 0 // reset by new request
+        }
+      }
     }
 
     node.closeSession = function () {
@@ -231,19 +241,29 @@ module.exports = function (RED) {
 
           coreConnector.closeSession(node.opcuaSession).then(function (session) {
             coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
-            node.opcuaSession = null
+            node.resetSessionRenewMode()
           }).catch(function (err) {
             coreConnector.internalDebugLog('Session Close Error ' + err.message)
-            node.opcuaSession = null
+            node.resetSessionRenewMode()
           })
         } else {
           coreConnector.internalDebugLog('No Session To Close ' + node.endpoint)
-          node.opcuaSession = null
+          node.resetSessionRenewMode()
         }
       } catch (err) {
         coreConnector.internalDebugLog('Session Close Error ' + err.message)
-        node.opcuaSession = null
+        node.resetSessionRenewMode()
       }
+    }
+
+    node.setSessionToRenewMode = function () {
+      node.opcuaSession = null
+      node.sessionNotInRenewMode = false
+    }
+
+    node.resetSessionRenewMode = function () {
+      node.opcuaSession = null
+      node.sessionNotInRenewMode = true
     }
 
     node.handleError = function (err) {
@@ -262,11 +282,8 @@ module.exports = function (RED) {
       } else {
         coreConnector.internalDebugLog('Session Error on ' + node.endpoint)
       }
-      node.opcuaSession = null
-      node.sessionConnectRetries += 1
-      if (node.sessionConnectRetries < MAX_SESSION_RETRIES) {
-        setTimeout(node.startSession(SESSION_TIMEOUT), CONNECTION_START_DELAY)
-      }
+      node.resetSessionRenewMode()
+      node.resetBadSession()
     }
 
     node.handleSessionClose = function (err) {
@@ -275,8 +292,8 @@ module.exports = function (RED) {
       } else {
         coreConnector.internalDebugLog('Closed Session')
       }
-      node.opcuaSession = null
-      setTimeout(node.startSession(SESSION_TIMEOUT), CONNECTION_START_DELAY)
+      node.resetSessionRenewMode()
+      node.resetBadSession()
     }
 
     try {

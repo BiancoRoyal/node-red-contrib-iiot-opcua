@@ -1,0 +1,17 @@
+{
+  "opcua-iiot-contrib": {
+    "tabs-label":{
+      "settings": "Einstellungen",
+      "argument": "Argumente"
+    },
+    "label": {
+      "connector": "Verbindung",
+      "methodType": "Methodentyp",
+      "value": "Wert",
+      "showActivities": "Zeige Aktivitäten",
+      "showErrors": "Zeige Fehler",
+      "addButton": "Neu",
+      "removeButton": "Entfernen"
+    }
+  }
+}
