@@ -3,6 +3,7 @@
 ![ES_Source_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-9.x-green.png)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/da70f651451445c58d5adaeebd0ad595)](https://www.codacy.com/app/klaus/node-red-contrib-iiot-opcua?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=biancode/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
@@ -92,14 +93,11 @@ to start playing with OPC UA method call, read and write operations.
 ### Known Issues and TODO's
 
 Ideas
-* converting in Result Filter is not finished yet
 * dynamic methods
 * dynamic IP for connector
-* individual import of XML to get more types and objects
 
 Errors
 * more Bad status situations handling
-* Publish Engine Error
 * API changes to 0.2.+ bring some errors - Please, test and report issues at GitHub!
 
 
