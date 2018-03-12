@@ -23,7 +23,9 @@
       "certificateFiles": "Certificate Files",
       "users": "Users",
       "xmlsets": "XML-Sets",
-      "serverDiscovery": "Discovery"
+      "serverDiscovery": "Discovery",
+      "maxNodesPerRead": "Max per Read",
+      "maxNodesPerBrowse": "Max per Browse"
     },
     "tabs-label": {
       "users": "Users & Sets",

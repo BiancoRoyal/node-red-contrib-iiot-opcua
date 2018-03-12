@@ -46,6 +46,9 @@ module.exports = function (RED) {
     this.asoDemo = config.asoDemo
     // discovery
     this.disableDiscovery = !config.serverDiscovery
+    // limits
+    this.maxNodesPerRead = config.maxNodesPerRead || 1000
+    this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
 
     let node = this
     node.initialized = false
@@ -130,8 +133,8 @@ module.exports = function (RED) {
         },
         serverCapabilities: {
           operationLimits: {
-            maxNodesPerRead: 1000,
-            maxNodesPerBrowse: 2000
+            maxNodesPerRead: node.maxNodesPerRead,
+            maxNodesPerBrowse: node.maxNodesPerBrowse
           }
         },
         serverInfo: {
@@ -171,70 +174,33 @@ module.exports = function (RED) {
 
     node.postInitialize = function () {
       if (node.opcuaServer) {
-        coreServer.constructAddressSpace(node.opcuaServer, node.asoDemo)
-
-        node.opcuaServer.start(function (err) {
+        coreServer.constructAddressSpace(node.opcuaServer, node.asoDemo).then(function (err) {
           if (err) {
-            coreServer.internalDebugLog('Start Error '.red + err)
+            coreServer.internalDebugLog(err)
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
           } else {
-            node.initialized = true
-
-            node.opcuaServer.endpoints.forEach(function (endpoint) {
-              endpoint.endpointDescriptions().forEach(function (endpointDescription) {
-                coreServer.internalDebugLog('Server endpointUrl: ' +
-                  endpointDescription.endpointUrl + ' securityMode: ' +
-                  endpointDescription.securityMode.toString() +
-                  ' securityPolicyUri: ' + endpointDescription.securityPolicyUri.toString())
-              })
-            })
-
-            let endpointUrl = node.opcuaServer.endpoints[0].endpointDescriptions()[0].endpointUrl
-            coreServer.internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
-
+            coreServer.start(node.opcuaServer, node)
             node.setNodeStatusTo('active')
             node.registerDiscovery()
-
-            coreServer.detailDebugLog(JSON.stringify(node.opcuaServer.serverInfo))
-
-            node.opcuaServer.on('newChannel', function (channel) {
-              coreServer.internalDebugLog('Client connected with address = ' +
-                channel.remoteAddress + ' port = ' + channel.remotePort
-              )
-            })
-
-            node.opcuaServer.on('closeChannel', function (channel) {
-              coreServer.internalDebugLog('Client disconnected with address = ' +
-                channel.remoteAddress + ' port = ' + channel.remotePort
-              )
-            })
-
-            node.opcuaServer.on('create_session', function (session) {
-              coreServer.internalDebugLog('############## SESSION CREATED ##############')
-              coreServer.detailDebugLog('Client application URI:' + session.clientDescription.applicationUri)
-              coreServer.detailDebugLog('Client product URI:' + session.clientDescription.productUri)
-              coreServer.detailDebugLog('Client application name:' + session.clientDescription.applicationName.toString())
-              coreServer.detailDebugLog('Client application type:' + session.clientDescription.applicationType.toString())
-              coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
-              coreServer.internalDebugLog('Session timeout:' + session.sessionTimeout)
-              coreServer.internalDebugLog('Session id:' + session.sessionId)
-            })
-
-            node.opcuaServer.on('session_closed', function (session, reason) {
-              coreServer.internalDebugLog('############## SESSION CLOSED ##############')
-              coreServer.internalDebugLog('reason:' + reason)
-              coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
-            })
-
-            coreServer.internalDebugLog('Server Initialized')
-            coreServer.detailDebugLog('serverInfo after start:' + JSON.stringify(node.opcuaServer.serverInfo))
+          }
+        }).catch(function (err) {
+          coreServer.internalDebugLog(err)
+          if (node.showErrors) {
+            node.error(err, {payload: ''})
           }
         })
       } else {
         node.initialized = false
-        coreServer.internalDebugLog('Server Is Not Valid'.red)
+        coreServer.internalDebugLog('OPC UA Server Is Not Ready'.red)
+        if (node.showErrors) {
+          node.error(new Error('OPC UA Server Is Not Ready'), {payload: ''})
+        }
       }
     }
 
+    // TODO: check if that is correct for multiple servers with different IP's and endpoints
     node.registerDiscovery = function () {
       let hostname = os.hostname()
       let discoveryEndpointUrl

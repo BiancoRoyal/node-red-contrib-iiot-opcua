@@ -8,6 +8,7 @@ install:
   - npm install -g gulp-cli
 script:
   - npm test
+  - npm run coverage
   - gulp publish
 cache:
   directories:

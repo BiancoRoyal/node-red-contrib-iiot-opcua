@@ -65,8 +65,8 @@
     "node": ">=9.4.0"
   },
   "scripts": {
-    "test": "standard --fix && mocha test/* --reporter dot",
-    "coverage": "istanbul cover src/**/*.js",
+    "test": "standard --fix && mocha test/**/*_test.js --reporter dot",
+    "coverage": "istanbul cover _mocha -- --recursive",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "standard --fix && npm run build && npm test",
     "ci-publish": "ci-publish",

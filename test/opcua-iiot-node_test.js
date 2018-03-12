@@ -13,8 +13,8 @@
 var assert = require('chai').assert
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
-var inputNode = require('../../src/opcua-iiot-node')
-var helper = require('../helper.js')
+var inputNode = require('../src/opcua-iiot-node')
+var helper = require('./helper.js')
 
 var testFlowPayload = [
   {

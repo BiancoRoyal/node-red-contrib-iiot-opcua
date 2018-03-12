@@ -1,9 +1,14 @@
 verbose: false
 instrumentation:
+    globals: ['expect']
     root: ./src
     default-excludes: true
     excludes: ['src/public']
     include-all-sources: true
+    include-pid: false
+    es-modules: true
+    ignoreLeaks: false
+    ui: bdd
     embed-source: false
     variable: __coverage__
     compact: true
@@ -12,7 +17,7 @@ instrumentation:
     save-baseline: false
     baseline-file: ./coverage/coverage-baseline.json
 reporting:
-    print: summary
+    print: both
     reports:
         - lcov
         - html
@@ -27,3 +32,17 @@ reporting:
 hooks:
     hook-run-in-context: false
     post-require-hook: null
+    handle-sigint: false
+check:
+    global:
+        statements: 0
+        lines: 0
+        branches: 0
+        functions: 0
+        excludes: []
+    each:
+        statements: 0
+        lines: 0
+        branches: 0
+        functions: 0
+        excludes: []
