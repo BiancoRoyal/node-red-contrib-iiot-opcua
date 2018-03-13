@@ -38,7 +38,7 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
     
-![Flow Example](images/opcua-iiot-v109s2.png)
+![Flow Example](images/listener-example-subv220.png)
   
 ## Contributing
 
@@ -78,15 +78,19 @@ With the flex server you could create your own information model with the OPC UA
 The server node contains demo objects and variables 
 to start playing with OPC UA method call, read and write operations.
 
-![Flow Example](images/opcua-iiot-v109.png)
+![Flow Example](images/method-caller-examplev220.png)
 
 **... secure reading from OPC UA servers with your own key pairs ...**
 
-![Read Example](images/opcua-iiot-read-example.png)
+![Read Example](images/read-examplev220.png)
+
+**... and secure writing to OPC UA servers ...**
+
+![Write Example](images/write-examplev220.png)
 
 **... create your own variables and objects from events ...**
 
-![ASO Example](images/opcua-iiot-aso-example.png)
+![ASO Example](images/server-aso-type-examplev220.png)
 
 ## Package Information
 
