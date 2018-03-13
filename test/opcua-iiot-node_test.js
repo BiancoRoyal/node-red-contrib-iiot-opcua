@@ -48,7 +48,7 @@ describe('OPC UA Node node Testing', function () {
     helper.unload()
   })
 
-  describe('Node', function () {
+  describe('Node node', function () {
     it('node should be loaded', function (done) {
       helper.load(
         [inputNode],
