@@ -77,7 +77,6 @@ module.exports = function (RED) {
           return
         }
       } else {
-        // just if not multiple request!
         if (msg.topic !== node.nodeId) { // TODO: that is very old and should be deleted
           return
         }
@@ -85,8 +84,6 @@ module.exports = function (RED) {
 
       msg.filtertype = 'filter'
       let result = msg.payload
-
-      node.status({fill: 'green', shape: 'dot', text: 'active'})
 
       switch (msg.nodetype) {
         case 'read':
@@ -124,7 +121,6 @@ module.exports = function (RED) {
       }
 
       if (result === undefined || result === null) {
-        coreFilter.internalDebugLog('converted result null or undefined' + JSON.stringify(msg))
         if (node.showErrors) {
           node.error(new Error('converted result null or undefined'), msg)
         }
@@ -162,40 +158,15 @@ module.exports = function (RED) {
     node.filterByReadType = function (msg) {
       let result = null
 
-      let minArraySize = node.entry
-      coreFilter.internalDebugLog('filter by read type ' + msg.readtype)
-
-      switch (msg.readtype) {
-        case 'Meta':
-          result = msg.payload // TODO: build an array structure for output
-          break
-        case 'read':
-          if (msg.multipleRequest && msg.payload.length >= minArraySize) {
-            result = node.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
-          } else {
-            result = node.extractValueFromOPCUAStructure(msg)
-          }
-          break
-        case 'VariableValue':
-          if (msg.multipleRequest && msg.payload.length >= minArraySize) {
-            result = node.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
-          } else {
-            result = node.extractValueFromOPCUAStructure(msg)
-          }
-          break
-        case 'AllAttributes':
-          result = msg.payload // TODO: build an array structure for output
-          break
-        default:
-          result = node.extractValueFromOPCUAStructure(msg)
-          break
+      if (msg.payload.length >= node.entry) {
+        result = node.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
+      } else {
+        result = node.extractValueFromOPCUAStructure(msg)
       }
 
       if (result.hasOwnProperty('value')) {
         result = result.value
       }
-
-      coreFilter.internalDebugLog('filter by read type result ' + JSON.stringify(result))
 
       return result
     }
@@ -273,6 +244,8 @@ module.exports = function (RED) {
       coreFilter.internalDebugLog('data type convert for ' + node.nodeId)
       return coreFilter.core.convertDataValueByDataType({value: result}, node.datatype)
     }
+
+    node.status({fill: 'green', shape: 'dot', text: 'active'})
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Result-Filter', OPCUAIIoTResultFilter)
