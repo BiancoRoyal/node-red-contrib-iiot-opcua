@@ -20,12 +20,11 @@ module.exports = function (RED) {
 
   function OPCUAIIoTEvent (config) {
     RED.nodes.createNode(this, config)
-    this.eventRoot = config.eventRoot
     this.eventType = config.eventType
+    this.eventTypeLabel = config.eventTypeLabel
     this.queueSize = config.queueSize
     this.usingListener = config.usingListener
     this.name = config.name
-    this.parseStrings = config.parseStrings
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
