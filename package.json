@@ -58,7 +58,8 @@
       "OPCUA-IIoT-Server-ASO": "opcuaIIoT/opcua-iiot-server-aso.js",
       "OPCUA-IIoT-Server-Command": "opcuaIIoT/opcua-iiot-server-cmd.js",
       "OPCUA-IIoT-Result-Filter": "opcuaIIoT/opcua-iiot-result-filter.js",
-      "OPCUA-IIoT-Method-Caller": "opcuaIIoT/opcua-iiot-method-caller.js"
+      "OPCUA-IIoT-Method-Caller": "opcuaIIoT/opcua-iiot-method-caller.js",
+      "OPCUA-IIoT-Discovery": "opcuaIIoT/opcua-iiot-discovery.js"
     }
   },
   "engines": {
