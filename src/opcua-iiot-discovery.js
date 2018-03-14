@@ -15,23 +15,40 @@
  */
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
-  let core = require('./core/opcua-iiot-core')
-  let _ = require('underscore')
+  let coreDiscovery = require('./core/opcua-iiot-core-discovery')
 
   function OPCUAIIoTDiscovery (config) {
     RED.nodes.createNode(this, config)
     this.name = config.name
 
+    let discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({})
     let node = this
 
-    let discoveryServer = new core.nodeOPCUA.OPCUADiscoveryServer({})
-    discoveryServer.start(function (server) {
-      node.discoveryServer = server
-      core.internalDebugLog('discovery server started')
+    node.status({fill: 'blue', shape: 'ring', text: 'new'})
+
+    discoveryServer.start(function () {
+      coreDiscovery.internalDebugLog('discovery server started')
       node.status({fill: 'green', shape: 'dot', text: 'active'})
     })
 
-    node.status({fill: 'blue', shape: 'ring', text: 'new'})
+    node.on('input', function (msg) {
+      if (discoveryServer !== null) {
+        msg.payload = {
+          discoveryUrls: discoveryServer.getDiscoveryUrls() || [],
+          endpoints: discoveryServer.endpoints || []
+        }
+      }
+      node.send(msg)
+    })
+
+    node.on('close', function (done) {
+      if (discoveryServer !== null) {
+        discoveryServer.shutdown(1, function () {
+          coreDiscovery.internalDebugLog('shutdown')
+          discoveryServer = null
+        })
+      }
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Discovery', OPCUAIIoTDiscovery)
