@@ -15,7 +15,6 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let core = require('./core/opcua-iiot-core')
-  let _ = require('underscore')
 
   function OPCUAIIoTASO (config) {
     RED.nodes.createNode(this, config)

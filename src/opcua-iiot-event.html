@@ -40,7 +40,7 @@
 
       eventTypeLookupField.click(function () {
         eventTypeLookupField.addClass('disabled')
-        $.getJSON('/opcuaIIoT/list/EvenTypesIds', function (data) {
+        $.getJSON('/opcuaIIoT/plain/EvenTypesIds', function (data) {
           eventTypeLookupField.removeClass('disabled')
           node.lookupItems = []
 
