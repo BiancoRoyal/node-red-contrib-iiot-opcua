@@ -18,7 +18,6 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreInject = require('./core/opcua-iiot-core-inject')
   let cron = require('cron')
-  let _ = require('underscore')
 
   function OPCUAIIoTInject (config) {
     RED.nodes.createNode(this, config)
@@ -177,9 +176,5 @@ module.exports = function (RED) {
     } else {
       res.sendStatus(404)
     }
-  })
-
-  RED.httpAdmin.get('/opcuaIIoT/data/types', RED.auth.needsPermission('opcua.datatypes'), function (req, res) {
-    res.json(_.toArray(_.invert(require('node-opcua').DataTypeIds)))
   })
 }

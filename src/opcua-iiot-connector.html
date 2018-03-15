@@ -82,15 +82,15 @@
         this.error(err);
       }
 
-      let endpointsLookupField = $("#node-config-lookup-endpoint")
+      let endpointsLookupButton = $("#node-config-lookup-endpoint")
       let endpointField = $("#node-config-input-endpoint")
       let securityPolicyField = $("#node-config-input-securityPolicy")
       let securityModeField = $("#node-config-input-securityMode")
 
-      endpointsLookupField.click(function () {
-        endpointsLookupField.addClass('disabled')
+      endpointsLookupButton.click(function () {
+        endpointsLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/client/endpoints/' + node.id, function (data) {
-          endpointsLookupField.removeClass('disabled')
+          endpointsLookupButton.removeClass('disabled')
           node.lookupItems = []
           let security = null
           $.each(data, function (i, entry) {

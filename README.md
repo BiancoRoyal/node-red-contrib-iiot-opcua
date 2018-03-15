@@ -3,6 +3,7 @@
 ![ES_Source_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-9.x-green.png)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/da70f651451445c58d5adaeebd0ad595)](https://www.codacy.com/app/klaus/node-red-contrib-iiot-opcua?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=biancode/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
@@ -37,7 +38,7 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
     
-![Flow Example](images/opcua-iiot-v109s2.png)
+![Flow Example](images/listener-example-subv220.png)
   
 ## Contributing
 
@@ -77,29 +78,30 @@ With the flex server you could create your own information model with the OPC UA
 The server node contains demo objects and variables 
 to start playing with OPC UA method call, read and write operations.
 
-![Flow Example](images/opcua-iiot-v109.png)
+![Flow Example](images/method-caller-examplev220.png)
 
 **... secure reading from OPC UA servers with your own key pairs ...**
 
-![Read Example](images/opcua-iiot-read-example.png)
+![Read Example](images/read-examplev220.png)
+
+**... and secure writing to OPC UA servers ...**
+
+![Write Example](images/write-examplev220.png)
 
 **... create your own variables and objects from events ...**
 
-![ASO Example](images/opcua-iiot-aso-example.png)
+![ASO Example](images/server-aso-type-examplev220.png)
 
 ## Package Information
 
 ### Known Issues and TODO's
 
 Ideas
-* converting in Result Filter is not finished yet
 * dynamic methods
 * dynamic IP for connector
-* individual import of XML to get more types and objects
 
 Errors
 * more Bad status situations handling
-* Publish Engine Error
 * API changes to 0.2.+ bring some errors - Please, test and report issues at GitHub!
 
 

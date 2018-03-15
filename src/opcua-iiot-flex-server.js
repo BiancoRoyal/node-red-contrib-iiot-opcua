@@ -47,6 +47,9 @@ module.exports = function (RED) {
     this.isAuditing = config.isAuditing
     // discovery
     this.disableDiscovery = !config.serverDiscovery
+    // limits
+    this.maxNodesPerRead = config.maxNodesPerRead || 1000
+    this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
 
     let node = this
     node.setMaxListeners(UNLIMITED_LISTENERS)
@@ -142,8 +145,8 @@ module.exports = function (RED) {
         },
         serverCapabilities: {
           operationLimits: {
-            maxNodesPerRead: 1000,
-            maxNodesPerBrowse: 2000
+            maxNodesPerRead: node.maxNodesPerRead,
+            maxNodesPerBrowse: node.maxNodesPerBrowse
           }
         },
         serverInfo: {
@@ -189,67 +192,22 @@ module.exports = function (RED) {
     node.postInitialize = function () {
       if (node.opcuaServer) {
         node.eventObjects = {} // event objects should stay in memory
-        coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects)
-
-        node.opcuaServer.start(function (err) {
-          if (err) {
-            coreServer.internalDebugLog('Start Error '.red + err)
-          } else {
-            node.initialized = true
-
-            node.opcuaServer.endpoints.forEach(function (endpoint) {
-              endpoint.endpointDescriptions().forEach(function (endpointDescription) {
-                coreServer.internalDebugLog('Server endpointUrl: ' +
-                  endpointDescription.endpointUrl + ' securityMode: ' +
-                  endpointDescription.securityMode.toString() +
-                  ' securityPolicyUri: ' + endpointDescription.securityPolicyUri.toString())
-              })
-            })
-
-            let endpointUrl = node.opcuaServer.endpoints[0].endpointDescriptions()[0].endpointUrl
-            coreServer.internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
-
-            node.setNodeStatusTo('active')
-            node.registerDiscovery()
-
-            coreServer.detailDebugLog(JSON.stringify(node.opcuaServer.serverInfo))
-
-            node.opcuaServer.on('newChannel', function (channel) {
-              coreServer.internalDebugLog('Client connected with address = ' +
-                channel.remoteAddress + ' port = ' + channel.remotePort
-              )
-            })
-
-            node.opcuaServer.on('closeChannel', function (channel) {
-              coreServer.internalDebugLog('Client disconnected with address = ' +
-                channel.remoteAddress + ' port = ' + channel.remotePort
-              )
-            })
-
-            node.opcuaServer.on('create_session', function (session) {
-              coreServer.internalDebugLog('############## SESSION CREATED ##############')
-              coreServer.detailDebugLog('Client application URI:' + session.clientDescription.applicationUri)
-              coreServer.detailDebugLog('Client product URI:' + session.clientDescription.productUri)
-              coreServer.detailDebugLog('Client application name:' + session.clientDescription.applicationName.toString())
-              coreServer.detailDebugLog('Client application type:' + session.clientDescription.applicationType.toString())
-              coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
-              coreServer.internalDebugLog('Session timeout:' + session.sessionTimeout)
-              coreServer.internalDebugLog('Session id:' + session.sessionId)
-            })
-
-            node.opcuaServer.on('session_closed', function (session, reason) {
-              coreServer.internalDebugLog('############## SESSION CLOSED ##############')
-              coreServer.internalDebugLog('reason:' + reason)
-              coreServer.internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : '<null>')
-            })
-
-            coreServer.internalDebugLog('Server Initialized')
-            coreServer.detailDebugLog('serverInfo after start:' + JSON.stringify(node.opcuaServer.serverInfo))
+        coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects).then(function () {
+          coreServer.start(node.opcuaServer, node)
+          node.setNodeStatusTo('active')
+          node.registerDiscovery()
+        }).catch(function (err) {
+          coreServer.internalDebugLog(err)
+          if (node.showErrors) {
+            node.error(err, {payload: ''})
           }
         })
       } else {
         node.initialized = false
-        coreServer.internalDebugLog('Server Is Not Valid'.red)
+        coreServer.internalDebugLog('OPC UA Server Is Not Ready'.red)
+        if (node.showErrors) {
+          node.error(new Error('OPC UA Server Is Not Ready'), {payload: ''})
+        }
       }
     }
 
@@ -270,7 +228,7 @@ module.exports = function (RED) {
         })
       }
 
-      discoveryEndpointUrl = 'opc.tcp://localhost:4840/UADiscovery'
+      discoveryEndpointUrl = 'opc.tcp://localhost:4840/UAFlexDiscovery'
       coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
 
       node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
@@ -333,7 +291,7 @@ module.exports = function (RED) {
       coreServer.internalDebugLog('Restart OPC UA Server')
 
       if (node.opcuaServer) {
-        node.opcuaServer.shutdown(0, function () {
+        node.opcuaServer.shutdown(1, function () {
           node.opcuaServer = null
           node.emit('shutdown')
           node.initNewServer()
@@ -351,39 +309,30 @@ module.exports = function (RED) {
       }
     }
 
-    node.on('close', function () {
-      node.closeServer()
+    node.on('close', function (done) {
+      node.closeServer(done)
     })
 
-    node.closeServer = function () {
+    node.closeServer = function (done) {
       if (node.opcuaServer) {
         if (coreServer.simulatorInterval) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        node.opcuaServer.shutdown(0, function () {
+        node.opcuaServer.shutdown(1, function () {
           node.opcuaServer = null
+          if (done) {
+            done()
+          }
         })
       } else {
         node.opcuaServer = null
+        if (done) {
+          done()
+        }
       }
     }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Flex-Server', OPCUAIIoTFlexServer)
-
-  RED.httpAdmin.get('/opcuaIIoT/xmlsets/public', RED.auth.needsPermission('opcua.xmlsets'), function (req, res) {
-    let nodeOpcua = require('node-opcua')
-    let xmlset = []
-    xmlset.push(nodeOpcua.di_nodeset_filename)
-    xmlset.push(nodeOpcua.adi_nodeset_filename)
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml')
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Adi.NodeSet2.xml')
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Gds.NodeSet2.xml')
-    xmlset.push('public/vendor/harting/10_di.xml')
-    xmlset.push('public/vendor/harting/20_autoid.xml')
-    xmlset.push('public/vendor/harting/30_aim.xml')
-    res.json(xmlset)
-  })
 }

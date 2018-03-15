@@ -29,7 +29,9 @@
       xmlsets: { value: [] },
       publicCertificateFile: {value: ''},
       privateCertificateFile: {value: ''},
-      addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects) {\n    " +
+      maxNodesPerRead: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 100000))) }},
+      maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }},
+      addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    " +
         "// server = the created node-opcua server\n    // addressSpace = script placeholder\n    " +
         "// eventObjects = to hold event variables in memory from this script\n    \n    " +
         "// internal global sandbox objects are \n    // node = node of the flex server, \n    " +
@@ -107,7 +109,7 @@
         "coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    " +
         "// hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    " +
         "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    " +
-        "eventObjects.gasTankLevelCondition = gasTankLevelCondition\n}"
+        "eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}"
       }
     },
     inputs: 1,
@@ -472,6 +474,15 @@
                 <label for="node-input-maxAllowedSubscriptionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSubscriptionNumber"></span></label>
                 <input type="text" id="node-input-maxAllowedSubscriptionNumber" placeholder="50" style="width:80px">
             </div>
+            <div class="form-row">
+                <label for="node-input-maxNodesPerRead"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerRead"></span></label>
+                <input type="text" id="node-input-maxNodesPerRead" placeholder="10" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxNodesPerBrowse"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerBrowse"></span></label>
+                <input type="text" id="node-input-maxNodesPerBrowse" placeholder="10" style="width:80px">
+            </div>
+            <hr>
             <div class="form-row">
                 <label for="node-input-alternateHostname"><i class="fa fa-server"></i> <span data-i18n="opcua-iiot-contrib.label.alternateHostname"></span></label>
                 <input type="text" id="node-input-alternateHostname" placeholder="">

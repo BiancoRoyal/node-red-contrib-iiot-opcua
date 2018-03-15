@@ -316,8 +316,6 @@ module.exports = function (RED) {
   }
 
   RED.httpAdmin.get('/opcuaIIoT/browser/:id/rootid/:rid', RED.auth.needsPermission('opcuaIIoT.browser.write'), function (req, res) {
-    coreBrowser.detailDebugLog(browserEntries.length + ' Items In List On HTTP Request Body: ' + JSON.stringify(req.body))
-    coreBrowser.detailDebugLog(browserEntries.length + ' Items In List On HTTP Request Params: ' + JSON.stringify(req.params))
     let node = RED.nodes.getNode(req.params.id)
     node.browseFromSettings(node, req.params.rid, res)
   })

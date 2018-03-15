@@ -1,0 +1,44 @@
+<!--
+ The BSD 3-Clause License
+
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
+ All rights reserved.
+ node-red-contrib-iiot-opcua
+-->
+
+<script type="text/javascript">
+  RED.nodes.registerType('OPCUA-IIoT-Discovery', {
+    category: 'IIoT',
+    color: "#ABCDEF",
+    defaults: {
+      name: {value: ""},
+    },
+    inputs: 1,
+    outputs: 1,
+    align: "left",
+    icon: "opcuaiiot.png",
+    label: function () {
+      return this.name || "Discovery";
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Discovery">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" placeholder="">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Discovery">
+    <h2>OPC UA IIoT Discovery</h2>
+
+    <p>OPC UA Discovery server</p>
+
+    <p>opc.tcp://localhost:4840/</p>
+    <p>opc.tcp://pcname.local:4840/</p>
+</script>

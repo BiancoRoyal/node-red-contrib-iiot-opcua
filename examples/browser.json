@@ -1,160 +1,84 @@
 [
   {
-    "id": "7cb2b434.7a27bc",
+    "id": "c64d598f.dd9138",
     "type": "tab",
     "label": "IIoT OPC UA Browser",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "a1adda09.5ac768",
+    "id": "d0370e2b.8b0358",
     "type": "OPCUA-IIoT-Browser",
-    "z": "7cb2b434.7a27bc",
-    "connector": "f65000e.85f4f",
-    "nodeId": "",
+    "z": "c64d598f.dd9138",
+    "connector": "e7696995.cf7358",
+    "nodeId": "ns=4;i=1234",
     "name": "",
+    "justValue": false,
+    "sendNodesToRead": false,
+    "sendNodesToListener": false,
     "showStatusActivities": false,
     "showErrors": false,
     "x": 340,
-    "y": 150,
+    "y": 160,
     "wires": [
       [
-        "6153aae4.726194",
-        "39a81460.894a8c",
-        "65c7773d.f9cf78",
-        "70e2ed79.8d09f4"
+        "da7f8086.a90ea8"
       ]
     ]
   },
   {
-    "id": "39a81460.894a8c",
-    "type": "debug",
-    "z": "7cb2b434.7a27bc",
-    "name": "",
-    "active": false,
-    "console": "false",
-    "complete": "false",
-    "x": 530,
-    "y": 150,
-    "wires": []
-  },
-  {
-    "id": "b910d3c2.6b67a",
+    "id": "8e4852fc.2e04b",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7cb2b434.7a27bc",
+    "z": "c64d598f.dd9138",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
-    "topic": "ns=0;i=85",
+    "topic": "",
     "repeat": "",
     "crontab": "",
     "once": true,
     "startDelay": "",
     "name": "Root",
     "addressSpaceItems": [],
-    "x": 150,
-    "y": 150,
+    "x": 170,
+    "y": 160,
     "wires": [
       [
-        "a1adda09.5ac768"
+        "d0370e2b.8b0358"
       ]
     ]
   },
   {
-    "id": "65c7773d.f9cf78",
-    "type": "OPCUA-IIoT-Response",
-    "z": "7cb2b434.7a27bc",
-    "name": "",
-    "showStatusActivities": false,
-    "showErrors": false,
-    "x": 540,
-    "y": 90,
-    "wires": [
-      [
-        "5623d935.201218"
-      ]
-    ]
-  },
-  {
-    "id": "5623d935.201218",
+    "id": "da7f8086.a90ea8",
     "type": "debug",
-    "z": "7cb2b434.7a27bc",
+    "z": "c64d598f.dd9138",
     "name": "",
-    "active": false,
-    "console": "false",
-    "complete": "false",
-    "x": 710,
-    "y": 90,
-    "wires": []
-  },
-  {
-    "id": "6153aae4.726194",
-    "type": "ui_template",
-    "z": "7cb2b434.7a27bc",
-    "group": "a016515e.bb79",
-    "name": "",
-    "order": 0,
-    "width": "10",
-    "height": "9",
-    "format": "<div layout=\"column\" layout-align=\"space-between\">\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <p>{{msg.payload.endpoint}}</p>\n    </div>\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <p>{{msg.payload.browseTopic}} with {{msg.payload.browserResultCount}} references</p>\n    </div>\n    <div layout=\"row\" layout-align=\"space-between center\">\n        <h1>Results</h1>\n    </div>\n    <div layout=\"row\" layout-align=\"space-between center\">\n        <select ng-model=\"item\" ng-options=\"item.displayName.text for item in msg.payload.browserItems\">\n            <option value=\"\">-- Root --</option>\n        </select>\n        <button ng-click=\"send({payload: {actiontype: 'browse', root: item}})\">Browse</button>\n    </div>\n    <div layout=\"row\" layout-align=\"space-around center\">\n        <div>\n            <ul>\n                <li ng-repeat=\"item in msg.payload.browserItems\">\n                  {{item.displayName.text}} ( {{item.nodeId}} - {{item.browseName}})\n                </li>\n            </ul>\n        </div>\n    </div>\n</div>",
-    "storeOutMessages": false,
-    "fwdInMessages": false,
-    "templateScope": "local",
-    "x": 340,
-    "y": 90,
-    "wires": [
-      [
-        "a1adda09.5ac768"
-      ]
-    ]
-  },
-  {
-    "id": "70e2ed79.8d09f4",
-    "type": "debug",
-    "z": "7cb2b434.7a27bc",
-    "name": "",
-    "active": false,
+    "active": true,
     "tosidebar": true,
     "console": false,
     "tostatus": false,
-    "complete": "true",
+    "complete": "payload",
     "x": 510,
-    "y": 200,
+    "y": 160,
     "wires": []
   },
   {
-    "id": "f65000e.85f4f",
+    "id": "e7696995.cf7358",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
-    "discoveryUrl": "opc.tcp://innoreactor.local:55388/",
-    "endpoint": "opc.tcp://innoreactor.local:55388/UA/NodeREDIIoTServer",
+    "discoveryUrl": "",
+    "endpoint": "opc.tcp://localhost:55388/",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
-    "name": "LOCAL SERVER",
+    "name": "LOCAL DEMO SERVER",
     "showStatusActivities": false,
     "showErrors": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
-    "defaultSecureTokenLifetime": "",
-    "endpointMusExist": false
-  },
-  {
-    "id": "a016515e.bb79",
-    "type": "ui_group",
-    "z": "",
-    "name": "Default",
-    "tab": "34bd0e54.e03b82",
-    "disp": true,
-    "width": "10",
-    "collapse": false
-  },
-  {
-    "id": "34bd0e54.e03b82",
-    "type": "ui_tab",
-    "z": "",
-    "name": "Home",
-    "icon": "dashboard"
+    "defaultSecureTokenLifetime": "60000",
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false
   }
 ]

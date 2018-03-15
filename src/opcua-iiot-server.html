@@ -29,7 +29,9 @@
       users: { value: [] },
       xmlsets: { value: [] },
       publicCertificateFile: {value: ''},
-      privateCertificateFile: {value: ''}
+      privateCertificateFile: {value: ''},
+      maxNodesPerRead: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 100000))) }},
+      maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }}
     },
     inputs: 1,
     outputs: 1,
@@ -353,6 +355,15 @@
                 <input type="text" id="node-input-maxAllowedSubscriptionNumber" placeholder="50" style="width:80px">
             </div>
             <div class="form-row">
+                <label for="node-input-maxNodesPerRead"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerRead"></span></label>
+                <input type="text" id="node-input-maxNodesPerRead" placeholder="10" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxNodesPerBrowse"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerBrowse"></span></label>
+                <input type="text" id="node-input-maxNodesPerBrowse" placeholder="10" style="width:80px">
+            </div>
+            <hr>
+            <div class="form-row">
                 <label for="node-input-alternateHostname"><i class="fa fa-server"></i> <span data-i18n="opcua-iiot-contrib.label.alternateHostname"></span></label>
                 <input type="text" id="node-input-alternateHostname" placeholder="">
             </div>
@@ -360,6 +371,7 @@
                 <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" placeholder="">
             </div>
+            <hr>
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-isAuditing"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.isAuditing"></span></label>

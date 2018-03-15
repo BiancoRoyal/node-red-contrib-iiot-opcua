@@ -16,7 +16,6 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let core = require('./core/opcua-iiot-core')
-  let _ = require('underscore')
 
   function OPCUAIIoTNode (config) {
     RED.nodes.createNode(this, config)
@@ -66,17 +65,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Node', OPCUAIIoTNode)
-
-  RED.httpAdmin.get('/opcuaIIoT/object/DataTypeIds', RED.auth.needsPermission('opcuaIIoT.node.read'), function (req, res) {
-    let typeList = require('node-opcua').DataTypeIds
-    let invertedTypeList = _.toArray(_.invert(typeList))
-    let resultTypeList = []
-
-    let typelistEntry
-    for (typelistEntry of invertedTypeList) {
-      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
-    }
-
-    res.json(resultTypeList)
-  })
 }

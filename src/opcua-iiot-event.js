@@ -16,16 +16,14 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreListener = require('./core/opcua-iiot-core-listener')
-  let _ = require('underscore')
 
   function OPCUAIIoTEvent (config) {
     RED.nodes.createNode(this, config)
-    this.eventRoot = config.eventRoot
     this.eventType = config.eventType
+    this.eventTypeLabel = config.eventTypeLabel
     this.queueSize = config.queueSize
     this.usingListener = config.usingListener
     this.name = config.name
-    this.parseStrings = config.parseStrings
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
@@ -79,20 +77,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Event', OPCUAIIoTEvent)
-
-  RED.httpAdmin.get('/opcuaIIoT/event/types', RED.auth.needsPermission('opcua.event.types'), function (req, res) {
-    let objectTypeIds = require('node-opcua').ObjectTypeIds
-    let invertedObjectTypeIds = _.invert(objectTypeIds)
-    let eventTypes = _.filter(invertedObjectTypeIds, function (objectTypeId) {
-      return objectTypeId.indexOf('Event') > -1
-    })
-
-    let typelistEntry
-    let eventTypesResults = []
-    for (typelistEntry of eventTypes) {
-      eventTypesResults.push({ nodeId: 'i=' + objectTypeIds[typelistEntry], label: typelistEntry })
-    }
-
-    res.json(eventTypesResults)
-  })
 }
