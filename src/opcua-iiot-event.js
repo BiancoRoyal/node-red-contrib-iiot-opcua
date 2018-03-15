@@ -78,20 +78,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Event', OPCUAIIoTEvent)
-
-  RED.httpAdmin.get('/opcuaIIoT/event/types', RED.auth.needsPermission('opcua.event.types'), function (req, res) {
-    let objectTypeIds = require('node-opcua').ObjectTypeIds
-    let invertedObjectTypeIds = _.invert(objectTypeIds)
-    let eventTypes = _.filter(invertedObjectTypeIds, function (objectTypeId) {
-      return objectTypeId.indexOf('Event') > -1
-    })
-
-    let typelistEntry
-    let eventTypesResults = []
-    for (typelistEntry of eventTypes) {
-      eventTypesResults.push({ nodeId: 'i=' + objectTypeIds[typelistEntry], label: typelistEntry })
-    }
-
-    res.json(eventTypesResults)
-  })
 }

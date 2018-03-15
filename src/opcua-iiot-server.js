@@ -367,22 +367,27 @@ module.exports = function (RED) {
       }
     }
 
-    node.on('close', function () {
-      node.closeServer()
+    node.on('close', function (done) {
+      node.closeServer(done)
     })
 
-    node.closeServer = function () {
+    node.closeServer = function (done) {
       if (node.opcuaServer) {
         if (coreServer.simulatorInterval) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        node.opcuaServer.shutdown(1, function () {
-          node.emit('shutdown')
+        node.opcuaServer.shutdown(function () {
           node.opcuaServer = null
+          if (done) {
+            done()
+          }
         })
       } else {
         node.opcuaServer = null
+        if (done) {
+          done()
+        }
       }
     }
   }

@@ -231,88 +231,102 @@ de.biancoroyal.opcua.iiot.core.listener.MonitoredItemSet = function () {
 }
 
 de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addressSpaceItem, msg, subscription) {
-  let interval
-  let queueSize
+  let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
-  if (typeof msg.payload.interval === 'number' &&
-    msg.payload.interval <= this.MAX_LISTENER_INTERVAL &&
-    msg.payload.interval >= this.MIN_LISTENER_INTERVAL) {
-    interval = parseInt(msg.payload.interval)
-  } else {
-    interval = this.SUBSCRIBE_DEFAULT_INTERVAL
-  }
+  return new Promise(
+    function (resolve, reject) {
+      if (!addressSpaceItem) {
+        reject(new Error('AddressSpaceItem Is Not Valid'))
+      }
 
-  if (msg.payload.queueSize && typeof msg.payload.queueSize === 'number') {
-    queueSize = parseInt(msg.payload.queueSize)
-  } else {
-    queueSize = this.SUBSCRIBE_DEFAULT_QUEUE_SIZE
-  }
+      let interval
+      let queueSize
 
-  subscription.monitor(
-    {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
-      attributeId: this.core.nodeOPCUA.AttributeIds.Value
-    },
-    {
-      samplingInterval: interval,
-      discardOldest: true,
-      queueSize: queueSize
-    },
-    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both
-  )
+      if (typeof msg.payload.interval === 'number' &&
+        msg.payload.interval <= coreListener.MAX_LISTENER_INTERVAL &&
+        msg.payload.interval >= coreListener.MIN_LISTENER_INTERVAL) {
+        interval = parseInt(msg.payload.interval)
+      } else {
+        interval = coreListener.SUBSCRIBE_DEFAULT_INTERVAL
+      }
+
+      if (msg.payload.queueSize && typeof msg.payload.queueSize === 'number') {
+        queueSize = parseInt(msg.payload.queueSize)
+      } else {
+        queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
+      }
+
+      let monitoredItem = subscription.monitor(
+        {
+          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
+          attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value
+        },
+        {
+          samplingInterval: interval,
+          discardOldest: true,
+          queueSize: queueSize
+        },
+        coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+        function (err, monitoredItemResult) {
+          if (err) {
+            coreListener.internalDebugLog('subscribing item ' + err)
+            reject(err)
+          } else {
+            coreListener.internalDebugLog('subscribed item ' + monitoredItemResult)
+            resolve(monitoredItem)
+          }
+        }
+      )
+    })
 }
 
 de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpaceItem, msg, subscription) {
-  let interval
-  let queueSize
+  let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
-  if (typeof msg.payload.interval === 'number' && msg.payload.interval < this.MAX_LISTENER_INTERVAL) {
-    interval = parseInt(msg.payload.interval)
-  } else {
-    interval = this.EVENT_DEFAULT_INTERVAL
-  }
+  return new Promise(
+    function (resolve, reject) {
+      if (!addressSpaceItem) {
+        reject(new Error('AddressSpaceItem Is Not Valid'))
+      }
 
-  if (typeof msg.payload.queueSize === 'number') {
-    queueSize = parseInt(msg.payload.queueSize)
-  } else {
-    queueSize = this.EVENT_DEFAULT_QUEUE_SIZE
-  }
+      let interval
+      let queueSize
 
-  subscription.monitor(
-    {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
-      attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier
-    },
-    {
-      samplingInterval: interval,
-      discardOldest: true,
-      queueSize: queueSize,
-      filter: msg.payload.eventFilter
-    },
-    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both
-  )
-}
+      if (typeof msg.payload.interval === 'number' && msg.payload.interval < coreListener.MAX_LISTENER_INTERVAL) {
+        interval = parseInt(msg.payload.interval)
+      } else {
+        interval = coreListener.EVENT_DEFAULT_INTERVAL
+      }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewEventFromMonitoredItem = function (addressSpaceItem, subscription) {
-  let interval
-  let queueSize
+      if (typeof msg.payload.queueSize === 'number') {
+        queueSize = parseInt(msg.payload.queueSize)
+      } else {
+        queueSize = coreListener.EVENT_DEFAULT_QUEUE_SIZE
+      }
 
-  interval = this.EVENT_DEFAULT_INTERVAL
-  queueSize = this.EVENT_DEFAULT_QUEUE_SIZE
-
-  subscription.monitor(
-    {
-      nodeId: this.core.nodeOPCUA.resolveNodeId(addressSpaceItem.nodeId),
-      attributeId: this.core.nodeOPCUA.AttributeIds.EventNotifier
-    },
-    {
-      samplingInterval: interval,
-      discardOldest: true,
-      queueSize: queueSize,
-      filter: addressSpaceItem.monitoringParameters.filter
-    },
-    this.core.nodeOPCUA.read_service.TimestampsToReturn.Both
-  )
+      let monitoredItem = subscription.monitor(
+        {
+          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
+          attributeId: coreListener.core.nodeOPCUA.AttributeIds.EventNotifier
+        },
+        {
+          samplingInterval: interval,
+          discardOldest: true,
+          queueSize: queueSize,
+          filter: msg.payload.eventFilter
+        },
+        coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+        function (err, monitoredItemResult) {
+          if (err) {
+            coreListener.internalDebugLog('subscribing item ' + err)
+            reject(err)
+          } else {
+            coreListener.internalDebugLog('subscribed item ' + monitoredItemResult)
+            resolve(monitoredItem)
+          }
+        }
+      )
+    })
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session, callback) {

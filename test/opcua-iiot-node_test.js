@@ -22,6 +22,8 @@ var testFlowPayload = [
     "type": "inject",
     "payload": "testpayload",
     "payloadType": "str",
+    "repeat": "",
+    "crontab": "",
     "once": true,
     "wires": [["n2", "n3"]]
   },
@@ -49,7 +51,7 @@ describe('OPC UA Node node Testing', function () {
   })
 
   describe('Node node', function () {
-    it('node should be loaded', function (done) {
+    it('should be loaded', function (done) {
       helper.load(
         [inputNode],
         [{

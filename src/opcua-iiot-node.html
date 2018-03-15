@@ -33,13 +33,13 @@
       let node = this
       node.lookupItems = []
 
-      let datatypeLookupField = $("#node-lookup-datatype")
+      let datatypeLookupButton = $("#node-lookup-datatype")
       let datatypeField = $("#node-input-datatype")
 
-      datatypeLookupField.click(function () {
-        datatypeLookupField.addClass('disabled')
-        $.getJSON('/opcuaIIoT/object/DataTypeIds', function (data) {
-          datatypeLookupField.removeClass('disabled')
+      datatypeLookupButton.click(function () {
+        datatypeLookupButton.addClass('disabled')
+        $.getJSON('/opcuaIIoT/list/DataTypeIds', function (data) {
+          datatypeLookupButton.removeClass('disabled')
           node.lookupItems = []
 
           $.each(data, function (i, entry) {

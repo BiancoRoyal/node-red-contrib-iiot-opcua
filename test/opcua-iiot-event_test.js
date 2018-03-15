@@ -23,6 +23,8 @@ var testFlowPayload = [
     "topic": "TestTopic",
     "payload": "{\"queueSize\":10, \"interval\":1000}",
     "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
     "once": true,
     "wires": [["n2", "n3"]]
   },

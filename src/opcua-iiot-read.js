@@ -256,6 +256,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Read', OPCUAIIoTRead)
-
-  // AttributeId via REST
 }

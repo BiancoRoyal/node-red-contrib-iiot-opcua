@@ -35,13 +35,13 @@
       let node = this
       node.lookupItems = []
 
-      let objecttypeLookupField = $("#node-lookup-objecttype")
+      let objecttypeLookupButton = $("#node-lookup-objecttype")
       let objecttypeField = $("#node-input-objecttype")
 
-      objecttypeLookupField.click(function () {
-        objecttypeLookupField.addClass('disabled')
-        $.getJSON('/opcuaIIoT/object/InstanceTypes', function (data) {
-          objecttypeLookupField.removeClass('disabled')
+      objecttypeLookupButton.click(function () {
+        objecttypeLookupButton.addClass('disabled')
+        $.getJSON('/opcuaIIoT/list/InstanceTypeIds', function (data) {
+          objecttypeLookupButton.removeClass('disabled')
           node.lookupItems = []
 
           $.each(data, function (i, entry) {
@@ -66,13 +66,13 @@
         })
       })
 
-      let datatypeLookupField = $("#node-lookup-datatype")
+      let datatypeLookupButton = $("#node-lookup-datatype")
       let datatypeField = $("#node-input-datatype")
 
-      datatypeLookupField.click(function () {
-        datatypeLookupField.addClass('disabled')
-        $.getJSON('/opcuaIIoT/object/DataTypeIds', function (data) {
-          datatypeLookupField.removeClass('disabled')
+      datatypeLookupButton.click(function () {
+        datatypeLookupButton.addClass('disabled')
+        $.getJSON('/opcuaIIoT/list/DataTypeIds', function (data) {
+          datatypeLookupButton.removeClass('disabled')
           node.lookupItems = []
 
           $.each(data, function (i, entry) {
@@ -97,13 +97,13 @@
         })
       })
 
-      let referencetypeLookupField = $("#node-lookup-referencetype")
+      let referencetypeLookupButton = $("#node-lookup-referencetype")
       let referencetypeField = $("#node-input-referencetype")
 
-      referencetypeLookupField.click(function () {
-        referencetypeLookupField.addClass('disabled')
-        $.getJSON('/opcuaIIoT/object/ReferenceTypeIds', function (data) {
-          referencetypeLookupField.removeClass('disabled')
+      referencetypeLookupButton.click(function () {
+        referencetypeLookupButton.addClass('disabled')
+        $.getJSON('/opcuaIIoT/list/ReferenceTypeIds', function (data) {
+          referencetypeLookupButton.removeClass('disabled')
           node.lookupItems = []
 
           $.each(data, function (i, entry) {

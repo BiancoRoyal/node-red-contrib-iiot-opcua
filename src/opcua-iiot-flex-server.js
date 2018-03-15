@@ -309,40 +309,30 @@ module.exports = function (RED) {
       }
     }
 
-    node.on('close', function () {
-      node.closeServer()
+    node.on('close', function (done) {
+      node.closeServer(done)
     })
 
-    node.closeServer = function () {
+    node.closeServer = function (done) {
       if (node.opcuaServer) {
         if (coreServer.simulatorInterval) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
         node.opcuaServer.shutdown(1, function () {
-          node.emit('shutdown')
           node.opcuaServer = null
+          if (done) {
+            done()
+          }
         })
       } else {
         node.opcuaServer = null
+        if (done) {
+          done()
+        }
       }
     }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Flex-Server', OPCUAIIoTFlexServer)
-
-  RED.httpAdmin.get('/opcuaIIoT/xmlsets/public', RED.auth.needsPermission('opcua.xmlsets'), function (req, res) {
-    let nodeOpcua = require('node-opcua')
-    let xmlset = []
-    xmlset.push(nodeOpcua.di_nodeset_filename)
-    xmlset.push(nodeOpcua.adi_nodeset_filename)
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml')
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Adi.NodeSet2.xml')
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')
-    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Gds.NodeSet2.xml')
-    xmlset.push('public/vendor/harting/10_di.xml')
-    xmlset.push('public/vendor/harting/20_autoid.xml')
-    xmlset.push('public/vendor/harting/30_aim.xml')
-    res.json(xmlset)
-  })
 }

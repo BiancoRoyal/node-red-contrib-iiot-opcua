@@ -53,25 +53,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Server-Command', OPCUAIIoTCMD)
-
-  // opcua_node_ids.js - node-opcua
-
-  // ObjectTypeIds, VariableTypeIds via REST
-  RED.httpAdmin.get('/opcuaIIoT/object/ObjectTypeIds', RED.auth.needsPermission('opcuaIIoT.CMD.read'), function (req, res) {
-    res.json(core.nodeOPCUA.ObjectTypeIds)
-  })
-
-  RED.httpAdmin.get('/opcuaIIoT/object/VariableTypeIds', RED.auth.needsPermission('opcuaIIoT.CMD.read'), function (req, res) {
-    res.json(core.nodeOPCUA.VariableTypeIds)
-  })
-
-  // ReferenceTypeIds via REST
-  RED.httpAdmin.get('/opcuaIIoT/object/ReferenceTypeIds', RED.auth.needsPermission('opcuaIIoT.CMD.read'), function (req, res) {
-    res.json(core.nodeOPCUA.ReferenceTypeIds)
-  })
-
-  // DataTypeIds via REST
-  RED.httpAdmin.get('/opcuaIIoT/object/DataTypeIds', RED.auth.needsPermission('opcuaIIoT.CMD.read'), function (req, res) {
-    res.json(core.nodeOPCUA.DataTypeIds)
-  })
 }

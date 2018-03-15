@@ -17,6 +17,7 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreConnector = require('./core/opcua-iiot-core-connector')
   let path = require('path')
+  let _ = require('underscore')
 
   function OPCUAIIoTConnectorConfiguration (config) {
     const CONNECTION_START_DELAY = 2000 // 2 sec.
@@ -343,5 +344,117 @@ module.exports = function (RED) {
     } else {
       coreConnector.internalDebugLog('Get Endpoints Request None Node ' + JSON.stringify(req.params))
     }
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/plain/DataTypesIds', RED.auth.needsPermission('opcuaIIoT.plain.datatypes'), function (req, res) {
+    res.json(_.toArray(_.invert(coreConnector.core.nodeOPCUA.DataTypeIds)))
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/plain/AttributeIds', RED.auth.needsPermission('opcuaIIoT.plain.attributeids'), function (req, res) {
+    res.json(_.toArray(_.invert(coreConnector.core.nodeOPCUA.AttributeIds)))
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/plain/StatusCodes', RED.auth.needsPermission('opcuaIIoT.plain.statuscodes'), function (req, res) {
+    res.json(_.toArray(_.invert(coreConnector.core.nodeOPCUA.StatusCodes)))
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/plain/ObjectTypeIds', RED.auth.needsPermission('opcuaIIoT.plain.objecttypeids'), function (req, res) {
+    res.json(coreConnector.core.nodeOPCUA.ObjectTypeIds)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/plain/VariableTypeIds', RED.auth.needsPermission('opcuaIIoT.plain.variabletypeids'), function (req, res) {
+    res.json(coreConnector.core.nodeOPCUA.VariableTypeIds)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/plain/ReferenceTypeIds', RED.auth.needsPermission('opcuaIIoT.plain.referencetypeids'), function (req, res) {
+    res.json(coreConnector.core.nodeOPCUA.ReferenceTypeIds)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/xmlsets/public', RED.auth.needsPermission('opcuaIIoT.xmlsets'), function (req, res) {
+    let xmlset = []
+    xmlset.push(coreConnector.core.nodeOPCUA.di_nodeset_filename)
+    xmlset.push(coreConnector.core.nodeOPCUA.adi_nodeset_filename)
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml')
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Adi.NodeSet2.xml')
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml')
+    xmlset.push('public/vendor/opc-foundation/xml/Opc.Ua.Gds.NodeSet2.xml')
+    xmlset.push('public/vendor/harting/10_di.xml')
+    xmlset.push('public/vendor/harting/20_autoid.xml')
+    xmlset.push('public/vendor/harting/30_aim.xml')
+    res.json(xmlset)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/list/DataTypeIds', RED.auth.needsPermission('opcuaIIoT.list.datatypeids'), function (req, res) {
+    let typeList = coreConnector.core.nodeOPCUA.DataTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/list/EvenTypesIds', RED.auth.needsPermission('opcuaIIoT.list.eventtypeids'), function (req, res) {
+    let objectTypeIds = coreConnector.core.nodeOPCUA.ObjectTypeIds
+    let invertedObjectTypeIds = _.invert(objectTypeIds)
+    let eventTypes = _.filter(invertedObjectTypeIds, function (objectTypeId) {
+      return objectTypeId.indexOf('Event') > -1
+    })
+
+    let typelistEntry
+    let eventTypesResults = []
+    for (typelistEntry of eventTypes) {
+      eventTypesResults.push({ nodeId: 'i=' + objectTypeIds[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(eventTypesResults)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/list/InstanceTypeIds', RED.auth.needsPermission('opcuaIIoT.list.instancetypeids'), function (req, res) {
+    let typeList = coreConnector.core.nodeOPCUA.ObjectTypeIds
+    let variabletypeList = coreConnector.core.nodeOPCUA.VariableTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let invertedVariableTypeList = _.toArray(_.invert(variabletypeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    for (typelistEntry of invertedVariableTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/list/VariableTypeIds', RED.auth.needsPermission('opcuaIIoT.list.variabletypeids'), function (req, res) {
+    let typeList = coreConnector.core.nodeOPCUA.VariableTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/list/ReferenceTypeIds', RED.auth.needsPermission('opcuaIIoT.list.referencetypeids'), function (req, res) {
+    let typeList = coreConnector.core.nodeOPCUA.ReferenceTypeIds
+    let invertedTypeList = _.toArray(_.invert(typeList))
+    let resultTypeList = []
+
+    let typelistEntry
+    for (typelistEntry of invertedTypeList) {
+      resultTypeList.push({ nodeId: 'i=' + typeList[typelistEntry], label: typelistEntry })
+    }
+
+    res.json(resultTypeList)
   })
 }

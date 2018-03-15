@@ -36,17 +36,16 @@
     oneditprepare: function () {
       let node = this
       node.lookupItems = []
-      let nodeIdLookupField = $("#node-lookup-nodeId")
+      let nodeIdLookupButton = $("#node-lookup-nodeId")
       let nodeIdField = $("#node-input-nodeId")
 
-      nodeIdLookupField.click(function () {
-        nodeIdLookupField.addClass('disabled')
-
+      nodeIdLookupButton.click(function () {
+        nodeIdLookupButton.addClass('disabled')
         let rootid = nodeIdField.val() || 'ns=0;i=84'
         let url = '/opcuaIIoT/browser/' + node.id + '/rootid/' + rootid
 
         $.getJSON(url, function (data) {
-          nodeIdLookupField.removeClass('disabled')
+          nodeIdLookupButton.removeClass('disabled')
           node.lookupItems = []
 
           $.each(data, function (i, entry) {

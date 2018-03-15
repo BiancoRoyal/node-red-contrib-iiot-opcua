@@ -34,41 +34,6 @@
     },
     oneditprepare: function () {
       let node = this
-      node.lookupItems = []
-      let nodeIdLookupField = $("#node-lookup-nodeId")
-      let nodeIdField = $("#node-input-nodeId")
-      let cacheItemCount = node.inputArguments.length
-
-      nodeIdLookupField.click(function () {
-        nodeIdLookupField.addClass('disabled')
-
-        let url = '/opcuaIIoT/object/' + node.objectId + '/method/' + nodeIdField.val()
-
-        $.getJSON(url, function (data) {
-          nodeIdLookupField.removeClass('disabled')
-          node.lookupItems = []
-
-          $.each(data, function (i, entry) {
-            node.lookupItems.push({value: entry.nodeId, label: entry.displayName.text})
-          })
-
-          nodeIdField.autocomplete({
-            source: node.lookupItems,
-            minLength: 0,
-            focus: function (event, ui) {
-              nodeIdField.val(ui.item.label);
-              return false;
-            },
-            select: function (event, ui) {
-              nodeIdField.val(ui.item.value)
-              return false;
-            },
-            close: function (event, ui) {
-              nodeIdField.autocomplete("destroy")
-            }
-          }).autocomplete("search", "")
-        })
-      })
 
       let tabs = RED.tabs.create({
         id: "node-input-method-tabs",
@@ -110,16 +75,14 @@
           placeholder: 'name'
         }).appendTo(row)
 
-        var datatypeField = $('<select/>', {
+        let datatypeField = $('<select/>', {
           id: "node-input-method-argument-dataType" + id,
           class: 'methodArgumentDatatype',
           type: "text",
           style: "margin-left:5px;width:18%;",
         }).appendTo(row);
 
-        url = '/opcuaIIoT/method/basicDataTypesForSelect'
-
-        $.getJSON(url, function (data) {
+        $.getJSON('/opcuaIIoT/method/basicDataTypesForSelect', function (data) {
           $(data).each(function () {
             datatypeField.append($("<option>").attr('value', this).text(this));
           });

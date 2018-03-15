@@ -24,6 +24,8 @@ var readTestFlowPayload = [
     topic:"TestTopic",
     payload:"[{\"node\":\"ns=1;s=TemperatureAnalogItem\",\"nodeId\":\"ns=1;s=TemperatureAnalogItem\",\"nodeClass\":2,\"browseName\":{\"namespaceIndex\":0,\"name\":\"TemperatureAnalogItem\"},\"displayName\":{\"text\":\"TemperatureAnalogItem\"},\"description\":{},\"writeMask\":0,\"userWriteMask\":0,\"value\":16.041979,\"dataType\":\"Double\",\"valueRank\":-1,\"arrayDimensions\":{},\"accessLevel\":3,\"userAccessLevel\":3,\"minimumSamplingInterval\":0,\"historizing\":false,\"statusCode\":{\"value\":0,\"description\":\"No Error\",\"name\":\"Good\"}}]",
     payloadType:"json",
+    repeat: "",
+    crontab: "",
     once:true,
     onceDelay:0.1,
     wires:[["n2","n3"]]
@@ -70,6 +72,8 @@ var listenTestFlowPayload = [
     "topic": "TestTopic",
     "payload": "{\"value\":{\"dataType\":\"Double\",\"arrayType\":\"Scalar\",\"value\":16.041979},\"statusCode\":{\"value\":0,\"description\":\"No Error\",\"name\":\"Good\"},\"sourceTimestamp\":\"2018-03-13T21:43:10.470Z\",\"sourcePicoseconds\":0,\"serverTimestamp\":\"2018-03-13T21:43:11.051Z\",\"serverPicoseconds\":3}",
     "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
     "once": true,
     "onceDelay": 0.1,
     "wires": [["n2", "n3"]]

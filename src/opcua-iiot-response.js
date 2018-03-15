@@ -280,6 +280,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Response', OPCUAIIoTResponse)
-
-// StatusCodes via REST anbieten
 }

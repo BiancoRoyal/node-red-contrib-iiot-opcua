@@ -24,6 +24,8 @@ var goodTestFlowPayload = [
     "topic": "TestTopic",
     "payload": "[{\"value\":{\"dataType\":\"Double\",\"arrayType\":\"Scalar\",\"value\":19.1},\"statusCode\":{\"value\":0,\"description\":\"No Error\",\"name\":\"Good\"},\"sourcePicoseconds\":0,\"serverPicoseconds\":0}]",
     "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
     "once": true,
     "onceDelay": 0.1,
     "wires": [["n2", "n3"]]
@@ -58,6 +60,8 @@ var badTestFlowPayload = [
     "topic": "TestTopic",
     "payload": "[{\"value\":{\"dataType\":\"Double\",\"arrayType\":\"Scalar\",\"value\":21.1},\"statusCode\":{\"value\":0,\"description\":\"Some Error\",\"name\":\"Bad\"},\"sourcePicoseconds\":0,\"serverPicoseconds\":0}]",
     "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
     "once": true,
     "onceDelay": 0.1,
     "wires": [["n2", "n3"]]
@@ -92,6 +96,8 @@ var otherTestFlowPayload = [
     "topic": "TestTopic",
     "payload": "[{\"value\":{\"dataType\":\"Double\",\"arrayType\":\"Scalar\",\"value\":21.1},\"statusCode\":{\"value\":0,\"description\":\"Some Unknown\",\"name\":\"Other\"},\"sourcePicoseconds\":0,\"serverPicoseconds\":0}]",
     "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
     "once": true,
     "onceDelay": 0.1,
     "wires": [["n2", "n3"]]
