@@ -1,15 +1,15 @@
 [
   {
-    "id": "1c4d7bd2.ec7344",
+    "id": "59dffae1.4cded4",
     "type": "tab",
     "label": "IIoT OPC UA Events",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "41c2a482.573964",
+    "id": "1a06cfb3.9fb668",
     "type": "debug",
-    "z": "1c4d7bd2.ec7344",
+    "z": "59dffae1.4cded4",
     "name": "",
     "active": true,
     "console": "false",
@@ -19,9 +19,9 @@
     "wires": []
   },
   {
-    "id": "12fc2038.a760e",
+    "id": "f6df8a61.4856f8",
     "type": "OPCUA-IIoT-Event",
-    "z": "1c4d7bd2.ec7344",
+    "z": "59dffae1.4cded4",
     "eventType": "BaseEventType",
     "eventTypeLabel": "BaseEventType (i=2041)",
     "queueSize": "1000",
@@ -33,14 +33,14 @@
     "y": 120,
     "wires": [
       [
-        "c0ce8da.4340ff"
+        "129770b1.17f8f7"
       ]
     ]
   },
   {
-    "id": "1471deb0.d5b961",
+    "id": "be0aa839.283e4",
     "type": "OPCUA-IIoT-Inject",
-    "z": "1c4d7bd2.ec7344",
+    "z": "59dffae1.4cded4",
     "injectType": "listen",
     "payload": "200",
     "payloadType": "num",
@@ -66,15 +66,15 @@
     "y": 120,
     "wires": [
       [
-        "12fc2038.a760e"
+        "f6df8a61.4856f8"
       ]
     ]
   },
   {
-    "id": "c0ce8da.4340ff",
+    "id": "129770b1.17f8f7",
     "type": "OPCUA-IIoT-Listener",
-    "z": "1c4d7bd2.ec7344",
-    "connector": "2ee612f9.a3dbde",
+    "z": "59dffae1.4cded4",
+    "connector": "e7696995.cf7358",
     "action": "events",
     "queueSize": "100",
     "name": "",
@@ -85,12 +85,12 @@
     "y": 120,
     "wires": [
       [
-        "41c2a482.573964"
+        "1a06cfb3.9fb668"
       ]
     ]
   },
   {
-    "id": "2ee612f9.a3dbde",
+    "id": "e7696995.cf7358",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "discoveryUrl": "",
@@ -105,6 +105,7 @@
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
-    "endpointMusExist": false
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false
   }
 ]
