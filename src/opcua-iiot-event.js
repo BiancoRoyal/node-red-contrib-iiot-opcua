@@ -16,7 +16,6 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreListener = require('./core/opcua-iiot-core-listener')
-  let _ = require('underscore')
 
   function OPCUAIIoTEvent (config) {
     RED.nodes.createNode(this, config)

@@ -1,39 +1,50 @@
 [
   {
-    "id": "f33a61fc.a017",
+    "id": "715d7f38.475918",
     "type": "tab",
     "label": "IIoT OPC UA Server ISA95",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "2d512ce1.e90664",
+    "id": "907cd781.2275",
+    "type": "comment",
+    "z": "715d7f38.475918",
+    "name": "information",
+    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
+    "x": 210,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "bf675756.c5ad5",
+    "type": "comment",
+    "z": "715d7f38.475918",
+    "name": "ISA95",
+    "info": "Some links\nhttps://opcfoundation.org/markets-collaboration/isa-95/\n\n\nhttps://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/\n\n56 min video by Paul Hunkar\n“OPC UA for ISA-95 Common Object Model Companion Specification”\nhttps://youtu.be/OobhzbQoUnA",
+    "x": 350,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "18a13f62.979b19",
     "type": "OPCUA-IIoT-Server",
-    "z": "f33a61fc.a017",
-    "port": "55388",
+    "z": "715d7f38.475918",
+    "port": "55395",
     "endpoint": "",
     "acceptExternalCommands": true,
     "maxAllowedSessionNumber": "",
     "maxConnectionsPerEndpoint": "",
     "maxAllowedSubscriptionNumber": "",
     "alternateHostname": "",
-    "name": "ISA95 SERVER",
+    "name": "ISA95 Server",
     "showStatusActivities": false,
     "showErrors": false,
     "asoDemo": true,
     "allowAnonymous": true,
     "isAuditing": false,
     "serverDiscovery": true,
-    "users": [
-      {
-        "name": "test",
-        "password": "test"
-      },
-      {
-        "name": "peter",
-        "password": "peter"
-      }
-    ],
+    "users": [],
     "xmlsets": [
       {
         "name": "ISA95",
@@ -42,31 +53,12 @@
     ],
     "publicCertificateFile": "",
     "privateCertificateFile": "",
-    "x": 220,
+    "maxNodesPerRead": 1000,
+    "maxNodesPerBrowse": 2000,
+    "x": 200,
     "y": 100,
     "wires": [
-      [],
       []
     ]
-  },
-  {
-    "id": "b6bf2900.3070e8",
-    "type": "comment",
-    "z": "f33a61fc.a017",
-    "name": "information",
-    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
-    "x": 210,
-    "y": 60,
-    "wires": []
-  },
-  {
-    "id": "7027664.651e898",
-    "type": "comment",
-    "z": "f33a61fc.a017",
-    "name": "ISA95",
-    "info": "Some links\nhttps://opcfoundation.org/markets-collaboration/isa-95/\n\n\nhttps://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/\n\n56 min video by Paul Hunkar\n“OPC UA for ISA-95 Common Object Model Companion Specification”\nhttps://youtu.be/OobhzbQoUnA",
-    "x": 350,
-    "y": 60,
-    "wires": []
   }
 ]
