@@ -4,7 +4,6 @@
       "discoveryUrl": "Discovery",
       "endpoint": "Endpoint",
       "connector": "Connector",
-      "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "type": "Type",
       "host": "Host",

@@ -32,6 +32,7 @@ module.exports = function (RED) {
     this.keepSessionAlive = config.keepSessionAlive
     this.loginEnabled = config.loginEnabled
     this.name = config.name
+    this.showErrors = config.showErrors
     this.securityPolicy = config.securityPolicy
     this.messageSecurityMode = config.securityMode
     this.publicCertificateFile = config.publicCertificateFile
@@ -185,6 +186,7 @@ module.exports = function (RED) {
         node.emit('session_started', node.opcuaSession)
         node.sessionConnectRetries = 0
       }).catch(function (err) {
+        coreConnector.internalDebugLog(err)
         if (node.showErrors) {
           node.error(err, {payload: ''})
         }
@@ -244,7 +246,7 @@ module.exports = function (RED) {
             coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
             node.resetSessionRenewMode()
           }).catch(function (err) {
-            coreConnector.internalDebugLog('Session Close Error ' + err.message)
+            coreConnector.internalDebugLog('Session Error On Close ' + err)
             node.resetSessionRenewMode()
           })
         } else {
@@ -252,7 +254,7 @@ module.exports = function (RED) {
           node.resetSessionRenewMode()
         }
       } catch (err) {
-        coreConnector.internalDebugLog('Session Close Error ' + err.message)
+        coreConnector.internalDebugLog('Session Catch On Error ' + err)
         node.resetSessionRenewMode()
       }
     }
@@ -268,18 +270,22 @@ module.exports = function (RED) {
     }
 
     node.handleError = function (err) {
-      if (err && node.showErrors) {
-        node.error(err, {payload: 'Connector Error'})
-        coreConnector.internalDebugLog('Error on ' + node.endpoint + ' err:' + err.message)
+      if (err) {
+        coreConnector.internalDebugLog('Error on ' + node.endpoint + ' err:' + err)
+        if (node.showErrors) {
+          node.error(err, {payload: ''})
+        }
       } else {
         coreConnector.internalDebugLog('Error on ' + node.endpoint)
       }
     }
 
     node.handleSessionError = function (err) {
-      if (err && node.showErrors) {
-        node.error(err, {payload: 'Connector Error'})
-        coreConnector.internalDebugLog('Session Error on ' + node.endpoint + ' err:' + err.message)
+      if (err) {
+        coreConnector.internalDebugLog('Session Error on ' + node.endpoint + ' err:' + err)
+        if (node.showErrors) {
+          node.error(err, {payload: ''})
+        }
       } else {
         coreConnector.internalDebugLog('Session Error on ' + node.endpoint)
       }
@@ -288,8 +294,11 @@ module.exports = function (RED) {
     }
 
     node.handleSessionClose = function (err) {
-      if (err && node.showErrors) {
-        node.error(err, {payload: 'Closed Session With Error'})
+      if (err) {
+        coreConnector.internalDebugLog('Session Error ' + err)
+        if (node.showErrors) {
+          node.error(err, {payload: ''})
+        }
       } else {
         coreConnector.internalDebugLog('Closed Session')
       }
