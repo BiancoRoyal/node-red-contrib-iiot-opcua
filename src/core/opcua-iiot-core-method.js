@@ -52,7 +52,6 @@ de.biancoroyal.opcua.iiot.core.method.getArgumentDefinition = function (session,
 
 de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
   let core = this.core
-  let coreMethod = this
   let coerceNodeId = this.core.nodeOPCUA.coerceNodeId
 
   return new Promise(
@@ -65,8 +64,6 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
             element.dataType = core.convertToDataType(element.dataType)
             element.value = core.convertDataValueByDataType({ value: element.value }, element.dataType)
           })
-
-          coreMethod.detailDebugLog(JSON.stringify(msg.inputArguments))
 
           let methodCalls = [{
             objectId: coerceNodeId(msg.objectId),

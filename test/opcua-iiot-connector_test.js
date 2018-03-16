@@ -343,6 +343,95 @@ var testWriteFlowPayload = [
   }
 ]
 
+var testMethodCallerFlowPayload = [
+  {
+    "id": "n1",
+    "type": "OPCUA-IIoT-Inject",
+    "injectType": "inject",
+    "payload": "1000",
+    "payloadType": "num",
+    "topic": "TestTopicMethod",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "3",
+    "name": "TestInject",
+    "addressSpaceItems": [],
+    "wires": [["n2", "n3"]]
+  },
+  {id:"n2", type:"helper"},
+  {
+    "id": "n3",
+    "type": "OPCUA-IIoT-Method-Caller",
+    "connector": "n4",
+    "objectId": "ns=4;i=1234",
+    "methodId": "ns=4;i=12345",
+    "methodType": "basic",
+    "value": "",
+    "justValue": true,
+    "name": "TestMethodBark",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "inputArguments": [
+      {
+        "name": "barks",
+        "dataType": "UInt32",
+        "value": "3"
+      },
+      {
+        "name": "volume",
+        "dataType": "UInt32",
+        "value": "6"
+      }
+    ],
+    "wires": [["n5"]]
+  },
+  {
+    "id": "n4",
+    "type": "OPCUA-IIoT-Connector",
+    "discoveryUrl": "",
+    "endpoint": "opc.tcp://localhost:1983/",
+    "keepSessionAlive": true,
+    "loginEnabled": false,
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "TESTSERVER",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "60000",
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false
+  },
+  {id:"n5", type:"helper"},
+  {
+    "id": "n6",
+    "type": "OPCUA-IIoT-Server",
+    "port": "1983",
+    "endpoint": "",
+    "acceptExternalCommands": true,
+    "maxAllowedSessionNumber": "",
+    "maxConnectionsPerEndpoint": "",
+    "maxAllowedSubscriptionNumber": "",
+    "alternateHostname": "",
+    "name": "TestServer",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "asoDemo": true,
+    "allowAnonymous": true,
+    "isAuditing": false,
+    "serverDiscovery": true,
+    "users": [],
+    "xmlsets": [],
+    "publicCertificateFile": "",
+    "privateCertificateFile": "",
+    "maxNodesPerRead": 1000,
+    "maxNodesPerBrowse": 2000,
+    "wires": [[]]
+  }
+]
+
 describe('OPC UA Connector node Testing', function () {
   before(function (done) {
     helper.startServer(done)
@@ -649,6 +738,45 @@ describe('OPC UA Connector node Testing', function () {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{"name":"Pressure","nodeId":"ns=4;s=Pressure","datatypeName":"Double"}])
+          done()
+        })
+      })
+    })
+  })
+
+  describe('Connector node with method', function () {
+    it('should get a message with payload after inject', function(done) {
+      this.timeout(5000)
+      helper.load([injectNode, methodCallerNode, inputNode, serverNode], testMethodCallerFlowPayload, function() {
+        let n2 = helper.getNode("n2")
+        n2.on("input", function(msg) {
+          msg.should.have.property('payload', 1000)
+          msg.should.have.property('topic', "TestTopicMethod")
+          done()
+        })
+      })
+    })
+
+    it('should get a message with nodeId in payload after method', function(done) {
+      this.timeout(5000)
+      helper.load([injectNode, methodCallerNode, inputNode, serverNode], testMethodCallerFlowPayload, function() {
+        let n5 = helper.getNode("n5")
+        n5.on("input", function (msg) {
+          msg.should.have.property('topic', "TestTopicMethod")
+          done()
+        })
+      })
+    })
+
+    it('should get a message with addressSpaceItems after method', function(done) {
+      this.timeout(5000)
+      helper.load([injectNode, methodCallerNode, inputNode, serverNode], testMethodCallerFlowPayload, function() {
+        let n5 = helper.getNode("n5")
+        n5.on("input", function (msg) {
+          msg.should.have.property('nodetype', "method")
+          msg.should.have.property('injectType', "inject")
+          msg.should.have.property('methodType', "basic")
+          msg.should.have.property('payload', [{"statusCode":{"value":0,"description":"No Error","name":"Good"},"outputArguments":[{"dataType":"String","arrayType":"Array","value":["Whaff!!!!!","Whaff!!!!!","Whaff!!!!!"]}]}])
           done()
         })
       })

@@ -90,33 +90,12 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nod
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.fillMessageObjectPayloadEntry = function (variant) {
-  let msgObjectPayloadEntry = variant || 'Unknown'
-
-  if (msgObjectPayloadEntry) {
-    msgObjectPayloadEntry = msgObjectPayloadEntry.toString()
-  }
-
-  return msgObjectPayloadEntry
-}
-
-de.biancoroyal.opcua.iiot.core.client.fillMessageObjectList = function (variantList) {
-  let coreClient = de.biancoroyal.opcua.iiot.core.client
-  let msgObjectList = []
-
-  variantList.forEach(function (element, index, array) {
-    coreClient.internalDebugLog('Variant List Entry ' + (index + 1) + ' Length ' + array.length)
-    msgObjectList.push({nodeId: element.nodeId.toString(), parent: element.name})
-  })
-
-  return msgObjectList
-}
-
 de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, options) {
+  let core = this.core
+
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        let core = require('./opcua-iiot-core')
         try {
           const structure = [
             {
@@ -167,7 +146,7 @@ de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, node
           }
         })
       } else {
-        reject(new Error('Session Not Valid To Read All Attributes'))
+        reject(new Error('Session Not Valid To Read History Value'))
       }
     }
   )

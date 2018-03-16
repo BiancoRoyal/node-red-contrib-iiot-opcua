@@ -291,7 +291,7 @@ module.exports = function (RED) {
       coreServer.internalDebugLog('Restart OPC UA Server')
 
       if (node.opcuaServer) {
-        node.opcuaServer.shutdown(1, function () {
+        node.opcuaServer.shutdown(function () {
           node.opcuaServer = null
           node.emit('shutdown')
           node.initNewServer()
@@ -319,7 +319,7 @@ module.exports = function (RED) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        node.opcuaServer.shutdown(1, function () {
+        node.opcuaServer.shutdown(function () {
           node.opcuaServer = null
           if (done) {
             done()
