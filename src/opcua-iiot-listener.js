@@ -456,16 +456,10 @@ module.exports = function (RED) {
     node.setNodeStatusTo('waiting')
 
     node.on('close', function (done) {
-      // let monitoredItem = null
-      // for (monitoredItem of node.monitoredItems) {
-      //   if (node.opcuaSession && node.opcuaSession.sessionId !== 'terminated' && monitoredItem.terminate) {
-      //     monitoredItem.terminate(function (err) {
-      //       node.monitoredItemTerminated({payload: 'close listener'}, monitoredItem, err)
-      //     })
-      //   }
-      // }
       if (uaSubscription) {
         uaSubscription.terminate(done)
+      } else {
+        done()
       }
     })
   }

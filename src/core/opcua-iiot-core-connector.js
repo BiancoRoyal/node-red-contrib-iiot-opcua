@@ -67,12 +67,21 @@ de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
 }
 
 de.biancoroyal.opcua.iiot.core.connector.createSession = function (opcuaClient, userIdentity) {
+  let coreConnector = this
+
   return new Promise(
     function (resolve, reject) {
       if (opcuaClient) {
         if (userIdentity && !userIdentity.userName) {
-          userIdentity = null
+          coreConnector.internalDebugLog('Create New Session Without User Identity None User')
+          userIdentity = {}
+        } else if (!userIdentity) {
+          coreConnector.internalDebugLog('Create New Session Without User Identity')
+          userIdentity = {}
+        } else {
+          coreConnector.internalDebugLog('Create New Session With User Identity For ' + userIdentity.userName)
         }
+
         opcuaClient.createSession(userIdentity, function (err, session) {
           if (err) {
             reject(err)
@@ -81,6 +90,7 @@ de.biancoroyal.opcua.iiot.core.connector.createSession = function (opcuaClient, 
           }
         })
       } else {
+        coreConnector.internalDebugLog('OPC UA Client Is Not Valid')
         reject(new Error('OPC UA Client Is Not Valid'))
       }
     }
@@ -211,8 +221,9 @@ de.biancoroyal.opcua.iiot.core.connector.closeSession = function (session) {
         session.close(function (err) {
           if (err) {
             reject(err)
+          } else {
+            resolve()
           }
-          resolve()
         })
       } else {
         resolve()

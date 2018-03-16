@@ -33,45 +33,32 @@ de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.o
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.type())
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.arch())
 
+de.biancoroyal.opcua.iiot.core.getPathFromRequireResolve = function (requireResolve) {
+  let pathToNodeOPCUA = ''
+
+  if (this.isWindows) {
+    pathToNodeOPCUA = requireResolve.replace('\\index.js', '')
+  } else {
+    pathToNodeOPCUA = requireResolve.replace('/index.js', '')
+  }
+
+  this.internalDebugLog('path to node-opcua: ' + pathToNodeOPCUA)
+
+  return pathToNodeOPCUA
+}
+
 de.biancoroyal.opcua.iiot.core.getNodeOPCUAPath = function () {
-  let nodeOPCUAPath = require.resolve('node-opcua')
-
-  if (this.isWindows) {
-    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
-  } else {
-    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
-  }
-
-  this.internalDebugLog(nodeOPCUAPath)
-
-  return nodeOPCUAPath
+  return this.getPathFromRequireResolve(require.resolve('node-opcua'))
 }
+
 de.biancoroyal.opcua.iiot.core.getNodeOPCUAClientPath = function () {
-  let nodeOPCUAPath = require.resolve('node-opcua-client')
-
-  if (this.isWindows) {
-    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
-  } else {
-    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
-  }
-
-  this.internalDebugLog(nodeOPCUAPath)
-
-  return nodeOPCUAPath
+  return this.getPathFromRequireResolve(require.resolve('node-opcua-client'))
 }
+
 de.biancoroyal.opcua.iiot.core.getNodeOPCUAServerPath = function () {
-  let nodeOPCUAPath = require.resolve('node-opcua-server')
-
-  if (this.isWindows) {
-    nodeOPCUAPath = nodeOPCUAPath.replace('\\index.js', '')
-  } else {
-    nodeOPCUAPath = nodeOPCUAPath.replace('/index.js', '')
-  }
-
-  this.internalDebugLog(nodeOPCUAPath)
-
-  return nodeOPCUAPath
+  return this.getPathFromRequireResolve(require.resolve('node-opcua-server'))
 }
+
 de.biancoroyal.opcua.iiot.core.getTimeUnitName = function (unit) {
   let unitAbbreviation = ''
 

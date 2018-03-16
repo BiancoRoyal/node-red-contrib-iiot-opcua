@@ -75,8 +75,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      coreMethod.detailDebugLog(JSON.stringify(msg))
-      let message = {}
+      let message = msg
 
       message.objectId = msg.payload.objectId || node.objectId
       message.methodId = msg.payload.methodId || node.methodId
@@ -128,11 +127,9 @@ module.exports = function (RED) {
 
         let result = null
         let outputArguments = []
-        let message = {
-          nodetype: 'method',
-          injectType: 'call',
-          methodType: data.msg.methodType
-        }
+        let message = data.msg
+        message.nodetype = 'method'
+        message.methodType = data.msg.methodType
 
         for (result of data.results) {
           outputArguments.push({statusCode: result.statusCode, outputArguments: result.outputArguments})
@@ -140,6 +137,9 @@ module.exports = function (RED) {
 
         let dataValuesString = {}
         if (node.justValue) {
+          if (message.inputArguments) {
+            delete message['inputArguments']
+          }
           dataValuesString = JSON.stringify(outputArguments, null, 2)
         } else {
           dataValuesString = JSON.stringify({
@@ -160,6 +160,11 @@ module.exports = function (RED) {
         }
 
         node.send(message)
+      }).catch(function (err) {
+        coreMethod.internalDebugLog(err)
+        if (node.showErrors) {
+          node.error(err, msg)
+        }
       })
     }
 
