@@ -2,12 +2,21 @@
   "opcua-iiot-contrib": {
     "label": {
       "eventType": "Event Type",
+      "resultType": "Result Type",
       "queueSize": "Queue Size",
       "usingListener": "Listener",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "parseStrings": "Parse Output",
       "lookupUseHint": "You can use the lookup or give a NodeId of your event."
+    },
+    "resulttype": {
+      "label": {
+        "basic": "basic",
+        "condition": "condition",
+        "state": "state",
+        "all": "all"
+      }
     }
   }
 }
