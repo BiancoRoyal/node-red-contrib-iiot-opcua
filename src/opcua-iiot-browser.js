@@ -90,11 +90,12 @@ module.exports = function (RED) {
         if (node.showErrors) {
           node.error(err, msg)
         }
-        coreBrowser.internalDebugLog('Browser Error ' + err.message)
-        node.status({fill: 'red', shape: 'dot', text: 'error'})
+        coreBrowser.internalDebugLog('Browser Error ' + err)
 
-        if (err.message && err.message.includes('BadSession')) {
-          node.connector.resetBadSession()
+        if (err && err.message) {
+          if (coreBrowser.core.isSessionBad(err)) {
+            node.connector.resetBadSession()
+          }
         }
       } else {
         results = browserEntries
@@ -110,7 +111,7 @@ module.exports = function (RED) {
 
       coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' + session.name + ' Id: ' + session.sessionId)
 
-      browserResult.browseResult.forEach(function (result) {
+      browserResult.forEach(function (result) {
         result.references.forEach(function (reference) {
           coreBrowser.internalDebugLog('Add Reference To List :' + reference)
           browserEntries.push(node.transformToEntry(reference))
@@ -121,7 +122,6 @@ module.exports = function (RED) {
         })
       })
 
-      node.status({fill: 'green', shape: 'dot', text: 'active'})
       node.sendMessage(msg, nodesToRead, addressItemsToRead)
     }
 
@@ -129,38 +129,26 @@ module.exports = function (RED) {
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
       browserEntries = []
 
-      if (session) {
-        coreBrowser.browse(session, node.browseTopic).then(function (browserResult) {
+      coreBrowser.browse(session, node.browseTopic)
+        .then(function (browserResult) {
           node.sendMessageBrowserResults(msg, session, browserResult)
         }).catch(function (err) {
           node.browseErrorHandling(err, msg)
         })
-      } else {
-        node.sessionNotReady(msg)
-      }
     }
 
     node.browseNodeList = function (session, msg) {
       browserEntries = []
       coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
 
-      if (session) {
-        msg.addressSpaceItems.map((entry) => (coreBrowser.browse(session, entry.nodeId).then(function (browserResult) {
-          browserEntries = []
-          node.sendMessageBrowserResults(msg, session, browserResult)
-        }).catch(function (err) {
-          node.browseErrorHandling(err, msg)
-        })))
-      } else {
-        node.sessionNotReady(msg)
-      }
-    }
-
-    node.sessionNotReady = function (msg) {
-      if (node.showErrors) {
-        node.error(new Error('Session To Browse Is Not Valid'), msg)
-      }
-      coreBrowser.internalDebugLog('Session To Browse Is Not Valid')
+      msg.addressSpaceItems.map((entry) => (
+        coreBrowser.browse(session, entry.nodeId)
+          .then(function (browserResult) {
+            browserEntries = []
+            node.sendMessageBrowserResults(msg, session, browserResult)
+          }).catch(function (err) {
+            node.browseErrorHandling(err, msg)
+          })))
     }
 
     node.sendMessage = function (originMessage, nodesToRead, addressItemsToRead) {
@@ -195,8 +183,6 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      node.browseTopic = null
-
       if (!node.opcuaSession) {
         node.error(new Error('Session Not Ready To Browse'), msg)
         return
@@ -210,7 +196,7 @@ module.exports = function (RED) {
         if (msg.addressSpaceItems) {
           node.browseNodeList(node.opcuaSession, msg)
         } else {
-          node.error(new Error('No Topic To Browse'), msg)
+          node.error(new Error('No AddressSpace Items Or Root To Browse'), msg)
         }
       }
     })

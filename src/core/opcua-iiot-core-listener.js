@@ -57,8 +57,6 @@ de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (ti
 de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, key, value) {
   let eventInformation = {}
 
-  this.eventDetailDebugLog('collectAlarmFields -> field: ' + field + ' key: ' + key + ' value: ' + JSON.stringify(value))
-
   switch (field) {
     // Common fields
     case 'EventId':
@@ -68,7 +66,7 @@ de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, ke
       eventInformation.eventType = value
       break
     case 'SourceNode':
-      eventInformation.ssourceNode = value
+      eventInformation.sourceNode = value
       break
     case 'SourceName':
       eventInformation.sourceName = value
@@ -91,7 +89,7 @@ de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, ke
       eventInformation.conditionClassId = value
       break
     case 'ConditionClassName':
-      eventInformation.conditionClassNameName = value
+      eventInformation.conditionClassName = value
       break
     case 'ConditionName':
       eventInformation.conditionName = value
@@ -169,18 +167,19 @@ de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, ke
 
 de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
   return ['EventId', 'SourceName', 'Message', 'ReceiveTime']
-  /* return [
-    'EventId',
+}
+
+de.biancoroyal.opcua.iiot.core.listener.getAllEventFields = function () {
+  return [
     'ConditionName',
-    'ConditionClassName',
+    'ConditionType',
     'ConditionClassId',
-    'SourceName',
+    'ConditionClassName',
+    'ConditionVariableType',
     'SourceNode',
     'BranchId',
     'EventType',
-    'ReceiveTime',
     'Severity',
-    'Message',
     'Retain',
     'Comment',
     'Comment.SourceTimestamp',
@@ -202,32 +201,42 @@ de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
     'LimitState.Id',
     'ActiveState',
     'ActiveState.Id'
-  ] */
+  ]
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getConditionEventFields = function () {
+de.biancoroyal.opcua.iiot.core.listener.getStateFields = function () {
   return [
-    'EventId',
-    'SourceName',
-    'Message',
-    'ReceiveTime',
+    'ConditionName',
+    'SourceNode',
+    'Quality',
+    'Time',
+    'EnabledState',
+    'EnabledState.Id',
+    'EnabledState.EffectiveDisplayName',
+    'EnabledState.TransitionTime',
+    'AckedState',
+    'AckedState.Id',
+    'ConfirmedState',
+    'ConfirmedState.Id',
+    'LimitState',
+    'LimitState.Id',
+    'ActiveState',
+    'ActiveState.Id'
+  ]
+}
+
+de.biancoroyal.opcua.iiot.core.listener.getConditionFields = function () {
+  return [
+    'Time',
+    'Quality',
+    'BranchId',
+    'SourceNode',
     'ConditionName',
     'ConditionType',
     'ConditionClassId',
     'ConditionClassName',
-    'ConditionVariableType',
-    'SourceNode',
-    'BranchId'
+    'ConditionVariableType'
   ]
-}
-
-de.biancoroyal.opcua.iiot.core.listener.MonitoredItemSet = function () {
-  let Set = require('collections/set')
-  return new Set(null, function (a, b) {
-    return a.topicName === b.topicName
-  }, function (object) {
-    return object.topicName
-  })
 }
 
 de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addressSpaceItem, msg, subscription) {
@@ -329,43 +338,49 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpa
     })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session, callback) {
-  let entries = []
-  let makeNodeId = this.core.nodeOPCUA.makeNodeId
-  let ObjectTypeIds = this.core.nodeOPCUA.ObjectTypeIds
-
-  let browseEventTypes = {
-    nodeId: makeNodeId(ObjectTypeIds.BaseEventType),
-    referenceTypeId: this.core.nodeOPCUA.resolveNodeId('HasSubtype'),
-    browseDirection: this.core.nodeOPCUA.BrowseDirection.Forward,
-    includeSubtypes: true,
-    nodeClassMask: this.core.nodeOPCUA.NodeClassMask.ObjectType,
-    resultMask: 63 // All ResultMask_Schema
-  }
-
-  let nodesToBrowse = [browseEventTypes]
-
-  session.browse(nodesToBrowse, function (err, results, diagnostics) {
-    if (err) {
-      callback(err)
-    } else {
-      if (results) {
-        if (results.length > 0) {
-          results[0].references.forEach(function (reference) {
-            entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
-          })
-        } else {
-          if (results.references) {
-            results.references.forEach(function (reference) {
-              entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
-            })
-          }
-        }
+de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session) {
+  return new Promise(
+    function (resolve, reject) {
+      if (!session) {
+        reject(new Error('Session Is Not Valid To Browse For Event Types'))
       }
 
-      callback(null, entries, diagnostics)
-    }
-  })
+      let entries = []
+      let makeNodeId = this.core.nodeOPCUA.makeNodeId
+      let ObjectTypeIds = this.core.nodeOPCUA.ObjectTypeIds
+
+      let browseEventTypes = {
+        nodeId: makeNodeId(ObjectTypeIds.BaseEventType),
+        referenceTypeId: this.core.nodeOPCUA.resolveNodeId('HasSubtype'),
+        browseDirection: this.core.nodeOPCUA.BrowseDirection.Forward,
+        includeSubtypes: true,
+        nodeClassMask: this.core.nodeOPCUA.NodeClassMask.ObjectType,
+        resultMask: 63 // All ResultMask_Schema
+      }
+
+      let nodesToBrowse = [browseEventTypes]
+
+      session.browse(nodesToBrowse, function (err, results, diagnostics) {
+        if (err) {
+          reject(err)
+        } else {
+          if (results) {
+            if (results.length > 0) {
+              results[0].references.forEach(function (reference) {
+                entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
+              })
+            } else {
+              if (results.references) {
+                results.references.forEach(function (reference) {
+                  entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
+                })
+              }
+            }
+          }
+          resolve(entries)
+        }
+      })
+    })
 }
 
 de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browseForBrowseName, dataValue) {
@@ -374,6 +389,14 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
 
   return new Promise(
     function (resolve, reject) {
+      if (!session) {
+        reject(new Error('Session Is Not Valid To Analyze Event'))
+      }
+
+      if (!browseForBrowseName || typeof browseForBrowseName !== 'function') {
+        reject(new Error('BrowseForBrowseName Is Not Valid Function'))
+      }
+
       if (!dataValue) {
         reject(new Error('Event Response Not Valid'))
       } else {

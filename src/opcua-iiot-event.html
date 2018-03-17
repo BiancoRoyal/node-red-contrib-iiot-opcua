@@ -14,6 +14,7 @@
     defaults: {
       eventType: {value: 'i=2041', required: true},
       eventTypeLabel: {value: 'BaseTypeEvent'},
+      resultType: {value: 'basic'},
       queueSize: {value: 1, required: true, validate: RED.validators.number()},
       usingListener: {value: false},
       name: {value: ''},
@@ -79,6 +80,15 @@
             <p><input type="text" id='node-input-eventTypeLabel' style='width: 80%' readonly></p>
             <p><span data-i18n="opcua-iiot-contrib.label.lookupUseHint"></span></p>
         </div>
+    </div>
+    <div class="form-row" id="node-inject-resultType">
+        <label for=""><i class="fa fa-list"></i> <span data-i18n="opcua-iiot-contrib.label.resultType"></span></label>
+        <select id="node-input-resultType" type="text" style="width:140px;">
+            <option value="basic" data-i18n="opcua-iiot-contrib.resulttype.label.basic"></option>
+            <option value="condition" data-i18n="opcua-iiot-contrib.resulttype.label.condition"></option>
+            <option value="state" data-i18n="opcua-iiot-contrib.resulttype.label.state"></option>
+            <option value="all" data-i18n="opcua-iiot-contrib.resulttype.label.all"></option>
+        </select>
     </div>
     <div class="form-row">
         <label for="node-input-queueSize"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.queueSize"></span></label>

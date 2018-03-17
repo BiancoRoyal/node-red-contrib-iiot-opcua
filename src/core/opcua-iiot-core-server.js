@@ -48,7 +48,11 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpaceFromScript = function
   return new Promise(
     function (resolve, reject) {
       if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
-        constructAddressSpaceScript(de.biancoroyal.opcua.iiot.core.server.flex, server.engine.addressSpace, eventObjects, resolve)
+        try {
+          constructAddressSpaceScript(de.biancoroyal.opcua.iiot.core.server.flex, server.engine.addressSpace, eventObjects, resolve)
+        } catch (err) {
+          reject(err)
+        }
       } else {
         reject(new Error('Wrong Parameters Construct AddressSpace From Script'))
       }

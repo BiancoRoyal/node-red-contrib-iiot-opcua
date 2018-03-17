@@ -35,12 +35,6 @@ module.exports = function (RED) {
     node.opcuaClient = null
     node.opcuaSession = null
 
-    node.verboseLog = function (logMessage) {
-      if (RED.settings.verbose) {
-        coreClient.readDebugLog(logMessage)
-      }
-    }
-
     node.statusLog = function (logMessage) {
       if (RED.settings.verbose && node.showStatusActivities) {
         coreClient.readDebugLog('Status: ' + logMessage)
@@ -54,122 +48,87 @@ module.exports = function (RED) {
     }
 
     node.handleReadError = function (err, msg) {
-      node.verboseLog('Read Handle Error '.red + err)
-
+      coreClient.readDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      coreClient.readDebugLog(err.message)
-      node.setNodeStatusTo('error')
-
-      if (err.message && err.message.includes('BadSession')) {
-        node.connector.resetBadSession()
+      if (err && err.message) {
+        if (coreClient.core.isSessionBad(err)) {
+          node.connector.resetBadSession()
+        }
       }
     }
 
     node.readFromSession = function (session, itemsToRead, msg) {
-      if (!itemsToRead || itemsToRead.length === 0) {
-        node.handleReadError(new Error('No Items To Read'), msg)
-        return
-      }
+      coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
 
-      if (session) {
-        if (session.sessionId === 'terminated') {
-          node.handleReadError(new Error('Session Terminated While Read'), msg)
-        } else {
-          coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
+      switch (parseInt(node.attributeId)) {
+        case 0:
+          coreClient.readAllAttributes(session, itemsToRead).then(function (readResult) {
+            try {
+              node.send(node.buildResultMessage(msg, 'AllAttributes', readResult))
+            } catch (err) {
+              node.handleReadError(err, msg)
+            }
+          }).catch(function (err) {
+            node.handleReadError(err, msg)
+          })
+          break
+        case 13:
+          coreClient.readVariableValue(session, itemsToRead).then(function (readResult) {
+            try {
+              let message = node.buildResultMessage(msg, 'VariableValue', readResult)
+              node.send(message)
+            } catch (err) {
+              node.handleReadError(err, msg)
+            }
+          }).catch(function (err) {
+            node.handleReadError(err, msg)
+          })
+          break
+        case 130:
+          let historyDate = new Date()
+          node.historyStart = new Date(historyDate.getDate() - 1)
+          node.historyEnd = historyDate
 
-          switch (parseInt(node.attributeId)) {
-            case 0:
-              coreClient.readAllAttributes(session, itemsToRead).then(function (readResult) {
-                node.setNodeStatusTo('active')
+          coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd).then(function (readResult) {
+            try {
+              let message = node.buildResultMessage(msg, 'HistoryValue', readResult)
+              message.historyStart = node.historyStart
+              message.historyEnd = node.historyEnd
+              node.send(message)
+            } catch (err) {
+              node.handleReadError(err, msg)
+            }
+          }).catch(function (err) {
+            node.handleReadError(err, msg)
+          })
+          break
+        default:
+          let item = null
+          let transformedItem = null
+          let transformedItemsToRead = []
 
-                try {
-                  node.send(node.buildResultMessage(msg, 'AllAttributes', readResult))
-                } catch (err) {
-                  node.handleReadError(err, msg)
-                }
-              }).catch(function (err) {
-                coreClient.readDebugLog('Error Items To Read All Attributes: ' + JSON.stringify(itemsToRead))
-                node.handleReadError(err, msg)
-              })
-              break
-            case 13:
-              coreClient.core.specialDebugLog('requested Values ' + itemsToRead.length)
-
-              coreClient.readVariableValue(session, itemsToRead).then(function (readResult) {
-                node.setNodeStatusTo('active')
-
-                try {
-                  let message = node.buildResultMessage(msg, 'VariableValue', readResult)
-                  node.send(message)
-                } catch (err) {
-                  node.handleReadError(err, msg)
-                }
-              }).catch(function (err) {
-                coreClient.core.specialDebugLog(err)
-                coreClient.readDebugLog('Error Items To Read Variable Value: ' + JSON.stringify(itemsToRead))
-                node.handleReadError(err, msg)
-              })
-              break
-            case 130:
-              coreClient.core.specialDebugLog('requested History ' + itemsToRead.length)
-
-              let historyDate = new Date()
-              node.historyStart = new Date(historyDate.getDate() - 1)
-              node.historyEnd = historyDate
-
-              coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd).then(function (readResult) {
-                node.setNodeStatusTo('active')
-
-                try {
-                  let message = node.buildResultMessage(msg, 'HistoryValue', readResult)
-                  message.historyStart = node.historyStart
-                  message.historyEnd = node.historyEnd
-                  node.send(message)
-                } catch (err) {
-                  node.handleReadError(err, msg)
-                }
-              }).catch(function (err) {
-                coreClient.core.specialDebugLog(err)
-                coreClient.readDebugLog('Error Items To Read History Value: ' + JSON.stringify(itemsToRead))
-                node.handleReadError(err, msg)
-              })
-              break
-            default:
-              let item = null
-              let transformedItem = null
-              let transformedItemsToRead = []
-
-              for (item of itemsToRead) {
-                transformedItem = {
-                  nodeId: item,
-                  attributeId: Number(node.attributeId) || null
-                }
-                coreClient.readDebugLog('Transformed Item: ' + JSON.stringify(transformedItem))
-                transformedItemsToRead.push(transformedItem)
-              }
-
-              coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (readResult) {
-                node.setNodeStatusTo('active')
-
-                try {
-                  let message = node.buildResultMessage(msg, 'Default', readResult)
-                  message.maxAge = node.maxAge
-                  node.send(message)
-                } catch (err) {
-                  node.handleReadError(err, msg)
-                }
-              }).catch(function (err) {
-                coreClient.readDebugLog('Error Read Default itemsToRead: ' + JSON.stringify(itemsToRead))
-                coreClient.readDebugLog('Error Read Default transformedItemsToRead: ' + JSON.stringify(transformedItemsToRead))
-                node.handleReadError(err, msg)
-              })
+          for (item of itemsToRead) {
+            transformedItem = {
+              nodeId: item,
+              attributeId: Number(node.attributeId) || null
+            }
+            transformedItemsToRead.push(transformedItem)
           }
-        }
-      } else {
-        node.handleReadError(new Error('Session Not Valid On Read'), msg)
+
+          coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (readResult) {
+            try {
+              let message = node.buildResultMessage(msg, 'Default', readResult)
+              message.maxAge = node.maxAge
+              node.send(message)
+            } catch (err) {
+              node.handleReadError(err, msg)
+            }
+          }).catch(function (err) {
+            node.handleReadError(err, msg)
+          })
       }
     }
 
@@ -191,7 +150,7 @@ module.exports = function (RED) {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
       } catch (err) {
         if (node.showErrors) {
-          node.warn('JSON not to parse from string for dataValues type ' + typeof readResult)
+          node.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
           node.error(err, msg)
         }
 
@@ -206,7 +165,7 @@ module.exports = function (RED) {
           RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
         } catch (err) {
           if (node.showErrors) {
-            node.warn('JSON not to parse from string for dataValues type ' + typeof readResult.results)
+            node.warn('JSON not to parse from string for dataValues type ' + readResult.results)
             node.error(err, msg)
           }
 
@@ -252,7 +211,7 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    node.setNodeStatusTo(false)
+    node.setNodeStatusTo('waiting')
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Read', OPCUAIIoTRead)

@@ -52,17 +52,15 @@ module.exports = function (RED) {
     }
 
     node.handleMethodError = function (err, msg) {
-      node.verboseLog('Method Handle Error '.red + err)
-
+      coreMethod.internalDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      coreMethod.internalDebugLog(err.message)
-      node.setNodeStatusTo('error')
-
-      if (err.message && err.message.includes('BadSession')) {
-        node.connector.resetBadSession()
+      if (err && err.message) {
+        if (coreMethod.core.isSessionBad(err)) {
+          node.connector.resetBadSession()
+        }
       }
     }
 

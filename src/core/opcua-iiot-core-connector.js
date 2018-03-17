@@ -195,21 +195,35 @@ de.biancoroyal.opcua.iiot.core.connector.logEndpoints = function (options, endpo
 de.biancoroyal.opcua.iiot.core.connector.disconnect = function (opcuaClient, session) {
   return new Promise(
     function (resolve, reject) {
-      de.biancoroyal.opcua.iiot.core.connector.closeSession(session).then(function () {
-        if (opcuaClient) {
-          opcuaClient.disconnect(function (err) {
-            if (err) {
-              reject(err)
-            } else {
-              resolve()
-            }
-          })
-        } else {
-          resolve()
-        }
-      }).catch(function (err) {
-        reject(err)
-      })
+      if (session && session.sessionId !== 'terminated') {
+        session.close(function (err) {
+          if (err) {
+            reject(err)
+          }
+
+          if (opcuaClient) {
+            opcuaClient.disconnect(function (err) {
+              if (err) {
+                reject(err)
+              } else {
+                resolve()
+              }
+            })
+          } else {
+            resolve()
+          }
+        })
+      } else if (opcuaClient) {
+        opcuaClient.disconnect(function (err) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      } else {
+        resolve()
+      }
     }
   )
 }

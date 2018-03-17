@@ -314,15 +314,18 @@ module.exports = function (RED) {
 
     node.on('close', function (done) {
       coreConnector.internalDebugLog('Close Disconnecting From ' + node.endpoint)
-      coreConnector.disconnect(node.opcuaClient).then(function () {
-        coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
-        node.opcuaClient = null
-        done()
-      }).catch(function (err) {
-        node.error(err, {payload: ''})
-        node.opcuaClient = null
-        done()
-      })
+      coreConnector.disconnect(node.opcuaClient)
+        .then(function () {
+          coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
+          node.opcuaClient = null
+          done()
+        }).catch(function (err) {
+          if (node.showErrors) {
+            node.error(err, {payload: ''})
+          }
+          node.opcuaClient = null
+          done()
+        })
     })
   }
 

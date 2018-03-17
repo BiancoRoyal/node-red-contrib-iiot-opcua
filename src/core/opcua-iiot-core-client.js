@@ -46,18 +46,17 @@ de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite) {
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.read = function (session, items, maxAge) {
+de.biancoroyal.opcua.iiot.core.client.read = function (session, nodesToRead, maxAge) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.read(items, maxAge, function (err, nodesToRead, dataValues, diagnostics) {
+        session.read(nodesToRead, maxAge, function (err, dataValues) {
           if (err) {
             reject(err)
           } else {
             resolve({
               results: dataValues,
-              nodesToRead: nodesToRead,
-              diagnostics: diagnostics
+              nodesToRead: nodesToRead
             })
           }
         })
@@ -72,14 +71,13 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nod
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.readVariableValue(nodesToRead, function (err, dataValues, diagnostics) {
+        session.readVariableValue(nodesToRead, function (err, dataValues) {
           if (err) {
             reject(err)
           } else {
             resolve({
               results: dataValues,
-              nodesToRead: nodesToRead,
-              diagnostic: diagnostics
+              nodesToRead: nodesToRead
             })
           }
         })
@@ -90,58 +88,17 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nod
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readObject = function (session, element, options) {
-  let core = this.core
-
-  return new Promise(
-    function (resolve, reject) {
-      if (session) {
-        try {
-          const structure = [
-            {
-              nodeId: element.nodeId,
-              referenceTypeId: 'Organizes',
-              includeSubtypes: true,
-              browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-              resultMask: 0x3f
-            },
-            {
-              nodeId: element.nodeId,
-              referenceTypeId: 'Aggregates',
-              includeSubtypes: true,
-              browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-              resultMask: 0x3f
-            }
-          ]
-
-          session.browse(structure, function (err, results) {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(results)
-            }
-          })
-        } catch (err) {
-          reject(err)
-        }
-      } else {
-        reject(new Error('Session Not Valid To Read Meta Information'))
-      }
-    })
-}
-
 de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, nodesToRead, start, end) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        session.readHistoryValue(nodesToRead, start, end, function (err, dataValues, diagnostics) {
+        session.readHistoryValue(nodesToRead, start, end, function (err, dataValues) {
           if (err) {
             reject(err)
           } else {
             resolve({
               results: dataValues,
-              nodesToRead: nodesToRead,
-              diagnostics: diagnostics
+              nodesToRead: nodesToRead
             })
           }
         })

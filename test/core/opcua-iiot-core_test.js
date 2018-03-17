@@ -9,6 +9,7 @@
 
 describe('OPC UA Core', function () {
   let assert = require('chai').assert
+  let expect = require('chai').expect
   let core = require('../../src/core/opcua-iiot-core')
   let isWindows = /^win/.test(core.os.platform())
 
@@ -93,6 +94,68 @@ describe('OPC UA Core', function () {
     it('should return the right string for converting to Int32', function (done) {
       let result = core.toInt32(16)
       assert.equal(16, result)
+      done()
+    })
+  })
+
+  describe('core helper functions', function () {
+    it('should return true if message includes BadSession', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a BadSession Test!')), true)
+      done()
+    })
+
+    it('should return false if message not includes BadSession', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a Test!')), false)
+      done()
+    })
+
+    it('should return false if message includes some of Session', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a Session Test!')), false)
+      done()
+    })
+
+    it('should return false if message not includes Invalid Channel', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a Invalid Channel Test!')), true)
+      done()
+    })
+
+    it('should return false if message not includes Invalid Channel', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a Test!')), false)
+      done()
+    })
+
+    it('should return value of available memory', function (done) {
+      expect(core.availableMemory()).is.greaterThan(0)
+      done()
+    })
+
+    it('should return array of nodes to read', function (done) {
+      expect(core.buildNodesToRead({payload:'', nodesToRead:["ns=4;s=TestReadWrite"]})).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      done()
+    })
+
+    it('should return array of nodes to write', function (done) {
+      expect(core.buildNodesToRead({payload:'', nodesToWrite:["ns=4;s=TestReadWrite"]})).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      done()
+    })
+
+    it('should return array of nodes from addressSpaceItems', function (done) {
+      expect(core.buildNodesToRead({payload:'', addressSpaceItems:[{name:'', nodeId:"ns=4;s=TestReadWrite", datatypeName:''}]})).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      done()
+    })
+
+    it('should return array of nodes to read in payload', function (done) {
+      expect(core.buildNodesToRead({payload: { nodesToRead:["ns=4;s=TestReadWrite"]} })).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      done()
+    })
+
+    it('should return array of nodes to write in payload', function (done) {
+      expect(core.buildNodesToRead({payload: { nodesToWrite:["ns=4;s=TestReadWrite"]} })).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      done()
+    })
+
+    it('should return array of nodes in payload from addressSpaceItems', function (done) {
+      expect(core.buildNodesToRead({payload: { addressSpaceItems:[{name:'', nodeId:"ns=4;s=TestReadWrite", datatypeName:''}]} })).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
       done()
     })
   })

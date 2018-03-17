@@ -60,22 +60,6 @@ describe('OPC UA Core Client', function () {
     })
   })
 
-  describe('readObject', function () {
-    it('should return Error object, if none value is present', function (done) {
-      coreClient.readObject(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read Meta Information', err.message)
-        done()
-      })
-    })
-
-    it('should be instance of Promise, if none value is present', function (done) {
-      expect(coreClient.readObject(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read Meta Information', err.message)
-        done()
-      })).to.be.instanceOf(Promise)
-    })
-  })
-
   describe('readHistoryValue', function () {
     it('should return Error object, if none value is present', function (done) {
       coreClient.readHistoryValue(null, null, null, null).catch(function (err) {

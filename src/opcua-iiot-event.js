@@ -21,6 +21,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
     this.eventType = config.eventType
     this.eventTypeLabel = config.eventTypeLabel
+    this.resultType = config.resultType || 'basic'
     this.queueSize = config.queueSize
     this.usingListener = config.usingListener
     this.name = config.name
@@ -45,11 +46,20 @@ module.exports = function (RED) {
         node.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
 
-      let uaEventFields = null
-      if (node.eventType.indexOf('Condition') > -1) {
-        uaEventFields = coreListener.getConditionEventFields()
-      } else {
-        uaEventFields = coreListener.getBasicEventFields()
+      let uaEventFields = coreListener.getBasicEventFields()
+
+      switch (node.resultType) {
+        case 'condition':
+          uaEventFields.push(coreListener.getConditionFields())
+          break
+        case 'state':
+          uaEventFields.push(coreListener.getStateFields())
+          break
+        case 'all':
+          uaEventFields.push(coreListener.getAllEventFields())
+          break
+        default:
+          break
       }
 
       let uaEventFilter = coreListener.core.nodeOPCUA.constructEventFilter(uaEventFields)
