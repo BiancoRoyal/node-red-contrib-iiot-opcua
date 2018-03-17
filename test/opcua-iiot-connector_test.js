@@ -16,12 +16,20 @@ var helper = require('./helper.js')
 // iiot opc ua nodes
 var serverNode = require('../src/opcua-iiot-server')
 var injectNode = require('../src/opcua-iiot-inject')
+var inputNode = require('../src/opcua-iiot-connector')
+// services
 var readNode = require('../src/opcua-iiot-read')
 var writeNode = require('../src/opcua-iiot-write')
 var browserNode = require('../src/opcua-iiot-browser')
 var listenerNode = require('../src/opcua-iiot-listener')
 var methodCallerNode = require('../src/opcua-iiot-method-caller')
-var inputNode = require('../src/opcua-iiot-connector')
+
+
+var nodesToLoadForBrowser = [injectNode, browserNode, inputNode, serverNode]
+var nodesToLoadForReader = [injectNode, readNode, inputNode, serverNode]
+var nodesToLoadForWriter = [injectNode, writeNode, inputNode, serverNode]
+var nodesToLoadForListener = [injectNode, listenerNode, inputNode, serverNode]
+var nodesToLoadForMethodCaller = [injectNode, methodCallerNode, inputNode, serverNode]
 
 var testBrowserFlowPayload = [
   {
@@ -34,7 +42,7 @@ var testBrowserFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "3.3",
     "name": "TestInject",
     "addressSpaceItems": [],
     "wires": [["n2", "n3"]]
@@ -194,7 +202,7 @@ var testListenerFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "3.4",
     "name": "",
     "addressSpaceItems": [
       {
@@ -480,7 +488,7 @@ describe('OPC UA Connector node Testing', function () {
   describe('Connector node with browser', function () {
     it('should get a message with payload after inject', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, browserNode, inputNode, serverNode], testBrowserFlowPayload, function() {
+      helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 'testpayload')
@@ -491,7 +499,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with browseTopic in payload after browse', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, browserNode, inputNode, serverNode], testBrowserFlowPayload, function() {
+      helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.payload.should.have.property('browseTopic', "ns=4;i=1234")
@@ -502,7 +510,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with browserItems in payload after browse', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, browserNode, inputNode, serverNode], testBrowserFlowPayload, function() {
+      helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.payload.should.have.property('browserItems', [{
@@ -635,7 +643,7 @@ describe('OPC UA Connector node Testing', function () {
   describe('Connector node with read', function () {
     it('should get a message with payload after inject', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, readNode, inputNode, serverNode], testReadFlowPayload, function() {
+      helper.load(nodesToLoadForReader, testReadFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 'testpayload')
@@ -647,7 +655,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with nodeId in payload after read', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, readNode, inputNode, serverNode], testReadFlowPayload, function() {
+      helper.load(nodesToLoadForReader, testReadFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.payload[0].should.have.property('nodeId', "ns=4;s=Pressure")
@@ -659,7 +667,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with addressSpaceItems after read', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, readNode, inputNode, serverNode], testReadFlowPayload, function() {
+      helper.load(nodesToLoadForReader, testReadFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{"name":"","nodeId":"ns=4;s=Pressure","datatypeName":""}])
@@ -672,7 +680,7 @@ describe('OPC UA Connector node Testing', function () {
   describe('Connector node with listener', function () {
     it('should get a message with payload after inject', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, listenerNode, inputNode, serverNode], testListenerFlowPayload, function() {
+      helper.load(nodesToLoadForListener, testListenerFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.payload.should.have.property('options')
@@ -684,7 +692,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with nodeId in payload after listen', function(done) {
       this.timeout(6000)
-      helper.load([injectNode, listenerNode, inputNode, serverNode], testListenerFlowPayload, function() {
+      helper.load(nodesToLoadForListener, testListenerFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.payload.value.should.have.property('dataType', 'Double')
@@ -698,7 +706,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with addressSpaceItems after listen', function(done) {
       this.timeout(6000)
-      helper.load([injectNode, listenerNode, inputNode, serverNode], testListenerFlowPayload, function() {
+      helper.load(nodesToLoadForListener, testListenerFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{"name":"","nodeId":"ns=4;s=Pressure","datatypeName":""}])
@@ -711,7 +719,7 @@ describe('OPC UA Connector node Testing', function () {
   describe('Connector node with write', function () {
     it('should get a message with payload after inject', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, writeNode, inputNode, serverNode], testWriteFlowPayload, function() {
+      helper.load(nodesToLoadForWriter, testWriteFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 1000)
@@ -723,7 +731,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with nodeId in payload after write', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, writeNode, inputNode, serverNode], testWriteFlowPayload, function() {
+      helper.load(nodesToLoadForWriter, testWriteFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.should.have.property('topic', "TestTopicWrite")
@@ -734,7 +742,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with addressSpaceItems after write', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, writeNode, inputNode, serverNode], testWriteFlowPayload, function() {
+      helper.load(nodesToLoadForWriter, testWriteFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{"name":"Pressure","nodeId":"ns=4;s=Pressure","datatypeName":"Double"}])
@@ -747,7 +755,7 @@ describe('OPC UA Connector node Testing', function () {
   describe('Connector node with method', function () {
     it('should get a message with payload after inject', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, methodCallerNode, inputNode, serverNode], testMethodCallerFlowPayload, function() {
+      helper.load(nodesToLoadForMethodCaller, testMethodCallerFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 1000)
@@ -759,7 +767,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with nodeId in payload after method', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, methodCallerNode, inputNode, serverNode], testMethodCallerFlowPayload, function() {
+      helper.load(nodesToLoadForMethodCaller, testMethodCallerFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.should.have.property('topic', "TestTopicMethod")
@@ -770,7 +778,7 @@ describe('OPC UA Connector node Testing', function () {
 
     it('should get a message with addressSpaceItems after method', function(done) {
       this.timeout(5000)
-      helper.load([injectNode, methodCallerNode, inputNode, serverNode], testMethodCallerFlowPayload, function() {
+      helper.load(nodesToLoadForMethodCaller, testMethodCallerFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.should.have.property('nodetype', "method")

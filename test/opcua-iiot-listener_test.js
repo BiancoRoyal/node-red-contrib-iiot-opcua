@@ -13,11 +13,13 @@
 var assert = require('chai').assert
 
 // iiot opc ua nodes
-var serverNode = require('../src/opcua-iiot-server')
 var injectNode = require('../src/opcua-iiot-inject')
+var serverNode = require('../src/opcua-iiot-server')
 var connectorNode = require('../src/opcua-iiot-connector')
 var inputNode = require('../src/opcua-iiot-listener')
 var helper = require('./helper.js')
+
+var nodesToLoad = [injectNode, connectorNode, inputNode, serverNode]
 
 var testFlowPayload = [
   {
@@ -30,7 +32,7 @@ var testFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "3.3",
     "name": "TestListen",
     "addressSpaceItems": [
       {
@@ -158,7 +160,7 @@ describe('OPC UA Listener node Testing', function () {
 
     it('should get a message with payload after inject', function(done) {
       this.timeout(5000)
-      helper.load([serverNode, injectNode, connectorNode, inputNode], testFlowPayload, function() {
+      helper.load(nodesToLoad, testFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.should.have.property('topic', 'TestTopicListen')
@@ -170,8 +172,8 @@ describe('OPC UA Listener node Testing', function () {
     })
 
     it('should get a message with payload options after inject', function(done) {
-      this.timeout(4000)
-      helper.load([serverNode, injectNode, connectorNode, inputNode], testFlowPayload, function() {
+      this.timeout(5000)
+      helper.load(nodesToLoad, testFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.payload.options.should.have.property('requestedPublishingInterval', 2000)
@@ -182,8 +184,8 @@ describe('OPC UA Listener node Testing', function () {
     })
 
     it('should get a message with payload test after listener', function(done) {
-      this.timeout(4000)
-      helper.load([serverNode, injectNode, connectorNode, inputNode], testFlowPayload, function() {
+      this.timeout(5000)
+      helper.load(nodesToLoad, testFlowPayload, function() {
         let n3 = helper.getNode("n3")
         n3.on("input", function(msg) {
           msg.payload.options.should.have.property('requestedPublishingInterval', 2000)
@@ -195,12 +197,11 @@ describe('OPC UA Listener node Testing', function () {
 
     it('should verify a message on changed monitored item', function(done) {
       this.timeout(6000)
-      helper.load([serverNode, injectNode, connectorNode, inputNode], testFlowPayload, function() {
+      helper.load(nodesToLoad, testFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function(msg) {
           msg.payload.value.should.have.property('dataType', 'Double')
           msg.payload.should.have.property('statusCode')
-          // msg.should.have.property('addressSpaceItems', [{"name":"","nodeId":"ns=4;s=free_memory","datatypeName":""}]);
           done()
         })
       })

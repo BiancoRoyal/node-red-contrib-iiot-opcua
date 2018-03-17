@@ -50,17 +50,15 @@ module.exports = function (RED) {
     }
 
     node.handleWriteError = function (err, msg) {
-      node.verboseLog('Write Handle Error '.red + err)
-
+      coreClient.writeDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      coreClient.writeDebugLog(err.message)
-      node.setNodeStatusTo('error')
-
-      if (err.message && err.message.includes('BadSession')) {
-        node.connector.resetBadSession()
+      if (err && err.message) {
+        if (coreClient.core.isSessionBad(err)) {
+          node.connector.resetBadSession()
+        }
       }
     }
 
@@ -72,8 +70,6 @@ module.exports = function (RED) {
           let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
 
           coreClient.write(session, nodesToWrite).then(function (writeResult) {
-            node.setNodeStatusTo('active')
-
             try {
               let message = node.buildResultMessage(msg, writeResult)
               node.send(message)

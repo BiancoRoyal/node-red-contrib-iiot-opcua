@@ -315,18 +315,17 @@ module.exports = function (RED) {
     }
 
     node.errorHandling = function (err) {
-      node.verboseLog('Listener Handle Error '.red + err)
-
+      coreListener.internalDebugLog(err)
       if (node.showErrors) {
         node.error(err)
       }
 
-      coreListener.internalDebugLog(err.message)
-
-      if (err && err.message && err.message.includes('BadSession')) {
-        node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
-        node.monitoredItems.clear()
-        node.connector.resetBadSession()
+      if (err && err.message) {
+        if (coreListener.core.isSessionBad(err)) {
+          node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
+          node.monitoredItems.clear()
+          node.connector.resetBadSession()
+        }
       }
     }
 

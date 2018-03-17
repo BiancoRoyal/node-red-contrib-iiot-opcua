@@ -961,64 +961,12 @@ de.biancoroyal.opcua.iiot.core.buildNodesToListen = function (msg) {
   return msg.addressItemsToRead || msg.addressSpaceItems
 }
 
-de.biancoroyal.opcua.iiot.core.dataValuetoString = function (attribute, dataValue) {
-  if (!dataValue || !dataValue.value || !dataValue.value.hasOwnProperty('value')) {
-    this.detailDebugLog('dataValuetoString input attribute:' + attribute + ' dataValue: ' + JSON.stringify(dataValue))
-    return '<null>'
-  }
-
-  let opcua = this.nodeOPCUA
-  let _ = require('underscore')
-  const NodeClass = opcua.NodeClass
-  const DataTypeIdsToString = _.invert(opcua.DataTypeIds)
-
-  switch (attribute) {
-    case opcua.AttributeIds.DataType:
-      return { datatype: DataTypeIdsToString[dataValue.value.value.value], data: JSON.parse(JSON.stringify(dataValue.value.value)) }
-    case opcua.AttributeIds.NodeClass:
-      return { class: NodeClass.get(dataValue.value.value).key, data: JSON.parse(JSON.stringify(dataValue.value.value)) }
-    case opcua.AttributeIds.WriteMask:
-    case opcua.AttributeIds.UserWriteMask:
-      return dataValue.value.value
-    case opcua.AttributeIds.NodeId:
-    case opcua.AttributeIds.BrowseName:
-    case opcua.AttributeIds.DisplayName:
-    case opcua.AttributeIds.Description:
-    case opcua.AttributeIds.EventNotifier:
-    case opcua.AttributeIds.ValueRank:
-    case opcua.AttributeIds.ArrayDimensions:
-    case opcua.AttributeIds.Historizing:
-    case opcua.AttributeIds.Executable:
-    case opcua.AttributeIds.UserExecutable:
-    case opcua.AttributeIds.MinimumSamplingInterval:
-      if (!dataValue.value.value) {
-        return 'null'
-      }
-      return JSON.parse(JSON.stringify(dataValue.value.value))
-    case opcua.AttributeIds.UserAccessLevel:
-    case opcua.AttributeIds.AccessLevel:
-      if (!dataValue.value.value) {
-        return 'null'
-      }
-      return { accessLevelFlaq: opcua.AccessLevelFlag.get(dataValue.value.value).key, data: JSON.parse(JSON.stringify(dataValue.value.value)) }
-    default:
-      if (!dataValue.value || dataValue.value.value === null) {
-        return '<???> : ' + dataValue.statusCode.toString()
-      }
-      switch (dataValue.value.arrayType) {
-        case opcua.VariantArrayType.Scalar:
-          return JSON.parse(JSON.stringify(dataValue))
-        case opcua.VariantArrayType.Array:
-          return JSON.parse(JSON.stringify(dataValue))
-        default:
-          return ''
-      }
-  }
+de.biancoroyal.opcua.iiot.core.availableMemory = function () {
+  return this.os.freemem() / this.os.totalmem() * 100.0
 }
 
-de.biancoroyal.opcua.iiot.core.availableMemory = function () {
-  let os = require('os')
-  return os.freemem() / os.totalmem() * 100.0
+de.biancoroyal.opcua.iiot.core.isSessionBad = function (err) {
+  return (err.message.includes('BadSession') || err.message.includes('Invalid Channel'))
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core

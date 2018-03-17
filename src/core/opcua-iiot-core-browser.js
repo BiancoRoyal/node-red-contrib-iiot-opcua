@@ -22,31 +22,35 @@ de.biancoroyal.opcua.iiot.core.browser.internalDebugLog = de.biancoroyal.opcua.i
 de.biancoroyal.opcua.iiot.core.browser.detailDebugLog = de.biancoroyal.opcua.iiot.core.browser.detailDebugLog || require('debug')('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
+  let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
-      let core = require('./opcua-iiot-core')
+      if (!session) {
+        reject(new Error('Session Not Ready To Browse'))
+      }
+
       let browseOptions = [
         {
           nodeId: topic,
           referenceTypeId: 'Organizes',
           includeSubtypes: true,
-          browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+          browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
           resultMask: 0x3f
         },
         {
           nodeId: topic,
           referenceTypeId: 'Aggregates',
           includeSubtypes: true,
-          browseDirection: core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+          browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
           resultMask: 0x3f
         }
       ]
 
-      session.browse(browseOptions, function (err, browseResult, diagnostics) {
+      session.browse(browseOptions, function (err, browseResult) {
         if (err) {
-          reject(err, diagnostics)
+          reject(err)
         } else {
-          resolve({ browseResult: browseResult, diagnostics: diagnostics })
+          resolve(browseResult)
         }
       })
     }

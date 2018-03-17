@@ -25,16 +25,9 @@ module.exports = function (RED) {
 
     let node = this
 
-    node.status({
-      fill: 'blue',
-      shape: 'ring',
-      text: '...'
-    })
+    node.status({fill: 'blue', shape: 'ring', text: '...'})
 
     node.on('input', function (msg) {
-      coreResponse.internalDebugLog(msg)
-      coreResponse.internalDebugLog(JSON.stringify(msg))
-
       try {
         if (msg.nodetype) {
           switch (msg.nodetype) {
@@ -55,7 +48,6 @@ module.exports = function (RED) {
               break
 
             default:
-              coreResponse.internalDebugLog('unknown node type: '.orange + JSON.stringify(msg.nodetype))
               if (msg && msg.payload) {
                 node.handlePayloadStatusCode(msg)
               }
@@ -132,11 +124,7 @@ module.exports = function (RED) {
         fillColor = 'red'
       }
 
-      node.status({
-        fill: fillColor,
-        shape: 'dot',
-        text: informationText
-      })
+      node.status({fill: fillColor, shape: 'dot', text: informationText})
     }
 
     node.analyzeWriteResults = function (msg) {
@@ -195,7 +183,6 @@ module.exports = function (RED) {
               } else if (entry.statusCode.name.includes('Bad')) {
                 entryStatus[1] += 1
               } else {
-                coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.statusCode.name))
                 entryStatus[2] += 1
               }
           }
@@ -224,12 +211,11 @@ module.exports = function (RED) {
               entryStatus[1] += 1
               break
             default:
-              if (msg.result.statusCode.name.includes('Good')) {
+              if (msg.payload.statusCode.name.includes('Good')) {
                 entryStatus[0] += 1
-              } else if (msg.result.statusCode.name.includes('Bad')) {
+              } else if (msg.payload.statusCode.name.includes('Bad')) {
                 entryStatus[1] += 1
               } else {
-                coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(msg.result.statusCode.name))
                 entryStatus[2] += 1
               }
           }
@@ -263,7 +249,6 @@ module.exports = function (RED) {
                 } else if (entry.name.includes('Bad')) {
                   entryStatus[1] += 1
                 } else {
-                  coreResponse.internalDebugLog('unknown status name: '.orange + JSON.stringify(entry.name))
                   entryStatus[2] += 1
                 }
             }
