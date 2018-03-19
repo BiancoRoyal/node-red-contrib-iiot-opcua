@@ -53,7 +53,7 @@ module.exports = function (RED) {
     node.discoveryServerEndpointUrl = null
     node.sessionNotInRenewMode = true
     node.stateMachine = coreConnector.createStatelyMachine()
-    node.stateMachine.close().lock()
+    node.stateMachine.init()
 
     let nodeOPCUAClientPath = coreConnector.core.getNodeOPCUAClientPath()
 
@@ -134,7 +134,6 @@ module.exports = function (RED) {
               coreConnector.internalDebugLog('Secured Connected On ' + node.endpoint)
               coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
 
-              node.stateMachine.unlock()
               node.opcuaClient = opcuaClient
               node.startSession(SESSION_TIMEOUT)
               node.emit('connected', opcuaClient)
@@ -232,7 +231,6 @@ module.exports = function (RED) {
       if (node.opcuaSession && node.sessionNotInRenewMode && node.sessionConnectRetries < MAX_SESSION_RETRIES) {
         node.sessionConnectRetries += 1
         node.setSessionToRenewMode()
-        node.stateMachine.unlock()
         setTimeout(node.startSession(SESSION_TIMEOUT), CONNECTION_START_DELAY)
       } else {
         if (node.sessionConnectRetries === MAX_SESSION_RETRIES) {
@@ -242,6 +240,7 @@ module.exports = function (RED) {
     }
 
     node.closeSession = function () {
+      node.stateMachine.close().lock()
       try {
         if (node.opcuaSession && node.opcuaClient) {
           coreConnector.internalDebugLog('Close Session Id: ' + node.opcuaSession.sessionId)
@@ -265,12 +264,13 @@ module.exports = function (RED) {
 
     node.setSessionToRenewMode = function () {
       node.opcuaSession = null
+      node.stateMachine.unlock().init()
       node.sessionNotInRenewMode = false
     }
 
     node.resetSessionRenewMode = function () {
-      node.stateMachine.close().lock()
       node.opcuaSession = null
+      node.stateMachine.close().lock()
       node.sessionNotInRenewMode = true
     }
 

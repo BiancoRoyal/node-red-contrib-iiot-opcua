@@ -971,12 +971,18 @@ de.biancoroyal.opcua.iiot.core.isSessionBad = function (err) {
 
 de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (node) {
   switch (node.connector.stateMachine.getMachineState()) {
+    case 'INIT':
+      node.setNodeStatusTo('connecting')
+      break
     case 'OPEN':
       node.opcuaSession = node.connector.opcuaSession
       node.setNodeStatusTo('active')
       break
     case 'LOCKED':
       node.setNodeStatusTo('locked')
+      break
+    case 'UNLOCKED':
+      node.setNodeStatusTo('unlocked')
       break
     default:
       node.setNodeStatusTo('waiting')
