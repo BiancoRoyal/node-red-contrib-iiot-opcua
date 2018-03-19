@@ -85,17 +85,14 @@ module.exports = function (RED) {
           nodeId: coreBrowser.core.OBJECTS_ROOT,
           browseName: 'Objects'
         })
-        node.verboseLog('Browse Handle Error '.red + err)
 
+        coreBrowser.internalDebugLog('Browser Error ' + err)
         if (node.showErrors) {
           node.error(err, msg)
         }
-        coreBrowser.internalDebugLog('Browser Error ' + err)
 
-        if (err && err.message) {
-          if (coreBrowser.core.isSessionBad(err)) {
-            node.connector.resetBadSession()
-          }
+        if (coreBrowser.core.isSessionBad(err)) {
+          node.connector.resetBadSession()
         }
       } else {
         results = browserEntries
@@ -257,7 +254,7 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    node.setNodeStatusTo('waiting')
+    coreBrowser.core.setNodeInitalState(node)
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)

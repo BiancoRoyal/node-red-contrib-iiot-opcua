@@ -15,7 +15,7 @@ var expect = require('chai').expect
 var functionNode = require('node-red/nodes/core/core/80-function')
 var injectNode = require('../src/opcua-iiot-inject')
 var inputNode = require('../src/opcua-iiot-server-aso')
-var helper = require('./helper.js')
+var helper = require('node-red-contrib-test-helper')
 
 var testFlowPayload = [
   {
