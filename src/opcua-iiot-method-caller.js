@@ -57,10 +57,8 @@ module.exports = function (RED) {
         node.error(err, msg)
       }
 
-      if (err && err.message) {
-        if (coreMethod.core.isSessionBad(err)) {
-          node.connector.resetBadSession()
-        }
+      if (coreMethod.core.isSessionBad(err)) {
+        node.connector.resetBadSession()
       }
     }
 
@@ -191,7 +189,7 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    node.setNodeStatusTo('waiting')
+    coreMethod.core.setNodeInitalState(node)
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Method-Caller', OPCUAIIoTMethodCaller)

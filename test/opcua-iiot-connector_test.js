@@ -11,7 +11,7 @@
 'use strict'
 
 var assert = require('chai').assert
-var helper = require('./helper.js')
+var helper = require('node-red-contrib-test-helper')
 
 // iiot opc ua nodes
 var serverNode = require('../src/opcua-iiot-server')

@@ -55,10 +55,8 @@ module.exports = function (RED) {
         node.error(err, msg)
       }
 
-      if (err && err.message) {
-        if (coreClient.core.isSessionBad(err)) {
-          node.connector.resetBadSession()
-        }
+      if (coreClient.core.isSessionBad(err)) {
+        node.connector.resetBadSession()
       }
     }
 
@@ -153,7 +151,7 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    node.setNodeStatusTo('waiting')
+    coreClient.core.setNodeInitalState(node)
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Write', OPCUAIIoTWrite)

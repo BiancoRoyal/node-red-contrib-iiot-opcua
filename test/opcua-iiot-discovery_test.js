@@ -12,7 +12,7 @@
 
 var assert = require('chai').assert
 var inputNode = require('../src/opcua-iiot-discovery')
-var helper = require('./helper.js')
+var helper = require('node-red-contrib-test-helper')
 
 var testFlowPayload = [
     {

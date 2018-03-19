@@ -966,7 +966,21 @@ de.biancoroyal.opcua.iiot.core.availableMemory = function () {
 }
 
 de.biancoroyal.opcua.iiot.core.isSessionBad = function (err) {
-  return (err.message.includes('BadSession') || err.message.includes('Invalid Channel'))
+  return (err.toString().includes('BadSession') || err.toString().includes('Invalid Channel'))
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (node) {
+  switch (node.connector.stateMachine.getMachineState()) {
+    case 'OPEN':
+      node.opcuaSession = node.connector.opcuaSession
+      node.setNodeStatusTo('active')
+      break
+    case 'LOCKED':
+      node.setNodeStatusTo('locked')
+      break
+    default:
+      node.setNodeStatusTo('waiting')
+  }
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core

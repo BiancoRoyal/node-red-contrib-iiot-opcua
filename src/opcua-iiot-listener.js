@@ -77,7 +77,15 @@ module.exports = function (RED) {
     }
 
     node.resetSubscription = function () {
-      node.send({payload: 'SUBSCRIPTION TERMINATED', monitoredItems: node.monitoredItems})
+      let monitoredItem
+      let addressSpaceItems = []
+      for (monitoredItem of node.monitoredItems) {
+        if (monitoredItem[1].itemToMonitor) {
+          addressSpaceItems.push({name: '', nodeId: monitoredItem[1].itemToMonitor.nodeId.toString(), datatypeName: ''})
+        }
+      }
+
+      node.send({payload: 'SUBSCRIPTION TERMINATED', monitoredItems: node.monitoredItems, addressSpaceItems: addressSpaceItems})
       node.monitoredItems.clear()
     }
 
@@ -320,7 +328,7 @@ module.exports = function (RED) {
         node.error(err)
       }
 
-      if (err && err.message) {
+      if (err) {
         if (coreListener.core.isSessionBad(err)) {
           node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
           node.monitoredItems.clear()
@@ -452,7 +460,7 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    node.setNodeStatusTo('waiting')
+    coreListener.core.setNodeInitalState(node)
 
     node.on('close', function (done) {
       if (uaSubscription) {

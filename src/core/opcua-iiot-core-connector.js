@@ -20,6 +20,22 @@ de.biancoroyal.opcua.iiot.core.connector.core = de.biancoroyal.opcua.iiot.core.c
 de.biancoroyal.opcua.iiot.core.connector.internalDebugLog = de.biancoroyal.opcua.iiot.core.connector.internalDebugLog || require('debug')('opcuaIIoT:connector') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.detailDebugLog = de.biancoroyal.opcua.iiot.core.connector.detailDebugLog || require('debug')('opcuaIIoT:connector:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.libDebugLog = de.biancoroyal.opcua.iiot.core.connector.libDebugLog || require('debug')('opcuaIIoT:connector:nodeopcua') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.connector.Stately = de.biancoroyal.opcua.iiot.core.connector.Stately || require('stately.js') // eslint-disable-line no-use-before-define
+
+de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
+  return de.biancoroyal.opcua.iiot.core.connector.Stately.machine({
+    'OPEN': {
+      'close': 'CLOSED'
+    },
+    'CLOSED': {
+      'open': 'OPEN',
+      'lock': 'LOCKED'
+    },
+    'LOCKED': {
+      'unlock': 'OPEN'
+    }
+  })
+}
 
 de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
   let coreConnector = this
