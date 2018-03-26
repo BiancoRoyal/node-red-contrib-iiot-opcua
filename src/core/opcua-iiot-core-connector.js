@@ -44,60 +44,8 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
   })
 }
 
-de.biancoroyal.opcua.iiot.core.connector.createSession = function (opcuaClient, userIdentity) {
-  let coreConnector = this
-
-  return new Promise(
-    function (resolve, reject) {
-      if (opcuaClient) {
-        if (userIdentity && !userIdentity.userName) {
-          coreConnector.internalDebugLog('Create New Session Without User Identity None User')
-          userIdentity = {}
-        } else if (!userIdentity) {
-          coreConnector.internalDebugLog('Create New Session Without User Identity')
-          userIdentity = {}
-        } else {
-          coreConnector.internalDebugLog('Create New Session With User Identity For ' + userIdentity.userName)
-        }
-
-        opcuaClient.createSession(userIdentity, function (err, session) {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({ opcuaClient: opcuaClient, session: session })
-          }
-        })
-      } else {
-        coreConnector.internalDebugLog('OPC UA Client Is Not Valid')
-        reject(new Error('OPC UA Client Is Not Valid'))
-      }
-    }
-  )
-}
-
 de.biancoroyal.opcua.iiot.core.connector.createSubscription = function (session, options) {
   return new this.core.nodeOPCUA.ClientSubscription(session, options)
-}
-
-de.biancoroyal.opcua.iiot.core.connector.setupSecureConnectOptions = function (opcuaClient, options) {
-  return new Promise(
-    function (resolve, reject) {
-      if (opcuaClient) {
-        opcuaClient.getEndpointsRequest(function (err, endpoints) {
-          if (err) {
-            reject(err)
-          } else {
-            if (endpoints && endpoints.length > 0) {
-              de.biancoroyal.opcua.iiot.core.connector.logEndpoints(options, endpoints)
-            }
-
-            resolve({opcuaClient: opcuaClient, endpoints: endpoints})
-          }
-        })
-      } else {
-        reject(new Error('OPC UA Client Is Not Valid'))
-      }
-    })
 }
 
 de.biancoroyal.opcua.iiot.core.connector.logEndpoints = function (options, endpoints) {

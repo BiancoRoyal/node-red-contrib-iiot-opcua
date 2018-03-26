@@ -153,23 +153,28 @@ module.exports = function (RED) {
         return
       }
 
-      coreConnector.createSession(node.opcuaClient, node.userIdentity || {}).then(function (result) {
-        coreConnector.internalDebugLog('Session Created On ' + node.endpoint)
-        node.stateMachine.open()
-        node.opcuaSession = result.session
-        node.opcuaSession.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 5, 's')
-        node.opcuaSession.on('error', node.handleSessionError)
-        node.opcuaSession.on('close', node.handleSessionClose)
-        node.logSessionInformation(node.opcuaSession)
-        node.emit('session_started', node.opcuaSession)
-        node.sessionConnectRetries = 0
-      }).catch(function (err) {
-        coreConnector.internalDebugLog(err)
-        if (node.showErrors) {
-          node.error(err, {payload: ''})
-        }
-        node.opcuaSession = null
-      })
+      if (node.opcuaClient) {
+        node.opcuaClient.createSession(node.userIdentity || {}).then(function (session) {
+          coreConnector.internalDebugLog('Session Created On ' + node.endpoint)
+          node.stateMachine.open()
+          node.opcuaSession = session
+          node.opcuaSession.timeout = coreConnector.core.calcMillisecondsByTimeAndUnit(timeoutSeconds || 5, 's')
+          node.opcuaSession.on('error', node.handleSessionError)
+          node.opcuaSession.on('close', node.handleSessionClose)
+          node.logSessionInformation(node.opcuaSession)
+          node.emit('session_started', node.opcuaSession)
+          node.sessionConnectRetries = 0
+        }).catch(function (err) {
+          coreConnector.internalDebugLog(err)
+          if (node.showErrors) {
+            node.error(err, {payload: ''})
+          }
+          node.opcuaSession = null
+        })
+      } else {
+        coreConnector.internalDebugLog('OPC UA Client Is Not Valid')
+        node.connectOPCUAEndpoint()
+      }
     }
 
     node.logSessionInformation = function (session) {
