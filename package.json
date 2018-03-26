@@ -67,7 +67,7 @@
     "node": ">=6.10"
   },
   "scripts": {
-    "test": "standard --fix && mocha test --recursive --reporter dot",
+    "test": "standard --fix",
     "test-with-coverage": "istanbul cover _mocha --report lcovonly -- --recursive -R spec && cat ./coverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4 && rm -rf ./coverage",
     "coverage": "istanbul cover _mocha -- --recursive",
     "build": "standard --fix && gulp publish",
