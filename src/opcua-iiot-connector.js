@@ -180,8 +180,15 @@ module.exports = function (RED) {
             })
           }
           node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
-          discoverClient.disconnect(function () {
-            coreConnector.internalDebugLog('Endpoints Auto Request Done With Endpoint ' + node.endpoint)
+          discoverClient.disconnect(function (err) {
+            if (err) {
+              coreConnector.internalDebugLog('Endpoints Auto Request Error ' + err)
+              if (node.showErrors) {
+                node.error(err, {payload: ''})
+              }
+            } else {
+              coreConnector.internalDebugLog('Endpoints Auto Request Done With Endpoint ' + node.endpoint)
+            }
           })
         })
       }).catch(function (err) {
@@ -346,20 +353,25 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      coreConnector.internalDebugLog('Close Disconnecting From ' + node.endpoint)
-      coreConnector.disconnect(node.opcuaClient)
-        .then(function () {
-          coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
-          node.opcuaClient = null
-          done()
-        }).catch(function (err) {
-          coreConnector.internalDebugLog(err)
-          if (node.showErrors) {
-            node.error(err, {payload: ''})
+      if (node.opcuaClient) {
+        coreConnector.internalDebugLog('Close Disconnecting From ' + node.endpoint)
+        node.opcuaClient.disconnect(function (err) {
+          if (err) {
+            coreConnector.internalDebugLog(err)
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
+            done()
+          } else {
+            coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
+            node.opcuaClient = null
+            done()
           }
-          node.opcuaClient = null
-          done()
         })
+      } else {
+        node.opcuaClient = null
+        done()
+      }
     })
   }
 
@@ -379,15 +391,21 @@ module.exports = function (RED) {
       node.opcuaClientOptions.endpoint_must_exist = false
       let discoveryClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
       discoveryClient.connect(node.discoveryUrl || node.endpoint).then(function () {
+        coreConnector.internalDebugLog('Get Endpoints Connected For Request')
         discoveryClient.getEndpointsRequest(function (err, endpoints) {
           if (err) {
             if (node.showErrors) {
               node.error(err, {payload: ''})
-              res.json([])
             }
+            coreConnector.internalDebugLog('Get Endpoints Request Error ' + err)
+            res.json([])
           } else {
+            coreConnector.internalDebugLog('Sending Endpoints For Request')
             res.json(endpoints)
           }
+          discoveryClient.disconnect(function () {
+            coreConnector.internalDebugLog('Get Endpoints Request Disconnect')
+          })
           node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
         })
       }).catch(function (err) {

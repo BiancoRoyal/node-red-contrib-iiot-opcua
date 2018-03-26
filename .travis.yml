@@ -2,6 +2,7 @@ language: node_js
 node_js:
     - 6
     - "lts/*"
+    - 9
 install:
   - npm install
   - npm install -g gulp
@@ -17,4 +18,3 @@ branches:
   only:
   - master
   - develop
-  - 2.1
