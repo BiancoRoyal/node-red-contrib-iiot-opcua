@@ -82,7 +82,7 @@ module.exports = function (RED) {
       securityPolicy: node.securityPolicy || 'None',
       securityMode: node.messageSecurityMode || 'NONE',
       defaultSecureTokenLifetime: node.defaultSecureTokenLifetime,
-      keepSessionAlive: true,
+      keepSessionAlive: node.keepSessionAlive,
       certificateFile: node.publicCertificateFile,
       privateKeyFile: node.privateKeyFile,
       endpoint_must_exist: node.endpointMustExist
@@ -104,6 +104,10 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
       coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
       node.opcuaClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
+
+      if (node.autoSelectRightEndpoint) {
+        node.autoSelectEndpointFromConnection()
+      }
 
       node.opcuaClient.on('close', function (err) {
         if (err) {
@@ -134,7 +138,7 @@ module.exports = function (RED) {
 
       node.opcuaClient.connect(node.endpoint).then(function () {
         coreConnector.internalDebugLog('Connected On ' + node.endpoint)
-        coreConnector.internalDebugLog('Client Options ' + node.opcuaClientOptions)
+        coreConnector.internalDebugLog('Client Options ' + JSON.stringify(node.opcuaClientOptions))
         node.emit('connected', node.opcuaClient)
         node.startSession(SESSION_TIMEOUT)
       }).catch(function (err) {
@@ -142,6 +146,47 @@ module.exports = function (RED) {
           node.error(err, {payload: ''})
         }
         node.handleError(err)
+      })
+    }
+
+    node.autoSelectEndpointFromConnection = function () {
+      coreConnector.internalDebugLog('Auto Searching For Endpoint On ' + node.endpoint)
+
+      let endpointMustExist = node.opcuaClientOptions.endpoint_must_exist
+      node.opcuaClientOptions.endpoint_must_exist = false
+      let discoverClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
+      discoverClient.connect(node.endpoint).then(function () {
+        coreConnector.internalDebugLog('Auto Searching Endpoint Connected To ' + node.endpoint)
+
+        discoverClient.getEndpointsRequest(function (err, endpoints) {
+          if (err) {
+            coreConnector.internalDebugLog('Auto Switch To Endpoint Error ' + err)
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
+          } else {
+            endpoints.forEach(function (endpoint, i) {
+              coreConnector.internalDebugLog('Auto Endpoint ' + endpoint.endpointUrl.toString() + ' ' + endpoint.securityPolicyUri.toString())
+              let securityMode = endpoint.securityMode.key || endpoint.securityMode
+              let securityPolicy = (endpoint.securityPolicyUri.includes('SecurityPolicy#')) ? endpoint.securityPolicyUri.split('#')[1] : endpoint.securityPolicyUri
+
+              coreConnector.internalDebugLog('node-mode:' + node.messageSecurityMode + ' securityMode: ' + securityMode)
+              coreConnector.internalDebugLog('node-policy:' + node.securityPolicy + ' securityPolicy: ' + securityPolicy)
+
+              if (securityMode === node.messageSecurityMode && securityPolicy === node.securityPolicy) {
+                node.endpoint = endpoint.endpointUrl
+                coreConnector.internalDebugLog('Auto Switch To Endpoint ' + node.endpoint)
+              }
+            })
+          }
+          node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
+          discoverClient.disconnect(function () {
+            coreConnector.internalDebugLog('Endpoints Auto Request Done With Endpoint ' + node.endpoint)
+          })
+        })
+      }).catch(function (err) {
+        coreConnector.internalDebugLog('Get Auto Endpoint Request Error ' + err.message)
+        node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
       })
     }
 
@@ -330,6 +375,8 @@ module.exports = function (RED) {
     coreConnector.internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params))
 
     if (node) {
+      let endpointMustExist = node.opcuaClientOptions.endpoint_must_exist
+      node.opcuaClientOptions.endpoint_must_exist = false
       let discoveryClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
       discoveryClient.connect(node.discoveryUrl || node.endpoint).then(function () {
         discoveryClient.getEndpointsRequest(function (err, endpoints) {
@@ -341,8 +388,10 @@ module.exports = function (RED) {
           } else {
             res.json(endpoints)
           }
+          node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
         })
       }).catch(function (err) {
+        node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
         coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
       })
     } else {
