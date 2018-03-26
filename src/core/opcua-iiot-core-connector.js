@@ -44,51 +44,6 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
   })
 }
 
-de.biancoroyal.opcua.iiot.core.connector.connect = function (url, options) {
-  let coreConnector = this
-
-  return new Promise(
-    function (resolve, reject) {
-      let opcuaClient = new coreConnector.core.nodeOPCUA.OPCUAClient(options)
-      if (url) {
-        opcuaClient.connect(url, function (err) {
-          if (err) {
-            reject(err)
-          } else {
-            coreConnector.internalDebugLog('connected to ' + url)
-            resolve(opcuaClient)
-          }
-        })
-
-        opcuaClient.on('close', function (err) {
-          if (err) {
-            coreConnector.internalDebugLog(err.message)
-          }
-          coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
-        })
-
-        opcuaClient.on('backoff', function (number, delay) {
-          coreConnector.internalDebugLog('backoff  attempt #'.bgWhite.yellow, number, ' retrying in ', delay / 1000.0, ' seconds')
-        })
-
-        opcuaClient.on('connection_reestablished', function () {
-          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
-        })
-
-        opcuaClient.on('start_reconnection', function () {
-          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  Starting Reconnection !!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
-        })
-
-        opcuaClient.on('after_reconnection', function () {
-          coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!        Reconnected     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
-        })
-      } else {
-        reject(new Error('URL Endpoint Is Not Valid'))
-      }
-    }
-  )
-}
-
 de.biancoroyal.opcua.iiot.core.connector.createSession = function (opcuaClient, userIdentity) {
   let coreConnector = this
 
