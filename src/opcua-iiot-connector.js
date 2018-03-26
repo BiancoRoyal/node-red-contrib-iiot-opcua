@@ -212,7 +212,9 @@ module.exports = function (RED) {
       if (node.opcuaSession && node.sessionNotInRenewMode && node.sessionConnectRetries < MAX_SESSION_RETRIES) {
         node.sessionConnectRetries += 1
         node.setSessionToRenewMode()
-        setTimeout(node.startSession(SESSION_TIMEOUT), CONNECTION_START_DELAY)
+        setTimeout(function () {
+          node.startSession(SESSION_TIMEOUT)
+        }, CONNECTION_START_DELAY)
       } else {
         if (node.sessionConnectRetries === MAX_SESSION_RETRIES) {
           node.sessionConnectRetries = 0 // reset by new request
