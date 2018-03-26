@@ -73,7 +73,7 @@
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "standard --fix && npm run build && npm test",
     "ci-publish": "ci-publish",
-    "release": "standard-version"
+    "release": "standard-version -a"
   },
   "files": [
     "docs",
