@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.3.4"></a>
+## [2.3.4](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.3.3...v2.3.4) (2018-03-26)
+
+
+### Bug Fixes
+
+* **connector:** session handling by node-opcua v0.2.2 ([afbaf87](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/afbaf87))
+
+
+
 <a name="2.3.3"></a>
 ## [2.3.3](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.3.2...v2.3.3) (2018-03-19)
 
