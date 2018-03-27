@@ -382,36 +382,70 @@ module.exports = function (RED) {
     }
   })
 
-  RED.httpAdmin.get('/opcuaIIoT/client/endpoints/:id', RED.auth.needsPermission('opcua.endpoints'), function (req, res) {
+  RED.httpAdmin.get('/opcuaIIoT/client/discover/:id/:discoveryUrl', RED.auth.needsPermission('opcua.discovery'), function (req, res) {
     let node = RED.nodes.getNode(req.params.id)
-    coreConnector.internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params))
-
+    let discoverUrlRequest = decodeURIComponent(req.params.discoveryUrl)
+    coreConnector.internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params) + ' for ' + discoverUrlRequest)
     if (node) {
-      let endpointMustExist = node.opcuaClientOptions.endpoint_must_exist
-      node.opcuaClientOptions.endpoint_must_exist = false
-      let discoveryClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
-      discoveryClient.connect(node.discoveryUrl || node.endpoint).then(function () {
-        coreConnector.internalDebugLog('Get Endpoints Connected For Request')
-        discoveryClient.getEndpointsRequest(function (err, endpoints) {
-          if (err) {
-            if (node.showErrors) {
-              node.error(err, {payload: ''})
-            }
-            coreConnector.internalDebugLog('Get Endpoints Request Error ' + err)
-            res.json([])
-          } else {
-            coreConnector.internalDebugLog('Sending Endpoints For Request')
-            res.json(endpoints)
-          }
-          discoveryClient.disconnect(function () {
-            coreConnector.internalDebugLog('Get Endpoints Request Disconnect')
+      let performFindServersRequest = coreConnector.core.nodeOPCUA.perform_findServersRequest
+      performFindServersRequest(discoverUrlRequest, function (err, servers) {
+        if (!err) {
+          let endpoints = []
+          servers.forEach(function (server) {
+            server.discoveryUrls.forEach(function (discoveryUrl) {
+              if (discoveryUrl.toString() !== discoverUrlRequest) {
+                endpoints.push(discoveryUrl.toString())
+              }
+            })
           })
-          node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
-        })
-      }).catch(function (err) {
-        node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
-        coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
+          res.json(endpoints)
+        } else {
+          coreConnector.internalDebugLog(err)
+          if (node.showErrors) {
+            node.error(err, {payload: ''})
+          }
+          res.json([])
+        }
       })
+    } else {
+      coreConnector.internalDebugLog('Get Discovery Request None Node ' + JSON.stringify(req.params))
+    }
+  })
+
+  RED.httpAdmin.get('/opcuaIIoT/client/endpoints/:id/:endpointUrl', RED.auth.needsPermission('opcua.endpoints'), function (req, res) {
+    let node = RED.nodes.getNode(req.params.id)
+    let endpointUrlRequest = decodeURIComponent(req.params.endpointUrl)
+    coreConnector.internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params) + ' for ' + endpointUrlRequest)
+    if (node) {
+      if (endpointUrlRequest && endpointUrlRequest === '') {
+        res.json([])
+      } else {
+        node.opcuaClientOptions.endpoint_must_exist = false
+        let discoveryClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
+        discoveryClient.connect(endpointUrlRequest).then(function () {
+          coreConnector.internalDebugLog('Get Endpoints Connected For Request')
+          discoveryClient.getEndpointsRequest(function (err, endpoints) {
+            if (err) {
+              if (node.showErrors) {
+                node.error(err, {payload: ''})
+              }
+              coreConnector.internalDebugLog('Get Endpoints Request Error ' + err)
+              res.json([])
+            } else {
+              coreConnector.internalDebugLog('Sending Endpoints For Request')
+              res.json(endpoints)
+            }
+            discoveryClient.disconnect(function () {
+              coreConnector.internalDebugLog('Get Endpoints Request Disconnect')
+            })
+            node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
+          })
+        }).catch(function (err) {
+          node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
+          coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
+        })
+        let endpointMustExist = node.opcuaClientOptions.endpoint_must_exist
+      }
     } else {
       coreConnector.internalDebugLog('Get Endpoints Request None Node ' + JSON.stringify(req.params))
     }

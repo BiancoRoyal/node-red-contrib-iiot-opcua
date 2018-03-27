@@ -81,6 +81,40 @@
         this.error(err);
       }
 
+      let discoveryLookupButton = $("#node-config-lookup-discovery")
+      let discoveryUrlField = $("#node-config-input-discoveryUrl")
+
+      discoveryLookupButton.click(function () {
+        discoveryLookupButton.addClass('disabled')
+        $.getJSON('/opcuaIIoT/client/discover/' + node.id + '/' + encodeURIComponent(discoveryUrlField.val()), function (data) {
+          discoveryLookupButton.removeClass('disabled')
+          node.lookupItems = []
+          let security = null
+          $.each(data, function (i, entry) {
+            node.lookupItems.push({
+              value: entry,
+              label: entry
+            })
+          })
+
+          endpointField.autocomplete({
+            source: node.lookupItems,
+            minLength: 0,
+            focus: function (event, ui) {
+              endpointField.val(ui.item.value);
+              return false;
+            },
+            select: function (event, ui) {
+              endpointField.val(ui.item.value)
+              return false;
+            },
+            close: function (event, ui) {
+              endpointField.autocomplete("destroy")
+            }
+          }).autocomplete("search", "")
+        })
+      })
+
       let endpointsLookupButton = $("#node-config-lookup-endpoint")
       let endpointField = $("#node-config-input-endpoint")
       let securityPolicyField = $("#node-config-input-securityPolicy")
@@ -88,7 +122,7 @@
 
       endpointsLookupButton.click(function () {
         endpointsLookupButton.addClass('disabled')
-        $.getJSON('/opcuaIIoT/client/endpoints/' + node.id, function (data) {
+        $.getJSON('/opcuaIIoT/client/endpoints/' + node.id + '/' + encodeURIComponent(endpointField.val()), function (data) {
           endpointsLookupButton.removeClass('disabled')
           node.lookupItems = []
           let security = null
@@ -98,7 +132,8 @@
               value: entry.endpointUrl,
               label: entry.endpointUrl + ' (' + entry.securityMode + ' ' + security[1] + ')',
               securityPolicy: security[1],
-              securityMode: entry.securityMode} )
+              securityMode: entry.securityMode
+            })
           })
 
           endpointField.autocomplete({
@@ -136,6 +171,7 @@
                 <label for="node-config-input-discoveryUrl"><i class="fa fa-external-link"></i>
                 <span data-i18n="opcua-iiot-contrib.label.discoveryUrl"></span></label>
                 <input type="text" id="node-config-input-discoveryUrl", palceholder="opc.tcp://server.local:4840/">
+                <a id="node-config-lookup-discovery" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
             </div>
             <div class="form-row">
                 <label for="node-config-input-endpoint"><i class="fa fa-external-link"></i>
