@@ -156,9 +156,9 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Browser">
  <h2>OPC UA IIoT Browser</h2>
 
- <p>Use the Browser to browse your OPC UA address space.
- It normally starts with the root folder by using an OPC UA Node-Id like ns=0;i=85.
- It also can be configured to start at any desired Node-Id as root within the address space.</p>
+ <p>Use the Browser to browse OPC UA address spaces.
+ It normally starts with the root folder or object by using an OPC UA Node-Id like ns=0;i=85 (root->Objects).
+ It also can get a state to start at any desired Node-Id as a root within the address space.</p>
 
  <h3>Configuration</h3>
 
@@ -173,7 +173,8 @@
 
  <h3>Input</h3>
 
- <p>The input could be empty or should hold addressSpaceItems (Array of objects) to browse for.</p>
+ <p>The input could be empty or should hold addressSpaceItems (Array of objects) to browse for.
+ A datatype is not required here - it just requires the nodeId in the addressSpaceItems objects here.</p>
 
  <h3>Output</h3>
 
@@ -208,5 +209,7 @@
 
  <strong>Name</strong>
  <p>Name in the flow of Node-RED.</p>
+
+ <p>Set showErrors to get errors from node-opcua on browse.</p>
 
 </script>

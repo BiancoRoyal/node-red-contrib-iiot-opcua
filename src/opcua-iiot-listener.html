@@ -99,9 +99,11 @@
     </div>
 
     <h4>Inject payload JSON</h4>
-    <p>There is a option to send a JSON payload inject into the Listener.</p>
+    <p>There is an option to send a JSON payload inject into the Listener.</p>
     <p>Example:</p>
     <p><pre>{ "interval": 500, "queueSize": 10 }</pre></p>
+
+    <p>The option interval means the sampling interval. If you want to set the publishing interval you have to send a bit more options.</p>
 
     <div>
         <h5>msg.payload.options<h5>
@@ -130,6 +132,9 @@
         }
         </pre>
     </div>
+
+    <p>The sampling interval and the publishing interval is to tell you want to sample every n interval in msec. and it should publish every n msec.</p>
+    <p>Example: interval: 200, queueSize: 5, and requestedPublishingInterval: 1000 samples every 200 msec. and publishing changes every second (1000 msec.) with max. 5 values</p>
 
     <h3>Output 1</h3>
 
@@ -174,4 +179,5 @@
     <strong>Name</strong>
     <p>Name in the flow of Node-RED.</p>
 
+    <p>Set showErrors to get errors from node-opcua on browse.</p>
 </script>

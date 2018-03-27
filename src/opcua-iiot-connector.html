@@ -165,11 +165,6 @@
             </div>
             <hr>
             <div class="form-row">
-                <label style="min-width:160px" for="node-config-input-showStatusActivities"><i class="fa fa-th"></i>
-                <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
-                <input type="checkbox" id="node-config-input-showStatusActivities" style="max-width:30px">
-            </div>
-            <div class="form-row">
                 <label style="min-width:160px" for="node-config-input-showErrors"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
                 <input type="checkbox" id="node-config-input-showErrors" style="max-width:30px">
@@ -248,7 +243,7 @@
 
     <p>The Connector is a pure configuration node and starts connecting 
     to the OPC UA server with an OPC UA client instantly after 'Deploy' or start/restart.
-    Please, keep in mind that the Connector will work if it is unused
+    Please, keep in mind that the Connector node will work if it is unused
     and open a connection to the endpoint, too.</p>
 
     <p>The best practice here
@@ -259,11 +254,12 @@
     set it to the flow to get all deleted if you delete the flow.</p>
 
     <p>The Connector is one connection to your OPC UA server, which handles the session.
-    If you need multiple connections use as many Connectors as you need. With that you can build your idea of OPC UA connectivity.</p>
+    If you need multiple connections use as many Connector nodes as you need.
+    With that you can build your idea of OPC UA in IIoT or IoT connectivity.</p>
 
     <h3>Configuration</h3>
 
-    <strong>Dicovery (optional lookup)</strong>
+    <strong>Discovery (optional lookup)</strong>
     <p>Some servers providing a discovery port, which is different from the endpoint port.
     To discover that port set it to opc.tcp://myopcuaserver.local:4840/
     </p>
@@ -276,13 +272,13 @@
     <p>The endpoint address (URI) to the OPC UA server like opc.tcp://localhost:55388/ or opc.tcp://mypcname.local:55388/</p>
     <p>The endpoint must exist as named if that option is activated.</p>
 
-    <p>Auto selecting for the right endpoint is optional and tries to find the correct enpoint to your security settings.</p>
+    <p>Auto selecting for the right endpoint is optional and tries to find the correct endpoint to your security settings.</p>
 
     <strong>Keep Session Alive</strong>
     <p>If the sessions should stay alive, then set that option to checked.
     Otherwise, it will close at session timeout and the first request will restart the session,
     but you will not succeed with the first request.
-    With the keep alive the session will survive and every request succeeds.</p>
+    With the keep alive option the session will survive and every request succeeds.</p>
 
     <h3>Security</h3>
 
@@ -318,9 +314,10 @@
     <p>With None/NONE mode the keys are not in use.</p>
 
     <h3>User Login</h3>
-
     <p>The user login is for user authentication to the server. It is stored with Node-RED credentials best practice.</p>
 
     <strong>Name</strong>
     <p>Name in the selection of the endpoint configuration.</p>
+
+    <p>Set showErrors to get errors from node-opcua on browse.</p>
 </script>

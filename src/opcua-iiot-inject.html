@@ -845,7 +845,7 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">
     <h2>OPC UA IIoT Inject</h2>
 
-    <p>The modified Inject node is to provide some unique features that you need to build beautiful Flows.</p>
+    <p>The modified Inject node is designed to provide some unique features you need to create beautiful flows.</p>
 
     <p>Pressing the button on the left side of the node builds an inject object to read, browse, listen or write by
     the OPC UA IIoT nodes.</p>
@@ -855,13 +855,40 @@
     <h3>Tab Settings</h3>
 
     <strong>Type</strong>
-    <p>Set that type to prepare the correct vaule for injects.</p>
+    <p>Set that type to prepare the correct value for injects.</p>
 
     <strong>Payload/Interval</strong>
-    <p>
-    If the Inject-Type is set to listen, then the value will be used as the interval for the monitored item.
-     Example listener options: <pre>{ "interval": 1000, "queueSize": 10000 }</pre>
-    </p>
+    <p>There is an option to send a JSON payload inject into the Listener.</p>
+    <p>Example:</p>
+    <p><pre>{ "interval": 500, "queueSize": 10 }</pre></p>
+
+    <div>
+        <h5>msg.payload.options<h5>
+
+        <strong>event subscription parameters default:</stong>
+        <pre>
+        msg.payload.options = {
+            requestedPublishingInterval: 100,
+            requestedLifetimeCount: 60,
+            requestedMaxKeepAliveCount: 10,
+            maxNotificationsPerPublish: 4,
+            publishingEnabled: true,
+            priority: 1
+        }
+        </pre>
+
+        <strong>subscription parameters default:</stong>
+        <pre>
+        msg.payload.options = {
+            requestedPublishingInterval: 100,
+            requestedLifetimeCount: 1000,
+            requestedMaxKeepAliveCount: 12,
+            maxNotificationsPerPublish: 100,
+            publishingEnabled: true,
+            priority: 10
+        }
+        </pre>
+    </div>
     <p>If the Inject-Type is set to read/write, then the value is a standard payload to transport your data.</p>
 
     <strong>Topic</strong>
@@ -885,7 +912,7 @@
     <p>Name in the flow of Node-RED.</p>
 
     <strong>Node-Id</strong>
-    <p>The Node-Id has to be an OPC UA valid Node-Id like ns=0;i=85</p>
+    <p>The Node-Id has to be an OPC UA valid Node-Id like ns=0;i=85 (root->Objects)</p>
     <p>You can use our Browser node for OPC UA to find the correct Node-Id.</p>
 
     <strong>Data Type</strong>
