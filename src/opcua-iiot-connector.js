@@ -260,7 +260,7 @@ module.exports = function (RED) {
     }
 
     node.resetBadSession = function () {
-      coreConnector.internalDebugLog('Reset Bad Session Id: ' + node.opcuaSession.sessionId)
+      coreConnector.internalDebugLog('Reset Bad Session')
       if (node.opcuaSession && node.sessionNotInRenewMode && node.sessionConnectRetries < MAX_SESSION_RETRIES) {
         node.sessionConnectRetries += 1
         node.setSessionToRenewMode()
