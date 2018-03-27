@@ -73,7 +73,7 @@ Follow the [white rabbit][4]!
 
 With the flex server you could create your own information model with the OPC UA address space.
 
-![Flex server Example](images/opcua-iiot-flex-server-example.png)
+![Flex server Example](images/wiki/flexServerAddressSapceExample.png)
 
 The server node contains demo objects and variables 
 to start playing with OPC UA method call, read and write operations.
@@ -90,7 +90,9 @@ to start playing with OPC UA method call, read and write operations.
 
 **... create your own variables and objects from events ...**
 
-![ASO Example](images/server-aso-type-examplev220.png)
+| Node-RED        | UAExpert / Client     |
+|-----------------|-----------------------|
+|![ASO Example](images/server-aso-type-examplev220.png)|![ASO UAExpert](images/wiki/ASOTestVariablesUAExpert.png)|
 
 ## Package Information
 
