@@ -277,10 +277,10 @@ module.exports = function (RED) {
     node.closeSession = function () {
       node.stateMachine.close().lock()
       try {
-        if (node.opcuaSession && node.opcuaSession !== 'terminated' && node.opcuaClient) {
+        if (node.opcuaSession && node.opcuaSession.sessionId !== 'terminated' && node.opcuaClient) {
           coreConnector.internalDebugLog('Close Session Id: ' + node.opcuaSession.sessionId)
 
-          coreConnector.closeSession(node.opcuaSession).then(function (session) {
+          coreConnector.closeSession(node.opcuaSession).then(function () {
             coreConnector.internalDebugLog('Successfully Closed For Reconnect On ' + node.endpoint)
             node.resetSessionRenewMode()
           }).catch(function (err) {
@@ -353,24 +353,35 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      if (node.opcuaClient) {
-        coreConnector.internalDebugLog('Close Disconnecting From ' + node.endpoint)
-        node.opcuaClient.disconnect(function (err) {
-          if (err) {
-            coreConnector.internalDebugLog(err)
+      node.stateMachine.close().lock()
+      if (node.opcuaSession && node.opcuaClient) {
+        coreConnector.closeSession(node.opcuaSession).then(function () {
+          node.opcuaClient.disconnect(function (err) {
             if (node.showErrors) {
               node.error(err, {payload: ''})
             }
             done()
-          } else {
-            coreConnector.internalDebugLog('Close Disconnected From ' + node.endpoint)
-            node.opcuaClient = null
-            done()
+          })
+        }).catch(function (err) {
+          coreConnector.internalDebugLog(err)
+          if (node.showErrors) {
+            node.error(err, {payload: ''})
           }
+          node.opcuaClient = null
+          done()
         })
       } else {
-        node.opcuaClient = null
-        done()
+        if (node.opcuaClient) {
+          node.opcuaClient.disconnect(function (err) {
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
+            done()
+          })
+        } else {
+          node.opcuaClient = null
+          done()
+        }
       }
     })
   }
@@ -385,30 +396,35 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/opcuaIIoT/client/discover/:id/:discoveryUrl', RED.auth.needsPermission('opcua.discovery'), function (req, res) {
     let node = RED.nodes.getNode(req.params.id)
     let discoverUrlRequest = decodeURIComponent(req.params.discoveryUrl)
-    coreConnector.internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params) + ' for ' + discoverUrlRequest)
+    coreConnector.internalDebugLog('Get Discovery Request ' + JSON.stringify(req.params) + ' for ' + discoverUrlRequest)
     if (node) {
-      let performFindServersRequest = coreConnector.core.nodeOPCUA.perform_findServersRequest
-      performFindServersRequest(discoverUrlRequest, function (err, servers) {
-        if (!err) {
-          let endpoints = []
-          servers.forEach(function (server) {
-            server.discoveryUrls.forEach(function (discoveryUrl) {
-              if (discoveryUrl.toString() !== discoverUrlRequest) {
-                endpoints.push(discoveryUrl.toString())
-              }
+      if (discoverUrlRequest && !discoverUrlRequest.includes('opc.tcp://')) {
+        res.json([])
+      } else {
+        let performFindServersRequest = coreConnector.core.nodeOPCUA.perform_findServersRequest
+        performFindServersRequest(discoverUrlRequest, function (err, servers) {
+          if (!err) {
+            let endpoints = []
+            servers.forEach(function (server) {
+              server.discoveryUrls.forEach(function (discoveryUrl) {
+                if (discoveryUrl.toString() !== discoverUrlRequest) {
+                  endpoints.push(discoveryUrl.toString())
+                }
+              })
             })
-          })
-          res.json(endpoints)
-        } else {
-          coreConnector.internalDebugLog(err)
-          if (node.showErrors) {
-            node.error(err, {payload: ''})
+            res.json(endpoints)
+          } else {
+            coreConnector.internalDebugLog(err)
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
+            res.json([])
           }
-          res.json([])
-        }
-      })
+        })
+      }
     } else {
       coreConnector.internalDebugLog('Get Discovery Request None Node ' + JSON.stringify(req.params))
+      res.json([])
     }
   })
 
@@ -417,7 +433,7 @@ module.exports = function (RED) {
     let endpointUrlRequest = decodeURIComponent(req.params.endpointUrl)
     coreConnector.internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params) + ' for ' + endpointUrlRequest)
     if (node) {
-      if (endpointUrlRequest && endpointUrlRequest === '') {
+      if (endpointUrlRequest && !endpointUrlRequest.includes('opc.tcp://')) {
         res.json([])
       } else {
         node.opcuaClientOptions.endpoint_must_exist = false
@@ -443,15 +459,17 @@ module.exports = function (RED) {
         }).catch(function (err) {
           node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
           coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
+          res.json([])
         })
         let endpointMustExist = node.opcuaClientOptions.endpoint_must_exist
       }
     } else {
       coreConnector.internalDebugLog('Get Endpoints Request None Node ' + JSON.stringify(req.params))
+      res.json([])
     }
   })
 
-  RED.httpAdmin.get('/opcuaIIoT/plain/DataTypesIds', RED.auth.needsPermission('opcuaIIoT.plain.datatypes'), function (req, res) {
+  RED.httpAdmin.get('/opcuaIIoT/plain/DataTypeIds', RED.auth.needsPermission('opcuaIIoT.plain.datatypes'), function (req, res) {
     res.json(_.toArray(_.invert(coreConnector.core.nodeOPCUA.DataTypeIds)))
   })
 
@@ -502,7 +520,7 @@ module.exports = function (RED) {
     res.json(resultTypeList)
   })
 
-  RED.httpAdmin.get('/opcuaIIoT/list/EvenTypesIds', RED.auth.needsPermission('opcuaIIoT.list.eventtypeids'), function (req, res) {
+  RED.httpAdmin.get('/opcuaIIoT/list/EvenTypeIds', RED.auth.needsPermission('opcuaIIoT.list.eventtypeids'), function (req, res) {
     let objectTypeIds = coreConnector.core.nodeOPCUA.ObjectTypeIds
     let invertedObjectTypeIds = _.invert(objectTypeIds)
     let eventTypes = _.filter(invertedObjectTypeIds, function (objectTypeId) {

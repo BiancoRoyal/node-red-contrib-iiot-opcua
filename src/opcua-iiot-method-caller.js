@@ -193,8 +193,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Method-Caller', OPCUAIIoTMethodCaller)
-
-  RED.httpAdmin.get('/opcuaIIoT/method/basicDataTypesForSelect', RED.auth.needsPermission('opcuaIIoT.method.read'), function (req, res) {
-    res.json(coreMethod.core.getBasicDataTypesForSelect())
-  })
 }

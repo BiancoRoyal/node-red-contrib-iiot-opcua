@@ -31,6 +31,12 @@ var nodesToLoadForWriter = [injectNode, writeNode, inputNode, serverNode]
 var nodesToLoadForListener = [injectNode, listenerNode, inputNode, serverNode]
 var nodesToLoadForMethodCaller = [injectNode, methodCallerNode, inputNode, serverNode]
 
+// https://www.dailycred.com/article/bcrypt-calculator
+var testCredentials = {
+  user: 'peter',
+  password: '$2a$04$Dj8UfDYcMLjttad0Qi67DeKtqJM6SZ8XR.Oy70.GUvle4MlrVWaYC'
+}
+
 var testBrowserFlowPayload = [
   {
     "id": "n1",
@@ -42,7 +48,7 @@ var testBrowserFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3.3",
+    "startDelay": "3",
     "name": "TestInject",
     "addressSpaceItems": [],
     "wires": [["n2", "n3"]]
@@ -202,7 +208,7 @@ var testListenerFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3.4",
+    "startDelay": "3",
     "name": "",
     "addressSpaceItems": [
       {
@@ -311,9 +317,9 @@ var testWriteFlowPayload = [
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1982/",
     "keepSessionAlive": true,
-    "loginEnabled": false,
-    "securityPolicy": "None",
-    "securityMode": "NONE",
+    "loginEnabled": true,
+    "securityPolicy": "Basic256",
+    "securityMode": "SIGNANDENCRYPT",
     "name": "TESTSERVER",
     "showStatusActivities": false,
     "showErrors": false,
@@ -341,8 +347,18 @@ var testWriteFlowPayload = [
     "allowAnonymous": true,
     "isAuditing": false,
     "serverDiscovery": true,
-    "users": [],
-    "xmlsets": [],
+    "users": [
+      {
+        "name": "peter",
+        "password": "peter"
+      }
+    ],
+    "xmlsets": [
+      {
+        "name": "ISA95",
+        "path": "public/vendor/opc-foundation/xml/Opc.ISA95.NodeSet2.xml"
+      }
+    ],
     "publicCertificateFile": "",
     "privateCertificateFile": "",
     "maxNodesPerRead": 1000,
@@ -456,8 +472,8 @@ describe('OPC UA Connector node Testing', function () {
             "id": "n4",
             "type": "OPCUA-IIoT-Connector",
             "discoveryUrl": "opc.tcp://localhost:4840/",
-            "endpoint": "opc.tcp://localhost:1979/",
-            "keepSessionAlive": true,
+            "endpoint": "opc.tcp://localhost:1964/",
+            "keepSessionAlive": false,
             "loginEnabled": false,
             "securityPolicy": "None",
             "securityMode": "NONE",
@@ -475,13 +491,119 @@ describe('OPC UA Connector node Testing', function () {
           let n4 = helper.getNode("n4")
           n4.should.have.property('name', 'TESTSERVER')
           n4.should.have.property('discoveryUrl', 'opc.tcp://localhost:4840/')
-          n4.should.have.property('endpoint', 'opc.tcp://localhost:1979/')
+          n4.should.have.property('endpoint', 'opc.tcp://localhost:1964/')
           n4.should.have.property('securityPolicy', 'None')
           n4.should.have.property('messageSecurityMode', 'NONE')
           n4.should.have.property('publicCertificateFile', null)
           n4.should.have.property('privateKeyFile', null)
           done()
         })
+    })
+  })
+
+  describe('Connector node http requests', function () {
+    before(function(done){
+      helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function () {
+        done()
+      })
+    })
+
+    it('should success on discovery request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/client/discover/n4/' + encodeURIComponent('test'))
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on endpoints request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/client/endpoints/n4/' + encodeURIComponent('test'))
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on DataTypeId request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/plain/DataTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on AttributeIds request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/plain/AttributeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on StatusCodes request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/plain/StatusCodes')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on ObjectTypeIds request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/plain/ObjectTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on VariableTypeIds request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/plain/VariableTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on ReferenceTypeIds request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/plain/ReferenceTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on ReferenceTypeIds request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/xmlsets/public')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on DataTypeIds list request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/list/DataTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on EvenTypeIds list request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/list/EvenTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on InstanceTypeIds list request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/list/InstanceTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on VariableTypeIds list request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/list/VariableTypeIds')
+        .expect(200)
+        .end(done);
+    })
+
+    it('should success on ReferenceTypeIds list request', function (done) {
+      helper.request()
+        .get('/opcuaIIoT/list/ReferenceTypeIds')
+        .expect(200)
+        .end(done);
     })
   })
 
@@ -497,22 +619,12 @@ describe('OPC UA Connector node Testing', function () {
       })
     })
 
-    it('should get a message with browseTopic in payload after browse', function(done) {
-      this.timeout(5000)
+    it('should get a message with browserItems in payload after browse', function(done) {
+      this.timeout(6000)
       helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
           msg.payload.should.have.property('browseTopic', "ns=4;i=1234")
-          done()
-        })
-      })
-    })
-
-    it('should get a message with browserItems in payload after browse', function(done) {
-      this.timeout(5000)
-      helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
-        let n5 = helper.getNode("n5")
-        n5.on("input", function (msg) {
           msg.payload.should.have.property('browserItems', [{
             "referenceTypeId": "ns=0;i=35",
             "isForward": true,
@@ -660,16 +772,6 @@ describe('OPC UA Connector node Testing', function () {
         n5.on("input", function (msg) {
           msg.payload[0].should.have.property('nodeId', "ns=4;s=Pressure")
           msg.should.have.property('topic', "TestTopicRead")
-          done()
-        })
-      })
-    })
-
-    it('should get a message with addressSpaceItems after read', function(done) {
-      this.timeout(5000)
-      helper.load(nodesToLoadForReader, testReadFlowPayload, function() {
-        let n5 = helper.getNode("n5")
-        n5.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{"name":"","nodeId":"ns=4;s=Pressure","datatypeName":""}])
           done()
         })
@@ -699,16 +801,6 @@ describe('OPC UA Connector node Testing', function () {
           msg.payload.statusCode.should.have.property('name', 'Good')
           msg.should.have.property('nodetype', "listen")
           msg.should.have.property('injectType', "subscribe")
-          done()
-        })
-      })
-    })
-
-    it('should get a message with addressSpaceItems after listen', function(done) {
-      this.timeout(6000)
-      helper.load(nodesToLoadForListener, testListenerFlowPayload, function() {
-        let n5 = helper.getNode("n5")
-        n5.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{"name":"","nodeId":"ns=4;s=Pressure","datatypeName":""}])
           done()
         })
@@ -719,7 +811,7 @@ describe('OPC UA Connector node Testing', function () {
   describe('Connector node with write', function () {
     it('should get a message with payload after inject', function(done) {
       this.timeout(5000)
-      helper.load(nodesToLoadForWriter, testWriteFlowPayload, function() {
+      helper.load(nodesToLoadForWriter, testWriteFlowPayload, testCredentials, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 1000)
@@ -729,22 +821,38 @@ describe('OPC UA Connector node Testing', function () {
       })
     })
 
-    it('should get a message with nodeId in payload after write', function(done) {
+    it('should get a message with addressSpaceItems after write', function(done) {
       this.timeout(5000)
-      helper.load(nodesToLoadForWriter, testWriteFlowPayload, function() {
+      helper.load(nodesToLoadForWriter, testWriteFlowPayload, testCredentials, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
+          msg.should.have.property('topic', "TestTopicWrite")
+          msg.should.have.property('addressSpaceItems', [{"name":"Pressure","nodeId":"ns=4;s=Pressure","datatypeName":"Double"}])
+          done()
+        })
+      })
+    })
+
+    it('should get a message with payload after inject with autoselect endpoint', function(done) {
+      this.timeout(5000)
+      testWriteFlowPayload[0].autoSelectRightEndpoint = true
+      helper.load(nodesToLoadForWriter, testWriteFlowPayload, testCredentials, function() {
+        let n2 = helper.getNode("n2")
+        n2.on("input", function(msg) {
+          msg.should.have.property('payload', 1000)
           msg.should.have.property('topic', "TestTopicWrite")
           done()
         })
       })
     })
 
-    it('should get a message with addressSpaceItems after write', function(done) {
+    it('should get a message with addressSpaceItems after write with autoselect endpoint', function(done) {
       this.timeout(5000)
-      helper.load(nodesToLoadForWriter, testWriteFlowPayload, function() {
+      testWriteFlowPayload[0].autoSelectRightEndpoint = true
+      helper.load(nodesToLoadForWriter, testWriteFlowPayload, testCredentials, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
+          msg.should.have.property('topic', "TestTopicWrite")
           msg.should.have.property('addressSpaceItems', [{"name":"Pressure","nodeId":"ns=4;s=Pressure","datatypeName":"Double"}])
           done()
         })
@@ -765,22 +873,12 @@ describe('OPC UA Connector node Testing', function () {
       })
     })
 
-    it('should get a message with nodeId in payload after method', function(done) {
-      this.timeout(5000)
-      helper.load(nodesToLoadForMethodCaller, testMethodCallerFlowPayload, function() {
-        let n5 = helper.getNode("n5")
-        n5.on("input", function (msg) {
-          msg.should.have.property('topic', "TestTopicMethod")
-          done()
-        })
-      })
-    })
-
     it('should get a message with addressSpaceItems after method', function(done) {
       this.timeout(5000)
       helper.load(nodesToLoadForMethodCaller, testMethodCallerFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function (msg) {
+          msg.should.have.property('topic', "TestTopicMethod")
           msg.should.have.property('nodetype', "method")
           msg.should.have.property('injectType', "inject")
           msg.should.have.property('methodType', "basic")

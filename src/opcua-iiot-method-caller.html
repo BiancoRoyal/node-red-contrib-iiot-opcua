@@ -82,7 +82,7 @@
           style: "margin-left:5px;width:18%;",
         }).appendTo(row);
 
-        $.getJSON('/opcuaIIoT/method/basicDataTypesForSelect', function (data) {
+        $.getJSON('/opcuaIIoT/plain/DataTypeIds', function (data) {
           $(data).each(function () {
             datatypeField.append($("<option>").attr('value', this).text(this));
           });

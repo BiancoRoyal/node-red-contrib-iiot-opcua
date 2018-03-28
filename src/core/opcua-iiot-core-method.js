@@ -61,7 +61,7 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
       } else {
         try {
           msg.inputArguments.forEach(function (element, index, array) {
-            element.dataType = core.convertToDataType(element.dataType)
+            element.dataType = element.dataType
             element.value = core.convertDataValueByDataType({ value: element.value }, element.dataType)
           })
 

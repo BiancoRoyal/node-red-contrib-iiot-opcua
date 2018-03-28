@@ -374,12 +374,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           inputArguments: [
             {
               name: 'barks',
-              dataType: coreServer.core.convertToDataType('UInt32'),
+              dataType: 'UInt32',
               arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Scalar,
               description: {text: 'specifies the number of time I should bark'}
             }, {
               name: 'volume',
-              dataType: coreServer.core.convertToDataType('UInt32'),
+              dataType: 'UInt32',
               arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Scalar,
               description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'}
             }
@@ -387,7 +387,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
 
           outputArguments: [{
             name: 'Barks',
-            dataType: coreServer.core.convertToDataType('String'),
+            dataType: 'String',
             arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
             description: {text: 'the generated barks'},
             valueRank: 1

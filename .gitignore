@@ -9,3 +9,4 @@ error*.txt
 maps/
 docs/gen/
 coverage/
+pki/

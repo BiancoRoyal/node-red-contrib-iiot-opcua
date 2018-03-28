@@ -265,20 +265,10 @@ describe('OPC UA Read node Testing', function () {
 
       it('should get a message with payload for attributeId ' + attributeId, function (done) {
         this.timeout(4000)
-        helper.load(nodesToLoad, testFlowPayload, function () {
+          helper.load(nodesToLoad, testFlowPayload, function () {
           let n2 = helper.getNode("n2")
           n2.on("input", function (msg) {
             msg.should.have.property('payload', 'testpayload')
-            done()
-          })
-        })
-      })
-
-      it('should verify addressSpaceItems for attributeId ' + attributeId, function (done) {
-        this.timeout(4000)
-        helper.load(nodesToLoad, testFlowPayload, function () {
-          let n2 = helper.getNode("n2")
-          n2.on("input", function (msg) {
             msg.should.have.property('addressSpaceItems', [{
               "name": "ServerStatus",
               "nodeId": "ns=0;i=2256",
