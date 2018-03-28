@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.5.0"></a>
+# [2.5.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.4.2...v2.5.0) (2018-03-28)
+
+
+### Bug Fixes
+
+* **node:** issue [#46](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/46) inject type and using payload from events via Node node ([b7c884f](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/b7c884f))
+* **nodes:** issues while testing ([7944ea0](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/7944ea0))
+
+
+### Features
+
+* **connector:** discover for endpoints and endpoint lookup separated ([7a55a54](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/7a55a54))
+* **new-browse:** browse to single result from multiple address space itmes ([0dba722](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0dba722))
+
+
+
 <a name="2.4.2"></a>
 ## [2.4.2](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.4.1...v2.4.2) (2018-03-27)
 
