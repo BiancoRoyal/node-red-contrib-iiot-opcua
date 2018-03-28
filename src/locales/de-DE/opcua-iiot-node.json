@@ -4,6 +4,7 @@
       "nodeId": "Node-Id",
       "datatype": "Datentyp",
       "value": "Wert",
+      "injectType": "Typ",
       "showActivities": "Zeige Aktivitäten",
       "showErrors": "Zeige Fehler"
     }

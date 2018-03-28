@@ -24,7 +24,8 @@ module.exports = function (RED) {
     this.value = config.value
     this.topic = config.topic
     this.name = config.name
-    this.usingListener = config.usingListener
+    this.injectType = config.injectType
+    this.showErrors = config.showErrors
 
     let node = this
     node.subscribed = false
@@ -33,9 +34,10 @@ module.exports = function (RED) {
 
     node.on('input', function (msg) {
       msg.nodetype = 'node'
+      msg.injectType = msg.injectType || node.injectType
       node.subscribed = !node.subscribed
 
-      if (node.usingListener) {
+      if (node.injectType === 'listen') {
         if (node.subscribed) {
           node.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
@@ -47,16 +49,21 @@ module.exports = function (RED) {
 
       msg.topic = msg.topic || node.topic
       msg.addressSpaceItems = msg.addressSpaceItems || [] // eslint-disable-line
-      msg.valuesToWrite = msg.valuesToWrite || [] // eslint-disable-line
 
-      msg.addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
+      if (node.injectType === 'write') {
+        msg.valuesToWrite = msg.valuesToWrite || [] // eslint-disable-line
+        msg.addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
 
-      if (node.value !== '') {
-        if (node.datatype) {
-          msg.valuesToWrite.push(core.convertDataValueByDataType({value: node.value}, node.datatype))
-        } else {
-          msg.valuesToWrite.push(node.value)
+        try {
+          msg.valuesToWrite.push(core.convertDataValueByDataType({value: msg.payload || node.value}, node.datatype))
+        } catch (err) {
+          core.internalDebugLog(err)
+          if (node.showErrors) {
+            node.error(err, msg)
+          }
         }
+      } else {
+        msg.addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
       }
 
       core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))

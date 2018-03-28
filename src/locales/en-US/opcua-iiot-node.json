@@ -5,9 +5,15 @@
       "datatype": "Data Type",
       "value": "Value",
       "topic": "Topic",
-      "usingListener": "Listener",
+      "injectType": "Type",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors"
+    },
+    "type-label":{
+      "inject": "inject",
+      "read": "read",
+      "write": "write",
+      "listen": "listen"
     }
   }
 }

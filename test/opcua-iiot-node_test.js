@@ -12,7 +12,6 @@
 
 var assert = require('chai').assert
 var injectNode = require('node-red/nodes/core/core/20-inject')
-var functionNode = require('node-red/nodes/core/core/80-function')
 var inputNode = require('../src/opcua-iiot-node')
 var helper = require('node-red-contrib-test-helper')
 
@@ -20,23 +19,151 @@ var testFlowPayload = [
   {
     "id": "n1",
     "type": "inject",
-    "payload": "testpayload",
+    "name": "TestName",
+    "topic": "TestTopicNode",
+    "payload": "12345.34",
+    "payloadType": "num",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "",
+    "wires": [
+      [
+        "n2",
+        "n3"
+      ]
+    ]
+  },
+  {id:"n2", type:"helper"},
+  {
+    "id":"n3",
+    "type": "OPCUA-IIoT-Node",
+    "injectType": "write",
+    "nodeId": "ns=2;s=TestReadWrite",
+    "datatype": "String",
+    "value": "",
+    "name": "TestReadWrite",
+    "topic": "",
+    "showErrors": false,
+    wires:[["n4"]]
+  },
+  {id:"n4", type:"helper"}
+]
+
+var testEventPayloadNumberFlowPayload =  [
+  {
+    "id": "n1",
+    "type": "inject",
+    "name": "TestReadWrite",
+    "topic": "TestTopicNode",
+    "payload": "1234",
+    "payloadType": "num",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "",
+    "wires": [
+      [
+        "n2",
+        "n3"
+      ]
+    ]
+  },
+  {id:"n2", type:"helper"},
+  {
+    "id": "n3",
+    "type": "OPCUA-IIoT-Node",
+    "injectType": "write",
+    "nodeId": "ns=2;s=TestReadWrite",
+    "datatype": "Int16",
+    "value": "",
+    "name": "TestReadWrite",
+    "topic": "",
+    "showErrors": false,
+    "wires": [
+      [
+        "n4"
+      ]
+    ]
+  },
+  {id:"n4", type:"helper"}
+]
+
+var testEventValueNumberFlowPayload =  [
+  {
+    "id": "n1",
+    "type": "inject",
+    "name": "TestReadWrite",
+    "topic": "",
+    "payload": "",
     "payloadType": "str",
     "repeat": "",
     "crontab": "",
     "once": true,
-    "wires": [["n2", "n3"]]
+    "onceDelay": "",
+    "wires": [
+      [
+        "n2",
+        "n3"
+      ]
+    ]
   },
   {id:"n2", type:"helper"},
-  {id:"n3",
-    type:"OPCUA-IIoT-Node",
-    nodeId:"ns=2;s=TestReadWrite",
-    datatype:"Double",
-    value:"1",
-    usingListener:false,
-    name:"TestName",
-    topic:"TestTopic",
-    wires:[["n4"]]
+  {
+    "id": "n3",
+    "type": "OPCUA-IIoT-Node",
+    "injectType": "write",
+    "nodeId": "ns=2;s=TestReadWrite",
+    "datatype": "Int16",
+    "value": "2345",
+    "name": "TestReadWrite",
+    "topic": "NODETOPICOVERRIDE",
+    "showErrors": false,
+    "wires": [
+      [
+        "n4"
+      ]
+    ]
+  },
+  {id:"n4", type:"helper"}
+]
+
+
+var testEventWithPayloadFlowPayload =  [
+  {
+    "id": "n1",
+    "type": "inject",
+    "name": "Error 1",
+    "topic": "ERRORS",
+    "payload": "1234",
+    "payloadType": "num",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "",
+    "wires": [
+      [
+        "n2",
+        "n3"
+      ]
+    ]
+  },
+  {id:"n2", type:"helper"},
+  {
+    "id": "n3",
+    "type": "OPCUA-IIoT-Node",
+    "injectType": "write",
+    "nodeId": "ns=5;s=GESTRUCKEST",
+    "datatype": "Int16",
+    "value": "",
+    "name": "ERRORNODE",
+    "topic": "",
+    "showErrors": false,
+    "wires": [
+      [
+        "n4"
+      ]
+    ]
   },
   {id:"n4", type:"helper"}
 ]
@@ -53,24 +180,26 @@ describe('OPC UA Node node Testing', function () {
   describe('Node node', function () {
     it('should be loaded', function (done) {
       helper.load(
-        [inputNode],
-        [{
-        "id":"3a234e92.cbc0f2",
-        "type":"OPCUA-IIoT-Node",
-        "nodeId":"ns=2;s=TestReadWrite",
-        "datatype":"Double",
-        "value":"1",
-        "name":"TestName",
-        "topic":"TestTopic",
-        "wires":[[]]}
+        [inputNode], [{
+          "id":"3a234e92.cbc0f2",
+          "type": "OPCUA-IIoT-Node",
+          "injectType": "inject",
+          "nodeId": "ns=2;s=TestReadWrite",
+          "datatype": "Double",
+          "value": "testpayload",
+          "name": "TestReadWrite",
+          "topic": "TestTopicNode",
+          "showErrors": false,
+          "wires":[[]]}
         ],
         function () {
           let nodeUnderTest = helper.getNode('3a234e92.cbc0f2')
-          nodeUnderTest.should.have.property('name', 'TestName')
+          nodeUnderTest.should.have.property('name', 'TestReadWrite')
           nodeUnderTest.should.have.property('nodeId', 'ns=2;s=TestReadWrite')
           nodeUnderTest.should.have.property('datatype', 'Double')
-          nodeUnderTest.should.have.property('value', '1')
-          nodeUnderTest.should.have.property('topic', 'TestTopic')
+          nodeUnderTest.should.have.property('injectType', 'inject')
+          nodeUnderTest.should.have.property('value', 'testpayload')
+          nodeUnderTest.should.have.property('topic', 'TestTopicNode')
           done()
         })
     })
@@ -79,17 +208,7 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
-          msg.should.have.property('payload', 'testpayload')
-          done()
-        })
-      })
-    })
-
-    it('should get a message with payload test', function(done) {
-      helper.load([injectNode, inputNode], testFlowPayload, function() {
-        let n2 = helper.getNode("n2")
-        n2.on("input", function(msg) {
-          assert.match(msg.payload, /^test.*./)
+          msg.should.have.property('payload', 12345.34)
           done()
         })
       })
@@ -99,17 +218,62 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testFlowPayload, function() {
         let n4 = helper.getNode("n4")
         n4.on("input", function(msg) {
-          msg.should.have.property('addressSpaceItems', [{"name":"TestName","nodeId":"ns=2;s=TestReadWrite","datatypeName":"Double"}]);
+          msg.should.have.property('addressSpaceItems', [{"name":"TestReadWrite","nodeId":"ns=2;s=TestReadWrite","datatypeName":"String"}]);
+          msg.should.have.property('topic', 'TestTopicNode');
           done()
         })
       })
     })
 
-    it('should have valuesToWrite', function(done) {
-      helper.load([injectNode, functionNode, inputNode], testFlowPayload, function() {
-        let n5 = helper.getNode("n4")
-        n5.on("input", function(msg) {
-          msg.should.have.property('valuesToWrite', [1]);
+    it('should have payload', function(done) {
+      helper.load([injectNode, inputNode], testFlowPayload, function() {
+        let n4 = helper.getNode("n4")
+        n4.on("input", function(msg) {
+          msg.should.have.property('payload', 12345.34);
+          done()
+        })
+      })
+    })
+
+    it('should have work with payloads', function(done) {
+      helper.load([injectNode, inputNode], testEventWithPayloadFlowPayload, function() {
+        let n4 = helper.getNode("n4")
+        n4.on("input", function(msg) {
+          msg.should.have.property('valuesToWrite', [1234]);
+          done()
+        })
+      })
+    })
+
+    it('should have work with payload number', function(done) {
+      helper.load([injectNode, inputNode], testEventPayloadNumberFlowPayload, function() {
+        let n4 = helper.getNode("n4")
+        n4.on("input", function(msg) {
+          msg.should.have.property('valuesToWrite', [1234]);
+          msg.should.have.property('topic', 'TestTopicNode');
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "TestReadWrite",
+            "nodeId": "ns=2;s=TestReadWrite",
+            "datatypeName": "Int16"
+          }]);
+          msg.should.have.property('payload', 1234);
+          done()
+        })
+      })
+    })
+
+    it('should have work with node value', function(done) {
+      helper.load([injectNode, inputNode], testEventValueNumberFlowPayload, function() {
+        let n4 = helper.getNode("n4")
+        n4.on("input", function(msg) {
+          msg.should.have.property('valuesToWrite', [2345]);
+          msg.should.have.property('payload', '');
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "TestReadWrite",
+            "nodeId": "ns=2;s=TestReadWrite",
+            "datatypeName": "Int16"
+          }]);
+          msg.should.have.property('topic', 'NODETOPICOVERRIDE');
           done()
         })
       })

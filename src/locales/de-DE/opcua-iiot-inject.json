@@ -2,6 +2,7 @@
   "opcuaiiotinject": {
     "opcuaiiotinject": "inject",
     "inject": "inject",
+    "injectType": "Typ",
     "repeat": "repeat = __repeat__",
     "crontab": "crontab = __crontab__",
     "stopped": "stopped",

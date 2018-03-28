@@ -12,12 +12,13 @@
     category: 'IIoT',
     color: "#ABCDEF",
     defaults: {
+      injectType: {value: "", required: true},
       nodeId: {value: "", required: true},
       datatype: {value: ""},
       value: {value: ""},
-      usingListener: {value: false},
       name: {value: ""},
-      topic: {value: ""}
+      topic: {value: ""},
+      showErrors: {value: false}
     },
     inputs: 1,
     outputs: 1,
@@ -63,11 +64,28 @@
           }).autocomplete("search", "")
         })
       })
+
+      $('#node-input-injectType').change(function () {
+        if ($(this).val() !== 'write') {
+          $('node-input-value').hide()
+        } else {
+          $('node-input-value').show()
+        }
+      })
     }
   });
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Node">
+    <div class="form-row" id="node-inject-type">
+        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="opcua-iiot-contrib.label.injectType"></span></label>
+        <select id="node-input-injectType" type="text" style="width:140px;">
+            <option value="inject" data-i18n="opcua-iiot-contrib.type-label.inject"></option>
+            <option value="read" data-i18n="opcua-iiot-contrib.type-label.read"></option>
+            <option value="write" data-i18n="opcua-iiot-contrib.type-label.write"></option>
+            <option value="listen" data-i18n="opcua-iiot-contrib.type-label.listen"></option>
+        </select>
+    </div>
     <div class="form-row">
         <label for="node-input-nodeId"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
         <input type="text" id="node-input-nodeId" placeholder="ns=2;s=MySwitch or ns=2;i=1234">
@@ -91,9 +109,9 @@
     </div>
     <hr>
     <div class="form-row">
-        <label style="min-width:160px" for="node-input-usingListener"><i class="fa fa-assistive-listening-systems"></i>
-        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span></label>
-        <input type="checkbox" id="node-input-usingListener" style="max-width:30px">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
     </div>
 </script>
 
@@ -129,10 +147,4 @@
 
     <strong>Name</strong>
     <p>Name in the flow of Node-RED.</p>
-
-    <strong>
-        <span data-i18n="opcua-iiot-contrib.label.usingListener"></span>
-    </strong>
-    <p>Please, set that option to true if it is an inject for the Listener node.
-    With that option, you will get the node subscribe or unsubscribe information.</p>
 </script>
