@@ -25,7 +25,9 @@ module.exports = function (RED) {
     // this.browseAll = config.browseAll
     this.justValue = config.justValue
     this.sendNodesToRead = config.sendNodesToRead
+    this.sendNodesToBrowser = config.sendNodesToBrowser
     this.sendNodesToListener = config.sendNodesToListener
+    this.singleBrowseResult = config.singleBrowseResult
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -104,7 +106,7 @@ module.exports = function (RED) {
 
     node.sendMessageBrowserResults = function (msg, session, browserResult) {
       let nodesToRead = []
-      let addressItemsToRead = []
+      let addressItemList = []
 
       coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' + session.name + ' Id: ' + session.sessionId)
 
@@ -114,12 +116,12 @@ module.exports = function (RED) {
           browserEntries.push(node.transformToEntry(reference))
           if (reference.nodeId) {
             nodesToRead.push(reference.nodeId.toString())
-            addressItemsToRead.push({ name: reference.browseName.name, nodeId: reference.nodeId.toString(), datatypeName: reference.typeDefinition.toString() })
+            addressItemList.push({ name: reference.browseName.name, nodeId: reference.nodeId.toString(), datatypeName: reference.typeDefinition.toString() })
           }
         })
       })
 
-      node.sendMessage(msg, nodesToRead, addressItemsToRead)
+      node.sendMessage(msg, nodesToRead, addressItemList)
     }
 
     node.browse = function (session, msg) {
@@ -138,17 +140,27 @@ module.exports = function (RED) {
       browserEntries = []
       coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
 
-      msg.addressSpaceItems.map((entry) => (
-        coreBrowser.browse(session, entry.nodeId)
+      if (node.singleBrowseResult) {
+        coreBrowser.browseAddressSpaceItems(session, msg.addressSpaceItems)
           .then(function (browserResult) {
             browserEntries = []
             node.sendMessageBrowserResults(msg, session, browserResult)
           }).catch(function (err) {
             node.browseErrorHandling(err, msg)
-          })))
+          })
+      } else {
+        msg.addressSpaceItems.map((entry) => (
+          coreBrowser.browse(session, entry.nodeId)
+            .then(function (browserResult) {
+              browserEntries = []
+              node.sendMessageBrowserResults(msg, session, browserResult)
+            }).catch(function (err) {
+              node.browseErrorHandling(err, msg)
+            })))
+      }
     }
 
-    node.sendMessage = function (originMessage, nodesToRead, addressItemsToRead) {
+    node.sendMessage = function (originMessage, nodesToRead, addressItemList) {
       let msg = originMessage
       msg.nodetype = 'browse'
 
@@ -171,9 +183,14 @@ module.exports = function (RED) {
         msg.nodesToReadCount = nodesToRead.length
       }
 
-      if (node.sendNodesToListener && addressItemsToRead) {
-        msg.addressItemsToRead = addressItemsToRead
-        msg.addressItemsToReadCount = addressItemsToRead.length
+      if (node.sendNodesToListener && addressItemList) {
+        msg.addressItemsToRead = addressItemList
+        msg.addressItemsToReadCount = addressItemList.length
+      }
+
+      if (node.sendNodesToBrowser && addressItemList) {
+        msg.addressItemsToBrowse = addressItemList
+        msg.addressItemsToBrowseCount = addressItemList.length
       }
 
       node.send(msg)
@@ -190,6 +207,10 @@ module.exports = function (RED) {
       if (node.browseTopic && node.browseTopic !== '') {
         node.browse(node.opcuaSession, msg)
       } else {
+        if (msg.addressItemsToBrowse) {
+          msg.addressSpaceItems = msg.addressItemsToBrowse
+        }
+
         if (msg.addressSpaceItems) {
           node.browseNodeList(node.opcuaSession, msg)
         } else {

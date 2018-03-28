@@ -57,4 +57,44 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
   )
 }
 
+de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (session, addressSpaceItems) {
+  let coreBrowser = this
+  return new Promise(
+    function (resolve, reject) {
+      if (!session) {
+        reject(new Error('Session Not Ready To Browse'))
+      }
+
+      let browseOptions = []
+
+      addressSpaceItems.forEach(function (item) {
+
+        browseOptions.push({
+          nodeId: item.nodeId,
+          referenceTypeId: 'Organizes',
+          includeSubtypes: true,
+          browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+          resultMask: 0x3f
+        })
+
+        browseOptions.push({
+          nodeId: item.nodeId,
+          referenceTypeId: 'Aggregates',
+          includeSubtypes: true,
+          browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
+          resultMask: 0x3f
+        })
+      })
+
+      session.browse(browseOptions, function (err, browseResult) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(browseResult)
+        }
+      })
+    }
+  )
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.browser

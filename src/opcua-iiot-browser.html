@@ -20,6 +20,8 @@
       justValue: {value: true},
       sendNodesToRead: {value: false},
       sendNodesToListener: {value: false},
+      sendNodesToBrowser: {value: false},
+      singleBrowseResult: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -126,6 +128,16 @@
                 <span data-i18n="opcua-iiot-contrib.label.sendNodesToListener"></span></label>
                 <input type="checkbox" id="node-input-sendNodesToListener" style="max-width:30px">
             </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-sendNodesToBrowser"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.sendNodesToBrowser"></span></label>
+                <input type="checkbox" id="node-input-sendNodesToBrowser" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-singleBrowseResult"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.singleBrowseResult"></span></label>
+                <input type="checkbox" id="node-input-singleBrowseResult" style="max-width:30px">
+            </div>
             <hr>
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
@@ -203,6 +215,8 @@
             <li>nodesToReadCount
             <li>addressItemsToRead (Array of Object results)
             <li>addressItemsToReadCount
+            <li>addressItemsToBrowse (Array of Object results)
+            <li>addressItemsToBrowseCount
         </ul>
     </ul>
  </div>

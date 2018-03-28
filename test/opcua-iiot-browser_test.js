@@ -47,6 +47,91 @@ var testFlowPayload = [
     "justValue": true,
     "sendNodesToRead": false,
     "sendNodesToListener": false,
+    "sendNodesToBrowser": false,
+    "singleBrowseResult": true,
+    "showStatusActivities": false,
+    "showErrors": false,
+    "wires": [["n5"]]
+  },
+  {
+    "id": "n4",
+    "type": "OPCUA-IIoT-Connector",
+    "discoveryUrl": "",
+    "endpoint": "opc.tcp://localhost:1971/",
+    "keepSessionAlive": true,
+    "loginEnabled": false,
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "LOCAL DEMO SERVER",
+    "showErrors": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "60000",
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false
+  },
+  {id:"n5", type:"helper"},
+  {
+    "id": "n6",
+    "type": "OPCUA-IIoT-Server",
+    "port": "1971",
+    "endpoint": "",
+    "acceptExternalCommands": true,
+    "maxAllowedSessionNumber": "",
+    "maxConnectionsPerEndpoint": "",
+    "maxAllowedSubscriptionNumber": "",
+    "alternateHostname": "",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "asoDemo": true,
+    "allowAnonymous": true,
+    "isAuditing": false,
+    "serverDiscovery": true,
+    "users": [],
+    "xmlsets": [],
+    "publicCertificateFile": "",
+    "privateCertificateFile": "",
+    "maxNodesPerRead": 1000,
+    "maxNodesPerBrowse": 2000,
+    "wires": [[]]
+  }
+]
+
+var testItemFlowPayload = [
+  {
+    "id": "n1",
+    "type": "OPCUA-IIoT-Inject",
+    "injectType": "inject",
+    "payload": "testpayload",
+    "payloadType": "str",
+    "topic": "TestTopicBrowse",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "3",
+    "name": "Root",
+    "addressSpaceItems": [
+      {
+        "name": "",
+        "nodeId": "ns=4;i=1234",
+        "datatypeName": ""
+      }
+    ],
+    "wires": [["n2", "n3"]]
+  },
+  {id:"n2", type:"helper"},
+  {
+    "id": "n3",
+    "type": "OPCUA-IIoT-Browser",
+    "connector": "n4",
+    "nodeId": "",
+    "name": "TestBrowse",
+    "justValue": true,
+    "sendNodesToRead": false,
+    "sendNodesToListener": false,
+    "sendNodesToBrowser": false,
+    "singleBrowseResult": true,
     "showStatusActivities": false,
     "showErrors": false,
     "wires": [["n5"]]
@@ -118,6 +203,7 @@ describe('OPC UA Browser node Testing', function () {
             "justValue": true,
             "sendNodesToRead": false,
             "sendNodesToListener": false,
+            "sendNodesToBrowser": true,
             "showStatusActivities": false,
             "showErrors": false,
             "wires": [
@@ -151,6 +237,7 @@ describe('OPC UA Browser node Testing', function () {
           nodeUnderTest.should.have.property('justValue', true)
           nodeUnderTest.should.have.property('sendNodesToRead', false)
           nodeUnderTest.should.have.property('sendNodesToListener', false)
+          nodeUnderTest.should.have.property('sendNodesToBrowser', true)
           nodeUnderTest.should.have.property('showStatusActivities', false)
           done()
         })
@@ -170,6 +257,19 @@ describe('OPC UA Browser node Testing', function () {
     it('should verify browser items as result', function(done) {
       this.timeout(6000)
       helper.load(nodesToLoad, testFlowPayload, function() {
+        let n5 = helper.getNode("n5")
+        n5.on("input", function(msg) {
+          msg.payload.should.have.property('browserItems')
+          expect(msg.payload.browserItems).to.be.an('array')
+          expect(msg.payload.browserItems.length).to.equal(15)
+          done()
+        })
+      })
+    })
+
+    it('should verify browser items as single result', function(done) {
+      this.timeout(6000)
+      helper.load(nodesToLoad, testItemFlowPayload, function() {
         let n5 = helper.getNode("n5")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')

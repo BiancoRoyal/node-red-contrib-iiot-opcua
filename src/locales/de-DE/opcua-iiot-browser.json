@@ -8,6 +8,8 @@
       "justValue": "Sende nur Werte",
       "sendNodesToRead": "Ergebnisliste für Read",
       "sendNodesToListener": "Ergebnisliste für Listener",
+      "sendNodesToListener": "Ergebnisliste für Browser",
+      "singleBrowseResult": "Gesamtergebnisliste",
       "lookupUseHint": "Das Browsen funktioniert via Auswahl und erneutem Klick auf Suche.",
       "showActivities": "Zeige Aktivitäten",
       "showErrors": "Zeige Fehler"

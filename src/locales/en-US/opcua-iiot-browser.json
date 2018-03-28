@@ -10,6 +10,8 @@
       "justValue": "Send Just Values",
       "sendNodesToRead": "Results To Read",
       "sendNodesToListener": "Results To Listener",
+      "sendNodesToBrowser": "Results To Browser",
+      "singleBrowseResult": "Single Result",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors",
       "topic": "Topic",
