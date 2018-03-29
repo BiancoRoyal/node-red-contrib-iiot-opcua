@@ -23,7 +23,6 @@ module.exports = function (RED) {
     const CONNECTION_START_DELAY = 2000 // 2 sec.
     const UNLIMITED_LISTENERS = 0
     const SESSION_TIMEOUT = 15 // sec.
-    const MAX_SESSION_RETRIES = 20
 
     RED.nodes.createNode(this, config)
     this.discoveryUrl = config.discoveryUrl || null
@@ -39,6 +38,9 @@ module.exports = function (RED) {
     this.privateKeyFile = config.privateKeyFile
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 60000
     this.autoSelectRightEndpoint = config.autoSelectRightEndpoint
+    this.strategyMaxRetry = config.strategyMaxRetry || 10
+    this.strategyInitialDelay = config.strategyInitialDelay || 2000
+    this.strategyMaxDelay = config.strategyMaxDelay || 10000
 
     let node = this
     node.setMaxListeners(UNLIMITED_LISTENERS)
@@ -85,7 +87,12 @@ module.exports = function (RED) {
       keepSessionAlive: node.keepSessionAlive,
       certificateFile: node.publicCertificateFile,
       privateKeyFile: node.privateKeyFile,
-      endpoint_must_exist: node.endpointMustExist
+      endpoint_must_exist: node.endpointMustExist,
+      connectionStrategy: {
+        maxRetry: node.strategyMaxRetry,
+        initialDelay: node.strategyInitialDelay,
+        maxDelay: node.strategyMaxDelay
+      }
     }
 
     if (node.loginEnabled) {
@@ -111,33 +118,50 @@ module.exports = function (RED) {
 
       node.opcuaClient.on('close', function (err) {
         if (err) {
-          coreConnector.internalDebugLog(err.message)
+          coreConnector.internalDebugLog('Connection Error On Close ' + err)
         }
-        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
+        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
+        coreConnector.internalDebugLog('CONNECTION CLOSED: ' + node.endpoint)
         node.closeSession()
         node.emit('server_connection_close')
       })
 
       node.opcuaClient.on('backoff', function (number, delay) {
-        coreConnector.internalDebugLog('backoff  attempt #'.bgWhite.yellow, number, ' retrying in ', delay / 1000.0, ' seconds')
+        coreConnector.internalDebugLog('!!! CONNECTION FAILED FOR #'.bgWhite.yellow, number, ' retrying ', delay / 1000.0, ' sec. !!!')
+        coreConnector.internalDebugLog('CONNECTION FAILED: ' + node.endpoint)
       })
 
       node.opcuaClient.on('connection_reestablished', function () {
-        coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!'.bgWhite.orange)
+        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!'.bgWhite.orange)
+        coreConnector.internalDebugLog('CONNECTION RE-ESTABLISHED: ' + node.endpoint)
       })
 
       node.opcuaClient.on('start_reconnection', function () {
-        coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!  Starting Reconnection !!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
+        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT STARTING RECONNECTION !!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
+        coreConnector.internalDebugLog('CONNECTION STARTING RECONNECTION: ' + node.endpoint)
       })
 
+      node.opcuaClient.on('timed_out_request', function () {
+        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT TIMED OUT REQUEST !!!!!!!!!!!!!!!!!!!'.bgWhite.blue)
+        coreConnector.internalDebugLog('CONNECTION TIMED OUT REQUEST: ' + node.endpoint)
+      })
+
+      if (RED.settings.verbose) {
+        node.opcuaClient.on('security_token_renewed', function () {
+          coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT SECURITY TOKEN RENEWED !!!!!!!!!!!!!!!!!!!'.bgWhite.violet)
+          coreConnector.internalDebugLog('CONNECTION SECURITY TOKEN RENEWE: ' + node.endpoint)
+        })
+      }
+
       node.opcuaClient.on('after_reconnection', function () {
-        coreConnector.internalDebugLog(' !!!!!!!!!!!!!!!!!!!!!!!!        Reconnected     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
+        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!      CLIENT RECONNECTED     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
+        coreConnector.internalDebugLog('CONNECTION RECONNECTED: ' + node.endpoint)
         node.emit('after_reconnection', node.opcuaClient)
         node.startSession(SESSION_TIMEOUT)
       })
 
       node.opcuaClient.connect(node.endpoint).then(function () {
-        coreConnector.internalDebugLog('Connected On ' + node.endpoint)
+        coreConnector.internalDebugLog('Client Connected On ' + node.endpoint)
         coreConnector.internalDebugLog('Client Options ' + JSON.stringify(node.opcuaClientOptions))
         node.emit('connected', node.opcuaClient)
         node.startSession(SESSION_TIMEOUT)
@@ -162,7 +186,7 @@ module.exports = function (RED) {
           if (err) {
             coreConnector.internalDebugLog('Auto Switch To Endpoint Error ' + err)
             if (node.showErrors) {
-              node.error(err, {payload: ''})
+              node.error(err, {payload: 'Get Endpoints Request Error'})
             }
           } else {
             endpoints.forEach(function (endpoint, i) {
@@ -184,7 +208,7 @@ module.exports = function (RED) {
             if (err) {
               coreConnector.internalDebugLog('Endpoints Auto Request Error ' + err)
               if (node.showErrors) {
-                node.error(err, {payload: ''})
+                node.error(err, {payload: 'Discover Client Disconnect Error'})
               }
             } else {
               coreConnector.internalDebugLog('Endpoints Auto Request Done With Endpoint ' + node.endpoint)
@@ -206,6 +230,7 @@ module.exports = function (RED) {
       }
 
       if (node.opcuaClient) {
+        node.opcuaSession = null
         node.opcuaClient.createSession(node.userIdentity || {}).then(function (session) {
           coreConnector.internalDebugLog('Session Created On ' + node.endpoint)
           node.stateMachine.open()
@@ -217,9 +242,9 @@ module.exports = function (RED) {
           node.emit('session_started', node.opcuaSession)
           node.sessionConnectRetries = 0
         }).catch(function (err) {
-          coreConnector.internalDebugLog(err)
+          coreConnector.internalDebugLog('Create Session ' + err)
           if (node.showErrors) {
-            node.error(err, {payload: ''})
+            node.error(err, {payload: 'Create Session Error'})
           }
           node.opcuaSession = null
         })
@@ -261,23 +286,30 @@ module.exports = function (RED) {
 
     node.resetBadSession = function () {
       coreConnector.internalDebugLog('Reset Bad Session')
-      if (node.opcuaSession && node.sessionNotInRenewMode && node.sessionConnectRetries < MAX_SESSION_RETRIES) {
+      if (node.sessionNotInRenewMode) {
         node.sessionConnectRetries += 1
+        coreConnector.internalDebugLog('Bad Session Connect Retries:' + node.sessionConnectRetries)
         node.setSessionToRenewMode()
         setTimeout(function () {
           node.startSession(SESSION_TIMEOUT)
         }, CONNECTION_START_DELAY)
       } else {
-        if (node.sessionConnectRetries === MAX_SESSION_RETRIES) {
-          node.sessionConnectRetries = 0 // reset by new request
-        }
+        coreConnector.internalDebugLog('Session In Renew Mode')
       }
     }
 
     node.closeSession = function () {
-      node.stateMachine.close().lock()
+      coreConnector.internalDebugLog('Close Session On Connector State ' + node.stateMachine.getMachineState())
+
+      if (node.stateMachine.getMachineState() !== 'LOCKED') {
+        node.stateMachine.close().lock()
+      } else {
+        coreConnector.internalDebugLog('No Session To Close On State Locked For ' + node.endpoint)
+        return
+      }
+
       try {
-        if (node.opcuaSession && node.opcuaSession.sessionId !== 'terminated' && node.opcuaClient) {
+        if (node.opcuaClient && node.opcuaSession && node.opcuaSession.sessionId !== 'terminated') {
           coreConnector.internalDebugLog('Close Session Id: ' + node.opcuaSession.sessionId)
 
           coreConnector.closeSession(node.opcuaSession).then(function () {
@@ -310,24 +342,16 @@ module.exports = function (RED) {
     }
 
     node.handleError = function (err) {
-      if (err) {
-        coreConnector.internalDebugLog('Error on ' + node.endpoint + ' err:' + err)
-        if (node.showErrors) {
-          node.error(err, {payload: ''})
-        }
-      } else {
-        coreConnector.internalDebugLog('Error on ' + node.endpoint)
+      coreConnector.internalDebugLog('Handle Error On ' + node.endpoint + ' err:' + err)
+      if (node.showErrors) {
+        node.error(err, {payload: 'Handle Connector Error'})
       }
     }
 
     node.handleSessionError = function (err) {
-      if (err) {
-        coreConnector.internalDebugLog('Session Error on ' + node.endpoint + ' err:' + err)
-        if (node.showErrors) {
-          node.error(err, {payload: ''})
-        }
-      } else {
-        coreConnector.internalDebugLog('Session Error on ' + node.endpoint)
+      coreConnector.internalDebugLog('Session Error On ' + node.endpoint + ' err:' + err)
+      if (node.showErrors) {
+        node.error(err, {payload: 'Session Error'})
       }
       node.resetSessionRenewMode()
       node.resetBadSession()
@@ -335,12 +359,12 @@ module.exports = function (RED) {
 
     node.handleSessionClose = function (err) {
       if (err) {
-        coreConnector.internalDebugLog('Session Error ' + err)
+        coreConnector.internalDebugLog('Session Closed With Error ' + err)
         if (node.showErrors) {
-          node.error(err, {payload: ''})
+          node.error(err, {payload: 'Session Closed'})
         }
       } else {
-        coreConnector.internalDebugLog('Closed Session')
+        coreConnector.internalDebugLog('Session Closed Without Error')
       }
       node.resetSessionRenewMode()
       node.resetBadSession()
@@ -349,39 +373,71 @@ module.exports = function (RED) {
     try {
       setTimeout(node.connectOPCUAEndpoint, CONNECTION_START_DELAY)
     } catch (err) {
-      coreConnector.internalDebugLog(err)
+      coreConnector.internalDebugLog('Connect OPC UA Endpoint ' + err)
+      if (node.showErrors) {
+        node.error(err, {payload: ''})
+      }
     }
 
     node.on('close', function (done) {
       node.stateMachine.close().lock()
-      if (node.opcuaSession && node.opcuaClient) {
-        coreConnector.closeSession(node.opcuaSession).then(function () {
-          node.opcuaClient.disconnect(function (err) {
-            if (node.showErrors) {
-              node.error(err, {payload: ''})
+      if (node.opcuaClient) {
+        if (node.opcuaSession) {
+          coreConnector.internalDebugLog('Close Node Try To Close Session For ' + node.endpoint)
+          coreConnector.closeSession(node.opcuaSession).then(function () {
+            coreConnector.internalDebugLog('Close Node Session Closed For ' + node.endpoint)
+            coreConnector.internalDebugLog('Close Node Disconnecting Client ' + node.endpoint)
+            node.opcuaClient.disconnect(function (err) {
+              if (err) {
+                coreConnector.internalDebugLog('Close Node Client Disconnected With Error ' + err + ' On ' + node.endpoint)
+                if (node.showErrors) {
+                  node.error(err, {payload: 'Session Close Error On Close Connector'})
+                }
+              } else {
+                coreConnector.internalDebugLog('Close Node Client Disconnected From ' + node.endpoint)
+              }
+              done()
+              coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
+            })
+          }).catch(function (err) {
+            if (err) {
+              coreConnector.internalDebugLog('Close Node With Session Close Error ' + err + ' On ' + node.endpoint)
+              if (node.showErrors) {
+                node.error(err, {payload: 'Session Close Crash On Close Connector'})
+              }
             }
-            done()
-          })
-        }).catch(function (err) {
-          coreConnector.internalDebugLog(err)
-          if (node.showErrors) {
-            node.error(err, {payload: ''})
-          }
-          node.opcuaClient = null
-          done()
-        })
-      } else {
-        if (node.opcuaClient) {
-          node.opcuaClient.disconnect(function (err) {
-            if (node.showErrors) {
-              node.error(err, {payload: ''})
-            }
-            done()
+            coreConnector.internalDebugLog('Close Node Disconnecting Client On Crashed Session Close On ' + node.endpoint)
+            node.opcuaClient.disconnect(function (err) {
+              if (err) {
+                coreConnector.internalDebugLog('Close Node With Client Close Error On Crashed Session Close ' + err + ' On ' + node.endpoint)
+                if (node.showErrors) {
+                  node.error(err, {payload: 'Client Close Error On Close Connector'})
+                }
+              } else {
+                coreConnector.internalDebugLog('Close Node Client Disconnected On Crashed Session Close On ' + node.endpoint)
+              }
+              done()
+              coreConnector.internalDebugLog('Close Node Done For Connector With Crashed Session Close On ' + node.endpoint)
+            })
           })
         } else {
-          node.opcuaClient = null
-          done()
+          coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
+          node.opcuaClient.disconnect(function (err) {
+            if (err) {
+              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
+              if (node.showErrors) {
+                node.error(err, {payload: 'Client Close Error On Close Connector'})
+              }
+            } else {
+              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint)
+            }
+            done()
+            coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
+          })
         }
+      } else {
+        done()
+        coreConnector.internalDebugLog('Close Node Done For Connector Without Client On ' + node.endpoint)
       }
     })
   }
@@ -414,7 +470,7 @@ module.exports = function (RED) {
             })
             res.json(endpoints)
           } else {
-            coreConnector.internalDebugLog(err)
+            coreConnector.internalDebugLog('Perform Find Servers Request ' + err)
             if (node.showErrors) {
               node.error(err, {payload: ''})
             }

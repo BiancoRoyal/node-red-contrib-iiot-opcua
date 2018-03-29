@@ -19,11 +19,15 @@
       "defaultSecureTokenLifetime": "Secure TLT",
       "certificateFiles": "Certificate Files",
       "endpointMustExist": "Endpoint Must Exist",
-      "autoSelectRightEndpoint": "Auto Select Endpoint"
+      "autoSelectRightEndpoint": "Auto Select Endpoint",
+      "strategyMaxRetry": "Max. Retry",
+      "strategyInitialDelay": "Initial Delay",
+      "strategyMaxDelay": "Max. Delay"
     },
     "tabs-label": {
       "settings": "Settings",
-      "security": "Security"
+      "security": "Security",
+      "strategy": "Strategy"
     }
   }
 }

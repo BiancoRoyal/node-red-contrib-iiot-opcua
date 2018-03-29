@@ -16,7 +16,8 @@
     },
     "tabs-label": {
       "settings": "Einstellungen",
-      "security": "Sicherheit"
+      "security": "Sicherheit",
+      "strategy": "Strategie"
     }
   }
 }
