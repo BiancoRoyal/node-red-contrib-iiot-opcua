@@ -167,7 +167,7 @@ module.exports = function (RED) {
         node.startSession(SESSION_TIMEOUT)
       }).catch(function (err) {
         if (node.showErrors) {
-          node.error(err, {payload: ''})
+          node.error(err, {payload: 'Client Connect Error'})
         }
         node.handleError(err)
       })

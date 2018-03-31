@@ -101,7 +101,20 @@
     <h4>Inject payload JSON</h4>
     <p>There is an option to send a JSON payload inject into the Listener.</p>
     <p>Example:</p>
-    <p><pre>{ "interval": 500, "queueSize": 10 }</pre></p>
+    <p><pre>
+      {
+        "interval": 500,
+        "queueSize": 10,
+        "options": {
+            "requestedPublishingInterval": 5000,
+            "requestedLifetimeCount": 60,
+            "requestedMaxKeepAliveCount": 10,
+            "maxNotificationsPerPublish": 5,
+            "publishingEnabled": true,
+            "priority": 7
+      }
+    }
+    </pre></p>
 
     <p>The option interval means the sampling interval. If you want to set the publishing interval you have to send a bit more options.</p>
 
