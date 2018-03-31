@@ -73,7 +73,7 @@ var testFlowPayload = [
     "id": "n7",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:1972/",
+    "endpoint": "opc.tcp://localhost:1970/",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
@@ -89,7 +89,7 @@ var testFlowPayload = [
   {
     "id": "n8",
     "type": "OPCUA-IIoT-Server",
-    "port": "1972",
+    "port": "1970",
     "endpoint": "",
     "acceptExternalCommands": true,
     "maxAllowedSessionNumber": "",
@@ -136,7 +136,7 @@ var readNodeToBeLoaded = [
     "id": "e507077b.ccdc18",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:2000/",
+    "endpoint": "opc.tcp://localhost:1971/",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
@@ -259,13 +259,17 @@ describe('OPC UA Read node Testing', function () {
         })
     })
 
-    var attributeId = 0
-    for (attributeId of [0,1,2,3,4,13,130]) {
-      testFlowPayload[2].attributeId = attributeId
+  })
+
+  describe('Read node attributes', function () {
+    let attributeId = 0
+    let readModeAttributes = [0,1,2,3,4,13,130]
+    readModeAttributes.forEach(function(attributeId) {
 
       it('should get a message with payload for attributeId ' + attributeId, function (done) {
         this.timeout(4000)
-          helper.load(nodesToLoad, testFlowPayload, function () {
+        testFlowPayload[2].attributeId = attributeId
+        helper.load(nodesToLoad, testFlowPayload, function () {
           let n2 = helper.getNode("n2")
           n2.on("input", function (msg) {
             msg.should.have.property('payload', 'testpayload')
@@ -281,6 +285,7 @@ describe('OPC UA Read node Testing', function () {
 
       it('should have read results for attributeId ' + attributeId, function (done) {
         this.timeout(4000)
+        testFlowPayload[2].attributeId = attributeId
         helper.load(nodesToLoad, testFlowPayload, function () {
           let n4 = helper.getNode("n4")
           n4.on("input", function (msg) {
@@ -291,6 +296,7 @@ describe('OPC UA Read node Testing', function () {
               msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
             }
             msg.should.have.property('topic', "TestTopicRead")
+            msg.should.have.property('attributeId', attributeId)
             done()
           })
         })
@@ -298,6 +304,7 @@ describe('OPC UA Read node Testing', function () {
 
       it('should have read results with response for attributeId ' + attributeId, function (done) {
         this.timeout(4000)
+        testFlowPayload[2].attributeId = attributeId
         helper.load(nodesToLoad, testFlowPayload, function () {
           let n6 = helper.getNode("n6")
           n6.on("input", function (msg) {
@@ -308,10 +315,11 @@ describe('OPC UA Read node Testing', function () {
 
             }
             msg.should.have.property('topic', "TestTopicRead")
+            msg.should.have.property('attributeId', attributeId)
             done()
           })
         })
       })
-    }
+    })
   })
 })

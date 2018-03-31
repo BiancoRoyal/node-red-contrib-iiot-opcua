@@ -529,7 +529,7 @@ de.biancoroyal.opcua.iiot.core.parseIdentifierFromMsgTopic = function (msg) {
       if (msg.topic.toString().includes(';b=')) {
         nodeIdentifier = {
           identifier: msg.topic.substring(msg.topic.indexOf(';b=') + 3),
-          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.NUMERIC
+          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.BYTESTRING
         }
       } else {
         nodeIdentifier = {

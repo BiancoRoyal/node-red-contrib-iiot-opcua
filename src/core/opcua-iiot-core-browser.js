@@ -68,7 +68,6 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
       let browseOptions = []
 
       addressSpaceItems.forEach(function (item) {
-
         browseOptions.push({
           nodeId: item.nodeId,
           referenceTypeId: 'Organizes',

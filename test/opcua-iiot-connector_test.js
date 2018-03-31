@@ -44,7 +44,7 @@ var testBrowserFlowPayload = [
     "injectType": "inject",
     "payload": "testpayload",
     "payloadType": "str",
-    "topic": "",
+    "topic": "TestTopicBrowse",
     "repeat": "",
     "crontab": "",
     "once": true,
@@ -57,7 +57,7 @@ var testBrowserFlowPayload = [
   {
     "id": "n3",
     "type": "OPCUA-IIoT-Browser",
-    "connector": "n4",
+    "connector": "c1",
     "nodeId": "ns=4;i=1234",
     "name": "TestBrowser",
     "justValue": true,
@@ -68,11 +68,11 @@ var testBrowserFlowPayload = [
     "wires": [["n5"]]
   },
   {
-    "id": "n4",
+    "id": "c1",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:1979/",
-    "keepSessionAlive": true,
+    "endpoint": "opc.tcp://localhost:1962/",
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -81,7 +81,7 @@ var testBrowserFlowPayload = [
     "showErrors": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
-    "defaultSecureTokenLifetime": "60000",
+    "defaultSecureTokenLifetime": "3000",
     "endpointMustExist": false,
     "autoSelectRightEndpoint": false
   },
@@ -89,7 +89,7 @@ var testBrowserFlowPayload = [
   {
     "id": "n6",
     "type": "OPCUA-IIoT-Server",
-    "port": "1979",
+    "port": "1962",
     "endpoint": "",
     "acceptExternalCommands": true,
     "maxAllowedSessionNumber": "",
@@ -472,7 +472,7 @@ describe('OPC UA Connector node Testing', function () {
             "id": "n4",
             "type": "OPCUA-IIoT-Connector",
             "discoveryUrl": "opc.tcp://localhost:4840/",
-            "endpoint": "opc.tcp://localhost:1964/",
+            "endpoint": "opc.tcp://localhost:1984/",
             "keepSessionAlive": false,
             "loginEnabled": false,
             "securityPolicy": "None",
@@ -491,7 +491,7 @@ describe('OPC UA Connector node Testing', function () {
           let n4 = helper.getNode("n4")
           n4.should.have.property('name', 'TESTSERVER')
           n4.should.have.property('discoveryUrl', 'opc.tcp://localhost:4840/')
-          n4.should.have.property('endpoint', 'opc.tcp://localhost:1964/')
+          n4.should.have.property('endpoint', 'opc.tcp://localhost:1984/')
           n4.should.have.property('securityPolicy', 'None')
           n4.should.have.property('messageSecurityMode', 'NONE')
           n4.should.have.property('publicCertificateFile', null)
@@ -506,6 +506,10 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function () {
         done()
       })
+    })
+
+    after(function () {
+      helper.unload()
     })
 
     it('should success on discovery request', function (done) {
@@ -609,11 +613,33 @@ describe('OPC UA Connector node Testing', function () {
 
   describe('Connector node with browser', function () {
     it('should get a message with payload after inject', function(done) {
-      this.timeout(5000)
+      this.timeout(6000)
       helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
         let n2 = helper.getNode("n2")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 'testpayload')
+          done()
+        })
+      })
+    })
+
+    it('should get a message with topic after browse', function(done) {
+      this.timeout(6000)
+      helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
+        let n5 = helper.getNode("n5")
+        n5.on("input", function(msg) {
+          msg.should.have.property('topic', 'TestTopicBrowse')
+          done()
+        })
+      })
+    })
+
+    it('should get a message with browse topic after browse', function(done) {
+      this.timeout(6000)
+      helper.load(nodesToLoadForBrowser, testBrowserFlowPayload, function() {
+        let n5 = helper.getNode("n5")
+        n5.on("input", function(msg) {
+          msg.payload.should.have.property('browseTopic', "ns=4;i=1234")
           done()
         })
       })

@@ -353,6 +353,7 @@
     "z": "ea2f9ebe.1851e8",
     "eventType": "BaseEventType",
     "eventTypeLabel": "BaseEventType (i=2041)",
+    "resultType": "all",
     "queueSize": "1000",
     "usingListener": true,
     "name": "Base Events",

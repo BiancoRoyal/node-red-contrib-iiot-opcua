@@ -280,13 +280,12 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
 
-  OPCUAIIoTBrowser.prototype.browseFromSettings = function (node, nodeId, res) {
+  RED.httpAdmin.get('/opcuaIIoT/browse/:id/:nodeId', RED.auth.needsPermission('opcuaIIoT.browse'), function (req, res) {
+    let node = RED.nodes.getNode(req.params.id)
     let entries = []
-    let nodeRootId = nodeId || coreBrowser.core.OBJECTS_ROOT
+    let nodeRootId = decodeURIComponent(req.params.nodeId) || coreBrowser.core.OBJECTS_ROOT
 
-    if (node.opcuaSession && nodeRootId) {
-      coreBrowser.internalDebugLog('Session Is Valid And NodeId Is ' + nodeRootId)
-
+    if (node.opcuaSession) {
       coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browserResult) {
         browserResult.browseResult.forEach(function (result) {
           if (result.references && result.references.length) {
@@ -315,12 +314,6 @@ module.exports = function (RED) {
     } else {
       res.json(entries)
       browserEntries = entries
-      coreBrowser.internalDebugLog('Session To Browse From Settings Is Not Valid')
     }
-  }
-
-  RED.httpAdmin.get('/opcuaIIoT/browser/:id/rootid/:rid', RED.auth.needsPermission('opcuaIIoT.browser.write'), function (req, res) {
-    let node = RED.nodes.getNode(req.params.id)
-    node.browseFromSettings(node, req.params.rid, res)
   })
 }

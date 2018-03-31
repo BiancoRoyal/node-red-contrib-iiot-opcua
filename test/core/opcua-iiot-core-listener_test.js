@@ -315,5 +315,13 @@ describe('OPC UA Core Listener', function () {
         done()
       })).to.be.instanceOf(Promise)
     })
+
+    it('should be instance of Promise, if none session is present', function (done) {
+      expect(coreListener.getAllEventTypes(null, function () {
+      }).catch(function (err) {
+        assert.equal('Session Is Not Valid To Browse For Event Types', err.message)
+        done()
+      })).to.be.instanceOf(Promise)
+    })
   })
 })
