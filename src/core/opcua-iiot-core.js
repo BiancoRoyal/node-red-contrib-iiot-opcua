@@ -305,6 +305,9 @@ de.biancoroyal.opcua.iiot.core.getVariantValue = function (datatype, value) {
     case 'DateTime':
     case opcua.DataType.DateTime:
       return new Date(value)
+    case 'String':
+    case opcua.DataType.String:
+      return (typeof value !== 'string') ? value.toString() : value
     default:
       return value
   }
@@ -380,7 +383,7 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
         break
       case 'Byte':
       case opcua.DataType.Byte:
-        if (valueType === 'Boolean') {
+        if (valueType === 'boolean') {
           convertedValue = value.value ? 1 : 0
         } else {
           convertedValue = parseInt(value.value)
@@ -425,7 +428,7 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
       case opcua.DataType.Int32:
       case 'Int64':
       case opcua.DataType.Int64:
-        if (valueType === 'Boolean') {
+        if (valueType === 'boolean') {
           convertedValue = value.value ? 1 : 0
         } else {
           if (isNaN(value.value)) {
@@ -437,40 +440,32 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
         break
       case 'Boolean':
       case opcua.DataType.Boolean:
-        if (valueType === 'Boolean') {
+        if (valueType === 'boolean') {
           convertedValue = value.value
         } else {
           if (isNaN(value.value)) {
             convertedValue = (value.value && value.value.toString().toLowerCase() !== 'false')
           } else {
-            if (value.value) {
-              convertedValue = true
-            } else {
-              convertedValue = false
-            }
+            convertedValue = (value.value)
           }
         }
         break
       case 'String':
       case opcua.DataType.String:
-        if (value.hasOwnProperty('value')) {
+        if (valueType !== 'string') {
           convertedValue = value.value.toString()
         } else {
-          convertedValue = JSON.stringify(value.value)
+          convertedValue = value.value
         }
         break
       case 'Null':
       case opcua.DataType.Null:
-        convertedValue = value.value
+        convertedValue = null
         break
       default:
         this.internalDebugLog('convertDataValue unused DataType: ' + dataType)
         if (value.hasOwnProperty('value')) {
-          if (value.value.toString) {
-            convertedValue = value.value.toString()
-          } else {
-            convertedValue = value.value
-          }
+          convertedValue = value.value
         } else {
           convertedValue = null
         }
@@ -570,28 +565,6 @@ de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId = function (item) {
   }
 
   return nodeIdentifier
-}
-
-de.biancoroyal.opcua.iiot.core.newOPCUANodeIdListFromMsgItems = function (addressSpaceItems) {
-  let core = this
-  let item = null
-  let itemList = []
-
-  if (addressSpaceItems && addressSpaceItems.length) {
-    for (item of addressSpaceItems) {
-      if (!item.nodeId) {
-        itemList.push(core.newOPCUANodeIdFromItemNodeId(item))
-      } else {
-        if (typeof item.nodeId === 'string') {
-          itemList.push(core.newOPCUANodeIdFromItemNodeId(item.nodeId))
-        } else {
-          itemList.push(item.nodeId)
-        }
-      }
-    }
-  }
-
-  return itemList
 }
 
 de.biancoroyal.opcua.iiot.core.newOPCUANodeIdFromItemNodeId = function (item) {
@@ -716,8 +689,8 @@ de.biancoroyal.opcua.iiot.core.isSessionBad = function (err) {
   return (err.toString().includes('BadSession') || err.toString().includes('Invalid Channel'))
 }
 
-de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (node) {
-  switch (node.connector.stateMachine.getMachineState()) {
+de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (nodeState, node) {
+  switch (nodeState) {
     case 'INIT':
       node.setNodeStatusTo('connecting')
       break
@@ -733,6 +706,21 @@ de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (node) {
       break
     default:
       node.setNodeStatusTo('waiting')
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.isNodeId = function (nodeId) {
+  if (!nodeId || !nodeId.identifierType) {
+    return false
+  }
+
+  switch (nodeId.identifierType) {
+    case this.nodeOPCUA.NodeIdType.NUMERIC:
+    case this.nodeOPCUA.NodeIdType.STRING:
+    case this.nodeOPCUA.NodeIdType.GUID:
+      return true
+    default:
+      return false
   }
 }
 

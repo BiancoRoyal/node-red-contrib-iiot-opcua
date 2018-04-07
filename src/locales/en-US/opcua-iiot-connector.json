@@ -22,7 +22,9 @@
       "autoSelectRightEndpoint": "Auto Select Endpoint",
       "strategyMaxRetry": "Max. Retry",
       "strategyInitialDelay": "Initial Delay",
-      "strategyMaxDelay": "Max. Delay"
+      "strategyMaxDelay": "Max. Delay",
+      "strategyRandomisationFactor": "Random Factor",
+      "requestedSessionTimeout": "Requested Timeout"
     },
     "tabs-label": {
       "settings": "Settings",

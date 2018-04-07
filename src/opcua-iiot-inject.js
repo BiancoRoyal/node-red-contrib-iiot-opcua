@@ -28,7 +28,7 @@ module.exports = function (RED) {
     this.repeat = config.repeat
     this.crontab = config.crontab
     this.once = config.once
-    this.startDelay = parseInt(config.startDelay) || 10
+    this.startDelay = parseFloat(config.startDelay) || 10
     this.name = config.name
     this.injectType = config.injectType || 'inject'
 
@@ -127,10 +127,8 @@ module.exports = function (RED) {
     })
 
     if (node.once) {
-      let timeout = node.INPUT_TIMEOUT_MILLISECONDS * node.startDelay
-      coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout +
-        ' msec.'
-      )
+      let timeout = parseInt(node.INPUT_TIMEOUT_MILLISECONDS * node.startDelay)
+      coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
       node.onceTimeout = setTimeout(function () {
         coreInject.internalDebugLog('injecting once at start')
         node.emit('input', {})

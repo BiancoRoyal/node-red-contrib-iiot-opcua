@@ -212,14 +212,14 @@ describe('OPC UA Core Listener', function () {
   describe('buildNewMonitoredItem', function () {
     it('should return Error object, if none value is present', function (done) {
       coreListener.buildNewMonitoredItem().catch(function (err) {
-        assert.equal('AddressSpaceItem Is Not Valid', err.message)
+        assert.equal('NodeId Is Not Valid', err.message)
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreListener.buildNewMonitoredItem().catch(function (err) {
-        assert.equal('AddressSpaceItem Is Not Valid', err.message)
+        assert.equal('NodeId Is Not Valid', err.message)
         done()
       })).to.be.instanceOf(Promise)
     })
@@ -228,14 +228,14 @@ describe('OPC UA Core Listener', function () {
   describe('buildNewEventItem', function () {
     it('should return Error object, if none value is present', function (done) {
       coreListener.buildNewEventItem().catch(function (err) {
-        assert.equal('AddressSpaceItem Is Not Valid', err.message)
+        assert.equal('NodeId Is Not Valid', err.message)
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreListener.buildNewEventItem().catch(function (err) {
-        assert.equal('AddressSpaceItem Is Not Valid', err.message)
+        assert.equal('NodeId Is Not Valid', err.message)
         done()
       })).to.be.instanceOf(Promise)
     })

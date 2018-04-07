@@ -15,7 +15,7 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreFilter = require('./core/opcua-iiot-core-filter')
-  let _ = require('underscore')
+  const _ = require('underscore')
 
   function OPCUAIIoTResultFilter (config) {
     RED.nodes.createNode(this, config)

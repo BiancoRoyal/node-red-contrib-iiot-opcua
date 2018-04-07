@@ -239,13 +239,13 @@ de.biancoroyal.opcua.iiot.core.listener.getConditionFields = function () {
   ]
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addressSpaceItem, msg, subscription) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId, msg, subscription) {
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
   return new Promise(
     function (resolve, reject) {
-      if (!addressSpaceItem) {
-        reject(new Error('AddressSpaceItem Is Not Valid'))
+      if (!nodeId) {
+        reject(new Error('NodeId Is Not Valid'))
       }
 
       let interval
@@ -265,9 +265,9 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addres
         queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
 
-      let monitoredItem = subscription.monitor(
+      subscription.monitor(
         {
-          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
+          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(nodeId),
           attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value
         },
         {
@@ -278,24 +278,23 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (addres
         coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
         function (err, monitoredItemResult) {
           if (err) {
-            coreListener.internalDebugLog('subscribing item ' + err)
+            coreListener.internalDebugLog('subscribing monitored item ' + err)
             reject(err)
           } else {
-            coreListener.internalDebugLog('subscribed item ' + monitoredItemResult)
-            resolve(monitoredItem)
+            resolve({nodeId: nodeId, monitoredItem: monitoredItemResult})
           }
         }
       )
     })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpaceItem, msg, subscription) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId, msg, subscription) {
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
   return new Promise(
     function (resolve, reject) {
-      if (!addressSpaceItem) {
-        reject(new Error('AddressSpaceItem Is Not Valid'))
+      if (!nodeId) {
+        reject(new Error('NodeId Is Not Valid'))
       }
 
       let interval
@@ -313,9 +312,9 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpa
         queueSize = coreListener.EVENT_DEFAULT_QUEUE_SIZE
       }
 
-      let monitoredItem = subscription.monitor(
+      subscription.monitor(
         {
-          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(addressSpaceItem),
+          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(nodeId),
           attributeId: coreListener.core.nodeOPCUA.AttributeIds.EventNotifier
         },
         {
@@ -327,11 +326,10 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (addressSpa
         coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
         function (err, monitoredItemResult) {
           if (err) {
-            coreListener.internalDebugLog('subscribing item ' + err)
+            coreListener.internalDebugLog('subscribing event item ' + err)
             reject(err)
           } else {
-            coreListener.internalDebugLog('subscribed item ' + monitoredItemResult)
-            resolve(monitoredItem)
+            resolve({ nodeId: nodeId, monitoredItem: monitoredItemResult })
           }
         }
       )

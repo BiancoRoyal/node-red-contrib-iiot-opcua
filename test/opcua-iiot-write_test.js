@@ -21,11 +21,11 @@ var responseNode = require('../src/opcua-iiot-response')
 var serverNode = require('../src/opcua-iiot-server')
 var helper = require('node-red-contrib-test-helper')
 
-var nodesToLoad = [injectNode, functionNode, connectorNode, inputNode, responseNode, serverNode]
+var writeNodesToLoad = [injectNode, functionNode, connectorNode, inputNode, responseNode, serverNode]
 
-var testFlowPayload = [
+var testWriteFlow = [
   {
-    "id": "n1",
+    "id": "n1wrf1",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "write",
     "payload": "12345.67",
@@ -34,7 +34,7 @@ var testFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "2.4",
     "name": "TestReadWrite",
     "addressSpaceItems": [
       {
@@ -43,35 +43,35 @@ var testFlowPayload = [
         "datatypeName": "Double"
       }
     ],
-    "wires": [["n2", "n3"]]
+    "wires": [["n2wrf1", "n3wrf1"]]
   },
-  {"id":"n2", "type":"helper"},
+  {"id":"n2wrf1", "type":"helper"},
   {
-    "id": "n3",
+    "id": "n3wrf1",
     "type": "function",
     "name": "",
     "func": "msg.valuesToWrite = [12345.22];\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
-    "wires": [["n4", "n5"]]
+    "wires": [["n4wrf1", "n5wrf1"]]
   },
-  {"id":"n4", "type":"helper"},
+  {"id":"n4wrf1", "type":"helper"},
   {
-    "id": "n5",
+    "id": "n5wrf1",
     "type": "OPCUA-IIoT-Write",
-    "connector": "c1",
+    "connector": "c1wrf1",
     "name": "TestWrite",
     "justValue": true,
     "showStatusActivities": false,
     "showErrors": true,
-    "wires": [["n6", "n7"]]
+    "wires": [["n6wrf1", "n7wrf1"]]
   },
   {
-    "id": "c1",
+    "id": "c1wrf1",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1972/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -81,20 +81,24 @@ var testFlowPayload = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   },
-  {"id":"n6", "type":"helper"},
+  {"id":"n6wrf1", "type":"helper"},
   {
-    "id": "n7",
+    "id": "n7wrf1",
     "type": "OPCUA-IIoT-Response",
     "name": "TestWriteResponse",
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n8"]]
+    "wires": [["n8wrf1"]]
   },
-  {"id":"n8", "type":"helper"},
+  {"id":"n8wrf1", "type":"helper"},
   {
-    "id": "s1",
+    "id": "s1wrf1",
     "type": "OPCUA-IIoT-Server",
     "port": "1972",
     "endpoint": "",
@@ -120,9 +124,9 @@ var testFlowPayload = [
   }
 ]
 
-var testWithoutValuesToWriteFlow = [
+var testWriteWithoutValuesToWriteFlow = [
   {
-    "id": "n1",
+    "id": "n1wrf2",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "write",
     "payload": "12345.67",
@@ -131,7 +135,7 @@ var testWithoutValuesToWriteFlow = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "2.4",
     "name": "TestReadWrite",
     "addressSpaceItems": [
       {
@@ -140,25 +144,25 @@ var testWithoutValuesToWriteFlow = [
         "datatypeName": "Double"
       }
     ],
-    "wires": [["n2", "n3"]]
+    "wires": [["n2wrf2", "n3wrf2"]]
   },
-  {"id":"n2", "type":"helper"},
+  {"id":"n2wrf2", "type":"helper"},
   {
-    "id": "n3",
+    "id": "n3wrf2",
     "type": "OPCUA-IIoT-Write",
-    "connector": "c1",
+    "connector": "c1wrf2",
     "name": "TestWrite",
     "justValue": true,
     "showStatusActivities": false,
     "showErrors": true,
-    "wires": [["n4", "n5"]]
+    "wires": [["n4wrf2", "n5wrf2"]]
   },
   {
-    "id": "c1",
+    "id": "c1wrf2",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1973/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -168,20 +172,24 @@ var testWithoutValuesToWriteFlow = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   },
-  {"id":"n4", "type":"helper"},
+  {"id":"n4wrf2", "type":"helper"},
   {
-    "id": "n5",
+    "id": "n5wrf2",
     "type": "OPCUA-IIoT-Response",
     "name": "TestWriteResponse",
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n6"]]
+    "wires": [["n6wrf2"]]
   },
-  {"id":"n6", "type":"helper"},
+  {"id":"n6wrf2", "type":"helper"},
   {
-    "id": "s1",
+    "id": "s1wrf2",
     "type": "OPCUA-IIoT-Server",
     "port": "1973",
     "endpoint": "",
@@ -207,7 +215,7 @@ var testWithoutValuesToWriteFlow = [
   }
 ]
 
-var writeNodeToBeLoaded = [
+var testWriteNodeToBeLoaded = [
   {
     "id": "34d2c6bc.43275a",
     "type": "OPCUA-IIoT-Write",
@@ -223,7 +231,7 @@ var writeNodeToBeLoaded = [
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:2000/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -233,22 +241,39 @@ var writeNodeToBeLoaded = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   }
 ]
 
 describe('OPC UA Write node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      done()
+    }).catch(function (err) {
+      console.log('Write error ' + err)
+      done()
+    })
+  })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      done()
+    })
   })
 
   describe('Write node', function () {
     it('should be loaded', function (done) {
-      helper.load([inputNode, connectorNode], writeNodeToBeLoaded,
+      helper.load([inputNode, connectorNode], testWriteNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('34d2c6bc.43275a')
           nodeUnderTest.should.have.property('name', 'TestWrite')
@@ -259,9 +284,9 @@ describe('OPC UA Write node Testing', function () {
     })
 
     it('should get a message with payload', function (done) {
-      this.timeout(4000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+
+      helper.load(writeNodesToLoad, testWriteFlow, function () {
+        let n2 = helper.getNode("n2wrf1")
         n2.on("input", function (msg) {
           msg.should.have.property('payload', 12345.67)
           msg.should.have.property('topic', "TestTopicWrite")
@@ -271,9 +296,9 @@ describe('OPC UA Write node Testing', function () {
     })
 
     it('should verify addressSpaceItems', function (done) {
-      this.timeout(4000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+
+      helper.load(writeNodesToLoad, testWriteFlow, function () {
+        let n2 = helper.getNode("n2wrf1")
         n2.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{
             "name": "TestReadWrite",
@@ -286,9 +311,9 @@ describe('OPC UA Write node Testing', function () {
     })
 
     it('should have values to write', function (done) {
-      this.timeout(4000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n4 = helper.getNode("n4")
+
+      helper.load(writeNodesToLoad, testWriteFlow, function () {
+        let n4 = helper.getNode("n4wrf1")
         n4.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [ {
             name: 'TestReadWrite',
@@ -305,28 +330,9 @@ describe('OPC UA Write node Testing', function () {
     })
 
     it('should have write results', function (done) {
-      this.timeout(4000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n6 = helper.getNode("n6")
-        n6.on("input", function (msg) {
-          msg.should.have.property('addressSpaceItems', [{
-            "name": "TestReadWrite",
-            "nodeId": "ns=4;s=TestReadWrite",
-            "datatypeName": "Double"
-          }]);
-          msg.payload.should.have.property('statusCodes', [{"value":0,"description":"No Error","name":"Good"}])
-          msg.should.have.property('topic', "TestTopicWrite")
-          msg.should.have.property('nodetype', "write")
-          msg.should.have.property('injectType', "write")
-          done()
-        })
-      })
-    })
 
-    it('should have write results from payload without a valuesToWrite property', function (done) {
-      this.timeout(4000)
-      helper.load(nodesToLoad, testWithoutValuesToWriteFlow, function () {
-        let n6 = helper.getNode("n6")
+      helper.load(writeNodesToLoad, testWriteFlow, function () {
+        let n6 = helper.getNode("n6wrf1")
         n6.on("input", function (msg) {
           msg.should.have.property('addressSpaceItems', [{
             "name": "TestReadWrite",
@@ -343,11 +349,30 @@ describe('OPC UA Write node Testing', function () {
     })
 
     it('should have write results with response', function (done) {
-      this.timeout(4000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n8 = helper.getNode("n8")
+
+      helper.load(writeNodesToLoad, testWriteFlow, function () {
+        let n8 = helper.getNode("n8wrf1")
         n8.on("input", function (msg) {
           msg.should.have.property('entryStatus', [1, 0, 0])
+          msg.should.have.property('topic', "TestTopicWrite")
+          msg.should.have.property('nodetype', "write")
+          msg.should.have.property('injectType', "write")
+          done()
+        })
+      })
+    })
+
+    it('should have write results from payload without a valuesToWrite property', function (done) {
+
+      helper.load(writeNodesToLoad, testWriteWithoutValuesToWriteFlow, function () {
+        let n6 = helper.getNode("n6wrf2")
+        n6.on("input", function (msg) {
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "TestReadWrite",
+            "nodeId": "ns=4;s=TestReadWrite",
+            "datatypeName": "Double"
+          }]);
+          msg.payload.should.have.property('statusCodes', [{"value":0,"description":"No Error","name":"Good"}])
           msg.should.have.property('topic', "TestTopicWrite")
           msg.should.have.property('nodetype', "write")
           msg.should.have.property('injectType', "write")

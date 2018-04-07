@@ -44,36 +44,4 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
   })
 }
 
-de.biancoroyal.opcua.iiot.core.connector.createSubscription = function (session, options) {
-  return new this.core.nodeOPCUA.ClientSubscription(session, options)
-}
-
-de.biancoroyal.opcua.iiot.core.connector.closeSession = function (session) {
-  return new Promise(
-    function (resolve, reject) {
-      if (session && session.sessionId !== 'terminated') {
-        session.close(function (err) {
-          if (err) {
-            reject(err)
-          } else {
-            resolve()
-          }
-        })
-      } else {
-        resolve()
-      }
-    }
-  )
-}
-
-de.biancoroyal.opcua.iiot.core.connector.removeFromList = function (array, element) {
-  if (array && array.length) {
-    const index = array.indexOf(element)
-
-    if (index !== -1) {
-      array.splice(index, 1)
-    }
-  }
-}
-
 module.exports = de.biancoroyal.opcua.iiot.core.connector
