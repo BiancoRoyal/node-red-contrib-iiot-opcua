@@ -173,31 +173,23 @@ module.exports = function (RED) {
     }
 
     node.postInitialize = function () {
-      if (node.opcuaServer) {
-        coreServer.constructAddressSpace(node.opcuaServer, node.asoDemo).then(function (err) {
-          if (err) {
-            coreServer.internalDebugLog(err)
-            if (node.showErrors) {
-              node.error(err, {payload: ''})
-            }
-          } else {
-            coreServer.start(node.opcuaServer, node)
-            node.setNodeStatusTo('active')
-            node.registerDiscovery()
-          }
-        }).catch(function (err) {
+      coreServer.constructAddressSpace(node.opcuaServer, node.asoDemo).then(function (err) {
+        if (err) {
           coreServer.internalDebugLog(err)
           if (node.showErrors) {
             node.error(err, {payload: ''})
           }
-        })
-      } else {
-        node.initialized = false
-        coreServer.internalDebugLog('OPC UA Server Is Not Ready'.red)
-        if (node.showErrors) {
-          node.error(new Error('OPC UA Server Is Not Ready'), {payload: ''})
+        } else {
+          coreServer.start(node.opcuaServer, node)
+          node.setNodeStatusTo('active')
+          node.registerDiscovery()
         }
-      }
+      }).catch(function (err) {
+        coreServer.internalDebugLog(err)
+        if (node.showErrors) {
+          node.error(err, {payload: ''})
+        }
+      })
     }
 
     // TODO: check if that is correct for multiple servers with different IP's and endpoints

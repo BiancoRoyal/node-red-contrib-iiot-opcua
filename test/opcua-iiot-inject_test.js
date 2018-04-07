@@ -68,14 +68,12 @@ var testInjectWithDelayFlow = [
 describe('OPC UA Inject node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Inject start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Inject unload done')
       done()
     }).catch(function (err) {
       console.log('Inject error ' + err)
@@ -85,7 +83,6 @@ describe('OPC UA Inject node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Inject stop server done')
       done()
     })
   })

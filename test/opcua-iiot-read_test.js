@@ -162,14 +162,12 @@ var testReadNodeToBeLoaded = [
 describe('OPC UA Read node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Read start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Read unload done')
       done()
     }).catch(function (err) {
       console.log('Read error ' + err)
@@ -179,21 +177,22 @@ describe('OPC UA Read node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Read stop server done')
       done()
     })
   })
 
 
   describe('Read node', function () {
+    let attributeId = ''
+
     it('should be loaded for all attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 0
+      testReadNodeToBeLoaded[0].attributeId = '0'
       testReadNodeToBeLoaded[0].name = 'ReadAll'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadAll')
-          nodeUnderTest.should.have.property('attributeId', 0)
+          nodeUnderTest.should.have.property('attributeId', '0')
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
           done()
@@ -201,13 +200,13 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for Node-Id attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 1
+      testReadNodeToBeLoaded[0].attributeId = '1'
       testReadNodeToBeLoaded[0].name = 'ReadNodeId'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadNodeId')
-          nodeUnderTest.should.have.property('attributeId', 1)
+          nodeUnderTest.should.have.property('attributeId', '1')
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
           done()
@@ -215,13 +214,13 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for Node-Class attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 2
+      testReadNodeToBeLoaded[0].attributeId = '2'
       testReadNodeToBeLoaded[0].name = 'ReadNodeClass'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadNodeClass')
-          nodeUnderTest.should.have.property('attributeId', 2)
+          nodeUnderTest.should.have.property('attributeId', '2')
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
           done()
@@ -229,13 +228,13 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for browse name attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 3
+      testReadNodeToBeLoaded[0].attributeId = '3'
       testReadNodeToBeLoaded[0].name = 'ReadBrowseName'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadBrowseName')
-          nodeUnderTest.should.have.property('attributeId', 3)
+          nodeUnderTest.should.have.property('attributeId', '3')
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
           done()
@@ -243,13 +242,13 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for display name attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 4
+      testReadNodeToBeLoaded[0].attributeId = '4'
       testReadNodeToBeLoaded[0].name = 'ReadDisplayName'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadDisplayName')
-          nodeUnderTest.should.have.property('attributeId', 4)
+          nodeUnderTest.should.have.property('attributeId', '4')
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
           done()
@@ -257,13 +256,13 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for values attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 13
+      testReadNodeToBeLoaded[0].attributeId = '13'
       testReadNodeToBeLoaded[0].name = 'ReadValues'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadValues')
-          nodeUnderTest.should.have.property('attributeId', 13)
+          nodeUnderTest.should.have.property('attributeId', '13')
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
           done()
@@ -271,22 +270,21 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for history values attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 130
+      testReadNodeToBeLoaded[0].attributeId = '130'
       testReadNodeToBeLoaded[0].name = 'ReadHistoryValues'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadHistoryValues')
-          nodeUnderTest.should.have.property('attributeId', 130)
+          nodeUnderTest.should.have.property('attributeId', '130')
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
           done()
         })
     })
 
-    let attributeId = 0
-    it('should get a message with payload for attributeId ' + attributeId, function (done) {
-
+    it('should get a message with payload for attributeId All', function (done) {
+      attributeId = '0'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode("n2rdf1")
@@ -302,18 +300,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results for attributeId ' + attributeId, function (done) {
-
+    it('should have read results for attributeId All', function (done) {
+      attributeId = '0'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode("n4rdf1")
         n4.on("input", function (msg) {
-          if(attributeId !== 130) {
-            msg.payload[0].should.have.property('value')
-          }
-          if(attributeId === 0) {
-            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-          }
+          msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -322,17 +315,12 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should have read results with response for attributeId ' + attributeId, function (done) {
-
+      attributeId = '0'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode("n6rdf1")
         n6.on("input", function (msg) {
-          if(attributeId === 130){
-            msg.should.have.property('entryStatus', [0, 1, 0])
-          } else {
-            msg.should.have.property('entryStatus', [1, 0, 0])
-
-          }
+          msg.should.have.property('entryStatus', [1, 0, 0])
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -340,9 +328,8 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    attributeId = 1
-    it('should get a message with payload for attributeId ' + attributeId, function (done) {
-
+    it('should get a message with payload for attributeId Node-ID', function (done) {
+      attributeId = '1'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode("n2rdf1")
@@ -358,18 +345,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results for attributeId ' + attributeId, function (done) {
-
+    it('should have read results for attributeId Node-ID', function (done) {
+      attributeId = '1'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode("n4rdf1")
         n4.on("input", function (msg) {
-          if(attributeId !== 130) {
-            msg.payload[0].should.have.property('value')
-          }
-          if(attributeId === 0) {
-            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-          }
+          msg.payload[0].should.have.property('value')
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -377,18 +359,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results with response for attributeId ' + attributeId, function (done) {
-
+    it('should have read results with response for attributeId Node-ID', function (done) {
+      attributeId = '1'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode("n6rdf1")
         n6.on("input", function (msg) {
-          if(attributeId === 130){
-            msg.should.have.property('entryStatus', [0, 1, 0])
-          } else {
-            msg.should.have.property('entryStatus', [1, 0, 0])
-
-          }
+          msg.should.have.property('entryStatus', [1, 0, 0])
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -396,9 +373,9 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    attributeId = 2
-    it('should get a message with payload for attributeId ' + attributeId, function (done) {
 
+    it('should get a message with payload for attributeId Node-Class', function (done) {
+      attributeId = '2'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode("n2rdf1")
@@ -414,18 +391,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results for attributeId ' + attributeId, function (done) {
-
+    it('should have read results for attributeId Node-Class', function (done) {
+      attributeId = '2'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode("n4rdf1")
         n4.on("input", function (msg) {
-          if(attributeId !== 130) {
-            msg.payload[0].should.have.property('value')
-          }
-          if(attributeId === 0) {
-            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-          }
+          msg.payload[0].should.have.property('value')
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -433,18 +405,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results with response for attributeId ' + attributeId, function (done) {
-
+    it('should have read results with response for attributeId Node-Class', function (done) {
+      attributeId = '2'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode("n6rdf1")
         n6.on("input", function (msg) {
-          if(attributeId === 130){
-            msg.should.have.property('entryStatus', [0, 1, 0])
-          } else {
-            msg.should.have.property('entryStatus', [1, 0, 0])
-
-          }
+          msg.should.have.property('entryStatus', [1, 0, 0])
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -452,9 +419,8 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    attributeId = 3
-    it('should get a message with payload for attributeId ' + attributeId, function (done) {
-
+    it('should get a message with payload for attributeId Browse-Name', function (done) {
+      attributeId = '3'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode("n2rdf1")
@@ -470,18 +436,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results for attributeId ' + attributeId, function (done) {
-
+    it('should have read results for attributeId Browse-Name', function (done) {
+      attributeId = '3'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode("n4rdf1")
         n4.on("input", function (msg) {
-          if(attributeId !== 130) {
-            msg.payload[0].should.have.property('value')
-          }
-          if(attributeId === 0) {
-            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-          }
+          msg.payload[0].should.have.property('value')
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -489,18 +450,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results with response for attributeId ' + attributeId, function (done) {
-
+    it('should have read results with response for attributeId Browse-Name', function (done) {
+      attributeId = '3'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode("n6rdf1")
         n6.on("input", function (msg) {
-          if(attributeId === 130){
-            msg.should.have.property('entryStatus', [0, 1, 0])
-          } else {
-            msg.should.have.property('entryStatus', [1, 0, 0])
-
-          }
+          msg.should.have.property('entryStatus', [1, 0, 0])
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -508,9 +464,8 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    attributeId = 4
-    it('should get a message with payload for attributeId ' + attributeId, function (done) {
-
+    it('should get a message with payload for attributeId Display-Name', function (done) {
+      attributeId = '4'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode("n2rdf1")
@@ -526,18 +481,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results for attributeId ' + attributeId, function (done) {
-
+    it('should have read results for attributeId Display-Name', function (done) {
+      attributeId = '4'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode("n4rdf1")
         n4.on("input", function (msg) {
-          if(attributeId !== 130) {
-            msg.payload[0].should.have.property('value')
-          }
-          if(attributeId === 0) {
-            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-          }
+          msg.payload[0].should.have.property('value')
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -545,18 +495,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results with response for attributeId ' + attributeId, function (done) {
-
+    it('should have read results with response for attributeId Display-Name', function (done) {
+      attributeId = '4'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode("n6rdf1")
         n6.on("input", function (msg) {
-          if(attributeId === 130){
-            msg.should.have.property('entryStatus', [0, 1, 0])
-          } else {
-            msg.should.have.property('entryStatus', [1, 0, 0])
-
-          }
+          msg.should.have.property('entryStatus', [1, 0, 0])
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -564,9 +509,8 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    attributeId = 13
-    it('should get a message with payload for attributeId ' + attributeId, function (done) {
-
+    it('should get a message with payload for attributeId Value', function (done) {
+      attributeId = '13'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode("n2rdf1")
@@ -582,18 +526,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results for attributeId ' + attributeId, function (done) {
-
+    it('should have read results for attributeId Value', function (done) {
+      attributeId = '13'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode("n4rdf1")
         n4.on("input", function (msg) {
-          if(attributeId !== 130) {
-            msg.payload[0].should.have.property('value')
-          }
-          if(attributeId === 0) {
-            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-          }
+          msg.payload[0].should.have.property('value')
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -601,18 +540,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results with response for attributeId ' + attributeId, function (done) {
-
+    it('should have read results with response for attributeId Value', function (done) {
+      attributeId = '13'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode("n6rdf1")
         n6.on("input", function (msg) {
-          if(attributeId === 130){
-            msg.should.have.property('entryStatus', [0, 1, 0])
-          } else {
-            msg.should.have.property('entryStatus', [1, 0, 0])
-
-          }
+          msg.should.have.property('entryStatus', [1, 0, 0])
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -620,9 +554,8 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    attributeId = 130
-    it('should get a message with payload for attributeId ' + attributeId, function (done) {
-
+    it('should get a message with payload for attributeId History', function (done) {
+      attributeId = '130'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode("n2rdf1")
@@ -638,18 +571,12 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results for attributeId ' + attributeId, function (done) {
-
+    it('should have read results for attributeId History', function (done) {
+      attributeId = '130'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode("n4rdf1")
         n4.on("input", function (msg) {
-          if(attributeId !== 130) {
-            msg.payload[0].should.have.property('value')
-          }
-          if(attributeId === 0) {
-            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-          }
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()
@@ -657,18 +584,13 @@ describe('OPC UA Read node Testing', function () {
       })
     })
 
-    it('should have read results with response for attributeId ' + attributeId, function (done) {
-
+    it('should have read results with response for attributeId History', function (done) {
+      attributeId = '130'
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode("n6rdf1")
         n6.on("input", function (msg) {
-          if(attributeId === 130){
-            msg.should.have.property('entryStatus', [0, 1, 0])
-          } else {
-            msg.should.have.property('entryStatus', [1, 0, 0])
-
-          }
+          msg.should.have.property('entryStatus', [0, 1, 0])
           msg.should.have.property('topic', "TestTopicRead")
           msg.should.have.property('attributeId', attributeId)
           done()

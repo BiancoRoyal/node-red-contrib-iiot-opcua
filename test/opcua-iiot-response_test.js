@@ -201,14 +201,12 @@ var listenOtherTestFlowPayload = testFlowPayload.concat([listenResultSimulation,
 describe('OPC UA Response node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Response start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Response unload done')
       done()
     }).catch(function (err) {
       console.log('Response error ' + err)
@@ -218,7 +216,6 @@ describe('OPC UA Response node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Response stop server done')
       done()
     })
   })

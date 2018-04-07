@@ -108,14 +108,12 @@ var testFlexServerFlow = [
 describe('OPC UA Flex Server node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Flex Server start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Flex Server unload done')
       done()
     }).catch(function (err) {
       console.log('Flex Server error ' + err)
@@ -125,7 +123,6 @@ describe('OPC UA Flex Server node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Flex Server stop server done')
       done()
     })
   })

@@ -28,14 +28,12 @@ var testDiscoveryFlow = [
 describe('OPC UA Discovery node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Discovery start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Discovery unload done')
       done()
     }).catch(function (err) {
       console.log('Discovery error ' + err)
@@ -45,7 +43,6 @@ describe('OPC UA Discovery node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Discovery stop server done')
       done()
     })
   })

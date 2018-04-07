@@ -558,14 +558,12 @@ var testConnectorHTTPFlow = [
 describe('OPC UA Connector node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Connector start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Connector unload done')
       done()
     }).catch(function (err) {
       console.log('Connector error ' + err)
@@ -575,7 +573,6 @@ describe('OPC UA Connector node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Connector stop server done')
       done()
     })
   })

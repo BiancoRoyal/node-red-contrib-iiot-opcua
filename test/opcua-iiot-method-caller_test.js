@@ -267,14 +267,12 @@ var testMethodInjectFlowPayload = [
 describe('OPC UA Method Caller node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Method Caller start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Method Caller unload done')
       done()
     }).catch(function (err) {
       console.log('Method Caller error ' + err)
@@ -284,7 +282,6 @@ describe('OPC UA Method Caller node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Method Caller stop server done')
       done()
     })
   })

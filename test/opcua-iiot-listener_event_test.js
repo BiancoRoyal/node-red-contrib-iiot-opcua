@@ -161,22 +161,18 @@ var testListenerEventFlow = [
 describe('OPC UA Listener event node Testing', function () {
   beforeEach(function(done) {
     helper.startServer(function () {
-      console.log('events start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('events unload done')
       helper.stopServer(function () {
-        console.log('events stop server done')
         done()
       })
     }).catch(function (err) {
       console.log('events error ' + err)
       helper.stopServer(function () {
-        console.log('events stop server done')
         done()
       })
     })

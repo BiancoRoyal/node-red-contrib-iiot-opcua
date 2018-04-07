@@ -252,14 +252,12 @@ var testWriteNodeToBeLoaded = [
 describe('OPC UA Write node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Write start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Write unload done')
       done()
     }).catch(function (err) {
       console.log('Write error ' + err)
@@ -269,7 +267,6 @@ describe('OPC UA Write node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Write stop server done')
       done()
     })
   })

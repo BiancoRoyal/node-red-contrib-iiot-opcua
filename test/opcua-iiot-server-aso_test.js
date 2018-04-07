@@ -15,6 +15,7 @@ var expect = require('chai').expect
 var functionNode = require('node-red/nodes/core/core/80-function')
 var injectNode = require('../src/opcua-iiot-inject')
 var inputNode = require('../src/opcua-iiot-server-aso')
+var serverNode = require('../src/opcua-iiot-server')
 var helper = require('node-red-contrib-test-helper')
 
 var testASOFlow = [
@@ -434,24 +435,48 @@ var testASOFlow = [
     "noerr": 0,
     "wires": [
       [
-        "n4"
+        "n4", "s1cf5"
       ]
     ]
   },
-  {id:"n4", type:"helper"}
+  {id:"n4", type:"helper"},
+  {
+    "id": "s1cf5",
+    "type": "OPCUA-IIoT-Server",
+    "port": "1998",
+    "endpoint": "",
+    "acceptExternalCommands": true,
+    "maxAllowedSessionNumber": "",
+    "maxConnectionsPerEndpoint": "",
+    "maxAllowedSubscriptionNumber": "",
+    "alternateHostname": "",
+    "name": "TestServer",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "asoDemo": true,
+    "allowAnonymous": true,
+    "isAuditing": false,
+    "serverDiscovery": true,
+    "users": [],
+    "xmlsets": [],
+    "publicCertificateFile": "",
+    "privateCertificateFile": "",
+    "maxNodesPerRead": 1000,
+    "maxNodesPerBrowse": 2000,
+    "wires": [["n5"]]
+  },
+  {id:"n5", type:"helper"}
 ]
 
 describe('OPC UA Server ASO node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('ASO start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('ASO unload done')
       done()
     }).catch(function (err) {
       console.log('ASO error ' + err)
@@ -461,7 +486,6 @@ describe('OPC UA Server ASO node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('ASO stop server done')
       done()
     })
   })
@@ -499,7 +523,7 @@ describe('OPC UA Server ASO node Testing', function () {
 
     it('should get a message with payload', function(done) {
 
-      helper.load([injectNode, functionNode, inputNode], testASOFlow, function() {
+      helper.load([injectNode, functionNode, inputNode, serverNode], testASOFlow, function() {
         let n4 = helper.getNode("n4")
         let test = 0
         n4.on("input", function(msg) {
@@ -561,7 +585,7 @@ describe('OPC UA Server ASO node Testing', function () {
 
     it('should verify an inject message for address space peration', function(done) {
 
-      helper.load([injectNode, functionNode, inputNode], testASOFlow, function() {
+      helper.load([injectNode, functionNode, inputNode, serverNode], testASOFlow, function() {
         let n4 = helper.getNode("n4")
         let test = 0
         n4.on("input", function(msg) {

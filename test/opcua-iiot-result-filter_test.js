@@ -114,14 +114,12 @@ var listenTestFlowPayload = [
 describe('OPC UA Result Filter node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Result Filter start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Result Filter unload done')
       done()
     }).catch(function (err) {
       console.log('Result Filter error ' + err)
@@ -131,7 +129,6 @@ describe('OPC UA Result Filter node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Result Filter stop server done')
       done()
     })
   })

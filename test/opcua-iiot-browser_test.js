@@ -289,14 +289,12 @@ var testBrowseItemFlow = [
 describe('OPC UA Browser node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('browser start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('browser unload done')
       done()
     }).catch(function (err) {
       console.log('browser error ' + err)
@@ -306,7 +304,6 @@ describe('OPC UA Browser node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('browser stop server done')
       done()
     })
   })

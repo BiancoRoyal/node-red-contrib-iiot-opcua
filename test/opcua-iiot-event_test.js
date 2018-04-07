@@ -47,14 +47,12 @@ var testEventNodeFlow = [
 describe('OPC UA Event node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Event start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Event unload done')
       done()
     }).catch(function (err) {
       console.log('Event error ' + err)
@@ -64,7 +62,6 @@ describe('OPC UA Event node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Event stop server done')
       done()
     })
   })

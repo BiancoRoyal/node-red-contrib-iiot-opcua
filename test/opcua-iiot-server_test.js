@@ -45,14 +45,12 @@ var testServerFlow = [
 describe('OPC UA Server node Testing', function () {
   before(function(done) {
     helper.startServer(function () {
-      console.log('Server start server done')
       done()
     })
   })
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      console.log('Server unload done')
       done()
     }).catch(function (err) {
       console.log('Server error ' + err)
@@ -62,7 +60,6 @@ describe('OPC UA Server node Testing', function () {
 
   after(function (done) {
     helper.stopServer(function () {
-      console.log('Server stop server done')
       done()
     })
   })
