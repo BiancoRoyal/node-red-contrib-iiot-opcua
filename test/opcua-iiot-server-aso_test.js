@@ -17,7 +17,7 @@ var injectNode = require('../src/opcua-iiot-inject')
 var inputNode = require('../src/opcua-iiot-server-aso')
 var helper = require('node-red-contrib-test-helper')
 
-var testFlowPayload = [
+var testASOFlow = [
   {
     "id": "7cb85115.7635",
     "type": "OPCUA-IIoT-Server-ASO",
@@ -442,13 +442,30 @@ var testFlowPayload = [
 ]
 
 describe('OPC UA Server ASO node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('ASO start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('ASO unload done')
+      done()
+    }).catch(function (err) {
+      console.log('ASO error ' + err)
+      done()
+    })
   })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('ASO stop server done')
+      done()
+    })
+  })
+
 
   describe('Address Space Operation node', function () {
     it('should be loaded', function (done) {
@@ -481,8 +498,8 @@ describe('OPC UA Server ASO node Testing', function () {
     })
 
     it('should get a message with payload', function(done) {
-      this.timeout(4000)
-      helper.load([injectNode, functionNode, inputNode], testFlowPayload, function() {
+
+      helper.load([injectNode, functionNode, inputNode], testASOFlow, function() {
         let n4 = helper.getNode("n4")
         let test = 0
         n4.on("input", function(msg) {
@@ -543,8 +560,8 @@ describe('OPC UA Server ASO node Testing', function () {
     })
 
     it('should verify an inject message for address space peration', function(done) {
-      this.timeout(3000)
-      helper.load([injectNode, functionNode, inputNode], testFlowPayload, function() {
+
+      helper.load([injectNode, functionNode, inputNode], testASOFlow, function() {
         let n4 = helper.getNode("n4")
         let test = 0
         n4.on("input", function(msg) {

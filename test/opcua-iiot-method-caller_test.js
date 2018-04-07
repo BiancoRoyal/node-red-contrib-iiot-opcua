@@ -22,12 +22,12 @@ var responseNode = require('../src/opcua-iiot-response')
 var serverNode = require('../src/opcua-iiot-server')
 var helper = require('node-red-contrib-test-helper')
 
-var nodesToLoad = [injectNode, connectorNode, inputNode, responseNode, serverNode]
+var methodCallerNodesToLoad = [injectNode, connectorNode, inputNode, responseNode, serverNode]
 var eventNodesToLoad = [injectNodeRed, functionNode, connectorNode, inputNode, responseNode, serverNode]
 
-var testFlowPayload = [
+var testMethodFlowPayload = [
   {
-    "id": "n1",
+    "id": "n1mcf1",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "inject",
     "payload": "12345",
@@ -36,21 +36,21 @@ var testFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "2.4",
     "name": "",
     "addressSpaceItems": [],
     "wires": [
       [
-        "n2",
-        "n3"
+        "n2mcf1",
+        "n3mcf1"
       ]
     ]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2mcf1", type:"helper"},
   {
-    "id": "n3",
+    "id": "n3mcf1",
     "type": "OPCUA-IIoT-Method-Caller",
-    "connector": "n7",
+    "connector": "c1mcf1",
     "objectId": "ns=4;i=1234",
     "methodId": "ns=4;i=12345",
     "methodType": "basic",
@@ -73,30 +73,30 @@ var testFlowPayload = [
     ],
     "wires": [
       [
-        "n4",
-        "n5"
+        "n4mcf1",
+        "n5mcf1"
       ]
     ]
   },
-  {id:"n4", type:"helper"},
+  {id:"n4mcf1", type:"helper"},
   {
-    "id": "n5",
+    "id": "n5mcf1",
     "type": "OPCUA-IIoT-Response",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
     "wires": [
-      ["n6"]
+      ["n6mcf1"]
     ]
   },
-  {id:"n6", type:"helper"},
+  {id:"n6mcf1", type:"helper"},
   {
-    "id": "n7",
+    "id": "c1mcf1",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1976/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -109,7 +109,7 @@ var testFlowPayload = [
     "autoSelectRightEndpoint": false
   },
   {
-    "id": "s1",
+    "id": "s1mcf1",
     "type": "OPCUA-IIoT-Server",
     "port": "1976",
     "endpoint": "",
@@ -135,9 +135,9 @@ var testFlowPayload = [
   }
 ]
 
-var testEventInjectFlowPayload = [
+var testMethodInjectFlowPayload = [
   {
-    "id": "n1",
+    "id": "n1mcf2",
     "type": "inject",
     "name": "TestName",
     "topic": "TestTopicMethod",
@@ -149,14 +149,14 @@ var testEventInjectFlowPayload = [
     "onceDelay": "3",
     "wires": [
       [
-        "n2",
-        "n3"
+        "n2mcf2",
+        "n3mcf2"
       ]
     ]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2mcf2", type:"helper"},
   {
-    "id": "n3",
+    "id": "n3mcf2",
     "type": "function",
     "name": "bark six times with volume twelve",
     "func": "msg.payload = {\n    objectId: 'ns=4;i=1234',\n    methodId: 'ns=4;i=12345',\n    inputArguments: [\n        " +
@@ -166,16 +166,16 @@ var testEventInjectFlowPayload = [
     "noerr": 0,
     "wires": [
       [
-        "n4",
-        "n5"
+        "n4mcf2",
+        "n5mcf2"
       ]
     ]
   },
-  {id:"n4", type:"helper"},
+  {id:"n4mcf2", type:"helper"},
   {
-    "id": "n5",
+    "id": "n5mcf2",
     "type": "OPCUA-IIoT-Method-Caller",
-    "connector": "n9",
+    "connector": "c1mcf2",
     "objectId": "ns=4;i=1234",
     "methodId": "ns=4;i=12345",
     "methodType": "basic",
@@ -198,30 +198,30 @@ var testEventInjectFlowPayload = [
     ],
     "wires": [
       [
-        "n6",
-        "n7"
+        "n6mcf2",
+        "n7mcf2"
       ]
     ]
   },
-  {id:"n6", type:"helper"},
+  {id:"n6mcf2", type:"helper"},
   {
-    "id": "n7",
+    "id": "n7mcf2",
     "type": "OPCUA-IIoT-Response",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
     "wires": [
-      ["n8"]
+      ["n8mcf2"]
     ]
   },
-  {id:"n8", type:"helper"},
+  {id:"n8mcf2", type:"helper"},
   {
-    "id": "n9",
+    "id": "c1mcf2",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1977/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -231,10 +231,14 @@ var testEventInjectFlowPayload = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   },
   {
-    "id": "s1",
+    "id": "s1mcf2",
     "type": "OPCUA-IIoT-Server",
     "port": "1977",
     "endpoint": "",
@@ -261,12 +265,28 @@ var testEventInjectFlowPayload = [
 ]
 
 describe('OPC UA Method Caller node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('Method Caller start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('Method Caller unload done')
+      done()
+    }).catch(function (err) {
+      console.log('Method Caller error ' + err)
+      done()
+    })
+  })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('Method Caller stop server done')
+      done()
+    })
   })
 
   describe('Method Caller node', function () {
@@ -303,7 +323,7 @@ describe('OPC UA Method Caller node Testing', function () {
             "type": "OPCUA-IIoT-Connector",
             "discoveryUrl": "",
             "endpoint": "opc.tcp://localhost:1978/",
-            "keepSessionAlive": true,
+            "keepSessionAlive": false,
             "loginEnabled": false,
             "securityPolicy": "None",
             "securityMode": "NONE",
@@ -338,13 +358,11 @@ describe('OPC UA Method Caller node Testing', function () {
           done()
         })
     })
-  })
 
-  describe('Method Caller node inject', function () {
     it('should get a message with payload after inject', function (done) {
-      this.timeout(5000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+
+      helper.load(methodCallerNodesToLoad, testMethodFlowPayload, function () {
+        let n2 = helper.getNode("n2mcf1")
         n2.on("input", function (msg) {
           msg.should.have.property('topic', 'TestTopicMethod')
           msg.should.have.property('nodetype', 'inject')
@@ -355,9 +373,9 @@ describe('OPC UA Method Caller node Testing', function () {
     })
 
     it('should get a message with payload', function (done) {
-      this.timeout(5000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+
+      helper.load(methodCallerNodesToLoad, testMethodFlowPayload, function () {
+        let n2 = helper.getNode("n2mcf1")
         n2.on("input", function (msg) {
           msg.should.have.property('payload', 12345)
           done()
@@ -366,9 +384,9 @@ describe('OPC UA Method Caller node Testing', function () {
     })
 
     it('should verify the result with response data', function (done) {
-      this.timeout(5000)
-      helper.load(nodesToLoad, testFlowPayload, function () {
-        let n6 = helper.getNode("n6")
+
+      helper.load(methodCallerNodesToLoad, testMethodFlowPayload, function () {
+        let n6 = helper.getNode("n6mcf1")
         n6.on("input", function (msg) {
           msg.should.have.property('nodetype', 'method')
           msg.should.have.property('entryStatus', [1, 0, 0])
@@ -377,13 +395,11 @@ describe('OPC UA Method Caller node Testing', function () {
         })
       })
     })
-  })
 
-  describe('Method Caller node event inject', function () {
-    it('should get a message with payload after inject', function(done) {
-      this.timeout(5000)
-      helper.load(eventNodesToLoad, testEventInjectFlowPayload, function() {
-        let n2 = helper.getNode("n2")
+    it('should get a message with payload after inject event inject', function(done) {
+
+      helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function() {
+        let n2 = helper.getNode("n2mcf2")
         n2.on("input", function(msg) {
           msg.should.have.property('topic', 'TestTopicMethod')
           msg.should.have.property('payload', 23456)
@@ -392,10 +408,10 @@ describe('OPC UA Method Caller node Testing', function () {
       })
     })
 
-    it('should get a message with payload', function(done) {
-      this.timeout(5000)
-      helper.load(eventNodesToLoad, testEventInjectFlowPayload, function() {
-        let n2 = helper.getNode("n2")
+    it('should get a message with payload event inject', function(done) {
+
+      helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function() {
+        let n2 = helper.getNode("n2mcf2")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 23456)
           done()
@@ -403,10 +419,10 @@ describe('OPC UA Method Caller node Testing', function () {
       })
     })
 
-    it('should verify the result with response data', function(done) {
-      this.timeout(5000)
-      helper.load(eventNodesToLoad, testEventInjectFlowPayload, function() {
-        let n8 = helper.getNode("n8")
+    it('should verify the result with response data event inject', function(done) {
+
+      helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function() {
+        let n8 = helper.getNode("n8mcf2")
         n8.on("input", function(msg) {
           msg.should.have.property('nodetype', 'method')
           msg.should.have.property('entryStatus', [1,0,0])

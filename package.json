@@ -16,7 +16,7 @@
     "node-opcua": "0.2.3",
     "node-opcua-isa95": "0.0.2",
     "source-map-support": "0.5.3",
-    "stately.js": "^2.0.0",
+    "stately.js": "2.0.0",
     "treeify": "1.1.0",
     "underscore": "1.8.3",
     "vm2": "3.5.2"
@@ -69,7 +69,7 @@
   "scripts": {
     "test": "standard --fix",
     "test-with-coverage": "istanbul cover _mocha --report lcovonly -- --recursive -R spec && cat ./coverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4 && rm -rf ./coverage",
-    "coverage": "istanbul cover _mocha -- --recursive",
+    "coverage": "istanbul cover _mocha -- --recursive --timeout 10000",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "standard --fix && npm run build && npm test && mocha test --recursive --reporter dot",
     "ci-publish": "ci-publish",

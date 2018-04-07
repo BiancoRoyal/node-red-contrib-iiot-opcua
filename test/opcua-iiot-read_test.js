@@ -20,11 +20,11 @@ var responseNode = require('../src/opcua-iiot-response')
 var serverNode = require('../src/opcua-iiot-server')
 var helper = require('node-red-contrib-test-helper')
 
-var nodesToLoad = [injectNode, connectorNode, inputNode, responseNode, serverNode]
+var readNodesToLoad = [injectNode, connectorNode, inputNode, responseNode, serverNode]
 
-var testFlowPayload = [
+var testReadFlow = [
   {
-    "id": "n1",
+    "id": "n1rdf1",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "read",
     "payload": "testpayload",
@@ -33,7 +33,7 @@ var testFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3.3",
+    "startDelay": "2.4",
     "name": "TestName",
     "addressSpaceItems": [
       {
@@ -42,39 +42,39 @@ var testFlowPayload = [
         "datatypeName": ""
       }
     ],
-    "wires": [["n2", "n3"]]
+    "wires": [["n2rdf1", "n3rdf1"]]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2rdf1", type:"helper"},
   {
-    "id": "n3",
+    "id": "n3rdf1",
     "type": "OPCUA-IIoT-Read",
     "attributeId": 0,
     "maxAge": 1,
     "depth": 1,
-    "connector": "n7",
+    "connector": "c1rdf1",
     "name": "ReadAll",
     "justValue": true,
     "showStatusActivities": false,
     "showErrors": false,
     "parseStrings": false,
-    "wires": [["n4", "n5"]]
+    "wires": [["n4rdf1", "n5rdf1"]]
   },
-  {id:"n4", type:"helper"},
+  {id:"n4rdf1", type:"helper"},
   {
-    "id": "n5",
+    "id": "n5rdf1",
     "type": "OPCUA-IIoT-Response",
     "name": "TestResponse",
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n6"]]
+    "wires": [["n6rdf1"]]
   },
-  {id:"n6", type:"helper"},
+  {id:"n6rdf1", type:"helper"},
   {
-    "id": "n7",
+    "id": "c1rdf1",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1970/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -84,10 +84,14 @@ var testFlowPayload = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   },
   {
-    "id": "n8",
+    "id": "s1rdf1",
     "type": "OPCUA-IIoT-Server",
     "port": "1970",
     "endpoint": "",
@@ -113,7 +117,7 @@ var testFlowPayload = [
   }
 ]
 
-var readNodeToBeLoaded = [
+var testReadNodeToBeLoaded = [
   {
     "id": "41cb29d.1ab50d8",
     "type": "OPCUA-IIoT-Read",
@@ -137,7 +141,7 @@ var readNodeToBeLoaded = [
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1971/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -147,24 +151,45 @@ var readNodeToBeLoaded = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   }
 ]
 
 describe('OPC UA Read node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('Read start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('Read unload done')
+      done()
+    }).catch(function (err) {
+      console.log('Read error ' + err)
+      done()
+    })
   })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('Read stop server done')
+      done()
+    })
+  })
+
 
   describe('Read node', function () {
     it('should be loaded for all attributes', function (done) {
-      readNodeToBeLoaded[0].attributeId = 0
-      readNodeToBeLoaded[0].name = 'ReadAll'
-      helper.load([inputNode, connectorNode], readNodeToBeLoaded,
+      testReadNodeToBeLoaded[0].attributeId = 0
+      testReadNodeToBeLoaded[0].name = 'ReadAll'
+      helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadAll')
@@ -176,9 +201,9 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for Node-Id attributes', function (done) {
-      readNodeToBeLoaded[0].attributeId = 1
-      readNodeToBeLoaded[0].name = 'ReadNodeId'
-      helper.load([inputNode, connectorNode], readNodeToBeLoaded,
+      testReadNodeToBeLoaded[0].attributeId = 1
+      testReadNodeToBeLoaded[0].name = 'ReadNodeId'
+      helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadNodeId')
@@ -190,9 +215,9 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for Node-Class attributes', function (done) {
-      readNodeToBeLoaded[0].attributeId = 2
-      readNodeToBeLoaded[0].name = 'ReadNodeClass'
-      helper.load([inputNode, connectorNode], readNodeToBeLoaded,
+      testReadNodeToBeLoaded[0].attributeId = 2
+      testReadNodeToBeLoaded[0].name = 'ReadNodeClass'
+      helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadNodeClass')
@@ -204,9 +229,9 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for browse name attributes', function (done) {
-      readNodeToBeLoaded[0].attributeId = 3
-      readNodeToBeLoaded[0].name = 'ReadBrowseName'
-      helper.load([inputNode, connectorNode], readNodeToBeLoaded,
+      testReadNodeToBeLoaded[0].attributeId = 3
+      testReadNodeToBeLoaded[0].name = 'ReadBrowseName'
+      helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadBrowseName')
@@ -218,9 +243,9 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for display name attributes', function (done) {
-      readNodeToBeLoaded[0].attributeId = 4
-      readNodeToBeLoaded[0].name = 'ReadDisplayName'
-      helper.load([inputNode, connectorNode], readNodeToBeLoaded,
+      testReadNodeToBeLoaded[0].attributeId = 4
+      testReadNodeToBeLoaded[0].name = 'ReadDisplayName'
+      helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadDisplayName')
@@ -232,9 +257,9 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for values attributes', function (done) {
-      readNodeToBeLoaded[0].attributeId = 13
-      readNodeToBeLoaded[0].name = 'ReadValues'
-      helper.load([inputNode, connectorNode], readNodeToBeLoaded,
+      testReadNodeToBeLoaded[0].attributeId = 13
+      testReadNodeToBeLoaded[0].name = 'ReadValues'
+      helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadValues')
@@ -246,9 +271,9 @@ describe('OPC UA Read node Testing', function () {
     })
 
     it('should be loaded for history values attributes', function (done) {
-      readNodeToBeLoaded[0].attributeId = 130
-      readNodeToBeLoaded[0].name = 'ReadHistoryValues'
-      helper.load([inputNode, connectorNode], readNodeToBeLoaded,
+      testReadNodeToBeLoaded[0].attributeId = 130
+      testReadNodeToBeLoaded[0].name = 'ReadHistoryValues'
+      helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           nodeUnderTest.should.have.property('name', 'ReadHistoryValues')
@@ -259,65 +284,394 @@ describe('OPC UA Read node Testing', function () {
         })
     })
 
-  })
-
-  describe('Read node attributes', function () {
     let attributeId = 0
-    let readModeAttributes = [0,1,2,3,4,13,130]
-    readModeAttributes.forEach(function(attributeId) {
+    it('should get a message with payload for attributeId ' + attributeId, function (done) {
 
-      it('should get a message with payload for attributeId ' + attributeId, function (done) {
-        this.timeout(4000)
-        testFlowPayload[2].attributeId = attributeId
-        helper.load(nodesToLoad, testFlowPayload, function () {
-          let n2 = helper.getNode("n2")
-          n2.on("input", function (msg) {
-            msg.should.have.property('payload', 'testpayload')
-            msg.should.have.property('addressSpaceItems', [{
-              "name": "ServerStatus",
-              "nodeId": "ns=0;i=2256",
-              "datatypeName": ""
-            }]);
-            done()
-          })
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n2 = helper.getNode("n2rdf1")
+        n2.on("input", function (msg) {
+          msg.should.have.property('payload', 'testpayload')
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "ServerStatus",
+            "nodeId": "ns=0;i=2256",
+            "datatypeName": ""
+          }]);
+          done()
         })
       })
+    })
 
-      it('should have read results for attributeId ' + attributeId, function (done) {
-        this.timeout(4000)
-        testFlowPayload[2].attributeId = attributeId
-        helper.load(nodesToLoad, testFlowPayload, function () {
-          let n4 = helper.getNode("n4")
-          n4.on("input", function (msg) {
-            if(attributeId !== 130) {
-              msg.payload[0].should.have.property('value')
-            }
-            if(attributeId === 0) {
-              msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
-            }
-            msg.should.have.property('topic', "TestTopicRead")
-            msg.should.have.property('attributeId', attributeId)
-            done()
-          })
+    it('should have read results for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n4 = helper.getNode("n4rdf1")
+        n4.on("input", function (msg) {
+          if(attributeId !== 130) {
+            msg.payload[0].should.have.property('value')
+          }
+          if(attributeId === 0) {
+            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
         })
       })
+    })
 
-      it('should have read results with response for attributeId ' + attributeId, function (done) {
-        this.timeout(4000)
-        testFlowPayload[2].attributeId = attributeId
-        helper.load(nodesToLoad, testFlowPayload, function () {
-          let n6 = helper.getNode("n6")
-          n6.on("input", function (msg) {
-            if(attributeId === 130){
-              msg.should.have.property('entryStatus', [0, 1, 0])
-            } else {
-              msg.should.have.property('entryStatus', [1, 0, 0])
+    it('should have read results with response for attributeId ' + attributeId, function (done) {
 
-            }
-            msg.should.have.property('topic', "TestTopicRead")
-            msg.should.have.property('attributeId', attributeId)
-            done()
-          })
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n6 = helper.getNode("n6rdf1")
+        n6.on("input", function (msg) {
+          if(attributeId === 130){
+            msg.should.have.property('entryStatus', [0, 1, 0])
+          } else {
+            msg.should.have.property('entryStatus', [1, 0, 0])
+
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    attributeId = 1
+    it('should get a message with payload for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n2 = helper.getNode("n2rdf1")
+        n2.on("input", function (msg) {
+          msg.should.have.property('payload', 'testpayload')
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "ServerStatus",
+            "nodeId": "ns=0;i=2256",
+            "datatypeName": ""
+          }]);
+          done()
+        })
+      })
+    })
+
+    it('should have read results for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n4 = helper.getNode("n4rdf1")
+        n4.on("input", function (msg) {
+          if(attributeId !== 130) {
+            msg.payload[0].should.have.property('value')
+          }
+          if(attributeId === 0) {
+            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    it('should have read results with response for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n6 = helper.getNode("n6rdf1")
+        n6.on("input", function (msg) {
+          if(attributeId === 130){
+            msg.should.have.property('entryStatus', [0, 1, 0])
+          } else {
+            msg.should.have.property('entryStatus', [1, 0, 0])
+
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    attributeId = 2
+    it('should get a message with payload for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n2 = helper.getNode("n2rdf1")
+        n2.on("input", function (msg) {
+          msg.should.have.property('payload', 'testpayload')
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "ServerStatus",
+            "nodeId": "ns=0;i=2256",
+            "datatypeName": ""
+          }]);
+          done()
+        })
+      })
+    })
+
+    it('should have read results for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n4 = helper.getNode("n4rdf1")
+        n4.on("input", function (msg) {
+          if(attributeId !== 130) {
+            msg.payload[0].should.have.property('value')
+          }
+          if(attributeId === 0) {
+            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    it('should have read results with response for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n6 = helper.getNode("n6rdf1")
+        n6.on("input", function (msg) {
+          if(attributeId === 130){
+            msg.should.have.property('entryStatus', [0, 1, 0])
+          } else {
+            msg.should.have.property('entryStatus', [1, 0, 0])
+
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    attributeId = 3
+    it('should get a message with payload for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n2 = helper.getNode("n2rdf1")
+        n2.on("input", function (msg) {
+          msg.should.have.property('payload', 'testpayload')
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "ServerStatus",
+            "nodeId": "ns=0;i=2256",
+            "datatypeName": ""
+          }]);
+          done()
+        })
+      })
+    })
+
+    it('should have read results for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n4 = helper.getNode("n4rdf1")
+        n4.on("input", function (msg) {
+          if(attributeId !== 130) {
+            msg.payload[0].should.have.property('value')
+          }
+          if(attributeId === 0) {
+            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    it('should have read results with response for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n6 = helper.getNode("n6rdf1")
+        n6.on("input", function (msg) {
+          if(attributeId === 130){
+            msg.should.have.property('entryStatus', [0, 1, 0])
+          } else {
+            msg.should.have.property('entryStatus', [1, 0, 0])
+
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    attributeId = 4
+    it('should get a message with payload for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n2 = helper.getNode("n2rdf1")
+        n2.on("input", function (msg) {
+          msg.should.have.property('payload', 'testpayload')
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "ServerStatus",
+            "nodeId": "ns=0;i=2256",
+            "datatypeName": ""
+          }]);
+          done()
+        })
+      })
+    })
+
+    it('should have read results for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n4 = helper.getNode("n4rdf1")
+        n4.on("input", function (msg) {
+          if(attributeId !== 130) {
+            msg.payload[0].should.have.property('value')
+          }
+          if(attributeId === 0) {
+            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    it('should have read results with response for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n6 = helper.getNode("n6rdf1")
+        n6.on("input", function (msg) {
+          if(attributeId === 130){
+            msg.should.have.property('entryStatus', [0, 1, 0])
+          } else {
+            msg.should.have.property('entryStatus', [1, 0, 0])
+
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    attributeId = 13
+    it('should get a message with payload for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n2 = helper.getNode("n2rdf1")
+        n2.on("input", function (msg) {
+          msg.should.have.property('payload', 'testpayload')
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "ServerStatus",
+            "nodeId": "ns=0;i=2256",
+            "datatypeName": ""
+          }]);
+          done()
+        })
+      })
+    })
+
+    it('should have read results for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n4 = helper.getNode("n4rdf1")
+        n4.on("input", function (msg) {
+          if(attributeId !== 130) {
+            msg.payload[0].should.have.property('value')
+          }
+          if(attributeId === 0) {
+            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    it('should have read results with response for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n6 = helper.getNode("n6rdf1")
+        n6.on("input", function (msg) {
+          if(attributeId === 130){
+            msg.should.have.property('entryStatus', [0, 1, 0])
+          } else {
+            msg.should.have.property('entryStatus', [1, 0, 0])
+
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    attributeId = 130
+    it('should get a message with payload for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n2 = helper.getNode("n2rdf1")
+        n2.on("input", function (msg) {
+          msg.should.have.property('payload', 'testpayload')
+          msg.should.have.property('addressSpaceItems', [{
+            "name": "ServerStatus",
+            "nodeId": "ns=0;i=2256",
+            "datatypeName": ""
+          }]);
+          done()
+        })
+      })
+    })
+
+    it('should have read results for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n4 = helper.getNode("n4rdf1")
+        n4.on("input", function (msg) {
+          if(attributeId !== 130) {
+            msg.payload[0].should.have.property('value')
+          }
+          if(attributeId === 0) {
+            msg.payload[0].should.have.property('nodeId', "ns=0;i=2256")
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
+        })
+      })
+    })
+
+    it('should have read results with response for attributeId ' + attributeId, function (done) {
+
+      testReadFlow[2].attributeId = attributeId
+      helper.load(readNodesToLoad, testReadFlow, function () {
+        let n6 = helper.getNode("n6rdf1")
+        n6.on("input", function (msg) {
+          if(attributeId === 130){
+            msg.should.have.property('entryStatus', [0, 1, 0])
+          } else {
+            msg.should.have.property('entryStatus', [1, 0, 0])
+
+          }
+          msg.should.have.property('topic', "TestTopicRead")
+          msg.should.have.property('attributeId', attributeId)
+          done()
         })
       })
     })

@@ -14,9 +14,9 @@ var assert = require('chai').assert
 var inputNode = require('../src/opcua-iiot-server')
 var helper = require('node-red-contrib-test-helper')
 
-var testFlowPayload = [
+var testServerFlow = [
   {
-    "id": "n1",
+    "id": "n1svrf1",
     "type": "OPCUA-IIoT-Server",
     "port": "1999",
     "endpoint": "",
@@ -43,20 +43,36 @@ var testFlowPayload = [
 ]
 
 describe('OPC UA Server node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('Server start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('Server unload done')
+      done()
+    }).catch(function (err) {
+      console.log('Server error ' + err)
+      done()
+    })
+  })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('Server stop server done')
+      done()
+    })
   })
 
   describe('Server node', function () {
     it('should be loaded', function (done) {
       helper.load(
-        [inputNode], testFlowPayload,
+        [inputNode], testServerFlow,
         function () {
-          let nodeUnderTest = helper.getNode('n1')
+          let nodeUnderTest = helper.getNode('n1svrf1')
           nodeUnderTest.should.have.property('name', 'DEMOSERVER')
           nodeUnderTest.should.have.property('maxAllowedSessionNumber', 10)
           nodeUnderTest.should.have.property('maxNodesPerRead', 1000)

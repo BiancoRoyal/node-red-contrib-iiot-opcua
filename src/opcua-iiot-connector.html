@@ -21,12 +21,14 @@
       showErrors: {value: false},
       publicCertificateFile: {value: ''},
       privateKeyFile: {value: ''},
-      defaultSecureTokenLifetime: {value: 60000},
+      defaultSecureTokenLifetime: {value: ''},
       endpointMustExist: {value: true},
       autoSelectRightEndpoint: {value: true},
-      strategyMaxRetry: {value: 10},
-      strategyInitialDelay: {value: 2000},
-      strategyMaxDelay: {value: 10000},
+      strategyMaxRetry: {value: ''},
+      strategyInitialDelay: {value: ''},
+      strategyMaxDelay: {value: ''},
+      strategyRandomisationFactor: {value: ''},
+      requestedSessionTimeout: {value: ''},
     },
     credentials: {
       user: {type: "text"},
@@ -282,15 +284,25 @@
         <div id="opcuaiiot-server-tab-strategy" style="display:none">
             <div class="form-row">
               <label for="node-config-input-strategyMaxRetry"><i class="fa fa-repeat"></i> <span data-i18n="opcua-iiot-contrib.label.strategyMaxRetry"></span></label>
-              <input type="text" id="node-config-input-strategyMaxRetry" placeholder="10" style="width:80px">
+              <input type="text" id="node-config-input-strategyMaxRetry" placeholder="200" style="width:80px">
             </div>
             <div class="form-row">
               <label for="node-config-input-strategyInitialDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.strategyInitialDelay"></span></label>
-              <input type="text" id="node-config-input-strategyInitialDelay" placeholder="2000" style="width:80px"> &nbsp; msec.
+              <input type="text" id="node-config-input-strategyInitialDelay" placeholder="1000" style="width:80px"> &nbsp; msec.
             </div>
             <div class="form-row">
               <label for="node-config-input-strategyMaxDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.strategyMaxDelay"></span></label>
-              <input type="text" id="node-config-input-strategyMaxDelay" placeholder="10000" style="width:80px"> &nbsp; msec.
+              <input type="text" id="node-config-input-strategyMaxDelay" placeholder="30000" style="width:80px"> &nbsp; msec.
+            </div>
+            <div class="form-row">
+              <label for="node-config-input-strategyRandomisationFactor"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.strategyRandomisationFactor"></span></label>
+              <input type="text" id="node-config-input-strategyRandomisationFactor" placeholder="0.1" style="width:80px">
+            </div>
+            <hr>
+            <h4>Session</h4>
+            <div class="form-row">
+              <label for="node-config-input-requestedSessionTimeout"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.requestedSessionTimeout"></span></label>
+              <input type="text" id="node-config-input-requestedSessionTimeout" placeholder="60000" style="width:80px"> &nbsp; msec.
             </div>
         </div>
     </div>

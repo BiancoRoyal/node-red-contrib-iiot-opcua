@@ -15,57 +15,74 @@ var injectNode = require('node-red/nodes/core/core/20-inject')
 var inputNode = require('../src/opcua-iiot-server-cmd')
 var helper = require('node-red-contrib-test-helper')
 
-var testFlowPayload = [
+var testCMDFlow = [
   {
-    "id": "n1",
+    "id": "n1cmdf1",
     "type": "inject",
     "payload": "testpayload",
     "payloadType": "str",
     "repeat": "",
     "crontab": "",
     "once": true,
-    "wires": [["n2", "n3", "n4"]]
+    "wires": [["n2cmdf1", "n3cmdf1", "n4cmdf1"]]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2cmdf1", type:"helper"},
   {
-    "id": "n3",
+    "id": "n3cmdf1",
     "type": "OPCUA-IIoT-Server-Command",
     "commandtype": "restart",
     "nodeId": "",
     "name": "",
     "wires": [
-      ["n5"]
+      ["n5cmdf1"]
     ]
   },
   {
-    "id": "n4",
+    "id": "n4cmdf1",
     "type": "OPCUA-IIoT-Server-Command",
     "commandtype": "deleteNode",
     "nodeId": "ns=4;s=TestFolder",
     "name": "",
     "wires": [
-      ["n6"]
+      ["n6cmdf1"]
     ]
   },
-  {id:"n5", type:"helper"},
-  {id:"n6", type:"helper"}
+  {id:"n5cmdf1", type:"helper"},
+  {id:"n6cmdf1", type:"helper"}
 ]
 
 describe('OPC UA Server Command node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('Command start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('Command unload done')
+      done()
+    }).catch(function (err) {
+      console.log('Command error ' + err)
+      done()
+    })
   })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('Command stop server done')
+      done()
+    })
+  })
+
 
   describe('Command node', function () {
     it('should be loaded', function (done) {
       helper.load(
         [inputNode],
         [{
-          "id": "n3",
+          "id": "n3cmdf1",
           "type": "OPCUA-IIoT-Server-Command",
           "commandtype": "restart",
           "nodeId": "",
@@ -74,7 +91,7 @@ describe('OPC UA Server Command node Testing', function () {
         }
         ],
         function () {
-          let nodeUnderTest = helper.getNode('n3')
+          let nodeUnderTest = helper.getNode('n3cmdf1')
           nodeUnderTest.should.have.property('name', 'TestName')
           nodeUnderTest.should.have.property('commandtype', 'restart')
           nodeUnderTest.should.have.property('nodeId', '')
@@ -83,8 +100,8 @@ describe('OPC UA Server Command node Testing', function () {
     })
 
     it('should get a message with payload on restart command', function(done) {
-      helper.load([injectNode, inputNode], testFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+      helper.load([injectNode, inputNode], testCMDFlow, function() {
+        let n5 = helper.getNode("n5cmdf1")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('commandtype', 'restart')
           msg.payload.should.have.property('nodeId', '')
@@ -95,8 +112,8 @@ describe('OPC UA Server Command node Testing', function () {
     })
 
     it('should get a message with payload on delete ASO command', function(done) {
-      helper.load([injectNode, inputNode], testFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+      helper.load([injectNode, inputNode], testCMDFlow, function() {
+        let n6 = helper.getNode("n6cmdf1")
         n6.on("input", function(msg) {
           msg.payload.should.have.property('commandtype', 'deleteNode')
           msg.payload.should.have.property('nodeId', 'ns=4;s=TestFolder')

@@ -39,20 +39,7 @@ module.exports = function (RED) {
     node.opcuaSession = null
     node.reconnectTimeout = 1000
 
-    node.verboseLog = function (logMessage) {
-      if (RED.settings.verbose) {
-        coreBrowser.internalDebugLog(logMessage)
-      }
-    }
-
-    node.statusLog = function (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        node.verboseLog('Status: ' + logMessage)
-      }
-    }
-
     node.setNodeStatusTo = function (statusValue) {
-      node.statusLog(statusValue)
       let statusParameter = coreBrowser.core.getNodeStatus(statusValue, node.showStatusActivities)
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
@@ -104,11 +91,9 @@ module.exports = function (RED) {
       browserEntries = results
     }
 
-    node.sendMessageBrowserResults = function (msg, session, browserResult) {
+    node.sendMessageBrowserResults = function (msg, browserResult) {
       let nodesToRead = []
       let addressItemList = []
-
-      coreBrowser.internalDebugLog('Browser Root ' + node.browseTopic + ' on ' + session.name + ' Id: ' + session.sessionId)
 
       browserResult.forEach(function (result) {
         result.references.forEach(function (reference) {
@@ -130,7 +115,7 @@ module.exports = function (RED) {
 
       coreBrowser.browse(session, node.browseTopic)
         .then(function (browserResult) {
-          node.sendMessageBrowserResults(msg, session, browserResult)
+          node.sendMessageBrowserResults(msg, browserResult)
         }).catch(function (err) {
           node.browseErrorHandling(err, msg)
         })
@@ -138,13 +123,12 @@ module.exports = function (RED) {
 
     node.browseNodeList = function (session, msg) {
       browserEntries = []
-      coreBrowser.internalDebugLog('Browse Node-List With Items ' + msg.addressSpaceItems.length)
 
       if (node.singleBrowseResult) {
         coreBrowser.browseAddressSpaceItems(session, msg.addressSpaceItems)
           .then(function (browserResult) {
             browserEntries = []
-            node.sendMessageBrowserResults(msg, session, browserResult)
+            node.sendMessageBrowserResults(msg, browserResult)
           }).catch(function (err) {
             node.browseErrorHandling(err, msg)
           })
@@ -153,7 +137,7 @@ module.exports = function (RED) {
           coreBrowser.browse(session, entry.nodeId)
             .then(function (browserResult) {
               browserEntries = []
-              node.sendMessageBrowserResults(msg, session, browserResult)
+              node.sendMessageBrowserResults(msg, browserResult)
             }).catch(function (err) {
               node.browseErrorHandling(err, msg)
             })))
@@ -275,7 +259,7 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    coreBrowser.core.setNodeInitalState(node)
+    coreBrowser.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
@@ -299,8 +283,9 @@ module.exports = function (RED) {
         res.json(entries)
         browserEntries = entries
       }).catch(function (err) {
-        if (err) {
-          node.verboseLog(err)
+        coreBrowser.internalDebugLog('Browser Error ' + err)
+        if (node.showErrors) {
+          node.error(err, {payload: 'Browse Internal Error'})
         }
 
         entries.push({

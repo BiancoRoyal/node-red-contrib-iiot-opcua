@@ -16,9 +16,9 @@ var functionNode = require('node-red/nodes/core/core/80-function')
 var inputNode = require('../src/opcua-iiot-event')
 var helper = require('node-red-contrib-test-helper')
 
-var testFlowPayload = [
+var testEventNodeFlow = [
   {
-    "id": "n1",
+    "id": "n1evf1",
     "type": "inject",
     "topic": "TestTopic",
     "payload": "{\"queueSize\":10, \"interval\":1000}",
@@ -26,11 +26,11 @@ var testFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "wires": [["n2", "n3"]]
+    "wires": [["n2evf1", "n3evf1"]]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2evf1", type:"helper"},
   {
-    "id":"n3",
+    "id":"n3evf1",
     "type":"OPCUA-IIoT-Event",
     "eventType":"i=2041",
     "eventTypeLabel":"BaseTypeEvent",
@@ -39,19 +39,36 @@ var testFlowPayload = [
     "name":"TestName",
     "showStatusActivities":false,
     "showErrors":false,
-    "wires":[["n4"]]
+    "wires":[["n4evf1"]]
   },
-  {id:"n4", type:"helper"}
+  {id:"n4evf1", type:"helper"}
 ]
 
 describe('OPC UA Event node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('Event start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('Event unload done')
+      done()
+    }).catch(function (err) {
+      console.log('Event error ' + err)
+      done()
+    })
   })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('Event stop server done')
+      done()
+    })
+  })
+
 
   describe('Event node', function () {
     it('should load with basic settings', function (done) {
@@ -82,8 +99,8 @@ describe('OPC UA Event node Testing', function () {
     })
 
     it('should get a message with payload', function(done) {
-      helper.load([injectNode, inputNode], testFlowPayload, function() {
-        let n2 = helper.getNode("n2")
+      helper.load([injectNode, inputNode], testEventNodeFlow, function() {
+        let n2 = helper.getNode("n2evf1")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', {"queueSize":10,"interval":1000})
           done()
@@ -92,8 +109,8 @@ describe('OPC UA Event node Testing', function () {
     })
 
     it('should verify a message for event parameters', function(done) {
-      helper.load([injectNode, inputNode], testFlowPayload, function() {
-        let n4 = helper.getNode("n4")
+      helper.load([injectNode, inputNode], testEventNodeFlow, function() {
+        let n4 = helper.getNode("n4evf1")
         n4.on("input", function(msg) {
           assert.match(JSON.stringify(msg.payload), /eventType/)
           assert.match(JSON.stringify(msg.payload), /eventFilter/)

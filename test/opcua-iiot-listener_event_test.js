@@ -11,96 +11,116 @@
 'use strict'
 
 var assert = require('chai').assert
+var expect = require('chai').expect
 
 // iiot opc ua nodes
 var injectNode = require('../src/opcua-iiot-inject')
+var eventNode = require('../src/opcua-iiot-event')
 var serverNode = require('../src/opcua-iiot-server')
 var connectorNode = require('../src/opcua-iiot-connector')
 var inputNode = require('../src/opcua-iiot-listener')
 var helper = require('node-red-contrib-test-helper')
 
-var listenerNodesToLoad = [injectNode, connectorNode, inputNode, serverNode]
+var eventNodesToLoad = [injectNode, eventNode, connectorNode, inputNode, serverNode]
 
-var testListenerMonitoringFlow = [
+var testListenerEventFlow = [
   {
-    "id": "n1li",
+    "id": "n1ev",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "listen",
     "payload": "{ \"interval\": 500, \"queueSize\": 1 }",
-    "payloadType": "json",
-    "topic": "TestTopicListen",
+    "payloadType": "num",
+    "topic": "TestTopicEvent",
     "repeat": "",
     "crontab": "",
     "once": true,
     "startDelay": "2.4",
-    "name": "Start Abo",
+    "name": "listen with 200 ms",
     "addressSpaceItems": [
       {
-        "name": "FullCounter",
-        "nodeId": "ns=4;s=FullCounter",
+        "name": "Tanks",
+        "nodeId": "ns=1;i=1000",
         "datatypeName": ""
       }
     ],
     "wires": [
       [
-        "n2li", "n3li"
+        "n2ev", "n3ev"
       ]
     ]
   },
   {
-    "id": "usli",
+    "id": "u1ev",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "listen",
     "payload": "unsubscribe",
     "payloadType": "str",
-    "topic": "TestTopicUnsubscribe",
+    "topic": "TestTopicEventUnsubscribe",
     "repeat": "",
     "crontab": "",
     "once": true,
     "startDelay": "5.5",
-    "name": "Stop Abo",
+    "name": "Unsubscribe",
     "addressSpaceItems": [
       {
-        "name": "FullCounter",
-        "nodeId": "ns=4;s=FullCounter",
+        "name": "Tanks",
+        "nodeId": "ns=1;i=1000",
         "datatypeName": ""
       }
     ],
     "wires": [
       [
-        "n2li", "n3li"
+        "n2ev", "n3ev"
       ]
     ]
   },
-  {id:"n2li", type:"helper"},
+  {id:"n2ev", type:"helper"},
   {
-    "id": "n3li",
+    "id": "n3ev",
+    "type": "OPCUA-IIoT-Event",
+    "eventType": "BaseEventType",
+    "eventTypeLabel": "BaseEventType (i=2041)",
+    "queueSize": "1",
+    "usingListener": true,
+    "name": "Base Events",
+    "showStatusActivities": false,
+    "showErrors": true,
+    "wires": [
+      [
+        "n4ev", "n5ev"
+      ]
+    ]
+  },
+  {id:"n4ev", type:"helper"},
+  {
+    "id": "n5ev",
     "type": "OPCUA-IIoT-Listener",
-    "connector": "c1li",
-    "action": "subscribe",
-    "queueSize": 1,
+    "connector": "c1ev",
+    "action": "events",
+    "queueSize": "1",
     "name": "",
     "justValue": true,
     "showStatusActivities": false,
     "showErrors": false,
     "wires": [
       [
-        "n4li"
+        "n6ev"
       ]
     ]
   },
+  {id:"n6ev", type:"helper"},
   {
-    "id": "c1li",
+    "id": "c1ev",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "9deca36b.f0384",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:1985",
+    "endpoint": "opc.tcp://localhost:1988",
     "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
     "name": "LOCAL DEMO SERVER",
-    "showErrors": false,
+    "showErrors": true,
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
@@ -111,11 +131,10 @@ var testListenerMonitoringFlow = [
     "strategyMaxDelay": "",
     "strategyRandomisationFactor": ""
   },
-  {id:"n4li", type:"helper"},
   {
-    "id": "s1li",
+    "id": "s1ev",
     "type": "OPCUA-IIoT-Server",
-    "port": "1985",
+    "port": "1988",
     "endpoint": "",
     "acceptExternalCommands": true,
     "maxAllowedSessionNumber": "",
@@ -139,7 +158,7 @@ var testListenerMonitoringFlow = [
   }
 ]
 
-describe('OPC UA Listener monitoring node Testing', function () {
+describe('OPC UA Listener event node Testing', function () {
   beforeEach(function(done) {
     helper.startServer(function () {
       console.log('events start server done')
@@ -163,8 +182,7 @@ describe('OPC UA Listener monitoring node Testing', function () {
     })
   })
 
-  describe('Listen node', function () {
-
+  describe('Listen event node', function () {
     let msgCounter = 0
 
     it('should be loaded', function (done) {
@@ -173,9 +191,9 @@ describe('OPC UA Listener monitoring node Testing', function () {
             "id": "bee3e3b0.ca1a08",
             "type": "OPCUA-IIoT-Listener",
             "connector": "c30aa44e.9ed95",
-            "action": "subscribe",
-            "queueSize": 10,
-            "name": "TestListener",
+            "action": "events",
+            "queueSize": 1,
+            "name": "TestEvents",
             "justValue": true,
             "showStatusActivities": false,
             "showErrors": false,
@@ -201,26 +219,30 @@ describe('OPC UA Listener monitoring node Testing', function () {
             "privateKeyFile": "",
             "defaultSecureTokenLifetime": "60000",
             "endpointMustExist": false,
-            "autoSelectRightEndpoint": false
+            "autoSelectRightEndpoint": false,
+            "strategyMaxRetry": "",
+            "strategyInitialDelay": "",
+            "strategyMaxDelay": "",
+            "strategyRandomisationFactor": ""
           }
         ],
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
-          nodeUnderTest.should.have.property('name', 'TestListener')
-          nodeUnderTest.should.have.property('action', 'subscribe')
+          nodeUnderTest.should.have.property('name', 'TestEvents')
+          nodeUnderTest.should.have.property('action', 'events')
           done()
         })
     })
 
-    it('should get a message with payload after inject on subscribe', function(done) {
+    it('should get a message without addressSpaceItems in payload after inject node subscribe', function(done) {
 
-      helper.load(listenerNodesToLoad, testListenerMonitoringFlow, function() {
+      helper.load(eventNodesToLoad, testListenerEventFlow, function () {
         msgCounter = 0
-        let n2 = helper.getNode("n2li")
-        n2.on("input", function(msg) {
+        let n2 = helper.getNode("n2ev")
+        n2.on("input", function (msg) {
           msgCounter++
           if(msgCounter === 1) {
-            msg.should.have.property('topic', 'TestTopicListen')
+            msg.should.have.property('topic', 'TestTopicEvent')
             msg.should.have.property('nodetype', 'inject')
             msg.should.have.property('injectType', 'listen')
             setTimeout(done, 2000)
@@ -229,31 +251,66 @@ describe('OPC UA Listener monitoring node Testing', function () {
       })
     })
 
-    it('should verify a message on changed monitored item with statusCode on subscribe', function(done) {
+    it('should get a message with payload after inject node subscribe',function(done) {
 
-      helper.load(listenerNodesToLoad, testListenerMonitoringFlow, function() {
+      helper.load(eventNodesToLoad, testListenerEventFlow, function () {
         msgCounter = 0
-        let n4 = helper.getNode("n4li")
+        let n2 = helper.getNode("n2ev")
+        n2.on("input", function(msg) {
+          msgCounter++
+          if(msgCounter === 1) {
+            msg.should.have.property('topic', 'TestTopicEvent')
+            msg.should.have.property('nodetype', 'inject')
+            msg.should.have.property('injectType', 'listen')
+            setTimeout(done, 2000)
+          }
+        })
+      })
+    })
+
+    it('should get a message with nodetype events after base event node subscribe', function(done) {
+
+      helper.load(eventNodesToLoad, testListenerEventFlow, function() {
+        msgCounter = 0
+        let n4 = helper.getNode("n4ev")
         n4.on("input", function(msg) {
           msgCounter++
           if(msgCounter === 1) {
-            msg.payload.value.should.have.property('dataType', 'Int32')
-            msg.payload.should.have.property('statusCode')
-            done()
+            msg.should.have.property('topic', 'TestTopicEvent')
+            msg.should.have.property('nodetype', 'events')
+            msg.should.have.property('injectType', 'listen')
+            setTimeout(done, 2000)
           }
         })
       })
     })
 
-    it('should get a message with payload after inject on unsubscribe', function(done) {
+    it('should get a message with payload test after base event node subscribe', function(done) {
 
-      helper.load(listenerNodesToLoad, testListenerMonitoringFlow, function() {
+      helper.load(eventNodesToLoad, testListenerEventFlow, function() {
         msgCounter = 0
-        let n2 = helper.getNode("n2li")
+        let n4 = helper.getNode("n4ev")
+        n4.on("input", function(msg) {
+          msgCounter++
+          if(msgCounter === 1) {
+            msg.payload.should.have.property('eventType', 'BaseEventType')
+            expect(msg.payload.eventFilter).to.be.an('object')
+            expect(msg.payload.eventFields).to.be.an('array')
+            setTimeout(done, 2000)
+          }
+        })
+      })
+    })
+
+    it('should get a message with payload after inject unsubscribe', function(done) {
+
+      helper.load(eventNodesToLoad, testListenerEventFlow, function() {
+        msgCounter = 0
+        let n2 = helper.getNode("n2ev")
         n2.on("input", function(msg) {
           msgCounter++
           if(msgCounter === 2) {
-            msg.should.have.property('topic', 'TestTopicUnsubscribe')
+            msg.should.have.property('topic', 'TestTopicEventUnsubscribe')
             msg.should.have.property('nodetype', 'inject')
             msg.should.have.property('injectType', 'listen')
             setTimeout(done, 2000)
@@ -262,16 +319,17 @@ describe('OPC UA Listener monitoring node Testing', function () {
       })
     })
 
-    it('should get a message with payload options after inject on unsubscribe', function(done) {
+    it('should get a message with payload after base event unsubscribe', function(done) {
 
-      helper.load(listenerNodesToLoad, testListenerMonitoringFlow, function() {
+      helper.load(eventNodesToLoad, testListenerEventFlow, function() {
         msgCounter = 0
-        let n2 = helper.getNode("n2li")
+        let n2 = helper.getNode("n4ev")
         n2.on("input", function(msg) {
           msgCounter++
           if(msgCounter === 2) {
-            msg.should.have.property('topic', 'TestTopicUnsubscribe')
-            msg.should.have.property('payload', 'unsubscribe')
+            msg.should.have.property('topic', 'TestTopicEventUnsubscribe')
+            msg.should.have.property('nodetype', 'events')
+            msg.should.have.property('injectType', 'listen')
             setTimeout(done, 2000)
           }
         })

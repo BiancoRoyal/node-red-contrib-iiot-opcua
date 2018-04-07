@@ -17,7 +17,7 @@ var inputNode = require('../src/opcua-iiot-response')
 var helper = require('node-red-contrib-test-helper')
 
 var readGoodInject = {
-  "id": "n1",
+  "id": "n1rsf1",
   "type": "inject",
   "name": "TestInject Read",
   "topic": "TestTopic",
@@ -27,11 +27,11 @@ var readGoodInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfrd"]]
 }
 
 var readBadInject = {
-  "id": "n1",
+  "id": "n1rsf2",
   "type": "inject",
   "name": "TestInject Read",
   "topic": "TestTopic",
@@ -41,11 +41,11 @@ var readBadInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfrd"]]
 }
 
 var readOtherInject = {
-  "id": "n1",
+  "id": "n1rsf3",
   "type": "inject",
   "name": "TestInject Read",
   "topic": "TestTopic",
@@ -55,21 +55,21 @@ var readOtherInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfrd"]]
 }
 
 var readResultSimulation = {
-  "id": "n3",
+  "id": "n3rsfrd",
   "type": "function",
   "name": "",
   "func": "msg.nodetype = 'read'\nmsg.injectType = 'read'\nreturn msg;",
   "outputs": 1,
   "noerr": 0,
-  "wires": [["n4", "n5"]]
+  "wires": [["n4rsf", "n5rsf"]]
 }
 
 var writeGoodInject = {
-  "id": "n1",
+  "id": "n1rsf5",
   "type": "inject",
   "name": "TestInject Write",
   "topic": "TestTopic",
@@ -79,11 +79,11 @@ var writeGoodInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfwr"]]
 }
 
 var writeBadInject = {
-  "id": "n1",
+  "id": "n1rsf6",
   "type": "inject",
   "name": "TestInject Write",
   "topic": "TestTopic",
@@ -93,11 +93,11 @@ var writeBadInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfwr"]]
 }
 
 var writeOtherInject = {
-  "id": "n1",
+  "id": "n1rsf7",
   "type": "inject",
   "name": "TestInject Write",
   "topic": "TestTopic",
@@ -107,21 +107,21 @@ var writeOtherInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfwr"]]
 }
 
 var writeResultSimulation = {
-  "id": "n3",
+  "id": "n3rsfwr",
   "type": "function",
   "name": "",
   "func": "msg.nodetype = 'write'\nmsg.injectType = 'write'\nreturn msg;",
   "outputs": 1,
   "noerr": 0,
-  "wires": [["n4", "n5"]]
+  "wires": [["n4rsf", "n5rsf"]]
 }
 
 var listenGoodInject = {
-    "id": "n1",
+    "id": "n1rsf8",
     "type": "inject",
     "name": "TestInject Listen",
     "topic": "TestTopic",
@@ -131,11 +131,11 @@ var listenGoodInject = {
     "crontab": "",
     "once": true,
     "onceDelay": 0.1,
-    "wires": [["n2", "n3"]]
+    "wires": [["n2rsf", "n3rsfli"]]
 }
 
 var listenBadInject = {
-  "id": "n1",
+  "id": "n1rsf9",
   "type": "inject",
   "name": "TestInject Listen",
   "topic": "TestTopic",
@@ -145,11 +145,11 @@ var listenBadInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfli"]]
 }
 
 var listenOtherInject = {
-  "id": "n1",
+  "id": "n1rsf10",
   "type": "inject",
   "name": "TestInject Listen",
   "topic": "TestTopic",
@@ -159,31 +159,31 @@ var listenOtherInject = {
   "crontab": "",
   "once": true,
   "onceDelay": 0.1,
-  "wires": [["n2", "n3"]]
+  "wires": [["n2rsf", "n3rsfli"]]
 }
 
 var listenResultSimulation = {
-  "id": "n3",
+  "id": "n3rsfli",
   "type": "function",
   "name": "",
   "func": "msg.nodetype = 'listen'\nmsg.injectType = 'subscribe'\nreturn msg;",
   "outputs": 1,
   "noerr": 0,
-  "wires": [["n4", "n5"]]
+  "wires": [["n4rsf", "n5rsf"]]
 }
 
 var testFlowPayload = [
-  {id:"n2", type:"helper"},
-  {id:"n4", type:"helper"},
+  {id:"n2rsf", type:"helper"},
+  {id:"n4rsf", type:"helper"},
   {
-    "id": "n5",
+    "id": "n5rsf",
     "type": "OPCUA-IIoT-Response",
     "name": "TestResponse",
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n6"]]
+    "wires": [["n6rsf"]]
   },
-  {id:"n6", type:"helper"}
+  {id:"n6rsf", type:"helper"}
 ]
 
 var readGoodTestFlowPayload = testFlowPayload.concat([readResultSimulation, readGoodInject])
@@ -199,13 +199,30 @@ var writeOtherTestFlowPayload = testFlowPayload.concat([writeResultSimulation, w
 var listenOtherTestFlowPayload = testFlowPayload.concat([listenResultSimulation, listenOtherInject])
 
 describe('OPC UA Response node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('Response start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('Response unload done')
+      done()
+    }).catch(function (err) {
+      console.log('Response error ' + err)
+      done()
+    })
   })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('Response stop server done')
+      done()
+    })
+  })
+
 
   describe('Response node', function () {
     it('should load with basic settings', function (done) {
@@ -228,7 +245,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should get a message with payload on read', function(done) {
       helper.load([injectNode, functionNode, inputNode], readGoodTestFlowPayload, function() {
-        let n4 = helper.getNode("n4")
+        let n4 = helper.getNode("n4rsf")
         n4.on("input", function(msg) {
           msg.should.have.property('payload', [{"value":{"dataType":"Double","arrayType":"Scalar","value":20},"statusCode":{"value":0,"description":"No Error","name":"Good"},"sourcePicoseconds":0,"serverPicoseconds":0}])
           done()
@@ -238,7 +255,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should get a message with payload on write', function(done) {
       helper.load([injectNode, functionNode, inputNode], writeGoodTestFlowPayload, function() {
-        let n4 = helper.getNode("n4")
+        let n4 = helper.getNode("n4rsf")
         n4.on("input", function(msg) {
           msg.should.have.property('payload', {"statusCodes":[{"value":0,"description":"No Error","name":"Good"}]})
           done()
@@ -248,7 +265,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should get a message with payload on listen', function(done) {
       helper.load([injectNode, functionNode, inputNode], listenGoodTestFlowPayload, function() {
-        let n4 = helper.getNode("n4")
+        let n4 = helper.getNode("n4rsf")
         n4.on("input", function(msg) {
           msg.should.have.property('payload', {"value":{"dataType":"UInt16","arrayType":"Scalar","value":0},"statusCode":{"value":0,"description":"No Error","name":"Good"},"sourceTimestamp":"0","sourcePicoseconds":0,"serverTimestamp":"0","serverPicoseconds":0})
           done()
@@ -258,7 +275,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a good message on read', function(done) {
       helper.load([injectNode, functionNode, inputNode], readGoodTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [1,0,0])
           done()
@@ -268,7 +285,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a good message on write', function(done) {
       helper.load([injectNode, functionNode, inputNode], writeGoodTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [1,0,0])
           done()
@@ -278,7 +295,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a good message on listen', function(done) {
       helper.load([injectNode, functionNode, inputNode], listenGoodTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [1,0,0])
           done()
@@ -288,7 +305,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a bad message on read', function(done) {
       helper.load([injectNode, functionNode, inputNode], readBadTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [0,1,0])
           done()
@@ -298,7 +315,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a bad message on write', function(done) {
       helper.load([injectNode, functionNode, inputNode], writeBadTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [0,1,0])
           done()
@@ -308,7 +325,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a bad message on listen', function(done) {
       helper.load([injectNode, functionNode, inputNode], listenBadTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [0,1,0])
           done()
@@ -318,7 +335,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a other message on read', function(done) {
       helper.load([injectNode, functionNode, inputNode], readOtherTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [0,0,1])
           done()
@@ -328,7 +345,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a other message on write', function(done) {
       helper.load([injectNode, functionNode, inputNode], writeOtherTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [0,0,1])
           done()
@@ -338,7 +355,7 @@ describe('OPC UA Response node Testing', function () {
 
     it('should verify a other message on listen', function(done) {
       helper.load([injectNode, functionNode, inputNode], listenOtherTestFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+        let n6 = helper.getNode("n6rsf")
         n6.on("input", function(msg) {
           msg.should.have.property('entryStatus', [0,0,1])
           done()

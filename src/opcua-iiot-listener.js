@@ -17,6 +17,7 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreListener = require('./core/opcua-iiot-core-listener')
   let Map = require('collections/map')
+  const _ = require('underscore')
 
   function OPCUAIIoTListener (config) {
     RED.nodes.createNode(this, config)
@@ -33,12 +34,14 @@ module.exports = function (RED) {
     node.sessionTimeout = null
     node.opcuaClient = null
     node.opcuaSession = null
+    node.subscriptionStarted = false
 
     let uaSubscription = null
     let subscriptionStarting = false
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
     node.monitoredItems = new Map()
+    node.monitoredASO = new Map()
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -63,56 +66,66 @@ module.exports = function (RED) {
 
       if (subscriptionStarting) {
         coreListener.internalDebugLog('monitoring subscription try to start twice')
-        return
-      }
-
-      subscriptionStarting = true
-      if (msg.nodetype !== 'events') {
-        coreListener.internalDebugLog('create monitoring subscription')
-        node.makeSubscription(cb, msg, msg.payload.options || coreListener.getSubscriptionParameters(timeMilliseconds))
       } else {
-        coreListener.internalDebugLog('create event subscription')
-        node.makeSubscription(cb, msg, msg.payload.options || coreListener.getEventSubscribtionParameters(timeMilliseconds))
+        uaSubscription = null
+        node.subscriptionStarting = true
+        let options = {}
+        if (node.action !== 'events') {
+          coreListener.internalDebugLog('create monitoring subscription')
+          options = msg.payload.options || coreListener.getSubscriptionParameters(timeMilliseconds)
+        } else {
+          coreListener.internalDebugLog('create event subscription')
+          options = msg.payload.options || coreListener.getEventSubscribtionParameters(timeMilliseconds)
+        }
+        node.makeSubscription(options, cb)
       }
     }
 
     node.resetSubscription = function () {
-      let monitoredItem
-      let addressSpaceItems = []
-      for (monitoredItem of node.monitoredItems) {
-        if (monitoredItem[1].itemToMonitor) {
-          addressSpaceItems.push({name: '', nodeId: monitoredItem[1].itemToMonitor.nodeId.toString(), datatypeName: ''})
-        }
-      }
+      node.subscriptionStarting = false
+      node.sendAllMonitoredItems('SUBSCRIPTION TERMINATED')
+    }
 
-      node.send({payload: 'SUBSCRIPTION TERMINATED', monitoredItems: node.monitoredItems, addressSpaceItems: addressSpaceItems})
+    node.sendAllMonitoredItems = function (payload) {
+      let addressSpaceItems = []
+      node.monitoredASO.forEach(function (value, key) {
+        addressSpaceItems.push({name: '', nodeId: key, datatypeName: ''})
+      })
+      node.send({payload: payload, monitoredASO: node.monitoredASO, addressSpaceItems: addressSpaceItems})
       node.monitoredItems.clear()
+      node.monitoredASO.clear()
     }
 
     node.subscribeActionInput = function (msg) {
       if (!uaSubscription) {
-        node.createSubscription(msg, node.subscribeMonitoredItem)
+        node.createSubscription(msg, function () {
+          node.subscribeMonitoredItem(msg)
+        })
       } else {
-        if (uaSubscription.subscriptionId !== 'terminated' && node.subscribingPreCheck(uaSubscription, msg)) {
-          node.subscribeMonitoredItem(uaSubscription, msg)
+        if (node.subscribingPreCheck()) {
+          node.subscribeMonitoredItem(msg)
         } else {
           node.resetSubscription()
         }
       }
     }
 
-    node.subscribingPreCheck = function (subscription, msg) {
-      if (!node.monitoredItems) {
-        coreListener.subscribeDebugLog('Monitored Item Set Not Valid')
-        return false
+    node.subscribeEventsInput = function (msg) {
+      if (!uaSubscription) {
+        node.createSubscription(msg, function () {
+          node.subscribeMonitoredEvent(msg)
+        })
+      } else {
+        if (node.subscribingPreCheck()) {
+          node.subscribeMonitoredEvent(msg)
+        } else {
+          node.resetSubscription()
+        }
       }
+    }
 
-      if (!msg.addressSpaceItems || !msg.addressSpaceItems.length) {
-        coreListener.subscribeDebugLog('Address-Space-Item Set Not Valid')
-        return false
-      }
-
-      return true
+    node.subscribingPreCheck = function () {
+      return uaSubscription && typeof uaSubscription.subscriptionId !== 'string'
     }
 
     node.updateSubscriptionStatus = function () {
@@ -120,105 +133,133 @@ module.exports = function (RED) {
       node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
     }
 
-    node.subscribeMonitoredItem = function (subscription, msg) {
-      if (!subscription) {
-        coreListener.subscribeDebugLog('Subscription Not Vaild')
+    node.subscribeMonitoredItem = function (msg) {
+      if (!node.subscriptionStarted) {
+        node.error(new Error('Subscription Not Started To Monitor'), msg)
         return
       }
 
-      uaSubscription = subscription
       let addressSpaceItem = null
-
       for (addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
           coreListener.subscribeDebugLog('Address Space Item Not Valid to Monitor ' + addressSpaceItem)
           return
         }
 
-        let monitoredItem = node.monitoredItems.get(addressSpaceItem.nodeId.toString())
+        if (addressSpaceItem.datatypeName === 'ns=0;i=0') {
+          coreListener.subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
+          return
+        }
+
+        let monitoredItem = node.monitoredASO.get(addressSpaceItem.nodeId.toString())
 
         if (!monitoredItem) {
           coreListener.subscribeDebugLog('Monitored Item Subscribing ' + addressSpaceItem.nodeId)
-          coreListener.buildNewMonitoredItem(addressSpaceItem.nodeId, msg, subscription)
-            .then(function (monitoredItem) {
-              coreListener.subscribeDebugLog('Monitored Item Subscribed ' + monitoredItem.itemToMonitor.nodeId.toString())
+          coreListener.buildNewMonitoredItem(addressSpaceItem.nodeId, msg, uaSubscription)
+            .then(function (result) {
+              coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+              node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
             }).catch(function (err) {
+              coreListener.subscribeDebugLog(err)
               if (node.showErrors) {
                 node.error(err, msg)
               }
-              coreListener.subscribeDebugLog(err)
             })
         } else {
           coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + addressSpaceItem.nodeId)
           monitoredItem.terminate(function (err) {
-            node.monitoredItemTerminated(msg, monitoredItem, err)
+            node.monitoredItemTerminated(msg, monitoredItem, addressSpaceItem.nodeId, err)
           })
         }
       }
     }
 
-    node.subscribeMonitoredEvent = function (subscription, msg) {
-      if (!subscription) {
-        coreListener.subscribeDebugLog('Subscription Not Vaild')
+    node.subscribeMonitoredEvent = function (msg) {
+      if (!node.subscriptionStarted) {
+        node.error(new Error('Subscription Not Started To Monitor'), msg)
         return
       }
 
-      uaSubscription = subscription
       let addressSpaceItem = null
-
       for (addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
           coreListener.eventDebugLog('Address Space Item Not Valid to Monitor Event Of ' + addressSpaceItem)
           return
         }
 
-        let monitoredItem = node.monitoredItems.get(addressSpaceItem.nodeId)
+        if (addressSpaceItem.datatypeName === 'ns=0;i=0') {
+          coreListener.subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
+          return
+        }
+
+        let monitoredItem = node.monitoredASO.get(addressSpaceItem.nodeId.toString())
 
         if (!monitoredItem) {
           coreListener.eventDebugLog('Regsiter Event Item ' + addressSpaceItem.nodeId)
-          coreListener.buildNewEventItem(addressSpaceItem.nodeId, msg, subscription)
-            .then(function (monitoredItem) {
-              coreListener.eventDebugLog('Event Item Regsitered ' + monitoredItem.itemToMonitor.nodeId.toString())
+          coreListener.buildNewEventItem(addressSpaceItem.nodeId, msg, uaSubscription)
+            .then(function (result) {
+              coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+              node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
             }).catch(function (err) {
+              coreListener.eventDebugLog(err)
               if (node.showErrors) {
                 node.error(err, msg)
               }
-              coreListener.eventDebugLog(err)
             })
         } else {
           coreListener.subscribeDebugLog('Terminate Event Item' + addressSpaceItem.nodeId)
           monitoredItem.terminate(function (err) {
-            node.monitoredItemTerminated(msg, monitoredItem, err)
+            node.monitoredItemTerminated(msg, monitoredItem, addressSpaceItem.nodeId, err)
           })
         }
       }
     }
 
-    node.monitoredItemTerminated = function (msg, monitoredItem, err) {
-      coreListener.internalDebugLog('Terminate Monitored Item')
-
+    node.monitoredItemTerminated = function (msg, monitoredItem, nodeId, err) {
       if (err) {
-        coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.itemToMonitor.nodeId.toString())
+        coreListener.internalDebugLog(err + ' on ' + monitoredItem.monitoredItemId)
         if (node.showErrors) {
           node.error(err, msg)
         }
       }
+      node.updateMonitoredItemLists(monitoredItem, nodeId)
+    }
 
-      if (monitoredItem && monitoredItem.itemToMonitor &&
-        node.monitoredItems.get(monitoredItem.itemToMonitor.nodeId.toString())) {
-        node.monitoredItems.delete(monitoredItem.itemToMonitor.nodeId.toString())
+    node.updateMonitoredItemLists = function (monitoredItem, nodeId) {
+      if (monitoredItem && monitoredItem.itemToMonitor) {
+        if (node.monitoredItems.has(monitoredItem.monitoredItemId)) {
+          node.monitoredItems.delete(monitoredItem.monitoredItemId)
+        }
+
+        if (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) {
+          coreListener.internalDebugLog('Terminate Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
+          if (node.monitoredASO.has(nodeId.toString())) {
+            node.monitoredASO.delete(nodeId.toString())
+          }
+        } else {
+          coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
+          node.monitoredASO.forEach(function (value, key, map) {
+            coreListener.internalDebugLog('monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItemId)
+            if (value.monitoredItemId && value.monitoredItemId === monitoredItem.monitoredItemId) {
+              coreListener.internalDebugLog('monitoredItem removed from ASO list' + key)
+              map.delete(key)
+            }
+          })
+        }
+
         node.updateSubscriptionStatus()
       }
     }
 
     node.setMonitoring = function (monitoredItem) {
-      coreListener.internalDebugLog('add monitoredItem to list' + monitoredItem + ' keys: ' + Object.keys(monitoredItem))
-      node.monitoredItems.set(monitoredItem.itemToMonitor.nodeId.toString(), monitoredItem)
+      if (!coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) {
+        coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
+      }
+
+      coreListener.internalDebugLog('add monitoredItem to list')
+      node.monitoredItems.set(monitoredItem.monitoredItemId, monitoredItem)
 
       monitoredItem.on('changed', function (dataValue) {
-        coreListener.detailDebugLog('Changed Monitored Item Data Value ' + dataValue)
-        coreListener.detailDebugLog('Changed Monitored Item Node ' + monitoredItem)
-
         if (!monitoredItem.monitoringParameters.filter) {
           node.sendDataFromMonitoredItem(monitoredItem, dataValue)
         } else {
@@ -227,31 +268,22 @@ module.exports = function (RED) {
       })
 
       monitoredItem.on('error', function (err) {
-        coreListener.internalDebugLog('Error: ' + err + ' on ' + monitoredItem.itemToMonitor.nodeId.toString())
-
-        if (node.monitoredItems.get(monitoredItem.itemToMonitor.nodeId.toString())) {
-          node.monitoredItems.delete(monitoredItem.itemToMonitor.nodeId.toString())
-          node.updateSubscriptionStatus()
-        }
-
+        coreListener.internalDebugLog(err + ' on ' + monitoredItem.monitoredItemId)
         if (node.showErrors) {
-          node.error(err, {payload: ''})
+          node.error(err, {payload: 'Monitored Item Error', monitoredItem: monitoredItem})
         }
+
+        node.updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
 
         if (err.message && err.message.includes('BadSession')) {
-          node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
-          node.monitoredItems.clear()
+          node.sendAllMonitoredItems('BAD SESSION')
           node.connector.resetBadSession()
         }
       })
 
       monitoredItem.on('terminated', function () {
-        coreListener.internalDebugLog('Terminated For ' + monitoredItem)
-
-        if (node.monitoredItems.get(monitoredItem.itemToMonitor.nodeId.toString())) {
-          node.monitoredItems.delete(monitoredItem.itemToMonitor.nodeId.toString())
-          node.updateSubscriptionStatus()
-        }
+        coreListener.internalDebugLog('Terminated For ' + monitoredItem.monitoredItemId)
+        node.updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
       })
     }
 
@@ -259,7 +291,7 @@ module.exports = function (RED) {
       let msg = {
         payload: {},
         topic: node.topic,
-        addressSpaceItems: [{name: '', nodeId: monitoredItem.itemToMonitor.nodeId.toString(), datatypeName: ''}],
+        addressSpaceItems: [{name: '', nodeId: (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid', datatypeName: ''}],
         nodetype: 'listen',
         injectType: 'subscribe'
       }
@@ -290,7 +322,7 @@ module.exports = function (RED) {
       let msg = {
         payload: {},
         topic: node.topic,
-        addressSpaceItems: [{name: '', nodeId: monitoredItem.itemToMonitor.nodeId.toString(), datatypeName: ''}],
+        addressSpaceItems: [{name: '', nodeId: (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid', datatypeName: ''}],
         nodetype: 'listen',
         injectType: 'event'
       }
@@ -319,37 +351,26 @@ module.exports = function (RED) {
 
           coreListener.detailDebugLog('sendDataFromEvent: ' + msg)
           node.send(msg)
-        }).catch(node.errorHandling)
+        }).catch(function (err) {
+          node.errorHandling(err)
+        })
     }
 
     node.errorHandling = function (err) {
       coreListener.internalDebugLog(err)
       if (node.showErrors) {
-        node.error(err)
+        node.error(err, {payload: 'Error Handling'})
       }
 
       if (err) {
         if (coreListener.core.isSessionBad(err)) {
-          node.send({payload: 'BADSESSION', monitoredItems: node.monitoredItems})
-          node.monitoredItems.clear()
+          node.sendAllMonitoredItems('BAD SESSION')
           node.connector.resetBadSession()
         }
       }
     }
 
-    node.subscribeEventsInput = function (msg) {
-      if (!uaSubscription) {
-        node.createSubscription(msg, node.subscribeMonitoredEvent)
-      } else {
-        if (uaSubscription.subscriptionId !== 'terminated' && node.subscribingPreCheck(uaSubscription, msg)) {
-          node.subscribeMonitoredEvent(uaSubscription, msg)
-        } else {
-          node.resetSubscription()
-        }
-      }
-    }
-
-    node.makeSubscription = function (callback, cbParameters, parameters) {
+    node.makeSubscription = function (parameters, callback) {
       if (!node.opcuaSession) {
         coreListener.internalDebugLog('Subscription Session Not Valid')
         return
@@ -358,11 +379,8 @@ module.exports = function (RED) {
       if (!parameters) {
         coreListener.internalDebugLog('Subscription Parameters Not Valid')
         return
-      }
-
-      if (uaSubscription) {
-        coreListener.internalDebugLog('Subscription Active On Subscription Make')
-        return
+      } else {
+        coreListener.internalDebugLog('Subscription Parameters: ' + parameters)
       }
 
       uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
@@ -370,6 +388,7 @@ module.exports = function (RED) {
 
       uaSubscription.on('initialized', function () {
         coreListener.internalDebugLog('Subscription initialized')
+        node.subscriptionStarting = true
         node.setNodeStatusTo('initialized')
       })
 
@@ -377,20 +396,30 @@ module.exports = function (RED) {
         coreListener.internalDebugLog('Subscription started')
         node.setNodeStatusTo('started')
         node.monitoredItems.clear()
-        callback(uaSubscription, cbParameters)
-        subscriptionStarting = false
+        node.subscriptionStarting = false
+        node.subscriptionStarted = true
+        callback()
       })
 
       uaSubscription.on('terminated', function () {
         coreListener.internalDebugLog('Subscription terminated')
-        uaSubscription = null
-        subscriptionStarting = false
+        node.subscriptionStarting = false
+        node.subscriptionStarted = false
         node.setNodeStatusTo('terminated')
         node.resetSubscription()
       })
 
+      uaSubscription.on('internal_error', function (err) {
+        node.subscriptionStarted = false
+        coreListener.internalDebugLog(err)
+        if (node.showErrors) {
+          node.error(err, {payload: 'Internal Error'})
+        }
+        node.setNodeStatusTo('error')
+        node.resetSubscription()
+      })
+
       uaSubscription.on('item_added', function (monitoredItem) {
-        coreListener.internalDebugLog('New Monitoring For ' + monitoredItem)
         node.setMonitoring(monitoredItem)
         node.updateSubscriptionStatus()
       })
@@ -412,15 +441,26 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (!node.opcuaSession) {
-        node.error(new Error('Session Not Ready To Listen'), msg)
-        return
-      }
-
       if (msg.nodetype === 'browse') { /* browse is just to address listening to many nodes */
         msg.nodetype = 'inject'
         msg.injectType = 'listen'
         msg.addressSpaceItems = coreListener.core.buildNodesToListen(msg)
+      }
+
+      if (!msg.addressSpaceItems || !msg.addressSpaceItems.length) {
+        coreListener.subscribeDebugLog('Address-Space-Item Set Not Valid')
+        if (node.showErrors) {
+          node.error(new Error('Address-Space-Item Set Not Valid'), msg)
+        }
+        return
+      }
+
+      if (!node.opcuaSession) {
+        coreListener.internalDebugLog('Session Not Ready To Listen')
+        if (node.showErrors) {
+          node.error(new Error('Session Not Ready To Listen'), msg)
+        }
+        return
       }
 
       switch (node.action) {
@@ -460,15 +500,9 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    coreListener.core.setNodeInitalState(node)
+    coreListener.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
 
-    node.on('close', function (done) {
-      if (uaSubscription) {
-        uaSubscription.terminate(done)
-      } else {
-        done()
-      }
-    })
+    // subscriptions are deleted from OPCUAClient on Connector close
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Listener', OPCUAIIoTListener)

@@ -19,11 +19,11 @@ var inputNode = require('../src/opcua-iiot-browser')
 var serverNode = require('../src/opcua-iiot-server')
 var helper = require('node-red-contrib-test-helper')
 
-var nodesToLoad = [injectNode, connectorNode, inputNode, serverNode]
+var browseNodesToLoad = [injectNode, connectorNode, inputNode, serverNode]
 
-var testFlowPayload = [
+var testBrowseFlow = [
   {
-    "id": "n1",
+    "id": "n1f1",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "inject",
     "payload": "testpayload",
@@ -32,16 +32,16 @@ var testFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "2.4",
     "name": "Root",
     "addressSpaceItems": [],
-    "wires": [["n2", "n3"]]
+    "wires": [["n2f1", "n3f1"]]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2f1", type:"helper"},
   {
-    "id": "n3",
+    "id": "n3f1",
     "type": "OPCUA-IIoT-Browser",
-    "connector": "n4",
+    "connector": "c1f1",
     "nodeId": "ns=4;i=1234",
     "name": "TestBrowse",
     "justValue": true,
@@ -51,14 +51,14 @@ var testFlowPayload = [
     "singleBrowseResult": true,
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n5"]]
+    "wires": [["n5f1"]]
   },
   {
-    "id": "n4",
+    "id": "c1f1",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1958/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -68,11 +68,15 @@ var testFlowPayload = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   },
-  {id:"n5", type:"helper"},
+  {id:"n5f1", type:"helper"},
   {
-    "id": "n6",
+    "id": "s1f1",
     "type": "OPCUA-IIoT-Server",
     "port": "1958",
     "endpoint": "",
@@ -98,9 +102,9 @@ var testFlowPayload = [
   }
 ]
 
-var testBrowseLevelsFlowPayload = [
+var testBrowseLevelsFlow = [
   {
-    "id": "n1",
+    "id": "n1f2",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "inject",
     "payload": "testpayload",
@@ -109,16 +113,16 @@ var testBrowseLevelsFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "2.4",
     "name": "Root",
     "addressSpaceItems": [],
-    "wires": [["n2", "n3"]]
+    "wires": [["n2f2", "n3f2"]]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2f2", type:"helper"},
   {
-    "id": "n3",
+    "id": "n3f2",
     "type": "OPCUA-IIoT-Browser",
-    "connector": "c1",
+    "connector": "c1f2",
     "nodeId": "ns=4;i=1234",
     "name": "TestBrowse",
     "justValue": true,
@@ -128,13 +132,13 @@ var testBrowseLevelsFlowPayload = [
     "singleBrowseResult": true,
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n4", "n5"]]
+    "wires": [["n4f2", "n5f2"]]
   },
-  {id:"n4", type:"helper"},
+  {id:"n4f2", type:"helper"},
   {
-    "id": "n5",
+    "id": "n5f2",
     "type": "OPCUA-IIoT-Browser",
-    "connector": "c1",
+    "connector": "c1f2",
     "nodeId": "",
     "name": "TestBrowseLevel2",
     "justValue": true,
@@ -144,14 +148,14 @@ var testBrowseLevelsFlowPayload = [
     "singleBrowseResult": true,
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n6"]]
+    "wires": [["n6f2"]]
   },
   {
-    "id": "c1",
+    "id": "c1f2",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1959/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -161,11 +165,15 @@ var testBrowseLevelsFlowPayload = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   },
-  {id:"n6", type:"helper"},
+  {id:"n6f2", type:"helper"},
   {
-    "id": "s1",
+    "id": "s1f2",
     "type": "OPCUA-IIoT-Server",
     "port": "1959",
     "endpoint": "",
@@ -191,9 +199,9 @@ var testBrowseLevelsFlowPayload = [
   }
 ]
 
-var testItemFlowPayload = [
+var testBrowseItemFlow = [
   {
-    "id": "n1",
+    "id": "n1f3",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "inject",
     "payload": "testpayload",
@@ -202,7 +210,7 @@ var testItemFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": "3",
+    "startDelay": "2.4",
     "name": "Root",
     "addressSpaceItems": [
       {
@@ -211,13 +219,13 @@ var testItemFlowPayload = [
         "datatypeName": ""
       }
     ],
-    "wires": [["n2", "n3"]]
+    "wires": [["n2f3", "n3f3"]]
   },
-  {id:"n2", type:"helper"},
+  {id:"n2f3", type:"helper"},
   {
-    "id": "n3",
+    "id": "n3f3",
     "type": "OPCUA-IIoT-Browser",
-    "connector": "n4",
+    "connector": "c1f3",
     "nodeId": "",
     "name": "TestBrowse",
     "justValue": true,
@@ -227,14 +235,14 @@ var testItemFlowPayload = [
     "singleBrowseResult": true,
     "showStatusActivities": false,
     "showErrors": false,
-    "wires": [["n5"]]
+    "wires": [["n5f3"]]
   },
   {
-    "id": "n4",
+    "id": "c1f3",
     "type": "OPCUA-IIoT-Connector",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:1960/",
-    "keepSessionAlive": true,
+    "keepSessionAlive": false,
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
@@ -244,11 +252,15 @@ var testItemFlowPayload = [
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": ""
   },
-  {id:"n5", type:"helper"},
+  {id:"n5f3", type:"helper"},
   {
-    "id": "n6",
+    "id": "s1f3",
     "type": "OPCUA-IIoT-Server",
     "port": "1960",
     "endpoint": "",
@@ -275,13 +287,30 @@ var testItemFlowPayload = [
 ]
 
 describe('OPC UA Browser node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      console.log('browser start server done')
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      console.log('browser unload done')
+      done()
+    }).catch(function (err) {
+      console.log('browser error ' + err)
+      done()
+    })
   })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      console.log('browser stop server done')
+      done()
+    })
+  })
+
 
   describe('Browser node', function () {
     it('should be loaded', function (done) {
@@ -310,7 +339,7 @@ describe('OPC UA Browser node Testing', function () {
             "type": "OPCUA-IIoT-Connector",
             "discoveryUrl": "",
             "endpoint": "opc.tcp://localhost:1961/",
-            "keepSessionAlive": true,
+            "keepSessionAlive": false,
             "loginEnabled": false,
             "securityPolicy": "None",
             "securityMode": "NONE",
@@ -337,9 +366,9 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should get a message with payload', function(done) {
-      this.timeout(4000)
-      helper.load(nodesToLoad, testFlowPayload, function() {
-        let n2 = helper.getNode("n2")
+
+      helper.load(browseNodesToLoad, testBrowseFlow, function() {
+        let n2 = helper.getNode("n2f1")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 'testpayload')
           done()
@@ -348,9 +377,9 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should verify browser items as result', function(done) {
-      this.timeout(6000)
-      helper.load(nodesToLoad, testFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+
+      helper.load(browseNodesToLoad, testBrowseFlow, function() {
+        let n5 = helper.getNode("n5f1")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.payload.browserItems).to.be.an('array')
@@ -361,9 +390,9 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should verify browser items as single result', function(done) {
-      this.timeout(6000)
-      helper.load(nodesToLoad, testItemFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+
+      helper.load(browseNodesToLoad, testBrowseItemFlow, function() {
+        let n5 = helper.getNode("n5f3")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.payload.browserItems).to.be.an('array')
@@ -374,10 +403,10 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should verify browser items as single of full result', function(done) {
-      this.timeout(6000)
-      testItemFlowPayload[2].justValue = false
-      helper.load(nodesToLoad, testItemFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+
+      testBrowseItemFlow[2].justValue = false
+      helper.load(browseNodesToLoad, testBrowseItemFlow, function() {
+        let n5 = helper.getNode("n5f3")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           msg.payload.should.have.property('endpoint')
@@ -391,10 +420,10 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Read', function(done) {
-      this.timeout(6000)
-      testItemFlowPayload[2].sendNodesToRead = true
-      helper.load(nodesToLoad, testItemFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+
+      testBrowseItemFlow[2].sendNodesToRead = true
+      helper.load(browseNodesToLoad, testBrowseItemFlow, function() {
+        let n5 = helper.getNode("n5f3")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.nodesToRead).to.be.an('array')
@@ -405,10 +434,10 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Listener', function(done) {
-      this.timeout(6000)
-      testItemFlowPayload[2].sendNodesToListener = true
-      helper.load(nodesToLoad, testItemFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+
+      testBrowseItemFlow[2].sendNodesToListener = true
+      helper.load(browseNodesToLoad, testBrowseItemFlow, function() {
+        let n5 = helper.getNode("n5f3")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.addressItemsToRead).to.be.an('array')
@@ -419,10 +448,10 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Browser', function(done) {
-      this.timeout(6000)
-      testItemFlowPayload[2].sendNodesToBrowser = true
-      helper.load(nodesToLoad, testItemFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+
+      testBrowseItemFlow[2].sendNodesToBrowser = true
+      helper.load(browseNodesToLoad, testBrowseItemFlow, function() {
+        let n5 = helper.getNode("n5f3")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.addressItemsToBrowse).to.be.an('array')
@@ -432,13 +461,13 @@ describe('OPC UA Browser node Testing', function () {
       })
     })
 
-    it('should verify browser items as single result with nodes to all', function(done) {
-      this.timeout(6000)
-      testItemFlowPayload[2].sendNodesToRead = true
-      testItemFlowPayload[2].sendNodesToListener = true
-      testItemFlowPayload[2].sendNodesToBrowser = true
-      helper.load(nodesToLoad, testItemFlowPayload, function() {
-        let n5 = helper.getNode("n5")
+    it('should verify browser items as single result with nodes to Read, Browse, and Listener', function(done) {
+
+      testBrowseItemFlow[2].sendNodesToRead = true
+      testBrowseItemFlow[2].sendNodesToListener = true
+      testBrowseItemFlow[2].sendNodesToBrowser = true
+      helper.load(browseNodesToLoad, testBrowseItemFlow, function() {
+        let n5 = helper.getNode("n5f3")
         n5.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.nodesToRead).to.be.an('array')
@@ -452,10 +481,10 @@ describe('OPC UA Browser node Testing', function () {
       })
     })
 
-    it('should verify browser items as single result with nodes to all', function(done) {
-      this.timeout(6000)
-      helper.load(nodesToLoad, testBrowseLevelsFlowPayload, function() {
-        let n4 = helper.getNode("n4")
+    it('should verify browser items as single result with nodes to Browse with levels', function(done) {
+
+      helper.load(browseNodesToLoad, testBrowseLevelsFlow, function() {
+        let n4 = helper.getNode("n4f2")
         n4.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.addressItemsToBrowse).to.be.an('array')
@@ -465,10 +494,10 @@ describe('OPC UA Browser node Testing', function () {
       })
     })
 
-    it('should verify browser items as single result with nodes to all', function(done) {
-      this.timeout(6000)
-      helper.load(nodesToLoad, testBrowseLevelsFlowPayload, function() {
-        let n6 = helper.getNode("n6")
+    it('should verify browser items as single result with nodes to Read with levels', function(done) {
+
+      helper.load(browseNodesToLoad, testBrowseLevelsFlow, function() {
+        let n6 = helper.getNode("n6f2")
         n6.on("input", function(msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.addressItemsToRead).to.be.an('array')
@@ -480,11 +509,11 @@ describe('OPC UA Browser node Testing', function () {
   })
 
   describe('Browser node HTTP requests', function () {
-    this.timeout(6000)
+
     it('should success on browse for a root id without session', function (done) {
-      testItemFlowPayload[5].port = 1997
-      helper.load(nodesToLoad, testItemFlowPayload, function() {
-        let n3 = helper.getNode("n3")
+      testBrowseItemFlow[5].port = 1997
+      helper.load(browseNodesToLoad, testBrowseItemFlow, function() {
+        let n3 = helper.getNode("n3f3")
         n3.opcuaSession = null
         helper.request()
           .get('/opcuaIIoT/browse/' + n3.id + '/' + encodeURIComponent('ns=0;i=85'))
@@ -494,9 +523,9 @@ describe('OPC UA Browser node Testing', function () {
     })
 
     it('should success on browse for a root id', function (done) {
-      this.timeout(6000)
-      helper.load(nodesToLoad, testFlowPayload, function() {
-        let n3 = helper.getNode("n3")
+
+      helper.load(browseNodesToLoad, testBrowseFlow, function() {
+        let n3 = helper.getNode("n3f1")
         n3.on("input", function(msg) {
           helper.request()
             .get('/opcuaIIoT/browse/' + n3.id + '/' + encodeURIComponent('ns=0;i=85'))
