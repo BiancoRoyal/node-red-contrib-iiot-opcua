@@ -68,7 +68,7 @@
   },
   "scripts": {
     "test": "standard --fix",
-    "test-with-coverage": "istanbul cover _mocha --report lcovonly -- --recursive -R spec && cat ./coverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4 && rm -rf ./coverage",
+    "test-with-coverage": "istanbul cover _mocha --report lcovonly -- --recursive --timeout 10000 -R spec && cat ./coverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4 && rm -rf ./coverage",
     "coverage": "istanbul cover _mocha -- --recursive --timeout 10000",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "standard --fix && npm run build && npm test && mocha test --recursive --reporter dot",
