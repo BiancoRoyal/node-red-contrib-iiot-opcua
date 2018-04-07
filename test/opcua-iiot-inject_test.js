@@ -14,9 +14,9 @@ var assert = require('chai').assert
 var inputNode = require('../src/opcua-iiot-inject')
 var helper = require('node-red-contrib-test-helper')
 
-var testFlowPayload = [
+var testInjectFlow = [
   {
-    "id": "n1",
+    "id": "n1ijf1",
     "type": "OPCUA-IIoT-Inject",
     "injectType": "inject",
     "payload": "12345",
@@ -25,7 +25,7 @@ var testFlowPayload = [
     "repeat": "",
     "crontab": "",
     "once": true,
-    "startDelay": 1,
+    "startDelay": "1",
     "name": "TestInject",
     "addressSpaceItems": [
       {
@@ -34,18 +34,57 @@ var testFlowPayload = [
         "datatypeName": "String"
       }
     ],
-    "wires": [["n2"]]
+    "wires": [["n2ijf1"]]
   },
-  {id:"n2", type:"helper"}
+  {id:"n2ijf1", type:"helper"}
+]
+
+
+var testInjectWithDelayFlow = [
+  {
+    "id": "n1ijf2",
+    "type": "OPCUA-IIoT-Inject",
+    "injectType": "inject",
+    "payload": "12345",
+    "payloadType": "num",
+    "topic": "TestTopicInject",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "2.3",
+    "name": "TestInject",
+    "addressSpaceItems": [
+      {
+        "name": "ServerStatus",
+        "nodeId": "ns=0;i=2256",
+        "datatypeName": "String"
+      }
+    ],
+    "wires": [["n2ijf2"]]
+  },
+  {id:"n2ijf2", type:"helper"}
 ]
 
 describe('OPC UA Inject node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      done()
+    }).catch(function (err) {
+      console.log('Inject error ' + err)
+      done()
+    })
+  })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      done()
+    })
   })
 
   describe('Inject default node', function () {
@@ -80,8 +119,8 @@ describe('OPC UA Inject node Testing', function () {
     })
 
     it('should send a message with payload', function(done) {
-      helper.load([inputNode], testFlowPayload, function() {
-        let n2 = helper.getNode("n2")
+      helper.load([inputNode], testInjectFlow, function() {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 12345)
           done()
@@ -90,18 +129,16 @@ describe('OPC UA Inject node Testing', function () {
     })
 
     it('should send a message with topic', function(done) {
-      helper.load([inputNode], testFlowPayload, function() {
-        let n2 = helper.getNode("n2")
+      helper.load([inputNode], testInjectFlow, function() {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function(msg) {
           msg.should.have.property('topic', 'TestTopicInject')
           done()
         })
       })
     })
-  })
-  
-  describe('Inject read node', function () {
-    it('should load with basic settings', function (done) {
+
+    it('should load with basic settings read node', function (done) {
       helper.load([inputNode], [
           {
             "id": "f93b472c.486038",
@@ -131,10 +168,10 @@ describe('OPC UA Inject node Testing', function () {
         })
     })
 
-    it('should send a message with payload', function (done) {
-      testFlowPayload[0].injectType = 'read'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with payload read node', function (done) {
+      testInjectFlow[0].injectType = 'read'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('payload', 12345)
           done()
@@ -142,10 +179,10 @@ describe('OPC UA Inject node Testing', function () {
       })
     })
 
-    it('should send a message with topic', function (done) {
-      testFlowPayload[0].injectType = 'read'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with topic read node', function (done) {
+      testInjectFlow[0].injectType = 'read'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('topic', 'TestTopicInject')
           done()
@@ -153,10 +190,10 @@ describe('OPC UA Inject node Testing', function () {
       })
     })
 
-    it('should send a message with types', function (done) {
-      testFlowPayload[0].injectType = 'read'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with types read node', function (done) {
+      testInjectFlow[0].injectType = 'read'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('nodetype', 'inject')
           msg.should.have.property('injectType', 'read')
@@ -164,10 +201,8 @@ describe('OPC UA Inject node Testing', function () {
         })
       })
     })
-  })
 
-  describe('Inject listen node', function () {
-    it('should load with basic settings', function (done) {
+    it('should load with basic settings listen node', function (done) {
       helper.load([inputNode], [
           {
             "id": "f93b472c.486038",
@@ -197,10 +232,10 @@ describe('OPC UA Inject node Testing', function () {
         })
     })
 
-    it('should send a message with payload', function (done) {
-      testFlowPayload[0].injectType = 'listen'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with payload listen node', function (done) {
+      testInjectFlow[0].injectType = 'listen'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('payload', 12345)
           done()
@@ -208,10 +243,10 @@ describe('OPC UA Inject node Testing', function () {
       })
     })
 
-    it('should send a message with topic', function (done) {
-      testFlowPayload[0].injectType = 'listen'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with topic listen node', function (done) {
+      testInjectFlow[0].injectType = 'listen'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('topic', 'TestTopicInject')
           done()
@@ -219,10 +254,10 @@ describe('OPC UA Inject node Testing', function () {
       })
     })
 
-    it('should send a message with types', function (done) {
-      testFlowPayload[0].injectType = 'listen'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with types listen node', function (done) {
+      testInjectFlow[0].injectType = 'listen'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('nodetype', 'inject')
           msg.should.have.property('injectType', 'listen')
@@ -230,10 +265,8 @@ describe('OPC UA Inject node Testing', function () {
         })
       })
     })
-  })
 
-  describe('Inject write node', function () {
-    it('should load with basic settings', function (done) {
+    it('should load with basic settings write node', function (done) {
       helper.load([inputNode], [
           {
             "id": "f93b472c.486038",
@@ -263,10 +296,10 @@ describe('OPC UA Inject node Testing', function () {
         })
     })
 
-    it('should send a message with payload', function (done) {
-      testFlowPayload[0].injectType = 'write'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with payload write node', function (done) {
+      testInjectFlow[0].injectType = 'write'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('payload', 12345)
           done()
@@ -274,10 +307,10 @@ describe('OPC UA Inject node Testing', function () {
       })
     })
 
-    it('should send a message with topic', function (done) {
-      testFlowPayload[0].injectType = 'write'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with topic write node', function (done) {
+      testInjectFlow[0].injectType = 'write'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('topic', 'TestTopicInject')
           done()
@@ -285,13 +318,25 @@ describe('OPC UA Inject node Testing', function () {
       })
     })
 
-    it('should send a message with types', function (done) {
-      testFlowPayload[0].injectType = 'write'
-      helper.load([inputNode], testFlowPayload, function () {
-        let n2 = helper.getNode("n2")
+    it('should send a message with types write node', function (done) {
+      testInjectFlow[0].injectType = 'write'
+      helper.load([inputNode], testInjectFlow, function () {
+        let n2 = helper.getNode("n2ijf1")
         n2.on("input", function (msg) {
           msg.should.have.property('nodetype', 'inject')
           msg.should.have.property('injectType', 'write')
+          done()
+        })
+      })
+    })
+
+    it('should send a message with types and delay write node', function (done) {
+
+      helper.load([inputNode], testInjectWithDelayFlow, function () {
+        let n2 = helper.getNode("n2ijf2")
+        n2.on("input", function (msg) {
+          msg.should.have.property('nodetype', 'inject')
+          msg.should.have.property('injectType', 'inject')
           done()
         })
       })

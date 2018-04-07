@@ -14,32 +14,46 @@ var assert = require('chai').assert
 var inputNode = require('../src/opcua-iiot-discovery')
 var helper = require('node-red-contrib-test-helper')
 
-var testFlowPayload = [
+var testDiscoveryFlow = [
     {
-      "id": "n1",
+      "id": "n1dsf1",
       "type": "OPCUA-IIoT-Discovery",
       "name": "TestName",
-      "wires": [["n2"]]
+      "wires": [["n2dsf1"]]
     }
   ,
-  {id:"n2", type:"helper"}
+  {id:"n2dsf1", type:"helper"}
 ]
 
 describe('OPC UA Discovery node Testing', function () {
-  before(function (done) {
-    helper.startServer(done)
+  before(function(done) {
+    helper.startServer(function () {
+      done()
+    })
   })
 
-  afterEach(function () {
-    helper.unload()
+  afterEach(function(done) {
+    helper.unload().then(function () {
+      done()
+    }).catch(function (err) {
+      console.log('Discovery error ' + err)
+      done()
+    })
   })
+
+  after(function (done) {
+    helper.stopServer(function () {
+      done()
+    })
+  })
+
 
   describe('Discovery node', function () {
     it('should be loaded', function (done) {
       helper.load(
-        [inputNode], testFlowPayload,
+        [inputNode], testDiscoveryFlow,
         function () {
-          let nodeUnderTest = helper.getNode('n1')
+          let nodeUnderTest = helper.getNode('n1dsf1')
           nodeUnderTest.should.have.property('type', 'OPCUA-IIoT-Discovery')
           nodeUnderTest.should.have.property('name', 'TestName')
           done()

@@ -151,7 +151,7 @@ module.exports = function (RED) {
       throw new TypeError('Connector Not Valid')
     }
 
-    coreClient.core.setNodeInitalState(node)
+    coreClient.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Write', OPCUAIIoTWrite)
