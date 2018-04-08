@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.6.1"></a>
+## [2.6.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.6.0...v2.6.1) (2018-04-08)
+
+
+### Bug Fixes
+
+* reconnect handling via FSM states ([9a14424](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/9a14424))
+
+
+
 <a name="2.6.0"></a>
 # [2.6.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.5.2...v2.6.0) (2018-04-07)
 
