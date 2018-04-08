@@ -454,6 +454,16 @@ module.exports = function (RED) {
         return
       }
 
+      // start here to check connection to get unit-tests working while there is no mocking
+      // TODO: Connector mocking
+      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+        coreListener.internalDebugLog('Client State Not Open On Browse')
+        if (node.showErrors) {
+          node.error(new Error('Client Not Open On Browse'), msg)
+        }
+        return
+      }
+
       if (!node.opcuaSession) {
         coreListener.internalDebugLog('Session Not Ready To Listen')
         if (node.showErrors) {

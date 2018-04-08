@@ -26,21 +26,30 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
   return de.biancoroyal.opcua.iiot.core.connector.Stately.machine({
     'INIT': {
       'open': 'OPEN',
-      'close': 'CLOSED'
+      'lock': 'LOCKED',
+      'end': 'END'
     },
     'OPEN': {
-      'close': 'CLOSED'
+      'close': 'CLOSED',
+      'lock': 'LOCKED',
+      'end': 'END'
     },
     'CLOSED': {
-      'open': 'OPEN',
-      'lock': 'LOCKED'
+      'init': 'INIT',
+      'lock': 'LOCKED',
+      'end': 'END'
     },
     'LOCKED': {
-      'unlock': 'UNLOCKED'
+      'unlock': 'UNLOCKED',
+      'open': 'OPEN',
+      'end': 'END'
     },
     'UNLOCKED': {
-      'init': 'INIT'
-    }
+      'init': 'INIT',
+      'open': 'OPEN',
+      'end': 'END'
+    },
+    'END': {}
   })
 }
 
