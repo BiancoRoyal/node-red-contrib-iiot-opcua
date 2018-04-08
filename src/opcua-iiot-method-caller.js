@@ -99,6 +99,14 @@ module.exports = function (RED) {
         return
       }
 
+      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+        coreMethod.writeDebugLog('Client State Not Open On Write')
+        if (node.showErrors) {
+          node.error(new Error('Client Not Open On Wirte'), msg)
+        }
+        return
+      }
+
       if (node.opcuaSession) {
         node.callMethodOnSession(message)
       } else {

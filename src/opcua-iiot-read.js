@@ -176,6 +176,14 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+        coreClient.readDebugLog('Client State Not Open On Read')
+        if (node.showErrors) {
+          node.error(new Error('Client Not Open On Read'), msg)
+        }
+        return
+      }
+
       if (!node.opcuaSession) {
         node.error(new Error('Session Not Ready To Read'), msg)
         return

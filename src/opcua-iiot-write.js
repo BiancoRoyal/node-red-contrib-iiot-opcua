@@ -75,7 +75,6 @@ module.exports = function (RED) {
               node.handleWriteError(err, msg)
             }
           }).catch(function (err) {
-            coreClient.writeDebugLog(err)
             node.handleWriteError(err, msg)
           })
         }
@@ -104,6 +103,7 @@ module.exports = function (RED) {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
       } catch (err) {
+        coreClient.writeDebugLog(err)
         if (node.showErrors) {
           node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
           node.error(err, msg)
@@ -116,8 +116,19 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+        coreClient.writeDebugLog('Client State Not Open On Write')
+        if (node.showErrors) {
+          node.error(new Error('Client Not Open On Wirte'), msg)
+        }
+        return
+      }
+
       if (!node.opcuaSession) {
-        node.error(new Error('Session Not Ready To Write'), msg)
+        coreClient.writeDebugLog('Session Not Ready To Write')
+        if (node.showErrors) {
+          node.error(new Error('Session Not Ready To Write'), msg)
+        }
         return
       }
 

@@ -181,12 +181,20 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      node.browseTopic = node.extractBrowserTopic(msg)
+
+      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+        coreBrowser.internalDebugLog('Client State Not Open On Browse')
+        if (node.showErrors) {
+          node.error(new Error('Client Not Open On Browse'), msg)
+        }
+        return
+      }
+
       if (!node.opcuaSession) {
         node.error(new Error('Session Not Ready To Browse'), msg)
         return
       }
-
-      node.browseTopic = node.extractBrowserTopic(msg)
 
       if (node.browseTopic && node.browseTopic !== '') {
         node.browse(node.opcuaSession, msg)
