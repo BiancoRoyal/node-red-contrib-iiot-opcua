@@ -287,7 +287,7 @@ var testBrowseItemFlow = [
 ]
 
 describe('OPC UA Browser node Testing', function () {
-  before(function(done) {
+  beforeEach(function(done) {
     helper.startServer(function () {
       done()
     })
@@ -295,19 +295,16 @@ describe('OPC UA Browser node Testing', function () {
 
   afterEach(function(done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function (err) {
-      console.log('browser error ' + err)
-      done()
+      console.log('events error ' + err)
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
-
-  after(function (done) {
-    helper.stopServer(function () {
-      done()
-    })
-  })
-
 
   describe('Browser node', function () {
     it('should be loaded', function (done) {

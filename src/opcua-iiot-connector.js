@@ -275,6 +275,11 @@ module.exports = function (RED) {
         }
       }
 
+      if (node.stateMachine.getMachineState() === 'END') {
+        coreConnector.internalDebugLog('State Is End While Try To Reconnect')
+        return
+      }
+
       if (node.opcuaClient) {
         node.opcuaSession = null
         node.opcuaClient.createSession(node.userIdentity || {}).then(function (session) {
@@ -434,7 +439,7 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.stateMachine.close().lock()
+      node.stateMachine.end()
       if (node.opcuaClient) {
         if (node.opcuaSession) {
           coreConnector.internalDebugLog('Close Node Try To Close Session For ' + node.endpoint)
