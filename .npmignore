@@ -10,3 +10,4 @@ Example.png
 *.conf.js
 *.log
 maps/
+pki/
