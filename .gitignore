@@ -10,3 +10,5 @@ maps/
 docs/gen/
 coverage/
 pki/
+
+\.vscode/

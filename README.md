@@ -7,6 +7,8 @@
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Percentage of issues still open")
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Average time to resolve an issue")
 
 # node-red-contrib-iiot-opcua 
 
