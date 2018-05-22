@@ -61,7 +61,7 @@ IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOU
      - Link   : https://
      
     
-* **node-red-contrib-iiot-opcu version:** ``
+* **node-red-contrib-iiot-opcua version:** ``
 <!-- Check which is the hash of the last commit from node-red-contrib-iiot-opcua that you have locally -->
 
 * **Node:** (min. 8.x)
