@@ -32,7 +32,7 @@ module.exports = function (RED) {
     this.name = config.name
     this.injectType = config.injectType || 'inject'
 
-    this.addressSpaceItems = config.addressSpaceItems
+    this.addressSpaceItems = config.addressSpaceItems || []
 
     let node = this
     node.interval_id = null
@@ -84,7 +84,8 @@ module.exports = function (RED) {
         msg.topic = node.topic
         msg.nodetype = 'inject'
         msg.injectType = node.injectType
-        msg.addressSpaceItems = node.addressSpaceItems
+        msg.addressSpaceItems = []
+        Object.assign(msg.addressSpaceItems, node.addressSpaceItems)
 
         switch (node.payloadType) {
           case 'none':
