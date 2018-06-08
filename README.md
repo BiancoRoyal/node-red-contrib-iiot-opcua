@@ -24,7 +24,7 @@ If you like that contributor's package for OPC UA, then please give us your star
 
 * tested with Node 8 LTS
 * tested with Node 9
-* based on node-opcua v0.2.x
+* based on node-opcua v0.4.x
 
 ## Install
 
@@ -102,12 +102,14 @@ to start playing with OPC UA method call, read and write operations.
 
 Ideas
 * dynamic methods
+* complex methods
 * dynamic IP for connector
+* recursive browsing with depth
+* monitoring groups
 
 Errors
 * more Bad status situations handling
 * API changes to 0.2.+ bring some errors - Please, test and report issues at GitHub!
-
 
 ### License
 
