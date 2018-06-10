@@ -55,6 +55,7 @@
       "OPCUA-IIoT-Write": "opcuaIIoT/opcua-iiot-write.js",
       "OPCUA-IIoT-Response": "opcuaIIoT/opcua-iiot-response.js",
       "OPCUA-IIoT-Browser": "opcuaIIoT/opcua-iiot-browser.js",
+      "OPCUA-IIoT-Crawler": "opcuaIIoT/opcua-iiot-crawler.js",
       "OPCUA-IIoT-Server": "opcuaIIoT/opcua-iiot-server.js",
       "OPCUA-IIoT-Flex-Server": "opcuaIIoT/opcua-iiot-flex-server.js",
       "OPCUA-IIoT-Server-ASO": "opcuaIIoT/opcua-iiot-server-aso.js",

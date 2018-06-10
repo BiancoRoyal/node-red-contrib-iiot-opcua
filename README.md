@@ -104,12 +104,14 @@ Ideas
 * dynamic methods
 * complex methods
 * dynamic IP for connector
-* recursive browsing with depth
 * monitoring groups
+* resubscribe after hard connection errors
+* crawling address space with filters
 
 Errors
 * more Bad status situations handling
-* API changes to 0.2.+ bring some errors - Please, test and report issues at GitHub!
+* API changes to 0.4.+ bring some breaking changes in connection handling
+  * Please, test and report issues via GitHub!
 
 ### License
 

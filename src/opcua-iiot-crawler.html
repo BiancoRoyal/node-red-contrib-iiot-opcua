@@ -1,0 +1,311 @@
+<!--
+ The BSD 3-Clause License
+
+ Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
+ All rights reserved.
+ node-red-contrib-iiot-opcua
+-->
+
+<script type="text/javascript">
+
+  RED.nodes.registerType('OPCUA-IIoT-Crawler', {
+    category: 'IIoT',
+    color: "#ABCDEF",
+    defaults: {
+      connector: {type: "OPCUA-IIoT-Connector", required: true},
+      name: {value: ""},
+      justValue: {value: true},
+      singleResult: {value: false},
+      showStatusActivities: {value: false},
+      showErrors: {value: false},
+      filters: {value: []},
+    },
+    inputs: 1,
+    outputs: 1,
+    align: "left",
+    icon: "opcuaiiot.png",
+    label: function () {
+      return this.name || "Crawler";
+    },
+    labelStyle: function () {
+      return this.item ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+      let node = this
+      let cacheItemCount = 0
+
+      let tabs = RED.tabs.create({
+        id: "node-input-crawler-tabs",
+        onchange: function (tab) {
+          $("#node-input-crawler-tabs-content").children().hide()
+          $("#" + tab.id).show()
+        }
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-crawler-tab-settings",
+        label: this._("opcua-iiot-contrib.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-crawler-tab-filter",
+        label: this._("opcua-iiot-contrib.tabs-label.filter")
+      })
+
+      // Filter Management
+      if(node.filters && node.filters.length > 0) {
+        cacheItemCount = node.filters.length
+        node.filters.forEach(function(element, index, array) {
+          generateFilterEntry(element, index);
+        })
+      }
+
+      function generateFilterEntry(filter, id) {
+        let container = $('<li/>', {
+          style:
+            'background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;'
+        })
+        let row = $('<div class="row" id="row' + id + '" />').appendTo(container)
+
+        $('<i style="color: #eee; cursor: move;" class="node-input-addressSpaceItems-handle fa fa-bars"></i>').appendTo(row)
+
+        let filterNameField = $('<input/>', {
+          id: "node-input-crawler-filter-name" + id,
+          class: 'opcuaFilterName',
+          type: "text",
+          style: "margin-left:5px;width:240px;",
+          placeholder: 'name'
+        }).appendTo(row)
+
+        let filterNodeIdField = $('<input/>', {
+          id: "node-input-crawler-filter-nodeId" + id,
+          class: 'opcuaFilterNodeId',
+          type: "text",
+          style: "margin: 0 auto;width:45%;min-width:60px;margin-left:5px",
+          placeholder: 'i=11704'
+        }).appendTo(row)
+
+        filterNameField.val(filter.name)
+        filterNodeIdField.val(filter.nodeId)
+
+        let finalspan = $('<span/>', {style: 'float: right;margin-right: 10px;'}).appendTo(row)
+
+        let lookupItemButton = $('<a/>', {
+          href: '#',
+          id: 'node-button-crawler-filter-referencetypes' + id,
+          class: 'editor-button editor-button-small listButton',
+          style: 'margin-top: 7px; margin-left: 5px;'
+        }).appendTo(finalspan)
+
+        lookupItemButton.click(function () {
+          let referencetypeLookupButton = $('#node-button-crawler-filter-referencetypes' + id)
+          let referenceNameLookupField = $('#row' + id + ' #node-input-crawler-filter-name'  + id)
+          let referencetypeLookupField = $('#row' + id + ' #node-input-crawler-filter-nodeId'  + id)
+
+          referencetypeLookupButton.addClass('disabled')
+
+          $.getJSON('/opcuaIIoT/list/ReferenceTypeIds', function (data) {
+            referencetypeLookupButton.removeClass('disabled')
+            node.lookupItems = []
+
+            $.each(data, function (i, entry) {
+              node.lookupItems.push({value: entry.nodeId, label: entry.label})
+            })
+
+            referencetypeLookupField.autocomplete({
+              source: node.lookupItems,
+              minLength: 0,
+              focus: function (event, ui) {
+                referenceNameLookupField.val(ui.item.label)
+                referencetypeLookupField.val(ui.item.value)
+                return false;
+              },
+              select: function (event, ui) {
+                referenceNameLookupField.val(ui.item.label)
+                referencetypeLookupField.val(ui.item.value)
+                return false;
+              },
+              close: function (event, ui) {
+                referencetypeLookupField.autocomplete("destroy")
+              }
+            }).autocomplete("search", "")
+          })
+        })
+
+        $('<i/>', {class: 'fa fa-search'}).appendTo(lookupItemButton)
+
+        let removeItemButton = $('<a/>', {
+          href: '#',
+          id: 'node-button-crawler-filter-remove' + id,
+          class: 'editor-button editor-button-small listButton',
+          style: 'margin-top: 7px; margin-left: 5px;'
+        }).appendTo(finalspan)
+
+        $('<i/>', {class: 'fa fa-remove'}).appendTo(removeItemButton)
+
+        removeItemButton.click(function () {
+          container.fadeOut(300, function () {
+            $(this).remove()
+          })
+        })
+
+        $('#node-input-crawler-filter-container').append(container)
+      }
+
+      $("#node-input-crawler-filter-container").sortable({
+        axis: "y",
+        handle: ".node-input-crawler-filter-handle",
+        cursor: "move"
+      });
+
+      $("#node-input-crawler-filter-container .node-input-crawler-filter-handle").disableSelection()
+
+      $("#node-input-crawler-filter-add").click(function () {
+        if(!cacheItemCount || cacheItemCount < 0) {
+          cacheItemCount = 0
+        }
+        generateFilterEntry({ name: '', nodeId: '' }, cacheItemCount++) // length is every time one more than index
+        let crawlerContainerDiv = $("#node-input-crawler-filter-container-div")
+        crawlerContainerDiv.scrollTop(crawlerContainerDiv.get(0).scrollHeight)
+      })
+
+      function switchDialogResize() {
+        switchFilterDialogResize()
+      }
+
+      // dialog Filter handling
+      function switchFilterDialogResize() {
+        let rows = $("#dialog-form>div:not(.node-input-crawler-filter-container-row)")
+        let height = $("#dialog-form").height()
+
+        rows.each(function (index, row) {
+          height -= row.outerHeight(true)
+        })
+
+        let editorRow = $("#dialog-form>div.node-input-crawler-filter-container-row")
+        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
+        $("#node-input-crawler-filter-container-div").css("height", height + "px")
+      }
+
+      let dialogHandle = $("#dialog")
+      dialogHandle.on("dialogresize", switchDialogResize)
+
+      dialogHandle.on("dialogopen", function (ev) {
+        let size = dialogHandle.dialog('option', 'sizeCache-switch')
+        if (size) {
+          dialogHandle.dialog('option', 'width', size.width)
+          dialogHandle.dialog('option', 'height', size.height)
+          switchDialogResize()
+        } else {
+          setTimeout(switchDialogResize, 10)
+        }
+      })
+
+      dialogHandle.on("dialogclose", function (ev, ui) {
+        dialogHandle.off("dialogresize", switchDialogResize)
+      })
+    },
+    oneditsave: function () {
+      let node = this
+
+      let cacheFilters = $("#node-input-crawler-filter-container").children()
+      node.filters = []
+      cacheFilters.each(function () {
+        node.filters.push({
+          name: $(this).find('.opcuaFilterName').val(),
+          nodeId: $(this).find('.opcuaFilterNodeId').val(),
+        })
+      })
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Crawler">
+    <div class="form-row">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-crawler-tabs"></ul>
+    </div>
+    <div id="node-input-crawler-tabs-content" style="min-height: 170px;">
+        <div id="opcuaiiot-crawler-tab-settings" style="display:none">
+            <div class="form-row" style="min-width:640px">
+                <label for="node-input-connector"><i class="icon-globe"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
+                <input type="text" id="node-input-connector">
+            </div>
+            <div class="form-row">
+                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <input type="text" id="node-input-name" placeholder="Name">
+            </div>
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
+                <input type="checkbox" id="node-input-justValue" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-singleResult"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.singleResult"></span></label>
+                <input type="checkbox" id="node-input-singleResult" style="max-width:30px">
+            </div>
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+                <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+                <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+            </div>
+        </div>
+        <div id="opcuaiiot-crawler-tab-filter" style="display:none">
+            <h4><span data-i18n="opcua-iiot-contrib.label.filters"></span></h4>
+            <div class="form-row node-input-crawler-filter-container-row" style="margin-bottom: 0px;">
+                <div id="node-input-crawler-filter-container-div"
+                    style="box-sizing: border-box; border-radius: 5px;
+                    height: 210px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+                    <ol id="node-input-crawler-filter-container" style="list-style-type:none; margin: 0;"></ol>
+                </div>
+            </div>
+            <div class="form-row">
+                <a href="#" class="editor-button editor-button-small" id="node-input-crawler-filter-add"
+                style="margin-top: 4px;"><i class="fa fa-plus"></i>
+                <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
+            </div>
+        </div>
+    </div>
+    <!-- TODO: ReferenceTypeIds List to add or remove reference types tp browse for -->
+
+</script>
+
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Crawler">
+ <h2>OPC UA IIoT Crawler</h2>
+
+ <p>Use the Crawler to browse OPC UA address spaces.
+ It normally starts with a root folder or object by using an OPC UA Node-Id like ns=0;i=85 (root->Objects).</p>
+
+ <h3>Configuration</h3>
+
+ <p>The filter tab inside the configuration section is used to filter crawling by reference types.<p>
+
+ <h3>Examples</h3>
+ <a href='https://github.com/biancode/node-red-contrib-iiot-opcua/blob/master/examples/' target='_blank'>GitHub Crawler example flow</a>
+
+ <p>You'll find the examples under Node-RED menu > Import > Examples > iiot opcua</p>
+
+ <h3>Input</h3>
+
+ <p>The input has to receive an addressSpaceItems (Array of objects) to browse for.
+ A datatype or name is not required here - it just requires the nodeId in the addressSpaceItems objects here.</p>
+
+ <h3>Output</h3>
+
+ <p>The output returns either a structured JSON object with the
+ requested data or the error messages from node-opcua.</p>
+
+ <strong>Name</strong>
+ <p>Name in the flow of Node-RED.</p>
+
+ <p>Set showErrors to get errors from node-opcua on browse.</p>
+
+</script>

@@ -706,10 +706,10 @@ describe('OPC UA Connector node Testing', function () {
       })
     })
 
-    it('should success on EvenTypeIds list request', function (done) {
+    it('should success on EventTypeIds list request', function (done) {
       helper.load(nodesToLoadForBrowser, testConnectorHTTPFlow, function () {
         helper.request()
-          .get('/opcuaIIoT/list/EvenTypeIds')
+          .get('/opcuaIIoT/list/EventTypeIds')
           .expect(200)
           .end(done);
       })

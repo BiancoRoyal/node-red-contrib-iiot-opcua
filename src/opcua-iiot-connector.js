@@ -163,11 +163,6 @@ module.exports = function (RED) {
           coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT SECURITY TOKEN RENEWED !!!!!!!!!!!!!!!!!!!'.bgWhite.violet)
           coreConnector.internalDebugLog('CONNECTION SECURITY TOKEN RENEWE: ' + node.endpoint)
         })
-
-        node.opcuaClient.on('timed_out_request', function () {
-          coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT REQUEST TIMEOUT !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
-          coreConnector.internalDebugLog('CLIENT REQUEST TIMEOUT: ' + node.endpoint)
-        })
       }
 
       node.opcuaClient.on('after_reconnection', function () {
@@ -358,16 +353,17 @@ module.exports = function (RED) {
     }
 
     node.resetBadSession = function () {
-      node.resetSessionRenewMode()
-      coreConnector.internalDebugLog('Reset Bad Session Connect Retries:' + node.sessionConnectRetries)
+      // node.resetSessionRenewMode()
+      // coreConnector.internalDebugLog('Reset Bad Session Connect Retries:' + node.sessionConnectRetries)
       node.sessionConnectRetries += 1
 
       if (RED.settings.verbose) {
-        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!   BAD SESSION CLOSE BY CONNECTOR   !!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
+        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!   BAD SESSION ON CONNECTOR   !!!!!!!!!!!!!!!!!!'.bgWhite.red)
         node.logSessionInformation(node.opcuaSession)
       }
 
-      node.renewSession('Renew From BadSession')
+      // node.renewSession('Renew From BadSession')
+      node.stateMachine.lock()
     }
 
     node.renewSession = function (callerInfo) {

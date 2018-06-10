@@ -181,14 +181,14 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      node.browseTopic = node.extractBrowserTopic(msg)
+      node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node)
 
       if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreBrowser.internalDebugLog('Client State Not Open On Browse')
+        coreBrowser.internalDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Browse')
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Browse'), msg)
         }
-        return
+        // return
       }
 
       if (!node.opcuaSession) {
@@ -200,47 +200,24 @@ module.exports = function (RED) {
         node.browse(node.opcuaSession, msg)
       } else {
         if (msg.addressItemsToBrowse) {
-          msg.addressSpaceItems = msg.addressItemsToBrowse
+          if (msg.addressItemsToBrowse.length > 0) {
+            msg.addressSpaceItems = msg.addressItemsToBrowse
+          } else {
+            if (node.showErrors) {
+              node.error(new Error('Address Items To Browse Are Empty'), msg)
+            }
+          }
         }
 
-        if (msg.addressSpaceItems) {
+        if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
           node.browseNodeList(node.opcuaSession, msg)
         } else {
-          node.error(new Error('No AddressSpace Items Or Root To Browse'), msg)
+          coreBrowser.detailDebugLog('Fallback NodeId On Browse Without Address Items')
+          node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
+          node.browse(node.opcuaSession, msg)
         }
       }
     })
-
-    node.extractBrowserTopic = function (msg) {
-      let rootNodeId
-
-      if (msg.payload.actiontype === 'browse') { // event driven browsing
-        if (msg.payload.root && msg.payload.root.nodeId) {
-          coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
-          rootNodeId = node.browseByItem(msg.payload.root.nodeId) || node.browseToRoot()
-        } else {
-          rootNodeId = node.nodeId || node.browseToRoot()
-        }
-      } else {
-        if (msg.topic !== '' && msg.topic.includes('=')) {
-          rootNodeId = msg.topic // backward compatibles to v0.x
-        } else {
-          rootNodeId = node.nodeId
-        }
-      }
-
-      return rootNodeId
-    }
-
-    node.browseByItem = function (nodeId) {
-      coreBrowser.detailDebugLog('Browse To Parent ' + nodeId)
-      return nodeId
-    }
-
-    node.browseToRoot = function () {
-      coreBrowser.detailDebugLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
-      return coreBrowser.core.OBJECTS_ROOT
-    }
 
     node.setOPCUAConnected = function (opcuaClient) {
       node.opcuaClient = opcuaClient

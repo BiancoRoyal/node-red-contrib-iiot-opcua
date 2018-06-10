@@ -117,7 +117,7 @@ module.exports = function (RED) {
 
     node.on('input', function (msg) {
       if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreClient.writeDebugLog('Client State Not Open On Write')
+        coreClient.writeDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Write')
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Wirte'), msg)
         }

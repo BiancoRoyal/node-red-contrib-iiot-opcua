@@ -35,19 +35,19 @@ de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // esli
 de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = function (timeMilliseconds) {
   return {
     requestedPublishingInterval: timeMilliseconds || 100,
-    requestedLifetimeCount: 60,
-    requestedMaxKeepAliveCount: 10,
-    maxNotificationsPerPublish: 4,
+    requestedLifetimeCount: 1000 * 60 * 20,
+    requestedMaxKeepAliveCount: 120,
+    maxNotificationsPerPublish: 200,
     publishingEnabled: true,
-    priority: 1
+    priority: 2
   }
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (timeMilliseconds) {
   return {
-    requestedPublishingInterval: timeMilliseconds || 100,
-    requestedLifetimeCount: 1000,
-    requestedMaxKeepAliveCount: 12,
+    requestedPublishingInterval: timeMilliseconds || 200,
+    requestedLifetimeCount: 1000 * 60 * 10,
+    requestedMaxKeepAliveCount: 60,
     maxNotificationsPerPublish: 100,
     publishingEnabled: true,
     priority: 10

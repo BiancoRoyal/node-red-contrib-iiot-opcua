@@ -457,7 +457,7 @@ module.exports = function (RED) {
       // start here to check connection to get unit-tests working while there is no mocking
       // TODO: Connector mocking
       if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreListener.internalDebugLog('Client State Not Open On Browse')
+        coreListener.internalDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Browse')
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Browse'), msg)
         }

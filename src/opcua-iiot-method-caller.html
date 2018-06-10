@@ -153,7 +153,7 @@
 
       $("#dialog").on("dialogresize", switchDialogResize)
 
-      $("#dialog").one("dialogopen", function (ev) {
+      $("#dialog").on("dialogopen", function (ev) {
         let size = $("#dialog").dialog('option', 'sizeCache-switch')
         if (size) {
           $("#dialog").dialog('option', 'width', size.width)
@@ -164,7 +164,7 @@
         }
       })
 
-      $("#dialog").one("dialogclose", function (ev, ui) {
+      $("#dialog").on("dialogclose", function (ev, ui) {
         $("#dialog").off("dialogresize", switchDialogResize)
       })
     },
