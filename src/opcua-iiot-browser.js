@@ -277,9 +277,12 @@ module.exports = function (RED) {
     let entries = []
     let nodeRootId = decodeURIComponent(req.params.nodeId) || coreBrowser.core.OBJECTS_ROOT
 
+    console.log(req.params)
+    coreBrowser.detailDebugLog('request for ' + req.params.nodeId)
+
     if (node.opcuaSession) {
       coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browserResult) {
-        browserResult.browseResult.forEach(function (result) {
+        browserResult.forEach(function (result) {
           if (result.references && result.references.length) {
             result.references.forEach(function (reference) {
               entries.push(node.transformToEntry(reference))

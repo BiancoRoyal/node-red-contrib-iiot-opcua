@@ -21,7 +21,7 @@ de.biancoroyal.opcua.iiot.core.browser.core = de.biancoroyal.opcua.iiot.core.bro
 de.biancoroyal.opcua.iiot.core.browser.internalDebugLog = de.biancoroyal.opcua.iiot.core.browser.internalDebugLog || require('debug')('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.detailDebugLog = de.biancoroyal.opcua.iiot.core.browser.detailDebugLog || require('debug')('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
 
-de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
+de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrowse) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
@@ -31,18 +31,20 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
 
       let browseOptions = [
         {
-          nodeId: topic,
+          nodeId: nodeIdToBrowse,
           referenceTypeId: 'Organizes',
           includeSubtypes: true,
           browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-          resultMask: 0x3f
+          nodeClassMask: 0,
+          resultMask: 63
         },
         {
-          nodeId: topic,
+          nodeId: nodeIdToBrowse,
           referenceTypeId: 'Aggregates',
           includeSubtypes: true,
           browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-          resultMask: 0x3f
+          nodeClassMask: 0,
+          resultMask: 63
         }
       ]
 

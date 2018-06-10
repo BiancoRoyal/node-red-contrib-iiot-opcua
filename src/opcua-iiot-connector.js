@@ -174,9 +174,10 @@ module.exports = function (RED) {
         coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!      CLIENT RECONNECTED     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
         coreConnector.internalDebugLog('CONNECTION RECONNECTED: ' + node.endpoint)
         node.emit('after_reconnection', node.opcuaClient)
-        node.setSessionToRenewMode()
-        node.startSession('after_reconnection')
-        node.stateMachine.unlock().init()
+        // node.setSessionToRenewMode()
+        // node.startSession('after_reconnection')
+        // node.stateMachine.unlock().init()
+        node.stateMachine.unlock().init().open()
       })
 
       node.connectToClient()
@@ -638,7 +639,7 @@ module.exports = function (RED) {
     res.json(resultTypeList)
   })
 
-  RED.httpAdmin.get('/opcuaIIoT/list/EvenTypeIds', RED.auth.needsPermission('opcuaIIoT.list.eventtypeids'), function (req, res) {
+  RED.httpAdmin.get('/opcuaIIoT/list/EventTypeIds', RED.auth.needsPermission('opcuaIIoT.list.eventtypeids'), function (req, res) {
     let objectTypeIds = coreConnector.core.nodeOPCUA.ObjectTypeIds
     let invertedObjectTypeIds = _.invert(objectTypeIds)
     let eventTypes = _.filter(invertedObjectTypeIds, function (objectTypeId) {
@@ -650,7 +651,7 @@ module.exports = function (RED) {
     for (typelistEntry of eventTypes) {
       eventTypesResults.push({ nodeId: 'i=' + objectTypeIds[typelistEntry], label: typelistEntry })
     }
-
+    console.log(eventTypesResults)
     res.json(eventTypesResults)
   })
 
