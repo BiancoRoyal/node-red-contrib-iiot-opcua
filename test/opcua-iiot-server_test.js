@@ -74,7 +74,7 @@ describe('OPC UA Server node Testing', function () {
           nodeUnderTest.should.have.property('maxAllowedSessionNumber', 10)
           nodeUnderTest.should.have.property('maxNodesPerRead', 1000)
           nodeUnderTest.should.have.property('maxNodesPerBrowse', 2000)
-          done()
+          setTimeout(done, 5000)
         })
     })
   })

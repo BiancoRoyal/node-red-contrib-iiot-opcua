@@ -1013,7 +1013,7 @@ describe('OPC UA Connector node Testing', function () {
         n2.on("input", function(msg) {
           msg.should.have.property('payload', 1000)
           msg.should.have.property('topic', "TestTopicMethod")
-          done()
+          setTimeout(done, 5000)
         })
       })
     })

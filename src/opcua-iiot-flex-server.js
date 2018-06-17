@@ -136,6 +136,7 @@ module.exports = function (RED) {
 
       let serverOptions = {
         port: node.port,
+        // registerServerMethod: coreServer.core.nodeOPCUA.RegisterServerMethod.LDS, // TODO: Hidden, MDNS or LDS
         nodeset_filename: xmlFiles,
         resourcePath: node.endpoint || 'UA/NodeREDFlexIIoTServer',
         buildInfo: {
@@ -195,7 +196,6 @@ module.exports = function (RED) {
         coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects).then(function () {
           coreServer.start(node.opcuaServer, node)
           node.setNodeStatusTo('active')
-          node.registerDiscovery()
         }).catch(function (err) {
           coreServer.internalDebugLog(err)
           if (node.showErrors) {
@@ -209,35 +209,6 @@ module.exports = function (RED) {
           node.error(new Error('OPC UA Server Is Not Ready'), {payload: ''})
         }
       }
-    }
-
-    node.registerDiscovery = function () {
-      let hostname = os.hostname()
-      let discoveryEndpointUrl
-
-      if (hostname) {
-        discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UAFlexDiscovery'
-        coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
-
-        node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
-          if (err) {
-            coreServer.internalDebugLog('Register Server Discovery Error'.red + err)
-          } else {
-            coreServer.internalDebugLog('Discovery Setup Discovery Done'.green)
-          }
-        })
-      }
-
-      discoveryEndpointUrl = 'opc.tcp://localhost:4840/UAFlexDiscovery'
-      coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
-
-      node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
-        if (err) {
-          coreServer.internalDebugLog('Register Server Discovery Error'.red + err)
-        } else {
-          coreServer.internalDebugLog('Discovery Setup Discovery Done'.green)
-        }
-      })
     }
 
     node.initNewServer()
