@@ -26,6 +26,8 @@ module.exports = function (RED) {
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
+    coreDiscovery.detailDebugLog('discovery endpoints:' + discoveryServer._get_endpoints())
+
     discoveryServer.start(function () {
       coreDiscovery.internalDebugLog('discovery server started')
       node.status({fill: 'green', shape: 'dot', text: 'active'})
@@ -43,10 +45,10 @@ module.exports = function (RED) {
 
     node.on('close', function (done) {
       if (discoveryServer !== null) {
-        discoveryServer.shutdown(1, function () {
+        discoveryServer.shutdown(function () {
           coreDiscovery.internalDebugLog('shutdown')
-          discoveryServer = null
         })
+        discoveryServer = null
       }
     })
   }

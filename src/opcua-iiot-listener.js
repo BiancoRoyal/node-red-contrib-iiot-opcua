@@ -42,6 +42,9 @@ module.exports = function (RED) {
     node.monitoredItems = new Map()
     node.monitoredASO = new Map()
 
+    node.stateMachine = coreListener.createStatelyMachine()
+    node.stateMachine.init()
+
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
         coreListener.internalDebugLog(logMessage)
@@ -389,6 +392,7 @@ module.exports = function (RED) {
         coreListener.internalDebugLog('Subscription initialized')
         node.subscriptionStarting = true
         node.setNodeStatusTo('initialized')
+        node.stateMachine.init()
       })
 
       uaSubscription.on('started', function () {
@@ -397,6 +401,7 @@ module.exports = function (RED) {
         node.monitoredItems.clear()
         node.subscriptionStarting = false
         node.subscriptionStarted = true
+        node.stateMachine.start()
         callback()
       })
 
@@ -405,6 +410,7 @@ module.exports = function (RED) {
         node.subscriptionStarting = false
         node.subscriptionStarted = false
         node.setNodeStatusTo('terminated')
+        node.stateMachine.terminate()
         node.resetSubscription()
       })
 
@@ -415,6 +421,7 @@ module.exports = function (RED) {
           node.error(err, {payload: 'Internal Error'})
         }
         node.setNodeStatusTo('error')
+        node.stateMachine.error()
         node.resetSubscription()
       })
 
@@ -511,7 +518,14 @@ module.exports = function (RED) {
 
     coreListener.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
 
-    // subscriptions are deleted from OPCUAClient on Connector close
+    node.on('close', function (done) {
+      if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
+        uaSubscription.terminate(done)
+        uaSubscription = null
+      } else {
+        done()
+      }
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Listener', OPCUAIIoTListener)

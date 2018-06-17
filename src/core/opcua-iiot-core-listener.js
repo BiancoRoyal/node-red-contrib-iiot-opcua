@@ -31,6 +31,31 @@ de.biancoroyal.opcua.iiot.core.listener.MAX_LISTENER_INTERVAL = 3600000 // eslin
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.Stately = de.biancoroyal.opcua.iiot.core.listener.Stately || require('stately.js') // eslint-disable-line no-use-before-define
+
+de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
+  return de.biancoroyal.opcua.iiot.core.listener.Stately.machine({
+    'INIT': {
+      'start': 'STARTED',
+      'terminate': 'TERMINATED',
+      'error': 'ERROR'
+    },
+    'STARTED': {
+      'terminate': 'TERMINATED',
+      'error': 'ERROR'
+    },
+    'TERMINATED': {
+      'init': 'INIT',
+      'error': 'ERROR',
+      'end': 'END'
+    },
+    'ERROR': {
+      'init': 'INIT',
+      'end': 'END'
+    },
+    'END': {}
+  })
+}
 
 de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = function (timeMilliseconds) {
   return {

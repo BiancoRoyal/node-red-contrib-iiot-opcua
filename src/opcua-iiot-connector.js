@@ -438,66 +438,25 @@ module.exports = function (RED) {
     node.on('close', function (done) {
       node.stateMachine.end()
       if (node.opcuaClient) {
-        if (node.opcuaSession) {
-          coreConnector.internalDebugLog('Close Node Try To Close Session For ' + node.endpoint)
-
-          node.opcuaClient.closeSession(node.opcuaSession, true, function () {
-            coreConnector.internalDebugLog('Close Node Session Closed For ' + node.endpoint)
-            coreConnector.internalDebugLog('Close Node Disconnecting Client ' + node.endpoint)
-
-            node.opcuaClient.disconnect(function (err) {
-              if (err) {
-                coreConnector.internalDebugLog('Close Node Client Disconnected With Error ' + err + ' On ' + node.endpoint)
-                if (node.showErrors) {
-                  node.error(err, {payload: 'Session Close Error On Close Connector'})
-                }
-              } else {
-                coreConnector.internalDebugLog('Close Node Client Disconnected From ' + node.endpoint)
-              }
-              done()
-              coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
-            })
-          }).catch(function (err) {
-            if (err) {
-              coreConnector.internalDebugLog('Close Node With Session Close Error ' + err + ' On ' + node.endpoint)
-              if (node.showErrors) {
-                node.error(err, {payload: 'Session Close Crash On Close Connector'})
-              }
+        coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
+        node.opcuaClient.disconnect(function (err) {
+          if (err) {
+            coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
+            if (node.showErrors) {
+              node.error(err, {payload: 'Client Close Error On Close Connector'})
             }
-
-            coreConnector.internalDebugLog('Close Node Disconnecting Client On Crashed Session Close On ' + node.endpoint)
-            node.opcuaClient.disconnect(function (err) {
-              if (err) {
-                coreConnector.internalDebugLog('Close Node With Client Close Error On Crashed Session Close ' + err + ' On ' + node.endpoint)
-                if (node.showErrors) {
-                  node.error(err, {payload: 'Client Close Error On Close Connector'})
-                }
-              } else {
-                coreConnector.internalDebugLog('Close Node Client Disconnected On Crashed Session Close On ' + node.endpoint)
-              }
-              done()
-              coreConnector.internalDebugLog('Close Node Done For Connector With Crashed Session Close On ' + node.endpoint)
-            })
-          })
-        } else {
-          coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
-          node.opcuaClient.disconnect(function (err) {
-            if (err) {
-              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
-              if (node.showErrors) {
-                node.error(err, {payload: 'Client Close Error On Close Connector'})
-              }
-            } else {
-              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint)
-            }
-            done()
-            coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
-          })
-        }
+          } else {
+            coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint)
+          }
+          coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
+          done()
+        })
       } else {
-        done()
         coreConnector.internalDebugLog('Close Node Done For Connector Without Client On ' + node.endpoint)
+        done()
       }
+
+      node.opcuaClient = null
     })
   }
 
