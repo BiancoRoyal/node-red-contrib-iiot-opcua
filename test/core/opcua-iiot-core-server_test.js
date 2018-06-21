@@ -53,7 +53,7 @@ describe('OPC UA Core Server', function () {
   })
 
   describe('core server functions', function () {
-    it('should catch error on start with empty server', function (done) {
+    it('should catch error on start with empty server and empty node', function (done) {
 
       coreServer.start(null, null).then().catch(function (err) {
         if(err) {
@@ -63,11 +63,11 @@ describe('OPC UA Core Server', function () {
       })
     })
 
-    it('should catch error on start with empty node', function (done) {
+    it('should catch error on start with initialized server and empty node', function (done) {
 
       opcuaserver.initialize(function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
-          coreServer.start(opcuaserver, false).then().catch(function (err) {
+          coreServer.start(opcuaserver, null).then().catch(function (err) {
             if(err) {
               assert.equal('Node Not Valid To Start', err.message)
               done()
