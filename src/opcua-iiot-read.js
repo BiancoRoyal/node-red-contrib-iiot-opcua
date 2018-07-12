@@ -19,14 +19,16 @@ module.exports = function (RED) {
 
   function OPCUAIIoTRead (config) {
     RED.nodes.createNode(this, config)
-    this.attributeId = config.attributeId || 0
-    this.maxAge = config.maxAge || 1
-    this.depth = config.depth || 1
+    this.attributeId = parseInt(config.attributeId) || 0
+    this.maxAge = parseInt(config.maxAge) || 1
+    this.depth = parseInt(config.depth) || 1
     this.name = config.name
     this.justValue = config.justValue
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.parseStrings = config.parseStrings
+    this.historyDays = parseInt(config.historyDays) || 1
+
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
@@ -86,22 +88,26 @@ module.exports = function (RED) {
           })
           break
         case 130:
-          let historyDate = new Date()
-          node.historyStart = new Date(historyDate.getDate() - 1)
-          node.historyEnd = historyDate
+          let startDate = new Date()
+          node.historyStart = new Date()
+          node.historyStart.setDate(startDate - node.historyDays)
+          node.historyEnd = new Date()
 
-          coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd).then(function (readResult) {
-            try {
-              let message = node.buildResultMessage(msg, 'HistoryValue', readResult)
-              message.historyStart = node.historyStart
-              message.historyEnd = node.historyEnd
-              node.send(message)
-            } catch (err) {
+          coreClient.readHistoryValue(session, itemsToRead,
+            msg.payload.historyStart || node.historyStart,
+            msg.payload.historyEnd || node.historyEnd)
+            .then(function (readResult) {
+              try {
+                let message = node.buildResultMessage(msg, 'HistoryValue', readResult)
+                message.historyStart = node.historyStart
+                message.historyEnd = node.historyEnd
+                node.send(message)
+              } catch (err) {
+                node.handleReadError(err, msg)
+              }
+            }).catch(function (err) {
               node.handleReadError(err, msg)
-            }
-          }).catch(function (err) {
-            node.handleReadError(err, msg)
-          })
+            })
           break
         default:
           let item = null

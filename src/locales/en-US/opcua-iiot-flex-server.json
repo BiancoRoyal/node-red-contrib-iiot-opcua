@@ -31,7 +31,8 @@
       "users": "Users & Sets",
       "settings": "Settings",
       "security": "Security",
-      "ass": "Address Space"
+      "ass": "Address Space",
+      "discovery": "Discovery"
     }
   }
 }

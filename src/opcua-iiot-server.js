@@ -46,6 +46,9 @@ module.exports = function (RED) {
     this.asoDemo = config.asoDemo
     // discovery
     this.disableDiscovery = !config.serverDiscovery
+    this.registerServerMethod = config.registerServerMethod || 1
+    this.discoveryServerEndpointUrl = config.discoveryServerEndpointUrl
+    this.capabilitiesForMDNS = (config.capabilitiesForMDNS) ? config.capabilitiesForMDNS.split(',') : [config.capabilitiesForMDNS]
     // limits
     this.maxNodesPerRead = config.maxNodesPerRead || 1000
     this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
@@ -122,15 +125,25 @@ module.exports = function (RED) {
 
       coreServer.name = 'NodeREDIIoTServer'
 
+      switch (parseInt(node.registerServerMethod)) {
+        case 2:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.MDNS
+          break
+        case 3:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.LDS
+          break
+        default:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.HIDDEN
+      }
+
       let serverOptions = {
         port: node.port,
-        // registerServerMethod: coreServer.core.nodeOPCUA.RegisterServerMethod.LDS, // TODO: Hidden, MDNS or LDS
         nodeset_filename: xmlFiles,
         resourcePath: node.endpoint || 'UA/NodeREDIIoTServer',
         buildInfo: {
           productName: node.name || 'NodeOPCUA IIoT Server',
           buildNumber: '160417',
-          buildDate: new Date(2017, 4, 16)
+          buildDate: new Date(2018, 4, 16)
         },
         serverCapabilities: {
           operationLimits: {
@@ -158,6 +171,18 @@ module.exports = function (RED) {
         },
         isAuditing: node.isAuditing,
         disableDiscovery: node.disableDiscovery
+      }
+
+      if (!node.disableDiscovery) {
+        serverOptions.registerServerMethod = node.registerServerMethod
+
+        if (node.discoveryServerEndpointUrl && node.discoveryServerEndpointUrl !== '') {
+          serverOptions.discoveryServerEndpointUrl = node.discoveryServerEndpointUrl
+        }
+
+        if (node.capabilitiesForMDNS && node.capabilitiesForMDNS.length) {
+          serverOptions.capabilitiesForMDNS = node.capabilitiesForMDNS
+        }
       }
 
       coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))

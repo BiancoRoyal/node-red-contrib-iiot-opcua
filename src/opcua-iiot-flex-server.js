@@ -136,13 +136,12 @@ module.exports = function (RED) {
 
       let serverOptions = {
         port: node.port,
-        // registerServerMethod: coreServer.core.nodeOPCUA.RegisterServerMethod.LDS, // TODO: Hidden, MDNS or LDS
         nodeset_filename: xmlFiles,
         resourcePath: node.endpoint || 'UA/NodeREDFlexIIoTServer',
         buildInfo: {
           productName: node.name || 'Node-RED Flex IIoT Server',
           buildNumber: '24122017',
-          buildDate: new Date(2017, 12, 24)
+          buildDate: new Date(2018, 12, 24)
         },
         serverCapabilities: {
           operationLimits: {

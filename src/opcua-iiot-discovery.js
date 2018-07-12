@@ -20,9 +20,10 @@ module.exports = function (RED) {
   function OPCUAIIoTDiscovery (config) {
     RED.nodes.createNode(this, config)
     this.name = config.name
+    this.discoveryPort = config.discoveryPort || 4840
 
-    let discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({})
     let node = this
+    let discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({port: node.discoveryPort})
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
@@ -47,8 +48,11 @@ module.exports = function (RED) {
       if (discoveryServer !== null) {
         discoveryServer.shutdown(function () {
           coreDiscovery.internalDebugLog('shutdown')
+          done()
         })
         discoveryServer = null
+      } else {
+        done()
       }
     })
   }
