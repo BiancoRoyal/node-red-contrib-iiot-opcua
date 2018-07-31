@@ -354,7 +354,7 @@ describe('OPC UA Browser node Testing', function () {
           nodeUnderTest.should.have.property('sendNodesToListener', false)
           nodeUnderTest.should.have.property('sendNodesToBrowser', true)
           nodeUnderTest.should.have.property('showStatusActivities', false)
-          done()
+          setTimeout(done, 3000)
         })
     })
 
@@ -363,7 +363,7 @@ describe('OPC UA Browser node Testing', function () {
         let n2 = helper.getNode('n2f1')
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 'testpayload')
-          done()
+          setTimeout(done, 3000)
         })
       })
     })
@@ -496,11 +496,12 @@ describe('OPC UA Browser node Testing', function () {
       testBrowseItemFlow[5].port = 1997
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n3 = helper.getNode('n3f3')
-        n3.opcuaSession = null
-        helper.request()
-          .get('/opcuaIIoT/browse/' + n3.id + '/' + encodeURIComponent('ns=0;i=85'))
-          .expect(200)
-          .end(done)
+        n3.on('input', function (msg) {
+          helper.request()
+            .get('/opcuaIIoT/browse/' + n3.id + '/' + encodeURIComponent('ns=0;i=85'))
+            .expect(200)
+            .end(done)
+        })
       })
     })
 

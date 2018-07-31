@@ -275,7 +275,7 @@ describe('OPC UA Write node Testing', function () {
           nodeUnderTest.should.have.property('name', 'TestWrite')
           nodeUnderTest.should.have.property('showErrors', true)
           nodeUnderTest.should.have.property('justValue', false)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
@@ -285,7 +285,7 @@ describe('OPC UA Write node Testing', function () {
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 12345.67)
           msg.should.have.property('topic', 'TestTopicWrite')
-          done()
+          setTimeout(done, 2000)
         })
       })
     })
@@ -299,7 +299,7 @@ describe('OPC UA Write node Testing', function () {
             'nodeId': 'ns=4;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })

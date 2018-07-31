@@ -93,6 +93,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           de.biancoroyal.opcua.iiot.core.server.simulateVariation(data)
         }, 500)
 
+        de.biancoroyal.opcua.iiot.core.server.intervalList.push(de.biancoroyal.opcua.iiot.core.server.simulatorInterval)
         let vendorName = addressSpace.addObject({
           organizedBy: addressSpace.rootFolder.objects,
           nodeId: 'ns=4;i=1234',
@@ -445,7 +446,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
 de.biancoroyal.opcua.iiot.core.server.destructAddressSpace = function () {
   de.biancoroyal.opcua.iiot.core.server.intervalList.forEach(function (value, index, list) {
     clearInterval(value)
+    list[index] = null
   })
+  de.biancoroyal.opcua.iiot.core.server.intervalList = []
 }
 
 de.biancoroyal.opcua.iiot.core.server.start = function (server, node) {

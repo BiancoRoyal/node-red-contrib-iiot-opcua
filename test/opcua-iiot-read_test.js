@@ -181,7 +181,7 @@ describe('OPC UA Read node Testing', function () {
     let attributeId = ''
 
     it('should be loaded for all attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = '0'
+      testReadNodeToBeLoaded[0].attributeId = 0
       testReadNodeToBeLoaded[0].name = 'ReadAll'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
@@ -190,12 +190,12 @@ describe('OPC UA Read node Testing', function () {
           nodeUnderTest.should.have.property('attributeId', 0)
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
     it('should be loaded for Node-Id attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = '1'
+      testReadNodeToBeLoaded[0].attributeId = 1
       testReadNodeToBeLoaded[0].name = 'ReadNodeId'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
@@ -204,12 +204,12 @@ describe('OPC UA Read node Testing', function () {
           nodeUnderTest.should.have.property('attributeId', 1)
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
     it('should be loaded for Node-Class attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = '2'
+      testReadNodeToBeLoaded[0].attributeId = 2
       testReadNodeToBeLoaded[0].name = 'ReadNodeClass'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
@@ -218,12 +218,12 @@ describe('OPC UA Read node Testing', function () {
           nodeUnderTest.should.have.property('attributeId', 2)
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
     it('should be loaded for browse name attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = '3'
+      testReadNodeToBeLoaded[0].attributeId = 3
       testReadNodeToBeLoaded[0].name = 'ReadBrowseName'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
@@ -232,12 +232,12 @@ describe('OPC UA Read node Testing', function () {
           nodeUnderTest.should.have.property('attributeId', 3)
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
     it('should be loaded for display name attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = '4'
+      testReadNodeToBeLoaded[0].attributeId = 4
       testReadNodeToBeLoaded[0].name = 'ReadDisplayName'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
@@ -246,12 +246,12 @@ describe('OPC UA Read node Testing', function () {
           nodeUnderTest.should.have.property('attributeId', 4)
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
     it('should be loaded for values attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = '13'
+      testReadNodeToBeLoaded[0].attributeId = 13
       testReadNodeToBeLoaded[0].name = 'ReadValues'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
@@ -260,12 +260,12 @@ describe('OPC UA Read node Testing', function () {
           nodeUnderTest.should.have.property('attributeId', 13)
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
     it('should be loaded for history values attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = '130'
+      testReadNodeToBeLoaded[0].attributeId = 130
       testReadNodeToBeLoaded[0].name = 'ReadHistoryValues'
       helper.load([inputNode, connectorNode], testReadNodeToBeLoaded,
         function () {
@@ -274,12 +274,12 @@ describe('OPC UA Read node Testing', function () {
           nodeUnderTest.should.have.property('attributeId', 130)
           nodeUnderTest.should.have.property('parseStrings', false)
           nodeUnderTest.should.have.property('justValue', true)
-          done()
+          setTimeout(done, 2000)
         })
     })
 
     it('should get a message with payload for attributeId All', function (done) {
-      attributeId = '0'
+      attributeId = 0
       testReadFlow[2].attributeId = attributeId
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
@@ -290,7 +290,7 @@ describe('OPC UA Read node Testing', function () {
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })
@@ -335,7 +335,7 @@ describe('OPC UA Read node Testing', function () {
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })
@@ -380,7 +380,7 @@ describe('OPC UA Read node Testing', function () {
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })
@@ -425,7 +425,7 @@ describe('OPC UA Read node Testing', function () {
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })
@@ -470,7 +470,7 @@ describe('OPC UA Read node Testing', function () {
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })
@@ -515,7 +515,7 @@ describe('OPC UA Read node Testing', function () {
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })
@@ -560,7 +560,7 @@ describe('OPC UA Read node Testing', function () {
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-          done()
+          setTimeout(done, 2000)
         })
       })
     })

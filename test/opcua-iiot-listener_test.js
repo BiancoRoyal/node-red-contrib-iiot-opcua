@@ -201,7 +201,7 @@ describe('OPC UA Listener monitoring node Testing', function () {
         let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
         nodeUnderTest.should.have.property('name', 'TestListener')
         nodeUnderTest.should.have.property('action', 'subscribe')
-        done()
+        setTimeout(done, 3000)
       })
     })
 

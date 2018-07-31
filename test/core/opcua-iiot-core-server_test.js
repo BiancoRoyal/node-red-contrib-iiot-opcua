@@ -13,28 +13,35 @@ let opcuaserver = null
 
 describe('OPC UA Core Server', function () {
   beforeEach(function (done) {
-    setTimeout(function () {
-      opcuaserver = new coreServer.core.nodeOPCUA.OPCUAServer({
-        port: 53531,
-        resourcePath: "UA/MyLittleTestServer",
-        buildInfo: {
-          productName: "MyTestServer1",
-          buildNumber: "7658",
-          buildDate: new Date(2018, 3, 12)
-        }
-      })
-      done()
-    }, 500)
-
+    opcuaserver = null
+    opcuaserver = new coreServer.core.nodeOPCUA.OPCUAServer({
+      port: 53531,
+      resourcePath: 'UA/MyLittleTestServer',
+      buildInfo: {
+        productName: 'MyTestServer1',
+        buildNumber: '7658',
+        buildDate: new Date()
+      }
+    })
+    done()
   })
 
   afterEach(function (done) {
-    opcuaserver.shutdown(1, done)
+    opcuaserver.shutdown(function () {
+      coreServer.destructAddressSpace()
+      done()
+    })
   })
 
-  describe('core address space functions', function () {
-    it('should work on server initialize callback', function (done) {
+  after(function (done) {
+    opcuaserver = null
+    coreServer.destructAddressSpace()
+    coreServer = null
+    done()
+  })
 
+  describe('core server functions', function () {
+    it('should work on server initialize callback', function (done) {
       opcuaserver.initialize(function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
           done()
@@ -43,19 +50,19 @@ describe('OPC UA Core Server', function () {
     })
 
     it('should reset count server timeInterval on maxTimeInterval', function (done) {
-
-      coreServer.timeInterval = coreServer.maxTimeInterval
-      coreServer.simulateVariation({})
-      assert.equal(1, coreServer.timeInterval)
-      done()
+      opcuaserver.initialize(function () {
+        coreServer.constructAddressSpace(opcuaserver, true).then(function () {
+          coreServer.timeInterval = coreServer.maxTimeInterval
+          coreServer.simulateVariation({})
+          assert.equal(1, coreServer.timeInterval)
+          done()
+        })
+      })
     })
-  })
 
-  describe('core server functions', function () {
     it('should catch error on start with empty server', function (done) {
-
       coreServer.start(null, null).then().catch(function (err) {
-        if(err) {
+        if (err) {
           assert.equal('Server Not Valid To Start', err.message)
           done()
         }
@@ -63,11 +70,10 @@ describe('OPC UA Core Server', function () {
     })
 
     it('should catch error on start with empty node', function (done) {
-
       opcuaserver.initialize(function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
           coreServer.start(opcuaserver, null).then().catch(function (err) {
-            if(err) {
+            if (err) {
               assert.equal('Node Not Valid To Start', err.message)
               done()
             }
@@ -77,7 +83,6 @@ describe('OPC UA Core Server', function () {
     })
 
     it('should work on server start callback', function (done) {
-
       opcuaserver.initialize(function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
           let node = {initialized: false}

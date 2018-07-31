@@ -351,7 +351,7 @@ describe('OPC UA Method Caller node Testing', function () {
             'value': '6'
           }
         ])
-        done()
+        setTimeout(done, 3000)
       })
     })
 
@@ -362,7 +362,7 @@ describe('OPC UA Method Caller node Testing', function () {
           msg.should.have.property('topic', 'TestTopicMethod')
           msg.should.have.property('nodetype', 'inject')
           msg.should.have.property('injectType', 'inject')
-          done()
+          setTimeout(done, 3000)
         })
       })
     })
@@ -372,7 +372,7 @@ describe('OPC UA Method Caller node Testing', function () {
         let n2 = helper.getNode('n2mcf1')
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 12345)
-          done()
+          setTimeout(done, 3000)
         })
       })
     })
@@ -395,7 +395,7 @@ describe('OPC UA Method Caller node Testing', function () {
         n2.on('input', function (msg) {
           msg.should.have.property('topic', 'TestTopicMethod')
           msg.should.have.property('payload', 23456)
-          done()
+          setTimeout(done, 3000)
         })
       })
     })
@@ -405,7 +405,7 @@ describe('OPC UA Method Caller node Testing', function () {
         let n2 = helper.getNode('n2mcf2')
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 23456)
-          done()
+          setTimeout(done, 3000)
         })
       })
     })

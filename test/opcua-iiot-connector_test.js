@@ -609,7 +609,7 @@ describe('OPC UA Connector node Testing', function () {
         n4.should.have.property('messageSecurityMode', 'NONE')
         n4.should.have.property('publicCertificateFile', null)
         n4.should.have.property('privateKeyFile', null)
-        setTimeout(done, 5000)
+        setTimeout(done, 3000)
       })
     })
 
@@ -744,7 +744,7 @@ describe('OPC UA Connector node Testing', function () {
         let n2 = helper.getNode('n2cf1')
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 'testpayload')
-          setTimeout(done, 5000)
+          setTimeout(done, 3000)
         })
       })
     })
@@ -906,7 +906,7 @@ describe('OPC UA Connector node Testing', function () {
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 'testpayload')
           msg.should.have.property('topic', 'TestTopicRead')
-          done()
+          setTimeout(done, 3000)
         })
       })
     })
@@ -952,7 +952,7 @@ describe('OPC UA Connector node Testing', function () {
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 1000)
           msg.should.have.property('topic', 'TestTopicWrite')
-          done()
+          setTimeout(done, 3000)
         })
       })
     })
@@ -998,7 +998,7 @@ describe('OPC UA Connector node Testing', function () {
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 1000)
           msg.should.have.property('topic', 'TestTopicMethod')
-          setTimeout(done, 5000)
+          setTimeout(done, 3000)
         })
       })
     })

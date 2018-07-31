@@ -380,7 +380,7 @@ describe('OPC UA Crawler node Testing', function () {
           nodeUnderTest.should.have.property('singleResult', false)
           nodeUnderTest.should.have.property('showStatusActivities', false)
           nodeUnderTest.should.have.property('showErrors', false)
-          done()
+          setTimeout(done, 3000)
         })
     })
 

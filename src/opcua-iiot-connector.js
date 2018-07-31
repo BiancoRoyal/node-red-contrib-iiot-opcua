@@ -606,7 +606,6 @@ module.exports = function (RED) {
     for (typelistEntry of eventTypes) {
       eventTypesResults.push({ nodeId: 'i=' + objectTypeIds[typelistEntry], label: typelistEntry })
     }
-    // console.log(eventTypesResults)
     res.json(eventTypesResults)
   })
 
