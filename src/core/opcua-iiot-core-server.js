@@ -27,7 +27,7 @@ de.biancoroyal.opcua.iiot.core.server.flex.internalDebugLog = de.biancoroyal.opc
 de.biancoroyal.opcua.iiot.core.server.simulatorInterval = de.biancoroyal.opcua.iiot.core.server.simulatorInterval || null // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.maxTimeInterval = de.biancoroyal.opcua.iiot.core.server.maxTimeInterval || 500000 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.timeInterval = de.biancoroyal.opcua.iiot.core.server.timeInterval || 1 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.server.name = de.biancoroyal.opcua.iiot.core.server.name || 'server' // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.server.intervalList = de.biancoroyal.opcua.iiot.core.server.intervalList || [] // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.server.simulateVariation = function (data) {
   let server = de.biancoroyal.opcua.iiot.core.server
@@ -102,13 +102,13 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         })
 
         let variable1 = 1
-        setInterval(function () {
+        de.biancoroyal.opcua.iiot.core.server.intervalList.push(setInterval(function () {
           if (variable1 < 1000000) {
             variable1 += 1
           } else {
             variable1 = 0
           }
-        }, 100)
+        }, 100))
 
         addressSpace.addVariable({
           componentOf: vendorName,
@@ -187,13 +187,13 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         addressSpace.installHistoricalDataNode(memoryVariable)
 
         let counterValue = 0
-        setInterval(function () {
+        de.biancoroyal.opcua.iiot.core.server.intervalList.push(setInterval(function () {
           if (counterValue < 65000) {
             counterValue += 1
           } else {
             counterValue = 0
           }
-        }, 1000)
+        }, 1000))
 
         let counterVariable = addressSpace.addVariable({
           componentOf: vendorName,
@@ -213,13 +213,13 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         addressSpace.installHistoricalDataNode(counterVariable)
 
         let fullcounterValue = 0
-        setInterval(function () {
+        de.biancoroyal.opcua.iiot.core.server.intervalList.push(setInterval(function () {
           if (fullcounterValue < 100000) {
             fullcounterValue += 1
           } else {
             fullcounterValue = -100000
           }
-        }, 1000)
+        }, 1000))
 
         let fullcounterVariable = addressSpace.addVariable({
           componentOf: vendorName,
@@ -244,10 +244,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           sourcePicoseconds: 0
         })
 
-        setInterval(function () {
+        de.biancoroyal.opcua.iiot.core.server.intervalList.push(setInterval(function () {
           externalValueWithSourceTimestamp.value.value = Math.random()
           externalValueWithSourceTimestamp.sourceTimestamp = new Date()
-        }, 1000)
+        }, 1000))
 
         addressSpace.addVariable({
           organizedBy: vendorName,
@@ -356,12 +356,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           value: new coreServer.core.nodeOPCUA.Variant({dataType: 'Double', value: 1000.0})
         })
 
-        setInterval(function () {
+        de.biancoroyal.opcua.iiot.core.server.intervalList.push(setInterval(function () {
           fanSpeed.setValueFromSource(new coreServer.core.nodeOPCUA.Variant({
             dataType: 'Double',
             value: 1000.0 + (Math.random() * 100 - 50)
           }))
-        }, 10)
+        }, 10))
 
         let method = addressSpace.addMethod(
           vendorName, {
@@ -440,6 +440,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         resolve()
       }
     })
+}
+
+de.biancoroyal.opcua.iiot.core.server.destructAddressSpace = function () {
+  de.biancoroyal.opcua.iiot.core.server.intervalList.forEach(function (value, index, list) {
+    clearInterval(value)
+  })
 }
 
 de.biancoroyal.opcua.iiot.core.server.start = function (server, node) {

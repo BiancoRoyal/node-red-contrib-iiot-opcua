@@ -130,8 +130,7 @@ module.exports = function (RED) {
 
     node.initNewServer = function () {
       node.initialized = false
-
-      coreServer.name = 'NodeREDFlexIIoTServer'
+      node.opcuaServer = null
 
       let serverOptions = {
         port: node.port,
@@ -139,8 +138,8 @@ module.exports = function (RED) {
         resourcePath: node.endpoint || 'UA/NodeREDFlexIIoTServer',
         buildInfo: {
           productName: node.name || 'Node-RED Flex IIoT Server',
-          buildNumber: '24122017',
-          buildDate: new Date(2018, 12, 24)
+          buildNumber: '20180701',
+          buildDate: new Date(2018, 7, 1)
         },
         serverCapabilities: {
           operationLimits: {
@@ -192,8 +191,15 @@ module.exports = function (RED) {
       if (node.opcuaServer) {
         node.eventObjects = {} // event objects should stay in memory
         coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects).then(function () {
-          coreServer.start(node.opcuaServer, node)
-          node.setNodeStatusTo('active')
+          coreServer.start(node.opcuaServer, node).then(function () {
+            node.setNodeStatusTo('active')
+          }).catch(function (err) {
+            node.setNodeStatusTo('errors')
+            coreServer.internalDebugLog(err)
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
+          })
         }).catch(function (err) {
           coreServer.internalDebugLog(err)
           if (node.showErrors) {
@@ -289,13 +295,11 @@ module.exports = function (RED) {
         }
         coreServer.simulatorInterval = null
         node.opcuaServer.shutdown(function () {
-          node.opcuaServer = null
           if (done) {
             done()
           }
         })
       } else {
-        node.opcuaServer = null
         if (done) {
           done()
         }

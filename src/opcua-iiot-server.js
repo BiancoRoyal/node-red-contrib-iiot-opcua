@@ -121,8 +121,7 @@ module.exports = function (RED) {
 
     node.initNewServer = function () {
       node.initialized = false
-
-      coreServer.name = 'NodeREDIIoTServer'
+      node.opcuaServer = null
 
       switch (parseInt(node.registerServerMethod)) {
         case 2:
@@ -141,7 +140,7 @@ module.exports = function (RED) {
         resourcePath: node.endpoint || 'UA/NodeREDIIoTServer',
         buildInfo: {
           productName: node.name || 'NodeOPCUA IIoT Server',
-          buildNumber: '160417',
+          buildNumber: '20180416',
           buildDate: new Date(2018, 4, 16)
         },
         serverCapabilities: {
@@ -205,8 +204,16 @@ module.exports = function (RED) {
             node.error(err, {payload: ''})
           }
         } else {
-          coreServer.start(node.opcuaServer, node)
-          node.setNodeStatusTo('active')
+          coreServer.start(node.opcuaServer, node).then(function () {
+            node.setNodeStatusTo('active')
+          }).catch(function (err) {
+            node.opcuaServer = null
+            node.setNodeStatusTo('errors')
+            coreServer.internalDebugLog(err)
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
+          })
         }
       }).catch(function (err) {
         coreServer.internalDebugLog(err)
@@ -220,7 +227,9 @@ module.exports = function (RED) {
 
     node.on('input', function (msg) {
       if (!node.opcuaServer || !node.initialized) {
-        node.error(new Error('Server Not Ready For Inputs'), msg)
+        if (node.showErrors) {
+          node.error(new Error('Server Not Ready For Inputs'), msg)
+        }
         return false
       }
 
@@ -336,7 +345,6 @@ module.exports = function (RED) {
 
       if (node.opcuaServer) {
         node.opcuaServer.shutdown(function () {
-          node.opcuaServer = null
           node.emit('shutdown')
           node.initNewServer()
         })
@@ -354,7 +362,9 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.closeServer(done)
+      node.closeServer(() => {
+        done()
+      })
     })
 
     node.closeServer = function (done) {
@@ -364,13 +374,12 @@ module.exports = function (RED) {
         }
         coreServer.simulatorInterval = null
         node.opcuaServer.shutdown(function () {
-          node.opcuaServer = null
+          coreServer.destructAddressSpace()
           if (done) {
             done()
           }
         })
       } else {
-        node.opcuaServer = null
         if (done) {
           done()
         }

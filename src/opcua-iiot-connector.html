@@ -261,7 +261,7 @@
             <div class="form-row">
                 <label for="node-config-input-defaultSecureTokenLifetime"><i class="fa fa-file"></i>
                 <span data-i18n="opcua-iiot-contrib.label.defaultSecureTokenLifetime"></span></label>
-                <input type="text" id="node-config-input-defaultSecureTokenLifetime" placeholder="60000"> &nbsp; msec.
+                <input type="text" id="node-config-input-defaultSecureTokenLifetime" placeholder="120000"> &nbsp; msec.
             </div>
             <div class="form-row">
                  <label for="node-config-input-loginEnabled"><i class="icon-lock"></i>
@@ -311,7 +311,7 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Connector">
     <h2>OPC UA IIoT Connector</h2>
 
-    <p>The Connector is a pure configuration node and starts connecting 
+    <p>The Connector is a pure configuration node and starts connecting
     to the OPC UA server with an OPC UA client instantly after 'Deploy' or start/restart.
     Please, keep in mind that the Connector node will work if it is unused
     and open a connection to the endpoint, too.</p>

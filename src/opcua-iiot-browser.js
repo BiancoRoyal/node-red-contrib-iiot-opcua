@@ -254,7 +254,7 @@ module.exports = function (RED) {
     let entries = []
     let nodeRootId = decodeURIComponent(req.params.nodeId) || coreBrowser.core.OBJECTS_ROOT
 
-    console.log(req.params)
+    // console.log(req.params)
     coreBrowser.detailDebugLog('request for ' + req.params.nodeId)
 
     if (node.opcuaSession) {

@@ -36,7 +36,7 @@ module.exports = function (RED) {
     this.messageSecurityMode = config.securityMode
     this.publicCertificateFile = config.publicCertificateFile
     this.privateKeyFile = config.privateKeyFile
-    this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 60000
+    this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 120000
     this.autoSelectRightEndpoint = config.autoSelectRightEndpoint
     this.strategyMaxRetry = config.strategyMaxRetry || 200
     this.strategyInitialDelay = config.strategyInitialDelay || 1000
@@ -455,8 +455,6 @@ module.exports = function (RED) {
         coreConnector.internalDebugLog('Close Node Done For Connector Without Client On ' + node.endpoint)
         done()
       }
-
-      node.opcuaClient = null
     })
   }
 
@@ -466,6 +464,8 @@ module.exports = function (RED) {
       password: {type: 'password'}
     }
   })
+
+  /*  ---------------------  HTTP Requests --------------------- */
 
   RED.httpAdmin.get('/opcuaIIoT/client/discover/:id/:discoveryUrl', RED.auth.needsPermission('opcua.discovery'), function (req, res) {
     let node = RED.nodes.getNode(req.params.id)
@@ -606,7 +606,7 @@ module.exports = function (RED) {
     for (typelistEntry of eventTypes) {
       eventTypesResults.push({ nodeId: 'i=' + objectTypeIds[typelistEntry], label: typelistEntry })
     }
-    console.log(eventTypesResults)
+    // console.log(eventTypesResults)
     res.json(eventTypesResults)
   })
 

@@ -609,7 +609,7 @@ describe('OPC UA Connector node Testing', function () {
         n4.should.have.property('messageSecurityMode', 'NONE')
         n4.should.have.property('publicCertificateFile', null)
         n4.should.have.property('privateKeyFile', null)
-        done()
+        setTimeout(done, 5000)
       })
     })
 
@@ -744,7 +744,7 @@ describe('OPC UA Connector node Testing', function () {
         let n2 = helper.getNode('n2cf1')
         n2.on('input', function (msg) {
           msg.should.have.property('payload', 'testpayload')
-          done()
+          setTimeout(done, 5000)
         })
       })
     })
