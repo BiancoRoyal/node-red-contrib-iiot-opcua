@@ -29,6 +29,7 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrows
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Not Ready To Browse'))
+        return
       }
 
       let browseOptions = [
@@ -65,6 +66,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Not Ready To Browse'))
+        return
       }
 
       let browseOptions = []
@@ -104,6 +106,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl)
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Not Ready To Crawl'))
+        return
       }
 
       const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
@@ -130,6 +133,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Not Ready To Crawl'))
+        return
       }
 
       const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)

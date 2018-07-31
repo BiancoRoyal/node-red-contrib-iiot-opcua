@@ -17,7 +17,6 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
-  let os = require('os')
   let LocalizedText = require('node-opcua').LocalizedText
 
   function OPCUAIIoTServer (config) {

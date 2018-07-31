@@ -12,46 +12,45 @@
 
 var assert = require('chai').assert
 var injectNode = require('node-red/nodes/core/core/20-inject')
-var functionNode = require('node-red/nodes/core/core/80-function')
 var inputNode = require('../src/opcua-iiot-event')
 var helper = require('node-red-contrib-test-helper')
 
 var testEventNodeFlow = [
   {
-    "id": "n1evf1",
-    "type": "inject",
-    "topic": "TestTopic",
-    "payload": "{\"queueSize\":10, \"interval\":1000}",
-    "payloadType": "json",
-    "repeat": "",
-    "crontab": "",
-    "once": true,
-    "wires": [["n2evf1", "n3evf1"]]
+    'id': 'n1evf1',
+    'type': 'inject',
+    'topic': 'TestTopic',
+    'payload': '{"queueSize":10, "interval":1000}',
+    'payloadType': 'json',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'wires': [['n2evf1', 'n3evf1']]
   },
-  {id:"n2evf1", type:"helper"},
+  {id: 'n2evf1', type: 'helper'},
   {
-    "id":"n3evf1",
-    "type":"OPCUA-IIoT-Event",
-    "eventType":"i=2041",
-    "eventTypeLabel":"BaseTypeEvent",
-    "queueSize":1,
-    "usingListener":true,
-    "name":"TestName",
-    "showStatusActivities":false,
-    "showErrors":false,
-    "wires":[["n4evf1"]]
+    'id': 'n3evf1',
+    'type': 'OPCUA-IIoT-Event',
+    'eventType': 'i=2041',
+    'eventTypeLabel': 'BaseTypeEvent',
+    'queueSize': 1,
+    'usingListener': true,
+    'name': 'TestName',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [['n4evf1']]
   },
-  {id:"n4evf1", type:"helper"}
+  {id: 'n4evf1', type: 'helper'}
 ]
 
 describe('OPC UA Event node Testing', function () {
-  before(function(done) {
+  before(function (done) {
     helper.startServer(function () {
       done()
     })
   })
 
-  afterEach(function(done) {
+  afterEach(function (done) {
     helper.unload().then(function () {
       done()
     }).catch(function (err) {
@@ -66,23 +65,22 @@ describe('OPC UA Event node Testing', function () {
     })
   })
 
-
   describe('Event node', function () {
     it('should load with basic settings', function (done) {
       helper.load(
         [inputNode],
         [{
-            "id": "67c521a2.07429",
-            "type": "OPCUA-IIoT-Event",
-            "eventType": "i=2041",
-            "eventTypeLabel": "BaseTypeEvent",
-            "queueSize": 1,
-            "usingListener": true,
-            "name": "TestName",
-            "showStatusActivities": false,
-            "showErrors": false,
-            "wires": [[]]
-          }
+          'id': '67c521a2.07429',
+          'type': 'OPCUA-IIoT-Event',
+          'eventType': 'i=2041',
+          'eventTypeLabel': 'BaseTypeEvent',
+          'queueSize': 1,
+          'usingListener': true,
+          'name': 'TestName',
+          'showStatusActivities': false,
+          'showErrors': false,
+          'wires': [[]]
+        }
         ],
         function () {
           let nodeUnderTest = helper.getNode('67c521a2.07429')
@@ -95,20 +93,20 @@ describe('OPC UA Event node Testing', function () {
         })
     })
 
-    it('should get a message with payload', function(done) {
-      helper.load([injectNode, inputNode], testEventNodeFlow, function() {
-        let n2 = helper.getNode("n2evf1")
-        n2.on("input", function(msg) {
-          msg.should.have.property('payload', {"queueSize":10,"interval":1000})
+    it('should get a message with payload', function (done) {
+      helper.load([injectNode, inputNode], testEventNodeFlow, function () {
+        let n2 = helper.getNode('n2evf1')
+        n2.on('input', function (msg) {
+          msg.should.have.property('payload', {'queueSize': 10, 'interval': 1000})
           done()
         })
       })
     })
 
-    it('should verify a message for event parameters', function(done) {
-      helper.load([injectNode, inputNode], testEventNodeFlow, function() {
-        let n4 = helper.getNode("n4evf1")
-        n4.on("input", function(msg) {
+    it('should verify a message for event parameters', function (done) {
+      helper.load([injectNode, inputNode], testEventNodeFlow, function () {
+        let n4 = helper.getNode('n4evf1')
+        n4.on('input', function (msg) {
           assert.match(JSON.stringify(msg.payload), /eventType/)
           assert.match(JSON.stringify(msg.payload), /eventFilter/)
           assert.match(JSON.stringify(msg.payload), /eventFields/)

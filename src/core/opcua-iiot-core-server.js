@@ -64,6 +64,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
     function (resolve, reject) {
       if (!server) {
         reject(new Error('Server Not Valid To Construct Address Space'))
+        return
       }
 
       let coreServer = de.biancoroyal.opcua.iiot.core.server
@@ -71,6 +72,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
 
       if (!addressSpace) {
         reject(new Error('No AddressSpace From OPC UA Server Engine'))
+        return
       }
 
       let view = addressSpace.addView({
@@ -446,10 +448,12 @@ de.biancoroyal.opcua.iiot.core.server.start = function (server, node) {
     function (resolve, reject) {
       if (!server) {
         reject(new Error('Server Not Valid To Start'))
+        return
       }
 
       if (!node) {
         reject(new Error('Node Not Valid To Start'))
+        return
       }
 
       server.start(function (err) {

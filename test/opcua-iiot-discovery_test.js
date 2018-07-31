@@ -10,29 +10,27 @@
 
 'use strict'
 
-var assert = require('chai').assert
 var inputNode = require('../src/opcua-iiot-discovery')
 var helper = require('node-red-contrib-test-helper')
 
 var testDiscoveryFlow = [
-    {
-      "id": "n1dsf1",
-      "type": "OPCUA-IIoT-Discovery",
-      "name": "TestName",
-      "wires": [["n2dsf1"]]
-    }
-  ,
-  {id:"n2dsf1", type:"helper"}
+  {
+    'id': 'n1dsf1',
+    'type': 'OPCUA-IIoT-Discovery',
+    'name': 'TestName',
+    'wires': [['n2dsf1']]
+  },
+  {id: 'n2dsf1', type: 'helper'}
 ]
 
 describe('OPC UA Discovery node Testing', function () {
-  before(function(done) {
+  before(function (done) {
     helper.startServer(function () {
       done()
     })
   })
 
-  afterEach(function(done) {
+  afterEach(function (done) {
     helper.unload().then(function () {
       done()
     }).catch(function (err) {
@@ -46,7 +44,6 @@ describe('OPC UA Discovery node Testing', function () {
       done()
     })
   })
-
 
   describe('Discovery node', function () {
     it('should be loaded', function (done) {

@@ -271,6 +271,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
     function (resolve, reject) {
       if (!nodeId) {
         reject(new Error('NodeId Is Not Valid'))
+        return
       }
 
       let interval
@@ -320,6 +321,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId, ms
     function (resolve, reject) {
       if (!nodeId) {
         reject(new Error('NodeId Is Not Valid'))
+        return
       }
 
       let interval
@@ -366,6 +368,7 @@ de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session) {
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Is Not Valid To Browse For Event Types'))
+        return
       }
 
       let entries = []
@@ -414,10 +417,12 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Is Not Valid To Analyze Event'))
+        return
       }
 
       if (!browseForBrowseName || typeof browseForBrowseName !== 'function') {
         reject(new Error('BrowseForBrowseName Is Not Valid Function'))
+        return
       }
 
       if (!dataValue) {

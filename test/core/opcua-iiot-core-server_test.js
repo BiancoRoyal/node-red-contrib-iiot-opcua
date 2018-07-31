@@ -8,7 +8,6 @@
 'use strict'
 
 let assert = require('chai').assert
-let expect = require('chai').expect
 let coreServer = require('../../src/core/opcua-iiot-core-server')
 let opcuaserver = null
 
@@ -67,7 +66,7 @@ describe('OPC UA Core Server', function () {
 
       opcuaserver.initialize(function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
-          coreServer.start(opcuaserver, false).then().catch(function (err) {
+          coreServer.start(opcuaserver, null).then().catch(function (err) {
             if(err) {
               assert.equal('Node Not Valid To Start', err.message)
               done()

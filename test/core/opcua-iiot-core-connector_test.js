@@ -8,8 +8,7 @@
 'use strict'
 
 let assert = require('chai').assert
-let expect = require('chai').expect
-let coreConnector= require('../../src/core/opcua-iiot-core-connector')
+let coreConnector = require('../../src/core/opcua-iiot-core-connector')
 
 describe('OPC UA Core Connector', function () {
   describe('core functions', function () {
