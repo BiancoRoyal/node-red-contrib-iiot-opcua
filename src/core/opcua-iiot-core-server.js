@@ -39,8 +39,8 @@ de.biancoroyal.opcua.iiot.core.server.simulateVariation = function (data) {
     server.timeInterval = 1
   }
 
-  if (data.tankLevel) data.tankLevel.setValueFromSource({dataType: 'Double', value: value})
-  if (data.tankLevel2) data.tankLevel2.setValueFromSource({dataType: 'Double', value: value})
+  if (data.tankLevel) data.tankLevel.setValueFromSource({dataType: 'Double', value})
+  if (data.tankLevel2) data.tankLevel2.setValueFromSource({dataType: 'Double', value})
 }
 
 de.biancoroyal.opcua.iiot.core.server.constructAddressSpaceFromScript = function (server, constructAddressSpaceScript, eventObjects) {

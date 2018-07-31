@@ -273,8 +273,7 @@ describe('OPC UA Method Caller node Testing', function () {
   afterEach(function (done) {
     helper.unload().then(function () {
       done()
-    }).catch(function (err) {
-      console.log('Method Caller error ' + err)
+    }).catch(function () {
       done()
     })
   })

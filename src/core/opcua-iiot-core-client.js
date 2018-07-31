@@ -34,8 +34,8 @@ de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite) {
             reject(err)
           } else {
             resolve({
-              statusCodes: statusCodes,
-              nodesToWrite: nodesToWrite
+              statusCodes,
+              nodesToWrite
             })
           }
         })
@@ -56,7 +56,7 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, nodesToRead, max
           } else {
             resolve({
               results: dataValues,
-              nodesToRead: nodesToRead
+              nodesToRead
             })
           }
         })
@@ -77,7 +77,7 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nod
           } else {
             resolve({
               results: dataValues,
-              nodesToRead: nodesToRead
+              nodesToRead
             })
           }
         })
@@ -98,7 +98,7 @@ de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, node
           } else {
             resolve({
               results: dataValues,
-              nodesToRead: nodesToRead
+              nodesToRead
             })
           }
         })
@@ -119,7 +119,7 @@ de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nod
           } else {
             resolve({
               results: dataValues,
-              nodesToRead: nodesToRead
+              nodesToRead
             })
           }
         })

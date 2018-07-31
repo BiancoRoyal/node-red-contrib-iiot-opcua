@@ -79,115 +79,12 @@ de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (ti
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, key, value) {
-  let eventInformation = {}
-
-  switch (field) {
-    // Common fields
-    case 'EventId':
-      eventInformation.eventId = value
-      break
-    case 'EventType':
-      eventInformation.eventType = value
-      break
-    case 'SourceNode':
-      eventInformation.sourceNode = value
-      break
-    case 'SourceName':
-      eventInformation.sourceName = value
-      break
-    case 'Time':
-      eventInformation.time = value
-      break
-    case 'ReceiveTime':
-      eventInformation.receiveTime = value
-      break
-    case 'Message':
-      eventInformation.message = value.text
-      break
-    case 'Severity':
-      eventInformation.severity = value
-      break
-
-    // ConditionType
-    case 'ConditionClassId':
-      eventInformation.conditionClassId = value
-      break
-    case 'ConditionClassName':
-      eventInformation.conditionClassName = value
-      break
-    case 'ConditionName':
-      eventInformation.conditionName = value
-      break
-    case 'BranchId':
-      eventInformation.branchId = value
-      break
-    case 'Retain':
-      eventInformation.retain = value
-      break
-    case 'EnabledState':
-      eventInformation.enabledState = value.text
-      break
-    case 'Quality':
-      eventInformation.quality = value
-      break
-    case 'LastSeverity':
-      eventInformation.lastSeverity = value
-      break
-    case 'Comment':
-      eventInformation.comment = value.text
-      break
-    case 'ClientUserId':
-      eventInformation.clientUserId = value
-      break
-
-    // AcknowledgeConditionType
-    case 'AckedState':
-      eventInformation.ackedState = value.text
-      break
-    case 'ConfirmedState':
-      eventInformation.confirmedState = value.text
-      break
-
-    // AlarmConditionType
-    case 'ActiveState':
-      eventInformation.activeState = value.text
-      break
-    case 'InputNode':
-      eventInformation.inputNode = value
-      break
-    case 'SupressedState':
-      eventInformation.supressedState = value.text
-      break
-
-    // Limits
-    case 'HighHighLimit':
-      eventInformation.highHighLimit = value
-      break
-    case 'HighLimit':
-      eventInformation.highLimit = value
-      break
-    case 'LowLimit':
-      eventInformation.lowLimit = value
-      break
-    case 'LowLowLimit':
-      eventInformation.lowLowLimit = value
-      break
-    case 'Value':
-      eventInformation.value = value
-      break
-    default:
-      eventInformation.field = {}
-      eventInformation.field.name = field
-      eventInformation.field.value = value
-
-      if (value.text) {
-        eventInformation.field.value.text = value.text
-      }
-      break
+de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, dataType, value) {
+  return {
+    field,
+    dataType,
+    value
   }
-
-  return eventInformation
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {

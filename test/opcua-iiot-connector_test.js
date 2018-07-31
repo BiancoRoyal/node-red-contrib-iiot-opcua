@@ -562,8 +562,7 @@ describe('OPC UA Connector node Testing', function () {
   afterEach(function (done) {
     helper.unload().then(function () {
       done()
-    }).catch(function (err) {
-      console.log('Connector error ' + err)
+    }).catch(function () {
       done()
     })
   })

@@ -477,8 +477,7 @@ describe('OPC UA Server ASO node Testing', function () {
   afterEach(function (done) {
     helper.unload().then(function () {
       done()
-    }).catch(function (err) {
-      console.log('ASO error ' + err)
+    }).catch(function () {
       done()
     })
   })

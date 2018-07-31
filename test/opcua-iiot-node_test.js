@@ -176,8 +176,7 @@ describe('OPC UA Node node Testing', function () {
   afterEach(function (done) {
     helper.unload().then(function () {
       done()
-    }).catch(function (err) {
-      console.log('Node error ' + err)
+    }).catch(function () {
       done()
     })
   })

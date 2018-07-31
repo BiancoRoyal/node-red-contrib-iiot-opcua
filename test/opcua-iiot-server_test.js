@@ -51,8 +51,7 @@ describe('OPC UA Server node Testing', function () {
   afterEach(function (done) {
     helper.unload().then(function () {
       done()
-    }).catch(function (err) {
-      console.log('Server error ' + err)
+    }).catch(function () {
       done()
     })
   })

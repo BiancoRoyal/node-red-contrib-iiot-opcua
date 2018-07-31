@@ -124,8 +124,7 @@ describe('OPC UA Server Command node Testing', function () {
   afterEach(function (done) {
     helper.unload().then(function () {
       done()
-    }).catch(function (err) {
-      console.log('Command error ' + err)
+    }).catch(function () {
       done()
     })
   })

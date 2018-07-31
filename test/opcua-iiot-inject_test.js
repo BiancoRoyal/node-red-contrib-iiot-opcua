@@ -73,8 +73,7 @@ describe('OPC UA Inject node Testing', function () {
   afterEach(function (done) {
     helper.unload().then(function () {
       done()
-    }).catch(function (err) {
-      console.log('Inject error ' + err)
+    }).catch(function () {
       done()
     })
   })

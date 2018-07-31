@@ -259,8 +259,7 @@ describe('OPC UA Write node Testing', function () {
       helper.stopServer(function () {
         done()
       })
-    }).catch(function (err) {
-      console.log('events error ' + err)
+    }).catch(function () {
       helper.stopServer(function () {
         done()
       })
