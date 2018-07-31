@@ -83,82 +83,9 @@ describe('OPC UA Core Listener', function () {
 
       for (field of allFields) {
         sut = coreListener.collectAlarmFields(field, 'key', TIME_IN_MILLISECONDS)
-
-        switch (field) {
-          // Common fields
-          case 'EventId':
-            expect(sut).to.be.an('object').that.has.property('eventId', TIME_IN_MILLISECONDS)
-            break
-          case 'EventType':
-            expect(sut).to.be.an('object').that.has.property('eventType', TIME_IN_MILLISECONDS)
-            break
-          case 'SourceNode':
-            expect(sut).to.be.an('object').that.has.property('sourceNode', TIME_IN_MILLISECONDS)
-            break
-          case 'SourceName':
-            expect(sut).to.be.an('object').that.has.property('sourceName', TIME_IN_MILLISECONDS)
-            break
-          case 'Time':
-            expect(sut).to.be.an('object').that.has.property('time', TIME_IN_MILLISECONDS)
-            break
-          case 'ReceiveTime':
-            expect(sut).to.be.an('object').that.has.property('receiveTime', TIME_IN_MILLISECONDS)
-            break
-          case 'Severity':
-            expect(sut).to.be.an('object').that.has.property('severity', TIME_IN_MILLISECONDS)
-            break
-
-          // ConditionType
-          case 'ConditionClassId':
-            expect(sut).to.be.an('object').that.has.property('conditionClassId', TIME_IN_MILLISECONDS)
-            break
-          case 'ConditionClassName':
-            expect(sut).to.be.an('object').that.has.property('conditionClassName', TIME_IN_MILLISECONDS)
-            break
-          case 'ConditionName':
-            expect(sut).to.be.an('object').that.has.property('conditionName', TIME_IN_MILLISECONDS)
-            break
-          case 'BranchId':
-            expect(sut).to.be.an('object').that.has.property('branchId', TIME_IN_MILLISECONDS)
-            break
-          case 'Retain':
-            expect(sut).to.be.an('object').that.has.property('retain', TIME_IN_MILLISECONDS)
-            break
-          case 'Quality':
-            expect(sut).to.be.an('object').that.has.property('quality', TIME_IN_MILLISECONDS)
-            break
-          case 'LastSeverity':
-            expect(sut).to.be.an('object').that.has.property('lastSeverity', TIME_IN_MILLISECONDS)
-            break
-          case 'ClientUserId':
-            expect(sut).to.be.an('object').that.has.property('clientUserId', TIME_IN_MILLISECONDS)
-            break
-
-          // AlarmConditionType
-          case 'InputNode':
-            expect(sut).to.be.an('object').that.has.property('inputNode', TIME_IN_MILLISECONDS)
-            break
-
-          // Limits
-          case 'HighHighLimit':
-            expect(sut).to.be.an('object').that.has.property('highHighLimit', TIME_IN_MILLISECONDS)
-            break
-          case 'HighLimit':
-            expect(sut).to.be.an('object').that.has.property('highLimit', TIME_IN_MILLISECONDS)
-            break
-          case 'LowLimit':
-            expect(sut).to.be.an('object').that.has.property('lowLimit', TIME_IN_MILLISECONDS)
-            break
-          case 'LowLowLimit':
-            expect(sut).to.be.an('object').that.has.property('lowLowLimit', TIME_IN_MILLISECONDS)
-            eventInformation.lowLowLimit = value
-            break
-          case 'Value':
-            expect(sut).to.be.an('object').that.has.property('value', TIME_IN_MILLISECONDS)
-            break
-          default:
-            break
-        }
+        expect(sut).to.be.an('object').that.has.property('field', field)
+        expect(sut).to.be.an('object').that.has.property('dataType', 'key')
+        expect(sut).to.be.an('object').that.has.property('value', TIME_IN_MILLISECONDS)
       }
       done()
     })
@@ -169,41 +96,10 @@ describe('OPC UA Core Listener', function () {
       let sut = null
 
       for (field of allFields) {
-        sut = coreListener.collectAlarmFields(field, 'key', {text: TIME_IN_MILLISECONDS})
-
-        switch (field) {
-          // Common fields
-          case 'Message':
-            expect(sut).to.be.an('object').that.has.property('message', TIME_IN_MILLISECONDS)
-            break
-
-          // ConditionType
-          case 'EnabledState':
-            expect(sut).to.be.an('object').that.has.property('enabledState', TIME_IN_MILLISECONDS)
-            break
-          case 'Comment':
-            expect(sut).to.be.an('object').that.has.property('comment', TIME_IN_MILLISECONDS)
-            break
-
-          // AcknowledgeConditionType
-          case 'AckedState':
-            expect(sut).to.be.an('object').that.has.property('ackedState', TIME_IN_MILLISECONDS)
-            break
-          case 'ConfirmedState':
-            expect(sut).to.be.an('object').that.has.property('confirmedState', TIME_IN_MILLISECONDS)
-            break
-
-          // AlarmConditionType
-          case 'ActiveState':
-            expect(sut).to.be.an('object').that.has.property('activeState', TIME_IN_MILLISECONDS)
-            break
-          case 'SupressedState':
-            expect(sut).to.be.an('object').that.has.property('supressedState', TIME_IN_MILLISECONDS)
-            break
-
-          default:
-            break
-        }
+        sut = coreListener.collectAlarmFields(field, 'key', {text: 'Hello World!'})
+        expect(sut).to.be.an('object').that.has.property('field', field)
+        expect(sut).to.be.an('object').that.has.property('dataType', 'key')
+        expect(sut.value).to.be.an('object').that.has.property('text', 'Hello World!')
       }
       done()
     })
