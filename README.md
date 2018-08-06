@@ -10,7 +10,7 @@
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Percentage of issues still open")
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Average time to resolve an issue")
 
-# node-red-contrib-iiot-opcua 
+# node-red-contrib-iiot-opcua
 
 ## The IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.
 
@@ -30,24 +30,24 @@ If you like that contributor's package for OPC UA, then please give us your star
 
 Run command on Node-RED installation directory.
 
-	npm install node-red-contrib-iiot-opcua 
+	npm install node-red-contrib-iiot-opcua
 
 or run command for global installation.
 
-	npm install -g node-red-contrib-iiot-opcua 
+	npm install -g node-red-contrib-iiot-opcua
 
 try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
-    
+
 ![Flow Example](images/listener-example-subv220.png)
-  
+
 ## Contributing
 
 **[Become a backer of the project straight away!][2]**
 
-Let's work together! 
-Please read and in best case accept [CONTRIBUTING](CONTRIBUTING.md) by your sign and send it via E-Mail.
+Let's work together!
+Please read and in best case accept [CONTRIBUTING](.github/CONTRIBUTING.md) by your sign and send it via E-Mail.
 You could also send just a pull request or issues while testing, please!
 
 ### Debug
@@ -60,13 +60,13 @@ Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
     DEBUG=opcuaIIoT* node-red -v 1>nodeREDIIoTOPCUA.log 2>&1
 
 or on local Node-RED
-    
+
     DEBUG=opcuaIIoT* node red.js -v 1>nodeREDIIoTOPCUAServer.log 2>&1
 
 #### Debug Options
 
 Please, read the [Wiki article][7]
-    
+
 ### Wiki
 
 Follow the [white rabbit][4]!
@@ -77,7 +77,7 @@ With the flex server you could create your own information model with the OPC UA
 
 ![Flex server Example](images/wiki/flexServerAddressSapceExample.png)
 
-The server node contains demo objects and variables 
+The server node contains demo objects and variables
 to start playing with OPC UA method call, read and write operations.
 
 ![Flow Example](images/method-caller-examplev220.png)
@@ -129,8 +129,8 @@ It is just to provide OPC UA to Node-RED based on node-opcua.
 
 ### Contribution node-opcua
 
-I'd like to give special thanks to [Etienne Rossignon][6] 
-for the node-opcua packages and very special for the node-opcua-isa95 package! 
+I'd like to give special thanks to [Etienne Rossignon][6]
+for the node-opcua packages and very special for the node-opcua-isa95 package!
 
 [1]:https://bianco-royal.cloud/
 [2]:https://bianco-royal.cloud/supporter/
