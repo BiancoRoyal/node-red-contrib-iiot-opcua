@@ -1,12 +1,13 @@
 ![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
 ![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
+[![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 ![ES_Source_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
-![NodeJS_Version](http://b.repl.ca/v1/NodeJS-9.x-green.png)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/da70f651451445c58d5adaeebd0ad595)](https://www.codacy.com/app/klaus/node-red-contrib-iiot-opcua?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=biancode/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
+![NodeJS_Version](http://b.repl.ca/v1/NodeJS-LTS-green.png)
+[![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
-[![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/da70f651451445c58d5adaeebd0ad595)](https://www.codacy.com/app/klaus/node-red-contrib-iiot-opcua?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=biancode/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Percentage of issues still open")
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Average time to resolve an issue")
 
@@ -18,13 +19,12 @@
 [![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
 [![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
+* tested with Node.js LTS
+* based on node-opcua v0.4
+
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
-**[Become a backer of the project straight away!][2]**
-
-* tested with Node 8 LTS
-* tested with Node 9
-* based on node-opcua v0.4.x
+**[You could help as a backer of the project.][2]**
 
 ## Install
 
@@ -44,11 +44,11 @@ try these options on npm install to build, if you have problems to install
 
 ## Contributing
 
-**[Become a backer of the project straight away!][2]**
-
 Let's work together!
-Please read and in best case accept [CONTRIBUTING](.github/CONTRIBUTING.md) by your sign and send it via E-Mail.
-You could also send just a pull request or issues while testing, please!
+Please, read and in best case accept [CONTRIBUTING](.github/CONTRIBUTING.md) by your sign and send it via E-Mail.
+You could also just send a pull request or issues while testing, please!
+
+**[Click here if you want to back the project!][2]**
 
 ### Debug
 

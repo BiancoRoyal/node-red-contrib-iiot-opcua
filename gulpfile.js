@@ -24,8 +24,8 @@ gulp.task('default', function () {
 })
 
 gulp.task('docs', sequence('doc', 'docIcons', 'docImages'))
-gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale', 'code'))
-gulp.task('publish', sequence('build', 'maps', 'public', 'icons', 'docs'))
+gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale', 'code', 'public', 'icons'))
+gulp.task('publish', sequence('build', 'maps', 'docs'))
 
 gulp.task('icons', function () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))

@@ -10,7 +10,8 @@
 
 'use strict'
 
-var helper = require('node-red-contrib-test-helper')
+var helper = require('node-red-node-test-helper')
+helper.init(require.resolve('node-red'))
 
 // iiot opc ua nodes
 var serverNode = require('../src/opcua-iiot-server')

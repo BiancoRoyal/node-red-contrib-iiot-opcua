@@ -18,7 +18,9 @@ var eventNode = require('../src/opcua-iiot-event')
 var serverNode = require('../src/opcua-iiot-server')
 var connectorNode = require('../src/opcua-iiot-connector')
 var inputNode = require('../src/opcua-iiot-listener')
-var helper = require('node-red-contrib-test-helper')
+
+var helper = require('node-red-node-test-helper')
+helper.init(require.resolve('node-red'))
 
 var eventNodesToLoad = [injectNode, eventNode, connectorNode, inputNode, serverNode]
 

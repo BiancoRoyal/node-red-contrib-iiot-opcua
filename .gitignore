@@ -9,6 +9,6 @@ error*.txt
 maps/
 docs/gen/
 coverage/
+.coverage/
 pki/
-
-\.vscode/
+.vscode/

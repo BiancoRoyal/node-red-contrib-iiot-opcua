@@ -11,7 +11,9 @@
 'use strict'
 
 var inputNode = require('../src/opcua-iiot-discovery')
-var helper = require('node-red-contrib-test-helper')
+
+var helper = require('node-red-node-test-helper')
+helper.init(require.resolve('node-red'))
 
 var testDiscoveryFlow = [
   {

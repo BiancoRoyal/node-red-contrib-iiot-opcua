@@ -15,7 +15,9 @@ var injectNode = require('../src/opcua-iiot-inject')
 var serverNode = require('../src/opcua-iiot-server')
 var connectorNode = require('../src/opcua-iiot-connector')
 var inputNode = require('../src/opcua-iiot-listener')
-var helper = require('node-red-contrib-test-helper')
+
+var helper = require('node-red-node-test-helper')
+helper.init(require.resolve('node-red'))
 
 var listenerNodesToLoad = [injectNode, connectorNode, inputNode, serverNode]
 
@@ -134,6 +136,109 @@ var testListenerMonitoringFlow = [
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
     'wires': [[]]
+  }
+]
+
+let aboByBrowserFlow = [
+  {
+    'id': '3db3c1a9.22c1a6',
+    'type': 'OPCUA-IIoT-Browser',
+    'z': '6cdf7b06.557b6c',
+    'connector': 'efee21b6.c96e08',
+    'nodeId': 'ns=2;s=ProzReg',
+    'name': 'Browse ProzReg NS2',
+    'justValue': true,
+    'sendNodesToRead': false,
+    'sendNodesToListener': true,
+    'sendNodesToBrowser': false,
+    'singleBrowseResult': true,
+    'showStatusActivities': false,
+    'showErrors': true,
+    'x': 360,
+    'y': 160,
+    'wires': [
+      [
+        '67b2f9e9.bb0d98',
+        'c6f7ef15.6881e'
+      ]
+    ]
+  },
+  {id: 'aboh1', type: 'helper'},
+  {
+    'id': 'd3bf13b7.29edd',
+    'type': 'OPCUA-IIoT-Inject',
+    'z': '6cdf7b06.557b6c',
+    'injectType': 'inject',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '',
+    'name': '',
+    'addressSpaceItems': [],
+    'x': 170,
+    'y': 160,
+    'wires': [
+      [
+        '3db3c1a9.22c1a6'
+      ]
+    ]
+  },
+  {
+    'id': '3f0064c7.47ddb4',
+    'type': 'OPCUA-IIoT-Listener',
+    'z': '6cdf7b06.557b6c',
+    'connector': 'efee21b6.c96e08',
+    'action': 'subscribe',
+    'queueSize': '1',
+    'name': '',
+    'justValue': false,
+    'showStatusActivities': false,
+    'showErrors': true,
+    'x': 560,
+    'y': 160,
+    'wires': [
+      []
+    ]
+  },
+  {
+    'id': 'c6f7ef15.6881e',
+    'type': 'debug',
+    'z': '6cdf7b06.557b6c',
+    'name': '',
+    'active': true,
+    'tosidebar': true,
+    'console': false,
+    'tostatus': false,
+    'complete': 'true',
+    'x': 550,
+    'y': 220,
+    'wires': []
+  },
+  {
+    'id': 'efee21b6.c96e08',
+    'type': 'OPCUA-IIoT-Connector',
+    'z': '',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://192.168.0.50:4840',
+    'keepSessionAlive': false,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'MLC RDM',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': true,
+    'strategyMaxRetry': '9999999',
+    'strategyInitialDelay': '1000',
+    'strategyMaxDelay': '60000',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': ''
   }
 ]
 

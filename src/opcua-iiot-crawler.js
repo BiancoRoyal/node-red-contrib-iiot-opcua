@@ -67,11 +67,21 @@ module.exports = function (RED) {
 
     node.sendMessageCrawlerResults = function (msg, browserResult) {
       browserEntries = browserResult || []
+      let filteredEntries = []
+
+      if (node.filters && node.filters.length > 0) {
+        browserEntries.forEach(function (item) {
+          if (node.itemIsNotToFilter(item, filteredEntries)) {
+            filteredEntries.push(item)
+          }
+        })
+        browserEntries = filteredEntries
+      }
 
       if (node.justValue) {
         browserEntries.forEach(function (item) {
           if (item.references) {
-            delete item.references
+            delete item['references']
           }
         })
       }
@@ -79,9 +89,39 @@ module.exports = function (RED) {
       node.sendMessage(msg)
     }
 
+    node.itemIsNotToFilter = function (item, filteredEntries) {
+      let result = true
+
+      node.filters.forEach(function (element, index, array) {
+        try {
+          if (item.nodeId && item.nodeId.toString() === element.nodeId) {
+            result &= false
+          }
+          if (item.browseName && item.browseName.name === element.name) {
+            result &= false
+          }
+          if (item.typeDefinition) {
+            if (item.typeDefinition.toString() === element.nodeId || item.typeDefinition.toString() === element.name) {
+              result &= false
+            }
+          }
+        } catch (e) {
+          if (node.showErrors) {
+            coreBrowser.crawler.internalDebugLog(e)
+          }
+        }
+      })
+
+      return result
+    }
+
     node.crawl = function (session, msg) {
       coreBrowser.internalDebugLog('Browse Topic To Call Crawler ' + node.browseTopic)
       browserEntries = []
+
+      if (node.showStatusActivities) {
+        node.setNodeStatusTo('crawling')
+      }
 
       coreBrowser.crawl(session, node.browseTopic)
         .then(function (browserResult) {
@@ -94,13 +134,23 @@ module.exports = function (RED) {
     node.crawlNodeList = function (session, msg) {
       browserEntries = []
 
+      if (node.showStatusActivities) {
+        node.setNodeStatusTo('crawling')
+      }
+
       if (node.singleResult) {
         coreBrowser.crawlAddressSpaceItems(session, msg.addressSpaceItems)
           .then(function (browserResult) {
             browserEntries = []
             node.sendMessageCrawlerResults(msg, browserResult)
+            if (node.showStatusActivities) {
+              node.setNodeStatusTo('active')
+            }
           }).catch(function (err) {
             node.browseErrorHandling(err, msg)
+            if (node.showStatusActivities) {
+              node.setNodeStatusTo('error')
+            }
           })
       } else {
         msg.addressSpaceItems.map((entry) => (
@@ -108,8 +158,14 @@ module.exports = function (RED) {
             .then(function (browserResult) {
               browserEntries = []
               node.sendMessageCrawlerResults(msg, browserResult)
+              if (node.showStatusActivities) {
+                node.setNodeStatusTo('active')
+              }
             }).catch(function (err) {
               node.browseErrorHandling(err, msg)
+              if (node.showStatusActivities) {
+                node.setNodeStatusTo('error')
+              }
             })))
       }
     }

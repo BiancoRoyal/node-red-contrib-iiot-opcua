@@ -13,7 +13,9 @@
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
 var inputNode = require('../src/opcua-iiot-response')
-var helper = require('node-red-contrib-test-helper')
+
+var helper = require('node-red-node-test-helper')
+helper.init(require.resolve('node-red'))
 
 var readGoodInject = {
   'id': 'n1rsf1',

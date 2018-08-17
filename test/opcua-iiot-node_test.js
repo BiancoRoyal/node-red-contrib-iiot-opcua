@@ -12,7 +12,9 @@
 
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var inputNode = require('../src/opcua-iiot-node')
-var helper = require('node-red-contrib-test-helper')
+
+var helper = require('node-red-node-test-helper')
+helper.init(require.resolve('node-red'))
 
 var testNodeFlow = [
   {

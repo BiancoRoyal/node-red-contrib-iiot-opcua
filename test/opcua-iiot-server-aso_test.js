@@ -15,7 +15,9 @@ var functionNode = require('node-red/nodes/core/core/80-function')
 var injectNode = require('../src/opcua-iiot-inject')
 var inputNode = require('../src/opcua-iiot-server-aso')
 var serverNode = require('../src/opcua-iiot-server')
-var helper = require('node-red-contrib-test-helper')
+
+var helper = require('node-red-node-test-helper')
+helper.init(require.resolve('node-red'))
 
 var testASOFlow = [
   {
