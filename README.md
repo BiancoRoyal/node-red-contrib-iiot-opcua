@@ -13,7 +13,7 @@
 
 # node-red-contrib-iiot-opcua
 
-## The IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.
+## The IoT/IIoT OPC UA toolbox package for [Node-RED][8] based on [node-opcua][9].
 
 [![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua/)
 [![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
@@ -21,6 +21,7 @@
 
 * tested with Node.js LTS
 * based on node-opcua v0.4
+* extendable with node-opcua-isa95
 
 If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
 
@@ -28,7 +29,7 @@ If you like that contributor's package for OPC UA, then please give us your star
 
 ## Install
 
-Run command on Node-RED installation directory.
+Run command on [Node-RED][8] installation directory.
 
 	npm install node-red-contrib-iiot-opcua
 
@@ -138,3 +139,5 @@ for the node-opcua packages and very special for the node-opcua-isa95 package!
 [4]:https://github.com/biancode/node-red-contrib-iiot-opcua/wiki
 [6]:https://github.com/erossignon
 [7]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki/DEBUG
+[8]:https://github.com/node-red/node-red
+[9]:https://github.com/node-opcua/node-opcua
