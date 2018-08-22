@@ -398,6 +398,111 @@ var testCrawlerJustValueSingleFilteredFlow = [
   }
 ]
 
+let testCrawlerWithFilter = [
+  {
+    'id': '88f582a2.3b9028',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '5388',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': true,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'wires': [ [ ] ]
+  },
+  {
+    'id': '7ca9c103.e1cec8',
+    'type': 'OPCUA-IIoT-Crawler',
+    'connector': 'b8172133.6e8a1',
+    'name': '',
+    'justValue': true,
+    'singleResult': true,
+    'showStatusActivities': true,
+    'showErrors': true,
+    'filters': [
+      {
+        'name': 'dataType',
+        'value': 'ObjectType'
+      },
+      {
+        'name': 'nodeClass',
+        'value': 'Object'
+      }
+    ],
+    'wires': [
+      [
+        '1h1f'
+      ]
+    ]
+  },
+  {id: 'h1f', type: 'helper'},
+  {
+    'id': '70c2f78b.a928a8',
+    'type': 'OPCUA-IIoT-Inject',
+    'z': '2c480163.82dc16',
+    'injectType': 'inject',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '2.4',
+    'name': '',
+    'addressSpaceItems': [
+      {
+        'name': '',
+        'nodeId': 'i=85',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        '7ca9c103.e1cec8'
+      ]
+    ]
+  },
+  {
+    'id': 'b8172133.6e8a1',
+    'type': 'OPCUA-IIoT-Connector',
+    'z': '2c480163.82dc16',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:5388/',
+    'keepSessionAlive': false,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL SERVER',
+    'showErrors': true,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': ''
+  }
+]
 
 describe('OPC UA Crawler node Testing', function () {
   beforeEach(function (done) {
@@ -540,6 +645,20 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFilteredFlow, function () {
         let n4 = helper.getNode('n4f2')
         n4.on('input', function (msg) {
+          msg.payload.should.have.property('browserItems')
+          expect(msg.payload.browserItems[0].references).to.equal(undefined)
+
+          expect(msg.payload.browserItems).to.be.an('array')
+          expect(msg.payload.browserItems.length).to.equal(33)
+          done()
+        })
+      })
+    })
+
+    it('should verify filtered crawler items as filtered results', function (done) {
+      helper.load(crawlerNodesToLoad, testCrawlerWithFilter, function () {
+        let h1f = helper.getNode('h1f')
+        h1f.on('input', function (msg) {
           msg.payload.should.have.property('browserItems')
           expect(msg.payload.browserItems[0].references).to.equal(undefined)
 

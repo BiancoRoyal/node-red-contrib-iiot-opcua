@@ -653,4 +653,15 @@ module.exports = function (RED) {
 
     res.json(resultTypeList)
   })
+
+  RED.httpAdmin.get('/opcuaIIoT/list/FilterTypes', RED.auth.needsPermission('opcuaIIoT.list.filterids'), function (req, res) {
+    let resultTypeList = []
+    resultTypeList.push({ name: 'dataType', label: 'Data Type' })
+    resultTypeList.push({ name: 'dataValue', label: 'Data Value' })
+    resultTypeList.push({ name: 'nodeClass', label: 'Node Class' })
+    resultTypeList.push({ name: 'typeDefinition', label: 'Type Definition' })
+    resultTypeList.push({ name: 'browseName', label: 'Browse Name' })
+    resultTypeList.push({ name: 'nodeId', label: 'Node Id' })
+    res.json(resultTypeList)
+  })
 }

@@ -91,23 +91,25 @@ module.exports = function (RED) {
 
     node.itemIsNotToFilter = function (item, filteredEntries) {
       let result = true
-
+      let filterValue
       node.filters.forEach(function (element, index, array) {
         try {
-          if (item.nodeId && item.nodeId.toString() === element.nodeId) {
-            result &= false
-          }
-          if (item.browseName && item.browseName.name === element.name) {
-            result &= false
-          }
-          if (item.typeDefinition) {
-            if (item.typeDefinition.toString() === element.nodeId || item.typeDefinition.toString() === element.name) {
-              result &= false
+          filterValue = item[element.name]
+          if (filterValue && filterValue.key) {
+            if (element.value.includes('*')) {
+              if (filterValue.key.includes(element.value.replace('*', ''))) {
+                result &= false
+              }
+            } else {
+              if (filterValue.key === element.value) {
+                result &= false
+              }
             }
           }
         } catch (e) {
+          coreBrowser.crawler.internalDebugLog(e)
           if (node.showErrors) {
-            coreBrowser.crawler.internalDebugLog(e)
+            node.error(e, {payload: e.message})
           }
         }
       })

@@ -75,59 +75,57 @@
           class: 'opcuaFilterName',
           type: "text",
           style: "margin-left:5px;width:240px;",
-          placeholder: 'ObjectType'
+          placeholder: 'nodeClass'
         }).appendTo(row)
 
-        let filterNodeIdField = $('<input/>', {
-          id: "node-input-crawler-filter-nodeId" + id,
-          class: 'opcuaFilterNodeId',
+        let filterValueField = $('<input/>', {
+          id: "node-input-crawler-filter-value" + id,
+          class: 'opcuaFilterValue',
           type: "text",
           style: "margin: 0 auto;width:45%;min-width:60px;margin-left:5px",
-          placeholder: 'ns=0;i=58'
+          placeholder: 'Object*'
         }).appendTo(row)
 
         filterNameField.val(filter.name)
-        filterNodeIdField.val(filter.nodeId)
+        filterValueField.val(filter.value)
 
         let finalspan = $('<span/>', {style: 'float: right;margin-right: 10px;'}).appendTo(row)
 
         let lookupItemButton = $('<a/>', {
           href: '#',
-          id: 'node-button-crawler-filter-referencetypes' + id,
+          id: 'node-button-crawler-filter-types' + id,
           class: 'editor-button editor-button-small listButton',
           style: 'margin-top: 7px; margin-left: 5px;'
         }).appendTo(finalspan)
 
         lookupItemButton.click(function () {
-          let referencetypeLookupButton = $('#node-button-crawler-filter-referencetypes' + id)
-          let referenceNameLookupField = $('#row' + id + ' #node-input-crawler-filter-name'  + id)
-          let referencetypeLookupField = $('#row' + id + ' #node-input-crawler-filter-nodeId'  + id)
+          let filterLookupButton = $('#node-button-crawler-filter-types' + id)
+          let filterNameLookupField = $('#row' + id + ' #node-input-crawler-filter-name'  + id)
+          let filterValueLookupField = $('#row' + id + ' #node-input-crawler-filter-value'  + id)
 
-          referencetypeLookupButton.addClass('disabled')
+          filterLookupButton.addClass('disabled')
 
-          $.getJSON('/opcuaIIoT/list/ReferenceTypeIds', function (data) {
-            referencetypeLookupButton.removeClass('disabled')
+          $.getJSON('/opcuaIIoT/list/FilterTypes', function (data) {
+            filterLookupButton.removeClass('disabled')
             node.lookupItems = []
 
             $.each(data, function (i, entry) {
-              node.lookupItems.push({value: entry.nodeId, label: entry.label})
+              node.lookupItems.push({name: entry.name, label: entry.label})
             })
 
-            referencetypeLookupField.autocomplete({
+            filterNameLookupField.autocomplete({
               source: node.lookupItems,
               minLength: 0,
               focus: function (event, ui) {
-                referenceNameLookupField.val(ui.item.label)
-                referencetypeLookupField.val(ui.item.value)
+                filterNameLookupField.val(ui.item.name)
                 return false;
               },
               select: function (event, ui) {
-                referenceNameLookupField.val(ui.item.label)
-                referencetypeLookupField.val(ui.item.value)
+                filterNameLookupField.val(ui.item.name)
                 return false;
               },
               close: function (event, ui) {
-                referencetypeLookupField.autocomplete("destroy")
+                filterNameLookupField.autocomplete("destroy")
               }
             }).autocomplete("search", "")
           })
@@ -165,7 +163,7 @@
         if(!cacheItemCount || cacheItemCount < 0) {
           cacheItemCount = 0
         }
-        generateFilterEntry({ name: '', nodeId: '' }, cacheItemCount++) // length is every time one more than index
+        generateFilterEntry({ name: '', value: '' }, cacheItemCount++) // length is every time one more than index
         let crawlerContainerDiv = $("#node-input-crawler-filter-container-div")
         crawlerContainerDiv.scrollTop(crawlerContainerDiv.get(0).scrollHeight)
       })
@@ -214,7 +212,7 @@
       cacheFilters.each(function () {
         node.filters.push({
           name: $(this).find('.opcuaFilterName').val(),
-          nodeId: $(this).find('.opcuaFilterNodeId').val(),
+          value: $(this).find('.opcuaFilterValue').val(),
         })
       })
     }
@@ -286,7 +284,8 @@
 
  <h3>Configuration</h3>
 
- <p>The filter tab inside the configuration section is used to filter crawling by reference types.<p>
+ <p>The filter tab inside the configuration section is used to filter crawling by properties.
+ You can set your own or use some of the listed properties.<p>
 
  <h3>Examples</h3>
  <a href='https://github.com/biancode/node-red-contrib-iiot-opcua/blob/master/examples/' target='_blank'>GitHub Crawler example flow</a>
