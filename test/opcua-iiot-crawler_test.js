@@ -415,7 +415,7 @@ let testCrawlerWithFilter = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -423,8 +423,8 @@ let testCrawlerWithFilter = [
     'registerServerMethod': 1,
     'discoveryServerEndpointUrl': '',
     'capabilitiesForMDNS': '',
-    'maxNodesPerRead': 1000,
-    'maxNodesPerBrowse': 2000,
+    'maxNodesPerRead': 6000,
+    'maxNodesPerBrowse': 6000,
     'wires': [ [ ] ]
   },
   {
@@ -443,12 +443,28 @@ let testCrawlerWithFilter = [
       },
       {
         'name': 'nodeClass',
-        'value': 'Object'
+        'value': 'Object*'
+      },
+      {
+        'name': 'nodeClass',
+        'value': 'Method'
+      },
+      {
+        'name': 'nodeClass',
+        'value': 'Base.*'
+      },
+      {
+        'name': 'dataType',
+        'value': 'ns=0;i=12'
+      },
+      {
+        'name': 'browseName',
+        'value': 'Array'
       }
     ],
     'wires': [
       [
-        '1h1f'
+        'h1f'
       ]
     ]
   },
@@ -649,7 +665,7 @@ describe('OPC UA Crawler node Testing', function () {
           expect(msg.payload.browserItems[0].references).to.equal(undefined)
 
           expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(33)
+          expect(msg.payload.browserItems.length).to.equal(34)
           done()
         })
       })
@@ -663,7 +679,7 @@ describe('OPC UA Crawler node Testing', function () {
           expect(msg.payload.browserItems[0].references).to.equal(undefined)
 
           expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(33)
+          expect(msg.payload.browserItems.length).to.equal(1691)
           done()
         })
       })

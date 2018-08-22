@@ -94,14 +94,24 @@ module.exports = function (RED) {
       let filterValue
       node.filters.forEach(function (element, index, array) {
         try {
-          filterValue = item[element.name]
-          if (filterValue && filterValue.key) {
-            if (element.value.includes('*')) {
-              if (filterValue.key.includes(element.value.replace('*', ''))) {
-                result &= false
-              }
-            } else {
-              if (filterValue.key === element.value) {
+          switch (element.name) {
+            case 'browseName':
+              filterValue = item[element.name].name
+              break
+            case 'displayName':
+              filterValue = item[element.name].text
+              break
+            default:
+              filterValue = item[element.name]
+          }
+
+          if (filterValue && filterValue.key && filterValue.key.match) {
+            if (filterValue.key.match(element.value)) {
+              result &= false
+            }
+          } else {
+            if (filterValue && filterValue.match) {
+              if (filterValue.match(element.value)) {
                 result &= false
               }
             }

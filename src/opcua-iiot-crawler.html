@@ -261,7 +261,7 @@
             <div class="form-row node-input-crawler-filter-container-row" style="margin-bottom: 0px;">
                 <div id="node-input-crawler-filter-container-div"
                     style="box-sizing: border-box; border-radius: 5px;
-                    height: 210px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+                    height: 480px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
                     <ol id="node-input-crawler-filter-container" style="list-style-type:none; margin: 0;"></ol>
                 </div>
             </div>
@@ -296,6 +296,13 @@
 
  <p>The input has to receive an addressSpaceItems (Array of objects) to browse for.
  A datatype or name is not required here - it just requires the nodeId in the addressSpaceItems objects here.</p>
+
+ <p>Filter:
+     <ul>
+        <li>name => property name to search inside result per item
+        <li>value => regex string to match content
+     </ul>
+ </p>
 
  <h3>Output</h3>
 
