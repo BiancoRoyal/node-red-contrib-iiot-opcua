@@ -75,7 +75,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         return
       }
 
-      let view = addressSpace.addView({
+      let view = addressSpace.getOwnNamespace().addView({
         organizedBy: addressSpace.rootFolder.views,
         browseName: 'BiancoRoyalView',
         displayName: 'Bianco Royal View'
@@ -94,9 +94,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         }, 500)
 
         de.biancoroyal.opcua.iiot.core.server.intervalList.push(de.biancoroyal.opcua.iiot.core.server.simulatorInterval)
-        let vendorName = addressSpace.addObject({
+        let vendorName = addressSpace.getOwnNamespace().addObject({
           organizedBy: addressSpace.rootFolder.objects,
-          nodeId: 'ns=4;i=1234',
+          nodeId: 'ns=1;i=1234',
           browseName: 'BiancoRoyal',
           displayName: 'Bianco Royal',
           description: 'Bianco Royal - Software Innovations®'
@@ -111,9 +111,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         }, 100))
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           componentOf: vendorName,
-          nodeId: 'ns=4;i=16479',
+          nodeId: 'ns=1;i=16479',
           browseName: 'MyVariable1',
           dataType: 'Double',
           value: {
@@ -128,9 +128,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
 
         let variable2 = 10.0
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           componentOf: vendorName,
-          nodeId: 'ns=4;b=1020FFAA',
+          nodeId: 'ns=1;b=1020FFAA',
           browseName: 'MyVariable2',
           dataType: 'Double',
           value: {
@@ -149,9 +149,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
 
         let variable3 = 1000.0
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           componentOf: vendorName,
-          nodeId: 'ns=4;s=TestReadWrite',
+          nodeId: 'ns=1;s=TestReadWrite',
           browseName: 'TestReadWrite',
           displayName: 'Test Read and Write',
           dataType: 'Double',
@@ -169,9 +169,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         })
 
-        let memoryVariable = addressSpace.addVariable({
+        let memoryVariable = addressSpace.getOwnNamespace().addVariable({
           componentOf: vendorName,
-          nodeId: 'ns=4;s=free_memory',
+          nodeId: 'ns=1;s=free_memory',
           browseName: 'FreeMemory',
           displayName: 'Free Memory',
           dataType: 'Double',
@@ -196,9 +196,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         }, 1000))
 
-        let counterVariable = addressSpace.addVariable({
+        let counterVariable = addressSpace.getOwnNamespace().addVariable({
           componentOf: vendorName,
-          nodeId: 'ns=4;s=Counter',
+          nodeId: 'ns=1;s=Counter',
           browseName: 'Counter',
           dataType: 'UInt16',
 
@@ -222,9 +222,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         }, 1000))
 
-        let fullcounterVariable = addressSpace.addVariable({
+        let fullcounterVariable = addressSpace.getOwnNamespace().addVariable({
           componentOf: vendorName,
-          nodeId: 'ns=4;s=FullCounter',
+          nodeId: 'ns=1;s=FullCounter',
           browseName: 'FullCounter',
           dataType: 'Int32',
 
@@ -250,9 +250,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           externalValueWithSourceTimestamp.sourceTimestamp = new Date()
         }, 1000))
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           organizedBy: vendorName,
-          nodeId: 'ns=4;s=Pressure',
+          nodeId: 'ns=1;s=Pressure',
           browseName: 'Pressure',
           dataType: 'Double',
           value: {
@@ -262,9 +262,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         })
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           organizedBy: vendorName,
-          nodeId: 'ns=4;s=Matrix',
+          nodeId: 'ns=1;s=Matrix',
           browseName: 'Matrix',
           dataType: 'Double',
           valueRank: 2,
@@ -281,9 +281,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         })
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           organizedBy: vendorName,
-          nodeId: 'ns=4;s=Position',
+          nodeId: 'ns=1;s=Position',
           browseName: 'Position',
           dataType: 'Double',
           valueRank: 1,
@@ -299,9 +299,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         })
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           organizedBy: vendorName,
-          nodeId: 'ns=4;s=PumpSpeed',
+          nodeId: 'ns=1;s=PumpSpeed',
           browseName: 'PumpSpeed',
           displayName: 'Pump Speed',
           dataType: 'Double',
@@ -315,9 +315,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         })
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           organizedBy: vendorName,
-          nodeId: 'ns=4;s=SomeDate',
+          nodeId: 'ns=1;s=SomeDate',
           browseName: 'SomeDate',
           displayName: 'Some Date',
           dataType: 'DateTime',
@@ -331,9 +331,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         })
 
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           organizedBy: vendorName,
-          nodeId: 'ns=4;s=MultiLanguageText',
+          nodeId: 'ns=1;s=MultiLanguageText',
           browseName: 'MultiLanguageText',
           displayName: 'Multi Language Text',
           dataType: 'LocalizedText',
@@ -349,9 +349,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }
         })
 
-        let fanSpeed = addressSpace.addVariable({
+        let fanSpeed = addressSpace.getOwnNamespace().addVariable({
           organizedBy: vendorName,
-          nodeId: 'ns=4;s=FanSpeed',
+          nodeId: 'ns=1;s=FanSpeed',
           browseName: 'FanSpeed',
           dataType: 'Double',
           value: new coreServer.core.nodeOPCUA.Variant({dataType: 'Double', value: 1000.0})
@@ -364,9 +364,9 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           }))
         }, 10))
 
-        let method = addressSpace.addMethod(
+        let method = addressSpace.getOwnNamespace().addMethod(
           vendorName, {
-            nodeId: 'ns=4;i=12345',
+            nodeId: 'ns=1;i=12345',
             browseName: 'Bark',
 
             inputArguments: [
@@ -413,7 +413,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           callback(null, callMethodResult)
         })
 
-        let analogItemNode = addressSpace.addAnalogDataItem({
+        let analogItemNode = addressSpace.getOwnNamespace().addAnalogDataItem({
           organizedBy: vendorName,
           nodeId: 'ns=1;s=TemperatureAnalogItem',
           browseName: 'TemperatureAnalogItem',

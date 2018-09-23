@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var injectNodeRed = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
 
@@ -52,8 +54,8 @@ var testMethodFlowPayload = [
     'id': 'n3mcf1',
     'type': 'OPCUA-IIoT-Method-Caller',
     'connector': 'c1mcf1',
-    'objectId': 'ns=4;i=1234',
-    'methodId': 'ns=4;i=12345',
+    'objectId': 'ns=1;i=1234',
+    'methodId': 'ns=1;i=12345',
     'methodType': 'basic',
     'value': '',
     'justValue': true,
@@ -160,7 +162,7 @@ var testMethodInjectFlowPayload = [
     'id': 'n3mcf2',
     'type': 'function',
     'name': 'bark six times with volume twelve',
-    'func': "msg.payload = {\n    objectId: 'ns=4;i=1234',\n    methodId: 'ns=4;i=12345',\n    inputArguments: [\n        " +
+    'func': "msg.payload = {\n    objectId: 'ns=1;i=1234',\n    methodId: 'ns=1;i=12345',\n    inputArguments: [\n        " +
     "{name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    " +
     "methodType: 'basic'\n}\nreturn msg;",
     'outputs': 1,
@@ -177,8 +179,8 @@ var testMethodInjectFlowPayload = [
     'id': 'n5mcf2',
     'type': 'OPCUA-IIoT-Method-Caller',
     'connector': 'c1mcf2',
-    'objectId': 'ns=4;i=1234',
-    'methodId': 'ns=4;i=12345',
+    'objectId': 'ns=1;i=1234',
+    'methodId': 'ns=1;i=12345',
     'methodType': 'basic',
     'value': '',
     'justValue': false,
@@ -266,7 +268,7 @@ var testMethodInjectFlowPayload = [
 ]
 
 describe('OPC UA Method Caller node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -280,7 +282,7 @@ describe('OPC UA Method Caller node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })
@@ -293,8 +295,8 @@ describe('OPC UA Method Caller node Testing', function () {
           'id': '706d43c1.90baac',
           'type': 'OPCUA-IIoT-Method-Caller',
           'connector': '6822ce7d.dcdb8',
-          'objectId': 'ns=4;i=1234',
-          'methodId': 'ns=4;i=12345',
+          'objectId': 'ns=1;i=1234',
+          'methodId': 'ns=1;i=12345',
           'methodType': 'basic',
           'value': '',
           'justValue': false,
@@ -337,8 +339,8 @@ describe('OPC UA Method Caller node Testing', function () {
         let nodeUnderTest = helper.getNode('706d43c1.90baac')
         nodeUnderTest.should.have.property('name', 'TestName')
         nodeUnderTest.should.have.property('methodType', 'basic')
-        nodeUnderTest.should.have.property('objectId', 'ns=4;i=1234')
-        nodeUnderTest.should.have.property('methodId', 'ns=4;i=12345')
+        nodeUnderTest.should.have.property('objectId', 'ns=1;i=1234')
+        nodeUnderTest.should.have.property('methodId', 'ns=1;i=12345')
         nodeUnderTest.should.have.property('justValue', false)
         nodeUnderTest.should.have.property('inputArguments', [
           {
@@ -417,7 +419,7 @@ describe('OPC UA Method Caller node Testing', function () {
         n8.on('input', function (msg) {
           msg.should.have.property('nodetype', 'method')
           msg.should.have.property('entryStatus', [1, 0, 0])
-          msg.should.have.property('payload', {'results': [{'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'inputArgumentResults': [[{'value': 0, 'description': 'No Error', 'name': 'Good'}, {'value': 0, 'description': 'No Error', 'name': 'Good'}], [{'value': 0, 'description': 'No Error', 'name': 'Good'}, {'value': 0, 'description': 'No Error', 'name': 'Good'}]], 'inputArgumentDiagnosticInfos': [], 'outputArguments': [{'dataType': 'String', 'arrayType': 'Array', 'value': ['Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!']}]}], 'definition': {'methodId': 'ns=4;i=12345', 'methodDefinition': {'inputArguments': {'inputArguments': [{'name': 'barks', 'dataType': 'ns=0;i=7', 'valueRank': -1, 'arrayDimensions': [[0]], 'description': {'text': 'specifies the number of time I should bark'}}, {'name': 'volume', 'dataType': 'ns=0;i=7', 'valueRank': -1, 'arrayDimensions': [[0]], 'description': {'text': 'specifies the sound volume [0 = quiet ,100 = loud]'}}], 'outputArguments': [{'name': 'Barks', 'dataType': 'ns=0;i=12', 'valueRank': 1, 'arrayDimensions': [[0]], 'description': {'text': 'the generated barks'}}]}}}})
+          msg.should.have.property('payload', {'results': [{'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'inputArgumentResults': [[{'value': 0, 'description': 'No Error', 'name': 'Good'}, {'value': 0, 'description': 'No Error', 'name': 'Good'}], [{'value': 0, 'description': 'No Error', 'name': 'Good'}, {'value': 0, 'description': 'No Error', 'name': 'Good'}]], 'inputArgumentDiagnosticInfos': [], 'outputArguments': [{'dataType': 'String', 'arrayType': 'Array', 'value': ['Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!']}]}], 'definition': {'methodId': 'ns=1;i=12345', 'methodDefinition': {'inputArguments': {'inputArguments': [{'name': 'barks', 'dataType': 'ns=0;i=7', 'valueRank': -1, 'arrayDimensions': [[0]], 'description': {'text': 'specifies the number of time I should bark'}}, {'name': 'volume', 'dataType': 'ns=0;i=7', 'valueRank': -1, 'arrayDimensions': [[0]], 'description': {'text': 'specifies the sound volume [0 = quiet ,100 = loud]'}}], 'outputArguments': [{'name': 'Barks', 'dataType': 'ns=0;i=12', 'valueRank': 1, 'arrayDimensions': [[0]], 'description': {'text': 'the generated barks'}}]}}}})
           done()
         })
       })

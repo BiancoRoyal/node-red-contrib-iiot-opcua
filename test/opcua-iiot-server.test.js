@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var inputNode = require('../src/opcua-iiot-server')
 
 var helper = require('node-red-node-test-helper')
@@ -44,7 +46,7 @@ var testServerFlow = [
 ]
 
 describe('OPC UA Server node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -58,7 +60,7 @@ describe('OPC UA Server node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })
@@ -70,10 +72,10 @@ describe('OPC UA Server node Testing', function () {
         [inputNode], testServerFlow,
         function () {
           let nodeUnderTest = helper.getNode('n1svrf1')
-          nodeUnderTest.should.have.property('name', 'DEMOSERVER')
-          nodeUnderTest.should.have.property('maxAllowedSessionNumber', 10)
-          nodeUnderTest.should.have.property('maxNodesPerRead', 1000)
-          nodeUnderTest.should.have.property('maxNodesPerBrowse', 2000)
+          expect(nodeUnderTest.name).toBe('DEMOSERVER')
+          expect(nodeUnderTest.maxAllowedSessionNumber).toBe(10)
+          expect(nodeUnderTest.maxNodesPerRead).toBe(1000)
+          expect(nodeUnderTest.maxNodesPerBrowse).toBe(2000)
           setTimeout(done, 3000)
         })
     })

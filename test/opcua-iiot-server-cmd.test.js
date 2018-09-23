@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var injectOPCUANode = require('../src/opcua-iiot-inject')
 var inputNode = require('../src/opcua-iiot-server-cmd')
@@ -44,7 +46,7 @@ var testCMDFlow = [
     'id': 'n4cmdf1',
     'type': 'OPCUA-IIoT-Server-Command',
     'commandtype': 'deleteNode',
-    'nodeId': 'ns=4;s=TestFolder',
+    'nodeId': 'ns=1;s=TestFolder',
     'name': '',
     'wires': [
       ['n6cmdf1']
@@ -70,7 +72,7 @@ var testInjectCMDFlow = [
     'addressSpaceItems': [
       {
         'name': 'TestFolder',
-        'nodeId': 'ns=4;s=TestFolder',
+        'nodeId': 'ns=1;s=TestFolder',
         'datatypeName': ''
       }
     ],
@@ -117,7 +119,7 @@ var testInjectCMDFlow = [
 ]
 
 describe('OPC UA Server Command node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -131,7 +133,7 @@ describe('OPC UA Server Command node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })
@@ -152,9 +154,9 @@ describe('OPC UA Server Command node Testing', function () {
         ],
         function () {
           let nodeUnderTest = helper.getNode('n3cmdf1')
-          nodeUnderTest.should.have.property('name', 'TestName')
-          nodeUnderTest.should.have.property('commandtype', 'restart')
-          nodeUnderTest.should.have.property('nodeId', '')
+          expect(nodeUnderTest.name).toBe('TestName')
+          expect(nodeUnderTest.commandtype).toBe('restart')
+          expect(nodeUnderTest.nodeId).toBe('')
           done()
         })
     })
@@ -163,9 +165,9 @@ describe('OPC UA Server Command node Testing', function () {
       helper.load([injectNode, inputNode], testCMDFlow, function () {
         let n5 = helper.getNode('n5cmdf1')
         n5.on('input', function (msg) {
-          msg.payload.should.have.property('commandtype', 'restart')
-          msg.payload.should.have.property('nodeId', '')
-          msg.should.have.property('nodetype', 'CMD')
+          expect(msg.payload.commandtype).toBe('restart')
+          expect(msg.payload.nodeId).toBe('')
+          expect(msg.nodetype).toBe('CMD')
           done()
         })
       })
@@ -175,9 +177,9 @@ describe('OPC UA Server Command node Testing', function () {
       helper.load([injectNode, inputNode], testCMDFlow, function () {
         let n6 = helper.getNode('n6cmdf1')
         n6.on('input', function (msg) {
-          msg.payload.should.have.property('commandtype', 'deleteNode')
-          msg.payload.should.have.property('nodeId', 'ns=4;s=TestFolder')
-          msg.should.have.property('nodetype', 'CMD')
+          expect(msg.payload.commandtype).toBe('deleteNode')
+          expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
+          expect(msg.nodetype).toBe('CMD')
           done()
         })
       })
@@ -187,9 +189,9 @@ describe('OPC UA Server Command node Testing', function () {
       helper.load([injectOPCUANode, inputNode, serverNode], testInjectCMDFlow, function () {
         let n4 = helper.getNode('n4cmdf2')
         n4.on('input', function (msg) {
-          msg.payload.should.have.property('commandtype', 'deleteNode')
-          msg.payload.should.have.property('nodeId', 'ns=4;s=TestFolder')
-          msg.should.have.property('nodetype', 'CMD')
+          expect(msg.payload.commandtype).toBe('deleteNode')
+          expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
+          expect(msg.nodetype).toBe('CMD')
           done()
         })
       })

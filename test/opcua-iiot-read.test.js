@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 // iiot opcua
 var injectNode = require('../src/opcua-iiot-inject')
 var connectorNode = require('../src/opcua-iiot-connector')

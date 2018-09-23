@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
 var inputNode = require('../src/opcua-iiot-response')
@@ -200,7 +202,7 @@ var writeOtherTestFlowPayload = testFlowPayload.concat([writeResultSimulation, w
 var listenOtherTestFlowPayload = testFlowPayload.concat([listenResultSimulation, listenOtherInject])
 
 describe('OPC UA Response node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -214,7 +216,7 @@ describe('OPC UA Response node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })

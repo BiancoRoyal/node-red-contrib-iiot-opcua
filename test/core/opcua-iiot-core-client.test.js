@@ -7,6 +7,8 @@
  */
 'use strict'
 
+jest.setTimeout(10000)
+
 describe('OPC UA Core Client', function () {
   let assert = require('chai').assert
   let expect = require('chai').expect

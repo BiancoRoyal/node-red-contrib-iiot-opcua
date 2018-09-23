@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 // iiot opc ua nodes
 var injectNode = require('../src/opcua-iiot-inject')
 var serverNode = require('../src/opcua-iiot-server')
@@ -37,7 +39,7 @@ var testListenerMonitoringFlow = [
     'addressSpaceItems': [
       {
         'name': 'FullCounter',
-        'nodeId': 'ns=4;s=FullCounter',
+        'nodeId': 'ns=1;s=FullCounter',
         'datatypeName': ''
       }
     ],
@@ -62,7 +64,7 @@ var testListenerMonitoringFlow = [
     'addressSpaceItems': [
       {
         'name': 'FullCounter',
-        'nodeId': 'ns=4;s=FullCounter',
+        'nodeId': 'ns=1;s=FullCounter',
         'datatypeName': ''
       }
     ],

@@ -10,7 +10,7 @@
 
 'use strict'
 
-var expect = require('chai').expect
+jest.setTimeout(10000)
 
 // iiot opc ua nodes
 var injectNode = require('../src/opcua-iiot-inject')

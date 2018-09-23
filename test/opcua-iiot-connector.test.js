@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
@@ -57,7 +59,7 @@ var testConnectorBrowseFlow = [
     'id': 'n3cf1',
     'type': 'OPCUA-IIoT-Browser',
     'connector': 'c1cf1',
-    'nodeId': 'ns=4;i=1234',
+    'nodeId': 'ns=1;i=1234',
     'name': 'TestBrowser',
     'justValue': true,
     'sendNodesToRead': false,
@@ -134,7 +136,7 @@ var testConnectorReadFlow = [
     'addressSpaceItems': [
       {
         'name': '',
-        'nodeId': 'ns=4;s=Pressure',
+        'nodeId': 'ns=1;s=Pressure',
         'datatypeName': ''
       }
     ],
@@ -221,7 +223,7 @@ var testConnectorListenerFlow = [
     'addressSpaceItems': [
       {
         'name': '',
-        'nodeId': 'ns=4;s=FullCounter',
+        'nodeId': 'ns=1;s=FullCounter',
         'datatypeName': ''
       }
     ],
@@ -307,7 +309,7 @@ var testConnectorWriteFlow = [
     'addressSpaceItems': [
       {
         'name': 'Pressure',
-        'nodeId': 'ns=4;s=Pressure',
+        'nodeId': 'ns=1;s=Pressure',
         'datatypeName': 'Double'
       }
     ],
@@ -405,8 +407,8 @@ var testConnectorMethodCallerFlow = [
     'id': 'n3cf5',
     'type': 'OPCUA-IIoT-Method-Caller',
     'connector': 'c1cf5',
-    'objectId': 'ns=4;i=1234',
-    'methodId': 'ns=4;i=12345',
+    'objectId': 'ns=1;i=1234',
+    'methodId': 'ns=1;i=12345',
     'methodType': 'basic',
     'value': '',
     'justValue': true,
@@ -482,8 +484,8 @@ var testConnectorHTTPFlow = [
     'id': 'n1cf6',
     'type': 'OPCUA-IIoT-Method-Caller',
     'connector': 'c1cf6',
-    'objectId': 'ns=4;i=1234',
-    'methodId': 'ns=4;i=12345',
+    'objectId': 'ns=1;i=1234',
+    'methodId': 'ns=1;i=12345',
     'methodType': 'basic',
     'value': '',
     'justValue': true,
@@ -554,7 +556,7 @@ var testConnectorHTTPFlow = [
 ]
 
 describe('OPC UA Connector node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -568,7 +570,7 @@ describe('OPC UA Connector node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })
@@ -763,7 +765,7 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
-          msg.payload.should.have.property('browseTopic', 'ns=4;i=1234')
+          msg.payload.should.have.property('browseTopic', 'ns=1;i=1234')
           done()
         })
       })
@@ -773,11 +775,11 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
-          msg.payload.should.have.property('browseTopic', 'ns=4;i=1234')
+          msg.payload.should.have.property('browseTopic', 'ns=1;i=1234')
           msg.payload.should.have.property('browserItems', [{
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
-            'nodeId': 'ns=4;s=Pressure',
+            'nodeId': 'ns=1;s=Pressure',
             'browseName': {'namespaceIndex': 0, 'name': 'Pressure'},
             'displayName': {'text': 'Pressure'},
             'nodeClass': 'Variable',
@@ -785,7 +787,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
-            'nodeId': 'ns=4;s=Matrix',
+            'nodeId': 'ns=1;s=Matrix',
             'browseName': {'namespaceIndex': 0, 'name': 'Matrix'},
             'displayName': {'text': 'Matrix'},
             'nodeClass': 'Variable',
@@ -793,7 +795,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
-            'nodeId': 'ns=4;s=Position',
+            'nodeId': 'ns=1;s=Position',
             'browseName': {'namespaceIndex': 0, 'name': 'Position'},
             'displayName': {'text': 'Position'},
             'nodeClass': 'Variable',
@@ -801,7 +803,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
-            'nodeId': 'ns=4;s=PumpSpeed',
+            'nodeId': 'ns=1;s=PumpSpeed',
             'browseName': {'namespaceIndex': 0, 'name': 'PumpSpeed'},
             'displayName': {'text': 'Pump Speed'},
             'nodeClass': 'Variable',
@@ -809,7 +811,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
-            'nodeId': 'ns=4;s=SomeDate',
+            'nodeId': 'ns=1;s=SomeDate',
             'browseName': {'namespaceIndex': 0, 'name': 'SomeDate'},
             'displayName': {'text': 'Some Date'},
             'nodeClass': 'Variable',
@@ -817,7 +819,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
-            'nodeId': 'ns=4;s=MultiLanguageText',
+            'nodeId': 'ns=1;s=MultiLanguageText',
             'browseName': {'namespaceIndex': 0, 'name': 'MultiLanguageText'},
             'displayName': {'text': 'Multi Language Text'},
             'nodeClass': 'Variable',
@@ -825,7 +827,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
-            'nodeId': 'ns=4;s=FanSpeed',
+            'nodeId': 'ns=1;s=FanSpeed',
             'browseName': {'namespaceIndex': 0, 'name': 'FanSpeed'},
             'displayName': {'text': 'FanSpeed'},
             'nodeClass': 'Variable',
@@ -841,7 +843,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=47',
             'isForward': true,
-            'nodeId': 'ns=4;i=16479',
+            'nodeId': 'ns=1;i=16479',
             'browseName': {'namespaceIndex': 0, 'name': 'MyVariable1'},
             'displayName': {'text': 'MyVariable1'},
             'nodeClass': 'Variable',
@@ -849,7 +851,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=47',
             'isForward': true,
-            'nodeId': 'ns=4;b=1020ffaa',
+            'nodeId': 'ns=1;b=1020ffaa',
             'browseName': {'namespaceIndex': 0, 'name': 'MyVariable2'},
             'displayName': {'text': 'MyVariable2'},
             'nodeClass': 'Variable',
@@ -857,7 +859,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=47',
             'isForward': true,
-            'nodeId': 'ns=4;s=TestReadWrite',
+            'nodeId': 'ns=1;s=TestReadWrite',
             'browseName': {'namespaceIndex': 0, 'name': 'TestReadWrite'},
             'displayName': {'text': 'Test Read and Write'},
             'nodeClass': 'Variable',
@@ -865,7 +867,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=47',
             'isForward': true,
-            'nodeId': 'ns=4;s=free_memory',
+            'nodeId': 'ns=1;s=free_memory',
             'browseName': {'namespaceIndex': 0, 'name': 'FreeMemory'},
             'displayName': {'text': 'Free Memory'},
             'nodeClass': 'Variable',
@@ -873,7 +875,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=47',
             'isForward': true,
-            'nodeId': 'ns=4;s=Counter',
+            'nodeId': 'ns=1;s=Counter',
             'browseName': {'namespaceIndex': 0, 'name': 'Counter'},
             'displayName': {'text': 'Counter'},
             'nodeClass': 'Variable',
@@ -881,7 +883,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=47',
             'isForward': true,
-            'nodeId': 'ns=4;s=FullCounter',
+            'nodeId': 'ns=1;s=FullCounter',
             'browseName': {'namespaceIndex': 0, 'name': 'FullCounter'},
             'displayName': {'text': 'FullCounter'},
             'nodeClass': 'Variable',
@@ -889,7 +891,7 @@ describe('OPC UA Connector node Testing', function () {
           }, {
             'referenceTypeId': 'ns=0;i=47',
             'isForward': true,
-            'nodeId': 'ns=4;i=12345',
+            'nodeId': 'ns=1;i=12345',
             'browseName': {'namespaceIndex': 0, 'name': 'Bark'},
             'displayName': {'text': 'Bark'},
             'nodeClass': 'Method',
@@ -915,9 +917,9 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForReader, testConnectorReadFlow, function () {
         let n5 = helper.getNode('n5cf2')
         n5.on('input', function (msg) {
-          msg.payload[0].should.have.property('nodeId', 'ns=4;s=Pressure')
+          msg.payload[0].should.have.property('nodeId', 'ns=1;s=Pressure')
           msg.should.have.property('topic', 'TestTopicRead')
-          msg.should.have.property('addressSpaceItems', [{'name': '', 'nodeId': 'ns=4;s=Pressure', 'datatypeName': ''}])
+          msg.should.have.property('addressSpaceItems', [{'name': '', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': ''}])
           done()
         })
       })
@@ -962,7 +964,7 @@ describe('OPC UA Connector node Testing', function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
           msg.should.have.property('topic', 'TestTopicWrite')
-          msg.should.have.property('addressSpaceItems', [{'name': 'Pressure', 'nodeId': 'ns=4;s=Pressure', 'datatypeName': 'Double'}])
+          msg.should.have.property('addressSpaceItems', [{'name': 'Pressure', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': 'Double'}])
           done()
         })
       })
@@ -986,7 +988,7 @@ describe('OPC UA Connector node Testing', function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
           msg.should.have.property('topic', 'TestTopicWrite')
-          msg.should.have.property('addressSpaceItems', [{'name': 'Pressure', 'nodeId': 'ns=4;s=Pressure', 'datatypeName': 'Double'}])
+          msg.should.have.property('addressSpaceItems', [{'name': 'Pressure', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': 'Double'}])
           done()
         })
       })

@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var inputNode = require('../src/opcua-iiot-inject')
 
 var helper = require('node-red-node-test-helper')
@@ -66,7 +68,7 @@ var testInjectWithDelayFlow = [
 ]
 
 describe('OPC UA Inject node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -80,7 +82,7 @@ describe('OPC UA Inject node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })

@@ -7,6 +7,8 @@
  */
 'use strict'
 
+jest.setTimeout(10000)
+
 describe('OPC UA Core', function () {
   let assert = require('chai').assert
   let expect = require('chai').expect
@@ -121,7 +123,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right namesapce five from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload:'', topic:'ns=5;s=TestReadWrite'})
+      let result = core.parseNamspaceFromMsgTopic({payload:'', topic:'ns=1;s=TestReadWrite'})
       assert.equal('5', result)
       done()
     })
@@ -141,7 +143,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right identifier five from msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload:'', topic:'ns=5;s=TestReadWrite'})
+      let result = core.parseIdentifierFromMsgTopic({payload:'', topic:'ns=1;s=TestReadWrite'})
       assert(result)
       let resultExpected = { identifier: 'TestReadWrite', type: core.nodeOPCUAId.NodeIdType.STRING }
       expect(result).to.deep.equal(resultExpected)

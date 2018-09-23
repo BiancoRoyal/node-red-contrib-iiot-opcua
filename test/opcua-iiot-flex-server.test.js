@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var inputNode = require('../src/opcua-iiot-flex-server')
 
 var helper = require('node-red-node-test-helper')
@@ -76,7 +78,7 @@ var testFlexServerFlow = [
     "browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        " +
     'organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    ' +
     'if(coreServer.core) {\n        addressSpace.addVariable({\n            componentOf: myVariables,\n            ' +
-    "nodeId: 'ns=4;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            " +
+    "nodeId: 'ns=1;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            " +
     "displayName: 'Test Read and Write',\n            dataType: 'Double',\n            " +
     'value: {\n                get: function () {\n                    ' +
     'return new coreServer.core.nodeOPCUA.Variant({\n                        ' +
@@ -84,14 +86,14 @@ var testFlexServerFlow = [
     '},\n                set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    ' +
     'return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        ' +
     'let memoryVariable = addressSpace.addVariable({\n            componentOf: myVariables,\n            ' +
-    "nodeId: 'ns=4;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: 'Free Memory',\n            " +
+    "nodeId: 'ns=1;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: 'Free Memory',\n            " +
     "dataType: 'Double',\n            \n            value: {\n              get: function () {\n                " +
     "return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  " +
     'value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        ' +
     'addressSpace.installHistoricalDataNode(memoryVariable)\n        \n        ' +
     'let globalValue = node.context().global.get("TestOPCUAVarValue")\n        if(globalValue) {\n            ' +
     "coreServer.internalDebugLog('init TestOPCUAVarValue in address space')\n            let testOPCUAVarValue = addressSpace.addVariable({\n                " +
-    "componentOf: myVariables,\n                nodeId: 'ns=4;s=TestOPCUAVarValue',\n                browseName: 'TestOPCUAVarValue',\n                " +
+    "componentOf: myVariables,\n                nodeId: 'ns=1;s=TestOPCUAVarValue',\n                browseName: 'TestOPCUAVarValue',\n                " +
     "displayName: 'Test OPC UA Variable Value',\n                dataType: 'Double',\n                \n                " +
     'value: {\n                  get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                      ' +
     "dataType: 'Double',\n                      value: node.context().global.get(\"TestOPCUAVarValue\").value\n                    })\n                  " +
@@ -107,7 +109,7 @@ var testFlexServerFlow = [
 ]
 
 describe('OPC UA Flex Server node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -121,7 +123,7 @@ describe('OPC UA Flex Server node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })

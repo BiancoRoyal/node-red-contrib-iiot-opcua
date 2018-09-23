@@ -124,6 +124,7 @@
     "test": "test"
   },
   "standard": {
+    "env": [ "jest" ],
     "ignore": [
       "code/",
       "node_modules/",

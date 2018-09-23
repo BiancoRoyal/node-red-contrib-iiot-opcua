@@ -10,7 +10,8 @@
 
 'use strict'
 
-var expect = require('chai').expect
+jest.setTimeout(15000)
+
 var functionNode = require('node-red/nodes/core/core/80-function')
 var injectNode = require('../src/opcua-iiot-inject')
 var inputNode = require('../src/opcua-iiot-server-aso')
@@ -23,7 +24,7 @@ var testASOFlow = [
   {
     'id': '7cb85115.7635',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestVariables',
+    'nodeId': 'ns=1;s=TestVariables',
     'browsename': 'TestVariables',
     'displayname': 'Test Variables',
     'objecttype': 'FolderType',
@@ -60,13 +61,13 @@ var testASOFlow = [
   {
     'id': 'df12586a.41bba8',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestDateTime',
+    'nodeId': 'ns=1;s=TestDateTime',
     'browsename': 'TestDateTime',
     'displayname': 'Test DateTime',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'DateTime',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'DateTime',
     'wires': [
@@ -97,13 +98,13 @@ var testASOFlow = [
   {
     'id': '8e9ace0.0c2453',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestBoolean',
+    'nodeId': 'ns=1;s=TestBoolean',
     'browsename': 'TestBoolean',
     'displayname': 'Test Boolean',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'Boolean',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'Boolean',
     'wires': [
@@ -134,13 +135,13 @@ var testASOFlow = [
   {
     'id': 'ab785570.b3e7e8',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestDouble',
+    'nodeId': 'ns=1;s=TestDouble',
     'browsename': 'TestDouble',
     'displayname': 'Test Double',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'Double',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'Double',
     'wires': [
@@ -171,13 +172,13 @@ var testASOFlow = [
   {
     'id': '1ae186da.38bfb9',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestUInt16',
+    'nodeId': 'ns=1;s=TestUInt16',
     'browsename': 'TestUInt16',
     'displayname': 'Test UInt16',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'UInt16',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'UInt16',
     'wires': [
@@ -208,13 +209,13 @@ var testASOFlow = [
   {
     'id': 'b1416f4e.5054b',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestUInt32',
+    'nodeId': 'ns=1;s=TestUInt32',
     'browsename': 'TestUInt32',
     'displayname': 'Test UInt32',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'UInt32',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'UInt32',
     'wires': [
@@ -245,13 +246,13 @@ var testASOFlow = [
   {
     'id': 'fdd7ec62.28318',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestUInt64',
+    'nodeId': 'ns=1;s=TestUInt64',
     'browsename': 'TestUInt64',
     'displayname': 'Test UInt64',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'UInt64',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'UInt64',
     'wires': [
@@ -282,13 +283,13 @@ var testASOFlow = [
   {
     'id': 'f6328ad1.cbcea8',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestString',
+    'nodeId': 'ns=1;s=TestString',
     'browsename': 'TestString',
     'displayname': 'Test String',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'String',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'String',
     'wires': [
@@ -319,13 +320,13 @@ var testASOFlow = [
   {
     'id': 'c15f96da.044178',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestInt16',
+    'nodeId': 'ns=1;s=TestInt16',
     'browsename': 'TestInt16',
     'displayname': 'Test Int16',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'Int16',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'Int16',
     'wires': [
@@ -356,13 +357,13 @@ var testASOFlow = [
   {
     'id': 'ad5f7bc5.03f188',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestInt32',
+    'nodeId': 'ns=1;s=TestInt32',
     'browsename': 'TestInt32',
     'displayname': 'Test Int32',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'Int32',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'Int32',
     'wires': [
@@ -412,13 +413,13 @@ var testASOFlow = [
   {
     'id': 'b85ce203.ecaec',
     'type': 'OPCUA-IIoT-Server-ASO',
-    'nodeId': 'ns=5;s=TestLocalizedText',
+    'nodeId': 'ns=1;s=TestLocalizedText',
     'browsename': 'TestLocalizedText',
     'displayname': 'Test LocalizedText',
     'objecttype': 'BaseDataVariableType',
     'datatype': 'LocalizedText',
     'value': '',
-    'referenceNodeId': 'ns=5;s=TestVariables',
+    'referenceNodeId': 'ns=1;s=TestVariables',
     'referencetype': 'Organizes',
     'name': 'LocalizedText',
     'wires': [
@@ -469,177 +470,175 @@ var testASOFlow = [
   {id: 'n5', type: 'helper'}
 ]
 
-describe('OPC UA Server ASO node Testing', function () {
-  before(function (done) {
-    helper.startServer(function () {
-      done()
-    })
+beforeAll(function (done) {
+  helper.startServer(function () {
+    done()
+  })
+})
+
+afterEach(function (done) {
+  helper.unload().then(function () {
+    done()
+  }).catch(function () {
+    done()
+  })
+})
+
+afterAll(function (done) {
+  helper.stopServer(function () {
+    done()
+  })
+})
+
+describe('Address Space Operation node', function () {
+  it('should be loaded', function (done) {
+    helper.load(
+      [inputNode], [
+        {
+          'id': '7cb85115.7635',
+          'type': 'OPCUA-IIoT-Server-ASO',
+          'nodeId': 'ns=1;s=TestVariables',
+          'browsename': 'TestVariables',
+          'displayname': 'Test Variables',
+          'objecttype': 'FolderType',
+          'datatype': 'Double',
+          'value': '1.0',
+          'referenceNodeId': 'ns=0;i=85',
+          'referencetype': 'Organizes',
+          'name': 'Folder'
+        }
+      ],
+      function () {
+        let nodeUnderTest = helper.getNode('7cb85115.7635')
+        expect(nodeUnderTest.name).toBe('Folder')
+        expect(nodeUnderTest.nodeId.toString()).toBe('ns=1;s=TestVariables')
+        expect(nodeUnderTest.datatype).toBe('Double')
+        expect(nodeUnderTest.value).toBe('1.0')
+        expect(nodeUnderTest.browsename).toBe('TestVariables')
+        expect(nodeUnderTest.displayname).toBe('Test Variables')
+        done()
+      })
   })
 
-  afterEach(function (done) {
-    helper.unload().then(function () {
-      done()
-    }).catch(function () {
-      done()
-    })
-  })
+  it('should get a message with payload', function (done) {
+    helper.load([injectNode, functionNode, inputNode, serverNode], testASOFlow, function () {
+      let n4 = helper.getNode('n4')
+      let test = 0
+      n4.on('input', function (msg) {
+        switch (msg.payload.datatype) {
+          case 'FolderType':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')
+            test ^= 1
+            break
+          case 'DateTime':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDateTime')
+            test ^= 2
+            break
+          case 'Boolean':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestBoolean')
+            test ^= 4
+            break
+          case 'Double':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDouble')
+            test ^= 8
+            break
+          case 'UInt16':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt16')
+            test ^= 16
+            break
+          case 'UInt32':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt32')
+            test ^= 32
+            break
+          case 'UInt64':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt64')
+            test ^= 64
+            break
+          case 'String':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestString')
+            test ^= 128
+            break
+          case 'Int16':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt16')
+            test ^= 256
+            break
+          case 'Int32':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt32')
+            test ^= 512
+            break
+          case 'LocalizedText':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestLocalizedText')
+            test ^= 1024
+            break
+          default:
+            break
+        }
 
-  after(function (done) {
-    helper.stopServer(function () {
-      done()
-    })
-  })
-
-  describe('Address Space Operation node', function () {
-    it('should be loaded', function (done) {
-      helper.load(
-        [inputNode], [
-          {
-            'id': '7cb85115.7635',
-            'type': 'OPCUA-IIoT-Server-ASO',
-            'nodeId': 'ns=5;s=TestVariables',
-            'browsename': 'TestVariables',
-            'displayname': 'Test Variables',
-            'objecttype': 'FolderType',
-            'datatype': 'Double',
-            'value': '1.0',
-            'referenceNodeId': 'ns=0;i=85',
-            'referencetype': 'Organizes',
-            'name': 'Folder'
-          }
-        ],
-        function () {
-          let nodeUnderTest = helper.getNode('7cb85115.7635')
-          nodeUnderTest.should.have.property('name', 'Folder')
-          nodeUnderTest.should.have.property('nodeId', 'ns=5;s=TestVariables')
-          nodeUnderTest.should.have.property('datatype', 'Double')
-          nodeUnderTest.should.have.property('value', '1.0')
-          nodeUnderTest.should.have.property('browsename', 'TestVariables')
-          nodeUnderTest.should.have.property('displayname', 'Test Variables')
+        if (test === Math.pow(2, 11) - 1) {
           done()
-        })
-    })
-
-    it('should get a message with payload', function (done) {
-      helper.load([injectNode, functionNode, inputNode, serverNode], testASOFlow, function () {
-        let n4 = helper.getNode('n4')
-        let test = 0
-        n4.on('input', function (msg) {
-          switch (msg.payload.datatype) {
-            case 'FolderType':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestVariables')
-              test ^= 1
-              break
-            case 'DateTime':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestDateTime')
-              test ^= 2
-              break
-            case 'Boolean':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestBoolean')
-              test ^= 4
-              break
-            case 'Double':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestDouble')
-              test ^= 8
-              break
-            case 'UInt16':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestUInt16')
-              test ^= 16
-              break
-            case 'UInt32':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestUInt32')
-              test ^= 32
-              break
-            case 'UInt64':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestUInt64')
-              test ^= 64
-              break
-            case 'String':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestString')
-              test ^= 128
-              break
-            case 'Int16':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestInt16')
-              test ^= 256
-              break
-            case 'Int32':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestInt32')
-              test ^= 512
-              break
-            case 'LocalizedText':
-              msg.payload.should.have.property('nodeId', 'ns=5;s=TestLocalizedText')
-              test ^= 1024
-              break
-            default:
-              break
-          }
-
-          if (test === Math.pow(2, 11) - 1) {
-            done()
-          }
-        })
+        }
       })
     })
+  })
 
-    it('should verify an inject message for address space peration', function (done) {
-      helper.load([injectNode, functionNode, inputNode, serverNode], testASOFlow, function () {
-        let n4 = helper.getNode('n4')
-        let test = 0
-        n4.on('input', function (msg) {
-          switch (msg.payload.datatype) {
-            case 'FolderType':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestVariables')
-              expect(msg.payload.browsename).to.equal('TestVariables')
-              test ^= 1
-              break
-            case 'DateTime':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestDateTime')
-              test ^= 2
-              break
-            case 'Boolean':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestBoolean')
-              test ^= 4
-              break
-            case 'Double':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestDouble')
-              test ^= 8
-              break
-            case 'UInt16':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestUInt16')
-              test ^= 16
-              break
-            case 'UInt32':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestUInt32')
-              test ^= 32
-              break
-            case 'UInt64':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestUInt64')
-              test ^= 64
-              break
-            case 'String':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestString')
-              test ^= 128
-              break
-            case 'Int16':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestInt16')
-              test ^= 256
-              break
-            case 'Int32':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestInt32')
-              test ^= 512
-              break
-            case 'LocalizedText':
-              expect(msg.payload.nodeId).to.equal('ns=5;s=TestLocalizedText')
-              test ^= 1024
-              break
-            default:
-              break
-          }
+  it('should verify an inject message for address space operation', function (done) {
+    helper.load([injectNode, functionNode, inputNode, serverNode], testASOFlow, function () {
+      let n4 = helper.getNode('n4')
+      let test = 0
+      n4.on('input', function (msg) {
+        switch (msg.payload.datatype) {
+          case 'FolderType':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')
+            expect(msg.payload.browsename).toBe('TestVariables')
+            test ^= 1
+            break
+          case 'DateTime':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDateTime')
+            test ^= 2
+            break
+          case 'Boolean':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestBoolean')
+            test ^= 4
+            break
+          case 'Double':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDouble')
+            test ^= 8
+            break
+          case 'UInt16':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt16')
+            test ^= 16
+            break
+          case 'UInt32':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt32')
+            test ^= 32
+            break
+          case 'UInt64':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt64')
+            test ^= 64
+            break
+          case 'String':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestString')
+            test ^= 128
+            break
+          case 'Int16':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt16')
+            test ^= 256
+            break
+          case 'Int32':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt32')
+            test ^= 512
+            break
+          case 'LocalizedText':
+            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestLocalizedText')
+            test ^= 1024
+            break
+          default:
+            break
+        }
 
-          if (test === Math.pow(2, 11) - 1) {
-            done()
-          }
-        })
+        if (test === Math.pow(2, 11) - 1) {
+          done()
+        }
       })
     })
   })

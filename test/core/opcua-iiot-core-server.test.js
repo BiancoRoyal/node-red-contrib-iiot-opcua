@@ -7,7 +7,8 @@
  */
 'use strict'
 
-let assert = require('chai').assert
+jest.setTimeout(10000)
+
 let coreServer = require('../../src/core/opcua-iiot-core-server')
 let opcuaserver = null
 
@@ -33,7 +34,7 @@ describe('OPC UA Core Server', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     opcuaserver = null
     coreServer.destructAddressSpace()
     coreServer = null
@@ -54,7 +55,7 @@ describe('OPC UA Core Server', function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
           coreServer.timeInterval = coreServer.maxTimeInterval
           coreServer.simulateVariation({})
-          assert.equal(1, coreServer.timeInterval)
+          expect(coreServer.timeInterval).toBe(1)
           done()
         })
       })
@@ -63,7 +64,7 @@ describe('OPC UA Core Server', function () {
     it('should catch error on start with empty server', function (done) {
       coreServer.start(null, null).then().catch(function (err) {
         if (err) {
-          assert.equal('Server Not Valid To Start', err.message)
+          expect(err.message).toBe('Server Not Valid To Start')
           done()
         }
       })
@@ -74,7 +75,7 @@ describe('OPC UA Core Server', function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
           coreServer.start(opcuaserver, null).then().catch(function (err) {
             if (err) {
-              assert.equal('Node Not Valid To Start', err.message)
+              expect(err.message).toBe('Node Not Valid To Start')
               done()
             }
           })
@@ -87,7 +88,7 @@ describe('OPC UA Core Server', function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
           let node = {initialized: false}
           coreServer.start(opcuaserver, node).then(function () {
-            assert.equal(true, node.initialized)
+            expect(node.initialized).toBe(true)
             done()
           })
         })

@@ -10,7 +10,8 @@
 
 'use strict'
 
-var assert = require('chai').assert
+jest.setTimeout(10000)
+
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
 var inputNode = require('../src/opcua-iiot-result-filter')
@@ -92,7 +93,7 @@ var listenTestFlowPayload = [
   {id: 'n4rff2', type: 'helper'},
   {id: 'n5rff2',
     'type': 'OPCUA-IIoT-Result-Filter',
-    'nodeId': 'ns=4;s=Pressure',
+    'nodeId': 'ns=1;s=Pressure',
     'datatype': 'Double',
     'fixedValue': true,
     'fixPoint': 2,
@@ -113,7 +114,7 @@ var listenTestFlowPayload = [
 ]
 
 describe('OPC UA Result Filter node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -127,7 +128,7 @@ describe('OPC UA Result Filter node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })
@@ -254,7 +255,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n6 = helper.getNode('n6rff2')
         n6.on('input', function (msg) {
-          msg.should.have.property('nodeId', 'ns=4;s=Pressure')
+          msg.should.have.property('nodeId', 'ns=1;s=Pressure')
           msg.should.have.property('payload', 16.04)
           msg.should.have.property('topic', 'TestTopic')
           done()

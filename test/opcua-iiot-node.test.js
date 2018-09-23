@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var inputNode = require('../src/opcua-iiot-node')
 
@@ -153,7 +155,7 @@ var testNodeEventWithPayloadFlow = [
     'id': 'n3',
     'type': 'OPCUA-IIoT-Node',
     'injectType': 'write',
-    'nodeId': 'ns=5;s=GESTRUCKEST',
+    'nodeId': 'ns=1;s=GESTRUCKEST',
     'datatype': 'Int16',
     'value': '',
     'name': 'ERRORNODE',
@@ -169,7 +171,7 @@ var testNodeEventWithPayloadFlow = [
 ]
 
 describe('OPC UA Node node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -183,7 +185,7 @@ describe('OPC UA Node node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })

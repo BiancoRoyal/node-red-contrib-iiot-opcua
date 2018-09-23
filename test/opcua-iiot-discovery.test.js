@@ -10,6 +10,8 @@
 
 'use strict'
 
+jest.setTimeout(10000)
+
 var inputNode = require('../src/opcua-iiot-discovery')
 
 var helper = require('node-red-node-test-helper')
@@ -26,7 +28,7 @@ var testDiscoveryFlow = [
 ]
 
 describe('OPC UA Discovery node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -40,7 +42,7 @@ describe('OPC UA Discovery node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })

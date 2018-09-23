@@ -266,7 +266,7 @@ module.exports = function (RED) {
       let variableData = coreServer.core.getVariantValue(msg.payload.datatype, msg.payload.value)
 
       if (rootFolder) {
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           componentOf: rootFolder,
           nodeId: msg.payload.nodeId,
           browseName: msg.payload.browsename,
@@ -300,7 +300,7 @@ module.exports = function (RED) {
       let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
 
       if (rootFolder) {
-        addressSpace.addObject({
+        addressSpace.getOwnNamespace().addObject({
           organizedBy: rootFolder,
           nodeId: msg.payload.nodeId,
           browseName: msg.payload.browsename,

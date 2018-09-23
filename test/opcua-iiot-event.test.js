@@ -10,7 +10,8 @@
 
 'use strict'
 
-var assert = require('chai').assert
+jest.setTimeout(10000)
+
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var inputNode = require('../src/opcua-iiot-event')
 
@@ -46,7 +47,7 @@ var testEventNodeFlow = [
 ]
 
 describe('OPC UA Event node Testing', function () {
-  before(function (done) {
+  beforeAll(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -60,7 +61,7 @@ describe('OPC UA Event node Testing', function () {
     })
   })
 
-  after(function (done) {
+  afterAll(function (done) {
     helper.stopServer(function () {
       done()
     })
