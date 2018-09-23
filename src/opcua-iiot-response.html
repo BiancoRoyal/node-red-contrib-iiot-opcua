@@ -12,8 +12,11 @@
     color: "#ABCDEF",
     defaults: {
       name: {value: ""},
+      compressStructure: {value: true},
       showStatusActivities: {value: false},
-      showErrors: {value: false}
+      showErrors: {value: false},
+      activateFilters: {value: false},
+      filters: {value: []},
     },
     inputs: 1,
     outputs: 1,
@@ -24,31 +27,248 @@
     },
     labelStyle: function () {
       return this.name ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+      let node = this
+      let cacheItemCount = 0
+
+      let tabs = RED.tabs.create({
+        id: "node-input-response-tabs",
+        onchange: function (tab) {
+          $("#node-input-response-tabs-content").children().hide()
+          $("#" + tab.id).show()
+        }
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-response-tab-settings",
+        label: this._("opcua-iiot-contrib.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-response-tab-filter",
+        label: this._("opcua-iiot-contrib.tabs-label.filter")
+      })
+
+      // Filter Management
+      if(node.filters && node.filters.length > 0) {
+        cacheItemCount = node.filters.length
+        node.filters.forEach(function(element, index, array) {
+          generateFilterEntry(element, index);
+        })
+      }
+
+      function generateFilterEntry(filter, id) {
+        let container = $('<li/>', {
+          style:
+            'background: #fefefe; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;'
+        })
+        let row = $('<div class="row" id="row' + id + '" />').appendTo(container)
+
+        $('<i style="color: #eee; cursor: move;" class="node-input-addressSpaceItems-handle fa fa-bars"></i>').appendTo(row)
+
+        let filterNameField = $('<input/>', {
+          id: "node-input-response-filter-name" + id,
+          class: 'opcuaFilterName',
+          type: "text",
+          style: "margin-left:5px;width:240px;",
+          placeholder: 'nodeId'
+        }).appendTo(row)
+
+        let filterValueField = $('<input/>', {
+          id: "node-input-response-filter-value" + id,
+          class: 'opcuaFilterValue',
+          type: "text",
+          style: "margin: 0 auto;width:45%;min-width:60px;margin-left:5px",
+          placeholder: 'ns=0*'
+        }).appendTo(row)
+
+        filterNameField.val(filter.name)
+        filterValueField.val(filter.value)
+
+        let finalspan = $('<span/>', {style: 'float: right;margin-right: 10px;'}).appendTo(row)
+
+        let lookupItemButton = $('<a/>', {
+          href: '#',
+          id: 'node-button-response-filter-types' + id,
+          class: 'editor-button editor-button-small listButton',
+          style: 'margin-top: 7px; margin-left: 5px;'
+        }).appendTo(finalspan)
+
+        lookupItemButton.click(function () {
+          let filterLookupButton = $('#node-button-response-filter-types' + id)
+          let filterNameLookupField = $('#row' + id + ' #node-input-response-filter-name'  + id)
+
+          filterLookupButton.addClass('disabled')
+
+          $.getJSON('/opcuaIIoT/list/FilterTypes', function (data) {
+            filterLookupButton.removeClass('disabled')
+            node.lookupItems = []
+
+            $.each(data, function (i, entry) {
+              node.lookupItems.push({name: entry.name, label: entry.label})
+            })
+
+            filterNameLookupField.autocomplete({
+              source: node.lookupItems,
+              minLength: 0,
+              focus: function (event, ui) {
+                filterNameLookupField.val(ui.item.name)
+                return false;
+              },
+              select: function (event, ui) {
+                filterNameLookupField.val(ui.item.name)
+                return false;
+              },
+              close: function (event, ui) {
+                filterNameLookupField.autocomplete("destroy")
+              }
+            }).autocomplete("search", "")
+          })
+        })
+
+        $('<i/>', {class: 'fa fa-search'}).appendTo(lookupItemButton)
+
+        let removeItemButton = $('<a/>', {
+          href: '#',
+          id: 'node-button-response-filter-remove' + id,
+          class: 'editor-button editor-button-small listButton',
+          style: 'margin-top: 7px; margin-left: 5px;'
+        }).appendTo(finalspan)
+
+        $('<i/>', {class: 'fa fa-remove'}).appendTo(removeItemButton)
+
+        removeItemButton.click(function () {
+          container.fadeOut(300, function () {
+            $(this).remove()
+          })
+        })
+
+        $('#node-input-response-filter-container').append(container)
+      }
+
+      $("#node-input-response-filter-container").sortable({
+        axis: "y",
+        handle: ".node-input-response-filter-handle",
+        cursor: "move"
+      });
+
+      $("#node-input-response-filter-container .node-input-response-filter-handle").disableSelection()
+
+      $("#node-input-response-filter-add").click(function () {
+        if(!cacheItemCount || cacheItemCount < 0) {
+          cacheItemCount = 0
+        }
+        generateFilterEntry({ name: '', value: '' }, cacheItemCount++) // length is every time one more than index
+        let responseContainerDiv = $("#node-input-response-filter-container-div")
+        responseContainerDiv.scrollTop(responseContainerDiv.get(0).scrollHeight)
+      })
+
+      function switchDialogResize() {
+        switchFilterDialogResize()
+      }
+
+      // dialog Filter handling
+      function switchFilterDialogResize() {
+        let rows = $("#dialog-form>div:not(.node-input-response-filter-container-row)")
+        let height = $("#dialog-form").height()
+
+        rows.each(function (index, row) {
+          height -= row.outerHeight(true)
+        })
+
+        let editorRow = $("#dialog-form>div.node-input-response-filter-container-row")
+        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")))
+        $("#node-input-response-filter-container-div").css("height", height + "px")
+      }
+
+      let dialogHandle = $("#dialog")
+      dialogHandle.on("dialogresize", switchDialogResize)
+
+      dialogHandle.on("dialogopen", function (ev) {
+        let size = dialogHandle.dialog('option', 'sizeCache-switch')
+        if (size) {
+          dialogHandle.dialog('option', 'width', size.width)
+          dialogHandle.dialog('option', 'height', size.height)
+          switchDialogResize()
+        } else {
+          setTimeout(switchDialogResize, 10)
+        }
+      })
+
+      dialogHandle.on("dialogclose", function (ev, ui) {
+        dialogHandle.off("dialogresize", switchDialogResize)
+      })
+    },
+    oneditsave: function () {
+      let node = this
+
+      let cacheFilters = $("#node-input-response-filter-container").children()
+      node.filters = []
+      cacheFilters.each(function () {
+        node.filters.push({
+          name: $(this).find('.opcuaFilterName').val(),
+          value: $(this).find('.opcuaFilterValue').val(),
+        })
+      })
     }
   });
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Response">
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
-        <input type="text" id="node-input-name" placeholder="">
+        <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-input-response-tabs"></ul>
     </div>
-    <!-- StatusCodes to add and remove to filter for in a second output -->
-    <hr>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
-        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
-        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
-    </div>
-    <div class="form-row">
-        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
-        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
-        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
-    </div>
+    <div id="node-input-response-tabs-content" style="min-height: 170px;">
+        <div id="opcuaiiot-response-tab-settings" style="display:none">
+            <div class="form-row" style="min-width:640px">
+                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <input type="text" id="node-input-name" placeholder="">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-compressStructure"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.compressStructure"></span></label>
+                <input type="checkbox" id="node-input-compressStructure" style="max-width:30px">
+            </div>
+            <!-- StatusCodes to add and remove to filter for in a second output -->
+            <hr>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+                <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+                <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+            </div>
+        </div>
+        <div id="opcuaiiot-response-tab-filter" style="display:none">
+            <h4><span data-i18n="opcua-iiot-contrib.label.filters"></span></h4>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-activateFilters"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.activateFilters"></span></label>
+                <input type="checkbox" id="node-input-activateFilters" style="max-width:30px">
+            </div>
+            <div class="form-row node-input-response-filter-container-row" style="margin-bottom: 0px;">
+                <div id="node-input-response-filter-container-div"
+                    style="box-sizing: border-box; border-radius: 5px;
+                    height: 480px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+                    <ol id="node-input-response-filter-container" style="list-style-type:none; margin: 0;"></ol>
+                </div>
+            </div>
+            <div class="form-row">
+                <a href="#" class="editor-button editor-button-small" id="node-input-response-filter-add"
+                style="margin-top: 4px;"><i class="fa fa-plus"></i>
+                <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
+            </div>
+        </div>
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Response">
     <h2>OPC UA IIoT Response</h2>
+
+    <p>There is a compress option to get compressed msg objects with just the payload data.</p>
 
     <p>The Response node shows you the response data from your request in categories of Good, Bad, and Other.</p>
 

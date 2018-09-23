@@ -582,8 +582,8 @@ describe('OPC UA Connector node Testing', function () {
         {
           'id': 'n4',
           'type': 'OPCUA-IIoT-Connector',
-          'discoveryUrl': 'opc.tcp://localhost:4840/',
-          'endpoint': 'opc.tcp://localhost:1984/',
+          'discoveryUrl': '',
+          'endpoint': '',
           'keepSessionAlive': false,
           'loginEnabled': false,
           'securityPolicy': 'None',
@@ -601,17 +601,43 @@ describe('OPC UA Connector node Testing', function () {
           'strategyMaxDelay': '',
           'strategyRandomisationFactor': ''
         }
-      ],
-      function () {
+      ], () => {
         let n4 = helper.getNode('n4')
-        n4.should.have.property('name', 'TESTSERVER')
-        n4.should.have.property('discoveryUrl', 'opc.tcp://localhost:4840/')
-        n4.should.have.property('endpoint', 'opc.tcp://localhost:1984/')
-        n4.should.have.property('securityPolicy', 'None')
-        n4.should.have.property('messageSecurityMode', 'NONE')
-        n4.should.have.property('publicCertificateFile', null)
-        n4.should.have.property('privateKeyFile', null)
-        setTimeout(done, 3000)
+        if (n4) {
+          done()
+        }
+      })
+    })
+
+    it('should be loaded and end with delay', function (done) {
+      helper.load([inputNode], [
+        {
+          'id': 'n4',
+          'type': 'OPCUA-IIoT-Connector',
+          'discoveryUrl': '',
+          'endpoint': 'opc.tcp://localhost:4840/',
+          'keepSessionAlive': false,
+          'loginEnabled': false,
+          'securityPolicy': 'None',
+          'securityMode': 'NONE',
+          'name': 'TESTSERVER',
+          'showStatusActivities': false,
+          'showErrors': false,
+          'publicCertificateFile': '',
+          'privateKeyFile': '',
+          'defaultSecureTokenLifetime': '60000',
+          'endpointMustExist': false,
+          'autoSelectRightEndpoint': false,
+          'strategyMaxRetry': '',
+          'strategyInitialDelay': '',
+          'strategyMaxDelay': '',
+          'strategyRandomisationFactor': ''
+        }
+      ], () => {
+        let n4 = helper.getNode('n4')
+        if (n4) {
+          setTimeout(done, 3000)
+        }
       })
     })
 
@@ -745,7 +771,7 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n2 = helper.getNode('n2cf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 'testpayload')
+          expect(msg.payload).to.equal('testpayload')
           setTimeout(done, 3000)
         })
       })
@@ -755,7 +781,7 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicBrowse')
+          expect(msg.topic).to.equal('TestTopicBrowse')
           done()
         })
       })
@@ -765,7 +791,7 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
-          msg.payload.should.have.property('browseTopic', 'ns=1;i=1234')
+          expect(msg.payload.browseTopic).to.equal('ns=1;i=1234')
           done()
         })
       })
@@ -775,8 +801,8 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
-          msg.payload.should.have.property('browseTopic', 'ns=1;i=1234')
-          msg.payload.should.have.property('browserItems', [{
+          expect(msg.payload.browseTopic).to.equal('ns=1;i=1234')
+          expect(msg.payload.browserItems).to.equal([{
             'referenceTypeId': 'ns=0;i=35',
             'isForward': true,
             'nodeId': 'ns=1;s=Pressure',
@@ -906,8 +932,8 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForReader, testConnectorReadFlow, function () {
         let n2 = helper.getNode('n2cf2')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 'testpayload')
-          msg.should.have.property('topic', 'TestTopicRead')
+          expect(msg.payload).to.equal('testpayload')
+          expect(msg.topic).to.equal('TestTopicRead')
           setTimeout(done, 3000)
         })
       })
@@ -917,9 +943,9 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForReader, testConnectorReadFlow, function () {
         let n5 = helper.getNode('n5cf2')
         n5.on('input', function (msg) {
-          msg.payload[0].should.have.property('nodeId', 'ns=1;s=Pressure')
-          msg.should.have.property('topic', 'TestTopicRead')
-          msg.should.have.property('addressSpaceItems', [{'name': '', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': ''}])
+          expect(msg.payload[0].nodeId).to.equal('ns=1;s=Pressure')
+          expect(msg.topic).to.equal('TestTopicRead')
+          expect(msg.addressSpaceItems).to.equal([{'name': '', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': ''}])
           done()
         })
       })
@@ -930,18 +956,18 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForListener, testConnectorListenerFlow, function () {
         let n2 = helper.getNode('n2cf3')
         n2.on('input', function (msg) {
-          msg.payload.should.have.property('options')
-          msg.should.have.property('topic', 'TestTopicListen')
+          expect(msg.payload.options).toBeDefined()
+          expect(msg.topic).to.equal('TestTopicListen')
         })
 
         let n5 = helper.getNode('n5cf3')
         n5.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            msg.payload.value.should.have.property('dataType', 'Int32')
-            msg.payload.statusCode.should.have.property('name', 'Good')
-            msg.should.have.property('nodetype', 'listen')
-            msg.should.have.property('injectType', 'subscribe')
+            expect(msg.payload.value.dataType).to.equal('Int32')
+            expect(msg.payload.statusCode.name).to.equal('Good')
+            expect(msg.nodetype).to.equal('listen')
+            expect(msg.injectType).to.equal('subscribe')
             done()
           }
         })
@@ -952,8 +978,8 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
         let n2 = helper.getNode('n2cf4')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 1000)
-          msg.should.have.property('topic', 'TestTopicWrite')
+          expect(msg.payload).to.equal(1000)
+          expect(msg.topic).to.equal('TestTopicWrite')
           setTimeout(done, 3000)
         })
       })
@@ -963,8 +989,8 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicWrite')
-          msg.should.have.property('addressSpaceItems', [{'name': 'Pressure', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': 'Double'}])
+          expect(msg.topic).to.equal('TestTopicWrite')
+          expect(msg.addressSpaceItems).to.equal([{'name': 'Pressure', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': 'Double'}])
           done()
         })
       })
@@ -975,8 +1001,8 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
         let n2 = helper.getNode('n2cf4')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 1000)
-          msg.should.have.property('topic', 'TestTopicWrite')
+          expect(msg.payload).to.equal(1000)
+          expect(msg.topic).to.equal('TestTopicWrite')
           done()
         })
       })
@@ -987,8 +1013,8 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicWrite')
-          msg.should.have.property('addressSpaceItems', [{'name': 'Pressure', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': 'Double'}])
+          expect(msg.topic).to.equal('TestTopicWrite')
+          expect(msg.addressSpaceItems).to.equal([{'name': 'Pressure', 'nodeId': 'ns=1;s=Pressure', 'datatypeName': 'Double'}])
           done()
         })
       })
@@ -998,8 +1024,8 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForMethodCaller, testConnectorMethodCallerFlow, function () {
         let n2 = helper.getNode('n2cf5')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 1000)
-          msg.should.have.property('topic', 'TestTopicMethod')
+          expect(msg.payload).to.equal(1000)
+          expect(msg.topic).to.equal('TestTopicMethod')
           setTimeout(done, 3000)
         })
       })
@@ -1009,11 +1035,11 @@ describe('OPC UA Connector node Testing', function () {
       helper.load(nodesToLoadForMethodCaller, testConnectorMethodCallerFlow, function () {
         let n5 = helper.getNode('n5cf5')
         n5.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicMethod')
-          msg.should.have.property('nodetype', 'method')
-          msg.should.have.property('injectType', 'inject')
-          msg.should.have.property('methodType', 'basic')
-          msg.should.have.property('payload', [{'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'outputArguments': [{'dataType': 'String', 'arrayType': 'Array', 'value': ['Whaff!!!!!', 'Whaff!!!!!', 'Whaff!!!!!']}]}])
+          expect(msg.topic).to.equal('TestTopicMethod')
+          expect(msg.nodetype).to.equal('method')
+          expect(msg.injectType).to.equal('inject')
+          expect(msg.methodType).to.equal('basic')
+          expect(msg.payload).to.equal([{'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'outputArguments': [{'dataType': 'String', 'arrayType': 'Array', 'value': ['Whaff!!!!!', 'Whaff!!!!!', 'Whaff!!!!!']}]}])
           done()
         })
       })

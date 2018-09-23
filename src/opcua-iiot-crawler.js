@@ -25,6 +25,7 @@ module.exports = function (RED) {
     this.singleResult = config.singleResult
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.activateFilters = config.activateFilters
     this.filters = config.filters
     this.connector = RED.nodes.getNode(config.connector)
 
@@ -69,9 +70,9 @@ module.exports = function (RED) {
       browserEntries = browserResult || []
       let filteredEntries = []
 
-      if (node.filters && node.filters.length > 0) {
+      if (node.activateFilters && node.filters && node.filters.length > 0) {
         browserEntries.forEach(function (item) {
-          if (node.itemIsNotToFilter(item, filteredEntries)) {
+          if (node.itemIsNotToFilter(item)) {
             filteredEntries.push(item)
           }
         })
@@ -89,17 +90,26 @@ module.exports = function (RED) {
       node.sendMessage(msg)
     }
 
-    node.itemIsNotToFilter = function (item, filteredEntries) {
+    node.itemIsNotToFilter = function (item) {
       let result = true
       let filterValue
       node.filters.forEach(function (element, index, array) {
         try {
           switch (element.name) {
             case 'browseName':
+            case 'statusCode':
               filterValue = item[element.name].name
               break
             case 'displayName':
               filterValue = item[element.name].text
+              break
+            case 'value':
+            case 'dataType':
+              if (item.value && item.value.hasOwnProperty('value')) {
+                filterValue = item.value[element.name]
+              } else {
+                filterValue = item[element.name]
+              }
               break
             default:
               filterValue = item[element.name]
@@ -113,6 +123,15 @@ module.exports = function (RED) {
             if (filterValue && filterValue.match) {
               if (filterValue.match(element.value)) {
                 result &= false
+              }
+            } else {
+              if (filterValue && filterValue.toString) {
+                filterValue = filterValue.toString()
+                if (filterValue && filterValue.match) {
+                  if (filterValue.match(element.value)) {
+                    result &= false
+                  }
+                }
               }
             }
           }

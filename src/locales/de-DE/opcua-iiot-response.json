@@ -1,6 +1,7 @@
 {
   "opcua-iiot-contrib": {
     "label": {
+      "compressStructure": "Vereinfache Daten",
       "showActivities": "Zeige Aktivitäten",
       "showErrors": "Zeige Fehler"
     }

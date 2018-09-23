@@ -1,6 +1,12 @@
 {
   "opcua-iiot-contrib": {
+    "tabs-label":{
+      "settings": "Settings",
+      "filter": "Filter"
+    },
     "label": {
+      "activateFilters": "Activate filters",
+      "compressStructure": "Simplify results",
       "showActivities": "Show Activities",
       "showErrors": "Show Errors"
     }

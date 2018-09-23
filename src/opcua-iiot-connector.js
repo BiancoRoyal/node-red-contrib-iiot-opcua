@@ -185,6 +185,10 @@ module.exports = function (RED) {
       }
 
       node.connectToClient = function () {
+        if (!node.endpoint.includes('opc.tcp://')) {
+          node.error(new Error('endpoint does not include opc.tcp://'), {payload: 'Client Endpoint Error'})
+        }
+
         node.opcuaClient.connect(node.endpoint, function (err) {
           if (err) {
             coreConnector.internalDebugLog('Client Error: ' + err)
@@ -313,7 +317,7 @@ module.exports = function (RED) {
               node.error(err, {payload: 'Create Session Error'})
             }
             node.opcuaSession = null
-            node.renewConnection('Renew Session From Catch Session Create')
+            // node.renewConnection('Renew Session From Catch Session Create')
           })
         } else {
           coreConnector.internalDebugLog('OPC UA Client Is Not Valid')

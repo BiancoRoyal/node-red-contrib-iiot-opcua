@@ -19,6 +19,7 @@
       singleResult: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false},
+      activateFilters: {value: false},
       filters: {value: []},
     },
     inputs: 1,
@@ -101,7 +102,6 @@
         lookupItemButton.click(function () {
           let filterLookupButton = $('#node-button-crawler-filter-types' + id)
           let filterNameLookupField = $('#row' + id + ' #node-input-crawler-filter-name'  + id)
-          let filterValueLookupField = $('#row' + id + ' #node-input-crawler-filter-value'  + id)
 
           filterLookupButton.addClass('disabled')
 
@@ -258,6 +258,11 @@
         </div>
         <div id="opcuaiiot-crawler-tab-filter" style="display:none">
             <h4><span data-i18n="opcua-iiot-contrib.label.filters"></span></h4>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-activateFilters"><i class="fa fa-th"></i>
+                <span data-i18n="opcua-iiot-contrib.label.activateFilters"></span></label>
+                <input type="checkbox" id="node-input-activateFilters" style="max-width:30px">
+            </div>
             <div class="form-row node-input-crawler-filter-container-row" style="margin-bottom: 0px;">
                 <div id="node-input-crawler-filter-container-div"
                     style="box-sizing: border-box; border-radius: 5px;
