@@ -12,52 +12,36 @@
 
 jest.setTimeout(10000)
 
-var injectNode = require('../src/opcua-iiot-inject')
-var connectorNode = require('../src/opcua-iiot-connector')
+var injectNode = require('node-red/nodes/core/core/20-inject')
+var functionNode = require('node-red/nodes/core/core/80-function')
 var browserNode = require('../src/opcua-iiot-browser')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var browseNodesToLoad = [injectNode, connectorNode, browserNode]
+var browseNodesToLoad = [injectNode, functionNode, browserNode]
+
 var testUnitBrowserFlow = [
   {
-    'id': '13118ee.7ced371',
+    'id': '4ac0b7c8.bebe18',
     'type': 'OPCUA-IIoT-Browser',
-    'connector': 'a0513f1.9777fc',
+    'connector': '',
     'nodeId': 'ns=1;i=1234',
-    'name': 'TestName',
+    'name': 'TestNameBrowser',
     'justValue': true,
     'sendNodesToRead': false,
     'sendNodesToListener': false,
-    'sendNodesToBrowser': true,
+    'sendNodesToBrowser': false,
+    'singleBrowseResult': false,
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [
-      [
-        'n1helper'
-      ]
+      []
     ]
   },
-  {id: 'n1helper', type: 'helper'},
-  {
-    'id': 'a0513f1.9777fc',
-    'type': 'OPCUA-IIoT-Connector',
-    'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1234/',
-    'keepSessionAlive': false,
-    'loginEnabled': false,
-    'securityPolicy': 'None',
-    'securityMode': 'NONE',
-    'name': 'LOCAL DEMO SERVER',
-    'showErrors': false,
-    'publicCertificateFile': '',
-    'privateKeyFile': '',
-    'defaultSecureTokenLifetime': '60000',
-    'endpointMustExist': false,
-    'autoSelectRightEndpoint': false
-  }
+  {id: 'n1helper', type: 'helper'}
 ]
+
 describe('OPC UA Browser node Unit Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -81,26 +65,16 @@ describe('OPC UA Browser node Unit Testing', function () {
     it('should be loaded', function (done) {
       helper.load(browseNodesToLoad, testUnitBrowserFlow,
         function () {
-          let nodeUnderTest = helper.getNode('13118ee.7ced371')
-          expect(nodeUnderTest.name).toBe('TestName')
+          let nodeUnderTest = helper.getNode('4ac0b7c8.bebe18')
+          expect(nodeUnderTest.name).toBe('TestNameBrowser')
           expect(nodeUnderTest.nodeId).toBe('ns=1;i=1234')
           expect(nodeUnderTest.justValue).toBe(true)
           expect(nodeUnderTest.sendNodesToRead).toBe(false)
           expect(nodeUnderTest.sendNodesToListener).toBe(false)
-          expect(nodeUnderTest.sendNodesToBrowser).toBe(true)
+          expect(nodeUnderTest.sendNodesToBrowser).toBe(false)
           expect(nodeUnderTest.showStatusActivities).toBe(false)
           setTimeout(done, 3000)
         })
-    })
-
-    it('should get a message with payload', function (done) {
-      helper.load(browseNodesToLoad, testUnitBrowserFlow, function () {
-        let helperNode = helper.getNode('n1helper')
-        helperNode.on('input', function (msg) {
-          expect(msg.payload).toBe('testpayload')
-          setTimeout(done, 3000)
-        })
-      })
     })
   })
 })

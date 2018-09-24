@@ -198,7 +198,7 @@ describe('OPC UA Node node Testing', function () {
           'id': '3a234e92.cbc0f2',
           'type': 'OPCUA-IIoT-Node',
           'injectType': 'inject',
-          'nodeId': 'ns=2;s=TestReadWrite',
+          'nodeId': 'ns=1;s=TestReadWrite',
           'datatype': 'Double',
           'value': 'testpayload',
           'name': 'TestReadWrite',
@@ -208,12 +208,12 @@ describe('OPC UA Node node Testing', function () {
         ],
         function () {
           let nodeUnderTest = helper.getNode('3a234e92.cbc0f2')
-          nodeUnderTest.should.have.property('name', 'TestReadWrite')
-          nodeUnderTest.should.have.property('nodeId', 'ns=2;s=TestReadWrite')
-          nodeUnderTest.should.have.property('datatype', 'Double')
-          nodeUnderTest.should.have.property('injectType', 'inject')
-          nodeUnderTest.should.have.property('value', 'testpayload')
-          nodeUnderTest.should.have.property('topic', 'TestTopicNode')
+          expect(nodeUnderTest.name).toBe('TestReadWrite')
+          expect(nodeUnderTest.nodeId).toBe('ns=1;s=TestReadWrite')
+          expect(nodeUnderTest.datatype).toBe('Double')
+          expect(nodeUnderTest.injectType).toBe('inject')
+          expect(nodeUnderTest.value).toBe('testpayload')
+          expect(nodeUnderTest.topic).toBe('TestTopicNode')
           done()
         })
     })
@@ -222,7 +222,7 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testNodeFlow, function () {
         let n2 = helper.getNode('n2nf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 12345.34)
+          expect(msg.payload).toBe(12345.34)
           done()
         })
       })
@@ -232,8 +232,8 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testNodeFlow, function () {
         let n4 = helper.getNode('n4nf1')
         n4.on('input', function (msg) {
-          msg.should.have.property('addressSpaceItems', [{'name': 'TestReadWrite', 'nodeId': 'ns=2;s=TestReadWrite', 'datatypeName': 'String'}])
-          msg.should.have.property('topic', 'TestTopicNode')
+          expect(msg.addressSpaceItems).toMatchObject([{'name': 'TestReadWrite', 'nodeId': 'ns=2;s=TestReadWrite', 'datatypeName': 'String'}])
+          expect(msg.topic).toBe('TestTopicNode')
           done()
         })
       })
@@ -243,7 +243,7 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testNodeFlow, function () {
         let n4 = helper.getNode('n4nf1')
         n4.on('input', function (msg) {
-          msg.should.have.property('payload', 12345.34)
+          expect(msg.payload).toBe(12345.34)
           done()
         })
       })
@@ -253,7 +253,7 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testNodeEventWithPayloadFlow, function () {
         let n4 = helper.getNode('n4')
         n4.on('input', function (msg) {
-          msg.should.have.property('valuesToWrite', [1234])
+          expect(msg.valuesToWrite).toMatchObject([1234])
           done()
         })
       })
@@ -263,14 +263,14 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testNodeEventFlow, function () {
         let n4 = helper.getNode('n4nf2')
         n4.on('input', function (msg) {
-          msg.should.have.property('valuesToWrite', [1234])
-          msg.should.have.property('topic', 'TestTopicNode')
-          msg.should.have.property('addressSpaceItems', [{
+          expect(msg.valuesToWrite).toMatchObject([1234])
+          expect(msg.topic).toBe('TestTopicNode')
+          expect(msg.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
             'nodeId': 'ns=2;s=TestReadWrite',
             'datatypeName': 'Int16'
           }])
-          msg.should.have.property('payload', 1234)
+          expect(msg.payload).toBe(1234)
           done()
         })
       })
@@ -280,14 +280,14 @@ describe('OPC UA Node node Testing', function () {
       helper.load([injectNode, inputNode], testEventValueNumberFlowPayload, function () {
         let n4 = helper.getNode('n4nf3')
         n4.on('input', function (msg) {
-          msg.should.have.property('valuesToWrite', [2345])
-          msg.should.have.property('payload', '')
-          msg.should.have.property('addressSpaceItems', [{
+          expect(msg.valuesToWrite).toMatchObject([2345])
+          expect(msg.payload).toBe('')
+          expect(msg.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
             'nodeId': 'ns=2;s=TestReadWrite',
             'datatypeName': 'Int16'
           }])
-          msg.should.have.property('topic', 'NODETOPICOVERRIDE')
+          expect(msg.topic).toBe('NODETOPICOVERRIDE')
           done()
         })
       })

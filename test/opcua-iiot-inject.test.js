@@ -110,11 +110,11 @@ describe('OPC UA Inject node Testing', function () {
         }],
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
-        nodeUnderTest.should.have.property('name', 'TestName')
-        nodeUnderTest.should.have.property('injectType', 'inject')
-        nodeUnderTest.should.have.property('payload', '123456')
-        nodeUnderTest.should.have.property('topic', 'TestTopicInject')
-        nodeUnderTest.should.have.property('startDelay', 10)
+        expect(nodeUnderTest.name).toBe('TestName')
+        expect(nodeUnderTest.injectType).toBe('inject')
+        expect(nodeUnderTest.payload).toBe('123456')
+        expect(nodeUnderTest.topic).toBe('TestTopicInject')
+        expect(nodeUnderTest.startDelay).toBe(10)
         done()
       })
     })
@@ -123,7 +123,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 12345)
+          expect(msg.payload).toBe(12345)
           done()
         })
       })
@@ -133,7 +133,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicInject')
+          expect(msg.topic).toBe('TestTopicInject')
           done()
         })
       })
@@ -160,11 +160,11 @@ describe('OPC UA Inject node Testing', function () {
         }],
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
-        nodeUnderTest.should.have.property('name', 'TestName')
-        nodeUnderTest.should.have.property('injectType', 'read')
-        nodeUnderTest.should.have.property('payload', '123456')
-        nodeUnderTest.should.have.property('topic', 'TestTopicInject')
-        nodeUnderTest.should.have.property('startDelay', 1)
+        expect(nodeUnderTest.name).toBe('TestName')
+        expect(nodeUnderTest.injectType).toBe('read')
+        expect(nodeUnderTest.payload).toBe('123456')
+        expect(nodeUnderTest.topic).toBe('TestTopicInject')
+        expect(nodeUnderTest.startDelay).toBe(1)
         done()
       })
     })
@@ -174,7 +174,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 12345)
+          expect(msg.payload).toBe(12345)
           done()
         })
       })
@@ -185,7 +185,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicInject')
+          expect(msg.topic).toBe('TestTopicInject')
           done()
         })
       })
@@ -196,8 +196,8 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('nodetype', 'inject')
-          msg.should.have.property('injectType', 'read')
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('read')
           done()
         })
       })
@@ -224,11 +224,11 @@ describe('OPC UA Inject node Testing', function () {
         }],
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
-        nodeUnderTest.should.have.property('name', 'TestName')
-        nodeUnderTest.should.have.property('injectType', 'listen')
-        nodeUnderTest.should.have.property('payload', '123456')
-        nodeUnderTest.should.have.property('topic', 'TestTopicInject')
-        nodeUnderTest.should.have.property('startDelay', 1)
+        expect(nodeUnderTest.name).toBe('TestName')
+        expect(nodeUnderTest.injectType).toBe('listen')
+        expect(nodeUnderTest.payload).toBe('123456')
+        expect(nodeUnderTest.topic).toBe('TestTopicInject')
+        expect(nodeUnderTest.startDelay).toBe(1)
         done()
       })
     })
@@ -238,7 +238,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 12345)
+          expect(msg.payload).toBe(12345)
           done()
         })
       })
@@ -249,7 +249,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicInject')
+          expect(msg.topic).toBe('TestTopicInject')
           done()
         })
       })
@@ -260,8 +260,8 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('nodetype', 'inject')
-          msg.should.have.property('injectType', 'listen')
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('listen')
           done()
         })
       })
@@ -288,11 +288,11 @@ describe('OPC UA Inject node Testing', function () {
         }],
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
-        nodeUnderTest.should.have.property('name', 'TestName')
-        nodeUnderTest.should.have.property('injectType', 'write')
-        nodeUnderTest.should.have.property('payload', '123456')
-        nodeUnderTest.should.have.property('topic', 'TestTopicInject')
-        nodeUnderTest.should.have.property('startDelay', 1)
+        expect(nodeUnderTest.name).toBe('TestName')
+        expect(nodeUnderTest.injectType).toBe('write')
+        expect(nodeUnderTest.payload).toBe('123456')
+        expect(nodeUnderTest.topic).toBe('TestTopicInject')
+        expect(nodeUnderTest.startDelay).toBe(1)
         done()
       })
     })
@@ -302,7 +302,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 12345)
+          expect(msg.payload).toBe(12345)
           done()
         })
       })
@@ -313,7 +313,7 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('topic', 'TestTopicInject')
+          expect(msg.topic).toBe('TestTopicInject')
           done()
         })
       })
@@ -324,8 +324,8 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectFlow, function () {
         let n2 = helper.getNode('n2ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('nodetype', 'inject')
-          msg.should.have.property('injectType', 'write')
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('write')
           done()
         })
       })
@@ -335,8 +335,8 @@ describe('OPC UA Inject node Testing', function () {
       helper.load([inputNode], testInjectWithDelayFlow, function () {
         let n2 = helper.getNode('n2ijf2')
         n2.on('input', function (msg) {
-          msg.should.have.property('nodetype', 'inject')
-          msg.should.have.property('injectType', 'inject')
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('inject')
           done()
         })
       })

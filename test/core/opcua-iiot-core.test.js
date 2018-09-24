@@ -42,12 +42,10 @@ describe('OPC UA Core', function () {
       done()
     })
 
-
     it('should return the right msec. transformation when the value is present', function (done) {
       assert.equal(60000, core.calcMillisecondsByTimeAndUnit(1, 'm'))
       done()
     })
-
 
     it('should return the right msec. transformation when the value is present', function (done) {
       assert.equal(3600000, core.calcMillisecondsByTimeAndUnit(1, 'h'))
@@ -117,25 +115,25 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right namesapce zero from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload:'', topic:'ns=0;i=85'})
+      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
       assert.equal('0', result)
       done()
     })
 
     it('should return the right namesapce five from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload:'', topic:'ns=1;s=TestReadWrite'})
-      assert.equal('5', result)
+      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
+      assert.equal('1', result)
       done()
     })
 
     it('should return the right namesapce two from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload:'', topic:'ns=2;b=TestReadWrite'})
+      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
       assert.equal('2', result)
       done()
     })
 
     it('should return the right identifier zero from msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload:'', topic:'ns=0;i=85'})
+      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
       assert(result)
       let resultExpected = { identifier: 85, type: core.nodeOPCUAId.NodeIdType.NUMERIC }
       expect(result).to.deep.equal(resultExpected)
@@ -143,7 +141,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right identifier five from msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload:'', topic:'ns=1;s=TestReadWrite'})
+      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
       assert(result)
       let resultExpected = { identifier: 'TestReadWrite', type: core.nodeOPCUAId.NodeIdType.STRING }
       expect(result).to.deep.equal(resultExpected)
@@ -151,7 +149,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right identifier two from msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload:'', topic:'ns=2;b=TestReadWrite'})
+      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
       assert(result)
       let resultExpected = { identifier: 'TestReadWrite', type: core.nodeOPCUAId.NodeIdType.BYTESTRING }
       expect(result).to.deep.equal(resultExpected)
@@ -191,51 +189,51 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes to read', function (done) {
-      expect(core.buildNodesToRead({payload:'', nodesToRead:["ns=4;s=TestReadWrite"]})).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      expect(core.buildNodesToRead({payload: '', nodesToRead: ['ns=4;s=TestReadWrite']})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to write', function (done) {
-      expect(core.buildNodesToRead({payload:'', nodesToWrite:["ns=4;s=TestReadWrite"]})).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      expect(core.buildNodesToRead({payload: '', nodesToWrite: ['ns=4;s=TestReadWrite']})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead({payload:'', addressSpaceItems:[{name:'', nodeId:"ns=4;s=TestReadWrite", datatypeName:''}]})).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      expect(core.buildNodesToRead({payload: '', addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to read in payload', function (done) {
-      expect(core.buildNodesToRead({payload: { nodesToRead:["ns=4;s=TestReadWrite"]} })).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      expect(core.buildNodesToRead({payload: { nodesToRead: ['ns=4;s=TestReadWrite']} })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to write in payload', function (done) {
-      expect(core.buildNodesToRead({payload: { nodesToWrite:["ns=4;s=TestReadWrite"]} })).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      expect(core.buildNodesToRead({payload: { nodesToWrite: ['ns=4;s=TestReadWrite']} })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes in payload from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead({payload: { addressSpaceItems:[{name:'', nodeId:"ns=4;s=TestReadWrite", datatypeName:''}]} })).to.be.an('array').that.does.include("ns=4;s=TestReadWrite")
+      expect(core.buildNodesToRead({payload: { addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]} })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to listen from payload of addressSpaceItems', function (done) {
-      let addressSapceItem = {name:'', nodeId:"ns=4;s=TestReadWrite", datatypeName:''}
-      expect(core.buildNodesToListen({ addressSpaceItems:[addressSapceItem]} )).to.be.an('array').that.does.include(addressSapceItem)
+      let addressSapceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      expect(core.buildNodesToListen({ addressSpaceItems: [addressSapceItem]})).to.be.an('array').that.does.include(addressSapceItem)
       done()
     })
 
     it('should return array of nodes to listen from payload of addressItemsToRead', function (done) {
-      let addressSapceItem = {name:'', nodeId:"ns=4;s=TestReadWrite", datatypeName:''}
-      expect(core.buildNodesToListen({ addressItemsToRead:[addressSapceItem] })).to.be.an('array').that.does.include(addressSapceItem)
+      let addressSapceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      expect(core.buildNodesToListen({ addressItemsToRead: [addressSapceItem] })).to.be.an('array').that.does.include(addressSapceItem)
       done()
     })
 
     it('should set node initial state init', function (done) {
       let node = {}
-      node.setNodeStatusTo = function(state) {
-        if(state === 'connecting') {
+      node.setNodeStatusTo = function (state) {
+        if (state === 'connecting') {
           done()
         }
       }
@@ -249,8 +247,8 @@ describe('OPC UA Core', function () {
           opcuaSession: {}
         }
       }
-      node.setNodeStatusTo = function(state) {
-        if(state === 'active' && node.opcuaSession === node.connector.opcuaSession) {
+      node.setNodeStatusTo = function (state) {
+        if (state === 'active' && node.opcuaSession === node.connector.opcuaSession) {
           done()
         }
       }
@@ -259,8 +257,8 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state locked', function (done) {
       let node = {}
-      node.setNodeStatusTo = function(state) {
-        if(state === 'locked') {
+      node.setNodeStatusTo = function (state) {
+        if (state === 'locked') {
           done()
         }
       }
@@ -269,8 +267,8 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state unlocked', function (done) {
       let node = {}
-      node.setNodeStatusTo = function(state) {
-        if(state === 'unlocked') {
+      node.setNodeStatusTo = function (state) {
+        if (state === 'unlocked') {
           done()
         }
       }
@@ -279,8 +277,8 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state unknown', function (done) {
       let node = {}
-      node.setNodeStatusTo = function(state) {
-        if(state === 'waiting') {
+      node.setNodeStatusTo = function (state) {
+        if (state === 'waiting') {
           done()
         }
       }
@@ -288,11 +286,11 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes to listen from payload of addressItemsToRead instead of addressSpaceItems', function (done) {
-      let addressSapceItem = {name:'', nodeId:"ns=4;s=TestReadWrite", datatypeName:''}
-      let addressSapceItem2 = {name:'', nodeId:"ns=4;s=TestNotUsedItem", datatypeName:''}
+      let addressSapceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      let addressSapceItem2 = {name: '', nodeId: 'ns=4;s=TestNotUsedItem', datatypeName: ''}
       expect(core.buildNodesToListen({
-        addressSpaceItems:[addressSapceItem2],
-          addressItemsToRead:[addressSapceItem]
+        addressSpaceItems: [addressSapceItem2],
+        addressItemsToRead: [addressSapceItem]
       })).to.be.an('array').that.does.include(addressSapceItem)
       done()
     })
@@ -829,5 +827,4 @@ describe('OPC UA Core', function () {
       done()
     })
   })
-
 })

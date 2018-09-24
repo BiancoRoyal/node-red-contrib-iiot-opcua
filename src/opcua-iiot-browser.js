@@ -80,7 +80,7 @@ module.exports = function (RED) {
           node.error(err, msg)
         }
 
-        if (coreBrowser.core.isSessionBad(err)) {
+        if (coreBrowser.core.isSessionBad(err) && node.connector) {
           node.connector.resetBadSession()
         }
       } else {
@@ -158,7 +158,9 @@ module.exports = function (RED) {
 
       if (!node.justValue) {
         msg.payload.browserItemsCount = browserEntries.length
-        msg.payload.endpoint = node.connector.endpoint
+        if (node.connector) {
+          msg.payload.endpoint = node.connector.endpoint
+        }
         msg.payload.session = node.opcuaSession.name || 'none'
       }
 
@@ -183,7 +185,7 @@ module.exports = function (RED) {
     node.on('input', function (msg) {
       node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node)
 
-      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
         coreBrowser.internalDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Browse')
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Browse'), msg)
@@ -240,11 +242,11 @@ module.exports = function (RED) {
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
 
-    coreBrowser.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+      coreBrowser.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+    } else {
+      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
