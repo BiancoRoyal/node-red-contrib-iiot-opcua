@@ -162,15 +162,15 @@ describe('OPC UA Result Filter node Testing', function () {
         ],
         function () {
           let nodeUnderTest = helper.getNode('21c01ed7.c1c372')
-          nodeUnderTest.should.have.property('name', 'AnalogItem')
-          nodeUnderTest.should.have.property('nodeId', 'ns=1;s=TemperatureAnalogItem')
-          nodeUnderTest.should.have.property('datatype', 'Double')
-          nodeUnderTest.should.have.property('fixedValue', true)
-          nodeUnderTest.should.have.property('fixPoint', 2)
-          nodeUnderTest.should.have.property('withPrecision', false)
-          nodeUnderTest.should.have.property('precision', 2)
-          nodeUnderTest.should.have.property('entry', 1)
-          nodeUnderTest.should.have.property('topic', 'TestTopic')
+          expect(nodeUnderTest.name).toBe('AnalogItem')
+          expect(nodeUnderTest.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
+          expect(nodeUnderTest.datatype).toBe('Double')
+          expect(nodeUnderTest.fixedValue).toBe(true)
+          expect(nodeUnderTest.fixPoint).toBe(2)
+          expect(nodeUnderTest.withPrecision).toBe(false)
+          expect(nodeUnderTest.precision).toBe(2)
+          expect(nodeUnderTest.entry).toBe(1)
+          expect(nodeUnderTest.topic).toBe('TestTopic')
           done()
         })
     })
@@ -181,7 +181,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n2 = helper.getNode('n2rff1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', [{'node': 'ns=1;s=TemperatureAnalogItem', 'nodeId': 'ns=1;s=TemperatureAnalogItem', 'nodeClass': 2, 'browseName': {'namespaceIndex': 0, 'name': 'TemperatureAnalogItem'}, 'displayName': {'text': 'TemperatureAnalogItem'}, 'description': {}, 'writeMask': 0, 'userWriteMask': 0, 'value': 16.041979, 'dataType': 'Double', 'valueRank': -1, 'arrayDimensions': {}, 'accessLevel': 3, 'userAccessLevel': 3, 'minimumSamplingInterval': 0, 'historizing': false, 'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}}])
+          expect(msg.payload).toMatchObject([{'node': 'ns=1;s=TemperatureAnalogItem', 'nodeId': 'ns=1;s=TemperatureAnalogItem', 'nodeClass': 2, 'browseName': {'namespaceIndex': 0, 'name': 'TemperatureAnalogItem'}, 'displayName': {'text': 'TemperatureAnalogItem'}, 'description': {}, 'writeMask': 0, 'userWriteMask': 0, 'value': 16.041979, 'dataType': 'Double', 'valueRank': -1, 'arrayDimensions': {}, 'accessLevel': 3, 'userAccessLevel': 3, 'minimumSamplingInterval': 0, 'historizing': false, 'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}}])
           done()
         })
       })
@@ -191,17 +191,17 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n2 = helper.getNode('n2rff1')
         n2.on('input', function (msg) {
-          assert.match(msg.payload[0].nodeId, /TemperatureAnalogItem/)
+          expect(msg.payload[0].nodeId).stringContaining('TemperatureAnalogItem')
           done()
         })
       })
     })
 
-    it('should contain addressSpaceItems in message', function (done) {
+    it('should contain TemperatureAnalogItem in message', function (done) {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n4 = helper.getNode('n4rff1')
         n4.on('input', function (msg) {
-          assert.match(msg.addressSpaceItems[0].nodeId, /TemperatureAnalogItem/)
+          expect(msg.addressSpaceItems[0].nodeId).stringContaining('TemperatureAnalogItem')
           done()
         })
       })
@@ -211,9 +211,9 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n6 = helper.getNode('n6rff1')
         n6.on('input', function (msg) {
-          msg.should.have.property('nodeId', 'ns=1;s=TemperatureAnalogItem')
-          msg.should.have.property('payload', 16.04)
-          msg.should.have.property('topic', 'TestTopic')
+          expect(msg.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
+          expect(msg.payload).toBe(16.04)
+          expect(msg.topic).toBe('TestTopic')
           done()
         })
       })
@@ -225,7 +225,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n2 = helper.getNode('n2rff2')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', {'value': {'dataType': 'Double', 'arrayType': 'Scalar', 'value': 16.041979}, 'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'sourceTimestamp': '2018-03-13T21:43:10.470Z', 'sourcePicoseconds': 0, 'serverTimestamp': '2018-03-13T21:43:11.051Z', 'serverPicoseconds': 3})
+          expect(msg.payload).toMatchObject({'value': {'dataType': 'Double', 'arrayType': 'Scalar', 'value': 16.041979}, 'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'sourceTimestamp': '2018-03-13T21:43:10.470Z', 'sourcePicoseconds': 0, 'serverTimestamp': '2018-03-13T21:43:11.051Z', 'serverPicoseconds': 3})
           done()
         })
       })
@@ -235,17 +235,17 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n2 = helper.getNode('n2rff2')
         n2.on('input', function (msg) {
-          msg.payload.value.should.have.property('value', 16.041979)
+          expect(msg.payload.value.value).toBe(16.041979)
           done()
         })
       })
     })
 
-    it('should contain addressSpaceItems in message', function (done) {
+    it('should contain Pressure in message', function (done) {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n4 = helper.getNode('n4rff2')
         n4.on('input', function (msg) {
-          assert.match(msg.addressSpaceItems[0].nodeId, /Pressure/)
+          expect(msg.addressSpaceItems[0].nodeId).stringContaining('Pressure')
           done()
         })
       })
@@ -255,9 +255,9 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n6 = helper.getNode('n6rff2')
         n6.on('input', function (msg) {
-          msg.should.have.property('nodeId', 'ns=1;s=Pressure')
-          msg.should.have.property('payload', 16.04)
-          msg.should.have.property('topic', 'TestTopic')
+          expect(msg.nodeId).toBe('ns=1;s=Pressure')
+          expect(msg.payload).toBe(16.04)
+          expect(msg.topic).toBe('TestTopic')
           done()
         })
       })
