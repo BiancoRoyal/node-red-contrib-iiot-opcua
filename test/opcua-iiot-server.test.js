@@ -10,18 +10,18 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(5000)
 
-var inputNode = require('../src/opcua-iiot-server')
+var serverNode = require('../src/opcua-iiot-server')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
 var testServerFlow = [
   {
-    'id': 'n1svrf1',
+    'id': '6ec4ef50.86dc1',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1999',
+    'port': '5555',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -39,13 +39,18 @@ var testServerFlow = [
     'xmlsets': [],
     'publicCertificateFile': '',
     'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
-    'wires': [[]]
+    'wires': [
+      []
+    ]
   }
 ]
 
-describe('OPC UA Server node Testing', function () {
+describe('OPC UA Server node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
       done()
@@ -68,15 +73,17 @@ describe('OPC UA Server node Testing', function () {
 
   describe('Server node', function () {
     it('should be loaded', function (done) {
-      helper.load(
-        [inputNode], testServerFlow,
+      helper.load(serverNode, testServerFlow,
         function () {
-          let nodeUnderTest = helper.getNode('n1svrf1')
-          expect(nodeUnderTest.name).toBe('DEMOSERVER')
-          expect(nodeUnderTest.maxAllowedSessionNumber).toBe(10)
-          expect(nodeUnderTest.maxNodesPerRead).toBe(1000)
-          expect(nodeUnderTest.maxNodesPerBrowse).toBe(2000)
-          setTimeout(done, 3000)
+          let nodeUnderTest = helper.getNode('6ec4ef50.86dc1')
+          expect(nodeUnderTest).toBeDefined()
+          nodeUnderTest.on('server_running', () => {
+            expect(nodeUnderTest.name).toBe('DEMOSERVER')
+            expect(nodeUnderTest.maxAllowedSessionNumber).toBe(10)
+            expect(nodeUnderTest.maxNodesPerRead).toBe(1000)
+            expect(nodeUnderTest.maxNodesPerBrowse).toBe(2000)
+            setTimeout(done, 3000)
+          })
         })
     })
   })

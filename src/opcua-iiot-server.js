@@ -206,6 +206,7 @@ module.exports = function (RED) {
         } else {
           coreServer.start(node.opcuaServer, node).then(function () {
             node.setNodeStatusTo('active')
+            node.emit('server_running')
           }).catch(function (err) {
             node.opcuaServer = null
             node.setNodeStatusTo('errors')

@@ -74,7 +74,7 @@ module.exports = function (RED) {
 
     if (node.xmlsets) {
       node.xmlsets.forEach(function (xmlsetFileName, i) {
-        coreServer.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
+        coreServer.flex.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
         if (xmlsetFileName.path) {
           if (xmlsetFileName.path.startsWith('public/vendor/')) {
             xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
@@ -89,21 +89,21 @@ module.exports = function (RED) {
           }
         }
       })
-      coreServer.detailDebugLog('append xmlFiles: ' + xmlFiles.toString())
+      coreServer.flex.detailDebugLog('append xmlFiles: ' + xmlFiles.toString())
     }
 
     let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
 
-    coreServer.detailDebugLog('config: ' + node.publicCertificateFile)
+    coreServer.flex.detailDebugLog('config: ' + node.publicCertificateFile)
     if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
       node.publicCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
-      coreServer.detailDebugLog('default key: ' + node.publicCertificateFile)
+      coreServer.flex.detailDebugLog('default key: ' + node.publicCertificateFile)
     }
 
-    coreServer.detailDebugLog('config: ' + node.privateCertificateFile)
+    coreServer.flex.detailDebugLog('config: ' + node.privateCertificateFile)
     if (node.privateCertificateFile === null || node.privateCertificateFile === '') {
       node.privateCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
-      coreServer.detailDebugLog('default key: ' + node.privateCertificateFile)
+      coreServer.flex.detailDebugLog('default key: ' + node.privateCertificateFile)
     }
 
     node.setNodeStatusTo = function (statusValue) {
@@ -112,15 +112,15 @@ module.exports = function (RED) {
     }
 
     node.setNodeStatusTo('waiting')
-    coreServer.internalDebugLog('flex node sets:' + xmlFiles.toString())
+    coreServer.flex.internalDebugLog('flex node sets:' + xmlFiles.toString())
 
     node.checkUser = function (userName, password) {
       let isValid = false
-      coreServer.internalDebugLog('Is Valid Server User?')
+      coreServer.flex.internalDebugLog('Is Valid Server User?')
 
       node.users.forEach(function (user, index, array) {
         if (userName === user.name && password === user.password) {
-          coreServer.internalDebugLog('Valid Server User Found')
+          coreServer.flex.internalDebugLog('Valid Server User Found')
           isValid = true
         }
       })
@@ -169,7 +169,7 @@ module.exports = function (RED) {
         disableDiscovery: node.disableDiscovery
       }
 
-      coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+      coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
 
       try {
         node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
@@ -179,11 +179,15 @@ module.exports = function (RED) {
       }
 
       node.opcuaServer.on('newChannel', function (channel) {
-        coreServer.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
+        coreServer.flex.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
       })
 
       node.opcuaServer.on('closeChannel', function (channel) {
-        coreServer.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
+        coreServer.flex.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
+      })
+
+      node.opcuaServer.on('post_initialize', function () {
+        coreServer.flex.internalDebugLog('Client initialized')
       })
     }
 
@@ -193,22 +197,23 @@ module.exports = function (RED) {
         coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects).then(function () {
           coreServer.start(node.opcuaServer, node).then(function () {
             node.setNodeStatusTo('active')
+            node.emit('server_running')
           }).catch(function (err) {
             node.setNodeStatusTo('errors')
-            coreServer.internalDebugLog(err)
+            coreServer.flex.internalDebugLog(err)
             if (node.showErrors) {
               node.error(err, {payload: ''})
             }
           })
         }).catch(function (err) {
-          coreServer.internalDebugLog(err)
+          coreServer.flex.internalDebugLog(err)
           if (node.showErrors) {
             node.error(err, {payload: ''})
           }
         })
       } else {
         node.initialized = false
-        coreServer.internalDebugLog('OPC UA Server Is Not Ready'.red)
+        coreServer.flex.internalDebugLog('OPC UA Server Is Not Ready'.red)
         if (node.showErrors) {
           node.error(new Error('OPC UA Server Is Not Ready'), {payload: ''})
         }
@@ -248,10 +253,10 @@ module.exports = function (RED) {
           if (msg.payload.nodeId) {
             let searchedNode = addressSpace.findNode(msg.payload.nodeId)
             if (searchedNode) {
-              coreServer.internalDebugLog('Delete NodeId ' + msg.payload.nodeId)
+              coreServer.flex.internalDebugLog('Delete NodeId ' + msg.payload.nodeId)
               addressSpace.deleteNode(searchedNode)
             } else {
-              coreServer.internalDebugLog('Delete NodeId Not Found ' + msg.payload.nodeId)
+              coreServer.flex.internalDebugLog('Delete NodeId Not Found ' + msg.payload.nodeId)
             }
           } else {
             node.error(new Error('OPC UA Command NodeId Not Valid'), msg)
@@ -263,7 +268,7 @@ module.exports = function (RED) {
     }
 
     node.restartServer = function () {
-      coreServer.internalDebugLog('Restart OPC UA Server')
+      coreServer.flex.internalDebugLog('Restart OPC UA Server')
 
       if (node.opcuaServer) {
         node.opcuaServer.shutdown(function () {
@@ -278,9 +283,9 @@ module.exports = function (RED) {
       }
 
       if (node.opcuaServer) {
-        coreServer.internalDebugLog('OPC UA Server restarted')
+        coreServer.flex.internalDebugLog('OPC UA Server restarted')
       } else {
-        coreServer.internalDebugLogr('Can not restart OPC UA Server')
+        coreServer.flex.internalDebugLogr('Can not restart OPC UA Server')
       }
     }
 
