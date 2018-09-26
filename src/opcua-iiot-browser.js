@@ -30,6 +30,8 @@ module.exports = function (RED) {
     this.singleBrowseResult = config.singleBrowseResult
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.recursiveBrowse = config.recursiveBrowse
+    this.recursiveDepth = config.recursiveDepth || 1
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
@@ -91,13 +93,10 @@ module.exports = function (RED) {
       browserEntries = results
     }
 
-    node.sendMessageBrowserResults = function (msg, browserResult) {
-      let nodesToRead = []
-      let addressItemList = []
-
+    node.getExtractItemsFromList = (browserResult, nodesToRead, addressItemList) => {
       browserResult.forEach(function (result) {
         result.references.forEach(function (reference) {
-          coreBrowser.internalDebugLog('Add Reference To List :' + reference)
+          coreBrowser.detailDebugLog('Add Reference To List :' + reference)
           browserEntries.push(node.transformToEntry(reference))
           if (reference.nodeId) {
             nodesToRead.push(reference.nodeId.toString())
@@ -105,55 +104,90 @@ module.exports = function (RED) {
           }
         })
       })
-
-      node.sendMessage(msg, nodesToRead, addressItemList)
     }
 
-    node.browse = function (session, msg) {
-      coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + node.browseTopic)
-      browserEntries = []
-
-      coreBrowser.browse(session, node.browseTopic)
-        .then(function (browserResult) {
-          node.sendMessageBrowserResults(msg, browserResult)
-        }).catch(function (err) {
-          node.browseErrorHandling(err, msg)
-        })
+    node.sendMessageBrowserResults = function (rootNodeId, msg, browserResult) {
+      let nodesToRead = []
+      let addressItemList = []
+      node.getExtractItemsFromList(browserResult, nodesToRead, addressItemList)
+      node.sendMessage(rootNodeId, msg, nodesToRead, addressItemList)
     }
 
-    node.browseNodeList = function (session, msg) {
-      browserEntries = []
+    node.browse = function (rootNodeId, msg, depth, nodesToBrowse, addressItemList, callback) {
+      coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + rootNodeId)
+      if (!node.singleBrowseResult) {
+        browserEntries = []
+        nodesToBrowse = []
+        addressItemList = []
+      }
 
-      if (node.singleBrowseResult) {
-        coreBrowser.browseAddressSpaceItems(session, msg.addressSpaceItems)
+      if (node.opcuaSession) {
+        coreBrowser.browse(node.opcuaSession, rootNodeId)
           .then(function (browserResult) {
-            browserEntries = []
-            node.sendMessageBrowserResults(msg, browserResult)
+            if (browserResult.length) {
+              node.getExtractItemsFromList(browserResult, nodesToBrowse, addressItemList)
+
+              if (node.recursiveBrowse) {
+                if (depth > 0) {
+                  let newDepth = depth - 1
+                  nodesToBrowse.forEach((item) => {
+                    node.browse(item, msg, newDepth, nodesToBrowse, addressItemList, () => {
+                      if (node.singleBrowseResult) {
+                        callback(depth, rootNodeId, msg, nodesToBrowse, addressItemList)
+                      } else {
+                        node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
+                      }
+                    })
+                  })
+                } else {
+                  if (node.singleBrowseResult) {
+                    callback(depth, rootNodeId, msg, nodesToBrowse, addressItemList)
+                  } else {
+                    node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
+                  }
+                }
+              } else {
+                node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
+              }
+            }
           }).catch(function (err) {
             node.browseErrorHandling(err, msg)
           })
-      } else {
-        msg.addressSpaceItems.map((entry) => (
-          coreBrowser.browse(session, entry.nodeId)
-            .then(function (browserResult) {
-              browserEntries = []
-              node.sendMessageBrowserResults(msg, browserResult)
-            }).catch(function (err) {
-              node.browseErrorHandling(err, msg)
-            })))
       }
     }
 
-    node.sendMessage = function (originMessage, nodesToRead, addressItemList) {
+    node.browseNodeList = function (addressSpaceItems, msg) {
+      browserEntries = []
+
+      if (node.opcuaSession) {
+        if (node.singleBrowseResult) {
+          coreBrowser.browseAddressSpaceItems(node.opcuaSession, addressSpaceItems)
+            .then(function (browserResult) {
+              browserEntries = []
+              node.sendMessageBrowserResults(addressSpaceItems, msg, browserResult)
+            }).catch(function (err) {
+              node.browseErrorHandling(err, msg)
+            })
+        } else {
+          addressSpaceItems.map((entry) => (
+            coreBrowser.browse(node.opcuaSession, entry.nodeId)
+              .then(function (browserResult) {
+                browserEntries = []
+                node.sendMessageBrowserResults(entry.nodeId, msg, browserResult)
+              }).catch(function (err) {
+                node.browseErrorHandling(err, msg)
+              })))
+        }
+      }
+    }
+
+    node.sendMessage = function (rootNodeId, originMessage, nodesToRead, addressItemList) {
       let msg = originMessage
       msg.nodetype = 'browse'
 
       msg.payload = {
+        browseTopic: rootNodeId,
         browserItems: browserEntries
-      }
-
-      if (node.browseTopic && node.browseTopic !== '') {
-        msg.payload.browseTopic = node.browseTopic
       }
 
       if (!node.justValue) {
@@ -161,7 +195,7 @@ module.exports = function (RED) {
         if (node.connector) {
           msg.payload.endpoint = node.connector.endpoint
         }
-        msg.payload.session = node.opcuaSession.name || 'none'
+        msg.payload.session = (node.opcuaSession) ? node.opcuaSession.name : 'none'
       }
 
       if (node.sendNodesToRead && nodesToRead) {
@@ -180,6 +214,10 @@ module.exports = function (RED) {
       }
 
       node.send(msg)
+
+      browserEntries = []
+      nodesToRead = []
+      addressItemList = []
     }
 
     node.on('input', function (msg) {
@@ -198,8 +236,18 @@ module.exports = function (RED) {
         return
       }
 
+      let nodesToBrowse = []
+      let addressItemList = []
+      browserEntries = []
+
       if (node.browseTopic && node.browseTopic !== '') {
-        node.browse(node.opcuaSession, msg)
+        node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList,
+          (depth, rootNodeId, msg, nodesToBrowse, addressItemList) => {
+            coreBrowser.internalDebugLog(node.browseTopic + ' called by depth ' + depth)
+            if (depth <= 0 || !node.recursiveBrowse) {
+              node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
+            }
+          })
       } else {
         if (msg.addressItemsToBrowse) {
           if (msg.addressItemsToBrowse.length > 0) {
@@ -212,11 +260,17 @@ module.exports = function (RED) {
         }
 
         if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
-          node.browseNodeList(node.opcuaSession, msg)
+          node.browseNodeList(msg.addressSpaceItems, msg)
         } else {
           coreBrowser.detailDebugLog('Fallback NodeId On Browse Without Address Items')
           node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
-          node.browse(node.opcuaSession, msg)
+          node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList,
+            (depth, rootNodeId, msg, nodesToBrowse, addressItemList) => {
+              coreBrowser.internalDebugLog(node.browseTopic + ' called by depth ' + depth)
+              if (depth <= 0 || !node.recursiveBrowse) {
+                node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
+              }
+            })
         }
       }
     })

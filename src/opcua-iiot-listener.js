@@ -131,8 +131,8 @@ module.exports = function (RED) {
     }
 
     node.updateSubscriptionStatus = function () {
-      coreListener.internalDebugLog('listening' + ' (' + node.monitoredItems.length + ')')
-      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
+      coreListener.internalDebugLog('listening' + ' (' + node.monitoredItems.size + ')')
+      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.size + ')')
     }
 
     node.subscribeMonitoredItem = function (msg) {
@@ -153,11 +153,18 @@ module.exports = function (RED) {
           return
         }
 
-        let monitoredItem = node.monitoredASO.get(addressSpaceItem.nodeId.toString())
+        let nodeIdToMonitor
+        if (typeof addressSpaceItem.nodeId === 'string') {
+          nodeIdToMonitor = addressSpaceItem.nodeId
+        } else {
+          nodeIdToMonitor = addressSpaceItem.nodeId.toString()
+        }
+
+        let monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
 
         if (!monitoredItem) {
-          coreListener.subscribeDebugLog('Monitored Item Subscribing ' + addressSpaceItem.nodeId)
-          coreListener.buildNewMonitoredItem(addressSpaceItem.nodeId, msg, uaSubscription)
+          coreListener.subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
+          coreListener.buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
             .then(function (result) {
               coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
               node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
@@ -168,9 +175,9 @@ module.exports = function (RED) {
               }
             })
         } else {
-          coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + addressSpaceItem.nodeId)
+          coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
           monitoredItem.terminate(function (err) {
-            node.monitoredItemTerminated(msg, monitoredItem, addressSpaceItem.nodeId, err)
+            node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
           })
         }
       }
@@ -194,11 +201,18 @@ module.exports = function (RED) {
           return
         }
 
-        let monitoredItem = node.monitoredASO.get(addressSpaceItem.nodeId.toString())
+        let nodeIdToMonitor
+        if (typeof addressSpaceItem.nodeId === 'string') {
+          nodeIdToMonitor = addressSpaceItem.nodeId
+        } else {
+          nodeIdToMonitor = addressSpaceItem.nodeId.toString()
+        }
+
+        let monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
 
         if (!monitoredItem) {
-          coreListener.eventDebugLog('Regsiter Event Item ' + addressSpaceItem.nodeId)
-          coreListener.buildNewEventItem(addressSpaceItem.nodeId, msg, uaSubscription)
+          coreListener.eventDebugLog('Regsiter Event Item ' + nodeIdToMonitor)
+          coreListener.buildNewEventItem(nodeIdToMonitor, msg, uaSubscription)
             .then(function (result) {
               coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
               node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
@@ -209,9 +223,9 @@ module.exports = function (RED) {
               }
             })
         } else {
-          coreListener.subscribeDebugLog('Terminate Event Item' + addressSpaceItem.nodeId)
+          coreListener.subscribeDebugLog('Terminate Event Item' + nodeIdToMonitor)
           monitoredItem.terminate(function (err) {
-            node.monitoredItemTerminated(msg, monitoredItem, addressSpaceItem.nodeId, err)
+            node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
           })
         }
       }
@@ -235,8 +249,8 @@ module.exports = function (RED) {
 
         if (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) {
           coreListener.internalDebugLog('Terminate Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
-          if (node.monitoredASO.has(nodeId.toString())) {
-            node.monitoredASO.delete(nodeId.toString())
+          if (node.monitoredASO.has(nodeId)) {
+            node.monitoredASO.delete(nodeId)
           }
         } else {
           coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)

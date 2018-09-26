@@ -18,11 +18,12 @@ var serverNode = require('../../src/opcua-iiot-server')
 var responseNode = require('../../src/opcua-iiot-response')
 var connectorNode = require('../../src/opcua-iiot-connector')
 var inputNode = require('../../src/opcua-iiot-listener')
+var browserNode = require('../../src/opcua-iiot-browser')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var listenerNodesToLoad = [injectNode, connectorNode, inputNode, responseNode, serverNode]
+var listenerNodesToLoad = [injectNode, browserNode, connectorNode, inputNode, responseNode, serverNode]
 
 var testListenerMonitoringFlow = [
   {
@@ -158,6 +159,151 @@ var testListenerMonitoringFlow = [
   }
 ]
 
+var recursiveBrowserAboFlow = [
+  {
+    'id': '8a761f37.f69808',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'listen',
+    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payloadType': 'json',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': 'Root',
+    'addressSpaceItems': [],
+    'wires': [
+      [
+        '18b3e5b9.f9ba4a',
+        'n1abo'
+      ]
+    ]
+  },
+  {id: 'n1abo', type: 'helper'},
+  {
+    'id': '18b3e5b9.f9ba4a',
+    'type': 'OPCUA-IIoT-Browser',
+    'connector': '296a2f29.56e248',
+    'nodeId': 'i=85',
+    'name': '',
+    'justValue': true,
+    'sendNodesToRead': false,
+    'sendNodesToListener': true,
+    'sendNodesToBrowser': false,
+    'singleBrowseResult': false,
+    'recursiveBrowse': true,
+    'recursiveDepth': '1',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        '44548ff9.287e48',
+        'f142e56c.d7906',
+        'n2abo'
+      ]
+    ]
+  },
+  {id: 'n2abo', type: 'helper'},
+  {
+    'id': '44548ff9.287e48',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': false,
+    'filters': [],
+    'wires': [
+      [
+        'n3abo'
+      ]
+    ]
+  },
+  {id: 'n3abo', type: 'helper'},
+  {
+    'id': 'f142e56c.d7906',
+    'type': 'OPCUA-IIoT-Listener',
+    'connector': '296a2f29.56e248',
+    'action': 'subscribe',
+    'queueSize': '1',
+    'name': '',
+    'justValue': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        'c2a66a6.1940198',
+        'n4abo'
+      ]
+    ]
+  },
+  {id: 'n4abo', type: 'helper'},
+  {
+    'id': 'c2a66a6.1940198',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': false,
+    'filters': [],
+    'wires': [
+      [
+        'n5abo'
+      ]
+    ]
+  },
+  {id: 'n5abo', type: 'helper'},
+  {
+    'id': '296a2f29.56e248',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:3335/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false
+  },
+  {
+    'id': '37396e13.734bd2',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '3335',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': false,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'wires': [
+      []
+    ]
+  }
+]
+
 describe('OPC UA Listener monitoring node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -223,6 +369,19 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
             expect(msg.payload.dataType).toBe('Int32')
             expect(msg.payload.nodeId).toBe('ns=1;s=FullCounter')
             expect(msg.payload.statusCode).not.toBeDefined()
+            done()
+          }
+        })
+      })
+    })
+
+    it('should verify a compressed message from response node on subscribe recursive', function (done) {
+      helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
+        msgCounter = 0
+        let n5 = helper.getNode('n5abo')
+        n5.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
             done()
           }
         })

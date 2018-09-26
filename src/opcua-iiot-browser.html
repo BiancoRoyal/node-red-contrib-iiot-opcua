@@ -22,6 +22,8 @@
       sendNodesToListener: {value: false},
       sendNodesToBrowser: {value: false},
       singleBrowseResult: {value: false},
+      recursiveBrowse: {value: false},
+      recursiveDepth: {value: 1},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -155,6 +157,15 @@
                 <a id="node-lookup-nodeId" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
                 <div>
                     <span data-i18n="opcua-iiot-contrib.label.lookupUseHint"></span>
+                </div>
+                <div class="form-row">
+                    <label style="min-width:160px" for="node-input-recursiveBrowse"><i class="fa fa-th"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.recursiveBrowse"></span></label>
+                    <input type="checkbox" id="node-input-recursiveBrowse" style="max-width:30px">
+                </div>
+                <div class="form-row">
+                    <label for="node-input-recursiveDepth"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.recursiveDepth"></span></label>
+                    <input type="text" id="node-input-recursiveDepth" placeholder="1">
                 </div>
             </div>
         </div>
