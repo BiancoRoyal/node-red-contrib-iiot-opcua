@@ -86,11 +86,11 @@ describe('OPC UA Event node Testing', function () {
         ],
         function () {
           let nodeUnderTest = helper.getNode('67c521a2.07429')
-          nodeUnderTest.should.have.property('name', 'TestName')
-          nodeUnderTest.should.have.property('eventTypeLabel', 'BaseTypeEvent')
-          nodeUnderTest.should.have.property('eventType', 'i=2041')
-          nodeUnderTest.should.have.property('usingListener', true)
-          nodeUnderTest.should.have.property('queueSize', 1)
+          expect(nodeUnderTest.name).toBe('TestName')
+          expect(nodeUnderTest.eventTypeLabel).toBe('BaseTypeEvent')
+          expect(nodeUnderTest.eventType).toBe('i=2041')
+          expect(nodeUnderTest.usingListener).toBe(true)
+          expect(nodeUnderTest.queueSize).toBe(1)
           done()
         })
     })
@@ -99,7 +99,7 @@ describe('OPC UA Event node Testing', function () {
       helper.load([injectNode, inputNode], testEventNodeFlow, function () {
         let n2 = helper.getNode('n2evf1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', {'queueSize': 10, 'interval': 1000})
+          expect(msg.payload).toMatchObject({'queueSize': 10, 'interval': 1000})
           done()
         })
       })
@@ -109,11 +109,11 @@ describe('OPC UA Event node Testing', function () {
       helper.load([injectNode, inputNode], testEventNodeFlow, function () {
         let n4 = helper.getNode('n4evf1')
         n4.on('input', function (msg) {
-          assert.match(JSON.stringify(msg.payload), /eventType/)
-          assert.match(JSON.stringify(msg.payload), /eventFilter/)
-          assert.match(JSON.stringify(msg.payload), /eventFields/)
-          msg.payload.should.have.property('queueSize', 10)
-          msg.payload.should.have.property('interval', 1000)
+          expect(msg.payload.eventType).toBeDefined()
+          expect(msg.payload.eventFilter).toBeDefined()
+          expect(msg.payload.eventFields).toBeDefined()
+          expect(msg.payload.queueSize).toBe(10)
+          expect(msg.payload.interval).toBe(1000)
           /* payload: { eventType: 'i=2041',
             eventFilter: EventFilter { selectClauses: [Array], whereClause: [ContentFilter] }, eventFields: [ 'EventId', 'SourceName', 'Message', 'ReceiveTime' ],
             queueSize: 10,

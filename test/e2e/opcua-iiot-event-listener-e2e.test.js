@@ -13,11 +13,11 @@
 jest.setTimeout(10000)
 
 // iiot opc ua nodes
-var injectNode = require('../src/opcua-iiot-inject')
-var eventNode = require('../src/opcua-iiot-event')
-var serverNode = require('../src/opcua-iiot-server')
-var connectorNode = require('../src/opcua-iiot-connector')
-var inputNode = require('../src/opcua-iiot-listener')
+var injectNode = require('../../src/opcua-iiot-inject')
+var eventNode = require('../../src/opcua-iiot-event')
+var serverNode = require('../../src/opcua-iiot-server')
+var connectorNode = require('../../src/opcua-iiot-connector')
+var inputNode = require('../../src/opcua-iiot-listener')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
@@ -181,55 +181,6 @@ describe('OPC UA Listener event node Testing', function () {
   describe('Listen event node', function () {
     let msgCounter = 0
 
-    it('should be loaded', function (done) {
-      helper.load([inputNode, connectorNode], [
-        {
-          'id': 'bee3e3b0.ca1a08',
-          'type': 'OPCUA-IIoT-Listener',
-          'connector': 'c30aa44e.9ed95',
-          'action': 'events',
-          'queueSize': 1,
-          'name': 'TestEvents',
-          'justValue': true,
-          'showStatusActivities': false,
-          'showErrors': false,
-          'wires': [
-            [
-              '3497534.af772ac'
-            ]
-          ]
-        },
-        {
-          'id': 'c30aa44e.9ed95',
-          'type': 'OPCUA-IIoT-Connector',
-          'discoveryUrl': '',
-          'endpoint': 'opc.tcp://localhost:2000/',
-          'keepSessionAlive': false,
-          'loginEnabled': false,
-          'securityPolicy': 'None',
-          'securityMode': 'NONE',
-          'name': 'TESTSERVER',
-          'showStatusActivities': false,
-          'showErrors': false,
-          'publicCertificateFile': '',
-          'privateKeyFile': '',
-          'defaultSecureTokenLifetime': '60000',
-          'endpointMustExist': false,
-          'autoSelectRightEndpoint': false,
-          'strategyMaxRetry': '',
-          'strategyInitialDelay': '',
-          'strategyMaxDelay': '',
-          'strategyRandomisationFactor': ''
-        }
-      ],
-      function () {
-        let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
-        nodeUnderTest.should.have.property('name', 'TestEvents')
-        nodeUnderTest.should.have.property('action', 'events')
-        setTimeout(done, 3000)
-      })
-    })
-
     it('should get a message without addressSpaceItems in payload after inject node subscribe', function (done) {
       helper.load(eventNodesToLoad, testListenerEventFlow, function () {
         msgCounter = 0
@@ -237,9 +188,9 @@ describe('OPC UA Listener event node Testing', function () {
         n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            msg.should.have.property('topic', 'TestTopicEvent')
-            msg.should.have.property('nodetype', 'inject')
-            msg.should.have.property('injectType', 'listen')
+            expect(msg.topic).toBe('TestTopicEvent')
+            expect(msg.nodetype).toBe('inject')
+            expect(msg.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })
@@ -253,9 +204,9 @@ describe('OPC UA Listener event node Testing', function () {
         n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            msg.should.have.property('topic', 'TestTopicEvent')
-            msg.should.have.property('nodetype', 'inject')
-            msg.should.have.property('injectType', 'listen')
+            expect(msg.topic).toBe('TestTopicEvent')
+            expect(msg.nodetype).toBe('inject')
+            expect(msg.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })
@@ -269,9 +220,9 @@ describe('OPC UA Listener event node Testing', function () {
         n4.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            msg.should.have.property('topic', 'TestTopicEvent')
-            msg.should.have.property('nodetype', 'events')
-            msg.should.have.property('injectType', 'listen')
+            expect(msg.topic).toBe('TestTopicEvent')
+            expect(msg.nodetype).toBe('events')
+            expect(msg.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })
@@ -285,9 +236,9 @@ describe('OPC UA Listener event node Testing', function () {
         n4.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            msg.payload.should.have.property('eventType', 'BaseEventType')
-            expect(msg.payload.eventFilter).to.be.an('object')
-            expect(msg.payload.eventFields).to.be.an('array')
+            expect(msg.payload.eventType).toBe('BaseEventType')
+            expect(msg.payload.eventFilter).toBeDefined()
+            expect(msg.payload.eventFields).toBeDefined()
             setTimeout(done, 2000)
           }
         })
@@ -301,9 +252,9 @@ describe('OPC UA Listener event node Testing', function () {
         n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 2) {
-            msg.should.have.property('topic', 'TestTopicEventUnsubscribe')
-            msg.should.have.property('nodetype', 'inject')
-            msg.should.have.property('injectType', 'listen')
+            expect(msg.topic).toBe('TestTopicEventUnsubscribe')
+            expect(msg.nodetype).toBe('inject')
+            expect(msg.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })
@@ -317,9 +268,9 @@ describe('OPC UA Listener event node Testing', function () {
         n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 2) {
-            msg.should.have.property('topic', 'TestTopicEventUnsubscribe')
-            msg.should.have.property('nodetype', 'events')
-            msg.should.have.property('injectType', 'listen')
+            expect(msg.topic).toBe('TestTopicEventUnsubscribe')
+            expect(msg.nodetype).toBe('events')
+            expect(msg.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })

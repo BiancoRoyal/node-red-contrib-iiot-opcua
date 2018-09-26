@@ -54,8 +54,8 @@ describe('OPC UA Discovery node Testing', function () {
         [inputNode], testDiscoveryFlow,
         function () {
           let nodeUnderTest = helper.getNode('n1dsf1')
-          nodeUnderTest.should.have.property('type', 'OPCUA-IIoT-Discovery')
-          nodeUnderTest.should.have.property('name', 'TestName')
+          expect(nodeUnderTest.type).toBe('OPCUA-IIoT-Discovery')
+          expect(nodeUnderTest.name).toBe('TestName')
           setTimeout(done, 3000)
         })
     })

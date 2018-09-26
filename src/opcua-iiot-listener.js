@@ -277,7 +277,7 @@ module.exports = function (RED) {
 
         node.updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
 
-        if (err.message && err.message.includes('BadSession')) {
+        if (node.connector && err.message && err.message.includes('BadSession')) {
           node.sendAllMonitoredItems('BAD SESSION')
           node.connector.resetBadSession()
         }
@@ -367,7 +367,9 @@ module.exports = function (RED) {
       if (err) {
         if (coreListener.core.isSessionBad(err)) {
           node.sendAllMonitoredItems('BAD SESSION')
-          node.connector.resetBadSession()
+          if (node.connector) {
+            node.connector.resetBadSession()
+          }
         }
       }
     }
@@ -463,7 +465,7 @@ module.exports = function (RED) {
 
       // start here to check connection to get unit-tests working while there is no mocking
       // TODO: Connector mocking
-      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
         coreListener.internalDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Browse')
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Browse'), msg)
@@ -512,11 +514,11 @@ module.exports = function (RED) {
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
 
-    coreListener.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+      coreListener.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+    } else {
+      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
+    }
 
     node.on('close', function (done) {
       if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
