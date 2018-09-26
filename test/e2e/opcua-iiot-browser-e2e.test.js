@@ -307,8 +307,6 @@ describe('OPC UA Browser node e2e Testing', function () {
   })
 
   describe('Browser node', function () {
-
-
     it('should verify browser items as result', function (done) {
       helper.load(browseNodesToLoad, testBrowseFlow, function () {
         let n5 = helper.getNode('n5f1')

@@ -85,7 +85,7 @@ var listenTestFlowPayload = [
     'id': 'n3rff2',
     'type': 'function',
     'name': '',
-    'func': "msg.nodetype = 'listen'\nmsg.injectType = 'subscribe'\nmsg.addressSpaceItems = [{\"name\":\"\",\"nodeId\":\"ns=4;s=Pressure\",\"datatypeName\":\"\"}]\nreturn msg;",
+    'func': "msg.nodetype = 'listen'\nmsg.injectType = 'subscribe'\nmsg.addressSpaceItems = [{\"name\":\"\",\"nodeId\":\"ns=1;s=Pressure\",\"datatypeName\":\"\"}]\nreturn msg;",
     'outputs': 1,
     'noerr': 0,
     'wires': [['n4rff2', 'n5rff2']]
@@ -191,7 +191,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n2 = helper.getNode('n2rff1')
         n2.on('input', function (msg) {
-          expect(msg.payload[0].nodeId).stringContaining('TemperatureAnalogItem')
+          expect(msg.payload[0].nodeId).toMatch(/TemperatureAnalogItem/)
           done()
         })
       })
@@ -201,7 +201,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n4 = helper.getNode('n4rff1')
         n4.on('input', function (msg) {
-          expect(msg.addressSpaceItems[0].nodeId).stringContaining('TemperatureAnalogItem')
+          expect(msg.addressSpaceItems[0].nodeId).toMatch(/TemperatureAnalogItem/)
           done()
         })
       })
@@ -245,7 +245,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n4 = helper.getNode('n4rff2')
         n4.on('input', function (msg) {
-          expect(msg.addressSpaceItems[0].nodeId).stringContaining('Pressure')
+          expect(msg.addressSpaceItems[0].nodeId).toMatch(/Pressure/)
           done()
         })
       })
