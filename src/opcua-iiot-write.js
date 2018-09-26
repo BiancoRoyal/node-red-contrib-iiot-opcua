@@ -55,7 +55,7 @@ module.exports = function (RED) {
         node.error(err, msg)
       }
 
-      if (coreClient.core.isSessionBad(err)) {
+      if (node.connector && coreClient.core.isSessionBad(err)) {
         node.connector.resetBadSession()
       }
     }
@@ -116,7 +116,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
         coreClient.writeDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Write')
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Wirte'), msg)
@@ -158,11 +158,11 @@ module.exports = function (RED) {
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
 
-    coreClient.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+      coreClient.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+    } else {
+      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Write', OPCUAIIoTWrite)
