@@ -57,7 +57,7 @@ module.exports = function (RED) {
         node.error(err, msg)
       }
 
-      if (coreMethod.core.isSessionBad(err)) {
+      if (node.connector && coreMethod.core.isSessionBad(err)) {
         node.connector.resetBadSession()
       }
     }
@@ -99,7 +99,7 @@ module.exports = function (RED) {
         return
       }
 
-      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
+      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
         coreMethod.writeDebugLog('Client State Not Open On Write')
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Wirte'), msg)
@@ -193,11 +193,11 @@ module.exports = function (RED) {
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
 
-    coreMethod.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+      coreMethod.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+    } else {
+      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Method-Caller', OPCUAIIoTMethodCaller)
