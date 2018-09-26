@@ -6,6 +6,7 @@
  **/
 
 describe('Server Test Suite', () => {
+  require('../test/opcua-iiot-connector.test')
   require('../test/opcua-iiot-server.test')
   require('../test/opcua-iiot-flex-server.test')
   require('../test/opcua-iiot-server-aso.test')

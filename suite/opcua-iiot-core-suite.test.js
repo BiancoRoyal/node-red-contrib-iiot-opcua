@@ -6,6 +6,7 @@
  **/
 
 describe('Core Test Suite', () => {
+  require('../test/core/opcua-iiot-core.test')
   require('../test/core/opcua-iiot-core-client.test')
   require('../test/core/opcua-iiot-core-connector.test')
   require('../test/core/opcua-iiot-core-listener.test')
