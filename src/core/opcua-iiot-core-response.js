@@ -86,12 +86,14 @@ de.biancoroyal.opcua.iiot.core.response.analyzeMethodResults = function (msg) {
 de.biancoroyal.opcua.iiot.core.response.setNodeStatus = function (node, entryStatus, informationText) {
   let fillColor = 'green'
 
-  if (entryStatus[2] > this.EMPTY_LIST) {
-    fillColor = 'yellow'
-  }
+  if (entryStatus && entryStatus.length === 3) {
+    if (entryStatus[2] > this.EMPTY_LIST) {
+      fillColor = 'yellow'
+    }
 
-  if (entryStatus[1] > this.EMPTY_LIST) {
-    fillColor = 'red'
+    if (entryStatus[1] > this.EMPTY_LIST) {
+      fillColor = 'red'
+    }
   }
 
   node.status({fill: fillColor, shape: 'dot', text: informationText})

@@ -93,7 +93,12 @@ module.exports = function (RED) {
         } else {
           node.send(msg)
         }
-        coreResponse.setNodeStatus(node, msg.entryStatus, msg.entryStatusText)
+
+        if (node.compressStructure) {
+          node.status({fill: 'green', shape: 'dot', text: 'active compressed'})
+        } else {
+          coreResponse.setNodeStatus(node, msg.entryStatus, msg.entryStatusText)
+        }
       } catch (err) {
         coreResponse.internalDebugLog(err)
         if (node.showErrors) {

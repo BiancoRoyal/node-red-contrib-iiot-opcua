@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(15000)
 
 // iiot opc ua nodes
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -170,7 +170,7 @@ var recursiveBrowserAboFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '4',
     'name': 'Root',
     'addressSpaceItems': [],
     'wires': [
