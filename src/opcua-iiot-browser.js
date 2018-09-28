@@ -216,8 +216,10 @@ module.exports = function (RED) {
       let addressItemList = []
       browserEntries = []
 
+      let depth = (node.recursiveBrowse) ? node.recursiveDepth : 0
+
       if (node.browseTopic && node.browseTopic !== '') {
-        node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
+        node.browse(node.browseTopic, msg, depth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
           nodesToBrowse.push(nodesToBrowseSub)
           addressItemList.push(addressItemListSub)
           node.browseSendResult(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
@@ -228,7 +230,7 @@ module.exports = function (RED) {
         }
 
         if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
-          node.browseNodeList(msg.addressSpaceItems, msg, node.recursiveDepth, nodesToBrowse, addressItemList, (depth, msg, nodesToBrowseSub, addressItemListSub) => {
+          node.browseNodeList(msg.addressSpaceItems, msg, depth, nodesToBrowse, addressItemList, (depth, msg, nodesToBrowseSub, addressItemListSub) => {
             nodesToBrowse.push(nodesToBrowseSub)
             addressItemList.push(addressItemListSub)
             node.browseSendResult('list', depth, msg, nodesToBrowse, addressItemList)
@@ -236,7 +238,7 @@ module.exports = function (RED) {
         } else {
           coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
           node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
-          node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
+          node.browse(node.browseTopic, msg, depth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
             nodesToBrowse.push(nodesToBrowseSub)
             addressItemList.push(addressItemListSub)
             node.browseSendResult(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
