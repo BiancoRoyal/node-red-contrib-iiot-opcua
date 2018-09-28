@@ -220,9 +220,7 @@ module.exports = function (RED) {
 
       if (node.browseTopic && node.browseTopic !== '') {
         node.browse(node.browseTopic, msg, depth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
-          nodesToBrowse.push(nodesToBrowseSub)
-          addressItemList.push(addressItemListSub)
-          node.browseSendResult(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+          node.browseSendResult(rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub)
         })
       } else {
         if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length > 0) {
@@ -231,17 +229,13 @@ module.exports = function (RED) {
 
         if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
           node.browseNodeList(msg.addressSpaceItems, msg, depth, nodesToBrowse, addressItemList, (depth, msg, nodesToBrowseSub, addressItemListSub) => {
-            nodesToBrowse.push(nodesToBrowseSub)
-            addressItemList.push(addressItemListSub)
-            node.browseSendResult('list', depth, msg, nodesToBrowse, addressItemList)
+            node.browseSendResult('list', depth, msg, nodesToBrowseSub, addressItemListSub)
           })
         } else {
           coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
           node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
           node.browse(node.browseTopic, msg, depth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
-            nodesToBrowse.push(nodesToBrowseSub)
-            addressItemList.push(addressItemListSub)
-            node.browseSendResult(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+            node.browseSendResult(rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub)
           })
         }
       }
