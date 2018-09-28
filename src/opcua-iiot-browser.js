@@ -46,28 +46,6 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.transformToEntry = function (reference) {
-      if (reference) {
-        try {
-          return reference.toJSON()
-        } catch (err) {
-          coreBrowser.internalDebugLog(err)
-
-          return {
-            referenceTypeId: reference.referenceTypeId.toString(),
-            isForward: reference.isForward,
-            nodeId: reference.nodeId.toString(),
-            browseName: reference.browseName.toString(),
-            displayName: reference.displayName,
-            nodeClass: reference.nodeClass.toString(),
-            typeDefinition: reference.typeDefinition.toString()
-          }
-        }
-      } else {
-        coreBrowser.internalDebugLog('Empty Reference On Browse')
-      }
-    }
-
     node.browseErrorHandling = function (err, msg) {
       let results = []
       if (err) {
@@ -97,7 +75,7 @@ module.exports = function (RED) {
       browserResult.forEach(function (result) {
         result.references.forEach(function (reference) {
           coreBrowser.detailDebugLog('Add Reference To List :' + reference)
-          browserEntries.push(node.transformToEntry(reference))
+          browserEntries.push(coreBrowser.transformToEntry(reference))
           if (reference.nodeId) {
             nodesToRead.push(reference.nodeId.toString())
             addressItemList.push({ name: reference.browseName.name, nodeId: reference.nodeId.toString(), datatypeName: reference.typeDefinition.toString() })
@@ -106,49 +84,29 @@ module.exports = function (RED) {
       })
     }
 
-    node.sendMessageBrowserResults = function (rootNodeId, msg, browserResult) {
-      let nodesToRead = []
-      let addressItemList = []
-      node.getExtractItemsFromList(browserResult, nodesToRead, addressItemList)
-      node.sendMessage(rootNodeId, msg, nodesToRead, addressItemList)
-    }
-
     node.browse = function (rootNodeId, msg, depth, nodesToBrowse, addressItemList, callback) {
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + rootNodeId)
-      if (!node.singleBrowseResult) {
-        browserEntries = []
-        nodesToBrowse = []
-        addressItemList = []
-      }
-
       if (node.opcuaSession) {
         coreBrowser.browse(node.opcuaSession, rootNodeId)
           .then(function (browserResult) {
             if (browserResult.length) {
               node.getExtractItemsFromList(browserResult, nodesToBrowse, addressItemList)
-
               if (node.recursiveBrowse) {
                 if (depth > 0) {
                   let newDepth = depth - 1
                   nodesToBrowse.forEach((item) => {
-                    node.browse(item, msg, newDepth, nodesToBrowse, addressItemList, () => {
-                      if (node.singleBrowseResult) {
-                        callback(depth, rootNodeId, msg, nodesToBrowse, addressItemList)
-                      } else {
-                        node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
-                      }
-                    })
+                    let nodesToSubBrowse = []
+                    let addressItemListSub = []
+                    node.browse(item, msg, newDepth, nodesToSubBrowse, addressItemListSub, callback)
                   })
                 } else {
-                  if (node.singleBrowseResult) {
-                    callback(depth, rootNodeId, msg, nodesToBrowse, addressItemList)
-                  } else {
-                    node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
-                  }
+                  coreBrowser.internalDebugLog('Minimum Depth Reached On Browse At ' + rootNodeId)
                 }
-              } else {
-                node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
               }
+
+              callback(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+            } else {
+              coreBrowser.internalDebugLog('No Browse Results On ' + rootNodeId)
             }
           }).catch(function (err) {
             node.browseErrorHandling(err, msg)
@@ -156,38 +114,43 @@ module.exports = function (RED) {
       }
     }
 
-    node.browseNodeList = function (addressSpaceItems, msg) {
-      browserEntries = []
-
+    node.browseNodeList = function (addressSpaceItems, msg, depth, nodesToBrowse, addressItemList, callback) {
+      coreBrowser.internalDebugLog('Browse For NodeId List')
       if (node.opcuaSession) {
-        if (node.singleBrowseResult) {
-          coreBrowser.browseAddressSpaceItems(node.opcuaSession, addressSpaceItems)
-            .then(function (browserResult) {
-              browserEntries = []
-              node.sendMessageBrowserResults(addressSpaceItems, msg, browserResult)
-            }).catch(function (err) {
-              node.browseErrorHandling(err, msg)
-            })
-        } else {
-          addressSpaceItems.map((entry) => (
-            coreBrowser.browse(node.opcuaSession, entry.nodeId)
-              .then(function (browserResult) {
-                browserEntries = []
-                node.sendMessageBrowserResults(entry.nodeId, msg, browserResult)
-              }).catch(function (err) {
-                node.browseErrorHandling(err, msg)
-              })))
-        }
+        coreBrowser.browseAddressSpaceItems(node.opcuaSession, addressSpaceItems)
+          .then(function (browserResult) {
+            node.getExtractItemsFromList(browserResult, nodesToBrowse, addressItemList)
+
+            if (node.recursiveBrowse) {
+              if (depth > 0) {
+                let newDepth = depth - 1
+                let nodesToSubBrowse = []
+                let addressItemListSub = []
+                node.browseNodeList(addressItemList, msg, newDepth, nodesToSubBrowse, addressItemListSub, callback)
+              } else {
+                coreBrowser.internalDebugLog('Minimum Depth Reached On Browse List')
+              }
+            }
+
+            callback(depth, msg, nodesToBrowse, addressItemList)
+          }).catch(function (err) {
+            node.browseErrorHandling(err, msg)
+          })
       }
     }
 
-    node.sendMessage = function (rootNodeId, originMessage, nodesToRead, addressItemList) {
+    node.sendMessage = function (rootNodeId, depth, originMessage, nodesToRead, addressItemList) {
       let msg = originMessage
       msg.nodetype = 'browse'
 
       msg.payload = {
-        browseTopic: rootNodeId,
-        browserItems: browserEntries
+        browseTopic: node.browseTopic,
+        addressSpaceItems: msg.addressSpaceItems,
+        rootNodeId,
+        browserResults: browserEntries,
+        recursiveBrowse: node.recursiveBrowse,
+        recursiveDepth: depth,
+        recursiveDepthMax: node.recursiveDepth
       }
 
       if (!node.justValue) {
@@ -214,10 +177,24 @@ module.exports = function (RED) {
       }
 
       node.send(msg)
+    }
 
-      browserEntries = []
-      nodesToRead = []
-      addressItemList = []
+    node.browseSendResult = function (rootNodeId, depth, msg, nodesToBrowse, addressItemList) {
+      coreBrowser.internalDebugLog(node.browseTopic + ' called by depth ' + depth)
+
+      if (node.singleBrowseResult) {
+        if (depth <= 0) {
+          node.sendMessage(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+          browserEntries = []
+          nodesToBrowse = []
+          addressItemList = []
+        }
+      } else {
+        node.sendMessage(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+        browserEntries = []
+        nodesToBrowse = []
+        addressItemList = []
+      }
     }
 
     node.on('input', function (msg) {
@@ -228,7 +205,6 @@ module.exports = function (RED) {
         if (node.showErrors) {
           node.error(new Error('Client Not Open On Browse'), msg)
         }
-        // return
       }
 
       if (!node.opcuaSession) {
@@ -241,36 +217,30 @@ module.exports = function (RED) {
       browserEntries = []
 
       if (node.browseTopic && node.browseTopic !== '') {
-        node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList,
-          (depth, rootNodeId, msg, nodesToBrowse, addressItemList) => {
-            coreBrowser.internalDebugLog(node.browseTopic + ' called by depth ' + depth)
-            if (depth <= 0 || !node.recursiveBrowse) {
-              node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
-            }
-          })
+        node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
+          nodesToBrowse.push(nodesToBrowseSub)
+          addressItemList.push(addressItemListSub)
+          node.browseSendResult(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+        })
       } else {
-        if (msg.addressItemsToBrowse) {
-          if (msg.addressItemsToBrowse.length > 0) {
-            msg.addressSpaceItems = msg.addressItemsToBrowse
-          } else {
-            if (node.showErrors) {
-              node.error(new Error('Address Items To Browse Are Empty'), msg)
-            }
-          }
+        if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length > 0) {
+          msg.addressSpaceItems = msg.addressItemsToBrowse
         }
 
         if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
-          node.browseNodeList(msg.addressSpaceItems, msg)
+          node.browseNodeList(msg.addressSpaceItems, msg, node.recursiveDepth, nodesToBrowse, addressItemList, (depth, msg, nodesToBrowseSub, addressItemListSub) => {
+            nodesToBrowse.push(nodesToBrowseSub)
+            addressItemList.push(addressItemListSub)
+            node.browseSendResult('list', depth, msg, nodesToBrowse, addressItemList)
+          })
         } else {
-          coreBrowser.detailDebugLog('Fallback NodeId On Browse Without Address Items')
+          coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
           node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
-          node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList,
-            (depth, rootNodeId, msg, nodesToBrowse, addressItemList) => {
-              coreBrowser.internalDebugLog(node.browseTopic + ' called by depth ' + depth)
-              if (depth <= 0 || !node.recursiveBrowse) {
-                node.sendMessage(rootNodeId, msg, nodesToBrowse, addressItemList)
-              }
-            })
+          node.browse(node.browseTopic, msg, node.recursiveDepth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
+            nodesToBrowse.push(nodesToBrowseSub)
+            addressItemList.push(addressItemListSub)
+            node.browseSendResult(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+          })
         }
       }
     })
@@ -310,7 +280,6 @@ module.exports = function (RED) {
     let entries = []
     let nodeRootId = decodeURIComponent(req.params.nodeId) || coreBrowser.core.OBJECTS_ROOT
 
-    // console.log(req.params)
     coreBrowser.detailDebugLog('request for ' + req.params.nodeId)
 
     if (node.opcuaSession) {
@@ -318,10 +287,8 @@ module.exports = function (RED) {
         browserResult.forEach(function (result) {
           if (result.references && result.references.length) {
             result.references.forEach(function (reference) {
-              entries.push(node.transformToEntry(reference))
+              entries.push(coreBrowser.transformToEntry(reference))
             })
-          } else {
-            coreBrowser.detailDebugLog(JSON.stringify(result))
           }
         })
         res.json(entries)

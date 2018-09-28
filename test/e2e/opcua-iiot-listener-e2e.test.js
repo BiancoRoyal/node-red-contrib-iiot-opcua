@@ -376,13 +376,28 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     })
 
     it('should verify a compressed message from response node on subscribe recursive', function (done) {
+      recursiveBrowserAboFlow[2].singleBrowseResult = false
       helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
         msgCounter = 0
         let n5 = helper.getNode('n5abo')
         n5.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            done()
+            setTimeout(done, 2000)
+          }
+        })
+      })
+    })
+
+    it('should verify a compressed message from response node on subscribe recursive as single result', function (done) {
+      recursiveBrowserAboFlow[2].singleBrowseResult = true
+      helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
+        msgCounter = 0
+        let n5 = helper.getNode('n5abo')
+        n5.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            setTimeout(done, 2000)
           }
         })
       })

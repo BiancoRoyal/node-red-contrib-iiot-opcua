@@ -179,4 +179,26 @@ de.biancoroyal.opcua.iiot.core.browser.extractNodeIdFromTopic = function (msg, n
   return rootNodeId
 }
 
+de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference) {
+  if (reference) {
+    try {
+      return reference.toJSON()
+    } catch (err) {
+      this.internalDebugLog(err)
+
+      return {
+        referenceTypeId: reference.referenceTypeId.toString(),
+        isForward: reference.isForward,
+        nodeId: reference.nodeId.toString(),
+        browseName: reference.browseName.toString(),
+        displayName: reference.displayName,
+        nodeClass: reference.nodeClass.toString(),
+        typeDefinition: reference.typeDefinition.toString()
+      }
+    }
+  } else {
+    this.internalDebugLog('Empty Reference On Browse')
+  }
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.browser
