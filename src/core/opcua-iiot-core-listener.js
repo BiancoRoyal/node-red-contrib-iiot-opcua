@@ -250,12 +250,12 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
     })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (node, msg, subscription) {
+de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (node, msg, addressSpaceItems, subscription) {
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
   return new Promise(
     function (resolve, reject) {
-      if (!msg.addressSpaceItems) {
+      if (!addressSpaceItems) {
         reject(new Error('NodeId Is Not Valid'))
         return
       }
@@ -279,7 +279,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
       }
 
       let subcriptionItems = []
-      msg.addressSpaceItems.forEach(item => {
+      addressSpaceItems.forEach(item => {
         subcriptionItems.push({
           nodeId: coreListener.core.nodeOPCUA.resolveNodeId(item.nodeId),
           attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value})
@@ -298,7 +298,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
             coreListener.internalDebugLog('subscribing monitored item group ' + err)
             reject(err)
           } else {
-            resolve({addressSpaceItems: msg.addressSpaceItems, monitoredItemGroup: monitoredItemGroup})
+            resolve({addressSpaceItems: addressSpaceItems, monitoredItemGroup: monitoredItemGroup})
           }
         }
       )

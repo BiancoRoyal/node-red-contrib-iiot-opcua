@@ -147,24 +147,48 @@ module.exports = function (RED) {
 
       if (msg.addressSpaceItems.length) {
         if (node.useGroupItems) {
-          coreListener.buildNewMonitoredItemGroup(node, msg, uaSubscription)
-            .then(function (result) {
-              if (!result.monitoredItemGroup) {
-                node.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
-                return
-              }
-              coreListener.detailDebugLog(result.monitoredItemGroup.toString())
-              result.monitoredItemGroup.monitoredItems.map(item => {
-                coreListener.subscribeDebugLog('Monitored Item Subscribed in Group to ' + JSON.stringify(item))
-                coreListener.subscribeDebugLog('Monitored Item Subscribed in Group to Id:' + item.monitoredItemId + ' Node: ' + item.nodeId)
-                node.monitoredASO.set(item.nodeId.toString(), item)
+          let itemsToMonitor = msg.addressSpaceItems.filter(addressSpaceItem => {
+            let nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+            return node.monitoredASO.get(nodeIdToMonitor) === undefined
+          })
+
+          let itemsToTerminate = msg.addressSpaceItems.filter(addressSpaceItem => {
+            let nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+            return node.monitoredASO.get(nodeIdToMonitor) !== undefined
+          })
+
+          if (itemsToMonitor.length) {
+            msg.addressSpaceItems = itemsToMonitor
+            coreListener.buildNewMonitoredItemGroup(node, msg, itemsToMonitor, uaSubscription)
+              .then(function (result) {
+                if (!result.monitoredItemGroup) {
+                  node.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
+                  return
+                }
+                result.monitoredItemGroup.monitoredItems.map(item => {
+                  coreListener.subscribeDebugLog('Monitored Item Subscribed in Group to Id:' + item.monitoredItemId + ' Node: ' + item.itemToMonitor.nodeId)
+                  node.monitoredASO.set(item.itemToMonitor.nodeId, item.itemToMonitor)
+                })
+              }).catch(function (err) {
+                coreListener.subscribeDebugLog(err)
+                if (node.showErrors) {
+                  node.error(err, msg)
+                }
               })
-            }).catch(function (err) {
-              coreListener.subscribeDebugLog(err)
-              if (node.showErrors) {
-                node.error(err, msg)
-              }
+          }
+
+          if (itemsToTerminate.length) {
+            let nodeIdToMonitor
+            let monitoredItem
+            itemsToTerminate.forEach(addressSpaceItem => {
+              nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+              monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
+              coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
+              monitoredItem.terminate(function (err) {
+                node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
+              })
             })
+          }
         } else {
           coreListener.monitorItem(node, msg, uaSubscription)
         }
