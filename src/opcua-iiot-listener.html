@@ -16,7 +16,9 @@
       action: {value: 'subscribe', required: true},
       queueSize: {value: 10, required: true, validate: RED.validators.number()},
       name: {value: ''},
+      topic: {value: ''},
       justValue: {value: true},
+      useGroupItems: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -53,7 +55,16 @@
         <label for="node-input-name"><i class="icon-tasks"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="">
     </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="node-red:common.label.topic"></span></label>
+        <input type="text" id="node-input-topic">
+    </div>
     <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-useGroupItems"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.useGroupItems"></span></label>
+        <input type="checkbox" id="node-input-useGroupItems" style="max-width:30px">
+    </div>
     <div class="form-row">
         <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
         <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>

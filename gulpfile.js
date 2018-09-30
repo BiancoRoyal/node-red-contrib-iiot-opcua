@@ -52,7 +52,7 @@ gulp.task('maps', function () {
 })
 
 gulp.task('clean', function () {
-  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps', 'code', 'coverage'])
+  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps', 'code', 'coverage', 'jcoverage', 'pki'])
     .pipe(clean({force: true}))
 })
 

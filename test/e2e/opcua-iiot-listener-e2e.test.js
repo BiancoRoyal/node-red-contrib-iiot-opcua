@@ -304,6 +304,137 @@ var recursiveBrowserAboFlow = [
   }
 ]
 
+var feedListenerWithRecursiveBrowse = [
+  {
+    'id': '3b4d83c1.6b490c',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'listen',
+    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payloadType': 'json',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '4',
+    'name': '',
+    'addressSpaceItems': [],
+    'wires': [
+      [
+        '70a1a122.850e4'
+      ]
+    ]
+  },
+  {
+    'id': '70a1a122.850e4',
+    'type': 'OPCUA-IIoT-Browser',
+    'connector': 'c95fc9fc.64ccc',
+    'nodeId': 'ns=1;i=1001',
+    'name': '',
+    'justValue': false,
+    'sendNodesToRead': false,
+    'sendNodesToListener': true,
+    'sendNodesToBrowser': false,
+    'singleBrowseResult': true,
+    'recursiveBrowse': true,
+    'recursiveDepth': '1',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        'n1brli',
+        '66692416.1b2bb4'
+      ]
+    ]
+  },
+  {id: 'n1brli', type: 'helper'},
+  {
+    'id': '66692416.1b2bb4',
+    'type': 'OPCUA-IIoT-Listener',
+    'connector': 'c95fc9fc.64ccc',
+    'action': 'subscribe',
+    'queueSize': '1',
+    'name': '',
+    'justValue': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        'e604f20a.c8bd4',
+        'n2brli'
+      ]
+    ]
+  },
+  {id: 'n2brli', type: 'helper'},
+  {
+    'id': 'e604f20a.c8bd4',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': true,
+    'filters': [
+      {
+        'name': 'dataType',
+        'value': 'Int32'
+      }
+    ],
+    'wires': [
+      [
+        'n3brli'
+      ]
+    ]
+  },
+  {id: 'n3brli', type: 'helper'},
+  {
+    'id': 'c95fc9fc.64ccc',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:3336/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false
+  },
+  {
+    'id': '37396e13.734bd2',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '3336',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': true,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'wires': [
+      []
+    ]
+  }
+]
+
 describe('OPC UA Listener monitoring node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -395,6 +526,34 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
         msgCounter = 0
         let n5 = helper.getNode('n5abo')
         n5.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            setTimeout(done, 2000)
+          }
+        })
+      })
+    })
+
+    it('should subscribe from recursive browse from multiple results', function (done) {
+      feedListenerWithRecursiveBrowse[1].singleBrowseResult = false
+      helper.load(listenerNodesToLoad, feedListenerWithRecursiveBrowse, function () {
+        msgCounter = 0
+        let n2 = helper.getNode('n2brli')
+        n2.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            setTimeout(done, 2000)
+          }
+        })
+      })
+    })
+
+    it('should subscribe from recursive browse from single result', function (done) {
+      feedListenerWithRecursiveBrowse[1].singleBrowseResult = true
+      helper.load(listenerNodesToLoad, feedListenerWithRecursiveBrowse, function () {
+        msgCounter = 0
+        let n2 = helper.getNode('n2brli')
+        n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
             setTimeout(done, 2000)

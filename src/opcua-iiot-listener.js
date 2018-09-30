@@ -23,7 +23,9 @@ module.exports = function (RED) {
     this.action = config.action
     this.queueSize = config.queueSize || 1
     this.name = config.name
+    this.topic = config.topic
     this.justValue = config.justValue
+    this.useGroupItems = config.useGroupItems
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
@@ -36,7 +38,6 @@ module.exports = function (RED) {
     node.subscriptionStarted = false
 
     let uaSubscription = null
-    let subscriptionStarting = false
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
     node.monitoredItems = new Map()
@@ -66,11 +67,11 @@ module.exports = function (RED) {
     node.createSubscription = function (msg, cb) {
       let timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
 
-      if (subscriptionStarting) {
+      if (node.subscriptionStarting) {
         coreListener.internalDebugLog('monitoring subscription try to start twice')
       } else {
-        uaSubscription = null
         node.subscriptionStarting = true
+        uaSubscription = null
         let options = {}
         if (node.action !== 'events') {
           coreListener.internalDebugLog('create monitoring subscription')
@@ -127,6 +128,9 @@ module.exports = function (RED) {
     }
 
     node.subscribingPreCheck = function () {
+      if (typeof uaSubscription.subscriptionId === 'string') {
+        coreListener.detailDebugLog('subscription not ready with ID: ' + uaSubscription.subscriptionId)
+      }
       return uaSubscription && typeof uaSubscription.subscriptionId !== 'string'
     }
 
@@ -141,33 +145,20 @@ module.exports = function (RED) {
         return
       }
 
-      let addressSpaceItem = null
-      for (addressSpaceItem of msg.addressSpaceItems) {
-        if (!addressSpaceItem.nodeId) {
-          coreListener.subscribeDebugLog('Address Space Item Not Valid to Monitor ' + addressSpaceItem)
-          return
-        }
-
-        if (addressSpaceItem.datatypeName === 'ns=0;i=0') {
-          coreListener.subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
-          return
-        }
-
-        let nodeIdToMonitor
-        if (typeof addressSpaceItem.nodeId === 'string') {
-          nodeIdToMonitor = addressSpaceItem.nodeId
-        } else {
-          nodeIdToMonitor = addressSpaceItem.nodeId.toString()
-        }
-
-        let monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
-
-        if (!monitoredItem) {
-          coreListener.subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
-          coreListener.buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
+      if (msg.addressSpaceItems.length) {
+        if (node.useGroupItems) {
+          coreListener.buildNewMonitoredItemGroup(node, msg, uaSubscription)
             .then(function (result) {
-              coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-              node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+              if (!result.monitoredItemGroup) {
+                node.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
+                return
+              }
+              coreListener.detailDebugLog(result.monitoredItemGroup.toString())
+              result.monitoredItemGroup.monitoredItems.map(item => {
+                coreListener.subscribeDebugLog('Monitored Item Subscribed in Group to ' + JSON.stringify(item))
+                coreListener.subscribeDebugLog('Monitored Item Subscribed in Group to Id:' + item.monitoredItemId + ' Node: ' + item.nodeId)
+                node.monitoredASO.set(item.nodeId.toString(), item)
+              })
             }).catch(function (err) {
               coreListener.subscribeDebugLog(err)
               if (node.showErrors) {
@@ -175,10 +166,7 @@ module.exports = function (RED) {
               }
             })
         } else {
-          coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
-          monitoredItem.terminate(function (err) {
-            node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
-          })
+          coreListener.monitorItem(node, msg, uaSubscription)
         }
       }
     }
@@ -189,8 +177,7 @@ module.exports = function (RED) {
         return
       }
 
-      let addressSpaceItem = null
-      for (addressSpaceItem of msg.addressSpaceItems) {
+      for (let addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
           coreListener.eventDebugLog('Address Space Item Not Valid to Monitor Event Of ' + addressSpaceItem)
           return
@@ -398,7 +385,7 @@ module.exports = function (RED) {
         coreListener.internalDebugLog('Subscription Parameters Not Valid')
         return
       } else {
-        coreListener.internalDebugLog('Subscription Parameters: ' + parameters)
+        coreListener.internalDebugLog('Subscription Parameters: ' + JSON.stringify(parameters))
       }
 
       uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
@@ -503,7 +490,7 @@ module.exports = function (RED) {
           node.subscribeEventsInput(msg)
           break
         default:
-          throw new TypeError('Unknown Action Type')
+          node.error(new Error('Type Of Action To Listener Is Not Valid'), msg)
       }
     })
 

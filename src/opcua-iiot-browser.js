@@ -78,7 +78,12 @@ module.exports = function (RED) {
           browserEntries.push(coreBrowser.transformToEntry(reference))
           if (reference.nodeId) {
             nodesToRead.push(reference.nodeId.toString())
-            addressItemList.push({ name: reference.browseName.name, nodeId: reference.nodeId.toString(), datatypeName: reference.typeDefinition.toString() })
+            addressItemList.push({
+              nodeId: reference.nodeId.toString(),
+              browseName: reference.browseName.toString(),
+              displayName: reference.displayName.toString(),
+              nodeClass: reference.nodeClass.toString(),
+              datatypeName: reference.typeDefinition.toString() })
           }
         })
       })
@@ -90,21 +95,22 @@ module.exports = function (RED) {
         coreBrowser.browse(node.opcuaSession, rootNodeId)
           .then(function (browserResult) {
             if (browserResult.length) {
+              coreBrowser.detailDebugLog('Browser Result To String: ' + browserResult.toString())
               node.getExtractItemsFromList(browserResult, nodesToBrowse, addressItemList)
               if (node.recursiveBrowse) {
                 if (depth > 0) {
                   let newDepth = depth - 1
-                  nodesToBrowse.forEach((item) => {
-                    let nodesToSubBrowse = []
-                    let addressItemListSub = []
-                    node.browse(item, msg, newDepth, nodesToSubBrowse, addressItemListSub, callback)
-                  })
+                  node.browseNodeList(addressItemList, msg, newDepth, nodesToBrowse, addressItemList, callback)
+                  if (!node.singleBrowseResult) {
+                    callback(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
+                  }
                 } else {
                   coreBrowser.internalDebugLog('Minimum Depth Reached On Browse At ' + rootNodeId)
+                  callback(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
                 }
+              } else {
+                callback(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
               }
-
-              callback(rootNodeId, depth, msg, nodesToBrowse, addressItemList)
             } else {
               coreBrowser.internalDebugLog('No Browse Results On ' + rootNodeId)
             }
@@ -116,23 +122,28 @@ module.exports = function (RED) {
 
     node.browseNodeList = function (addressSpaceItems, msg, depth, nodesToBrowse, addressItemList, callback) {
       coreBrowser.internalDebugLog('Browse For NodeId List')
+      let rootNode = 'list'
       if (node.opcuaSession) {
         coreBrowser.browseAddressSpaceItems(node.opcuaSession, addressSpaceItems)
           .then(function (browserResult) {
+            coreBrowser.detailDebugLog('List Browser Result To String: ' + browserResult.toString())
             node.getExtractItemsFromList(browserResult, nodesToBrowse, addressItemList)
-
             if (node.recursiveBrowse) {
               if (depth > 0) {
                 let newDepth = depth - 1
                 let nodesToSubBrowse = []
                 let addressItemListSub = []
                 node.browseNodeList(addressItemList, msg, newDepth, nodesToSubBrowse, addressItemListSub, callback)
+                if (!node.singleBrowseResult) {
+                  callback(rootNode, depth, msg, nodesToBrowse, addressItemList)
+                }
               } else {
                 coreBrowser.internalDebugLog('Minimum Depth Reached On Browse List')
+                callback(rootNode, depth, msg, nodesToBrowse, addressItemList)
               }
+            } else {
+              callback(rootNode, depth, msg, nodesToBrowse, addressItemList)
             }
-
-            callback(depth, msg, nodesToBrowse, addressItemList)
           }).catch(function (err) {
             node.browseErrorHandling(err, msg)
           })
@@ -143,22 +154,32 @@ module.exports = function (RED) {
       let msg = originMessage
       msg.nodetype = 'browse'
 
+      let options
+      if (msg.injectType === 'listen') {
+        options = msg.payload
+      } else {
+        options = {}
+      }
+
       msg.payload = {
-        browseTopic: node.browseTopic,
-        addressSpaceItems: msg.addressSpaceItems,
         rootNodeId,
         browserResults: browserEntries,
         recursiveBrowse: node.recursiveBrowse,
         recursiveDepth: depth,
-        recursiveDepthMax: node.recursiveDepth
+        recursiveDepthMax: node.recursiveDepth,
+        options
       }
 
       if (!node.justValue) {
+        msg.payload.browseTopic = node.browseTopic
+        msg.payload.addressSpaceItems = msg.addressSpaceItems
         msg.payload.browserItemsCount = browserEntries.length
         if (node.connector) {
           msg.payload.endpoint = node.connector.endpoint
         }
         msg.payload.session = (node.opcuaSession) ? node.opcuaSession.name : 'none'
+      } else {
+        msg.payload.browserResults = addressItemList
       }
 
       if (node.sendNodesToRead && nodesToRead) {

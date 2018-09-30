@@ -8,7 +8,8 @@
       "showErrors": "Show Errors",
       "attributeId": "Attribute Id",
       "queueSize": "Queue Size",
-      "justValue": "Send Just Values"
+      "justValue": "Send Just Values",
+      "useGroupItems": "Group Items"
     }
   }
 }
