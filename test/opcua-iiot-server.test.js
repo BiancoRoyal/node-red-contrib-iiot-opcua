@@ -21,7 +21,7 @@ var testServerFlow = [
   {
     'id': '6ec4ef50.86dc1',
     'type': 'OPCUA-IIoT-Server',
-    'port': '5555',
+    'port': '5557',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',

@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(15000)
+jest.setTimeout(60000)
 
 // iiot opc ua nodes
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -355,6 +355,7 @@ var feedListenerWithRecursiveBrowse = [
     'queueSize': '1',
     'name': '',
     'justValue': true,
+    'useGroupItems': true,
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [

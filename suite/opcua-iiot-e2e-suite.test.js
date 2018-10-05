@@ -5,7 +5,8 @@
  *
  **/
 
-describe('Client Event Test Suite', () => {
+describe('Test Suite e2e', () => {
+  require('../test/e2e/opcua-iiot-connector-e2e.test')
   require('../test/e2e/opcua-iiot-browser-e2e.test')
   require('../test/e2e/opcua-iiot-crawler-e2e.test')
   require('../test/e2e/opcua-iiot-event-listener-e2e.test')

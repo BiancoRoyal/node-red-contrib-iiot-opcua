@@ -134,7 +134,7 @@ describe('OPC UA Result Filter node Testing', function () {
     })
   })
 
-  describe('Result Filter node', function () {
+  describe('Result Filter node Unit Testing', function () {
     it('node should be loaded', function (done) {
       helper.load(
         [inputNode],

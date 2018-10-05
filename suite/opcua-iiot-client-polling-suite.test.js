@@ -6,6 +6,7 @@
  **/
 
 describe('Client Polling Test Suite', () => {
+  require('../test/opcua-iiot-connector.test')
   require('../test/opcua-iiot-inject.test')
   require('../test/opcua-iiot-node.test')
   require('../test/opcua-iiot-browser.test')

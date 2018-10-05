@@ -41,7 +41,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
     })
   })
 
-  describe('Listen node', function () {
+  describe('Listener node', function () {
     it('should be loaded', function (done) {
       helper.load(listenerNodesToLoad, [
         {

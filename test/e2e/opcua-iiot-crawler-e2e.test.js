@@ -33,7 +33,7 @@ var testCrawlerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '2.6',
     'name': 'Limits',
     'addressSpaceItems': [
       {
@@ -544,7 +544,7 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerFlow, function () {
         let n2 = helper.getNode('n2f1')
         n2.on('input', function (msg) {
-          msg.should.have.property('payload', 'testpayload')
+          expect(msg.payload).toBe('testpayload')
         })
         let n4 = helper.getNode('n4f1')
         n4.on('input', function (msg) {
@@ -557,12 +557,12 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerFlow, function () {
         let n4 = helper.getNode('n4f1')
         n4.on('input', function (msg) {
-          msg.payload.should.have.property('browserItems')
-          msg.payload.browserItems[0].should.have.property('references')
+          expect(msg.payload.browserItems).toBeDefined()
+          expect(msg.payload.browserItems[0].references).toBeDefined()
 
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(34)
-          expect(msg.payload.browserItemsCount).to.equal(34)
+          expect(msg.payload.browserItems).toBeInstanceOf(Array)
+          expect(msg.payload.browserItems.length).toBe(34)
+          expect(msg.payload.browserItemsCount).toBe(34)
           done()
         })
       })
@@ -572,11 +572,11 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueFlow, function () {
         let n4 = helper.getNode('n4f2')
         n4.on('input', function (msg) {
-          msg.payload.should.have.property('browserItems')
-          expect(msg.payload.browserItems[0].references).to.equal(undefined)
+          expect(msg.payload.browserItems).toBeDefined()
+          expect(msg.payload.browserItems[0].references).toBe(undefined)
 
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(34)
+          expect(msg.payload.browserItems).toBeInstanceOf(Array)
+          expect(msg.payload.browserItems.length).toBe(34)
           done()
         })
       })
@@ -586,11 +586,11 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFlow, function () {
         let n4 = helper.getNode('n4f2')
         n4.on('input', function (msg) {
-          msg.payload.should.have.property('browserItems')
-          expect(msg.payload.browserItems[0].references).to.equal(undefined)
+          expect(msg.payload.browserItems).toBeDefined()
+          expect(msg.payload.browserItems[0].references).toBe(undefined)
 
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(34)
+          expect(msg.payload.browserItems).toBeInstanceOf(Array)
+          expect(msg.payload.browserItems.length).toBe(34)
           done()
         })
       })
@@ -600,11 +600,11 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFilteredFlow, function () {
         let n4 = helper.getNode('n4f2')
         n4.on('input', function (msg) {
-          msg.payload.should.have.property('browserItems')
-          expect(msg.payload.browserItems[0].references).to.equal(undefined)
+          expect(msg.payload.browserItems).toBeDefined()
+          expect(msg.payload.browserItems[0].references).toBe(undefined)
 
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(34)
+          expect(msg.payload.browserItems).toBeInstanceOf(Array)
+          expect(msg.payload.browserItems.length).toBe(34)
           done()
         })
       })
@@ -614,11 +614,11 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerWithFilter, function () {
         let h1f = helper.getNode('h1f')
         h1f.on('input', function (msg) {
-          msg.payload.should.have.property('browserItems')
-          expect(msg.payload.browserItems[0].references).to.equal(undefined)
+          expect(msg.payload.browserItems).toBeDefined()
+          expect(msg.payload.browserItems[0].references).not.toBeDefined()
 
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(1691)
+          expect(msg.payload.browserItems).toBeInstanceOf(Array)
+          expect(msg.payload.browserItems.length).toBe(3550)
           done()
         })
       })

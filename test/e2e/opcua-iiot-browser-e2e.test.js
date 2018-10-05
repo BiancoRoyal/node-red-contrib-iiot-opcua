@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(12000)
 
 var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
@@ -33,7 +33,7 @@ var testBrowseFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '2.6',
     'name': 'Root',
     'addressSpaceItems': [],
     'wires': [['n2f1', 'n3f1']]
@@ -46,6 +46,8 @@ var testBrowseFlow = [
     'nodeId': 'ns=1;i=1234',
     'name': 'TestBrowse',
     'justValue': true,
+    'recursiveBrowse': false,
+    'recursiveDepth': 1,
     'sendNodesToRead': false,
     'sendNodesToListener': false,
     'sendNodesToBrowser': false,
@@ -114,7 +116,7 @@ var testBrowseLevelsFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '2.6',
     'name': 'Root',
     'addressSpaceItems': [],
     'wires': [['n2f2', 'n3f2']]
@@ -127,6 +129,8 @@ var testBrowseLevelsFlow = [
     'nodeId': 'ns=1;i=1234',
     'name': 'TestBrowse',
     'justValue': true,
+    'recursiveBrowse': false,
+    'recursiveDepth': 1,
     'sendNodesToRead': false,
     'sendNodesToListener': false,
     'sendNodesToBrowser': true,
@@ -143,6 +147,8 @@ var testBrowseLevelsFlow = [
     'nodeId': '',
     'name': 'TestBrowseLevel2',
     'justValue': true,
+    'recursiveBrowse': false,
+    'recursiveDepth': 1,
     'sendNodesToRead': false,
     'sendNodesToListener': true,
     'sendNodesToBrowser': false,
@@ -211,7 +217,7 @@ var testBrowseItemFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '2.6',
     'name': 'Root',
     'addressSpaceItems': [
       {
@@ -230,6 +236,8 @@ var testBrowseItemFlow = [
     'nodeId': '',
     'name': 'TestBrowse',
     'justValue': true,
+    'recursiveBrowse': false,
+    'recursiveDepth': 1,
     'sendNodesToRead': false,
     'sendNodesToListener': false,
     'sendNodesToBrowser': false,
@@ -311,9 +319,9 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseFlow, function () {
         let n5 = helper.getNode('n5f1')
         n5.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(15)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.payload.browserResults).toBeInstanceOf(Array)
+          expect(msg.payload.browserResults.length).toBe(15)
           done()
         })
       })
@@ -323,9 +331,9 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         n5.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(15)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.payload.browserResults).toBeInstanceOf(Array)
+          expect(msg.payload.browserResults.length).toBe(15)
           done()
         })
       })
@@ -336,12 +344,12 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         n5.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
+          expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.endpoint).toBeDefined()
           expect(msg.payload.session).toBeDefined()
-          expect(msg.payload.browserItems).to.be.an('array')
-          expect(msg.payload.browserItems.length).to.equal(15)
-          expect(msg.payload.browserItems.length).to.equal(msg.payload.browserItemsCount)
+          expect(msg.payload.browserResults).toBeInstanceOf(Array)
+          expect(msg.payload.browserResults.length).toBe(15)
+          expect(msg.payload.browserResults.length).toBe(msg.payload.browserResultsCount)
           done()
         })
       })
@@ -352,9 +360,9 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         n5.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.nodesToRead).to.be.an('array')
-          expect(msg.nodesToRead.length).to.equal(15)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.nodesToRead).toBeInstanceOf(Array)
+          expect(msg.nodesToRead.length).toBe(15)
           done()
         })
       })
@@ -365,9 +373,9 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         n5.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.addressItemsToRead).to.be.an('array')
-          expect(msg.addressItemsToRead.length).to.equal(15)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.addressItemsToRead).toBeInstanceOf(Array)
+          expect(msg.addressItemsToRead.length).toBe(15)
           done()
         })
       })
@@ -378,9 +386,9 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         n5.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.addressItemsToBrowse).to.be.an('array')
-          expect(msg.addressItemsToBrowse.length).to.equal(15)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.addressItemsToBrowse).toBeInstanceOf(Array)
+          expect(msg.addressItemsToBrowse.length).toBe(15)
           done()
         })
       })
@@ -393,13 +401,13 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         n5.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.nodesToRead).to.be.an('array')
-          expect(msg.nodesToRead.length).to.equal(15)
-          expect(msg.addressItemsToRead).to.be.an('array')
-          expect(msg.addressItemsToRead.length).to.equal(15)
-          expect(msg.addressItemsToBrowse).to.be.an('array')
-          expect(msg.addressItemsToBrowse.length).to.equal(15)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.nodesToRead).toBeInstanceOf(Array)
+          expect(msg.nodesToRead.length).toBe(15)
+          expect(msg.addressItemsToRead).toBeInstanceOf(Array)
+          expect(msg.addressItemsToRead.length).toBe(15)
+          expect(msg.addressItemsToBrowse).toBeInstanceOf(Array)
+          expect(msg.addressItemsToBrowse.length).toBe(15)
           done()
         })
       })
@@ -409,9 +417,9 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseLevelsFlow, function () {
         let n4 = helper.getNode('n4f2')
         n4.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.addressItemsToBrowse).to.be.an('array')
-          expect(msg.addressItemsToBrowse.length).to.equal(15)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.addressItemsToBrowse).toBeInstanceOf(Array)
+          expect(msg.addressItemsToBrowse.length).toBe(15)
           done()
         })
       })
@@ -421,9 +429,9 @@ describe('OPC UA Browser node e2e Testing', function () {
       helper.load(browseNodesToLoad, testBrowseLevelsFlow, function () {
         let n6 = helper.getNode('n6f2')
         n6.on('input', function (msg) {
-          expect(msg.payload.browserItems).toBeDefined()
-          expect(msg.addressItemsToRead).to.be.an('array')
-          expect(msg.addressItemsToRead.length).to.equal(10)
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.addressItemsToRead).toBeInstanceOf(Array)
+          expect(msg.addressItemsToRead.length).toBe(10)
           done()
         })
       })
@@ -431,19 +439,6 @@ describe('OPC UA Browser node e2e Testing', function () {
   })
 
   describe('Browser node HTTP requests', function () {
-    it('should success on browse for a root id without session', function (done) {
-      testBrowseItemFlow[5].port = 1997
-      helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
-        let n3 = helper.getNode('n3f3')
-        n3.on('input', function (msg) {
-          helper.request()
-            .get('/opcuaIIoT/browse/' + n3.id + '/' + encodeURIComponent('ns=0;i=85'))
-            .expect(200)
-            .end(done)
-        })
-      })
-    })
-
     it('should success on browse for a root id', function (done) {
       helper.load(browseNodesToLoad, testBrowseFlow, function () {
         let n3 = helper.getNode('n3f1')

@@ -17,6 +17,7 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreListener = require('./core/opcua-iiot-core-listener')
   let Map = require('collections/map')
+  const _ = require('underscore')
 
   function OPCUAIIoTListener (config) {
     RED.nodes.createNode(this, config)
@@ -147,6 +148,30 @@ module.exports = function (RED) {
 
       if (msg.addressSpaceItems.length) {
         if (node.useGroupItems) {
+          if (node.monitoredItemGroup && node.monitoredItemGroup.groupId !== null) {
+            node.monitoredItemGroup.terminate(function (err) {
+              if (err) {
+                coreListener.internalDebugLog(err)
+              }
+              node.monitoredItemGroup.groupId = null
+            })
+          } else {
+            coreListener.buildNewMonitoredItemGroup(node, msg, msg.addressSpaceItems, uaSubscription)
+              .then(function (result) {
+                if (!result.monitoredItemGroup) {
+                  node.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
+                } else {
+                  result.monitoredItemGroup.groupId = _.uniqueId('group_')
+                  node.monitoredItemGroup = result.monitoredItemGroup
+                }
+              }).catch(function (err) {
+                coreListener.subscribeDebugLog(err)
+                if (node.showErrors) {
+                  node.error(err, msg)
+                }
+              })
+          }
+        } else {
           let itemsToMonitor = msg.addressSpaceItems.filter(addressSpaceItem => {
             let nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
             return node.monitoredASO.get(nodeIdToMonitor) === undefined
@@ -159,22 +184,7 @@ module.exports = function (RED) {
 
           if (itemsToMonitor.length) {
             msg.addressSpaceItems = itemsToMonitor
-            coreListener.buildNewMonitoredItemGroup(node, msg, itemsToMonitor, uaSubscription)
-              .then(function (result) {
-                if (!result.monitoredItemGroup) {
-                  node.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
-                  return
-                }
-                result.monitoredItemGroup.monitoredItems.map(item => {
-                  coreListener.subscribeDebugLog('Monitored Item Subscribed in Group to Id:' + item.monitoredItemId + ' Node: ' + item.itemToMonitor.nodeId)
-                  node.monitoredASO.set(item.itemToMonitor.nodeId, item.itemToMonitor)
-                })
-              }).catch(function (err) {
-                coreListener.subscribeDebugLog(err)
-                if (node.showErrors) {
-                  node.error(err, msg)
-                }
-              })
+            coreListener.monitorItems(node, msg, uaSubscription)
           }
 
           if (itemsToTerminate.length) {
@@ -189,8 +199,6 @@ module.exports = function (RED) {
               })
             })
           }
-        } else {
-          coreListener.monitorItem(node, msg, uaSubscription)
         }
       }
     }
@@ -528,6 +536,11 @@ module.exports = function (RED) {
       node.setNodeStatusTo('active')
     }
 
+    node.opcuaSessionClosed = function (opcuaSession) {
+      node.opcuaSession = null
+      node.setNodeStatusTo('closed')
+    }
+
     node.connectorShutdown = function (opcuaClient) {
       coreListener.internalDebugLog('Connector Shutdown')
       if (opcuaClient) {
@@ -538,6 +551,7 @@ module.exports = function (RED) {
     if (node.connector) {
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
+      node.connector.on('session_closed', node.opcuaSessionClosed)
       node.connector.on('after_reconnection', node.connectorShutdown)
 
       coreListener.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)

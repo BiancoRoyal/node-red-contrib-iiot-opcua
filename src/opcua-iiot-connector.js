@@ -114,6 +114,11 @@ module.exports = function (RED) {
       }
 
       node.connectOPCUAEndpoint = function () {
+        if (!node.endpoint.includes('opc.tcp:')) {
+          coreConnector.internalDebugLog('connector endpoint is wrong and needs opc.tcp// ' + node.endpoint)
+          return
+        }
+
         coreConnector.internalDebugLog('Connecting On ' + node.endpoint)
         coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
 
@@ -124,7 +129,10 @@ module.exports = function (RED) {
             node.autoSelectEndpointFromConnection()
           }
         } catch (e) {
+          node.opcuaClient = null
+          coreConnector.internalDebugLog('Error on creating OPCUAClient')
           coreConnector.internalDebugLog(e.message)
+          return
         }
 
         if (RED.settings.verbose) {
@@ -181,7 +189,13 @@ module.exports = function (RED) {
           node.stateMachine.unlock().init().open()
         })
 
-        node.connectToClient()
+        try {
+          node.connectToClient()
+        } catch (e) {
+          node.opcuaClient = null
+          coreConnector.internalDebugLog('Error on creating OPCUAClient')
+          coreConnector.internalDebugLog(e.message)
+        }
       }
 
       node.connectToClient = function () {
@@ -195,6 +209,7 @@ module.exports = function (RED) {
             if (node.showErrors) {
               node.error(err, {payload: 'Client Connect Error'})
             }
+            node.stateMachine.init().lock()
             node.handleError(err)
           } else {
             coreConnector.internalDebugLog('Client Connected On ' + node.endpoint)
@@ -305,7 +320,7 @@ module.exports = function (RED) {
                 coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!    CLIENT SESSION CLOSED   !!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
                 node.logSessionInformation(node.opcuaSession)
               }
-
+              node.emit('session_closed', node.opcuaSession)
               node.handleSessionClose()
             })
 

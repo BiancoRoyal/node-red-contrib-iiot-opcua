@@ -27,7 +27,7 @@ var testDiscoveryFlow = [
   {id: 'n2dsf1', type: 'helper'}
 ]
 
-describe('OPC UA Discovery node Testing', function () {
+describe('OPC UA Discovery node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
       done()

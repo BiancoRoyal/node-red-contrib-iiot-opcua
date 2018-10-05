@@ -67,7 +67,7 @@ var testInjectWithDelayFlow = [
   {id: 'n2ijf2', type: 'helper'}
 ]
 
-describe('OPC UA Inject node Testing', function () {
+describe('OPC UA Inject node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
       done()
@@ -88,7 +88,7 @@ describe('OPC UA Inject node Testing', function () {
     })
   })
 
-  describe('Inject default node', function () {
+  describe('Inject node', function () {
     it('should load with basic settings', function (done) {
       helper.load([inputNode], [
         {

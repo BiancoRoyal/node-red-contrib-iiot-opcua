@@ -173,7 +173,7 @@ module.exports = function (RED) {
       if (!node.justValue) {
         msg.payload.browseTopic = node.browseTopic
         msg.payload.addressSpaceItems = msg.addressSpaceItems
-        msg.payload.browserItemsCount = browserEntries.length
+        msg.payload.browserResultsCount = browserEntries.length
         if (node.connector) {
           msg.payload.endpoint = node.connector.endpoint
         }
@@ -201,7 +201,7 @@ module.exports = function (RED) {
     }
 
     node.browseSendResult = function (rootNodeId, depth, msg, nodesToBrowse, addressItemList) {
-      coreBrowser.internalDebugLog(node.browseTopic + ' called by depth ' + depth)
+      coreBrowser.internalDebugLog(rootNodeId + ' called by depth ' + depth)
 
       if (node.singleBrowseResult) {
         if (depth <= 0) {
@@ -249,8 +249,8 @@ module.exports = function (RED) {
         }
 
         if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
-          node.browseNodeList(msg.addressSpaceItems, msg, depth, nodesToBrowse, addressItemList, (depth, msg, nodesToBrowseSub, addressItemListSub) => {
-            node.browseSendResult('list', depth, msg, nodesToBrowseSub, addressItemListSub)
+          node.browseNodeList(msg.addressSpaceItems, msg, depth, nodesToBrowse, addressItemList, (rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub) => {
+            node.browseSendResult(rootNodeId, depth, msg, nodesToBrowseSub, addressItemListSub)
           })
         } else {
           coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')

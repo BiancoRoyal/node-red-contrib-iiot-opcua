@@ -161,7 +161,7 @@ de.biancoroyal.opcua.iiot.core.listener.getConditionFields = function () {
   ]
 }
 
-de.biancoroyal.opcua.iiot.core.listener.monitorItem = function (node, msg, uaSubscription) {
+de.biancoroyal.opcua.iiot.core.listener.monitorItems = function (node, msg, uaSubscription) {
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
   for (let addressSpaceItem of msg.addressSpaceItems) {
@@ -176,11 +176,9 @@ de.biancoroyal.opcua.iiot.core.listener.monitorItem = function (node, msg, uaSub
     }
 
     let nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-    let monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
 
-    if (!monitoredItem) {
+    if (nodeIdToMonitor) {
       coreListener.subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
-
       this.buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
         .then(function (result) {
           coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
@@ -191,11 +189,6 @@ de.biancoroyal.opcua.iiot.core.listener.monitorItem = function (node, msg, uaSub
             node.error(err, msg)
           }
         })
-    } else {
-      coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
-      monitoredItem.terminate(function (err) {
-        node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
-      })
     }
   }
 }

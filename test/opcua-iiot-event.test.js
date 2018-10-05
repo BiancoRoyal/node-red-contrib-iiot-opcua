@@ -46,7 +46,7 @@ var testEventNodeFlow = [
   {id: 'n4evf1', type: 'helper'}
 ]
 
-describe('OPC UA Event node Testing', function () {
+describe('OPC UA Event node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
       done()

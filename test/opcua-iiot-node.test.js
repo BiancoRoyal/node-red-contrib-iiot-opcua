@@ -170,7 +170,7 @@ var testNodeEventWithPayloadFlow = [
   {id: 'n4', type: 'helper'}
 ]
 
-describe('OPC UA Node node Testing', function () {
+describe('OPC UA Node node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
       done()
