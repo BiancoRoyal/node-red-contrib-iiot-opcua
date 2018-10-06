@@ -155,6 +155,7 @@ module.exports = function (RED) {
     }
 
     if (node.connector) {
+      node.connector.registerForOPCUA(node)
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
@@ -163,6 +164,10 @@ module.exports = function (RED) {
     } else {
       node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
     }
+
+    node.on('close', done => {
+      node.connector.deregisterForOPCUA(node, done)
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Write', OPCUAIIoTWrite)

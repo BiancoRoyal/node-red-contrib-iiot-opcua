@@ -154,11 +154,11 @@ module.exports = function (RED) {
       let msg = originMessage
       msg.nodetype = 'browse'
 
-      let options
+      let listenerParameters
       if (msg.injectType === 'listen') {
-        options = msg.payload
+        listenerParameters = msg.payload
       } else {
-        options = {}
+        listenerParameters = null
       }
 
       msg.payload = {
@@ -167,7 +167,7 @@ module.exports = function (RED) {
         recursiveBrowse: node.recursiveBrowse,
         recursiveDepth: depth,
         recursiveDepthMax: node.recursiveDepth,
-        options
+        listenerParameters
       }
 
       if (!node.justValue) {
@@ -280,6 +280,7 @@ module.exports = function (RED) {
     }
 
     if (node.connector) {
+      node.connector.registerForOPCUA(node)
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('after_reconnection', node.connectorShutdown)
@@ -288,6 +289,10 @@ module.exports = function (RED) {
     } else {
       node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
     }
+
+    node.on('close', done => {
+      node.connector.deregisterForOPCUA(node, done)
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)

@@ -37,6 +37,7 @@ module.exports = function (RED) {
     node.opcuaClient = null
     node.opcuaSession = null
     node.subscriptionStarted = false
+    node.subscriberDelay = 0
 
     let uaSubscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
@@ -73,13 +74,13 @@ module.exports = function (RED) {
       } else {
         node.subscriptionStarting = true
         uaSubscription = null
-        let options = {}
+        let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
         if (node.action !== 'events') {
           coreListener.internalDebugLog('create monitoring subscription')
-          options = msg.payload.options || coreListener.getSubscriptionParameters(timeMilliseconds)
+          options = options || coreListener.getSubscriptionParameters(timeMilliseconds)
         } else {
           coreListener.internalDebugLog('create event subscription')
-          options = msg.payload.options || coreListener.getEventSubscribtionParameters(timeMilliseconds)
+          options = options || coreListener.getEventSubscribtionParameters(timeMilliseconds)
         }
         node.makeSubscription(options, cb)
       }
@@ -104,12 +105,23 @@ module.exports = function (RED) {
       if (!uaSubscription) {
         node.createSubscription(msg, function () {
           node.subscribeMonitoredItem(msg)
+          if (node.subscriberDelay > 2000) {
+            node.subscriberDelay -= 1000
+          } else {
+            node.subscriberDelay = 2000
+          }
         })
       } else {
         if (node.subscribingPreCheck()) {
           node.subscribeMonitoredItem(msg)
         } else {
           node.resetSubscription()
+        }
+
+        if (node.subscriberDelay > 2000) {
+          node.subscriberDelay -= 1000
+        } else {
+          node.subscriberDelay = 2000
         }
       }
     }
@@ -153,7 +165,10 @@ module.exports = function (RED) {
               if (err) {
                 coreListener.internalDebugLog(err)
               }
+              node.monitoredItems.clear()
+              node.monitoredASO.clear()
               node.monitoredItemGroup.groupId = null
+              node.updateSubscriptionStatus()
             })
           } else {
             coreListener.buildNewMonitoredItemGroup(node, msg, msg.addressSpaceItems, uaSubscription)
@@ -173,30 +188,35 @@ module.exports = function (RED) {
           }
         } else {
           let itemsToMonitor = msg.addressSpaceItems.filter(addressSpaceItem => {
-            let nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+            const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
             return node.monitoredASO.get(nodeIdToMonitor) === undefined
           })
 
           let itemsToTerminate = msg.addressSpaceItems.filter(addressSpaceItem => {
-            let nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+            const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
             return node.monitoredASO.get(nodeIdToMonitor) !== undefined
           })
 
-          if (itemsToMonitor.length) {
+          if (itemsToMonitor.length > 0) {
             msg.addressSpaceItems = itemsToMonitor
+            coreListener.subscribeDebugLog('itemsToMonitor ' + itemsToMonitor.length)
             coreListener.monitorItems(node, msg, uaSubscription)
           }
 
-          if (itemsToTerminate.length) {
-            let nodeIdToMonitor
-            let monitoredItem
+          if (itemsToTerminate.length > 0) {
+            coreListener.subscribeDebugLog('itemsToTerminate ' + itemsToTerminate.length)
             itemsToTerminate.forEach(addressSpaceItem => {
-              nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-              monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
-              coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
-              monitoredItem.terminate(function (err) {
-                node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
-              })
+              const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+              const monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
+              if (monitoredItem) {
+                coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
+                monitoredItem.terminate(function (err) {
+                  coreListener.subscribeDebugLog('Terminated Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
+                  node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
+                })
+              } else {
+                coreListener.subscribeDebugLog('Monitored Item Was Not Monitoring ' + nodeIdToMonitor)
+              }
             })
           }
         }
@@ -233,8 +253,10 @@ module.exports = function (RED) {
           coreListener.eventDebugLog('Regsiter Event Item ' + nodeIdToMonitor)
           coreListener.buildNewEventItem(nodeIdToMonitor, msg, uaSubscription)
             .then(function (result) {
-              coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-              node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+              if (result.monitoredItem.monitoredItemId) {
+                coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+                node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+              }
             }).catch(function (err) {
               coreListener.eventDebugLog(err)
               if (node.showErrors) {
@@ -242,8 +264,9 @@ module.exports = function (RED) {
               }
             })
         } else {
-          coreListener.subscribeDebugLog('Terminate Event Item' + nodeIdToMonitor)
+          coreListener.eventDebugLog('Terminate Event Item' + nodeIdToMonitor)
           monitoredItem.terminate(function (err) {
+            coreListener.eventDebugLog('Terminated Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
             node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
           })
         }
@@ -252,7 +275,7 @@ module.exports = function (RED) {
 
     node.monitoredItemTerminated = function (msg, monitoredItem, nodeId, err) {
       if (err) {
-        coreListener.internalDebugLog(err + ' on ' + monitoredItem.monitoredItemId)
+        coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.monitoredItemId)
         if (node.showErrors) {
           node.error(err, msg)
         }
@@ -261,22 +284,24 @@ module.exports = function (RED) {
     }
 
     node.updateMonitoredItemLists = function (monitoredItem, nodeId) {
+      coreListener.internalDebugLog('updateMonitoredItemLists = UMIL')
+
       if (monitoredItem && monitoredItem.itemToMonitor) {
         if (node.monitoredItems.has(monitoredItem.monitoredItemId)) {
           node.monitoredItems.delete(monitoredItem.monitoredItemId)
         }
 
         if (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) {
-          coreListener.internalDebugLog('Terminate Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
+          coreListener.internalDebugLog('UMIL Terminate Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
           if (node.monitoredASO.has(nodeId)) {
             node.monitoredASO.delete(nodeId)
           }
         } else {
-          coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
+          coreListener.internalDebugLog('UMIL monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
           node.monitoredASO.forEach(function (value, key, map) {
-            coreListener.internalDebugLog('monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItemId)
+            coreListener.internalDebugLog('UMIL monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItemId)
             if (value.monitoredItemId && value.monitoredItemId === monitoredItem.monitoredItemId) {
-              coreListener.internalDebugLog('monitoredItem removed from ASO list' + key)
+              coreListener.internalDebugLog('UMIL monitoredItem removed from ASO list' + key)
               map.delete(key)
             }
           })
@@ -286,15 +311,26 @@ module.exports = function (RED) {
       }
     }
 
-    node.setMonitoring = function (monitoredItem) {
+    node.setMonitoring = function (monitoredItemToSet) {
+      const monitoredItem = monitoredItemToSet
+      if (monitoredItem.monitoredItemId === undefined) {
+        coreListener.internalDebugLog('monitoredItem Id from server is not valid Id: ' + monitoredItem.monitoredItemId)
+        return
+      }
+
       if (!coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) {
         coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
       }
 
-      coreListener.internalDebugLog('add monitoredItem to list')
+      coreListener.internalDebugLog('add monitoredItem to list Id:' + monitoredItem.monitoredItemId + ' nodeId: ' + monitoredItem.itemToMonitor.nodeId)
       node.monitoredItems.set(monitoredItem.monitoredItemId, monitoredItem)
 
+      monitoredItem.on('initialized', function () {
+        coreListener.internalDebugLog('monitoredItem ' + monitoredItem.itemToMonitor.nodeId + ' initialized on ' + monitoredItem.monitoredItemId)
+      })
+
       monitoredItem.on('changed', function (dataValue) {
+        coreListener.detailDebugLog('data changed for item: ' + monitoredItem.itemToMonitor.nodeId + ' with Id ' + monitoredItem.monitoredItemId)
         if (!monitoredItem.monitoringParameters.filter) {
           node.sendDataFromMonitoredItem(monitoredItem, dataValue)
         } else {
@@ -303,7 +339,7 @@ module.exports = function (RED) {
       })
 
       monitoredItem.on('error', function (err) {
-        coreListener.internalDebugLog(err + ' on ' + monitoredItem.monitoredItemId)
+        coreListener.internalDebugLog('monitoredItem Error: ' + err.message + ' on ' + monitoredItem.monitoredItemId)
         if (node.showErrors) {
           node.error(err, {payload: 'Monitored Item Error', monitoredItem: monitoredItem})
         }
@@ -331,6 +367,8 @@ module.exports = function (RED) {
         injectType: 'subscribe'
       }
 
+      coreListener.internalDebugLog('sendDataFromMonitoredItem: ' + msg.addressSpaceItems[0].nodeId)
+
       let dataValuesString = {}
       if (node.justValue) {
         dataValuesString = JSON.stringify(dataValue, null, 2)
@@ -349,7 +387,6 @@ module.exports = function (RED) {
         msg.payload = { dataValue: dataValue, monitoredItem: monitoredItem }
       }
 
-      coreListener.detailDebugLog('sendDataFromMonitoredItem: ' + msg)
       node.send(msg)
     }
 
@@ -451,7 +488,7 @@ module.exports = function (RED) {
 
       uaSubscription.on('internal_error', function (err) {
         node.subscriptionStarted = false
-        coreListener.internalDebugLog(err)
+        coreListener.internalDebugLog('internal_error: ' + err.message)
         if (node.showErrors) {
           node.error(err, {payload: 'Internal Error'})
         }
@@ -514,16 +551,23 @@ module.exports = function (RED) {
         return
       }
 
+      coreListener.detailDebugLog('delay to subscribe is ' + node.subscriberDelay + ' ms')
       switch (node.action) {
         case 'subscribe':
-          node.subscribeActionInput(msg)
+          setTimeout(() => {
+            node.subscribeActionInput(msg)
+          }, node.subscriberDelay)
           break
         case 'events':
-          node.subscribeEventsInput(msg)
+          setTimeout(() => {
+            node.subscribeEventsInput(msg)
+          }, node.subscriberDelay)
           break
         default:
           node.error(new Error('Type Of Action To Listener Is Not Valid'), msg)
       }
+
+      node.subscriberDelay += 2000
     })
 
     node.setOPCUAConnected = function (opcuaClient) {
@@ -549,6 +593,7 @@ module.exports = function (RED) {
     }
 
     if (node.connector) {
+      node.connector.registerForOPCUA(node)
       node.connector.on('connected', node.setOPCUAConnected)
       node.connector.on('session_started', node.opcuaSessionStarted)
       node.connector.on('session_closed', node.opcuaSessionClosed)
@@ -561,10 +606,12 @@ module.exports = function (RED) {
 
     node.on('close', function (done) {
       if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
-        uaSubscription.terminate(done)
+        uaSubscription.terminate(() => {
+          node.connector.deregisterForOPCUA(node, done)
+        })
         uaSubscription = null
       } else {
-        done()
+        node.connector.deregisterForOPCUA(node, done)
       }
     })
   }

@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(60000)
+jest.setTimeout(20000)
 
 // iiot opc ua nodes
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -36,7 +36,7 @@ var testListenerMonitoringFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'Start Abo',
     'addressSpaceItems': [
       {
@@ -61,7 +61,7 @@ var testListenerMonitoringFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '5.5',
+    'startDelay': '6',
     'name': 'End Abo',
     'addressSpaceItems': [
       {
@@ -159,6 +159,191 @@ var testListenerMonitoringFlow = [
   }
 ]
 
+var testListenerMonitoringAboFlow = [
+  {
+    'id': 'c9ca1bbe.d1cb3',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'listen',
+    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payloadType': 'json',
+    'topic': 'TestTopicSubscribe1',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': 'Start Abo',
+    'addressSpaceItems': [
+      {
+        'name': 'FullCounter',
+        'nodeId': 'ns=1;s=FullCounter',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        'd9754392.9eb1e', 'n1lia'
+      ]
+    ]
+  },
+  {
+    'id': 'c9ca1bbe.d1cb4',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'listen',
+    'payload': '',
+    'payloadType': 'string',
+    'topic': 'TestTopicUnsubscribe1',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '6',
+    'name': 'End Abo',
+    'addressSpaceItems': [
+      {
+        'name': 'FullCounter',
+        'nodeId': 'ns=1;s=FullCounter',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        'd9754392.9eb1e', 'n1lia'
+      ]
+    ]
+  },
+  {id: 'n1lia', type: 'helper'},
+  {
+    'id': 'c9ca1bbe.d1cb5',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'listen',
+    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payloadType': 'json',
+    'topic': 'TestTopicSubscribe2',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '9',
+    'name': 'Start Abo',
+    'addressSpaceItems': [
+      {
+        'name': 'FullCounter',
+        'nodeId': 'ns=1;s=FullCounter',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        'd9754392.9eb1e', 'n2lia'
+      ]
+    ]
+  },
+  {
+    'id': 'c9ca1bbe.d1cb6',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'listen',
+    'payload': '',
+    'payloadType': 'string',
+    'topic': 'TestTopicUnsubscribe2',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '12',
+    'name': 'End Abo',
+    'addressSpaceItems': [
+      {
+        'name': 'FullCounter',
+        'nodeId': 'ns=1;s=FullCounter',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        'd9754392.9eb1e', 'n2lia'
+      ]
+    ]
+  },
+  {id: 'n2lia', type: 'helper'},
+  {
+    'id': 'd9754392.9eb1e',
+    'type': 'OPCUA-IIoT-Listener',
+    'connector': 'c95fc9fc.64ccb',
+    'action': 'subscribe',
+    'queueSize': '1',
+    'name': '',
+    'justValue': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        'b0856b45.da4a19', 'n3lia'
+      ]
+    ]
+  },
+  {id: 'n3lia', type: 'helper'},
+  {
+    'id': 'b0856b45.da4a19',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': false,
+    'filters': [],
+    'wires': [
+      [
+        'n4lia'
+      ]
+    ]
+  },
+  {id: 'n4lia', type: 'helper'},
+  {
+    'id': '4ab7dc9.b7c5625',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '5585',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': true,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'wires': [
+      []
+    ]
+  },
+  {
+    'id': 'c95fc9fc.64ccb',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:5585/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false
+  }
+]
+
 var recursiveBrowserAboFlow = [
   {
     'id': '8a761f37.f69808',
@@ -170,7 +355,7 @@ var recursiveBrowserAboFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '4',
+    'startDelay': '3',
     'name': 'Root',
     'addressSpaceItems': [],
     'wires': [
@@ -185,8 +370,8 @@ var recursiveBrowserAboFlow = [
     'id': '18b3e5b9.f9ba4a',
     'type': 'OPCUA-IIoT-Browser',
     'connector': '296a2f29.56e248',
-    'nodeId': 'i=85',
-    'name': '',
+    'nodeId': 'ns=0;i=85',
+    'name': 'RootBrowser',
     'justValue': true,
     'sendNodesToRead': false,
     'sendNodesToListener': true,
@@ -259,7 +444,7 @@ var recursiveBrowserAboFlow = [
     'id': '296a2f29.56e248',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:3335/',
+    'endpoint': 'opc.tcp://localhost:5587/',
     'keepSessionAlive': true,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -275,7 +460,7 @@ var recursiveBrowserAboFlow = [
   {
     'id': '37396e13.734bd2',
     'type': 'OPCUA-IIoT-Server',
-    'port': '3335',
+    'port': '5587',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -315,7 +500,7 @@ var feedListenerWithRecursiveBrowse = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '4',
+    'startDelay': '3',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -330,13 +515,13 @@ var feedListenerWithRecursiveBrowse = [
     'connector': 'c95fc9fc.64ccc',
     'nodeId': 'ns=1;i=1001',
     'name': '',
-    'justValue': false,
+    'justValue': true,
     'sendNodesToRead': false,
     'sendNodesToListener': true,
     'sendNodesToBrowser': false,
-    'singleBrowseResult': true,
+    'singleBrowseResult': false,
     'recursiveBrowse': true,
-    'recursiveDepth': '1',
+    'recursiveDepth': 1,
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [
@@ -484,7 +669,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
             expect(msg.payload.value).toBeDefined()
             expect(msg.payload.value.dataType).toBe('Int32')
             expect(msg.payload.statusCode).toBeDefined()
-            done()
+            setTimeout(done, 500)
           }
         })
       })
@@ -501,34 +686,153 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
             expect(msg.payload.dataType).toBe('Int32')
             expect(msg.payload.nodeId).toBe('ns=1;s=FullCounter')
             expect(msg.payload.statusCode).not.toBeDefined()
-            done()
+            setTimeout(done, 200)
           }
         })
       })
     })
 
-    it('should verify a compressed message from response node on subscribe recursive', function (done) {
-      recursiveBrowserAboFlow[2].singleBrowseResult = false
-      helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
+    it('should get a message with payload after injecting twice', function (done) {
+      helper.load(listenerNodesToLoad, testListenerMonitoringAboFlow, function () {
         msgCounter = 0
-        let n5 = helper.getNode('n5abo')
-        n5.on('input', function (msg) {
+        let n1 = helper.getNode('n1lia')
+        n1.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
+            expect(msg.topic).toBe('TestTopicSubscribe1')
+            expect(msg.nodetype).toBe('inject')
+            expect(msg.injectType).toBe('listen')
+          }
+
+          if (msgCounter === 2) {
+            expect(msg.topic).toBe('TestTopicUnsubscribe1')
+            expect(msg.nodetype).toBe('inject')
+            expect(msg.injectType).toBe('listen')
+            setTimeout(done, 200)
+          }
+        })
+      })
+    })
+
+    it('should verify a message on changed monitored item with statusCode on subscribing twice', function (done) {
+      helper.load(listenerNodesToLoad, testListenerMonitoringAboFlow, function () {
+        msgCounter = 0
+        let n2 = helper.getNode('n2lia')
+        n2.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.topic).toBe('TestTopicSubscribe2')
+            expect(msg.nodetype).toBe('inject')
+            expect(msg.injectType).toBe('listen')
+            expect(msg.payload.value).toBeDefined()
+          }
+
+          if (msgCounter === 2) {
+            expect(msg.topic).toBe('TestTopicUnsubscribe2')
+            expect(msg.nodetype).toBe('inject')
+            expect(msg.injectType).toBe('listen')
+            setTimeout(done, 200)
+          }
+        })
+      })
+    })
+
+    it('should verify message from listener node on subscribing twice', function (done) {
+      helper.load(listenerNodesToLoad, testListenerMonitoringAboFlow, function () {
+        msgCounter = 0
+        let n3 = helper.getNode('n3lia')
+        n3.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.payload.value).toBeDefined()
             setTimeout(done, 2000)
           }
         })
       })
     })
 
-    it('should verify a compressed message from response node on subscribe recursive as single result', function (done) {
-      recursiveBrowserAboFlow[2].singleBrowseResult = true
+    it('should verify a compressed message from response node on subscribing twice', function (done) {
+      helper.load(listenerNodesToLoad, testListenerMonitoringAboFlow, function () {
+        msgCounter = 0
+        let n4 = helper.getNode('n4lia')
+        n4.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.payload.value).toBeDefined()
+            setTimeout(done, 2000)
+          }
+        })
+      })
+    })
+
+    it('should verify a message from browse node on subscribe recursive', function (done) {
+      helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
+        msgCounter = 0
+        let n2 = helper.getNode('n2abo')
+        n2.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.payload.browserResults).toBeDefined()
+            expect(msg.payload.browserResults.length).toBe(3)
+          }
+
+          if (msgCounter === 2) {
+            expect(msg.payload.browserResults).toBeDefined()
+            expect(msg.payload.browserResults.length).toBe(40)
+            setTimeout(done, 200)
+          }
+        })
+      })
+    })
+
+    it('should verify a compressed message from response after browser node on subscribe recursive', function (done) {
+      helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
+        msgCounter = 0
+        let n3 = helper.getNode('n3abo')
+        n3.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.payload).toBeDefined()
+            expect(msg.payload.browserResults.length).toBe(3)
+            expect(msg.payload.recursiveDepth).toBe(1)
+          }
+
+          if (msgCounter === 2) {
+            expect(msg.payload).toBeDefined()
+            expect(msg.payload.browserResults.length).toBe(40)
+            expect(msg.payload.recursiveDepth).toBe(0)
+            setTimeout(done, 2000)
+          }
+        })
+      })
+    })
+
+    it('should verify a message from listener node on subscribe recursive', function (done) {
+      helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
+        msgCounter = 0
+        let n4 = helper.getNode('n4abo')
+        n4.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.payload).toBeDefined()
+          }
+
+          if (msgCounter === 2) {
+            expect(msg.payload).toBeDefined()
+            setTimeout(done, 200)
+          }
+        })
+      })
+    })
+
+    it('should verify a compressed message from response after listener node on subscribe recursive as single result', function (done) {
       helper.load(listenerNodesToLoad, recursiveBrowserAboFlow, function () {
         msgCounter = 0
         let n5 = helper.getNode('n5abo')
         n5.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
+            expect(msg.payload).toBeDefined()
             setTimeout(done, 2000)
           }
         })
@@ -543,6 +847,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
         n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
+            expect(msg.payload).toBeDefined()
             setTimeout(done, 2000)
           }
         })
@@ -557,6 +862,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
         n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
+            expect(msg.payload).toBeDefined()
             setTimeout(done, 2000)
           }
         })

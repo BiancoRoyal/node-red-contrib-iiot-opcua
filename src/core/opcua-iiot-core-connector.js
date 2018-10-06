@@ -30,18 +30,32 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
       'end': 'END'
     },
     'OPEN': {
+      'sessionactive': 'SESSIONACTIVE',
       'close': 'CLOSED',
+      'lock': 'LOCKED',
+      'end': 'END'
+    },
+    'SESSIONACTIVE': {
+      'open': 'OPEN',
+      'sessionclose': 'SESSIONCLOSED',
+      'lock': 'LOCKED',
+      'end': 'END'
+    },
+    'SESSIONCLOSED': {
+      'init': 'INIT',
+      'open': 'OPEN',
       'lock': 'LOCKED',
       'end': 'END'
     },
     'CLOSED': {
       'init': 'INIT',
+      'open': 'OPEN',
       'lock': 'LOCKED',
       'end': 'END'
     },
     'LOCKED': {
       'unlock': 'UNLOCKED',
-      'open': 'OPEN',
+      'init': 'INIT',
       'end': 'END'
     },
     'UNLOCKED': {

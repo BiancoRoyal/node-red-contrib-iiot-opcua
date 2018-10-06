@@ -31,6 +31,7 @@ de.biancoroyal.opcua.iiot.core.listener.MAX_LISTENER_INTERVAL = 3600000 // eslin
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.Stately = de.biancoroyal.opcua.iiot.core.listener.Stately || require('stately.js') // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
@@ -170,19 +171,21 @@ de.biancoroyal.opcua.iiot.core.listener.monitorItems = function (node, msg, uaSu
       return
     }
 
-    if (addressSpaceItem.datatypeName === 'ns=0;i=0') {
+    if (addressSpaceItem.datatypeName === de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE) {
       coreListener.subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
       return
     }
 
-    let nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+    const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
 
     if (nodeIdToMonitor) {
       coreListener.subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
       this.buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
         .then(function (result) {
-          coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-          node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+          if (result.monitoredItem.monitoredItemId) {
+            coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+            node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+          }
         }).catch(function (err) {
           coreListener.subscribeDebugLog(err)
           if (node.showErrors) {
@@ -205,7 +208,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
 
       let interval
       let queueSize
-      let options = (msg.payload.options) ? msg.payload.options : msg.payload
+      let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters : msg.payload
       if (typeof options.interval === 'number' &&
         options.interval <= coreListener.MAX_LISTENER_INTERVAL &&
         options.interval >= coreListener.MIN_LISTENER_INTERVAL) {
@@ -256,7 +259,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
       let interval
       let queueSize
 
-      let options = (msg.payload.options) ? msg.payload.options : msg.payload
+      let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters : msg.payload
       if (typeof options.interval === 'number' &&
         options.interval <= coreListener.MAX_LISTENER_INTERVAL &&
         options.interval >= coreListener.MIN_LISTENER_INTERVAL) {
@@ -271,8 +274,12 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
         queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
 
+      let filteredAddressSpaceItems = addressSpaceItems.filter(addressSpaceItem => {
+        return addressSpaceItem.datatypeName !== de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE
+      })
+
       let subcriptionItems = []
-      addressSpaceItems.forEach(item => {
+      filteredAddressSpaceItems.forEach(item => {
         subcriptionItems.push({
           nodeId: coreListener.core.nodeOPCUA.resolveNodeId(item.nodeId),
           attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value})
