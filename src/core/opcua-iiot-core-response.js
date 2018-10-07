@@ -23,60 +23,60 @@ de.biancoroyal.opcua.iiot.core.response.detailDebugLog = de.biancoroyal.opcua.ii
 de.biancoroyal.opcua.iiot.core.response.EMPTY_LIST = 0
 de.biancoroyal.opcua.iiot.core.response.NONE = 0
 
-de.biancoroyal.opcua.iiot.core.response.analyzeBrowserResults = function (msg) {
+de.biancoroyal.opcua.iiot.core.response.analyzeBrowserResults = function (node, msg) {
   switch (msg.readtype) {
     case 'AllAttributes':
-      this.handlePayloadStatusCode(msg) // TODO: do more
+      this.handlePayloadStatusCode(node, msg) // TODO: do more
       break
     case 'VariableValue':
-      this.handlePayloadStatusCode(msg) // TODO: do less
+      this.handlePayloadStatusCode(node, msg) // TODO: do less
       break
     case 'Meta':
       this.setNodeStatus([this.NONE, this.NONE, this.NONE], 'None')
       break
     default:
-      this.handlePayloadStatusCode(msg) // TODO: do default
+      this.handlePayloadStatusCode(node, msg) // TODO: do default
       break
   }
 }
 
-de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (msg) {
+de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (node, msg) {
   switch (msg.readtype) {
     case 'AllAttributes':
-      this.handlePayloadStatusCode(msg) // TODO: do more
+      this.handlePayloadStatusCode(node, msg) // TODO: do more
       break
     case 'VariableValue':
-      this.handlePayloadStatusCode(msg) // TODO: do less
+      this.handlePayloadStatusCode(node, msg) // TODO: do less
       break
     case 'Meta':
       this.setNodeStatus([this.NONE, this.NONE, this.NONE], 'None')
       break
     default:
-      this.handlePayloadStatusCode(msg) // TODO: do default
+      this.handlePayloadStatusCode(node, msg) // TODO: do default
       break
   }
 }
 
-de.biancoroyal.opcua.iiot.core.response.analyzeListenerResults = function (msg) {
+de.biancoroyal.opcua.iiot.core.response.analyzeListenerResults = function (node, msg) {
   switch (msg.injectType) {
     case 'subscribe':
-      this.analyzeSubscribeResultStatus(msg)
+      this.analyzeSubscribeResultStatus(node, msg)
       break
     case 'event':
-      this.analyzeEventResultStatus(msg)
+      this.analyzeEventResultStatus(node, msg)
       break
     default:
       break
   }
 }
 
-de.biancoroyal.opcua.iiot.core.response.analyzeMethodResults = function (msg) {
+de.biancoroyal.opcua.iiot.core.response.analyzeMethodResults = function (node, msg) {
   switch (msg.methodType) {
     case 'basic':
-      this.handlePayloadStatusCode(msg)
+      this.handlePayloadStatusCode(node, msg)
       break
     case 'complex':
-      this.handlePayloadStatusCode(msg)
+      this.handlePayloadStatusCode(node, msg)
       break
     default:
       break
@@ -105,11 +105,11 @@ de.biancoroyal.opcua.iiot.core.response.analyzeWriteResults = function (node, ms
 }
 
 de.biancoroyal.opcua.iiot.core.response.analyzeSubscribeResultStatus = function (node, msg) {
-  this.handlePayloadStatusCode(msg)
+  this.handlePayloadStatusCode(node, msg)
 }
 
 de.biancoroyal.opcua.iiot.core.response.analyzeEventResultStatus = function (node, msg) {
-  this.handlePayloadStatusCode(msg)
+  this.handlePayloadStatusCode(node, msg)
 }
 
 de.biancoroyal.opcua.iiot.core.response.handlePayloadStatusCode = function (node, msg) {

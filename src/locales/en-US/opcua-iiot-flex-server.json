@@ -25,7 +25,10 @@
       "xmlsets": "XML-Sets",
       "serverDiscovery": "Discovery",
       "maxNodesPerRead": "Max per Read",
-      "maxNodesPerBrowse": "Max per Browse"
+      "maxNodesPerBrowse": "Max per Browse",
+      "registerServerMethod": "Register Server Method",
+      "discoveryServerEndpointUrl": "Endpoint Url",
+      "capabilitiesForMDNS": "MDNS capabilities"
     },
     "tabs-label": {
       "users": "Users & Sets",

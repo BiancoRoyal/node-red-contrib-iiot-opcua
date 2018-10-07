@@ -144,9 +144,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
       helper.load([injectNode, inputNode], testCMDFlow, function () {
         let n5 = helper.getNode('n5cmdf1')
         n5.on('input', function (msg) {
-          expect(msg.payload.commandtype).toBe('restart')
-          expect(msg.payload.nodeId).toBe('')
-          expect(msg.nodetype).toBe('CMD')
+          expect(msg.commandType).toBe('restart')
+          expect(msg.payload.nodeId).not.toBeDefined()
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('CMD')
           done()
         })
       })
@@ -156,9 +157,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
       helper.load([injectNode, inputNode], testCMDFlow, function () {
         let n6 = helper.getNode('n6cmdf1')
         n6.on('input', function (msg) {
-          expect(msg.payload.commandtype).toBe('deleteNode')
+          expect(msg.commandType).toBe('deleteNode')
           expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
-          expect(msg.nodetype).toBe('CMD')
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('CMD')
           done()
         })
       })
@@ -168,9 +170,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
       helper.load([injectOPCUANode, inputNode, serverNode], testInjectCMDFlow, function () {
         let n4 = helper.getNode('n4cmdf2')
         n4.on('input', function (msg) {
-          expect(msg.payload.commandtype).toBe('deleteNode')
+          expect(msg.commandType).toBe('deleteNode')
           expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
-          expect(msg.nodetype).toBe('CMD')
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('CMD')
           done()
         })
       })

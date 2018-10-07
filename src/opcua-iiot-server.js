@@ -234,7 +234,7 @@ module.exports = function (RED) {
         return false
       }
 
-      switch (msg.nodetype) {
+      switch (msg.injectType) {
         case 'ASO':
           node.changeAddressSpace(msg)
           break
@@ -243,7 +243,7 @@ module.exports = function (RED) {
           node.executeOpcuaCommand(msg)
           break
         default:
-          node.error(new Error('Unknown Node Type ' + msg.nodetype), msg)
+          node.error(new Error('Unknown Inject Type ' + msg.injectType), msg)
       }
 
       node.send(msg)
@@ -319,7 +319,7 @@ module.exports = function (RED) {
         node.error(new Error('Server AddressSpace Not Valid'), msg)
       }
 
-      switch (msg.payload.commandtype) {
+      switch (msg.commandType) {
         case 'restart':
           node.restartServer()
           break
@@ -354,6 +354,9 @@ module.exports = function (RED) {
         node.emit('shutdown')
         node.initNewServer()
       }
+
+      node.send({payload: 'server shutdown'})
+      node.setNodeStatusTo('shutdown')
 
       if (node.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')

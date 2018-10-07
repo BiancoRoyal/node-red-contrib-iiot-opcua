@@ -29,87 +29,12 @@
       xmlsets: { value: [] },
       publicCertificateFile: {value: ''},
       privateCertificateFile: {value: ''},
+      registerServerMethod: {value: 1},
+      discoveryServerEndpointUrl: {value: ''},
+      capabilitiesForMDNS: {value: ''},
       maxNodesPerRead: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 100000))) }},
       maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }},
-      addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    " +
-        "// server = the created node-opcua server\n    // addressSpace = script placeholder\n    " +
-        "// eventObjects = to hold event variables in memory from this script\n    \n    " +
-        "// internal global sandbox objects are \n    // node = node of the flex server, \n    " +
-        "// coreServer = core iiot server object for debug and access to nodeOPCUA,\n    " +
-        "// and scriptObjects to hold variables and functions\n    \n    " +
-        "// globals are to find on node.context().global and should be initialized here\n    " +
-        "node.context().global.set(\"TestOPCUAVarValue\", {})\n    \n    " +
-        "coreServer.internalDebugLog('init dynamic address space')\n    " +
-        "node.warn('construct new address space for OPC UA')\n    \n    " +
-        "// from here - see the node-opcua docs how to build address sapces\n    let tanks = addressSpace.addObject({\n        " +
-        "browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        " +
-        "organizedBy: addressSpace.rootFolder.objects,\n        " +
-        "notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    " +
-        "let oilTankLevel = addressSpace.addVariable({\n        browseName: 'OilTankLevel',\n        " +
-        "displayName: 'Oil Tank Level',\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        " +
-        "propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    " +
-        "// ---------------------------------------------------------------------------------\n    " +
-        "// Let's create a exclusive Limit Alarm that automatically raise itself\n    " +
-        "// when the tank level is out of limit\n    " +
-        "// ---------------------------------------------------------------------------------\n    " +
-        "let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    " +
-        "node.assert(exclusiveLimitAlarmType !== null)\n    \n    " +
-        "let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        " +
-        "componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        " +
-        "displayName: 'Oil Tank Level Condition',\n        description: 'ExclusiveLimitAlarmType Condition',\n        " +
-        "conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' " +
-        "// confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   " +
-        "// the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        " +
-        "highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    " +
-        "// --------------------------------------------------------------\n    " +
-        "// Let's create a second letiable with no Exclusive alarm\n    " +
-        "// --------------------------------------------------------------\n    " +
-        "let gasTankLevel = addressSpace.addVariable({\n        browseName: 'GasTankLevel',\n        " +
-        "displayName: 'Gas Tank Level',\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        " +
-        "propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    " +
-        "let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    " +
-        "node.assert(nonExclusiveLimitAlarmType !== null)\n    \n    " +
-        "let gasTankLevelCondition = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        " +
-        "componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        " +
-        "displayName: 'Gas Tank Level Condition',\n        description: 'NonExclusiveLimitAlarmType Condition',\n        " +
-        "conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' " +
-        "// confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   " +
-        "// the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        " +
-        "lowLimit: 0.2\n    })\n    \n    // variable with value\n    " +
-        "if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            " +
-        "scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = addressSpace.addObject({\n        " +
-        "browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        " +
-        "organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    " +
-        "if(coreServer.core) {\n        addressSpace.addVariable({\n            componentOf: myVariables,\n            " +
-        "nodeId: 'ns=4;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            " +
-        "displayName: 'Test Read and Write',\n            dataType: 'Double',\n            value: {\n                " +
-        "get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        " +
-        "dataType: 'Double',\n                        " +
-        "value: scriptObjects.testReadWrite\n                    })\n                },\n                " +
-        "set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    " +
-        "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        " +
-        "let memoryVariable = addressSpace.addVariable({\n            componentOf: myVariables,\n            " +
-        "nodeId: 'ns=4;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: 'Free Memory',\n            " +
-        "dataType: 'Double',\n            \n            value: {\n              get: function () {\n                " +
-        "return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  " +
-        "value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        " +
-        "addressSpace.installHistoricalDataNode(memoryVariable)\n        \n        " +
-        "let globalValue = node.context().global.get(\"TestOPCUAVarValue\")\n        if(globalValue) {\n            " +
-        "coreServer.internalDebugLog('init TestOPCUAVarValue in address space')\n            " +
-        "let testOPCUAVarValue = addressSpace.addVariable({\n                componentOf: myVariables,\n                " +
-        "nodeId: 'ns=4;s=TestOPCUAVarValue',\n                browseName: 'TestOPCUAVarValue',\n                " +
-        "displayName: 'Test OPC UA Variable Value',\n                " +
-        "dataType: 'Double',\n                \n                value: {\n                  " +
-        "get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                      " +
-        "dataType: 'Double',\n                      " +
-        "value: node.context().global.get(\"TestOPCUAVarValue\").value\n                    })\n                  },\n                  " +
-        "set: function (variant) {\n                      scriptObjects.testReadWrite = parseFloat(variant.value)\n                      " +
-        "return coreServer.core.nodeOPCUA.StatusCodes.Good\n                  }\n                }\n            })\n            " +
-        "addressSpace.installHistoricalDataNode(memoryVariable)\n        }\n    \n    } else {\n        " +
-        "coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    " +
-        "// hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    " +
-        "eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    " +
-        "eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}"
+      addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    // server = the created node-opcua server\n    // addressSpace = script placeholder\n    // eventObjects = to hold event variables in memory from this script\n    \n    // internal global sandbox objects are \n    // node = node of the flex server, \n    // coreServer = core iiot server object for debug and access to nodeOPCUA,\n    // and scriptObjects to hold variables and functions\n    \n    const namespace = addressSpace.getOwnNamespace()\n    \n    coreServer.internalDebugLog('init dynamic address space')\n    node.warn('construct new address space for OPC UA')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    let tanks = namespace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    let oilTankLevel = namespace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: 'Oil Tank Level',\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    // Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    // ---------------------------------------------------------------------------------\n    let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.assert(exclusiveLimitAlarmType !== null)\n    \n    let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: 'Oil Tank Level Condition',\n        description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    // --------------------------------------------------------------\n    let gasTankLevel = namespace.addVariable({\n        browseName: 'GasTankLevel',\n        displayName: 'Gas Tank Level',\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    node.assert(nonExclusiveLimitAlarmType !== null)\n    \n    let gasTankLevelCondition = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        displayName: 'Gas Tank Level Condition',\n        description: 'NonExclusiveLimitAlarmType Condition',\n        conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // variable with value\n    if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = namespace.addObject({\n        browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    if(coreServer.core) {\n        namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            displayName: 'Test Read and Write',\n            dataType: 'Double',\n            value: {\n                get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        dataType: 'Double',\n                        value: scriptObjects.testReadWrite\n                    })\n                },\n                set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        let memoryVariable = namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: 'Free Memory',\n            dataType: 'Double',\n            \n            value: {\n              get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n       \n    } else {\n        coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}"
       }
     },
     inputs: 1,
@@ -154,6 +79,11 @@
       tabs.addTab({
         id: "opcuaiiot-server-tab-ass",
         label: this._("opcua-iiot-contrib.tabs-label.ass")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-server-tab-discovery",
+        label: this._("opcua-iiot-contrib.tabs-label.discovery")
       })
 
       // User Management
@@ -382,27 +312,25 @@
       })
 
       // address space script
-      let editorGlobals = {
-        msg:true,
-        context:true,
-        RED: true,
-        util: true,
-        flow: true,
-        global: true,
-        console: true,
-        Buffer: true,
-        setTimeout: true,
-        clearTimeout: true,
-        setInterval: true,
-        clearInterval: true,
-        draggable: true
-      }
-
       node.editorAddressSpaceScript = RED.editor.createEditor({
         id: 'node-input-func-editor-addressSpaceScript',
         mode: 'ace/mode/javascript',
         value: $("#node-input-addressSpaceScript").val(),
-        globals: editorGlobals
+        globals: {
+          msg:true,
+          context:true,
+          RED: true,
+          util: true,
+          flow: true,
+          global: true,
+          console: true,
+          Buffer: true,
+          setTimeout: true,
+          clearTimeout: true,
+          setInterval: true,
+          clearInterval: true,
+          draggable: true
+        }
       });
 
       $( function() {
@@ -596,6 +524,42 @@
             </div>
             <div class="form-row node-text-editor-row" id="div-script-editor">
                 <div style="height: 350px; min-height:150px;" class="node-text-editor" id="node-input-func-editor-addressSpaceScript"></div>
+            </div>
+        </div>
+        <div id="opcuaiiot-server-tab-discovery" style="display:none">
+            <div class="form-row">
+                <!-- SecurityPolicy enum via REST -->
+                <label for="node-input-registerServerMethod" style="min-width:160px"><i class="fa fa-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.registerServerMethod"></span></label>
+                <select type="text" id="node-input-registerServerMethod">
+                    <option value="1">HIDDEN</option>
+                    <option value="2">MDNS</option>
+                    <option value="3">LDS</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <span style="min-width:160px">
+                  <ul>
+                    <li>HIDDEN: the server doesn't expose itself to the external world
+                    <li>MDNS: the server publish itself to the mDNS Multicast network directly
+                    <li>LDS: the server registers itself to the LDS or LDS-ME (Local Discovery Server)
+                  </ul>
+                </span>
+            </div>
+            <div class="form-row">
+                 <label for="node-input-serverDiscovery" style="min-width:160px"><i class="fa fa-cc-discover"></i>
+                 <span data-i18n="opcua-iiot-contrib.label.serverDiscovery"></span></label>
+                <input type="checkbox" id="node-input-serverDiscovery" style="max-width:35px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-discoveryServerEndpointUrl" style="min-width:160px"><i class="icon-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.discoveryServerEndpointUrl"></span></label>
+                <input type="text" id="node-input-discoveryServerEndpointUrl" placeholder="opc.tcp://localhost:4840">
+            </div>
+            <div class="form-row">
+                <label for="node-input-capabilitiesForMDNS" style="min-width:160px"><i class="icon-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.capabilitiesForMDNS"></span></label>
+                <input type="text" id="node-input-capabilitiesForMDNS" placeholder="NA,DA,..." >
             </div>
         </div>
     </div>

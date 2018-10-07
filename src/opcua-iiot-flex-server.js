@@ -46,6 +46,9 @@ module.exports = function (RED) {
     this.isAuditing = config.isAuditing
     // discovery
     this.disableDiscovery = !config.serverDiscovery
+    this.registerServerMethod = config.registerServerMethod || 1
+    this.discoveryServerEndpointUrl = config.discoveryServerEndpointUrl
+    this.capabilitiesForMDNS = (config.capabilitiesForMDNS) ? config.capabilitiesForMDNS.split(',') : [config.capabilitiesForMDNS]
     // limits
     this.maxNodesPerRead = config.maxNodesPerRead || 1000
     this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
@@ -57,7 +60,14 @@ module.exports = function (RED) {
 
     node.assert = require('better-assert')
 
-    const vm = new VM({ sandbox: { node, coreServer, scriptObjects } })
+    const vm = new VM({
+      sandbox: {
+        node,
+        coreServer,
+        scriptObjects,
+        RED
+      }
+    })
 
     node.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
       server.internalDebugLog('Init Function Block Flex Server')
@@ -132,6 +142,17 @@ module.exports = function (RED) {
       node.initialized = false
       node.opcuaServer = null
 
+      switch (parseInt(node.registerServerMethod)) {
+        case 2:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.MDNS
+          break
+        case 3:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.LDS
+          break
+        default:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.HIDDEN
+      }
+
       let serverOptions = {
         port: node.port,
         nodeset_filename: xmlFiles,
@@ -167,6 +188,18 @@ module.exports = function (RED) {
         },
         isAuditing: node.isAuditing,
         disableDiscovery: node.disableDiscovery
+      }
+
+      if (!node.disableDiscovery) {
+        serverOptions.registerServerMethod = node.registerServerMethod
+
+        if (node.discoveryServerEndpointUrl && node.discoveryServerEndpointUrl !== '') {
+          serverOptions.discoveryServerEndpointUrl = node.discoveryServerEndpointUrl
+        }
+
+        if (node.capabilitiesForMDNS && node.capabilitiesForMDNS.length) {
+          serverOptions.capabilitiesForMDNS = node.capabilitiesForMDNS
+        }
       }
 
       coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))

@@ -402,42 +402,6 @@
                 <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
             </div>
         </div>
-        <div id="opcuaiiot-server-tab-discovery" style="display:none">
-            <div class="form-row">
-                <!-- SecurityPolicy enum via REST -->
-                <label for="node-input-registerServerMethod" style="min-width:160px"><i class="fa fa-discover"></i>
-                <span data-i18n="opcua-iiot-contrib.label.registerServerMethod"></span></label>
-                <select type="text" id="node-input-registerServerMethod">
-                    <option value="1">HIDDEN</option>
-                    <option value="2">MDNS</option>
-                    <option value="3">LDS</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <span style="min-width:160px">
-                  <ul>
-                    <li>HIDDEN: the server doesn't expose itself to the external world
-                    <li>MDNS: the server publish itself to the mDNS Multicast network directly
-                    <li>LDS: the server registers itself to the LDS or LDS-ME (Local Discovery Server)
-                  </ul>
-                </span>
-            </div>
-            <div class="form-row">
-                 <label for="node-input-serverDiscovery" style="min-width:160px"><i class="fa fa-cc-discover"></i>
-                 <span data-i18n="opcua-iiot-contrib.label.serverDiscovery"></span></label>
-                <input type="checkbox" id="node-input-serverDiscovery" style="max-width:35px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-discoveryServerEndpointUrl" style="min-width:160px"><i class="icon-discover"></i>
-                <span data-i18n="opcua-iiot-contrib.label.discoveryServerEndpointUrl"></span></label>
-                <input type="text" id="node-input-discoveryServerEndpointUrl" placeholder="opc.tcp://localhost:4840">
-            </div>
-            <div class="form-row">
-                <label for="node-input-capabilitiesForMDNS" style="min-width:160px"><i class="icon-discover"></i>
-                <span data-i18n="opcua-iiot-contrib.label.capabilitiesForMDNS"></span></label>
-                <input type="text" id="node-input-capabilitiesForMDNS" placeholder="NA,DA,..." >
-            </div>
-        </div>
         <div id="opcuaiiot-server-tab-security" style="display:none">
             <div class="form-row">
                 <!-- SecurityPolicy enum via REST -->
@@ -512,6 +476,42 @@
                 <a href="#" class="editor-button editor-button-small" id="node-input-server-xmlsets-add"
                 style="margin-top: 4px;"><i class="fa fa-plus"></i>
                 <span data-i18n="opcua-iiot-contrib.label.addButton"></span></a>
+            </div>
+        </div>
+        <div id="opcuaiiot-server-tab-discovery" style="display:none">
+            <div class="form-row">
+                <!-- SecurityPolicy enum via REST -->
+                <label for="node-input-registerServerMethod" style="min-width:160px"><i class="fa fa-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.registerServerMethod"></span></label>
+                <select type="text" id="node-input-registerServerMethod">
+                    <option value="1">HIDDEN</option>
+                    <option value="2">MDNS</option>
+                    <option value="3">LDS</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <span style="min-width:160px">
+                  <ul>
+                    <li>HIDDEN: the server doesn't expose itself to the external world
+                    <li>MDNS: the server publish itself to the mDNS Multicast network directly
+                    <li>LDS: the server registers itself to the LDS or LDS-ME (Local Discovery Server)
+                  </ul>
+                </span>
+            </div>
+            <div class="form-row">
+                 <label for="node-input-serverDiscovery" style="min-width:160px"><i class="fa fa-cc-discover"></i>
+                 <span data-i18n="opcua-iiot-contrib.label.serverDiscovery"></span></label>
+                <input type="checkbox" id="node-input-serverDiscovery" style="max-width:35px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-discoveryServerEndpointUrl" style="min-width:160px"><i class="icon-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.discoveryServerEndpointUrl"></span></label>
+                <input type="text" id="node-input-discoveryServerEndpointUrl" placeholder="opc.tcp://localhost:4840">
+            </div>
+            <div class="form-row">
+                <label for="node-input-capabilitiesForMDNS" style="min-width:160px"><i class="icon-discover"></i>
+                <span data-i18n="opcua-iiot-contrib.label.capabilitiesForMDNS"></span></label>
+                <input type="text" id="node-input-capabilitiesForMDNS" placeholder="NA,DA,..." >
             </div>
         </div>
     </div>

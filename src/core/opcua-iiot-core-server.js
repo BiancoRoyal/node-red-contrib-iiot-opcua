@@ -50,7 +50,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpaceFromScript = function
     function (resolve, reject) {
       if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
         try {
-          constructAddressSpaceScript(de.biancoroyal.opcua.iiot.core.server.flex, server.engine.addressSpace, eventObjects, resolve)
+          constructAddressSpaceScript(server, server.engine.addressSpace, eventObjects, resolve)
         } catch (err) {
           reject(err)
         }
