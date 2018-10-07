@@ -34,34 +34,34 @@ module.exports = function (RED) {
         if (msg.nodetype) {
           switch (msg.nodetype) {
             case 'browse':
-              coreResponse.analyzeBrowserResults(msg)
+              coreResponse.analyzeBrowserResults(node, msg)
               if (node.compressStructure) {
                 coreResponse.compressBrowseMessageStructure(msg)
               }
               break
             case 'read':
-              coreResponse.analyzeReadResults(msg)
+              coreResponse.analyzeReadResults(node, msg)
               if (node.compressStructure) {
                 coreResponse.compressReadMessageStructure(msg)
               }
               break
 
             case 'write':
-              coreResponse.analyzeWriteResults(msg)
+              coreResponse.analyzeWriteResults(node, msg)
               if (node.compressStructure) {
                 coreResponse.compressWriteMessageStructure(msg)
               }
               break
 
             case 'listen':
-              coreResponse.analyzeListenerResults(msg)
+              coreResponse.analyzeListenerResults(node, msg)
               if (node.compressStructure) {
                 coreResponse.compressListenMessageStructure(msg)
               }
               break
 
             case 'method':
-              coreResponse.analyzeMethodResults(msg)
+              coreResponse.analyzeMethodResults(node, msg)
               if (node.compressStructure) {
                 coreResponse.compressMethodMessageStructure(msg)
               }
@@ -69,7 +69,10 @@ module.exports = function (RED) {
 
             default:
               if (msg && msg.payload) {
-                node.handlePayloadStatusCode(msg)
+                coreResponse.handlePayloadStatusCode(node, msg)
+                if (node.compressStructure) {
+                  coreResponse.compressDefaultMessageStructure(msg)
+                }
               }
           }
         }
@@ -92,12 +95,6 @@ module.exports = function (RED) {
           }
         } else {
           node.send(msg)
-        }
-
-        if (node.compressStructure) {
-          node.status({fill: 'green', shape: 'dot', text: 'active compressed'})
-        } else {
-          coreResponse.setNodeStatus(node, msg.entryStatus, msg.entryStatusText)
         }
       } catch (err) {
         coreResponse.internalDebugLog(err)
