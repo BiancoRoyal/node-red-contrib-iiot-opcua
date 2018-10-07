@@ -261,7 +261,7 @@
     "type": "OPCUA-IIoT-Browser",
     "z": "53a638fa.9efff",
     "connector": "9b18cf5.86d1d3",
-    "nodeId": "ns=4;s=NonUaNodeComplianceTest",
+    "nodeId": "ns=1;s=NonUaNodeComplianceTest",
     "name": "",
     "justValue": false,
     "sendNodesToRead": true,
@@ -352,7 +352,7 @@
     "type": "OPCUA-IIoT-Browser",
     "z": "53a638fa.9efff",
     "connector": "9b18cf5.86d1d3",
-    "nodeId": "ns=4;s=NonUaNodeComplianceTest",
+    "nodeId": "ns=1;s=NonUaNodeComplianceTest",
     "name": "",
     "justValue": true,
     "sendNodesToRead": true,
@@ -404,22 +404,22 @@
     "addressSpaceItems": [
       {
         "name": "",
-        "nodeId": "ns=4;s=Boolean",
+        "nodeId": "ns=1;s=Boolean",
         "datatypeName": "Boolean"
       },
       {
         "name": "",
-        "nodeId": "ns=4;s=Double",
+        "nodeId": "ns=1;s=Double",
         "datatypeName": "Double"
       },
       {
         "name": "",
-        "nodeId": "ns=4;s=DateTime",
+        "nodeId": "ns=1;s=DateTime",
         "datatypeName": "DateTime"
       },
       {
         "name": "",
-        "nodeId": "ns=4;s=Float",
+        "nodeId": "ns=1;s=Float",
         "datatypeName": "Float"
       }
     ],
@@ -510,22 +510,22 @@
     "addressSpaceItems": [
       {
         "name": "",
-        "nodeId": "ns=4;s=Boolean",
+        "nodeId": "ns=1;s=Boolean",
         "datatypeName": "Boolean"
       },
       {
         "name": "",
-        "nodeId": "ns=4;s=Double",
+        "nodeId": "ns=1;s=Double",
         "datatypeName": "Double"
       },
       {
         "name": "",
-        "nodeId": "ns=4;s=DateTime",
+        "nodeId": "ns=1;s=DateTime",
         "datatypeName": "DateTime"
       },
       {
         "name": "",
-        "nodeId": "ns=4;s=Float",
+        "nodeId": "ns=1;s=Float",
         "datatypeName": "Float"
       }
     ],
@@ -591,7 +591,7 @@
     "type": "OPCUA-IIoT-Browser",
     "z": "53a638fa.9efff",
     "connector": "9b18cf5.86d1d3",
-    "nodeId": "ns=4;s=NonUaNodeComplianceTest",
+    "nodeId": "ns=1;s=NonUaNodeComplianceTest",
     "name": "",
     "justValue": false,
     "sendNodesToRead": false,
@@ -877,7 +877,7 @@
     "addressSpaceItems": [
       {
         "name": "",
-        "nodeId": "ns=4;s=Double",
+        "nodeId": "ns=1;s=Double",
         "datatypeName": ""
       }
     ],
@@ -980,7 +980,7 @@
     "addressSpaceItems": [
       {
         "name": "",
-        "nodeId": "ns=4;s=Double",
+        "nodeId": "ns=1;s=Double",
         "datatypeName": ""
       }
     ],
@@ -1131,7 +1131,7 @@
     "addressSpaceItems": [
       {
         "name": "",
-        "nodeId": "ns=4;s=Double",
+        "nodeId": "ns=1;s=Double",
         "datatypeName": ""
       }
     ],
@@ -1159,7 +1159,7 @@
     "addressSpaceItems": [
       {
         "name": "",
-        "nodeId": "ns=4;s=Double",
+        "nodeId": "ns=1;s=Double",
         "datatypeName": ""
       }
     ],
@@ -1187,7 +1187,7 @@
     "addressSpaceItems": [
       {
         "name": "",
-        "nodeId": "ns=4;s=Double",
+        "nodeId": "ns=1;s=Double",
         "datatypeName": ""
       }
     ],

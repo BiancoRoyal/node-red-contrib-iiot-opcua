@@ -41,7 +41,7 @@
     "addressSpaceItems": [
       {
         "name": "TestReadWrite",
-        "nodeId": "ns=4;s=TestReadWrite",
+        "nodeId": "ns=1;s=TestReadWrite",
         "datatypeName": "Double"
       }
     ],

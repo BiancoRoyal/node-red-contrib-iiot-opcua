@@ -22,12 +22,12 @@
     "addressSpaceItems": [
       {
         "name": "Counter",
-        "nodeId": "ns=4;s=Counter",
+        "nodeId": "ns=1;s=Counter",
         "datatypeName": ""
       },
       {
         "name": "FullCounter",
-        "nodeId": "ns=4;s=FullCounter",
+        "nodeId": "ns=1;s=FullCounter",
         "datatypeName": ""
       }
     ],
@@ -99,7 +99,7 @@
     "id": "eda86a72.8c23d",
     "type": "OPCUA-IIoT-Node",
     "z": "59883822.75de4",
-    "nodeId": "ns=4;s=TestReadWrite",
+    "nodeId": "ns=1;s=TestReadWrite",
     "datatype": "NodeId",
     "value": "",
     "usingListener": true,
@@ -216,7 +216,7 @@
     "id": "4be98c23.792d0c",
     "type": "OPCUA-IIoT-Result-Filter",
     "z": "59883822.75de4",
-    "nodeId": "ns=4;s=FullCounter",
+    "nodeId": "ns=1;s=FullCounter",
     "datatype": "UInt32",
     "fixedValue": false,
     "fixPoint": 2,
@@ -270,7 +270,7 @@
     "id": "c6cd00ee.8a1d78",
     "type": "OPCUA-IIoT-Result-Filter",
     "z": "59883822.75de4",
-    "nodeId": "ns=4;s=TestReadWrite",
+    "nodeId": "ns=1;s=TestReadWrite",
     "datatype": "Double",
     "fixedValue": true,
     "fixPoint": 2,
@@ -297,7 +297,7 @@
     "id": "9b8bfa5.fe4cc08",
     "type": "OPCUA-IIoT-Result-Filter",
     "z": "59883822.75de4",
-    "nodeId": "ns=4;s=Counter",
+    "nodeId": "ns=1;s=Counter",
     "datatype": "UInt16",
     "fixedValue": false,
     "fixPoint": 2,

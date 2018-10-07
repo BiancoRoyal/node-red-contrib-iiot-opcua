@@ -33,7 +33,7 @@
     "type": "OPCUA-IIoT-Browser",
     "z": "e2b0733f.0cec78",
     "connector": "e7696995.cf7358",
-    "nodeId": "ns=4;i=1234",
+    "nodeId": "ns=1;i=1234",
     "name": "",
     "justValue": true,
     "sendNodesToRead": false,
