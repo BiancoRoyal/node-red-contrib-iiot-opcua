@@ -164,7 +164,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseToRoot = function () {
 
 de.biancoroyal.opcua.iiot.core.browser.extractNodeIdFromTopic = function (msg, node) {
   let coreBrowser = this
-  let rootNodeId
+  let rootNodeId = null
 
   if (msg.payload.actiontype === 'browse') { // event driven browsing
     if (msg.payload.root && msg.payload.root.nodeId) {

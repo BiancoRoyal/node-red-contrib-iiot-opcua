@@ -242,13 +242,15 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state open', function (done) {
       let node = {
+        opcuaClient: null,
         opcuaSession: null,
         connector: {
+          opcuaClient: {},
           opcuaSession: {}
         }
       }
       node.setNodeStatusTo = function (state) {
-        if (state === 'active' && node.opcuaSession === node.connector.opcuaSession) {
+        if (state === 'connected' && node.opcuaClient === node.connector.opcuaClient) {
           done()
         }
       }
@@ -263,6 +265,23 @@ describe('OPC UA Core', function () {
         }
       }
       core.setNodeInitalState('LOCKED', node)
+    })
+
+    it('should set node initial state sessionactive', function (done) {
+      let node = {
+        opcuaClient: null,
+        opcuaSession: null,
+        connector: {
+          opcuaClient: {},
+          opcuaSession: {}
+        }
+      }
+      node.setNodeStatusTo = function (state) {
+        if (state === 'active' && node.opcuaSession === node.connector.opcuaSession) {
+          done()
+        }
+      }
+      core.setNodeInitalState('SESSIONACTIVE', node)
     })
 
     it('should set node initial state unlocked', function (done) {

@@ -16,7 +16,6 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreBrowser = require('./core/opcua-iiot-core-browser')
-  let browserEntries = []
 
   function OPCUAIIoTCrawler (config) {
     RED.nodes.createNode(this, config)
@@ -42,14 +41,7 @@ module.exports = function (RED) {
     }
 
     node.browseErrorHandling = function (err, msg) {
-      let results = []
       if (err) {
-        results.push({
-          displayName: {text: 'Objects'},
-          nodeId: coreBrowser.core.OBJECTS_ROOT,
-          browseName: 'Objects'
-        })
-
         coreBrowser.internalDebugLog('Crawler Error ' + err)
         if (node.showErrors) {
           node.error(err, msg)
@@ -59,35 +51,32 @@ module.exports = function (RED) {
           node.connector.resetBadSession()
         }
       } else {
-        results = browserEntries
-        coreBrowser.internalDebugLog('Browse Done With Error: ' + results.length + ' item(s)')
+        coreBrowser.internalDebugLog('Crawling Done With Error')
       }
-
-      browserEntries = results
     }
 
-    node.sendMessageCrawlerResults = function (msg, browserResult) {
-      browserEntries = browserResult || []
+    node.filterCrawlerResults = function (msg, crawlerResultToFilter) {
+      let crawlerResult = crawlerResultToFilter || []
       let filteredEntries = []
 
       if (node.activateFilters && node.filters && node.filters.length > 0) {
-        browserEntries.forEach(function (item) {
+        crawlerResult.forEach(function (item) {
           if (node.itemIsNotToFilter(item)) {
             filteredEntries.push(item)
           }
         })
-        browserEntries = filteredEntries
+        crawlerResult = filteredEntries
       }
 
       if (node.justValue) {
-        browserEntries.forEach(function (item) {
+        crawlerResult.forEach(function (item) {
           if (item.references) {
             delete item['references']
           }
         })
       }
 
-      node.sendMessage(msg)
+      return crawlerResult
     }
 
     node.itemIsNotToFilter = function (item) {
@@ -147,33 +136,35 @@ module.exports = function (RED) {
     }
 
     node.crawl = function (session, msg) {
+      if (coreBrowser.core.checkSessionNotValid(node.opcuaSession, 'Crawler')) {
+        return
+      }
+
       coreBrowser.internalDebugLog('Browse Topic To Call Crawler ' + node.browseTopic)
-      browserEntries = []
 
       if (node.showStatusActivities) {
         node.setNodeStatusTo('crawling')
       }
 
       coreBrowser.crawl(session, node.browseTopic)
-        .then(function (browserResult) {
-          node.sendMessageCrawlerResults(msg, browserResult)
+        .then(function (crawlerResult) {
+          const filteredCrawlerResult = node.filterCrawlerResults(msg, crawlerResult)
+          node.sendMessage(msg, filteredCrawlerResult)
         }).catch(function (err) {
           node.browseErrorHandling(err, msg)
         })
     }
 
     node.crawlNodeList = function (session, msg) {
-      browserEntries = []
-
       if (node.showStatusActivities) {
         node.setNodeStatusTo('crawling')
       }
 
       if (node.singleResult) {
         coreBrowser.crawlAddressSpaceItems(session, msg.addressSpaceItems)
-          .then(function (browserResult) {
-            browserEntries = []
-            node.sendMessageCrawlerResults(msg, browserResult)
+          .then(function (crawlerResult) {
+            const filteredCrawlerResult = node.filterCrawlerResults(msg, crawlerResult)
+            node.sendMessage(msg, filteredCrawlerResult)
             if (node.showStatusActivities) {
               node.setNodeStatusTo('active')
             }
@@ -186,9 +177,9 @@ module.exports = function (RED) {
       } else {
         msg.addressSpaceItems.map((entry) => (
           coreBrowser.crawl(session, entry.nodeId)
-            .then(function (browserResult) {
-              browserEntries = []
-              node.sendMessageCrawlerResults(msg, browserResult)
+            .then(function (crawlerResult) {
+              const filteredCrawlerResult = node.filterCrawlerResults(msg, crawlerResult)
+              node.sendMessage(msg, filteredCrawlerResult)
               if (node.showStatusActivities) {
                 node.setNodeStatusTo('active')
               }
@@ -201,12 +192,12 @@ module.exports = function (RED) {
       }
     }
 
-    node.sendMessage = function (originMessage, browserResult) {
+    node.sendMessage = function (originMessage, crawlerResult) {
       let msg = originMessage
       msg.nodetype = 'crawl'
 
       msg.payload = {
-        browserItems: browserEntries
+        crawlerResults: crawlerResult
       }
 
       if (node.browseTopic && node.browseTopic !== '') {
@@ -214,7 +205,7 @@ module.exports = function (RED) {
       }
 
       if (!node.justValue) {
-        msg.payload.browserItemsCount = browserEntries.length
+        msg.payload.crawlerResultsCount = crawlerResult.length
         if (node.connector) {
           msg.payload.endpoint = node.connector.endpoint
         }
@@ -225,20 +216,11 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      if (!coreBrowser.core.checkConnectorState(node, msg, 'Crawler')) {
+        return
+      }
+
       node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node)
-
-      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreBrowser.internalDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Crawl')
-        if (node.showErrors) {
-          node.error(new Error('Client Not Open On Crawl'), msg)
-        }
-        return
-      }
-
-      if (!node.opcuaSession) {
-        node.error(new Error('Session Not Ready To Browse'), msg)
-        return
-      }
 
       if (node.browseTopic && node.browseTopic !== '') {
         node.crawl(node.opcuaSession, msg)
@@ -255,33 +237,7 @@ module.exports = function (RED) {
       }
     })
 
-    node.setOPCUAConnected = function (opcuaClient) {
-      node.opcuaClient = opcuaClient
-      node.setNodeStatusTo('connected')
-    }
-
-    node.opcuaSessionStarted = function (opcuaSession) {
-      node.opcuaSession = opcuaSession
-      node.setNodeStatusTo('active')
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreBrowser.internalDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
-      }
-    }
-
-    if (node.connector) {
-      node.connector.registerForOPCUA(node)
-      node.connector.on('connected', node.setOPCUAConnected)
-      node.connector.on('session_started', node.opcuaSessionStarted)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-
-      coreBrowser.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
-    } else {
-      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
-    }
+    coreBrowser.core.registerToConnector(node)
 
     node.on('close', done => {
       node.connector.deregisterForOPCUA(node, done)

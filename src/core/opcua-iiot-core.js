@@ -24,6 +24,7 @@ de.biancoroyal.opcua.iiot.core.detailDebugLog = de.biancoroyal.opcua.iiot.core.d
 de.biancoroyal.opcua.iiot.core.specialDebugLog = de.biancoroyal.opcua.iiot.core.specialDebugLog || require('debug')('opcuaIIoT:core:special') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT || 'ns=0;i=84' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.RUNNING_STATE = de.biancoroyal.opcua.iiot.core.RUNNING_STATE || 'SESSIONACTIVE' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.os = de.biancoroyal.opcua.iiot.core.os || require('os') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.isWindows = de.biancoroyal.opcua.iiot.core.isWindows || /^win/.test(de.biancoroyal.opcua.iiot.core.os.platform()) // eslint-disable-line no-use-before-define
 
@@ -692,9 +693,15 @@ de.biancoroyal.opcua.iiot.core.isSessionBad = function (err) {
 de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (nodeState, node) {
   switch (nodeState) {
     case 'INIT':
+    case 'SESSIONREQUESTED':
       node.setNodeStatusTo('connecting')
       break
     case 'OPEN':
+    case 'SESSIONCLOSED':
+      node.opcuaClient = node.connector.opcuaClient
+      node.setNodeStatusTo('connected')
+      break
+    case 'SESSIONACTIVE':
       node.opcuaSession = node.connector.opcuaSession
       node.setNodeStatusTo('active')
       break
@@ -703,6 +710,9 @@ de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (nodeState, node) {
       break
     case 'UNLOCKED':
       node.setNodeStatusTo('unlocked')
+      break
+    case 'END':
+      node.setNodeStatusTo('end')
       break
     default:
       node.setNodeStatusTo('waiting')
@@ -722,6 +732,113 @@ de.biancoroyal.opcua.iiot.core.isNodeId = function (nodeId) {
     default:
       return false
   }
+}
+
+de.biancoroyal.opcua.iiot.core.checkConnectorState = function (node, msg, callerType) {
+  this.internalDebugLog('Check Connector State ' + node.connector.stateMachine.getMachineState() + ' By ' + callerType)
+
+  if (node.connector && node.connector.stateMachine && node.connector.stateMachine.getMachineState() !== this.RUNNING_STATE) {
+    this.internalDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' By ' + callerType)
+    if (node.showErrors) {
+      node.error(new Error('Client Not ' + this.RUNNING_STATE + ' On ' + callerType), msg)
+    }
+    return false
+  } else {
+    return true
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeOPCUAConnected = function (node, opcuaClient) {
+  node.opcuaClient = opcuaClient
+  node.setNodeStatusTo('connecting')
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeOPCUAClosed = function (node) {
+  node.opcuaClient = null
+  node.setNodeStatusTo('disconnected')
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionStarted = function (node, opcuaSession) {
+  node.opcuaSession = opcuaSession
+  node.setNodeStatusTo('active')
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionClosed = function (node) {
+  node.opcuaSession = null
+  node.setNodeStatusTo('connecting')
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionError = function (node) {
+  node.opcuaSession = null
+  node.setNodeStatusTo('connecting')
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeOPCUARestart = function (node, opcuaClient) {
+  this.internalDebugLog('Connector Restart')
+  if (opcuaClient) {
+    node.opcuaClient = opcuaClient
+  }
+  node.setNodeStatusTo('connecting')
+}
+
+de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
+  let core = de.biancoroyal.opcua.iiot.core
+
+  if (!node) {
+    core.internalDebugLog('Node Not Valid On Register To Connector')
+    return
+  }
+
+  if (!node.connector) {
+    node.error(new Error('Connector Not Valid On Register To Connector'), {payload: 'No Connector Configured'})
+    return
+  }
+
+  node.connector.registerForOPCUA(node)
+
+  node.connector.on('connection_started', (opcuaClient) => {
+    core.setNodeOPCUAConnected(node, opcuaClient)
+  })
+
+  node.connector.on('server_connection_close', () => {
+    core.setNodeOPCUAClosed(node)
+  })
+
+  node.connector.on('connection_closed', () => {
+    core.setNodeOPCUAClosed(node)
+  })
+
+  node.connector.on('session_started', (opcuaSession) => {
+    core.setNodeOPCUASessionStarted(node, opcuaSession)
+  })
+
+  node.connector.on('session_closed', () => {
+    core.setNodeOPCUASessionClosed(node)
+  })
+
+  node.connector.on('session_error', () => {
+    core.setNodeOPCUASessionError(node)
+  })
+
+  node.connector.on('after_reconnection', () => {
+    core.setNodeOPCUARestart(node)
+  })
+
+  core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+}
+
+de.biancoroyal.opcua.iiot.core.checkSessionNotValid = function (session, callerType) {
+  if (!session) {
+    this.internalDebugLog('Session Not Valid On Check For ' + callerType)
+    return true
+  }
+
+  if (session.sessionId === 'terminated') {
+    this.internalDebugLog('Session Is Valid But Terminated On Check For ' + callerType)
+    return true
+  }
+
+  return false
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core

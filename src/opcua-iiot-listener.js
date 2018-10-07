@@ -32,21 +32,19 @@ module.exports = function (RED) {
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
-    node.reconnectTimeout = 1000
-    node.sessionTimeout = null
     node.opcuaClient = null
     node.opcuaSession = null
-    node.subscriptionStarted = false
-    node.subscriberDelay = 0
 
     let uaSubscription = null
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
     node.monitoredItems = new Map()
     node.monitoredASO = new Map()
+    node.messageQueue = []
 
     node.stateMachine = coreListener.createStatelyMachine()
-    node.stateMachine.init()
+    coreListener.internalDebugLog('Start FSM: ' + node.stateMachine.getMachineState())
+    coreListener.detailDebugLog('FSM events:' + node.stateMachine.getMachineEvents())
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -66,28 +64,82 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.createSubscription = function (msg, cb) {
-      let timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
+    node.createSubscription = function (msg) {
+      if (node.stateMachine.getMachineState() !== 'IDLE') {
+        coreListener.internalDebugLog('New Subscription Request On State ' + node.stateMachine.getMachineState())
+        return
+      }
 
-      if (node.subscriptionStarting) {
-        coreListener.internalDebugLog('monitoring subscription try to start twice')
+      uaSubscription = null
+      node.stateMachine.requestinitsub()
+
+      const timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
+      const dynamicOptions = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
+
+      if (node.action !== 'events') {
+        coreListener.internalDebugLog('create monitoring subscription')
+        const monitoringOptions = dynamicOptions || coreListener.getSubscriptionParameters(timeMilliseconds)
+        node.makeSubscription(monitoringOptions)
       } else {
-        node.subscriptionStarting = true
-        uaSubscription = null
-        let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
-        if (node.action !== 'events') {
-          coreListener.internalDebugLog('create monitoring subscription')
-          options = options || coreListener.getSubscriptionParameters(timeMilliseconds)
-        } else {
-          coreListener.internalDebugLog('create event subscription')
-          options = options || coreListener.getEventSubscribtionParameters(timeMilliseconds)
-        }
-        node.makeSubscription(options, cb)
+        coreListener.internalDebugLog('create event subscription')
+        const eventOptions = dynamicOptions || coreListener.getEventSubscribtionParameters(timeMilliseconds)
+        node.makeSubscription(eventOptions)
       }
     }
 
+    node.makeSubscription = function (parameters) {
+      if (coreListener.core.checkSessionNotValid(node.opcuaSession, 'ListenerSubscription')) {
+        return
+      }
+
+      if (!parameters) {
+        coreListener.internalDebugLog('Subscription Parameters Not Valid')
+        return
+      } else {
+        coreListener.internalDebugLog('Subscription Parameters: ' + JSON.stringify(parameters))
+      }
+
+      uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
+      coreListener.internalDebugLog('New Subscription Created')
+
+      uaSubscription.on('initialized', function () {
+        coreListener.internalDebugLog('Subscription initialized')
+        node.setNodeStatusTo('initialized')
+      })
+
+      uaSubscription.on('started', function () {
+        coreListener.internalDebugLog('Subscription started')
+        node.setNodeStatusTo('started')
+        node.monitoredItems.clear()
+        node.stateMachine.startsub()
+      })
+
+      uaSubscription.on('terminated', function () {
+        coreListener.internalDebugLog('Subscription terminated')
+        node.setNodeStatusTo('terminated')
+        node.stateMachine.terminatesub().idlesub()
+        node.resetSubscription()
+      })
+
+      uaSubscription.on('internal_error', function (err) {
+        coreListener.internalDebugLog('internal_error: ' + err.message)
+        if (node.showErrors) {
+          node.error(err, {payload: 'Internal Error'})
+        }
+        node.setNodeStatusTo('error')
+        node.stateMachine.errorsub()
+        node.resetSubscription()
+      })
+
+      uaSubscription.on('item_added', function (monitoredItem) {
+        node.setMonitoring(monitoredItem)
+        node.updateSubscriptionStatus()
+      })
+
+      node.stateMachine.initsub()
+    }
+
     node.resetSubscription = function () {
-      node.subscriptionStarting = false
       node.sendAllMonitoredItems('SUBSCRIPTION TERMINATED')
     }
 
@@ -102,49 +154,19 @@ module.exports = function (RED) {
     }
 
     node.subscribeActionInput = function (msg) {
-      if (!uaSubscription) {
-        node.createSubscription(msg, function () {
-          node.subscribeMonitoredItem(msg)
-          if (node.subscriberDelay > 2000) {
-            node.subscriberDelay -= 1000
-          } else {
-            node.subscriberDelay = 2000
-          }
-        })
+      if (node.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+        node.messageQueue.push(msg)
       } else {
-        if (node.subscribingPreCheck()) {
-          node.subscribeMonitoredItem(msg)
-        } else {
-          node.resetSubscription()
-        }
-
-        if (node.subscriberDelay > 2000) {
-          node.subscriberDelay -= 1000
-        } else {
-          node.subscriberDelay = 2000
-        }
+        node.subscribeMonitoredItem(msg)
       }
     }
 
     node.subscribeEventsInput = function (msg) {
-      if (!uaSubscription) {
-        node.createSubscription(msg, function () {
-          node.subscribeMonitoredEvent(msg)
-        })
+      if (node.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+        node.messageQueue.push(msg)
       } else {
-        if (node.subscribingPreCheck()) {
-          node.subscribeMonitoredEvent(msg)
-        } else {
-          node.resetSubscription()
-        }
+        node.subscribeMonitoredEvent(msg)
       }
-    }
-
-    node.subscribingPreCheck = function () {
-      if (typeof uaSubscription.subscriptionId === 'string') {
-        coreListener.detailDebugLog('subscription not ready with ID: ' + uaSubscription.subscriptionId)
-      }
-      return uaSubscription && typeof uaSubscription.subscriptionId !== 'string'
     }
 
     node.updateSubscriptionStatus = function () {
@@ -153,8 +175,11 @@ module.exports = function (RED) {
     }
 
     node.subscribeMonitoredItem = function (msg) {
-      if (!node.subscriptionStarted) {
-        node.error(new Error('Subscription Not Started To Monitor'), msg)
+      if (coreListener.core.checkSessionNotValid(node.opcuaSession, 'MonitorListener')) {
+        return
+      }
+
+      if (!coreListener.checkState(node, msg, 'Monitoring')) {
         return
       }
 
@@ -224,8 +249,11 @@ module.exports = function (RED) {
     }
 
     node.subscribeMonitoredEvent = function (msg) {
-      if (!node.subscriptionStarted) {
-        node.error(new Error('Subscription Not Started To Monitor'), msg)
+      if (coreListener.core.checkSessionNotValid(node.opcuaSession, 'EventListener')) {
+        return
+      }
+
+      if (!coreListener.checkState(node, msg, 'Event')) {
         return
       }
 
@@ -444,65 +472,6 @@ module.exports = function (RED) {
       }
     }
 
-    node.makeSubscription = function (parameters, callback) {
-      if (!node.opcuaSession) {
-        coreListener.internalDebugLog('Subscription Session Not Valid')
-        return
-      }
-
-      if (!parameters) {
-        coreListener.internalDebugLog('Subscription Parameters Not Valid')
-        return
-      } else {
-        coreListener.internalDebugLog('Subscription Parameters: ' + JSON.stringify(parameters))
-      }
-
-      uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
-      coreListener.internalDebugLog('New Subscription Created')
-
-      uaSubscription.on('initialized', function () {
-        coreListener.internalDebugLog('Subscription initialized')
-        node.subscriptionStarting = true
-        node.setNodeStatusTo('initialized')
-        node.stateMachine.init()
-      })
-
-      uaSubscription.on('started', function () {
-        coreListener.internalDebugLog('Subscription started')
-        node.setNodeStatusTo('started')
-        node.monitoredItems.clear()
-        node.subscriptionStarting = false
-        node.subscriptionStarted = true
-        node.stateMachine.start()
-        callback()
-      })
-
-      uaSubscription.on('terminated', function () {
-        coreListener.internalDebugLog('Subscription terminated')
-        node.subscriptionStarting = false
-        node.subscriptionStarted = false
-        node.setNodeStatusTo('terminated')
-        node.stateMachine.terminate()
-        node.resetSubscription()
-      })
-
-      uaSubscription.on('internal_error', function (err) {
-        node.subscriptionStarted = false
-        coreListener.internalDebugLog('internal_error: ' + err.message)
-        if (node.showErrors) {
-          node.error(err, {payload: 'Internal Error'})
-        }
-        node.setNodeStatusTo('error')
-        node.stateMachine.error()
-        node.resetSubscription()
-      })
-
-      uaSubscription.on('item_added', function (monitoredItem) {
-        node.setMonitoring(monitoredItem)
-        node.updateSubscriptionStatus()
-      })
-    }
-
     node.getBrowseName = function (session, nodeId, callback) {
       coreListener.client.read(session, [{
         nodeId: nodeId,
@@ -519,6 +488,10 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      if (!coreListener.core.checkConnectorState(node, msg, 'Listener')) {
+        return
+      }
+
       if (msg.nodetype === 'browse') { /* browse is just to address listening to many nodes */
         msg.nodetype = 'inject'
         msg.injectType = 'listen'
@@ -533,76 +506,29 @@ module.exports = function (RED) {
         return
       }
 
-      // start here to check connection to get unit-tests working while there is no mocking
-      // TODO: Connector mocking
-      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreListener.internalDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Browse')
-        if (node.showErrors) {
-          node.error(new Error('Client Not Open On Browse'), msg)
+      if (node.stateMachine.getMachineState() === 'IDLE') {
+        node.messageQueue.push(msg)
+        node.createSubscription(msg)
+      } else {
+        if (!coreListener.checkState(node, msg, 'Event')) {
+          node.messageQueue.push(msg)
+          return
         }
-        return
-      }
 
-      if (!node.opcuaSession) {
-        coreListener.internalDebugLog('Session Not Ready To Listen')
-        if (node.showErrors) {
-          node.error(new Error('Session Not Ready To Listen'), msg)
+        switch (node.action) {
+          case 'subscribe':
+            node.subscribeMonitoredItem(msg)
+            break
+          case 'events':
+            node.subscribeMonitoredEvent(msg)
+            break
+          default:
+            node.error(new Error('Type Of Action To Listener Is Not Valid'), msg)
         }
-        return
       }
-
-      coreListener.detailDebugLog('delay to subscribe is ' + node.subscriberDelay + ' ms')
-      switch (node.action) {
-        case 'subscribe':
-          setTimeout(() => {
-            node.subscribeActionInput(msg)
-          }, node.subscriberDelay)
-          break
-        case 'events':
-          setTimeout(() => {
-            node.subscribeEventsInput(msg)
-          }, node.subscriberDelay)
-          break
-        default:
-          node.error(new Error('Type Of Action To Listener Is Not Valid'), msg)
-      }
-
-      node.subscriberDelay += 2000
     })
 
-    node.setOPCUAConnected = function (opcuaClient) {
-      node.opcuaClient = opcuaClient
-      node.setNodeStatusTo('connected')
-    }
-
-    node.opcuaSessionStarted = function (opcuaSession) {
-      node.opcuaSession = opcuaSession
-      node.setNodeStatusTo('active')
-    }
-
-    node.opcuaSessionClosed = function (opcuaSession) {
-      node.opcuaSession = null
-      node.setNodeStatusTo('closed')
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreListener.internalDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
-      }
-    }
-
-    if (node.connector) {
-      node.connector.registerForOPCUA(node)
-      node.connector.on('connected', node.setOPCUAConnected)
-      node.connector.on('session_started', node.opcuaSessionStarted)
-      node.connector.on('session_closed', node.opcuaSessionClosed)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-
-      coreListener.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
-    } else {
-      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
-    }
+    coreListener.core.registerToConnector(node)
 
     node.on('close', function (done) {
       if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
@@ -614,6 +540,51 @@ module.exports = function (RED) {
         node.connector.deregisterForOPCUA(node, done)
       }
     })
+
+    /* #########   FSM EVENTS  #########     */
+
+    node.stateMachine.onIDLE = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener IDLE Event FSM')
+    }
+
+    node.stateMachine.onREQUESTED = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener REQUESTED Event FSM')
+    }
+
+    node.stateMachine.onINIT = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener INIT Event FSM')
+    }
+
+    node.stateMachine.onSTARTED = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener STARTED Event FSM')
+
+      switch (node.action) {
+        case 'subscribe':
+          while (node.messageQueue.length > 0) {
+            node.subscribeMonitoredItem(node.messageQueue.shift())
+          }
+          break
+        case 'events':
+          while (node.messageQueue.length > 0) {
+            node.subscribeMonitoredEvent(node.messageQueue.shift())
+          }
+          break
+        default:
+          coreListener.internalDebugLog('Unknown Action Type ' + node.action)
+      }
+    }
+
+    node.stateMachine.onTERMINATED = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener TERMINATED Event FSM')
+    }
+
+    node.stateMachine.onERROR = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener ERROR Event FSM')
+    }
+
+    node.stateMachine.onEND = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener END Event FSM')
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Listener', OPCUAIIoTListener)

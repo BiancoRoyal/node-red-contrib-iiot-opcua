@@ -61,26 +61,22 @@ module.exports = function (RED) {
     }
 
     node.writeToSession = function (session, msg) {
-      if (session) {
-        if (session.sessionId === 'terminated') {
-          node.handleWriteError(new Error('Session Terminated'), msg)
-        } else {
-          let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
-
-          coreClient.write(session, nodesToWrite).then(function (writeResult) {
-            try {
-              let message = node.buildResultMessage(msg, writeResult)
-              node.send(message)
-            } catch (err) {
-              node.handleWriteError(err, msg)
-            }
-          }).catch(function (err) {
-            node.handleWriteError(err, msg)
-          })
-        }
-      } else {
-        node.handleWriteError(new Error('Session Not Valid On Write'), msg)
+      if (coreClient.core.checkSessionNotValid(session, 'Writer')) {
+        return
       }
+
+      let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
+
+      coreClient.write(session, nodesToWrite).then(function (writeResult) {
+        try {
+          let message = node.buildResultMessage(msg, writeResult)
+          node.send(message)
+        } catch (err) {
+          node.handleWriteError(err, msg)
+        }
+      }).catch(function (err) {
+        node.handleWriteError(err, msg)
+      })
     }
 
     node.buildResultMessage = function (msg, result) {
@@ -116,54 +112,21 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreClient.writeDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Write')
-        if (node.showErrors) {
-          node.error(new Error('Client Not Open On Wirte'), msg)
-        }
-        return
-      }
-
-      if (!node.opcuaSession) {
-        coreClient.writeDebugLog('Session Not Ready To Write')
-        if (node.showErrors) {
-          node.error(new Error('Session Not Ready To Write'), msg)
-        }
+      if (!coreClient.core.checkConnectorState(node, msg, 'Write')) {
         return
       }
 
       if (msg.injectType === 'write') {
         node.writeToSession(node.opcuaSession, msg)
+      } else {
+        coreClient.writeDebugLog('Wrong Inject Type ' + msg.injectType + '! The Type has to be write.')
+        if (node.showErrors) {
+          node.warn('Wrong Inject Type ' + msg.injectType + '! The msg.injectType has to be write.')
+        }
       }
     })
 
-    node.setOPCUAConnected = function (opcuaClient) {
-      node.opcuaClient = opcuaClient
-      node.setNodeStatusTo('connected')
-    }
-
-    node.opcuaSessionStarted = function (opcuaSession) {
-      node.opcuaSession = opcuaSession
-      node.setNodeStatusTo('active')
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreClient.writeDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
-      }
-    }
-
-    if (node.connector) {
-      node.connector.registerForOPCUA(node)
-      node.connector.on('connected', node.setOPCUAConnected)
-      node.connector.on('session_started', node.opcuaSessionStarted)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-
-      coreClient.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
-    } else {
-      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
-    }
+    coreClient.core.registerToConnector(node)
 
     node.on('close', done => {
       node.connector.deregisterForOPCUA(node, done)

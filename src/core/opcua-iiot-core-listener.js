@@ -32,30 +32,38 @@ de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // esli
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.Stately = de.biancoroyal.opcua.iiot.core.listener.Stately || require('stately.js') // eslint-disable-line no-use-before-define
 
 de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
   return de.biancoroyal.opcua.iiot.core.listener.Stately.machine({
+    'IDLE': {
+      'requestinitsub': 'REQUESTED',
+      'endsub': 'END'
+    },
+    'REQUESTED': {
+      'initsub': 'INIT'
+    },
     'INIT': {
-      'start': 'STARTED',
-      'terminate': 'TERMINATED',
-      'error': 'ERROR'
+      'startsub': 'STARTED',
+      'terminatesub': 'TERMINATED',
+      'errorsub': 'ERROR'
     },
     'STARTED': {
-      'terminate': 'TERMINATED',
-      'error': 'ERROR'
+      'terminatesub': 'TERMINATED',
+      'errorsub': 'ERROR'
     },
     'TERMINATED': {
-      'init': 'INIT',
-      'error': 'ERROR',
-      'end': 'END'
+      'idlesub': 'IDLE',
+      'errorsub': 'ERROR',
+      'endsub': 'END'
     },
     'ERROR': {
-      'init': 'INIT',
-      'end': 'END'
+      'initsub': 'INIT',
+      'endsub': 'END'
     },
     'END': {}
-  })
+  }, 'IDLE')
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = function (timeMilliseconds) {
@@ -454,6 +462,20 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
       }
     }
   )
+}
+
+de.biancoroyal.opcua.iiot.core.listener.checkState = function (node, msg, callerType) {
+  this.internalDebugLog('Check Listener State ' + node.stateMachine.getMachineState() + ' By ' + callerType)
+
+  if (node.connector && node.stateMachine && node.stateMachine.getMachineState() !== this.RUNNING_STATE) {
+    this.internalDebugLog('Wrong Listener State ' + node.stateMachine.getMachineState() + ' By ' + callerType)
+    if (node.showErrors) {
+      node.error(new Error('Listener Not ' + this.RUNNING_STATE + ' On ' + callerType), msg)
+    }
+    return false
+  } else {
+    return true
+  }
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.listener

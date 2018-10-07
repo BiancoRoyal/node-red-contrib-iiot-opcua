@@ -60,6 +60,10 @@ module.exports = function (RED) {
     }
 
     node.readFromSession = function (session, itemsToRead, msg) {
+      if (coreClient.core.checkSessionNotValid(session, 'Reader')) {
+        return
+      }
+
       coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
 
       switch (parseInt(node.attributeId)) {
@@ -181,49 +185,14 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (node.connector && node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreClient.readDebugLog('Wrong Client State ' + node.connector.stateMachine.getMachineState() + ' On Read')
-        if (node.showErrors) {
-          node.error(new Error('Client Not Open On Read'), msg)
-        }
-        return
-      }
-
-      if (!node.opcuaSession) {
-        node.error(new Error('Session Not Ready To Read'), msg)
+      if (!coreClient.core.checkConnectorState(node, msg, 'Read')) {
         return
       }
 
       node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
     })
 
-    node.setOPCUAConnected = function (opcuaClient) {
-      node.opcuaClient = opcuaClient
-      node.setNodeStatusTo('connected')
-    }
-
-    node.opcuaSessionStarted = function (opcuaSession) {
-      node.opcuaSession = opcuaSession
-      node.setNodeStatusTo('active')
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreClient.readDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
-      }
-    }
-
-    if (node.connector) {
-      node.connector.registerForOPCUA(node)
-      node.connector.on('connected', node.setOPCUAConnected)
-      node.connector.on('session_started', node.opcuaSessionStarted)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-
-      coreClient.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
-    } else {
-      node.error(new Error('Connector Not Valid'), {payload: 'No connector configured'})
-    }
+    coreClient.core.registerToConnector(node)
 
     node.on('close', done => {
       node.connector.deregisterForOPCUA(node, done)

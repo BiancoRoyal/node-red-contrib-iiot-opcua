@@ -16,7 +16,6 @@
       connector: {type: "OPCUA-IIoT-Connector", required: true},
       nodeId: {value: ""},
       name: {value: ""},
-      // browseAll: {value: false},
       justValue: {value: true},
       sendNodesToRead: {value: false},
       sendNodesToListener: {value: false},
@@ -108,11 +107,6 @@
                 <input type="text" id="node-input-name" placeholder="Name">
             </div>
             <hr>
-            <!-- <div class="form-row">
-                <label style="min-width:160px" for="node-input-browseAll"><i class="fa fa-th"></i>
-                <span data-i18n="opcua-iiot-contrib.label.browseAll"></span></label>
-                <input type="checkbox" id="node-input-browseAll" style="max-width:30px">
-            </div> -->
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
@@ -170,7 +164,7 @@
             </div>
         </div>
     </div>
-    <!-- TODO: ReferenceTypeIds List to add or remove reference types tp browse for -->
+    <!-- TODO: ReferenceTypeIds List to add or remove reference types to browse for -->
 
 </script>
 

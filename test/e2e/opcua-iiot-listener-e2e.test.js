@@ -30,13 +30,13 @@ var testListenerMonitoringFlow = [
     'id': 'c9ca1bbe.d1cb2',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
-    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payload': '{"interval":250,"queueSize":4,"options":{"requestedPublishingInterval":500,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
     'payloadType': 'json',
     'topic': 'TestTopicSubscribe',
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '2.4',
     'name': 'Start Abo',
     'addressSpaceItems': [
       {
@@ -55,13 +55,13 @@ var testListenerMonitoringFlow = [
     'id': '273f8497.2f8b44',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
-    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payload': '{"interval":250,"queueSize":4,"options":{"requestedPublishingInterval":500,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
     'payloadType': 'json',
     'topic': 'TestTopicUnsubscribe',
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '6',
+    'startDelay': '4.4',
     'name': 'End Abo',
     'addressSpaceItems': [
       {
@@ -170,7 +170,7 @@ var testListenerMonitoringAboFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '2.4',
     'name': 'Start Abo',
     'addressSpaceItems': [
       {
@@ -195,7 +195,7 @@ var testListenerMonitoringAboFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '6',
+    'startDelay': '4.4',
     'name': 'End Abo',
     'addressSpaceItems': [
       {
@@ -221,7 +221,7 @@ var testListenerMonitoringAboFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '9',
+    'startDelay': '6.4',
     'name': 'Start Abo',
     'addressSpaceItems': [
       {
@@ -246,7 +246,7 @@ var testListenerMonitoringAboFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '12',
+    'startDelay': '8.4',
     'name': 'End Abo',
     'addressSpaceItems': [
       {
@@ -349,13 +349,13 @@ var recursiveBrowserAboFlow = [
     'id': '8a761f37.f69808',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
-    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payload': '{"interval":250,"queueSize":4,"options":{"requestedPublishingInterval":500,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
     'payloadType': 'json',
     'topic': '',
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '2.4',
     'name': 'Root',
     'addressSpaceItems': [],
     'wires': [
@@ -500,7 +500,7 @@ var feedListenerWithRecursiveBrowse = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '2.4',
     'name': '',
     'addressSpaceItems': [],
     'wires': [

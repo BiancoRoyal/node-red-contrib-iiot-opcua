@@ -159,7 +159,7 @@ var testListenerEventFlow = [
   }
 ]
 
-describe('OPC UA Listener event node Testing', function () {
+describe('OPC UA Listener event node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
       done()

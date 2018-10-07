@@ -29,6 +29,8 @@
       strategyMaxDelay: {value: ''},
       strategyRandomisationFactor: {value: ''},
       requestedSessionTimeout: {value: ''},
+      connectionStartDelay: {value: ''},
+      reconnectDelay: {value: ''},
     },
     credentials: {
       user: {type: "text"},
@@ -303,6 +305,16 @@
             <div class="form-row">
               <label for="node-config-input-requestedSessionTimeout"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.requestedSessionTimeout"></span></label>
               <input type="text" id="node-config-input-requestedSessionTimeout" placeholder="60000" style="width:80px"> &nbsp; msec.
+            </div>
+            <hr>
+            <h4>Server</h4>
+            <div class="form-row">
+              <label for="node-config-input-connectionStartDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.connectionStartDelay"></span></label>
+              <input type="text" id="node-config-input-connectionStartDelay" placeholder="1200" style="width:80px"> &nbsp; msec.
+            </div>
+            <div class="form-row">
+              <label for="node-config-input-reconnectDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.reconnectDelay"></span></label>
+              <input type="text" id="node-config-input-reconnectDelay" placeholder="600" style="width:80px"> &nbsp; msec.
             </div>
         </div>
     </div>
