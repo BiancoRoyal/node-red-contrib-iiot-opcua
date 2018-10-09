@@ -30,6 +30,7 @@ module.exports = function (RED) {
     this.showErrors = config.showErrors
     this.recursiveBrowse = config.recursiveBrowse
     this.recursiveDepth = config.recursiveDepth || 1
+    this.delayPerMessage = config.delayPerMessage || 0.2
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
@@ -38,6 +39,7 @@ module.exports = function (RED) {
     node.opcuaClient = null
     node.opcuaSession = null
     node.reconnectTimeout = 1000
+    node.messageList = []
 
     node.setNodeStatusTo = function (statusValue) {
       let statusParameter = coreBrowser.core.getNodeStatus(statusValue, node.showStatusActivities)
@@ -162,7 +164,7 @@ module.exports = function (RED) {
     }
 
     node.sendMessage = function (rootNodeId, depth, originMessage, lists) {
-      let msg = originMessage
+      let msg = Object.assign({}, originMessage)
       msg.nodetype = 'browse'
 
       if (!lists) {
@@ -215,7 +217,11 @@ module.exports = function (RED) {
         msg.addressItemsToBrowseCount = lists.addressItemList.length
       }
 
-      node.send(msg)
+      node.messageList.push(msg)
+
+      setTimeout(() => {
+        node.send(node.messageList.shift())
+      }, node.delayPerMessage * node.messageList.length * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
     }
 
     node.browseSendResult = function (rootNodeId, depth, msg, lists) {

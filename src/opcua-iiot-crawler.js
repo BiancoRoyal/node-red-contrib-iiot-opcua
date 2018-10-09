@@ -26,6 +26,7 @@ module.exports = function (RED) {
     this.showErrors = config.showErrors
     this.activateFilters = config.activateFilters
     this.filters = config.filters
+    this.delayPerMessage = config.delayPerMessage || 0.2
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
@@ -34,6 +35,7 @@ module.exports = function (RED) {
     node.opcuaClient = null
     node.opcuaSession = null
     node.reconnectTimeout = 1000
+    node.messageList = []
 
     node.setNodeStatusTo = function (statusValue) {
       let statusParameter = coreBrowser.core.getNodeStatus(statusValue, node.showStatusActivities)
@@ -193,7 +195,7 @@ module.exports = function (RED) {
     }
 
     node.sendMessage = function (originMessage, crawlerResult) {
-      let msg = originMessage
+      let msg = Object.assign({}, originMessage)
       msg.nodetype = 'crawl'
 
       msg.payload = {
@@ -212,7 +214,11 @@ module.exports = function (RED) {
         msg.payload.session = node.opcuaSession.name || 'none'
       }
 
-      node.send(msg)
+      node.messageList.push(msg)
+
+      setTimeout(() => {
+        node.send(node.messageList.shift())
+      }, node.delayPerMessage * node.messageList.length * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
     }
 
     node.on('input', function (msg) {
@@ -229,7 +235,8 @@ module.exports = function (RED) {
           msg.addressSpaceItems = msg.addressItemsToBrowse
         }
 
-        if (msg.addressSpaceItems) {
+        if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
+          coreBrowser.internalDebugLog('Start Crawling On AddressSpace Items')
           node.crawlNodeList(node.opcuaSession, msg)
         } else {
           node.error(new Error('No AddressSpace Items Or Root To Crawl'), msg)

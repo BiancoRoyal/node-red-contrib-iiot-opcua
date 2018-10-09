@@ -18,7 +18,8 @@
       "nodeId": "Node-Id",
       "lookupUseHint": "You can browse with the lookup by select and lookup agian.",
       "recursiveBrowse": "Recursive",
-      "recursiveDepth": "Depth"
+      "recursiveDepth": "Depth",
+      "delayPerMessage": "Delay msg"
     }
   }
 }

@@ -27,7 +27,7 @@ de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.c
 de.biancoroyal.opcua.iiot.core.RUNNING_STATE = de.biancoroyal.opcua.iiot.core.RUNNING_STATE || 'SESSIONACTIVE' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.os = de.biancoroyal.opcua.iiot.core.os || require('os') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.isWindows = de.biancoroyal.opcua.iiot.core.isWindows || /^win/.test(de.biancoroyal.opcua.iiot.core.os.platform()) // eslint-disable-line no-use-before-define
-
+de.biancoroyal.opcua.iiot.core.FAKTOR_SEC_TO_MSEC = de.biancoroyal.opcua.iiot.core.FAKTOR_SEC_TO_MSEC || 1000 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.endianness())
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.hostname())
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.platform())

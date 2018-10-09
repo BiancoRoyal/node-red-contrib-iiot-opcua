@@ -21,6 +21,7 @@
       showErrors: {value: false},
       activateFilters: {value: false},
       filters: {value: []},
+      delayPerMessage: {value: 0.2},
     },
     inputs: 1,
     outputs: 1,
@@ -233,6 +234,10 @@
                 <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" placeholder="Name">
             </div>
+            <div class="form-row">
+                    <label for="node-input-delayPerMessage"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayPerMessage"></span></label>
+                    <input type="text" id="node-input-delayPerMessage" placeholder="0.2"> sec.
+                </div>
             <hr>
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>

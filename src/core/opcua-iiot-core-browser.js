@@ -109,6 +109,11 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl)
         return
       }
 
+      if (!nodeIdToCrawl) {
+        reject(new Error('NodeId To Crawl Not Valid'))
+        return
+      }
+
       const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
       let crawlerResult = []
       const data = {
@@ -136,15 +141,28 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
         return
       }
 
+      if (!addressSpaceItems) {
+        reject(new Error('AddressSpace Items Not Valid To Crawl'))
+        return
+      }
+
       const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
       let crawlerResult = []
       const data = {
         onBrowse: function (crawler, cacheNode) {
+          if (!cacheNode) {
+            coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
+          }
           crawlerResult.push(cacheNode)
           coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
         }
       }
-      addressSpaceItems.forEach(function (item) {
+      addressSpaceItems.forEach(item => {
+        if (!item.nodeId) {
+          coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
+          return
+        }
+
         crawler.crawl(item.nodeId, data, function (err) {
           if (err) {
             reject(err)
