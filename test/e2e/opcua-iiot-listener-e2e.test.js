@@ -355,9 +355,20 @@ var recursiveBrowserAboFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'Root',
-    'addressSpaceItems': [],
+    'addressSpaceItems': [
+      {
+        'name': 'BiancoRoyal',
+        'nodeId': 'ns=1;i=1234',
+        'datatypeName': ''
+      },
+      {
+        'name': 'Tanks',
+        'nodeId': 'ns=1;i=1001',
+        'datatypeName': ''
+      }
+    ],
     'wires': [
       [
         '18b3e5b9.f9ba4a',
@@ -370,7 +381,7 @@ var recursiveBrowserAboFlow = [
     'id': '18b3e5b9.f9ba4a',
     'type': 'OPCUA-IIoT-Browser',
     'connector': '296a2f29.56e248',
-    'nodeId': 'ns=0;i=85',
+    'nodeId': '',
     'name': 'RootBrowser',
     'justValue': true,
     'sendNodesToRead': false,
@@ -379,6 +390,7 @@ var recursiveBrowserAboFlow = [
     'singleBrowseResult': false,
     'recursiveBrowse': true,
     'recursiveDepth': '1',
+    'delayPerMessage': '0.5',
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [
@@ -494,7 +506,7 @@ var feedListenerWithRecursiveBrowse = [
     'id': '3b4d83c1.6b490c',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
-    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payload': '{"interval":250,"queueSize":4,"options":{"requestedPublishingInterval":500,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
     'payloadType': 'json',
     'topic': '',
     'repeat': '',
@@ -502,7 +514,13 @@ var feedListenerWithRecursiveBrowse = [
     'once': true,
     'startDelay': '2.4',
     'name': '',
-    'addressSpaceItems': [],
+    'addressSpaceItems': [
+      {
+        'name': 'BiancoRoyal',
+        'nodeId': 'ns=1;i=1234',
+        'datatypeName': ''
+      }
+    ],
     'wires': [
       [
         '70a1a122.850e4'
@@ -513,7 +531,7 @@ var feedListenerWithRecursiveBrowse = [
     'id': '70a1a122.850e4',
     'type': 'OPCUA-IIoT-Browser',
     'connector': 'c95fc9fc.64ccc',
-    'nodeId': 'ns=1;i=1001',
+    'nodeId': '',
     'name': '',
     'justValue': true,
     'sendNodesToRead': false,
@@ -522,6 +540,7 @@ var feedListenerWithRecursiveBrowse = [
     'singleBrowseResult': false,
     'recursiveBrowse': true,
     'recursiveDepth': 1,
+    'delayPerMessage': '2',
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [
@@ -667,6 +686,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 1) {
             expect(msg.payload.value).toBeDefined()
+            expect(msg.topic).toBe('TestTopicSubscribe')
             expect(msg.payload.value.dataType).toBe('Int32')
             expect(msg.payload.statusCode).toBeDefined()
             setTimeout(done, 500)
@@ -683,6 +703,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 1) {
             expect(msg.payload.value).toBeDefined()
+            expect(msg.topic).toBe('TestTopicSubscribe')
             expect(msg.payload.dataType).toBe('Int32')
             expect(msg.payload.nodeId).toBe('ns=1;s=FullCounter')
             expect(msg.payload.statusCode).not.toBeDefined()

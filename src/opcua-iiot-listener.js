@@ -212,32 +212,33 @@ module.exports = function (RED) {
               })
           }
         } else {
-          let itemsToMonitor = msg.addressSpaceItems.filter(addressSpaceItem => {
+          const itemsToMonitor = msg.addressSpaceItems.filter(addressSpaceItem => {
             const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
             return node.monitoredASO.get(nodeIdToMonitor) === undefined
           })
 
-          let itemsToTerminate = msg.addressSpaceItems.filter(addressSpaceItem => {
+          const itemsToTerminate = msg.addressSpaceItems.filter(addressSpaceItem => {
             const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
             return node.monitoredASO.get(nodeIdToMonitor) !== undefined
           })
 
           if (itemsToMonitor.length > 0) {
-            msg.addressSpaceItems = itemsToMonitor
+            const monitorMessage = Object.assign({}, msg)
+            monitorMessage.addressSpaceItems = itemsToMonitor
             coreListener.subscribeDebugLog('itemsToMonitor ' + itemsToMonitor.length)
-            coreListener.monitorItems(node, msg, uaSubscription)
+            coreListener.monitorItems(node, monitorMessage, uaSubscription)
           }
 
           if (itemsToTerminate.length > 0) {
             coreListener.subscribeDebugLog('itemsToTerminate ' + itemsToTerminate.length)
             itemsToTerminate.forEach(addressSpaceItem => {
               const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-              const monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
-              if (monitoredItem) {
+              const item = node.monitoredASO.get(nodeIdToMonitor)
+              if (item.monitoredItem) {
                 coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
-                monitoredItem.terminate(function (err) {
-                  coreListener.subscribeDebugLog('Terminated Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
-                  node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
+                item.monitoredItem.terminate(function (err) {
+                  coreListener.subscribeDebugLog('Terminated Monitored Item ' + item.monitoredItem.itemToMonitor.nodeId)
+                  node.monitoredItemTerminated(msg, item.monitoredItem, nodeIdToMonitor, err)
                 })
               } else {
                 coreListener.subscribeDebugLog('Monitored Item Was Not Monitoring ' + nodeIdToMonitor)
@@ -275,15 +276,15 @@ module.exports = function (RED) {
           nodeIdToMonitor = addressSpaceItem.nodeId.toString()
         }
 
-        let monitoredItem = node.monitoredASO.get(nodeIdToMonitor)
+        const item = node.monitoredASO.get(nodeIdToMonitor)
 
-        if (!monitoredItem) {
+        if (!item.monitoredItem) {
           coreListener.eventDebugLog('Regsiter Event Item ' + nodeIdToMonitor)
           coreListener.buildNewEventItem(nodeIdToMonitor, msg, uaSubscription)
             .then(function (result) {
               if (result.monitoredItem.monitoredItemId) {
                 coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-                node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+                node.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
               }
             }).catch(function (err) {
               coreListener.eventDebugLog(err)
@@ -293,9 +294,10 @@ module.exports = function (RED) {
             })
         } else {
           coreListener.eventDebugLog('Terminate Event Item' + nodeIdToMonitor)
-          monitoredItem.terminate(function (err) {
-            coreListener.eventDebugLog('Terminated Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
-            node.monitoredItemTerminated(msg, monitoredItem, nodeIdToMonitor, err)
+          const eventMessage = Object.assign({}, msg)
+          item.monitoredItem.terminate(function (err) {
+            coreListener.eventDebugLog('Terminated Monitored Item ' + item.monitoredItem.itemToMonitor.nodeId)
+            node.monitoredItemTerminated(eventMessage, item.monitoredItem, nodeIdToMonitor, err)
           })
         }
       }
@@ -327,8 +329,8 @@ module.exports = function (RED) {
         } else {
           coreListener.internalDebugLog('UMIL monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
           node.monitoredASO.forEach(function (value, key, map) {
-            coreListener.internalDebugLog('UMIL monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItemId)
-            if (value.monitoredItemId && value.monitoredItemId === monitoredItem.monitoredItemId) {
+            coreListener.internalDebugLog('UMIL monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItem.monitoredItemId)
+            if (value.monitoredItem.monitoredItemId && value.monitoredItem.monitoredItemId === monitoredItem.monitoredItemId) {
               coreListener.internalDebugLog('UMIL monitoredItem removed from ASO list' + key)
               map.delete(key)
             }
@@ -387,10 +389,19 @@ module.exports = function (RED) {
     }
 
     node.sendDataFromMonitoredItem = function (monitoredItem, dataValue) {
+      if (!monitoredItem) {
+        coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
+        return
+      }
+
+      const nodeId = (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid'
+      const item = node.monitoredASO.get(nodeId)
+      const topic = (item) ? item.topic : node.topic
+
       let msg = {
         payload: {},
-        topic: node.topic,
-        addressSpaceItems: [{name: '', nodeId: (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid', datatypeName: ''}],
+        topic: topic,
+        addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
         nodetype: 'listen',
         injectType: 'subscribe'
       }
@@ -419,10 +430,19 @@ module.exports = function (RED) {
     }
 
     node.sendDataFromEvent = function (monitoredItem, dataValue) {
+      if (!monitoredItem) {
+        coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
+        return
+      }
+
+      const nodeId = (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid'
+      const item = node.monitoredASO.get(nodeId)
+      const topic = (item) ? item.topic : node.topic
+
       let msg = {
         payload: {},
-        topic: node.topic,
-        addressSpaceItems: [{name: '', nodeId: (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid', datatypeName: ''}],
+        topic: topic || node.topic, // default if item.topic is empty
+        addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
         nodetype: 'listen',
         injectType: 'event'
       }

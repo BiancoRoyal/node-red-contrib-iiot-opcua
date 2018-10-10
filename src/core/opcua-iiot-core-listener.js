@@ -192,7 +192,7 @@ de.biancoroyal.opcua.iiot.core.listener.monitorItems = function (node, msg, uaSu
         .then(function (result) {
           if (result.monitoredItem.monitoredItemId) {
             coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-            node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+            node.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
           }
         }).catch(function (err) {
           coreListener.subscribeDebugLog(err)

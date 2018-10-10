@@ -211,6 +211,7 @@ var testMethodInjectFlowPayload = [
     'id': 'n7mcf2',
     'type': 'OPCUA-IIoT-Response',
     'name': '',
+    'compressStructure': false,
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [
