@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(12000)
 
 var injectNodeRed = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
@@ -214,6 +214,8 @@ var testMethodInjectFlowPayload = [
     'compressStructure': false,
     'showStatusActivities': false,
     'showErrors': false,
+    'activateFilters': false,
+    'filters': [],
     'wires': [
       ['n8mcf2']
     ]
@@ -349,9 +351,11 @@ describe('OPC UA Method Caller node e2e Testing', function () {
       helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function () {
         let n8 = helper.getNode('n8mcf2')
         n8.on('input', function (msg) {
+          console.log(msg)
           expect(msg.nodetype).toBe('method')
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
-          expect(msg.payload).toMatchObject({'results': [{'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'inputArgumentResults': [[{'value': 0, 'description': 'No Error', 'name': 'Good'}, {'value': 0, 'description': 'No Error', 'name': 'Good'}], [{'value': 0, 'description': 'No Error', 'name': 'Good'}, {'value': 0, 'description': 'No Error', 'name': 'Good'}]], 'inputArgumentDiagnosticInfos': [], 'outputArguments': [{'dataType': 'String', 'arrayType': 'Array', 'value': ['Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!', 'Whaff!!!!!!!!!!!']}]}], 'definition': {'methodId': 'ns=1;i=12345', 'methodDefinition': {'inputArguments': {'inputArguments': [{'name': 'barks', 'dataType': 'ns=0;i=7', 'valueRank': -1, 'arrayDimensions': [[0]], 'description': {'text': 'specifies the number of time I should bark'}}, {'name': 'volume', 'dataType': 'ns=0;i=7', 'valueRank': -1, 'arrayDimensions': [[0]], 'description': {'text': 'specifies the sound volume [0 = quiet ,100 = loud]'}}], 'outputArguments': [{'name': 'Barks', 'dataType': 'ns=0;i=12', 'valueRank': 1, 'arrayDimensions': [[0]], 'description': {'text': 'the generated barks'}}]}}}})
+          expect(msg.payload.results).toBeDefined()
+          expect(msg.payload.definition).toBeDefined()
           done()
         })
       })

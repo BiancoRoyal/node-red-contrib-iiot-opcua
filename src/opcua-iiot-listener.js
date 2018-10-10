@@ -234,7 +234,7 @@ module.exports = function (RED) {
             itemsToTerminate.forEach(addressSpaceItem => {
               const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
               const item = node.monitoredASO.get(nodeIdToMonitor)
-              if (item.monitoredItem) {
+              if (item && item.monitoredItem) {
                 coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
                 item.monitoredItem.terminate(function (err) {
                   coreListener.subscribeDebugLog('Terminated Monitored Item ' + item.monitoredItem.itemToMonitor.nodeId)
@@ -278,7 +278,7 @@ module.exports = function (RED) {
 
         const item = node.monitoredASO.get(nodeIdToMonitor)
 
-        if (!item.monitoredItem) {
+        if (!item) {
           coreListener.eventDebugLog('Regsiter Event Item ' + nodeIdToMonitor)
           coreListener.buildNewEventItem(nodeIdToMonitor, msg, uaSubscription)
             .then(function (result) {
