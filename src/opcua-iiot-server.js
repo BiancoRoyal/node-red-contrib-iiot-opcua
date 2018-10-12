@@ -377,12 +377,18 @@ module.exports = function (RED) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        node.opcuaServer.shutdown(function () {
-          coreServer.destructAddressSpace()
-          if (done) {
-            done()
-          }
-        })
+        let timeoutShutdown = 100
+        if (node.opcuaServer.engine.subscriptionCount > 0) {
+          timeoutShutdown += 3000
+        }
+        setTimeout(() => {
+          node.opcuaServer.shutdown(function () {
+            coreServer.destructAddressSpace()
+            if (done) {
+              done()
+            }
+          })
+        }, timeoutShutdown)
       } else {
         if (done) {
           done()
