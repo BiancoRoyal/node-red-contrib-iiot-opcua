@@ -61,6 +61,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpaceFromScript = function
 }
 
 de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, asoDemo) {
+  const LocalizedText = this.core.nodeOPCUA.LocalizedText
+
   return new Promise(
     function (resolve, reject) {
       if (!server) {
@@ -80,7 +82,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
       let view = namespace.addView({
         organizedBy: addressSpace.rootFolder.views,
         browseName: 'BiancoRoyalView',
-        displayName: 'Bianco Royal View'
+        displayName: [
+          new LocalizedText({text: 'Bianco Royal View', locale: 'en-US'}),
+          new LocalizedText({text: 'Bianco Royal Sicht', locale: 'de-DE'})
+        ]
       })
 
       if (!asoDemo) {
@@ -100,7 +105,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           organizedBy: addressSpace.rootFolder.objects,
           nodeId: 'i=1234',
           browseName: 'BiancoRoyal',
-          displayName: 'Bianco Royal',
+          displayName: [
+            new LocalizedText({text: 'Bianco Royal', locale: 'en-US'}),
+            new LocalizedText({text: 'Bianco Royal', locale: 'de-DE'})
+          ],
           description: 'Bianco Royal - Software Innovations®'
         })
 
@@ -175,7 +183,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           componentOf: vendorName,
           nodeId: 's=free_memory',
           browseName: 'FreeMemory',
-          displayName: 'Free Memory',
+          displayName: [
+            new LocalizedText({text: 'Free Memory', locale: 'en-US'}),
+            new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})
+          ],
           dataType: 'Double',
 
           value: {
@@ -305,7 +316,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           organizedBy: vendorName,
           nodeId: 's=PumpSpeed',
           browseName: 'PumpSpeed',
-          displayName: 'Pump Speed',
+          displayName: [
+            new LocalizedText({text: 'Pump Speed', locale: 'en-US'}),
+            new LocalizedText({text: 'Geschwindigkeit Pumpe', locale: 'de-DE'})
+          ],
           dataType: 'Double',
           value: {
             get: function () {
@@ -321,7 +335,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           organizedBy: vendorName,
           nodeId: 's=SomeDate',
           browseName: 'SomeDate',
-          displayName: 'Some Date',
+          displayName: [
+            new LocalizedText({text: 'Some Date', locale: 'en-US'}),
+            new LocalizedText({text: 'Einfaches Datum', locale: 'de-DE'})
+          ],
           dataType: 'DateTime',
           value: {
             get: function () {
@@ -337,7 +354,10 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           organizedBy: vendorName,
           nodeId: 's=MultiLanguageText',
           browseName: 'MultiLanguageText',
-          displayName: 'Multi Language Text',
+          displayName: [
+            new LocalizedText({text: 'Multi Language Text', locale: 'en-US'}),
+            new LocalizedText({text: 'Mehrsprachiger Text', locale: 'de-DE'})
+          ],
           dataType: 'LocalizedText',
           value: {
             get: function () {

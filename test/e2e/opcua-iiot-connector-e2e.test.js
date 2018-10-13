@@ -740,113 +740,81 @@ describe('OPC UA Connector node e2e Testing', function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
           expect(msg.payload.rootNodeId).toBe('ns=1;i=1234')
-          expect(msg.payload.browserResults).toMatchObject([
-            {
-              'nodeId': 'ns=1;s=Pressure',
-              'browseName': '1:Pressure',
-              'displayName': 'locale=null text=Pressure',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=Matrix',
-              'browseName': '1:Matrix',
-              'displayName': 'locale=null text=Matrix',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=Position',
-              'browseName': '1:Position',
-              'displayName': 'locale=null text=Position',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=PumpSpeed',
-              'browseName': '1:PumpSpeed',
-              'displayName': 'locale=null text=Pump Speed',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=SomeDate',
-              'browseName': '1:SomeDate',
-              'displayName': 'locale=null text=Some Date',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=MultiLanguageText',
-              'browseName': '1:MultiLanguageText',
-              'displayName': 'locale=null text=Multi Language Text',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=FanSpeed',
-              'browseName': '1:FanSpeed',
-              'displayName': 'locale=null text=FanSpeed',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=TemperatureAnalogItem',
-              'browseName': '1:TemperatureAnalogItem',
-              'displayName': 'locale=null text=TemperatureAnalogItem',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=2368'
-            },
-            {
-              'nodeId': 'ns=1;i=16479',
-              'browseName': '1:MyVariable1',
-              'displayName': 'locale=null text=MyVariable1',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;b=1020ffaa',
-              'browseName': '1:MyVariable2',
-              'displayName': 'locale=null text=MyVariable2',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=TestReadWrite',
-              'browseName': '1:TestReadWrite',
-              'displayName': 'locale=null text=Test Read and Write',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=free_memory',
-              'browseName': '1:FreeMemory',
-              'displayName': 'locale=null text=Free Memory',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=Counter',
-              'browseName': '1:Counter',
-              'displayName': 'locale=null text=Counter',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;s=FullCounter',
-              'browseName': '1:FullCounter',
-              'displayName': 'locale=null text=FullCounter',
-              'nodeClass': 'Variable',
-              'datatypeName': 'ns=0;i=63'
-            },
-            {
-              'nodeId': 'ns=1;i=12345',
-              'browseName': '1:Bark',
-              'displayName': 'locale=null text=Bark',
-              'nodeClass': 'Method',
-              'datatypeName': 'ns=0;i=0'
-            }
-          ])
+          expect(msg.payload.browserResults).toMatchObject([ { nodeId: 'ns=1;s=Pressure',
+            browseName: '1:Pressure',
+            displayName: 'locale=null text=Pressure',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=Matrix',
+            browseName: '1:Matrix',
+            displayName: 'locale=null text=Matrix',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=Position',
+            browseName: '1:Position',
+            displayName: 'locale=null text=Position',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=PumpSpeed',
+            browseName: '1:PumpSpeed',
+            displayName: 'locale=en-US text=Pump Speed',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=SomeDate',
+            browseName: '1:SomeDate',
+            displayName: 'locale=en-US text=Some Date',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=MultiLanguageText',
+            browseName: '1:MultiLanguageText',
+            displayName: 'locale=en-US text=Multi Language Text',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=FanSpeed',
+            browseName: '1:FanSpeed',
+            displayName: 'locale=null text=FanSpeed',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=TemperatureAnalogItem',
+            browseName: '1:TemperatureAnalogItem',
+            displayName: 'locale=null text=TemperatureAnalogItem',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=2368' },
+          { nodeId: 'ns=1;i=16479',
+            browseName: '1:MyVariable1',
+            displayName: 'locale=null text=MyVariable1',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;b=1020ffaa',
+            browseName: '1:MyVariable2',
+            displayName: 'locale=null text=MyVariable2',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=TestReadWrite',
+            browseName: '1:TestReadWrite',
+            displayName: 'locale=null text=Test Read and Write',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=free_memory',
+            browseName: '1:FreeMemory',
+            displayName: 'locale=en-US text=Free Memory',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=Counter',
+            browseName: '1:Counter',
+            displayName: 'locale=null text=Counter',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;s=FullCounter',
+            browseName: '1:FullCounter',
+            displayName: 'locale=null text=FullCounter',
+            nodeClass: 'Variable',
+            datatypeName: 'ns=0;i=63' },
+          { nodeId: 'ns=1;i=12345',
+            browseName: '1:Bark',
+            displayName: 'locale=null text=Bark',
+            nodeClass: 'Method',
+            datatypeName: 'ns=0;i=0' } ])
           done()
         })
       })
