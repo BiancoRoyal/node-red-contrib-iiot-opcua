@@ -45,7 +45,7 @@ var testBrowseFlow = [
     'connector': 'c1f1',
     'nodeId': 'ns=1;i=1234',
     'name': 'TestBrowse',
-    'justValue': true,
+    'justValue': false,
     'recursiveBrowse': false,
     'recursiveDepth': 1,
     'sendNodesToRead': false,
@@ -432,6 +432,19 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.addressItemsToRead).toBeInstanceOf(Array)
           expect(msg.addressItemsToRead.length).toBe(10)
+          done()
+        })
+      })
+    })
+
+    it('should verify browser items as single result with nodes to Read with levels recursive', function (done) {
+      testBrowseLevelsFlow[2].recursiveBrowse = true
+      helper.load(browseNodesToLoad, testBrowseLevelsFlow, function () {
+        let n6 = helper.getNode('n6f2')
+        n6.on('input', function (msg) {
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.addressItemsToRead).toBeInstanceOf(Array)
+          expect(msg.addressItemsToRead.length).toBeGreaterThan(10)
           done()
         })
       })

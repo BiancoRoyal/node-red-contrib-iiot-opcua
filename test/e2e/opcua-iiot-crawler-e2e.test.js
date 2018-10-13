@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(12000)
 
 var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
@@ -520,6 +520,128 @@ let testCrawlerWithFilter = [
   }
 ]
 
+var testCrawlerWithFilterNS0 = [
+  {
+    'id': 'bb36ac76.436a7',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'inject',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '2.4',
+    'name': 'correct',
+    'addressSpaceItems': [
+      {
+        'name': '',
+        'nodeId': 'ns=1;i=1234',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        '23fcf6d.13b5d8a',
+        'nc1h'
+      ]
+    ]
+  },
+  {id: 'nc1h', type: 'helper'},
+  {
+    'id': '23fcf6d.13b5d8a',
+    'type': 'OPCUA-IIoT-Crawler',
+    'connector': 'ef9763f4.0e6728',
+    'name': '',
+    'justValue': false,
+    'singleResult': false,
+    'showStatusActivities': true,
+    'showErrors': false,
+    'activateFilters': true,
+    'filters': [
+      {
+        'name': 'nodeClass',
+        'value': 'Method'
+      },
+      {
+        'name': 'nodeClass',
+        'value': 'ObjectType*'
+      },
+      {
+        'name': 'typeDefinition',
+        'value': 'ns=0;i=58'
+      },
+      {
+        'name': 'nodeId',
+        'value': 'ns=0;*'
+      }
+    ],
+    'delayPerMessage': '1',
+    'wires': [
+      [
+        'nc2h'
+      ]
+    ]
+  },
+  {id: 'nc2h', type: 'helper'},
+  {
+    'id': 'ef9763f4.0e6728',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:4446/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': '',
+    'connectionStartDelay': '',
+    'reconnectDelay': ''
+  },
+  {
+    'id': '920108b3.753a68',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '4446',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': false,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': '1',
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'wires': [
+      [
+        'c52df7cd.518078'
+      ]
+    ]
+  }
+]
+
 describe('OPC UA Crawler node Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -618,6 +740,19 @@ describe('OPC UA Crawler node Testing', function () {
           expect(msg.payload.crawlerResults[0].references).not.toBeDefined()
 
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
+          done()
+        })
+      })
+    })
+
+    it('should verify filtered crawler items without ns=0', function (done) {
+      helper.load(crawlerNodesToLoad, testCrawlerWithFilterNS0, function () {
+        let n2 = helper.getNode('nc2h')
+        n2.on('input', function (msg) {
+          expect(msg.payload.crawlerResults).toBeDefined()
+
+          expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
+          expect(msg.payload.crawlerResults.length).toBeLessThan(100)
           done()
         })
       })
