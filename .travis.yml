@@ -3,18 +3,20 @@ matrix:
   include:
     - node_js: 6
     - node_js: 7
-    - node_js: "lts/*"
+    - node_js: 8
     - node_js: 9
     - node_js: 10
+    - node_js: "lts/*"
   allow_failures:
     - node_js: 6
     - node_js: 7
+    - node_js: 8
     - node_js: 9
-    - node_js: 10
 install:
   - npm install
   - npm install -g gulp
   - npm install -g gulp-cli
+  - npm install -g jest
 script:
   - npm test
   - npm run coverage
