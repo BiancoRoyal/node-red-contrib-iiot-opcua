@@ -435,7 +435,7 @@ let testCrawlerWithFilter = [
     'justValue': true,
     'singleResult': true,
     'showStatusActivities': true,
-    'showErrors': true,
+    'showErrors': false,
     'filters': [
       {
         'name': 'dataType',

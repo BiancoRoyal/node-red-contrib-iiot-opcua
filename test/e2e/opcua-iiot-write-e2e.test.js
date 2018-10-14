@@ -234,7 +234,7 @@ var testWriteNodeToBeLoadedWithServer = [
     'id': 'd35ceb8e.d06aa8',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:5388/',
+    'endpoint': 'opc.tcp://localhost:5392/',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -254,7 +254,7 @@ var testWriteNodeToBeLoadedWithServer = [
   {
     'id': 's1wrf2',
     'type': 'OPCUA-IIoT-Server',
-    'port': '5388',
+    'port': '5392',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
