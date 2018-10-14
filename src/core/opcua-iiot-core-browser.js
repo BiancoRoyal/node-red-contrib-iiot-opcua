@@ -16,33 +16,36 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.browser
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {browser: {}}}}}} // eslint-disable-line no-use-before-define
+var de = de || {biancoroyal: {opcua: {iiot: {core: {browser: {crawler: {}}}}}}} // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.core = de.biancoroyal.opcua.iiot.core.browser.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.internalDebugLog = de.biancoroyal.opcua.iiot.core.browser.internalDebugLog || require('debug')('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.detailDebugLog = de.biancoroyal.opcua.iiot.core.browser.detailDebugLog || require('debug')('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.browser.crawler.internalDebugLog = de.biancoroyal.opcua.iiot.core.browser.crawler.internalDebugLog || require('debug')('opcuaIIoT:browser:crawler') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.browser.crawler.detailDebugLog = de.biancoroyal.opcua.iiot.core.browser.crawler.detailDebugLog || require('debug')('opcuaIIoT:browser:crawler:details') // eslint-disable-line no-use-before-define
 
-de.biancoroyal.opcua.iiot.core.browser.browse = function (session, topic) {
+de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrowse) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Not Ready To Browse'))
+        return
       }
 
       let browseOptions = [
         {
-          nodeId: topic,
+          nodeId: nodeIdToBrowse,
           referenceTypeId: 'Organizes',
           includeSubtypes: true,
           browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-          resultMask: 0x3f
+          resultMask: 63
         },
         {
-          nodeId: topic,
+          nodeId: nodeIdToBrowse,
           referenceTypeId: 'Aggregates',
           includeSubtypes: true,
           browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-          resultMask: 0x3f
+          resultMask: 63
         }
       ]
 
@@ -63,6 +66,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Not Ready To Browse'))
+        return
       }
 
       let browseOptions = []
@@ -73,7 +77,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
           referenceTypeId: 'Organizes',
           includeSubtypes: true,
           browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-          resultMask: 0x3f
+          resultMask: 63
         })
 
         browseOptions.push({
@@ -81,7 +85,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
           referenceTypeId: 'Aggregates',
           includeSubtypes: true,
           browseDirection: coreBrowser.core.nodeOPCUA.browse_service.BrowseDirection.Forward,
-          resultMask: 0x3f
+          resultMask: 63
         })
       })
 
@@ -94,6 +98,125 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
       })
     }
   )
+}
+
+de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl) {
+  let coreBrowser = this
+  return new Promise(
+    function (resolve, reject) {
+      if (!session) {
+        reject(new Error('Session Not Ready To Crawl'))
+        return
+      }
+
+      if (!nodeIdToCrawl) {
+        reject(new Error('NodeId To Crawl Not Valid'))
+        return
+      }
+
+      const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
+      let crawlerResult = []
+      const data = {
+        onBrowse: function (crawler, cacheNode) {
+          crawlerResult.push(cacheNode)
+          coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
+        }
+      }
+      crawler.crawl(nodeIdToCrawl, data, function (err) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(crawlerResult)
+        }
+      })
+    })
+}
+
+de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (session, addressSpaceItems) {
+  let coreBrowser = this
+  return new Promise(
+    function (resolve, reject) {
+      if (!session) {
+        reject(new Error('Session Not Ready To Crawl'))
+        return
+      }
+
+      if (!addressSpaceItems) {
+        reject(new Error('AddressSpace Items Not Valid To Crawl'))
+        return
+      }
+
+      const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
+      let crawlerResult = []
+      const data = {
+        onBrowse: function (crawler, cacheNode) {
+          if (!cacheNode) {
+            coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
+          }
+          crawlerResult.push(cacheNode)
+          coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
+        }
+      }
+      addressSpaceItems.forEach(item => {
+        if (!item.nodeId) {
+          coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
+          return
+        }
+
+        crawler.crawl(item.nodeId, data, function (err) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(crawlerResult)
+          }
+        })
+      })
+    })
+}
+
+de.biancoroyal.opcua.iiot.core.browser.browseToRoot = function () {
+  let coreBrowser = this
+  coreBrowser.detailDebugLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
+  return coreBrowser.core.OBJECTS_ROOT
+}
+
+de.biancoroyal.opcua.iiot.core.browser.extractNodeIdFromTopic = function (msg, node) {
+  let coreBrowser = this
+  let rootNodeId = null
+
+  if (msg.payload.actiontype === 'browse') { // event driven browsing
+    if (msg.payload.root && msg.payload.root.nodeId) {
+      coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
+      rootNodeId = msg.payload.root.nodeId || coreBrowser.browseToRoot()
+    } else {
+      rootNodeId = node.nodeId || coreBrowser.browseToRoot()
+    }
+  }
+
+  coreBrowser.detailDebugLog('Extracted NodeId ' + rootNodeId)
+  return rootNodeId
+}
+
+de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference) {
+  if (reference) {
+    try {
+      return reference.toJSON()
+    } catch (err) {
+      this.internalDebugLog(err)
+
+      return {
+        referenceTypeId: reference.referenceTypeId.toString(),
+        isForward: reference.isForward,
+        nodeId: reference.nodeId.toString(),
+        browseName: reference.browseName.toString(),
+        displayName: reference.displayName,
+        nodeClass: reference.nodeClass.toString(),
+        typeDefinition: reference.typeDefinition.toString()
+      }
+    }
+  } else {
+    this.internalDebugLog('Empty Reference On Browse')
+  }
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.browser

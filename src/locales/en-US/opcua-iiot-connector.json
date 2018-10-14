@@ -24,7 +24,9 @@
       "strategyInitialDelay": "Initial Delay",
       "strategyMaxDelay": "Max. Delay",
       "strategyRandomisationFactor": "Random Factor",
-      "requestedSessionTimeout": "Requested Timeout"
+      "requestedSessionTimeout": "Requested Timeout",
+      "connectionStartDelay": "Connection Start",
+      "reconnectDelay": "Reconnect"
     },
     "tabs-label": {
       "settings": "Settings",

@@ -25,7 +25,7 @@
     "id": "1c3fa75d.d888e9",
     "type": "OPCUA-IIoT-Server-ASO",
     "z": "ea2f9ebe.1851e8",
-    "nodeId": "ns=5;s=TestFolder",
+    "nodeId": "ns=1;s=TestFolder",
     "browsename": "TestFolder",
     "displayname": "Test Folder",
     "objecttype": "FolderType",
@@ -47,7 +47,7 @@
     "type": "OPCUA-IIoT-Server-Command",
     "z": "ea2f9ebe.1851e8",
     "commandtype": "deleteNode",
-    "nodeId": "ns=5;s=TestFolder",
+    "nodeId": "ns=1;s=TestFolder",
     "name": "Delete",
     "x": 410,
     "y": 180,
@@ -471,12 +471,12 @@
     "addressSpaceItems": [
       {
         "name": "Counter",
-        "nodeId": "ns=4;s=Counter",
+        "nodeId": "ns=1;s=Counter",
         "datatypeName": ""
       },
       {
         "name": "FullCounter",
-        "nodeId": "ns=4;s=FullCounter",
+        "nodeId": "ns=1;s=FullCounter",
         "datatypeName": ""
       }
     ],
@@ -551,7 +551,7 @@
     "type": "OPCUA-IIoT-Node",
     "z": "ea2f9ebe.1851e8",
     "injectType": "listen",
-    "nodeId": "ns=4;s=TestReadWrite",
+    "nodeId": "ns=1;s=TestReadWrite",
     "datatype": "NodeId",
     "value": "",
     "name": "",
@@ -645,7 +645,7 @@
     "id": "5ca3b0ab.2b41e8",
     "type": "OPCUA-IIoT-Result-Filter",
     "z": "ea2f9ebe.1851e8",
-    "nodeId": "ns=4;s=FullCounter",
+    "nodeId": "ns=1;s=FullCounter",
     "datatype": "UInt32",
     "fixedValue": false,
     "fixPoint": 2,
@@ -699,7 +699,7 @@
     "id": "c603bab0.384fa8",
     "type": "OPCUA-IIoT-Result-Filter",
     "z": "ea2f9ebe.1851e8",
-    "nodeId": "ns=4;s=TestReadWrite",
+    "nodeId": "ns=1;s=TestReadWrite",
     "datatype": "Double",
     "fixedValue": true,
     "fixPoint": 2,
@@ -726,7 +726,7 @@
     "id": "70de5797.5a1a6",
     "type": "OPCUA-IIoT-Result-Filter",
     "z": "ea2f9ebe.1851e8",
-    "nodeId": "ns=4;s=Counter",
+    "nodeId": "ns=1;s=Counter",
     "datatype": "UInt16",
     "fixedValue": false,
     "fixPoint": 2,
@@ -795,7 +795,7 @@
     "addressSpaceItems": [
       {
         "name": "TestReadWrite",
-        "nodeId": "ns=4;s=TestReadWrite",
+        "nodeId": "ns=1;s=TestReadWrite",
         "datatypeName": "Double"
       }
     ],
@@ -1095,7 +1095,7 @@
     "addressSpaceItems": [
       {
         "name": "TestReadWrite",
-        "nodeId": "ns=4;s=TestReadWrite",
+        "nodeId": "ns=1;s=TestReadWrite",
         "datatypeName": ""
       }
     ],
@@ -1152,7 +1152,7 @@
     "addressSpaceItems": [
       {
         "name": "TestReadWrite",
-        "nodeId": "ns=4;s=TestReadWrite",
+        "nodeId": "ns=1;s=TestReadWrite",
         "datatypeName": ""
       }
     ],
@@ -1229,7 +1229,7 @@
     "type": "OPCUA-IIoT-Browser",
     "z": "ea2f9ebe.1851e8",
     "connector": "8d783f2f.3484d",
-    "nodeId": "ns=4;i=1234",
+    "nodeId": "ns=1;i=1234",
     "name": "Bianco Royal",
     "justValue": true,
     "sendNodesToRead": false,
@@ -1285,8 +1285,8 @@
     "type": "OPCUA-IIoT-Method-Caller",
     "z": "ea2f9ebe.1851e8",
     "connector": "8d783f2f.3484d",
-    "objectId": "ns=4;i=1234",
-    "methodId": "ns=4;i=12345",
+    "objectId": "ns=1;i=1234",
+    "methodId": "ns=1;i=12345",
     "methodType": "basic",
     "value": "",
     "justValue": true,
@@ -1399,7 +1399,7 @@
     "type": "function",
     "z": "ea2f9ebe.1851e8",
     "name": "call",
-    "func": "msg.payload = {\n    objectId: 'ns=4;i=1234',\n    methodId: 'ns=4;i=12345',\n    inputArguments: [\n        {name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    methodType: 'basic'\n}\nreturn msg;",
+    "func": "msg.payload = {\n    objectId: 'ns=1;i=1234',\n    methodId: 'ns=1;i=12345',\n    inputArguments: [\n        {name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    methodType: 'basic'\n}\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
     "x": 290,
@@ -1415,8 +1415,8 @@
     "type": "OPCUA-IIoT-Method-Caller",
     "z": "ea2f9ebe.1851e8",
     "connector": "8d783f2f.3484d",
-    "objectId": "ns=4;i=1234",
-    "methodId": "ns=4;i=12345",
+    "objectId": "ns=1;i=1234",
+    "methodId": "ns=1;i=12345",
     "methodType": "basic",
     "value": "",
     "justValue": false,
@@ -1701,7 +1701,7 @@
     "type": "OPCUA-IIoT-Browser",
     "z": "ea2f9ebe.1851e8",
     "connector": "8d783f2f.3484d",
-    "nodeId": "ns=4;i=1234",
+    "nodeId": "ns=1;i=1234",
     "name": "Bianco Royal",
     "justValue": true,
     "sendNodesToRead": false,
@@ -1784,7 +1784,7 @@
     "type": "OPCUA-IIoT-Node",
     "z": "ea2f9ebe.1851e8",
     "injectType": "write",
-    "nodeId": "ns=4;s=TestReadWrite",
+    "nodeId": "ns=1;s=TestReadWrite",
     "datatype": "Double",
     "value": "",
     "name": "",

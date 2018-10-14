@@ -7,7 +7,8 @@
       "actiontype": "Actionstyp",
       "attributeId": "Attribut Id",
       "queueSize": "Queue Umfang",
-      "justValue": "Sende nur Werte"
+      "justValue": "Sende nur Werte",
+      "useGroupItems": "Nutze Gruppierung"
     }
   }
 }

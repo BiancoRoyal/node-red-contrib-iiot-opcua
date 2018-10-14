@@ -14,7 +14,6 @@
  */
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
-  let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTCMD (config) {
     RED.nodes.createNode(this, config)
@@ -25,28 +24,26 @@ module.exports = function (RED) {
     let node = this
 
     node.on('input', function (msg) {
-      if (msg.nodetype === 'inject') {
+      msg.nodetype = 'inject'
+      msg.injectType = 'CMD'
+      msg.commandType = node.commandtype
+
+      if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
         let addressSpaceItem
         for (addressSpaceItem of msg.addressSpaceItems) {
-          msg = {payload: {}} // clean message
-          msg.topic = 'ServerCommand'
-          msg.nodetype = 'CMD'
-          msg.payload.commandtype = node.commandtype
-          msg.payload.nodeId = addressSpaceItem.nodeId
-
+          msg.payload = {
+            nodeId: addressSpaceItem.nodeId
+          }
           if (msg.payload.nodeId) {
-            core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
             node.send(msg)
           }
         }
       } else {
-        msg = {payload: {}} // clean message
-        msg.topic = 'ServerCommand'
-        msg.nodetype = 'CMD'
-        msg.payload.commandtype = node.commandtype
-        msg.payload.nodeId = node.nodeId
-
-        core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
+        if (node.nodeId) {
+          msg.payload = {
+            nodeId: node.nodeId
+          }
+        }
         node.send(msg)
       }
     })

@@ -19,14 +19,15 @@ module.exports = function (RED) {
 
   function OPCUAIIoTRead (config) {
     RED.nodes.createNode(this, config)
-    this.attributeId = config.attributeId || 0
-    this.maxAge = config.maxAge || 1
-    this.depth = config.depth || 1
+    this.attributeId = parseInt(config.attributeId) || 0
+    this.maxAge = parseInt(config.maxAge) || 1
+    this.depth = parseInt(config.depth) || 1
     this.name = config.name
     this.justValue = config.justValue
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.parseStrings = config.parseStrings
+    this.historyDays = parseInt(config.historyDays) || 1
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
@@ -53,55 +54,67 @@ module.exports = function (RED) {
         node.error(err, msg)
       }
 
-      if (coreClient.core.isSessionBad(err)) {
+      if (node.connector && coreClient.core.isSessionBad(err)) {
         node.connector.resetBadSession()
       }
     }
 
-    node.readFromSession = function (session, itemsToRead, msg) {
+    node.readFromSession = function (session, itemsToRead, originMsg) {
+      let msg = Object.assign({}, originMsg)
+      if (coreClient.core.checkSessionNotValid(session, 'Reader')) {
+        return
+      }
+
       coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
 
       switch (parseInt(node.attributeId)) {
-        case 0:
-          coreClient.readAllAttributes(session, itemsToRead).then(function (readResult) {
+        case coreClient.READ_TYPE.ALL:
+          coreClient.readAllAttributes(session, itemsToRead, msg).then(function (readResult) {
             try {
-              node.send(node.buildResultMessage(msg, 'AllAttributes', readResult))
+              node.send(node.buildResultMessage('AllAttributes', readResult))
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleReadError(err, readResult.msg)
             }
           }).catch(function (err) {
             node.handleReadError(err, msg)
           })
           break
-        case 13:
-          coreClient.readVariableValue(session, itemsToRead).then(function (readResult) {
+        case coreClient.READ_TYPE.VALUE:
+          coreClient.readVariableValue(session, itemsToRead, msg).then(function (readResult) {
             try {
-              let message = node.buildResultMessage(msg, 'VariableValue', readResult)
+              let message = node.buildResultMessage('VariableValue', readResult)
               node.send(message)
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleReadError(err, readResult.msg)
             }
           }).catch(function (err) {
             node.handleReadError(err, msg)
           })
           break
-        case 130:
-          let historyDate = new Date()
-          node.historyStart = new Date(historyDate.getDate() - 1)
-          node.historyEnd = historyDate
+        case coreClient.READ_TYPE.HISTORY:
+          const startDate = new Date()
+          node.historyStart = new Date()
+          node.historyStart.setDate(startDate.getDate() - node.historyDays)
+          node.historyEnd = new Date()
 
-          coreClient.readHistoryValue(session, itemsToRead, node.historyStart, node.historyEnd).then(function (readResult) {
-            try {
-              let message = node.buildResultMessage(msg, 'HistoryValue', readResult)
-              message.historyStart = node.historyStart
-              message.historyEnd = node.historyEnd
-              node.send(message)
-            } catch (err) {
+          coreClient.readHistoryValue(
+            session,
+            itemsToRead,
+            msg.payload.historyStart || node.historyStart,
+            msg.payload.historyEnd || node.historyEnd,
+            msg)
+            .then(function (readResult) {
+              try {
+                let message = node.buildResultMessage('HistoryValue', readResult)
+                message.historyStart = readResult.startDate || node.historyStart
+                message.historyEnd = readResult.endDate || node.historyEnd
+                node.send(message)
+              } catch (err) {
+                node.handleReadError(err, readResult.msg)
+              }
+            }).catch(function (err) {
               node.handleReadError(err, msg)
-            }
-          }).catch(function (err) {
-            node.handleReadError(err, msg)
-          })
+            })
           break
         default:
           let item = null
@@ -116,13 +129,13 @@ module.exports = function (RED) {
             transformedItemsToRead.push(transformedItem)
           }
 
-          coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (readResult) {
+          coreClient.read(session, transformedItemsToRead, node.maxAge, msg).then(function (readResult) {
             try {
-              let message = node.buildResultMessage(msg, 'Default', readResult)
+              let message = node.buildResultMessage('Default', readResult)
               message.maxAge = node.maxAge
               node.send(message)
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleReadError(err, readResult.msg)
             }
           }).catch(function (err) {
             node.handleReadError(err, msg)
@@ -130,8 +143,8 @@ module.exports = function (RED) {
       }
     }
 
-    node.buildResultMessage = function (msg, readType, readResult) {
-      let message = msg
+    node.buildResultMessage = function (readType, readResult) {
+      let message = readResult.msg
       message.payload = {}
       message.nodetype = 'read'
       message.readtype = readType
@@ -149,13 +162,14 @@ module.exports = function (RED) {
       } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
-          node.error(err, msg)
+          node.error(err, readResult.msg)
         }
 
         message.payload = dataValuesString
         message.error = err.message
       }
 
+      message.justValue = node.justValue
       if (!node.justValue) {
         try {
           message.resultsConverted = {}
@@ -164,7 +178,7 @@ module.exports = function (RED) {
         } catch (err) {
           if (node.showErrors) {
             node.warn('JSON not to parse from string for dataValues type ' + readResult.results)
-            node.error(err, msg)
+            node.error(err, readResult.msg)
           }
 
           message.resultsConverted = null
@@ -176,48 +190,18 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreClient.readDebugLog('Client State Not Open On Read')
-        if (node.showErrors) {
-          node.error(new Error('Client Not Open On Read'), msg)
-        }
-        return
-      }
-
-      if (!node.opcuaSession) {
-        node.error(new Error('Session Not Ready To Read'), msg)
+      if (!coreClient.core.checkConnectorState(node, msg, 'Read')) {
         return
       }
 
       node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
     })
 
-    node.setOPCUAConnected = function (opcuaClient) {
-      node.opcuaClient = opcuaClient
-      node.setNodeStatusTo('connected')
-    }
+    coreClient.core.registerToConnector(node)
 
-    node.opcuaSessionStarted = function (opcuaSession) {
-      node.opcuaSession = opcuaSession
-      node.setNodeStatusTo('active')
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreClient.readDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
-      }
-    }
-
-    if (node.connector) {
-      node.connector.on('connected', node.setOPCUAConnected)
-      node.connector.on('session_started', node.opcuaSessionStarted)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
-
-    coreClient.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+    node.on('close', done => {
+      node.connector.deregisterForOPCUA(node, done)
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Read', OPCUAIIoTRead)

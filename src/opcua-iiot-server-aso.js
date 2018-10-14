@@ -39,7 +39,8 @@ module.exports = function (RED) {
 
       msg = {payload: {}} // clean message
       msg.topic = 'ServerAddressSpaceObject'
-      msg.nodetype = 'ASO'
+      msg.nodetype = 'inject'
+      msg.injectType = 'ASO'
 
       if (node.nodeId.includes('i=') || node.nodeId.includes('s=') || node.nodeId.includes('b=')) {
         msg.payload.nodeId = node.nodeId

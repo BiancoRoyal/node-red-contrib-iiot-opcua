@@ -16,12 +16,14 @@
       connector: {type: "OPCUA-IIoT-Connector", required: true},
       nodeId: {value: ""},
       name: {value: ""},
-      // browseAll: {value: false},
       justValue: {value: true},
       sendNodesToRead: {value: false},
       sendNodesToListener: {value: false},
       sendNodesToBrowser: {value: false},
       singleBrowseResult: {value: false},
+      recursiveBrowse: {value: false},
+      recursiveDepth: {value: 1},
+      delayPerMessage: {value: 0.2},
       showStatusActivities: {value: false},
       showErrors: {value: false}
     },
@@ -106,11 +108,6 @@
                 <input type="text" id="node-input-name" placeholder="Name">
             </div>
             <hr>
-            <!-- <div class="form-row">
-                <label style="min-width:160px" for="node-input-browseAll"><i class="fa fa-th"></i>
-                <span data-i18n="opcua-iiot-contrib.label.browseAll"></span></label>
-                <input type="checkbox" id="node-input-browseAll" style="max-width:30px">
-            </div> -->
             <div class="form-row">
                 <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
@@ -156,10 +153,23 @@
                 <div>
                     <span data-i18n="opcua-iiot-contrib.label.lookupUseHint"></span>
                 </div>
+                <div class="form-row">
+                    <label style="min-width:160px" for="node-input-recursiveBrowse"><i class="fa fa-th"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.recursiveBrowse"></span></label>
+                    <input type="checkbox" id="node-input-recursiveBrowse" style="max-width:30px">
+                </div>
+                <div class="form-row">
+                    <label for="node-input-recursiveDepth"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.recursiveDepth"></span></label>
+                    <input type="text" id="node-input-recursiveDepth" placeholder="1">
+                </div>
+                <div class="form-row">
+                    <label for="node-input-delayPerMessage"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayPerMessage"></span></label>
+                    <input type="text" id="node-input-delayPerMessage" placeholder="0.2"> sec.
+                </div>
             </div>
         </div>
     </div>
-    <!-- TODO: ReferenceTypeIds List to add or remove reference types tp browse for -->
+    <!-- TODO: ReferenceTypeIds List to add or remove reference types to browse for -->
 
 </script>
 
@@ -192,7 +202,7 @@
  requested data or the error messages from node-opcua.</p>
 
  <div>
-    <strong>Content of a subscribed message:</strong>
+    <strong>Content of a browse result:</strong>
 
     <ul>
         <li>payload (value)

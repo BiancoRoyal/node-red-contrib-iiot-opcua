@@ -29,6 +29,8 @@
       strategyMaxDelay: {value: ''},
       strategyRandomisationFactor: {value: ''},
       requestedSessionTimeout: {value: ''},
+      connectionStartDelay: {value: ''},
+      reconnectDelay: {value: ''},
     },
     credentials: {
       user: {type: "text"},
@@ -261,7 +263,7 @@
             <div class="form-row">
                 <label for="node-config-input-defaultSecureTokenLifetime"><i class="fa fa-file"></i>
                 <span data-i18n="opcua-iiot-contrib.label.defaultSecureTokenLifetime"></span></label>
-                <input type="text" id="node-config-input-defaultSecureTokenLifetime" placeholder="60000"> &nbsp; msec.
+                <input type="text" id="node-config-input-defaultSecureTokenLifetime" placeholder="120000"> &nbsp; msec.
             </div>
             <div class="form-row">
                  <label for="node-config-input-loginEnabled"><i class="icon-lock"></i>
@@ -296,13 +298,23 @@
             </div>
             <div class="form-row">
               <label for="node-config-input-strategyRandomisationFactor"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.strategyRandomisationFactor"></span></label>
-              <input type="text" id="node-config-input-strategyRandomisationFactor" placeholder="0.1" style="width:80px">
+              <input type="text" id="node-config-input-strategyRandomisationFactor" placeholder="0.2" style="width:80px">
             </div>
             <hr>
             <h4>Session</h4>
             <div class="form-row">
               <label for="node-config-input-requestedSessionTimeout"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.requestedSessionTimeout"></span></label>
               <input type="text" id="node-config-input-requestedSessionTimeout" placeholder="60000" style="width:80px"> &nbsp; msec.
+            </div>
+            <hr>
+            <h4>Server</h4>
+            <div class="form-row">
+              <label for="node-config-input-connectionStartDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.connectionStartDelay"></span></label>
+              <input type="text" id="node-config-input-connectionStartDelay" placeholder="1200" style="width:80px"> &nbsp; msec.
+            </div>
+            <div class="form-row">
+              <label for="node-config-input-reconnectDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.reconnectDelay"></span></label>
+              <input type="text" id="node-config-input-reconnectDelay" placeholder="600" style="width:80px"> &nbsp; msec.
             </div>
         </div>
     </div>
@@ -311,7 +323,7 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Connector">
     <h2>OPC UA IIoT Connector</h2>
 
-    <p>The Connector is a pure configuration node and starts connecting 
+    <p>The Connector is a pure configuration node and starts connecting
     to the OPC UA server with an OPC UA client instantly after 'Deploy' or start/restart.
     Please, keep in mind that the Connector node will work if it is unused
     and open a connection to the endpoint, too.</p>

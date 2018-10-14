@@ -15,43 +15,86 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreResponse = require('./core/opcua-iiot-core-response')
-  const EMPTY_LIST = 0
 
   function OPCUAIIoTResponse (config) {
     RED.nodes.createNode(this, config)
     this.name = config.name
+    this.compressStructure = config.compressStructure
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.activateFilters = config.activateFilters
+    this.filters = config.filters
 
     let node = this
 
-    node.status({fill: 'blue', shape: 'ring', text: '...'})
+    node.status({fill: 'green', shape: 'ring', text: 'active'})
 
     node.on('input', function (msg) {
       try {
         if (msg.nodetype) {
           switch (msg.nodetype) {
+            case 'browse':
+              coreResponse.analyzeBrowserResults(node, msg)
+              if (node.compressStructure) {
+                coreResponse.compressBrowseMessageStructure(msg)
+              }
+              break
             case 'read':
-              node.analyzeReadResults(msg)
+              coreResponse.analyzeReadResults(node, msg)
+              if (node.compressStructure) {
+                coreResponse.compressReadMessageStructure(msg)
+              }
               break
 
             case 'write':
-              node.analyzeWriteResults(msg)
+              coreResponse.analyzeWriteResults(node, msg)
+              if (node.compressStructure) {
+                coreResponse.compressWriteMessageStructure(msg)
+              }
               break
 
             case 'listen':
-              node.analyzeListenerResults(msg)
+              coreResponse.analyzeListenerResults(node, msg)
+              if (node.compressStructure) {
+                coreResponse.compressListenMessageStructure(msg)
+              }
               break
 
             case 'method':
-              node.analyzeMethodResults(msg)
+              coreResponse.analyzeMethodResults(node, msg)
+              if (node.compressStructure) {
+                coreResponse.compressMethodMessageStructure(msg)
+              }
               break
 
             default:
               if (msg && msg.payload) {
-                node.handlePayloadStatusCode(msg)
+                coreResponse.handlePayloadStatusCode(node, msg)
+                if (node.compressStructure) {
+                  coreResponse.compressDefaultMessageStructure(msg)
+                }
               }
           }
+        }
+
+        let filteredEntries = []
+
+        if (node.activateFilters && node.filters && node.filters.length > 0) {
+          if (msg.payload.length) {
+            msg.payload.forEach(function (item) {
+              if (node.itemIsNotToFilter(item)) {
+                filteredEntries.push(item)
+              }
+            })
+            msg.payload = filteredEntries
+            node.send(msg)
+          } else {
+            if (node.itemIsNotToFilter(msg.payload)) {
+              node.send(msg)
+            }
+          }
+        } else {
+          node.send(msg)
         }
       } catch (err) {
         coreResponse.internalDebugLog(err)
@@ -59,208 +102,60 @@ module.exports = function (RED) {
           node.error(err, msg)
         }
       }
-
-      node.send(msg)
     })
 
-    node.analyzeReadResults = function (msg) {
-      switch (msg.readtype) {
-        case 'AllAttributes':
-          node.handlePayloadStatusCode(msg) // TODO: do more
-          break
-
-        case 'VariableValue':
-          node.handlePayloadStatusCode(msg) // TODO: do less
-          break
-
-        case 'Meta':
-          node.setNodeStatus([0, 0, 0], 'None')
-          break
-
-        default:
-          node.handlePayloadStatusCode(msg) // TODO: do default
-          break
-      }
-    }
-
-    node.analyzeListenerResults = function (msg) {
-      switch (msg.injectType) {
-        case 'subscribe':
-          node.analyzeSubscribeResultStatus(msg)
-          break
-
-        case 'event':
-          node.analyzeEventResultStatus(msg)
-          break
-
-        default:
-          break
-      }
-    }
-
-    node.analyzeMethodResults = function (msg) {
-      switch (msg.methodType) {
-        case 'basic':
-          node.handlePayloadStatusCode(msg)
-          break
-
-        case 'complex':
-          node.handlePayloadStatusCode(msg)
-          break
-
-        default:
-          break
-      }
-    }
-
-    node.setNodeStatus = function (entryStatus, informationText) {
-      let fillColor = 'green'
-
-      if (entryStatus[2] > EMPTY_LIST) {
-        fillColor = 'yellow'
-      }
-
-      if (entryStatus[1] > EMPTY_LIST) {
-        fillColor = 'red'
-      }
-
-      node.status({fill: fillColor, shape: 'dot', text: informationText})
-    }
-
-    node.analyzeWriteResults = function (msg) {
-      let entryStatus = node.handlePayloadArrayOfStatusCodes(msg)
-      msg.entryStatus = entryStatus
-      node.setNodeStatus(entryStatus, 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2])
-    }
-
-    node.analyzeSubscribeResultStatus = function (msg) {
-      node.handlePayloadStatusCode(msg)
-    }
-
-    node.analyzeEventResultStatus = function (msg) {
-      node.handlePayloadStatusCode(msg)
-    }
-
-    node.handlePayloadStatusCode = function (msg) {
-      let entryStatus = [0, 0, 0]
-
-      if (msg.payload.length || msg.payload.results || msg.payload.statusCodes) {
-        entryStatus = node.handlePayloadArrayOfObjects(msg)
-      } else {
-        entryStatus = node.handlePayloadObject(msg)
-      }
-
-      msg.entryStatus = entryStatus
-
-      node.setNodeStatus(entryStatus, 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2])
-    }
-
-    node.handlePayloadArrayOfObjects = function (msg) {
-      let entry = null
-      let entryStatus = [0, 0, 0]
-      let results = []
-
-      if (msg.payload.results) {
-        results = msg.payload.results
-      } else if (msg.payload.statusCodes) {
-        results = msg.payload.statusCodes
-      } else {
-        if (msg.payload.length) { results = msg.payload }
-      }
-
-      for (entry of results) {
-        if (entry.statusCode && entry.statusCode.name) {
-          switch (entry.statusCode.name) {
-            case 'Good':
-              entryStatus[0] += 1
+    node.itemIsNotToFilter = function (item) {
+      let result = item !== null && item !== undefined
+      let filterValue
+      node.filters.forEach(function (element, index, array) {
+        try {
+          switch (element.name) {
+            case 'browseName':
+            case 'statusCode':
+              filterValue = item[element.name].name
               break
-            case 'Bad':
-              entryStatus[1] += 1
+            case 'displayName':
+              filterValue = item[element.name].text
+              break
+            case 'value':
+            case 'dataType':
+              if (item.value && item.value.hasOwnProperty('value')) {
+                filterValue = item.value[element.name]
+              } else {
+                filterValue = item[element.name]
+              }
               break
             default:
-              if (entry.statusCode.name.includes('Good')) {
-                entryStatus[0] += 1
-              } else if (entry.statusCode.name.includes('Bad')) {
-                entryStatus[1] += 1
-              } else {
-                entryStatus[2] += 1
-              }
+              filterValue = item[element.name]
           }
-        } else {
-          entryStatus[2] += 1
-        }
-      }
 
-      return entryStatus
-    }
-
-    node.handlePayloadObject = function (msg) {
-      let entryStatus = [0, 0, 0]
-
-      if (msg.payload.results || msg.payload.statusCodes) {
-        entryStatus = node.handlePayloadArrayOfObjects(msg)
-      }
-
-      if (msg.payload && msg.payload.statusCode) {
-        if (msg.payload.statusCode.name) {
-          switch (msg.payload.statusCode.name) {
-            case 'Good':
-              entryStatus[0] += 1
-              break
-            case 'Bad':
-              entryStatus[1] += 1
-              break
-            default:
-              if (msg.payload.statusCode.name.includes('Good')) {
-                entryStatus[0] += 1
-              } else if (msg.payload.statusCode.name.includes('Bad')) {
-                entryStatus[1] += 1
+          if (filterValue) {
+            if (filterValue.key && filterValue.key.match) {
+              result &= filterValue.key.match(element.value) !== null
+            } else {
+              if (filterValue.match) {
+                result &= filterValue.match(element.value) !== null
               } else {
-                entryStatus[2] += 1
-              }
-          }
-        } else {
-          entryStatus[2] += 1
-        }
-      } else {
-        entryStatus[2] += 1
-      }
-
-      return entryStatus
-    }
-
-    node.handlePayloadArrayOfStatusCodes = function (msg) {
-      let entry = null
-      let entryStatus = [0, 0, 0]
-
-      if (msg.payload.statusCodes) {
-        for (entry of msg.payload.statusCodes) {
-          if (entry && entry.name) {
-            switch (entry.name) {
-              case 'Good':
-                entryStatus[0] += 1
-                break
-              case 'Bad':
-                entryStatus[1] += 1
-                break
-              default:
-                if (entry.name.includes('Good')) {
-                  entryStatus[0] += 1
-                } else if (entry.name.includes('Bad')) {
-                  entryStatus[1] += 1
-                } else {
-                  entryStatus[2] += 1
+                if (filterValue.toString) {
+                  filterValue = filterValue.toString()
+                  if (filterValue.match) {
+                    result &= filterValue.match(element.value) !== null
+                  }
                 }
+              }
             }
           } else {
-            entryStatus[2] += 1
+            result &= false // undefined items
+          }
+        } catch (e) {
+          coreResponse.crawler.internalDebugLog(e)
+          if (node.showErrors) {
+            node.error(e, {payload: e.message})
           }
         }
-      } else {
-        entryStatus[2] += 1
-      }
+      })
 
-      return entryStatus
+      return result
     }
   }
 

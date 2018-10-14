@@ -28,14 +28,14 @@ let assert = require('better-assert')
 function constructAlarmAddressSpaceDemo (test, addressSpace) {
   addressSpace.installAlarmsAndConditionsService()
 
-  let tanks = addressSpace.addObject({
+  let tanks = addressSpace.getOwnNamespace().addObject({
     browseName: 'Tanks',
     description: 'The Object representing some tanks',
     organizedBy: addressSpace.rootFolder.objects,
     notifierOf: addressSpace.rootFolder.objects.server
   })
 
-  let oilTankLevel = addressSpace.addVariable({
+  let oilTankLevel = addressSpace.getOwnNamespace().addVariable({
     browseName: 'OilTankLevel',
     displayName: 'Oil Tank Level',
     description: 'Fill level in percentage (0% to 100%) of the oil tank',
@@ -51,7 +51,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
   let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')
   assert(exclusiveLimitAlarmType != null)
 
-  let oilTankLevelCondition = addressSpace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {
+  let oilTankLevelCondition = addressSpace.getOwnNamespace().instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {
     componentOf: tanks,
     conditionSource: oilTankLevel,
     browseName: 'OilTankLevelCondition',
@@ -70,7 +70,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
   // --------------------------------------------------------------
   // Let's create a second letiable with no Exclusive alarm
   // --------------------------------------------------------------
-  let gasTankLevel = addressSpace.addVariable({
+  let gasTankLevel = addressSpace.getOwnNamespace().addVariable({
     browseName: 'GasTankLevel',
     displayName: 'Gas Tank Level',
     description: 'Fill level in percentage (0% to 100%) of the gas tank',
@@ -82,7 +82,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
   let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')
   assert(nonExclusiveLimitAlarmType != null)
 
-  let gasTankLevelCondition = addressSpace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {
+  let gasTankLevelCondition = addressSpace.getOwnNamespace().instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {
     componentOf: tanks,
     conditionSource: gasTankLevel,
     browseName: 'GasTankLevelCondition',

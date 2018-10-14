@@ -20,7 +20,8 @@
       justValue: {value: true},
       showStatusActivities: {value: false},
       showErrors: {value: false},
-      parseStrings: {value: false}
+      parseStrings: {value: false},
+      historyDays: {value: 1}
     },
     inputs: 1,
     outputs: 1,
@@ -35,6 +36,7 @@
     oneditprepare: function () {
       try {
         let depthRow = $("#node-input-depth-row")
+        let historyRow = $("#node-input-history-row")
 
         if (parseInt(this.attributeId) === 99) {
           depthRow.show();
@@ -49,6 +51,12 @@
             depthRow.show()
           } else {
             depthRow.hide()
+          }
+
+          if ($(this).val() === "130") {
+            historyRow.show()
+          } else {
+            historyRow.hide()
           }
         })
       } catch
@@ -77,6 +85,12 @@
             <option value="13">Value</option>
             <option value="130">History</option>
         </select>
+    </div>
+    <div id="node-input-history-row">
+       <div class="form-row">
+          <label for="node-input-historyDays"><i class="icon-calendar"></i> <span data-i18n="opcua-iiot-contrib.label.historyDays"></span></label>
+          <input type="text" id="node-input-historyDays" placeholder="1">
+       </div>
     </div>
     <div class="form-row">
         <label for="node-input-maxAge"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.maxAge"></span></label>

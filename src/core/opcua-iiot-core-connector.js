@@ -24,25 +24,51 @@ de.biancoroyal.opcua.iiot.core.connector.Stately = de.biancoroyal.opcua.iiot.cor
 
 de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
   return de.biancoroyal.opcua.iiot.core.connector.Stately.machine({
+    'IDLE': {
+      'init': 'INIT',
+      'end': 'END'
+    },
     'INIT': {
       'open': 'OPEN',
       'lock': 'LOCKED',
       'end': 'END'
     },
     'OPEN': {
+      'sessionrequest': 'SESSIONREQUESTED',
       'close': 'CLOSED',
+      'lock': 'LOCKED',
+      'end': 'END'
+    },
+    'SESSIONREQUESTED': {
+      'open': 'OPEN',
+      'sessionactive': 'SESSIONACTIVE',
+      'lock': 'LOCKED',
+      'end': 'END'
+    },
+    'SESSIONACTIVE': {
+      'open': 'OPEN',
+      'sessionclose': 'SESSIONCLOSED',
+      'lock': 'LOCKED',
+      'end': 'END'
+    },
+    'SESSIONCLOSED': {
+      'init': 'INIT',
+      'open': 'OPEN',
       'lock': 'LOCKED',
       'end': 'END'
     },
     'CLOSED': {
       'init': 'INIT',
+      'open': 'OPEN',
       'lock': 'LOCKED',
-      'end': 'END'
+      'end': 'END',
+      'idle': 'IDLE'
     },
     'LOCKED': {
       'unlock': 'UNLOCKED',
-      'open': 'OPEN',
-      'end': 'END'
+      'init': 'INIT',
+      'end': 'END',
+      'idle': 'IDLE'
     },
     'UNLOCKED': {
       'init': 'INIT',
@@ -50,7 +76,7 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
       'end': 'END'
     },
     'END': {}
-  })
+  }, 'IDLE')
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.connector

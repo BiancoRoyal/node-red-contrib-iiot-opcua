@@ -8,7 +8,8 @@
       "maxAge": "Max. Age",
       "depth": "Depth",
       "justValue": "Send Just Values",
-      "parseStrings": "Parse Result"
+      "parseStrings": "Parse Result",
+      "historyDays": "History Days"
     }
   }
 }

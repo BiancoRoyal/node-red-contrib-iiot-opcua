@@ -31,138 +31,69 @@ de.biancoroyal.opcua.iiot.core.listener.MAX_LISTENER_INTERVAL = 3600000 // eslin
 de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.listener.Stately = de.biancoroyal.opcua.iiot.core.listener.Stately || require('stately.js') // eslint-disable-line no-use-before-define
+
+de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
+  return de.biancoroyal.opcua.iiot.core.listener.Stately.machine({
+    'IDLE': {
+      'requestinitsub': 'REQUESTED',
+      'endsub': 'END'
+    },
+    'REQUESTED': {
+      'initsub': 'INIT'
+    },
+    'INIT': {
+      'startsub': 'STARTED',
+      'terminatesub': 'TERMINATED',
+      'errorsub': 'ERROR'
+    },
+    'STARTED': {
+      'terminatesub': 'TERMINATED',
+      'errorsub': 'ERROR'
+    },
+    'TERMINATED': {
+      'idlesub': 'IDLE',
+      'errorsub': 'ERROR',
+      'endsub': 'END'
+    },
+    'ERROR': {
+      'initsub': 'INIT',
+      'endsub': 'END'
+    },
+    'END': {}
+  }, 'IDLE')
+}
 
 de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = function (timeMilliseconds) {
   return {
     requestedPublishingInterval: timeMilliseconds || 100,
-    requestedLifetimeCount: 60,
-    requestedMaxKeepAliveCount: 10,
-    maxNotificationsPerPublish: 4,
+    requestedLifetimeCount: 1000 * 60 * 20,
+    requestedMaxKeepAliveCount: 120,
+    maxNotificationsPerPublish: 200,
     publishingEnabled: true,
-    priority: 1
+    priority: 2
   }
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (timeMilliseconds) {
   return {
-    requestedPublishingInterval: timeMilliseconds || 100,
-    requestedLifetimeCount: 1000,
-    requestedMaxKeepAliveCount: 12,
+    requestedPublishingInterval: timeMilliseconds || 200,
+    requestedLifetimeCount: 1000 * 60 * 10,
+    requestedMaxKeepAliveCount: 60,
     maxNotificationsPerPublish: 100,
     publishingEnabled: true,
     priority: 10
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, key, value) {
-  let eventInformation = {}
-
-  switch (field) {
-    // Common fields
-    case 'EventId':
-      eventInformation.eventId = value
-      break
-    case 'EventType':
-      eventInformation.eventType = value
-      break
-    case 'SourceNode':
-      eventInformation.sourceNode = value
-      break
-    case 'SourceName':
-      eventInformation.sourceName = value
-      break
-    case 'Time':
-      eventInformation.time = value
-      break
-    case 'ReceiveTime':
-      eventInformation.receiveTime = value
-      break
-    case 'Message':
-      eventInformation.message = value.text
-      break
-    case 'Severity':
-      eventInformation.severity = value
-      break
-
-    // ConditionType
-    case 'ConditionClassId':
-      eventInformation.conditionClassId = value
-      break
-    case 'ConditionClassName':
-      eventInformation.conditionClassName = value
-      break
-    case 'ConditionName':
-      eventInformation.conditionName = value
-      break
-    case 'BranchId':
-      eventInformation.branchId = value
-      break
-    case 'Retain':
-      eventInformation.retain = value
-      break
-    case 'EnabledState':
-      eventInformation.enabledState = value.text
-      break
-    case 'Quality':
-      eventInformation.quality = value
-      break
-    case 'LastSeverity':
-      eventInformation.lastSeverity = value
-      break
-    case 'Comment':
-      eventInformation.comment = value.text
-      break
-    case 'ClientUserId':
-      eventInformation.clientUserId = value
-      break
-
-    // AcknowledgeConditionType
-    case 'AckedState':
-      eventInformation.ackedState = value.text
-      break
-    case 'ConfirmedState':
-      eventInformation.confirmedState = value.text
-      break
-
-    // AlarmConditionType
-    case 'ActiveState':
-      eventInformation.activeState = value.text
-      break
-    case 'InputNode':
-      eventInformation.inputNode = value
-      break
-    case 'SupressedState':
-      eventInformation.supressedState = value.text
-      break
-
-    // Limits
-    case 'HighHighLimit':
-      eventInformation.highHighLimit = value
-      break
-    case 'HighLimit':
-      eventInformation.highLimit = value
-      break
-    case 'LowLimit':
-      eventInformation.lowLimit = value
-      break
-    case 'LowLowLimit':
-      eventInformation.lowLowLimit = value
-      break
-    case 'Value':
-      eventInformation.value = value
-      break
-    default:
-      eventInformation.field = {}
-      eventInformation.field.name = field
-      eventInformation.field.value = value
-
-      if (value.text) {
-        eventInformation.field.value.text = value.text
-      }
-      break
+de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field, dataType, value) {
+  return {
+    field,
+    dataType,
+    value
   }
-
-  return eventInformation
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
@@ -239,6 +170,40 @@ de.biancoroyal.opcua.iiot.core.listener.getConditionFields = function () {
   ]
 }
 
+de.biancoroyal.opcua.iiot.core.listener.monitorItems = function (node, msg, uaSubscription) {
+  let coreListener = de.biancoroyal.opcua.iiot.core.listener
+
+  for (let addressSpaceItem of msg.addressSpaceItems) {
+    if (!addressSpaceItem.nodeId) {
+      coreListener.subscribeDebugLog('Address Space Item Not Valid to Monitor ' + addressSpaceItem)
+      return
+    }
+
+    if (addressSpaceItem.datatypeName === de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE) {
+      coreListener.subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
+      return
+    }
+
+    const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+
+    if (nodeIdToMonitor) {
+      coreListener.subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
+      this.buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
+        .then(function (result) {
+          if (result.monitoredItem.monitoredItemId) {
+            coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+            node.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
+          }
+        }).catch(function (err) {
+          coreListener.subscribeDebugLog(err)
+          if (node.showErrors) {
+            node.error(err, msg)
+          }
+        })
+    }
+  }
+}
+
 de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId, msg, subscription) {
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
@@ -246,21 +211,22 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
     function (resolve, reject) {
       if (!nodeId) {
         reject(new Error('NodeId Is Not Valid'))
+        return
       }
 
       let interval
       let queueSize
-
-      if (typeof msg.payload.interval === 'number' &&
-        msg.payload.interval <= coreListener.MAX_LISTENER_INTERVAL &&
-        msg.payload.interval >= coreListener.MIN_LISTENER_INTERVAL) {
-        interval = parseInt(msg.payload.interval)
+      let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters : msg.payload
+      if (typeof options.interval === 'number' &&
+        options.interval <= coreListener.MAX_LISTENER_INTERVAL &&
+        options.interval >= coreListener.MIN_LISTENER_INTERVAL) {
+        interval = parseInt(options.interval)
       } else {
         interval = coreListener.SUBSCRIBE_DEFAULT_INTERVAL
       }
 
-      if (msg.payload.queueSize && typeof msg.payload.queueSize === 'number') {
-        queueSize = parseInt(msg.payload.queueSize)
+      if (options.queueSize && typeof options.queueSize === 'number') {
+        queueSize = parseInt(options.queueSize)
       } else {
         queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
@@ -288,6 +254,65 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
     })
 }
 
+de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (node, msg, addressSpaceItems, subscription) {
+  let coreListener = de.biancoroyal.opcua.iiot.core.listener
+
+  return new Promise(
+    function (resolve, reject) {
+      if (!addressSpaceItems) {
+        reject(new Error('NodeId Is Not Valid'))
+        return
+      }
+
+      let interval
+      let queueSize
+
+      let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters : msg.payload
+      if (typeof options.interval === 'number' &&
+        options.interval <= coreListener.MAX_LISTENER_INTERVAL &&
+        options.interval >= coreListener.MIN_LISTENER_INTERVAL) {
+        interval = parseInt(options.interval)
+      } else {
+        interval = coreListener.SUBSCRIBE_DEFAULT_INTERVAL
+      }
+
+      if (options.queueSize && typeof options.queueSize === 'number') {
+        queueSize = parseInt(options.queueSize)
+      } else {
+        queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
+      }
+
+      let filteredAddressSpaceItems = addressSpaceItems.filter(addressSpaceItem => {
+        return addressSpaceItem.datatypeName !== de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE
+      })
+
+      let subcriptionItems = []
+      filteredAddressSpaceItems.forEach(item => {
+        subcriptionItems.push({
+          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(item.nodeId),
+          attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value})
+      })
+
+      subscription.monitorItems(
+        subcriptionItems,
+        {
+          samplingInterval: interval,
+          discardOldest: true,
+          queueSize: queueSize
+        },
+        coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+        function (err, monitoredItemGroup) {
+          if (err) {
+            coreListener.internalDebugLog('subscribing monitored item group ' + err)
+            reject(err)
+          } else {
+            resolve({addressSpaceItems: addressSpaceItems, monitoredItemGroup: monitoredItemGroup})
+          }
+        }
+      )
+    })
+}
+
 de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId, msg, subscription) {
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
 
@@ -295,6 +320,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId, ms
     function (resolve, reject) {
       if (!nodeId) {
         reject(new Error('NodeId Is Not Valid'))
+        return
       }
 
       let interval
@@ -341,6 +367,7 @@ de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session) {
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Is Not Valid To Browse For Event Types'))
+        return
       }
 
       let entries = []
@@ -389,10 +416,12 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Session Is Not Valid To Analyze Event'))
+        return
       }
 
       if (!browseForBrowseName || typeof browseForBrowseName !== 'function') {
         reject(new Error('BrowseForBrowseName Is Not Valid Function'))
+        return
       }
 
       if (!dataValue) {
@@ -433,6 +462,20 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
       }
     }
   )
+}
+
+de.biancoroyal.opcua.iiot.core.listener.checkState = function (node, msg, callerType) {
+  this.internalDebugLog('Check Listener State ' + node.stateMachine.getMachineState() + ' By ' + callerType)
+
+  if (node.connector && node.stateMachine && node.stateMachine.getMachineState() !== this.RUNNING_STATE) {
+    this.internalDebugLog('Wrong Listener State ' + node.stateMachine.getMachineState() + ' By ' + callerType)
+    if (node.showErrors) {
+      node.error(new Error('Listener Not ' + this.RUNNING_STATE + ' On ' + callerType), msg)
+    }
+    return false
+  } else {
+    return true
+  }
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.listener

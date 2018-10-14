@@ -1,5 +1,5 @@
+.idea/
 *.iml
-.idea
 code/
 node_modules/
 opcuaIIoT/
@@ -9,8 +9,7 @@ error*.txt
 maps/
 docs/gen/
 coverage/
+.coverage/
 pki/
-
-\.vscode/
-
+.vscode/
 jcoverage/

@@ -17,7 +17,6 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
   let path = require('path')
-  let os = require('os')
   let LocalizedText = require('node-opcua').LocalizedText
 
   function OPCUAIIoTServer (config) {
@@ -46,6 +45,9 @@ module.exports = function (RED) {
     this.asoDemo = config.asoDemo
     // discovery
     this.disableDiscovery = !config.serverDiscovery
+    this.registerServerMethod = config.registerServerMethod || 1
+    this.discoveryServerEndpointUrl = config.discoveryServerEndpointUrl
+    this.capabilitiesForMDNS = (config.capabilitiesForMDNS) ? config.capabilitiesForMDNS.split(',') : [config.capabilitiesForMDNS]
     // limits
     this.maxNodesPerRead = config.maxNodesPerRead || 1000
     this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
@@ -119,8 +121,18 @@ module.exports = function (RED) {
 
     node.initNewServer = function () {
       node.initialized = false
+      node.opcuaServer = null
 
-      coreServer.name = 'NodeREDIIoTServer'
+      switch (parseInt(node.registerServerMethod)) {
+        case 2:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.MDNS
+          break
+        case 3:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.LDS
+          break
+        default:
+          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.HIDDEN
+      }
 
       let serverOptions = {
         port: node.port,
@@ -128,8 +140,8 @@ module.exports = function (RED) {
         resourcePath: node.endpoint || 'UA/NodeREDIIoTServer',
         buildInfo: {
           productName: node.name || 'NodeOPCUA IIoT Server',
-          buildNumber: '160417',
-          buildDate: new Date(2017, 4, 16)
+          buildNumber: '20180416',
+          buildDate: new Date(2018, 4, 16)
         },
         serverCapabilities: {
           operationLimits: {
@@ -159,6 +171,18 @@ module.exports = function (RED) {
         disableDiscovery: node.disableDiscovery
       }
 
+      if (!node.disableDiscovery) {
+        serverOptions.registerServerMethod = node.registerServerMethod
+
+        if (node.discoveryServerEndpointUrl && node.discoveryServerEndpointUrl !== '') {
+          serverOptions.discoveryServerEndpointUrl = node.discoveryServerEndpointUrl
+        }
+
+        if (node.capabilitiesForMDNS && node.capabilitiesForMDNS.length) {
+          serverOptions.capabilitiesForMDNS = node.capabilitiesForMDNS
+        }
+      }
+
       coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
       node.opcuaServer.initialize(node.postInitialize)
@@ -180,9 +204,17 @@ module.exports = function (RED) {
             node.error(err, {payload: ''})
           }
         } else {
-          coreServer.start(node.opcuaServer, node)
-          node.setNodeStatusTo('active')
-          node.registerDiscovery()
+          coreServer.start(node.opcuaServer, node).then(function () {
+            node.setNodeStatusTo('active')
+            node.emit('server_running')
+          }).catch(function (err) {
+            node.opcuaServer = null
+            node.setNodeStatusTo('errors')
+            coreServer.internalDebugLog(err)
+            if (node.showErrors) {
+              node.error(err, {payload: ''})
+            }
+          })
         }
       }).catch(function (err) {
         coreServer.internalDebugLog(err)
@@ -192,45 +224,17 @@ module.exports = function (RED) {
       })
     }
 
-    // TODO: check if that is correct for multiple servers with different IP's and endpoints
-    node.registerDiscovery = function () {
-      let hostname = os.hostname()
-      let discoveryEndpointUrl
-
-      if (hostname) {
-        discoveryEndpointUrl = 'opc.tcp://' + hostname + ':4840/UADiscovery'
-        coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
-
-        node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
-          if (err) {
-            coreServer.internalDebugLog('Register Server Discovery Error'.red + err)
-          } else {
-            coreServer.internalDebugLog('Discovery Setup Discovery Done'.green)
-          }
-        })
-      }
-
-      discoveryEndpointUrl = 'opc.tcp://localhost:4840/UADiscovery'
-      coreServer.internalDebugLog('Registering Server To ' + discoveryEndpointUrl)
-
-      node.opcuaServer.registerServer(discoveryEndpointUrl, function (err) {
-        if (err) {
-          coreServer.internalDebugLog('Register Server Discovery Error'.red + err)
-        } else {
-          coreServer.internalDebugLog('Discovery Setup Discovery Done'.green)
-        }
-      })
-    }
-
     node.initNewServer()
 
     node.on('input', function (msg) {
       if (!node.opcuaServer || !node.initialized) {
-        node.error(new Error('Server Not Ready For Inputs'), msg)
+        if (node.showErrors) {
+          node.error(new Error('Server Not Ready For Inputs'), msg)
+        }
         return false
       }
 
-      switch (msg.nodetype) {
+      switch (msg.injectType) {
         case 'ASO':
           node.changeAddressSpace(msg)
           break
@@ -239,7 +243,7 @@ module.exports = function (RED) {
           node.executeOpcuaCommand(msg)
           break
         default:
-          node.error(new Error('Unknown Node Type ' + msg.nodetype), msg)
+          node.error(new Error('Unknown Inject Type ' + msg.injectType), msg)
       }
 
       node.send(msg)
@@ -263,7 +267,7 @@ module.exports = function (RED) {
       let variableData = coreServer.core.getVariantValue(msg.payload.datatype, msg.payload.value)
 
       if (rootFolder) {
-        addressSpace.addVariable({
+        addressSpace.getOwnNamespace().addVariable({
           componentOf: rootFolder,
           nodeId: msg.payload.nodeId,
           browseName: msg.payload.browsename,
@@ -297,7 +301,7 @@ module.exports = function (RED) {
       let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
 
       if (rootFolder) {
-        addressSpace.addObject({
+        addressSpace.getOwnNamespace().addObject({
           organizedBy: rootFolder,
           nodeId: msg.payload.nodeId,
           browseName: msg.payload.browsename,
@@ -315,7 +319,7 @@ module.exports = function (RED) {
         node.error(new Error('Server AddressSpace Not Valid'), msg)
       }
 
-      switch (msg.payload.commandtype) {
+      switch (msg.commandType) {
         case 'restart':
           node.restartServer()
           break
@@ -342,7 +346,6 @@ module.exports = function (RED) {
 
       if (node.opcuaServer) {
         node.opcuaServer.shutdown(function () {
-          node.opcuaServer = null
           node.emit('shutdown')
           node.initNewServer()
         })
@@ -352,6 +355,9 @@ module.exports = function (RED) {
         node.initNewServer()
       }
 
+      node.send({payload: 'server shutdown'})
+      node.setNodeStatusTo('shutdown')
+
       if (node.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')
       } else {
@@ -360,7 +366,9 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.closeServer(done)
+      node.closeServer(() => {
+        done()
+      })
     })
 
     node.closeServer = function (done) {
@@ -369,14 +377,23 @@ module.exports = function (RED) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        node.opcuaServer.shutdown(function () {
-          node.opcuaServer = null
-          if (done) {
+        let timeoutShutdown = 100
+        if (node.opcuaServer.engine.subscriptionCount > 0) {
+          timeoutShutdown += 3000
+        }
+        setTimeout(() => {
+          if (node.opcuaServer) {
+            node.opcuaServer.shutdown(function () {
+              coreServer.destructAddressSpace()
+              if (done) {
+                done()
+              }
+            })
+          } else {
             done()
           }
-        })
+        }, timeoutShutdown)
       } else {
-        node.opcuaServer = null
         if (done) {
           done()
         }

@@ -57,7 +57,7 @@ module.exports = function (RED) {
         node.error(err, msg)
       }
 
-      if (coreMethod.core.isSessionBad(err)) {
+      if (node.connector && coreMethod.core.isSessionBad(err)) {
         node.connector.resetBadSession()
       }
     }
@@ -70,51 +70,11 @@ module.exports = function (RED) {
       coreMethod.internalDebugLog(message)
     }
 
-    node.on('input', function (msg) {
-      let message = msg
-
-      message.objectId = msg.payload.objectId || node.objectId
-      message.methodId = msg.payload.methodId || node.methodId
-      message.methodType = msg.payload.methodType || node.methodType
-      message.inputArguments = msg.payload.inputArguments || node.inputArguments
-      message.nodetype = 'method'
-
-      if (!message.objectId) {
-        node.handleMethodWarn('No Object-Id Found For Method Call')
+    node.callMethodOnSession = function (session, msg) {
+      if (coreMethod.core.checkSessionNotValid(session, 'Writer')) {
         return
       }
 
-      if (!message.methodId) {
-        node.handleMethodWarn('No Method-Id Found For Method Call')
-        return
-      }
-
-      if (!message.inputArguments) {
-        node.handleMethodWarn('No Input Arguments Found For Method Call')
-        return
-      }
-
-      if (!message.methodType) {
-        node.handleMethodWarn('No Method Type Found For Method Call')
-        return
-      }
-
-      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreMethod.writeDebugLog('Client State Not Open On Write')
-        if (node.showErrors) {
-          node.error(new Error('Client Not Open On Wirte'), msg)
-        }
-        return
-      }
-
-      if (node.opcuaSession) {
-        node.callMethodOnSession(message)
-      } else {
-        node.handleMethodWarn('Session Not Ready For Method Call')
-      }
-    })
-
-    node.callMethodOnSession = function (msg) {
       if (msg.methodId && msg.inputArguments) {
         coreMethod.getArgumentDefinition(node.opcuaSession, msg).then(function (results) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
@@ -131,7 +91,7 @@ module.exports = function (RED) {
 
         let result = null
         let outputArguments = []
-        let message = data.msg
+        let message = Object.assign({}, data.msg)
         message.nodetype = 'method'
         message.methodType = data.msg.methodType
 
@@ -172,32 +132,47 @@ module.exports = function (RED) {
       })
     }
 
-    node.setOPCUAConnected = function (opcuaClient) {
-      node.opcuaClient = opcuaClient
-      node.setNodeStatusTo('connected')
-    }
-
-    node.opcuaSessionStarted = function (opcuaSession) {
-      node.opcuaSession = opcuaSession
-      node.setNodeStatusTo('active')
-    }
-
-    node.connectorShutdown = function (opcuaClient) {
-      coreMethod.internalDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
+    node.on('input', function (msg) {
+      if (!coreMethod.core.checkConnectorState(node, msg, 'MethodCaller')) {
+        return
       }
-    }
 
-    if (node.connector) {
-      node.connector.on('connected', node.setOPCUAConnected)
-      node.connector.on('session_started', node.opcuaSessionStarted)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
-    }
+      let message = msg
 
-    coreMethod.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+      message.objectId = msg.payload.objectId || node.objectId
+      message.methodId = msg.payload.methodId || node.methodId
+      message.methodType = msg.payload.methodType || node.methodType
+      message.inputArguments = msg.payload.inputArguments || node.inputArguments
+      message.nodetype = 'method'
+
+      if (!message.objectId) {
+        node.handleMethodWarn('No Object-Id Found For Method Call')
+        return
+      }
+
+      if (!message.methodId) {
+        node.handleMethodWarn('No Method-Id Found For Method Call')
+        return
+      }
+
+      if (!message.inputArguments) {
+        node.handleMethodWarn('No Input Arguments Found For Method Call')
+        return
+      }
+
+      if (!message.methodType) {
+        node.handleMethodWarn('No Method Type Found For Method Call')
+        return
+      }
+
+      node.callMethodOnSession(node.opcuaSession, message)
+    })
+
+    coreMethod.core.registerToConnector(node)
+
+    node.on('close', done => {
+      node.connector.deregisterForOPCUA(node, done)
+    })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Method-Caller', OPCUAIIoTMethodCaller)

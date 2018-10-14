@@ -17,30 +17,34 @@ module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreListener = require('./core/opcua-iiot-core-listener')
   let Map = require('collections/map')
+  const _ = require('underscore')
 
   function OPCUAIIoTListener (config) {
     RED.nodes.createNode(this, config)
     this.action = config.action
     this.queueSize = config.queueSize || 1
     this.name = config.name
+    this.topic = config.topic
     this.justValue = config.justValue
+    this.useGroupItems = config.useGroupItems
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
-    node.reconnectTimeout = 1000
-    node.sessionTimeout = null
     node.opcuaClient = null
     node.opcuaSession = null
-    node.subscriptionStarted = false
 
     let uaSubscription = null
-    let subscriptionStarting = false
     let StatusCodes = coreListener.core.nodeOPCUA.StatusCodes
     let AttributeIds = coreListener.core.nodeOPCUA.AttributeIds
     node.monitoredItems = new Map()
     node.monitoredASO = new Map()
+    node.messageQueue = []
+
+    node.stateMachine = coreListener.createStatelyMachine()
+    coreListener.internalDebugLog('Start FSM: ' + node.stateMachine.getMachineState())
+    coreListener.detailDebugLog('FSM events:' + node.stateMachine.getMachineEvents())
 
     node.verboseLog = function (logMessage) {
       if (RED.settings.verbose) {
@@ -60,28 +64,82 @@ module.exports = function (RED) {
       node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
     }
 
-    node.createSubscription = function (msg, cb) {
-      let timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
+    node.createSubscription = function (msg) {
+      if (node.stateMachine.getMachineState() !== 'IDLE') {
+        coreListener.internalDebugLog('New Subscription Request On State ' + node.stateMachine.getMachineState())
+        return
+      }
 
-      if (subscriptionStarting) {
-        coreListener.internalDebugLog('monitoring subscription try to start twice')
+      uaSubscription = null
+      node.stateMachine.requestinitsub()
+
+      const timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
+      const dynamicOptions = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
+
+      if (node.action !== 'events') {
+        coreListener.internalDebugLog('create monitoring subscription')
+        const monitoringOptions = dynamicOptions || coreListener.getSubscriptionParameters(timeMilliseconds)
+        node.makeSubscription(monitoringOptions)
       } else {
-        uaSubscription = null
-        node.subscriptionStarting = true
-        let options = {}
-        if (node.action !== 'events') {
-          coreListener.internalDebugLog('create monitoring subscription')
-          options = msg.payload.options || coreListener.getSubscriptionParameters(timeMilliseconds)
-        } else {
-          coreListener.internalDebugLog('create event subscription')
-          options = msg.payload.options || coreListener.getEventSubscribtionParameters(timeMilliseconds)
-        }
-        node.makeSubscription(options, cb)
+        coreListener.internalDebugLog('create event subscription')
+        const eventOptions = dynamicOptions || coreListener.getEventSubscribtionParameters(timeMilliseconds)
+        node.makeSubscription(eventOptions)
       }
     }
 
+    node.makeSubscription = function (parameters) {
+      if (coreListener.core.checkSessionNotValid(node.opcuaSession, 'ListenerSubscription')) {
+        return
+      }
+
+      if (!parameters) {
+        coreListener.internalDebugLog('Subscription Parameters Not Valid')
+        return
+      } else {
+        coreListener.internalDebugLog('Subscription Parameters: ' + JSON.stringify(parameters))
+      }
+
+      uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
+      coreListener.internalDebugLog('New Subscription Created')
+
+      uaSubscription.on('initialized', function () {
+        coreListener.internalDebugLog('Subscription initialized')
+        node.setNodeStatusTo('initialized')
+      })
+
+      uaSubscription.on('started', function () {
+        coreListener.internalDebugLog('Subscription started')
+        node.setNodeStatusTo('started')
+        node.monitoredItems.clear()
+        node.stateMachine.startsub()
+      })
+
+      uaSubscription.on('terminated', function () {
+        coreListener.internalDebugLog('Subscription terminated')
+        node.setNodeStatusTo('terminated')
+        node.stateMachine.terminatesub().idlesub()
+        node.resetSubscription()
+      })
+
+      uaSubscription.on('internal_error', function (err) {
+        coreListener.internalDebugLog('internal_error: ' + err.message)
+        if (node.showErrors) {
+          node.error(err, {payload: 'Internal Error'})
+        }
+        node.setNodeStatusTo('error')
+        node.stateMachine.errorsub()
+        node.resetSubscription()
+      })
+
+      uaSubscription.on('item_added', function (monitoredItem) {
+        node.setMonitoring(monitoredItem)
+        node.updateSubscriptionStatus()
+      })
+
+      node.stateMachine.initsub()
+    }
+
     node.resetSubscription = function () {
-      node.subscriptionStarting = false
       node.sendAllMonitoredItems('SUBSCRIPTION TERMINATED')
     }
 
@@ -96,91 +154,111 @@ module.exports = function (RED) {
     }
 
     node.subscribeActionInput = function (msg) {
-      if (!uaSubscription) {
-        node.createSubscription(msg, function () {
-          node.subscribeMonitoredItem(msg)
-        })
+      if (node.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+        node.messageQueue.push(msg)
       } else {
-        if (node.subscribingPreCheck()) {
-          node.subscribeMonitoredItem(msg)
-        } else {
-          node.resetSubscription()
-        }
+        node.subscribeMonitoredItem(msg)
       }
     }
 
     node.subscribeEventsInput = function (msg) {
-      if (!uaSubscription) {
-        node.createSubscription(msg, function () {
-          node.subscribeMonitoredEvent(msg)
-        })
+      if (node.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+        node.messageQueue.push(msg)
       } else {
-        if (node.subscribingPreCheck()) {
-          node.subscribeMonitoredEvent(msg)
-        } else {
-          node.resetSubscription()
-        }
+        node.subscribeMonitoredEvent(msg)
       }
-    }
-
-    node.subscribingPreCheck = function () {
-      return uaSubscription && typeof uaSubscription.subscriptionId !== 'string'
     }
 
     node.updateSubscriptionStatus = function () {
-      coreListener.internalDebugLog('listening' + ' (' + node.monitoredItems.length + ')')
-      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.length + ')')
+      coreListener.internalDebugLog('listening' + ' (' + node.monitoredItems.size + ')')
+      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.size + ')')
     }
 
     node.subscribeMonitoredItem = function (msg) {
-      if (!node.subscriptionStarted) {
-        node.error(new Error('Subscription Not Started To Monitor'), msg)
+      if (coreListener.core.checkSessionNotValid(node.opcuaSession, 'MonitorListener')) {
         return
       }
 
-      let addressSpaceItem = null
-      for (addressSpaceItem of msg.addressSpaceItems) {
-        if (!addressSpaceItem.nodeId) {
-          coreListener.subscribeDebugLog('Address Space Item Not Valid to Monitor ' + addressSpaceItem)
-          return
-        }
+      if (!coreListener.checkState(node, msg, 'Monitoring')) {
+        return
+      }
 
-        if (addressSpaceItem.datatypeName === 'ns=0;i=0') {
-          coreListener.subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
-          return
-        }
+      if (msg.addressSpaceItems.length) {
+        if (node.useGroupItems) {
+          if (node.monitoredItemGroup && node.monitoredItemGroup.groupId !== null) {
+            node.monitoredItemGroup.terminate(function (err) {
+              if (err) {
+                coreListener.internalDebugLog(err)
+              }
+              node.monitoredItems.clear()
+              node.monitoredASO.clear()
+              node.monitoredItemGroup.groupId = null
+              node.updateSubscriptionStatus()
+            })
+          } else {
+            coreListener.buildNewMonitoredItemGroup(node, msg, msg.addressSpaceItems, uaSubscription)
+              .then(function (result) {
+                if (!result.monitoredItemGroup) {
+                  node.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
+                } else {
+                  result.monitoredItemGroup.groupId = _.uniqueId('group_')
+                  node.monitoredItemGroup = result.monitoredItemGroup
+                }
+              }).catch(function (err) {
+                coreListener.subscribeDebugLog(err)
+                if (node.showErrors) {
+                  node.error(err, msg)
+                }
+              })
+          }
+        } else {
+          const itemsToMonitor = msg.addressSpaceItems.filter(addressSpaceItem => {
+            const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+            return node.monitoredASO.get(nodeIdToMonitor) === undefined
+          })
 
-        let monitoredItem = node.monitoredASO.get(addressSpaceItem.nodeId.toString())
+          const itemsToTerminate = msg.addressSpaceItems.filter(addressSpaceItem => {
+            const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+            return node.monitoredASO.get(nodeIdToMonitor) !== undefined
+          })
 
-        if (!monitoredItem) {
-          coreListener.subscribeDebugLog('Monitored Item Subscribing ' + addressSpaceItem.nodeId)
-          coreListener.buildNewMonitoredItem(addressSpaceItem.nodeId, msg, uaSubscription)
-            .then(function (result) {
-              coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-              node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
-            }).catch(function (err) {
-              coreListener.subscribeDebugLog(err)
-              if (node.showErrors) {
-                node.error(err, msg)
+          if (itemsToMonitor.length > 0) {
+            const monitorMessage = Object.assign({}, msg)
+            monitorMessage.addressSpaceItems = itemsToMonitor
+            coreListener.subscribeDebugLog('itemsToMonitor ' + itemsToMonitor.length)
+            coreListener.monitorItems(node, monitorMessage, uaSubscription)
+          }
+
+          if (itemsToTerminate.length > 0) {
+            coreListener.subscribeDebugLog('itemsToTerminate ' + itemsToTerminate.length)
+            itemsToTerminate.forEach(addressSpaceItem => {
+              const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
+              const item = node.monitoredASO.get(nodeIdToMonitor)
+              if (item && item.monitoredItem) {
+                coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
+                item.monitoredItem.terminate(function (err) {
+                  coreListener.subscribeDebugLog('Terminated Monitored Item ' + item.monitoredItem.itemToMonitor.nodeId)
+                  node.monitoredItemTerminated(msg, item.monitoredItem, nodeIdToMonitor, err)
+                })
+              } else {
+                coreListener.subscribeDebugLog('Monitored Item Was Not Monitoring ' + nodeIdToMonitor)
               }
             })
-        } else {
-          coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + addressSpaceItem.nodeId)
-          monitoredItem.terminate(function (err) {
-            node.monitoredItemTerminated(msg, monitoredItem, addressSpaceItem.nodeId, err)
-          })
+          }
         }
       }
     }
 
     node.subscribeMonitoredEvent = function (msg) {
-      if (!node.subscriptionStarted) {
-        node.error(new Error('Subscription Not Started To Monitor'), msg)
+      if (coreListener.core.checkSessionNotValid(node.opcuaSession, 'EventListener')) {
         return
       }
 
-      let addressSpaceItem = null
-      for (addressSpaceItem of msg.addressSpaceItems) {
+      if (!coreListener.checkState(node, msg, 'Event')) {
+        return
+      }
+
+      for (let addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
           coreListener.eventDebugLog('Address Space Item Not Valid to Monitor Event Of ' + addressSpaceItem)
           return
@@ -191,14 +269,23 @@ module.exports = function (RED) {
           return
         }
 
-        let monitoredItem = node.monitoredASO.get(addressSpaceItem.nodeId.toString())
+        let nodeIdToMonitor
+        if (typeof addressSpaceItem.nodeId === 'string') {
+          nodeIdToMonitor = addressSpaceItem.nodeId
+        } else {
+          nodeIdToMonitor = addressSpaceItem.nodeId.toString()
+        }
 
-        if (!monitoredItem) {
-          coreListener.eventDebugLog('Regsiter Event Item ' + addressSpaceItem.nodeId)
-          coreListener.buildNewEventItem(addressSpaceItem.nodeId, msg, uaSubscription)
+        const item = node.monitoredASO.get(nodeIdToMonitor)
+
+        if (!item) {
+          coreListener.eventDebugLog('Regsiter Event Item ' + nodeIdToMonitor)
+          coreListener.buildNewEventItem(nodeIdToMonitor, msg, uaSubscription)
             .then(function (result) {
-              coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-              node.monitoredASO.set(result.nodeId.toString(), result.monitoredItem)
+              if (result.monitoredItem.monitoredItemId) {
+                coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+                node.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
+              }
             }).catch(function (err) {
               coreListener.eventDebugLog(err)
               if (node.showErrors) {
@@ -206,9 +293,11 @@ module.exports = function (RED) {
               }
             })
         } else {
-          coreListener.subscribeDebugLog('Terminate Event Item' + addressSpaceItem.nodeId)
-          monitoredItem.terminate(function (err) {
-            node.monitoredItemTerminated(msg, monitoredItem, addressSpaceItem.nodeId, err)
+          coreListener.eventDebugLog('Terminate Event Item' + nodeIdToMonitor)
+          const eventMessage = Object.assign({}, msg)
+          item.monitoredItem.terminate(function (err) {
+            coreListener.eventDebugLog('Terminated Monitored Item ' + item.monitoredItem.itemToMonitor.nodeId)
+            node.monitoredItemTerminated(eventMessage, item.monitoredItem, nodeIdToMonitor, err)
           })
         }
       }
@@ -216,7 +305,7 @@ module.exports = function (RED) {
 
     node.monitoredItemTerminated = function (msg, monitoredItem, nodeId, err) {
       if (err) {
-        coreListener.internalDebugLog(err + ' on ' + monitoredItem.monitoredItemId)
+        coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.monitoredItemId)
         if (node.showErrors) {
           node.error(err, msg)
         }
@@ -225,22 +314,24 @@ module.exports = function (RED) {
     }
 
     node.updateMonitoredItemLists = function (monitoredItem, nodeId) {
+      coreListener.internalDebugLog('updateMonitoredItemLists = UMIL')
+
       if (monitoredItem && monitoredItem.itemToMonitor) {
         if (node.monitoredItems.has(monitoredItem.monitoredItemId)) {
           node.monitoredItems.delete(monitoredItem.monitoredItemId)
         }
 
         if (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) {
-          coreListener.internalDebugLog('Terminate Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
-          if (node.monitoredASO.has(nodeId.toString())) {
-            node.monitoredASO.delete(nodeId.toString())
+          coreListener.internalDebugLog('UMIL Terminate Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
+          if (node.monitoredASO.has(nodeId)) {
+            node.monitoredASO.delete(nodeId)
           }
         } else {
-          coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
+          coreListener.internalDebugLog('UMIL monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
           node.monitoredASO.forEach(function (value, key, map) {
-            coreListener.internalDebugLog('monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItemId)
-            if (value.monitoredItemId && value.monitoredItemId === monitoredItem.monitoredItemId) {
-              coreListener.internalDebugLog('monitoredItem removed from ASO list' + key)
+            coreListener.internalDebugLog('UMIL monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItem.monitoredItemId)
+            if (value.monitoredItem.monitoredItemId && value.monitoredItem.monitoredItemId === monitoredItem.monitoredItemId) {
+              coreListener.internalDebugLog('UMIL monitoredItem removed from ASO list' + key)
               map.delete(key)
             }
           })
@@ -250,15 +341,26 @@ module.exports = function (RED) {
       }
     }
 
-    node.setMonitoring = function (monitoredItem) {
+    node.setMonitoring = function (monitoredItemToSet) {
+      const monitoredItem = monitoredItemToSet
+      if (monitoredItem.monitoredItemId === undefined) {
+        coreListener.internalDebugLog('monitoredItem Id from server is not valid Id: ' + monitoredItem.monitoredItemId)
+        return
+      }
+
       if (!coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) {
         coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
       }
 
-      coreListener.internalDebugLog('add monitoredItem to list')
+      coreListener.internalDebugLog('add monitoredItem to list Id:' + monitoredItem.monitoredItemId + ' nodeId: ' + monitoredItem.itemToMonitor.nodeId)
       node.monitoredItems.set(monitoredItem.monitoredItemId, monitoredItem)
 
+      monitoredItem.on('initialized', function () {
+        coreListener.internalDebugLog('monitoredItem ' + monitoredItem.itemToMonitor.nodeId + ' initialized on ' + monitoredItem.monitoredItemId)
+      })
+
       monitoredItem.on('changed', function (dataValue) {
+        coreListener.detailDebugLog('data changed for item: ' + monitoredItem.itemToMonitor.nodeId + ' with Id ' + monitoredItem.monitoredItemId)
         if (!monitoredItem.monitoringParameters.filter) {
           node.sendDataFromMonitoredItem(monitoredItem, dataValue)
         } else {
@@ -267,14 +369,14 @@ module.exports = function (RED) {
       })
 
       monitoredItem.on('error', function (err) {
-        coreListener.internalDebugLog(err + ' on ' + monitoredItem.monitoredItemId)
+        coreListener.internalDebugLog('monitoredItem Error: ' + err.message + ' on ' + monitoredItem.monitoredItemId)
         if (node.showErrors) {
           node.error(err, {payload: 'Monitored Item Error', monitoredItem: monitoredItem})
         }
 
         node.updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
 
-        if (err.message && err.message.includes('BadSession')) {
+        if (node.connector && err.message && err.message.includes('BadSession')) {
           node.sendAllMonitoredItems('BAD SESSION')
           node.connector.resetBadSession()
         }
@@ -287,13 +389,24 @@ module.exports = function (RED) {
     }
 
     node.sendDataFromMonitoredItem = function (monitoredItem, dataValue) {
+      if (!monitoredItem) {
+        coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
+        return
+      }
+
+      const nodeId = (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid'
+      const item = node.monitoredASO.get(nodeId)
+      const topic = (item) ? item.topic : node.topic
+
       let msg = {
         payload: {},
-        topic: node.topic,
-        addressSpaceItems: [{name: '', nodeId: (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid', datatypeName: ''}],
+        topic: topic,
+        addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
         nodetype: 'listen',
         injectType: 'subscribe'
       }
+
+      coreListener.internalDebugLog('sendDataFromMonitoredItem: ' + msg.addressSpaceItems[0].nodeId)
 
       let dataValuesString = {}
       if (node.justValue) {
@@ -313,15 +426,23 @@ module.exports = function (RED) {
         msg.payload = { dataValue: dataValue, monitoredItem: monitoredItem }
       }
 
-      coreListener.detailDebugLog('sendDataFromMonitoredItem: ' + msg)
       node.send(msg)
     }
 
     node.sendDataFromEvent = function (monitoredItem, dataValue) {
+      if (!monitoredItem) {
+        coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
+        return
+      }
+
+      const nodeId = (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid'
+      const item = node.monitoredASO.get(nodeId)
+      const topic = (item) ? item.topic : node.topic
+
       let msg = {
         payload: {},
-        topic: node.topic,
-        addressSpaceItems: [{name: '', nodeId: (coreListener.core.isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid', datatypeName: ''}],
+        topic: topic || node.topic, // default if item.topic is empty
+        addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
         nodetype: 'listen',
         injectType: 'event'
       }
@@ -364,64 +485,11 @@ module.exports = function (RED) {
       if (err) {
         if (coreListener.core.isSessionBad(err)) {
           node.sendAllMonitoredItems('BAD SESSION')
-          node.connector.resetBadSession()
+          if (node.connector) {
+            node.connector.resetBadSession()
+          }
         }
       }
-    }
-
-    node.makeSubscription = function (parameters, callback) {
-      if (!node.opcuaSession) {
-        coreListener.internalDebugLog('Subscription Session Not Valid')
-        return
-      }
-
-      if (!parameters) {
-        coreListener.internalDebugLog('Subscription Parameters Not Valid')
-        return
-      } else {
-        coreListener.internalDebugLog('Subscription Parameters: ' + parameters)
-      }
-
-      uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
-      coreListener.internalDebugLog('New Subscription Created')
-
-      uaSubscription.on('initialized', function () {
-        coreListener.internalDebugLog('Subscription initialized')
-        node.subscriptionStarting = true
-        node.setNodeStatusTo('initialized')
-      })
-
-      uaSubscription.on('started', function () {
-        coreListener.internalDebugLog('Subscription started')
-        node.setNodeStatusTo('started')
-        node.monitoredItems.clear()
-        node.subscriptionStarting = false
-        node.subscriptionStarted = true
-        callback()
-      })
-
-      uaSubscription.on('terminated', function () {
-        coreListener.internalDebugLog('Subscription terminated')
-        node.subscriptionStarting = false
-        node.subscriptionStarted = false
-        node.setNodeStatusTo('terminated')
-        node.resetSubscription()
-      })
-
-      uaSubscription.on('internal_error', function (err) {
-        node.subscriptionStarted = false
-        coreListener.internalDebugLog(err)
-        if (node.showErrors) {
-          node.error(err, {payload: 'Internal Error'})
-        }
-        node.setNodeStatusTo('error')
-        node.resetSubscription()
-      })
-
-      uaSubscription.on('item_added', function (monitoredItem) {
-        node.setMonitoring(monitoredItem)
-        node.updateSubscriptionStatus()
-      })
     }
 
     node.getBrowseName = function (session, nodeId, callback) {
@@ -440,6 +508,10 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      if (!coreListener.core.checkConnectorState(node, msg, 'Listener')) {
+        return
+      }
+
       if (msg.nodetype === 'browse') { /* browse is just to address listening to many nodes */
         msg.nodetype = 'inject'
         msg.injectType = 'listen'
@@ -454,64 +526,85 @@ module.exports = function (RED) {
         return
       }
 
-      // start here to check connection to get unit-tests working while there is no mocking
-      // TODO: Connector mocking
-      if (node.connector.stateMachine.getMachineState() !== 'OPEN') {
-        coreListener.internalDebugLog('Client State Not Open On Browse')
-        if (node.showErrors) {
-          node.error(new Error('Client Not Open On Browse'), msg)
+      if (node.stateMachine.getMachineState() === 'IDLE') {
+        node.messageQueue.push(msg)
+        node.createSubscription(msg)
+      } else {
+        if (!coreListener.checkState(node, msg, 'Event')) {
+          node.messageQueue.push(msg)
+          return
         }
-        return
-      }
 
-      if (!node.opcuaSession) {
-        coreListener.internalDebugLog('Session Not Ready To Listen')
-        if (node.showErrors) {
-          node.error(new Error('Session Not Ready To Listen'), msg)
+        switch (node.action) {
+          case 'subscribe':
+            node.subscribeMonitoredItem(msg)
+            break
+          case 'events':
+            node.subscribeMonitoredEvent(msg)
+            break
+          default:
+            node.error(new Error('Type Of Action To Listener Is Not Valid'), msg)
         }
-        return
-      }
-
-      switch (node.action) {
-        case 'subscribe':
-          node.subscribeActionInput(msg)
-          break
-        case 'events':
-          node.subscribeEventsInput(msg)
-          break
-        default:
-          throw new TypeError('Unknown Action Type')
       }
     })
 
-    node.setOPCUAConnected = function (opcuaClient) {
-      node.opcuaClient = opcuaClient
-      node.setNodeStatusTo('connected')
+    coreListener.core.registerToConnector(node)
+
+    node.on('close', function (done) {
+      if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
+        uaSubscription.terminate(() => {
+          node.connector.deregisterForOPCUA(node, done)
+        })
+        uaSubscription = null
+      } else {
+        node.connector.deregisterForOPCUA(node, done)
+      }
+    })
+
+    /* #########   FSM EVENTS  #########     */
+
+    node.stateMachine.onIDLE = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener IDLE Event FSM')
     }
 
-    node.opcuaSessionStarted = function (opcuaSession) {
-      node.opcuaSession = opcuaSession
-      node.setNodeStatusTo('active')
+    node.stateMachine.onREQUESTED = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener REQUESTED Event FSM')
     }
 
-    node.connectorShutdown = function (opcuaClient) {
-      coreListener.internalDebugLog('Connector Shutdown')
-      if (opcuaClient) {
-        node.opcuaClient = opcuaClient
+    node.stateMachine.onINIT = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener INIT Event FSM')
+    }
+
+    node.stateMachine.onSTARTED = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener STARTED Event FSM')
+
+      switch (node.action) {
+        case 'subscribe':
+          while (node.messageQueue.length > 0) {
+            node.subscribeMonitoredItem(node.messageQueue.shift())
+          }
+          break
+        case 'events':
+          while (node.messageQueue.length > 0) {
+            node.subscribeMonitoredEvent(node.messageQueue.shift())
+          }
+          break
+        default:
+          coreListener.internalDebugLog('Unknown Action Type ' + node.action)
       }
     }
 
-    if (node.connector) {
-      node.connector.on('connected', node.setOPCUAConnected)
-      node.connector.on('session_started', node.opcuaSessionStarted)
-      node.connector.on('after_reconnection', node.connectorShutdown)
-    } else {
-      throw new TypeError('Connector Not Valid')
+    node.stateMachine.onTERMINATED = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener TERMINATED Event FSM')
     }
 
-    coreListener.core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
+    node.stateMachine.onERROR = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener ERROR Event FSM')
+    }
 
-    // subscriptions are deleted from OPCUAClient on Connector close
+    node.stateMachine.onEND = function (event, oldState, newState) {
+      coreListener.detailDebugLog('Listener END Event FSM')
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Listener', OPCUAIIoTListener)

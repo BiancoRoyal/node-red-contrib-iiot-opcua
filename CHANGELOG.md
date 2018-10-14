@@ -1,24 +1,26 @@
-# Change Log
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.7.1...v3.0.0) (2018-07-31)
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### Bug Fixes
+
+* **API:** self organised node-opcua ([1cb4760](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/1cb4760))
+* **browser:** wrong result used ([0db0aac](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0db0aac))
+* **method:** variable was not declared anymore ([60acae8](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/60acae8))
+* **read:** history read ([9c1b2be](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/9c1b2be))
+* **test:** test did not end while interval was running ([e38e3d1](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/e38e3d1))
+* **test:** with patterns of codacy ([c0b493a](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/c0b493a))
+* **tests:** working with the new v0.4.1 of node-opcua ([f8a2bd6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/f8a2bd6))
+
+
 
 <a name="2.7.1"></a>
-## [2.7.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.6.2...v2.7.1) (2018-05-28)
+## [2.7.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.6.1...v2.7.1) (2018-05-28)
 
 
 ### Bug Fixes
 
 * **inject:** error on a whole new flow with the address space items list ([cf90fd0](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/cf90fd0))
-
-
-
-<a name="2.7.0"></a>
-# [2.7.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.6.2...v2.7.0) (2018-05-22)
-
-
-
-<a name="2.6.2"></a>
-## [2.6.2](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.6.1...v2.6.2) (2018-04-15)
 
 
 
@@ -107,53 +109,18 @@ All notable changes to this project will be documented in this file. See [standa
 
 
 
-<a name="2.3.0"></a>
-# [2.3.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.2.1...v2.3.0) (2018-03-15)
-
-
-
-<a name="2.1.1"></a>
-## [2.1.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.1.0...v2.1.1) (2018-03-09)
-
-
-
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.12...v2.1.0) (2018-03-05)
 
 
 
 <a name="2.0.12"></a>
-## [2.0.12](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.11...v2.0.12) (2018-03-05)
-
-
-
-<a name="2.0.11"></a>
-## [2.0.11](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.10...v2.0.11) (2018-02-25)
+## [2.0.12](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.10...v2.0.12) (2018-03-05)
 
 
 
 <a name="2.0.10"></a>
-## [2.0.10](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.9...v2.0.10) (2018-02-25)
-
-
-
-<a name="2.0.9"></a>
-## [2.0.9](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.8...v2.0.9) (2018-02-24)
-
-
-
-<a name="2.0.8"></a>
-## [2.0.8](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.7...v2.0.8) (2018-02-22)
-
-
-
-<a name="2.0.7"></a>
-## [2.0.7](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.6...v2.0.7) (2018-02-22)
-
-
-
-<a name="2.0.6"></a>
-## [2.0.6](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.5...v2.0.6) (2018-02-21)
+## [2.0.10](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.0.5...v2.0.10) (2018-02-25)
 
 
 
@@ -184,3 +151,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 <a name="1.0.17"></a>
 ## 1.0.17 (2017-12-03)
+
+
+
