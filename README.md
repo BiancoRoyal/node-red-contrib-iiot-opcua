@@ -1,15 +1,12 @@
 ![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
 ![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
-![ES_Source_Version](http://b.repl.ca/v1/JS_Source-ES6-yellow.png)
-![ES_Deploy_Version](http://b.repl.ca/v1/JS_Deploy-ES2015-yellow.png)
+![ES_Deploy_Version](http://b.repl.ca/v1/JS-ES2015-yellow.png)
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-LTS-green.png)
 [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/biancode/node-red-contrib-iiot-opcua)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/da70f651451445c58d5adaeebd0ad595)](https://www.codacy.com/app/klaus/node-red-contrib-iiot-opcua?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=biancode/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Percentage of issues still open")
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/biancode/node-red-contrib-iiot-opcua.svg)](http://isitmaintained.com/project/biancode/node-red-contrib-iiot-opcua "Average time to resolve an issue")
 
 # node-red-contrib-iiot-opcua
 
@@ -40,8 +37,14 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
 
-![Flow Example](images/listener-example-subv220.png)
+![Flow Example](images/wiki/browser-listener-flow3-active.png)
 
+To get a special version please set the version with @M.M.F:
+
+    npm install node-red-contrib-iiot-opcua@2.7.1
+
+or global with the -g option of npm. You get more help in the npm docs.
+    
 ## Contributing
 
 Let's work together!
@@ -62,7 +65,7 @@ Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 or on local Node-RED
 
     DEBUG=opcuaIIoT* node red.js -v 1>nodeREDIIoTOPCUAServer.log 2>&1
-
+    
 #### Debug Options
 
 Please, read the [Wiki article][7]
@@ -80,25 +83,23 @@ With the flex server you could create your own information model with the OPC UA
 The server node contains demo objects and variables
 to start playing with OPC UA method call, read and write operations.
 
-![Flow Example](images/method-caller-examplev220.png)
+![Flow Example](images/wiki/method-call3-active.png)
 
 **... secure reading from OPC UA servers with your own key pairs ...**
 
-![Read Example](images/read-examplev220.png)
+![Read Example](images/wiki/read-history3-active.png)
 
 **... and secure writing and moving data between OPC UA servers ...**
 
-![Write Example](images/write-examplev220.png)
+![Write Example](images/wiki/write-flow3-active.png)
 
-![Read-Write Example](images/wiki/read-write-flow.png)
-
-![Write-Read Example](images/wiki/write-read-flow2.png)
+![Read Write Example](images/wiki/write-read-flow3.png)
 
 **... create your own variables and objects from events ...**
 
 | Node-RED        | UAExpert / Client     |
 |-----------------|-----------------------|
-|![ASO Example](images/server-aso-type-examplev220.png)|![ASO UAExpert](images/wiki/ASOTestVariablesUAExpert.png)|
+|![ASO Example](images/wiki/server-aso-flow3.png)|![ASO UAExpert](images/wiki/ASOTestVariablesUAExpert.png)|
 
 ## Package Information
 
