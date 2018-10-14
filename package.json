@@ -64,7 +64,7 @@
   "scripts": {
     "test": "jest --detectOpenHandles --no-cache --testPathPattern=suite",
     "upload-coverage": "cat ./jcoverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4",
-    "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --no-cache --maxWorkers=4 --detectOpenHandles --testPathPattern=suite",
+    "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --no-cache --runInBand --detectOpenHandles --testPathPattern=suite",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "npm run build && npm test",
     "ci-publish": "ci-publish",
