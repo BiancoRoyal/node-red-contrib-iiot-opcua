@@ -190,6 +190,7 @@ module.exports = function (RED) {
         listenerParameters
       }
 
+      msg.justValue = node.justValue
       if (!node.justValue) {
         msg.payload.browseTopic = node.browseTopic
         msg.payload.addressSpaceItems = msg.addressSpaceItems

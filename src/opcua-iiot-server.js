@@ -382,12 +382,16 @@ module.exports = function (RED) {
           timeoutShutdown += 3000
         }
         setTimeout(() => {
-          node.opcuaServer.shutdown(function () {
-            coreServer.destructAddressSpace()
-            if (done) {
-              done()
-            }
-          })
+          if (node.opcuaServer) {
+            node.opcuaServer.shutdown(function () {
+              coreServer.destructAddressSpace()
+              if (done) {
+                done()
+              }
+            })
+          } else {
+            done()
+          }
         }, timeoutShutdown)
       } else {
         if (done) {

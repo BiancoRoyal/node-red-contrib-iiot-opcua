@@ -60,16 +60,16 @@ module.exports = function (RED) {
       }
     }
 
-    node.writeToSession = function (session, msg) {
+    node.writeToSession = function (session, originMsg) {
       if (coreClient.core.checkSessionNotValid(session, 'Writer')) {
         return
       }
 
+      let msg = Object.assign({}, originMsg)
       let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
-
-      coreClient.write(session, nodesToWrite).then(function (writeResult) {
+      coreClient.write(session, nodesToWrite, msg).then(function (writeResult) {
         try {
-          let message = node.buildResultMessage(msg, writeResult)
+          let message = node.buildResultMessage(writeResult)
           node.send(message)
         } catch (err) {
           node.handleWriteError(err, msg)
@@ -79,9 +79,9 @@ module.exports = function (RED) {
       })
     }
 
-    node.buildResultMessage = function (msg, result) {
-      let message = msg
-      msg.nodetype = 'write'
+    node.buildResultMessage = function (result) {
+      let message = result.msg
+      message.nodetype = 'write'
 
       let dataValuesString = {}
       if (node.justValue) {
@@ -102,7 +102,7 @@ module.exports = function (RED) {
         coreClient.writeDebugLog(err)
         if (node.showErrors) {
           node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
-          node.error(err, msg)
+          node.error(err, result.msg)
         }
         message.resultsConverted = dataValuesString
         message.error = err.message

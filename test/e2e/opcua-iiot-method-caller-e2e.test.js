@@ -351,7 +351,6 @@ describe('OPC UA Method Caller node e2e Testing', function () {
       helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function () {
         let n8 = helper.getNode('n8mcf2')
         n8.on('input', function (msg) {
-          console.log(msg)
           expect(msg.nodetype).toBe('method')
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.payload.results).toBeDefined()

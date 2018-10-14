@@ -82,6 +82,17 @@ module.exports = function (RED) {
         }
       }
 
+      const message = Object.assign({}, msg)
+      const result = node.filterResult(message)
+
+      if (node.justValue) {
+        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId})
+      } else {
+        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId, input: message})
+      } // here node topic first to overwrite for dashboard
+    })
+
+    node.filterResult = function (msg) {
       msg.filtertype = 'filter'
       let result = msg.payload
 
@@ -148,12 +159,8 @@ module.exports = function (RED) {
         }
       }
 
-      if (node.justValue) {
-        node.send({payload: result, topic: node.topic || msg.topic, nodeId: node.nodeId})
-      } else {
-        node.send({payload: result, topic: node.topic || msg.topic, nodeId: node.nodeId, input: msg})
-      } // here node topic first to overwrite for dashboard
-    })
+      return result
+    }
 
     node.filterByReadType = function (msg) {
       let result = null

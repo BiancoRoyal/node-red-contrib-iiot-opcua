@@ -24,35 +24,27 @@ de.biancoroyal.opcua.iiot.core.response.EMPTY_LIST = 0
 de.biancoroyal.opcua.iiot.core.response.NONE = 0
 
 de.biancoroyal.opcua.iiot.core.response.analyzeBrowserResults = function (node, msg) {
-  switch (msg.readtype) {
-    case 'AllAttributes':
-      this.handlePayloadStatusCode(node, msg) // TODO: do more
-      break
-    case 'VariableValue':
-      this.handlePayloadStatusCode(node, msg) // TODO: do less
-      break
-    case 'Meta':
-      this.setNodeStatus([this.NONE, this.NONE, this.NONE], 'None')
-      break
-    default:
-      this.handlePayloadStatusCode(node, msg) // TODO: do default
-      break
-  }
+  this.handlePayloadStatusCode(node, msg)
 }
 
 de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (node, msg) {
+  if (msg.readtype !== 'Meta') {
+    this.handlePayloadStatusCode(node, msg)
+  }
   switch (msg.readtype) {
-    case 'AllAttributes':
-      this.handlePayloadStatusCode(node, msg) // TODO: do more
-      break
-    case 'VariableValue':
-      this.handlePayloadStatusCode(node, msg) // TODO: do less
-      break
     case 'Meta':
       this.setNodeStatus([this.NONE, this.NONE, this.NONE], 'None')
       break
+    case 'AllAttributes':
+      break
+    case 'VariableValue':
+      break
+    case 'HistoryValue':
+      msg.payload.forEach(item => {
+        delete item['statusCode']
+      })
+      break
     default:
-      this.handlePayloadStatusCode(node, msg) // TODO: do default
       break
   }
 }

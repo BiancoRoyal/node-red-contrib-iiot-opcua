@@ -59,7 +59,8 @@ module.exports = function (RED) {
       }
     }
 
-    node.readFromSession = function (session, itemsToRead, msg) {
+    node.readFromSession = function (session, itemsToRead, originMsg) {
+      let msg = Object.assign({}, originMsg)
       if (coreClient.core.checkSessionNotValid(session, 'Reader')) {
         return
       }
@@ -67,46 +68,49 @@ module.exports = function (RED) {
       coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
 
       switch (parseInt(node.attributeId)) {
-        case 0:
-          coreClient.readAllAttributes(session, itemsToRead).then(function (readResult) {
+        case coreClient.READ_TYPE.ALL:
+          coreClient.readAllAttributes(session, itemsToRead, msg).then(function (readResult) {
             try {
-              node.send(node.buildResultMessage(msg, 'AllAttributes', readResult))
+              node.send(node.buildResultMessage('AllAttributes', readResult))
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleReadError(err, readResult.msg)
             }
           }).catch(function (err) {
             node.handleReadError(err, msg)
           })
           break
-        case 13:
-          coreClient.readVariableValue(session, itemsToRead).then(function (readResult) {
+        case coreClient.READ_TYPE.VALUE:
+          coreClient.readVariableValue(session, itemsToRead, msg).then(function (readResult) {
             try {
-              let message = node.buildResultMessage(msg, 'VariableValue', readResult)
+              let message = node.buildResultMessage('VariableValue', readResult)
               node.send(message)
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleReadError(err, readResult.msg)
             }
           }).catch(function (err) {
             node.handleReadError(err, msg)
           })
           break
-        case 130:
-          let startDate = new Date()
+        case coreClient.READ_TYPE.HISTORY:
+          const startDate = new Date()
           node.historyStart = new Date()
-          node.historyStart.setDate(startDate - node.historyDays)
+          node.historyStart.setDate(startDate.getDate() - node.historyDays)
           node.historyEnd = new Date()
 
-          coreClient.readHistoryValue(session, itemsToRead,
+          coreClient.readHistoryValue(
+            session,
+            itemsToRead,
             msg.payload.historyStart || node.historyStart,
-            msg.payload.historyEnd || node.historyEnd)
+            msg.payload.historyEnd || node.historyEnd,
+            msg)
             .then(function (readResult) {
               try {
-                let message = node.buildResultMessage(msg, 'HistoryValue', readResult)
-                message.historyStart = node.historyStart
-                message.historyEnd = node.historyEnd
+                let message = node.buildResultMessage('HistoryValue', readResult)
+                message.historyStart = readResult.startDate || node.historyStart
+                message.historyEnd = readResult.endDate || node.historyEnd
                 node.send(message)
               } catch (err) {
-                node.handleReadError(err, msg)
+                node.handleReadError(err, readResult.msg)
               }
             }).catch(function (err) {
               node.handleReadError(err, msg)
@@ -125,13 +129,13 @@ module.exports = function (RED) {
             transformedItemsToRead.push(transformedItem)
           }
 
-          coreClient.read(session, transformedItemsToRead, node.maxAge).then(function (readResult) {
+          coreClient.read(session, transformedItemsToRead, node.maxAge, msg).then(function (readResult) {
             try {
-              let message = node.buildResultMessage(msg, 'Default', readResult)
+              let message = node.buildResultMessage('Default', readResult)
               message.maxAge = node.maxAge
               node.send(message)
             } catch (err) {
-              node.handleReadError(err, msg)
+              node.handleReadError(err, readResult.msg)
             }
           }).catch(function (err) {
             node.handleReadError(err, msg)
@@ -139,8 +143,8 @@ module.exports = function (RED) {
       }
     }
 
-    node.buildResultMessage = function (msg, readType, readResult) {
-      let message = msg
+    node.buildResultMessage = function (readType, readResult) {
+      let message = readResult.msg
       message.payload = {}
       message.nodetype = 'read'
       message.readtype = readType
@@ -158,13 +162,14 @@ module.exports = function (RED) {
       } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
-          node.error(err, msg)
+          node.error(err, readResult.msg)
         }
 
         message.payload = dataValuesString
         message.error = err.message
       }
 
+      message.justValue = node.justValue
       if (!node.justValue) {
         try {
           message.resultsConverted = {}
@@ -173,7 +178,7 @@ module.exports = function (RED) {
         } catch (err) {
           if (node.showErrors) {
             node.warn('JSON not to parse from string for dataValues type ' + readResult.results)
-            node.error(err, msg)
+            node.error(err, readResult.msg)
           }
 
           message.resultsConverted = null

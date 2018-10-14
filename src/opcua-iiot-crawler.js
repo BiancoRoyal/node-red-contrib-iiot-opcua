@@ -95,7 +95,6 @@ module.exports = function (RED) {
               filterValue = item[element.name].text
               break
             case 'value':
-            case 'dataType':
               if (item.value && item.value.hasOwnProperty('value')) {
                 filterValue = item.value[element.name]
               } else {

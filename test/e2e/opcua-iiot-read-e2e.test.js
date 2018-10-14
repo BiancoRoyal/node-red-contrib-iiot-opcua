@@ -10,7 +10,9 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(12000)
+
+var functionNode = require('node-red/nodes/core/core/80-function')
 
 // iiot opcua
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -22,7 +24,7 @@ var serverNode = require('../../src/opcua-iiot-server')
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var readNodesToLoad = [injectNode, connectorNode, inputNode, responseNode, serverNode]
+var readNodesToLoad = [injectNode, functionNode, connectorNode, inputNode, responseNode, serverNode]
 
 var testReadFlow = [
   {
@@ -66,6 +68,7 @@ var testReadFlow = [
     'id': 'n5rdf1',
     'type': 'OPCUA-IIoT-Response',
     'name': 'TestResponse',
+    'compressedStruct': false,
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [['n6rdf1']]
@@ -119,6 +122,178 @@ var testReadFlow = [
   }
 ]
 
+var testReadHistoryRangeFlow = [
+  {
+    'id': 'b6e5bc66.864128',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'read',
+    'payload': '{"historyStart":0,"historyEnd":0}',
+    'payloadType': 'json',
+    'topic': 'TestTopicRead1',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '2.4',
+    'name': '',
+    'addressSpaceItems': [
+      {
+        'name': '',
+        'nodeId': 'ns=1;s=free_memory',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        'ed779eb9.7b89'
+      ]
+    ]
+  },
+  {
+    'id': '5ab9594f.f9358',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'read',
+    'payload': '{"historyStart":0,"historyEnd":0}',
+    'payloadType': 'json',
+    'topic': 'TestTopicRead2',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '4.4',
+    'name': '',
+    'addressSpaceItems': [
+      {
+        'name': '',
+        'nodeId': 'ns=1;s=free_memory',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        'cb36ad39.f475b8'
+      ]
+    ]
+  },
+  {
+    'id': 'cb36ad39.f475b8',
+    'type': 'function',
+    'name': '',
+    'func': 'let startDate = new Date()\nlet historyStart = new Date()\nhistoryStart.setDate(startDate.getDate() - 2)\nlet historyEnd = new Date()\n\nmsg.payload.historyStart = historyStart\nmsg.payload.historyEnd = historyEnd\n\nreturn msg;',
+    'outputs': 1,
+    'noerr': 0,
+    'wires': [
+      [
+        'ed779eb9.7b89'
+      ]
+    ]
+  },
+  {
+    'id': 'ed779eb9.7b89',
+    'type': 'OPCUA-IIoT-Read',
+    'attributeId': '130',
+    'maxAge': 1,
+    'depth': 1,
+    'connector': 'ef9763f4.0e6728',
+    'name': 'Read History',
+    'justValue': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'parseStrings': false,
+    'historyDays': '',
+    'wires': [
+      [
+        '37d1d8fb.5f4908',
+        'dd2554f4.e88bd8'
+      ]
+    ]
+  },
+  {
+    'id': '37d1d8fb.5f4908',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        'nr1h'
+      ]
+    ]
+  },
+  {id: 'nr1h', type: 'helper'},
+  {
+    'id': 'dd2554f4.e88bd8',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': false,
+    'filters': [],
+    'wires': [
+      [
+        'nr2h'
+      ]
+    ]
+  },
+  {id: 'nr2h', type: 'helper'},
+  {
+    'id': 'ef9763f4.0e6728',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:5603/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': '',
+    'connectionStartDelay': '',
+    'reconnectDelay': ''
+  },
+  {
+    'id': '920108b3.753a68',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '5603',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': true,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': '1',
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'wires': [
+      [
+        'c52df7cd.518078'
+      ]
+    ]
+  }
+]
+
 describe('OPC UA Read node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -139,11 +314,8 @@ describe('OPC UA Read node e2e Testing', function () {
   })
 
   describe('Read node', function () {
-    let attributeId = ''
-
     it('should get a message with payload for attributeId All', function (done) {
-      attributeId = 0
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 0
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', function (msg) {
@@ -159,36 +331,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId All', function (done) {
-      attributeId = 0
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 0
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', function (msg) {
           expect(msg.payload[0].nodeId).toBe('ns=0;i=2256')
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(0)
           done()
         })
       })
     })
 
-    it('should have read results with response for attributeId ' + attributeId, function (done) {
-      attributeId = 0
-      testReadFlow[2].attributeId = attributeId
+    it('should have read results with response for attributeId 0', function (done) {
+      testReadFlow[2].attributeId = 0
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(0)
           done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Node-ID', function (done) {
-      attributeId = 1
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 1
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', function (msg) {
@@ -204,36 +373,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Node-ID', function (done) {
-      attributeId = 1
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 1
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', function (msg) {
           expect(msg.payload[0].value).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(1)
           done()
         })
       })
     })
 
     it('should have read results with response for attributeId Node-ID', function (done) {
-      attributeId = 1
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 1
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(1)
           done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Node-Class', function (done) {
-      attributeId = 2
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 2
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', function (msg) {
@@ -249,36 +415,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Node-Class', function (done) {
-      attributeId = 2
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 2
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', function (msg) {
           expect(msg.payload[0].value).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(2)
           done()
         })
       })
     })
 
     it('should have read results with response for attributeId Node-Class', function (done) {
-      attributeId = 2
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 2
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(2)
           done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Browse-Name', function (done) {
-      attributeId = 3
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 3
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', function (msg) {
@@ -294,36 +457,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Browse-Name', function (done) {
-      attributeId = 3
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 3
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', function (msg) {
           expect(msg.payload[0].value).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(3)
           done()
         })
       })
     })
 
     it('should have read results with response for attributeId Browse-Name', function (done) {
-      attributeId = 3
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 3
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(3)
           done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Display-Name', function (done) {
-      attributeId = 4
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 4
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', function (msg) {
@@ -339,36 +499,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Display-Name', function (done) {
-      attributeId = 4
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 4
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', function (msg) {
           expect(msg.payload[0].value).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(4)
           done()
         })
       })
     })
 
     it('should have read results with response for attributeId Display-Name', function (done) {
-      attributeId = 4
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 4
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(4)
           done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Value', function (done) {
-      attributeId = 13
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 13
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', function (msg) {
@@ -384,36 +541,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Value', function (done) {
-      attributeId = 13
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 13
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', function (msg) {
           expect(msg.payload[0].value).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(13)
           done()
         })
       })
     })
 
     it('should have read results with response for attributeId Value', function (done) {
-      attributeId = 13
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 13
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.attributeId).toBe(13)
           done()
         })
       })
     })
 
     it('should get a message with payload for attributeId History', function (done) {
-      attributeId = 130
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 130
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', function (msg) {
@@ -429,28 +583,86 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId History', function (done) {
-      attributeId = 130
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 130
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.payload[0]).toBeDefined()
+          expect(msg.historyStart).toBeDefined()
+          expect(msg.historyEnd).toBeDefined()
+          expect(msg.attributeId).toBe(130)
           done()
         })
       })
     })
 
     it('should have read results with response for attributeId History', function (done) {
-      attributeId = 130
-      testReadFlow[2].attributeId = attributeId
+      testReadFlow[2].attributeId = 130
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([0, 1, 0])
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.attributeId).toBe(attributeId)
+          expect(msg.readtype).toBe('HistoryValue')
+          expect(msg.historyStart).toBeDefined()
+          expect(msg.historyEnd).toBeDefined()
+          expect(msg.attributeId).toBe(130)
           done()
+        })
+      })
+    })
+
+    it('should have read with an injected time range results with response for attributeId History', function (done) {
+      helper.load(readNodesToLoad, testReadHistoryRangeFlow, function () {
+        let msgCounter = 0
+        let n1 = helper.getNode('nr1h')
+        n1.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.entryStatus).toMatchObject([1, 0, 0])
+            expect(msg.topic).toBe('TestTopicRead1')
+            expect(msg.readtype).toBe('HistoryValue')
+            expect(msg.historyStart).toBeDefined()
+            expect(msg.historyEnd).toBeDefined()
+            expect(msg.attributeId).toBe(130)
+          }
+
+          if (msgCounter === 2) {
+            expect(msg.entryStatus).toMatchObject([1, 0, 0])
+            expect(msg.topic).toBe('TestTopicRead2')
+            expect(msg.readtype).toBe('HistoryValue')
+            expect(msg.historyStart).toBeDefined()
+            expect(msg.historyEnd).toBeDefined()
+            expect(msg.attributeId).toBe(130)
+            done()
+          }
+        })
+      })
+    })
+
+    it('should have read with an injected time range results with compressed response for attributeId History', function (done) {
+      helper.load(readNodesToLoad, testReadHistoryRangeFlow, function () {
+        let msgCounter = 0
+        let n2 = helper.getNode('nr2h')
+        n2.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.entryStatus).toBeUndefined()
+            expect(msg.topic).toBe('TestTopicRead1')
+            expect(msg.historyStart).toBeDefined()
+            expect(msg.historyEnd).toBeDefined()
+            expect(msg.attributeId).toBeUndefined()
+          }
+
+          if (msgCounter === 2) {
+            expect(msg.entryStatus).toBeUndefined()
+            expect(msg.topic).toBe('TestTopicRead2')
+            expect(msg.historyStart).toBeDefined()
+            expect(msg.historyEnd).toBeDefined()
+            expect(msg.attributeId).toBeUndefined()
+            done()
+          }
         })
       })
     })

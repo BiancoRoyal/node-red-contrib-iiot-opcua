@@ -91,7 +91,7 @@ module.exports = function (RED) {
 
         let result = null
         let outputArguments = []
-        let message = data.msg
+        let message = Object.assign({}, data.msg)
         message.nodetype = 'method'
         message.methodType = data.msg.methodType
 

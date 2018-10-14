@@ -64,7 +64,7 @@
   "scripts": {
     "test": "jest",
     "upload-coverage": "cat ./jcoverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4",
-    "coverage": "standard --fix && gulp build && npm test && rm -rf ./jcoverage && jest --coverage",
+    "coverage": "standard --fix && gulp build && npm test && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --testPathPattern=suite",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "standard --fix && npm run build && npm test && mocha test --recursive --timeout 10000 --reporter dot",
     "ci-publish": "ci-publish",
