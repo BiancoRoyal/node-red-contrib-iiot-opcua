@@ -400,6 +400,92 @@ var testCrawlerJustValueSingleFilteredFlow = [
 
 let testCrawlerWithFilter = [
   {
+    'id': '61167469.38921c',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'inject',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '2.6',
+    'name': 'inject',
+    'addressSpaceItems': [
+      {
+        'name': '',
+        'nodeId': 'i=85',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        '9a7df98e.660e68'
+      ]
+    ]
+  },
+  {
+    'id': '9a7df98e.660e68',
+    'type': 'OPCUA-IIoT-Crawler',
+    'connector': '71a3171a.97466',
+    'name': '',
+    'justValue': true,
+    'singleResult': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': true,
+    'filters': [
+      {
+        'name': 'nodeClass',
+        'value': 'Method'
+      },
+      {
+        'name': 'nodeClass',
+        'value': 'ObjectType*'
+      },
+      {
+        'name': 'typeDefinition',
+        'value': 'ns=0;i=58'
+      },
+      {
+        'name': 'nodeId',
+        'value': 'ns=0;*'
+      }
+    ],
+    'delayPerMessage': '0.5',
+    'wires': [
+      [
+        'h1ff'
+      ]
+    ]
+  },
+  {id: 'h1ff', type: 'helper'},
+  {
+    'id': '71a3171a.97466',
+    'type': 'OPCUA-IIoT-Connector',
+    'z': '',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:5388',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'Basic256',
+    'securityMode': 'SIGN',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': '',
+    'connectionStartDelay': '',
+    'reconnectDelay': ''
+  },
+  {
     'id': '88f582a2.3b9028',
     'type': 'OPCUA-IIoT-Server',
     'port': '5388',
@@ -426,97 +512,6 @@ let testCrawlerWithFilter = [
     'maxNodesPerRead': 6000,
     'maxNodesPerBrowse': 6000,
     'wires': [ [ ] ]
-  },
-  {
-    'id': '7ca9c103.e1cec8',
-    'type': 'OPCUA-IIoT-Crawler',
-    'connector': 'b8172133.6e8a1',
-    'name': '',
-    'justValue': true,
-    'singleResult': true,
-    'showStatusActivities': true,
-    'showErrors': false,
-    'filters': [
-      {
-        'name': 'dataType',
-        'value': 'ObjectType'
-      },
-      {
-        'name': 'nodeClass',
-        'value': 'Object*'
-      },
-      {
-        'name': 'nodeClass',
-        'value': 'Method'
-      },
-      {
-        'name': 'nodeClass',
-        'value': 'Base.*'
-      },
-      {
-        'name': 'dataType',
-        'value': 'ns=0;i=12'
-      },
-      {
-        'name': 'browseName',
-        'value': 'Array'
-      }
-    ],
-    'wires': [
-      [
-        'h1f'
-      ]
-    ]
-  },
-  {id: 'h1f', type: 'helper'},
-  {
-    'id': '70c2f78b.a928a8',
-    'type': 'OPCUA-IIoT-Inject',
-    'z': '2c480163.82dc16',
-    'injectType': 'inject',
-    'payload': '',
-    'payloadType': 'date',
-    'topic': '',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'startDelay': '2.4',
-    'name': '',
-    'addressSpaceItems': [
-      {
-        'name': '',
-        'nodeId': 'i=85',
-        'datatypeName': ''
-      }
-    ],
-    'wires': [
-      [
-        '7ca9c103.e1cec8'
-      ]
-    ]
-  },
-  {
-    'id': 'b8172133.6e8a1',
-    'type': 'OPCUA-IIoT-Connector',
-    'z': '2c480163.82dc16',
-    'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:5388/',
-    'keepSessionAlive': false,
-    'loginEnabled': false,
-    'securityPolicy': 'None',
-    'securityMode': 'NONE',
-    'name': 'LOCAL SERVER',
-    'showErrors': true,
-    'publicCertificateFile': '',
-    'privateKeyFile': '',
-    'defaultSecureTokenLifetime': '',
-    'endpointMustExist': false,
-    'autoSelectRightEndpoint': false,
-    'strategyMaxRetry': '',
-    'strategyInitialDelay': '',
-    'strategyMaxDelay': '',
-    'strategyRandomisationFactor': '',
-    'requestedSessionTimeout': ''
   }
 ]
 
@@ -860,7 +855,7 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify filtered crawler items as filtered results', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerWithFilter, function () {
-        let h1f = helper.getNode('h1f')
+        let h1f = helper.getNode('h1ff')
         h1f.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBeUndefined()
