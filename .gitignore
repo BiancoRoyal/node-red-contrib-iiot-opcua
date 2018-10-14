@@ -12,3 +12,5 @@ coverage/
 pki/
 
 \.vscode/
+
+jcoverage/
