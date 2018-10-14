@@ -196,6 +196,14 @@
  <p>The input could be empty or should hold addressSpaceItems (Array of objects) to browse for.
  A datatype is not required here - it just requires the nodeId in the addressSpaceItems objects here.</p>
 
+ <p>With the single result option you get less msg objects from the Browser node.
+ The delay per msg option helps to get some time between every msg outputs.</p>
+
+ <h3>Recursive Browse</h3>
+ <p>Sometime you need to browse into structure and the crawler gets too much data.
+ In that case you could try to work with the recursive browse if the server allows that operation.
+ It does not work in any case, but it helps to build some better results for you.</p>
+
  <h3>Output</h3>
 
  <p>The output returns either a structured JSON object with the
@@ -207,23 +215,28 @@
     <ul>
         <li>payload (value)
             <ul>
-                <li>browserItems (Array of Objects)
-                <li>browserItemsCount
-                <li>browseTopic (Browser root to browse)
-                <li>endpoint
-                <li>session
+                <li>rootNodeId
+                <li>browserResults (Array of Objects)
+                <li>browserResultsCount
+                <li>recursiveBrowse
+                <li>recursiveDepth
+                <li>recursiveDepthMax
+                <li>listenerParameters
+                <li>browseTopic (node browse root)
+                <li>addressSpaceItems (input)
             </ul>
+        <li>justValue
         <li>topic
         <li>nodetype (browse)
         <li>injectType (inject)
         <li>addressSpaceItems (Array of Objects to browse)
         <li>optional
         <ul>
-            <li>nodesToRead (Array of String resluts)
+            <li>nodesToRead (Array of String resluts to read)
             <li>nodesToReadCount
-            <li>addressItemsToRead (Array of Object results)
+            <li>addressItemsToRead (Array of Object results to listen)
             <li>addressItemsToReadCount
-            <li>addressItemsToBrowse (Array of Object results)
+            <li>addressItemsToBrowse (Array of Object results to browse)
             <li>addressItemsToBrowseCount
         </ul>
     </ul>

@@ -873,7 +873,7 @@
             requestedMaxKeepAliveCount: 10,
             maxNotificationsPerPublish: 4,
             publishingEnabled: true,
-            priority: 1
+            priority: 3
         }
         </pre>
 
@@ -885,7 +885,7 @@
             requestedMaxKeepAliveCount: 12,
             maxNotificationsPerPublish: 100,
             publishingEnabled: true,
-            priority: 10
+            priority: 6
         }
         </pre>
     </div>
@@ -908,15 +908,28 @@
 
     <h3>Tab OPC UA Items</h3>
 
-    <strong>Name</strong>
-    <p>Name in the flow of Node-RED.</p>
+    <strong>Name (optional)</strong>
+    <p>A short human readable name for long or numeric nodeId's.</p>
 
-    <strong>Node-Id</strong>
+    <strong>Node-Id (mandatory)</strong>
     <p>The Node-Id has to be an OPC UA valid Node-Id like ns=0;i=85 (root->Objects)</p>
     <p>You can use our Browser node for OPC UA to find the correct Node-Id.</p>
 
-    <strong>Data Type</strong>
+    <strong>Data Type (mandatory/optional)</strong>
     <p>The Data Type setting is needed to do the converts of the node-opcua Variant type result(s).</p>
+    <p>It is mandatory to write data otherwise it is optional!</p>
     <p>In best practice do transformations with the Result Filter node.</p>
+
+    <div>
+        <strong>Content of an inject:</strong>
+
+        <ul>
+            <li>payload (value or options for listener)
+            <li>topic
+            <li>nodetype (inject, read, write, listen)
+            <li>injectType (inject)
+            <li>addressSpaceItems (Array of nodeId's)
+        </ul>
+     </div>
 
 </script>

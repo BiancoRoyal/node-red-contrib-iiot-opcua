@@ -67,7 +67,14 @@
     All write requests will produce an array of StatusCodes for writing
     in amount as applied for and responded.</p>
 
-    <p>It needs a <pre>msg.valuesToWrite</pre> to write values and datatypeName in the addressSpaceItems object is required.</p>
+    <p>It needs a <pre>msg.valuesToWrite</pre> to write values and datatypeName in the addressSpaceItems objects is required.</p>
+
+    <p>Every entry in the addressSpaceItems corresponding to each array place in msg.valuesToWrite.
+    That means addressSpaceItem[0] will write the data from msg.valuesToWrite[0]!</p>
+
+    <p>It is important to have the injectType write in the msg object!
+    That is to protect your flow in event based flows.</p>
+
 
     <h3>Input</h3>
 

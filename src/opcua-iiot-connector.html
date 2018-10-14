@@ -22,8 +22,8 @@
       publicCertificateFile: {value: ''},
       privateKeyFile: {value: ''},
       defaultSecureTokenLifetime: {value: ''},
-      endpointMustExist: {value: true},
-      autoSelectRightEndpoint: {value: true},
+      endpointMustExist: {value: false},
+      autoSelectRightEndpoint: {value: false},
       strategyMaxRetry: {value: ''},
       strategyInitialDelay: {value: ''},
       strategyMaxDelay: {value: ''},
@@ -324,15 +324,9 @@
     <h2>OPC UA IIoT Connector</h2>
 
     <p>The Connector is a pure configuration node and starts connecting
-    to the OPC UA server with an OPC UA client instantly after 'Deploy' or start/restart.
-    Please, keep in mind that the Connector node will work if it is unused
-    and open a connection to the endpoint, too.</p>
+    to the OPC UA server with an OPC UA client instantly after 'Deploy' or start/restart.</p>
 
-    <p>The best practice here
-    is to delete unused Connectors or connect each Connector
-    with the flow where it lives. That binding with the flow is to find in
-    the right bottom corner of the Connectors configuration view.
-    The default is 'On all flows' -
+    <p>The default for config nodes is 'On all flows' -
     set it to the flow to get all deleted if you delete the flow.</p>
 
     <p>The Connector is one connection to your OPC UA server, which handles the session.
@@ -352,7 +346,7 @@
 
     <strong>Endpoint</strong>
     <p>The endpoint address (URI) to the OPC UA server like opc.tcp://localhost:55388/ or opc.tcp://mypcname.local:55388/</p>
-    <p>The endpoint must exist as named if that option is activated.</p>
+    <p>The endpoint must exist as named if that option is activated. That gives you more integrity in connecting devices.</p>
 
     <p>Auto selecting for the right endpoint is optional and tries to find the correct endpoint to your security settings.</p>
 
@@ -393,6 +387,8 @@
     Otherwise you get pre installed keys from node-opcua for secured communication.
     </p>
 
+    <p>You could set up your own certificate and private key files. This is optional.</p>
+
     <p>With None/NONE mode the keys are not in use.</p>
 
     <h3>User Login</h3>
@@ -402,4 +398,8 @@
     <p>Name in the selection of the endpoint configuration.</p>
 
     <p>Set showErrors to get errors from node-opcua on browse.</p>
+
+    <h3>Strategy</h3>
+
+    <p>The strategy is based on the node-opcua API strategy parameters.</p>
 </script>

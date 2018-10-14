@@ -521,13 +521,29 @@
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Server">
     <h2>OPC UA IIoT Server</h2>
 
-    <p>The Server node is an OPC UA server with a small information model.
+    <p>The Server node is an OPC UA server with a simple optional information model (ASO Demo).
     The address space is to expand with the ASO nodes and commands are to send by the Command nodes.</p>
 
     <p>Default enpoint: opc.tcp://localhost:55388</p>
     <p>Named enpoint: opc.tcp://localhost:55388/UA/NodeREDIIoTServer</p>
     <p>Default discovery: opc.tcp://localhost:4840/UADiscovery</p>
     <p>all discovery: opc.tcp://localhost:4840/</p>
+
+    <h3>Options</h3>
+    <p>If you need more information about all options read the node-opcua API, please!</p>
+
+    <h3>Certificates</h3>
+    <p>The server provides simple NodeOPCUA demo certificates and private keys.</p>
+    <p>You could set up your own certificate and private key files. This is optional.</p>
+
+    <h3>User</h3>
+    <p>The user list is to set up users to the server. It is stored with Node-RED credentials best practice.</p>
+
+    <h3>XML NodeSets</h3>
+    <p>That is static for now to add ISA95, DI, and Auto-ID to a server via XML NodeSet.</p>
+
+    <h3>Discovery</h3>
+    <p>That gives you access to the servers discovery node-opcua parameters.</p>
 
     <p>Set showErrors to get errors from node-opcua on browse.</p>
 </script>
