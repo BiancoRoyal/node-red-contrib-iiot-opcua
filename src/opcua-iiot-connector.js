@@ -248,7 +248,7 @@ module.exports = function (RED) {
       discoverClient.connect(node.endpoint).then(function () {
         coreConnector.internalDebugLog('Auto Searching Endpoint Connected To ' + node.endpoint)
 
-        discoverClient.getEndpointsRequest(function (err, endpoints) {
+        discoverClient.getEndpoints(function (err, endpoints) {
           if (err) {
             coreConnector.internalDebugLog('Auto Switch To Endpoint Error ' + err)
             if (node.showErrors) {
@@ -650,7 +650,7 @@ module.exports = function (RED) {
         let discoveryClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
         discoveryClient.connect(endpointUrlRequest).then(function () {
           coreConnector.internalDebugLog('Get Endpoints Connected For Request')
-          discoveryClient.getEndpointsRequest(function (err, endpoints) {
+          discoveryClient.getEndpoints(function (err, endpoints) {
             if (err) {
               if (node.showErrors) {
                 node.error(err, {payload: ''})
