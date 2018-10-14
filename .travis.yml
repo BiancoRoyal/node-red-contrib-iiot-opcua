@@ -14,9 +14,8 @@ install:
   - npm install -g gulp-cli
   - npm install -g jest
 script:
-  - npm test
   - npm run coverage
-  - gulp publish
+  - npm run upload-coverage
 cache:
   directories:
     - "node_modules"
