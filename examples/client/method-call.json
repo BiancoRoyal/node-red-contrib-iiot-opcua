@@ -1,28 +1,28 @@
 [
   {
-    "id": "9c219518.7222e",
+    "id": "ed0da469.d78f18",
     "type": "tab",
     "label": "IIoT OPC UA Method Call",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "820e43cb.337528",
+    "id": "ad7873eb.84275",
     "type": "debug",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
     "active": true,
     "console": "false",
     "complete": "true",
     "x": 790,
-    "y": 60,
+    "y": 400,
     "wires": []
   },
   {
-    "id": "aab1ba8.592dec8",
+    "id": "792a4566.c069cc",
     "type": "OPCUA-IIoT-Method-Caller",
-    "z": "9c219518.7222e",
-    "connector": "a2d881ba.427328",
+    "z": "ed0da469.d78f18",
+    "connector": "ef9763f4.0e6728",
     "objectId": "ns=1;i=1234",
     "methodId": "ns=1;i=12345",
     "methodType": "basic",
@@ -43,49 +43,52 @@
         "value": "6"
       }
     ],
-    "x": 600,
+    "x": 580,
     "y": 140,
     "wires": [
       [
-        "820e43cb.337528",
-        "ac807356.d5e918",
-        "bdee6439.38228",
-        "d1b1640f.035f78"
+        "ad7873eb.84275",
+        "d8cb9628.a38078",
+        "e30802f.63cc88",
+        "da3a6e75.7067f"
       ]
     ]
   },
   {
-    "id": "ac807356.d5e918",
+    "id": "d8cb9628.a38078",
     "type": "OPCUA-IIoT-Response",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
+    "compressStructure": false,
     "showStatusActivities": false,
     "showErrors": false,
+    "activateFilters": false,
+    "filters": [],
     "x": 800,
-    "y": 180,
+    "y": 140,
     "wires": [
       [
-        "53f22377.3a7284",
-        "27b65085.8fc858"
+        "b1c6bffe.0f7ed8",
+        "5bef87dc.3295b8"
       ]
     ]
   },
   {
-    "id": "53f22377.3a7284",
+    "id": "b1c6bffe.0f7ed8",
     "type": "debug",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
-    "active": false,
+    "active": true,
     "console": "false",
     "complete": "true",
-    "x": 950,
+    "x": 990,
     "y": 180,
     "wires": []
   },
   {
-    "id": "e3d199b8.0c9918",
+    "id": "e45be1cf.2a2348",
     "type": "OPCUA-IIoT-Inject",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -100,14 +103,14 @@
     "y": 140,
     "wires": [
       [
-        "aab1ba8.592dec8"
+        "792a4566.c069cc"
       ]
     ]
   },
   {
-    "id": "de49723b.01124",
+    "id": "32b85709.1420d",
     "type": "inject",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
     "topic": "",
     "payload": "",
@@ -119,14 +122,14 @@
     "y": 200,
     "wires": [
       [
-        "946d18cc.748e"
+        "80c8f5c.46bf208"
       ]
     ]
   },
   {
-    "id": "946d18cc.748e",
+    "id": "80c8f5c.46bf208",
     "type": "function",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "bark 6 times with volume 12",
     "func": "msg.payload = {\n    objectId: 'ns=1;i=1234',\n    methodId: 'ns=1;i=12345',\n    inputArguments: [\n        {name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    methodType: 'basic'\n}\nreturn msg;",
     "outputs": 1,
@@ -135,14 +138,14 @@
     "y": 200,
     "wires": [
       [
-        "aab1ba8.592dec8"
+        "792a4566.c069cc"
       ]
     ]
   },
   {
-    "id": "a4708d29.7a2548",
+    "id": "40a31169.9bab48",
     "type": "comment",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "Information",
     "info": "If you have none OPC UA server on other tabs, \nplease drag&drop an OPC UA Server \nfrom the package nodes on this tab!",
     "x": 130,
@@ -150,94 +153,101 @@
     "wires": []
   },
   {
-    "id": "bdee6439.38228",
+    "id": "e30802f.63cc88",
     "type": "OPCUA-IIoT-Response",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
     "showErrors": false,
     "activateFilters": false,
     "filters": [],
-    "x": 800,
-    "y": 260,
+    "x": 810,
+    "y": 200,
     "wires": [
       [
-        "fffda84a.96c2c",
-        "b08141d4.51cdf8"
+        "14904fd.cde223",
+        "3dc02261.99d816"
       ]
     ]
   },
   {
-    "id": "fffda84a.96c2c",
+    "id": "14904fd.cde223",
     "type": "debug",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
-    "active": false,
+    "active": true,
     "console": "false",
     "complete": "true",
-    "x": 950,
+    "x": 990,
     "y": 260,
     "wires": []
   },
   {
-    "id": "d1b1640f.035f78",
+    "id": "da3a6e75.7067f",
     "type": "debug",
-    "z": "9c219518.7222e",
-    "name": "",
-    "active": false,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "payload",
-    "x": 810,
-    "y": 100,
-    "wires": []
-  },
-  {
-    "id": "27b65085.8fc858",
-    "type": "debug",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
     "active": true,
     "tosidebar": true,
     "console": false,
     "tostatus": false,
     "complete": "payload",
-    "x": 970,
+    "x": 790,
+    "y": 360,
+    "wires": []
+  },
+  {
+    "id": "5bef87dc.3295b8",
+    "type": "debug",
+    "z": "ed0da469.d78f18",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 1010,
     "y": 140,
     "wires": []
   },
   {
-    "id": "b08141d4.51cdf8",
+    "id": "3dc02261.99d816",
     "type": "debug",
-    "z": "9c219518.7222e",
+    "z": "ed0da469.d78f18",
     "name": "",
     "active": true,
     "tosidebar": true,
     "console": false,
     "tostatus": false,
     "complete": "payload",
-    "x": 970,
+    "x": 1010,
     "y": 220,
     "wires": []
   },
   {
-    "id": "a2d881ba.427328",
+    "id": "ef9763f4.0e6728",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:55388/",
+    "endpoint": "opc.tcp://innoreactor.local:55388/UA/NodeREDIIoTServer",
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityPolicy": "Basic256",
+    "securityMode": "SIGN",
     "name": "LOCAL DEMO SERVER",
     "showErrors": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": "",
+    "requestedSessionTimeout": "",
+    "connectionStartDelay": "",
+    "reconnectDelay": ""
   }
 ]

@@ -1,0 +1,234 @@
+[
+  {
+    "id": "9398cadc.ff083",
+    "type": "tab",
+    "label": "OPC UA IIoT Crawler",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "23fcf6d.13b5d8a",
+    "type": "OPCUA-IIoT-Crawler",
+    "z": "9398cadc.ff083",
+    "connector": "ef9763f4.0e6728",
+    "name": "",
+    "justValue": true,
+    "singleResult": false,
+    "showStatusActivities": true,
+    "showErrors": false,
+    "activateFilters": true,
+    "filters": [
+      {
+        "name": "nodeClass",
+        "value": "Method"
+      },
+      {
+        "name": "nodeClass",
+        "value": "ObjectType*"
+      },
+      {
+        "name": "typeDefinition",
+        "value": "ns=0;i=58"
+      },
+      {
+        "name": "nodeId",
+        "value": "ns=0;*"
+      }
+    ],
+    "delayPerMessage": "0.5",
+    "x": 300,
+    "y": 100,
+    "wires": [
+      [
+        "21684708.36ef"
+      ]
+    ]
+  },
+  {
+    "id": "21684708.36ef",
+    "type": "debug",
+    "z": "9398cadc.ff083",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 470,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "bb36ac76.436a7",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "9398cadc.ff083",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "inject",
+    "addressSpaceItems": [
+      {
+        "name": "",
+        "nodeId": "ns=1;i=1001",
+        "datatypeName": ""
+      }
+    ],
+    "x": 150,
+    "y": 100,
+    "wires": [
+      [
+        "23fcf6d.13b5d8a"
+      ]
+    ]
+  },
+  {
+    "id": "add50513.726488",
+    "type": "catch",
+    "z": "9398cadc.ff083",
+    "name": "",
+    "scope": null,
+    "x": 860,
+    "y": 60,
+    "wires": [
+      [
+        "78e09232.affe14"
+      ]
+    ]
+  },
+  {
+    "id": "78e09232.affe14",
+    "type": "debug",
+    "z": "9398cadc.ff083",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 1010,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "99b6cc9a.be7568",
+    "type": "OPCUA-IIoT-Crawler",
+    "z": "9398cadc.ff083",
+    "connector": "ef9763f4.0e6728",
+    "name": "",
+    "justValue": false,
+    "singleResult": true,
+    "showStatusActivities": true,
+    "showErrors": false,
+    "activateFilters": true,
+    "filters": [
+      {
+        "name": "nodeClass",
+        "value": "Method"
+      },
+      {
+        "name": "nodeId",
+        "value": "ns=0;*"
+      },
+      {
+        "name": "browseName",
+        "value": "PumpSpeed"
+      },
+      {
+        "name": "dataType",
+        "value": "ns=0;i=21"
+      },
+      {
+        "name": "browseName",
+        "value": "BiancoRoyal"
+      },
+      {
+        "name": "dataValue",
+        "value": "100"
+      },
+      {
+        "name": "typeDefinition",
+        "value": "ns=0;i=68"
+      }
+    ],
+    "delayPerMessage": "1",
+    "x": 300,
+    "y": 180,
+    "wires": [
+      [
+        "96a352e7.b46148"
+      ]
+    ]
+  },
+  {
+    "id": "848ce5aa.9991d",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "9398cadc.ff083",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "correct",
+    "addressSpaceItems": [
+      {
+        "name": "",
+        "nodeId": "ns=1;i=1234",
+        "datatypeName": ""
+      }
+    ],
+    "x": 150,
+    "y": 180,
+    "wires": [
+      [
+        "99b6cc9a.be7568"
+      ]
+    ]
+  },
+  {
+    "id": "96a352e7.b46148",
+    "type": "debug",
+    "z": "9398cadc.ff083",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 470,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "ef9763f4.0e6728",
+    "type": "OPCUA-IIoT-Connector",
+    "z": "",
+    "discoveryUrl": "",
+    "endpoint": "opc.tcp://innoreactor.local:55389/UA/NodeREDIIoTServer",
+    "keepSessionAlive": true,
+    "loginEnabled": false,
+    "securityPolicy": "Basic256",
+    "securityMode": "SIGN",
+    "name": "LOCAL DEMO SERVER",
+    "showErrors": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "60000",
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": "",
+    "requestedSessionTimeout": "",
+    "connectionStartDelay": "",
+    "reconnectDelay": ""
+  }
+]

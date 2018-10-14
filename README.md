@@ -15,17 +15,16 @@
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][8] based on [node-opcua][9].
 
-[![opcuaiiot64](images/opcua-iiot-logo64-glass.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua/)
 [![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
 [![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
-* tested with Node.js LTS
+* tested with Node.js v10 and Node-RED v0.19
 * based on node-opcua v0.4
 * extendable with node-opcua-isa95
 
-If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3] !
+**If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3]!**
 
-**[You could help as a backer of the project.][2]**
+[You could also help as a backer of the project.][2]
 
 ## Install
 
@@ -49,7 +48,7 @@ Let's work together!
 Please, read and in best case accept [CONTRIBUTING](.github/CONTRIBUTING.md) by your sign and send it via E-Mail.
 You could also just send a pull request or issues while testing, please!
 
-**[Click here if you want to back the project!][2]**
+[Click here if you want to back the project!][2]
 
 ### Debug
 
@@ -76,7 +75,7 @@ Follow the [white rabbit][4]!
 
 With the flex server you could create your own information model with the OPC UA address space.
 
-![Flex server Example](images/wiki/flexServerAddressSapceExample.png)
+![Flex server Example](images/wiki/flexServerAddressSapceExamplev3.png)
 
 The server node contains demo objects and variables
 to start playing with OPC UA method call, read and write operations.
@@ -87,9 +86,13 @@ to start playing with OPC UA method call, read and write operations.
 
 ![Read Example](images/read-examplev220.png)
 
-**... and secure writing to OPC UA servers ...**
+**... and secure writing and moving data between OPC UA servers ...**
 
 ![Write Example](images/write-examplev220.png)
+
+![Read-Write Example](images/wiki/read-write-flow.png)
+
+![Write-Read Example](images/wiki/write-read-flow2.png)
 
 **... create your own variables and objects from events ...**
 
@@ -105,9 +108,6 @@ Ideas
 * dynamic methods
 * complex methods
 * dynamic IP for connector
-* monitoring groups
-* resubscribe after hard connection errors
-* crawling address space with filters
 
 Errors
 * more Bad status situations handling
@@ -120,13 +120,12 @@ The BSD 3-Clause License
 
 [Klaus Landsdorf][1]
 
-That is a whole new Node-RED package started in 2017 based on the node-opcua v0.1.x and the API documentation.
+That is a whole new Node-RED package started in 2017 based on the node-opcua v0.4 and the API documentation.
 The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED and OPC UA.
 
 ### Important
 
 This is **not** an official product of the OPC Foundation or Plattform Industrie 4.0.
-It is just to provide OPC UA to Node-RED based on node-opcua.
 
 ### Contribution node-opcua
 

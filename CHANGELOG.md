@@ -1,16 +1,42 @@
 <a name="3.0.0"></a>
-# [3.0.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.7.1...v3.0.0) (2018-07-31)
+# [3.0.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.7.1...v3.0.0) (2018-10-14)
 
+#### BREAKING CHANGES with new node-opcua version 0.4 in output objects and parameters
 
 ### Bug Fixes
 
 * **API:** self organised node-opcua ([1cb4760](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/1cb4760))
+* **browser:** browse without recursive settings ([5276e76](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/5276e76))
+* **browser:** list to read and listen ([98c1700](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/98c1700))
 * **browser:** wrong result used ([0db0aac](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0db0aac))
+* **listener:** browser to listener parameters and options ([ee1c7b3](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/ee1c7b3))
 * **method:** variable was not declared anymore ([60acae8](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/60acae8))
-* **read:** history read ([9c1b2be](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/9c1b2be))
+* code for standard.js ([346dac6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/346dac6))
 * **test:** test did not end while interval was running ([e38e3d1](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/e38e3d1))
+* examples namespace since 0.4.4 of node-opcua ([1088074](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/1088074))
+* issue  [#54](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/54) - new historyStart and historyEnd option parameter via msg or to set from node options ([abffca0](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/abffca0))
+* listener monitored item select from list ([8213bef](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/8213bef))
+* **read:** history read ([9c1b2be](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/9c1b2be))
+* **test:** failed on Windows 10 and nodejs 9 ([8cef89d](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/8cef89d))
 * **test:** with patterns of codacy ([c0b493a](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/c0b493a))
 * **tests:** working with the new v0.4.1 of node-opcua ([f8a2bd6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/f8a2bd6))
+* new version node-opcua 0.4.6 to fix grouped monitored items problem ([c922231](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/c922231))
+* server delay on shutdown for listener subscriptions ([82ba6f7](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/82ba6f7))
+* testing suites ([72adde6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/72adde6))
+
+
+### Features
+
+* **browser:** recursive browsing ([de98d78](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/de98d78))
+* **browser:** recursive browsing with depth ([5b86688](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/5b86688))
+* **crawler:** filter by every key-value pair of the result items ([bd16831](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/bd16831))
+* **crawler:** filter by property with a match of string ([e251a45](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/e251a45))
+* **listener:** new structure for event fields ([536f314](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/536f314))
+* **response:** compressing results ([2cc4504](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/2cc4504))
+* **server:** flex server working with new namespace operations ([0664f52](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0664f52))
+* issue [#57](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/57) passing topic for monitored items ([ab8b4ca](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/ab8b4ca))
+* new flex-server discovery options ([f5de659](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/f5de659))
+* upgrade node-opcua to v0.4.5 ([4d48954](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/4d48954))
 
 
 
