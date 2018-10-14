@@ -62,9 +62,9 @@
     "node": ">=6.10"
   },
   "scripts": {
-    "test": "jest --detectOpenHandles --no-cache --testPathPattern=suite",
+    "test": "standard --fix && gulp clean && jest",
     "upload-coverage": "cat ./jcoverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4",
-    "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --no-cache --runInBand --detectOpenHandles --testPathPattern=suite",
+    "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage && ls -lAh",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "npm run build && npm test",
     "ci-publish": "ci-publish",
