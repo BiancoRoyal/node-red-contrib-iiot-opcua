@@ -706,7 +706,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
             expect(msg.topic).toBe('TestTopicSubscribe')
             expect(msg.payload.dataType).toBe('Int32')
             expect(msg.payload.nodeId).toBe('ns=1;s=FullCounter')
-            expect(msg.payload.statusCode).not.toBeDefined()
+            expect(msg.payload.statusCode).toBeUndefined()
             setTimeout(done, 500)
           }
         })

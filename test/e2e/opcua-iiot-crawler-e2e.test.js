@@ -863,7 +863,7 @@ describe('OPC UA Crawler node Testing', function () {
         let h1f = helper.getNode('h1f')
         h1f.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
-          expect(msg.payload.crawlerResults[0].references).not.toBeDefined()
+          expect(msg.payload.crawlerResults[0].references).toBeUndefined()
 
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
           done()

@@ -145,7 +145,7 @@ describe('OPC UA Server Command node e2e Testing', function () {
         let n5 = helper.getNode('n5cmdf1')
         n5.on('input', function (msg) {
           expect(msg.commandType).toBe('restart')
-          expect(msg.payload.nodeId).not.toBeDefined()
+          expect(msg.payload.nodeId).toBeUndefined()
           expect(msg.nodetype).toBe('inject')
           expect(msg.injectType).toBe('CMD')
           done()
