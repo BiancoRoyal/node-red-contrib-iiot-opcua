@@ -493,7 +493,7 @@ de.biancoroyal.opcua.iiot.core.server.start = function (server, node) {
         } else {
           node.initialized = true
 
-          if (server.endpoints) {
+          if (server.endpoints && server.endpoints.length) {
             server.endpoints.forEach(function (endpoint) {
               endpoint.endpointDescriptions().forEach(function (endpointDescription) {
                 coreServer.internalDebugLog('Server endpointUrl: ' +
