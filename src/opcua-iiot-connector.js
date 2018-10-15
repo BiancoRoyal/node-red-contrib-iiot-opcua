@@ -38,7 +38,7 @@ module.exports = function (RED) {
     this.privateKeyFile = config.privateKeyFile
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 120000
     this.autoSelectRightEndpoint = config.autoSelectRightEndpoint
-    this.strategyMaxRetry = config.strategyMaxRetry || 200
+    this.strategyMaxRetry = config.strategyMaxRetry || 2000
     this.strategyInitialDelay = config.strategyInitialDelay || 1000
     this.strategyMaxDelay = config.strategyMaxDelay || 30000
     this.strategyRandomisationFactor = config.strategyRandomisationFactor || 0.2
@@ -75,19 +75,21 @@ module.exports = function (RED) {
     coreConnector.detailDebugLog('config: ' + node.privateKeyFile)
     coreConnector.detailDebugLog('securedCommunication: ' + node.securedCommunication.toString())
 
-    if (node.securedCommunication) {
-      if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
-        node.publicCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/client_selfsigned_cert_1024.pem')
-        coreConnector.detailDebugLog('default key: ' + node.publicCertificateFile)
-      }
+    node.initCertificatesAndKeys = function () {
+      if (node.securedCommunication) {
+        if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
+          node.publicCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/client_selfsigned_cert_1024.pem')
+          coreConnector.detailDebugLog('default key: ' + node.publicCertificateFile)
+        }
 
-      if (node.privateKeyFile === null || node.privateKeyFile === '') {
-        node.privateKeyFile = path.join(nodeOPCUAClientPath, '/certificates/PKI/own/private/private_key.pem')
-        coreConnector.detailDebugLog('default key: ' + node.privateKeyFile)
+        if (node.privateKeyFile === null || node.privateKeyFile === '') {
+          node.privateKeyFile = path.join(nodeOPCUAClientPath, '/certificates/PKI/own/private/private_key.pem')
+          coreConnector.detailDebugLog('default key: ' + node.privateKeyFile)
+        }
+      } else {
+        node.publicCertificateFile = null
+        node.privateKeyFile = null
       }
-    } else {
-      node.publicCertificateFile = null
-      node.privateKeyFile = null
     }
 
     if (node.loginEnabled) {
@@ -105,20 +107,21 @@ module.exports = function (RED) {
     /*  #########   CONNECTION  #########     */
 
     node.updateServerOptions = function () {
+      node.initCertificatesAndKeys()
       node.opcuaClientOptions = {
         securityPolicy: node.securityPolicy || 'None',
         securityMode: node.messageSecurityMode || 'NONE',
-        defaultSecureTokenLifetime: node.defaultSecureTokenLifetime,
+        defaultSecureTokenLifetime: node.defaultSecureTokenLifetime || 120000,
         keepSessionAlive: node.keepSessionAlive,
         certificateFile: node.publicCertificateFile,
         privateKeyFile: node.privateKeyFile,
         endpoint_must_exist: node.endpointMustExist,
-        requestedSessionTimeout: node.requestedSessionTimeout,
+        requestedSessionTimeout: node.requestedSessionTimeout || 60000,
         connectionStrategy: {
-          maxRetry: node.strategyMaxRetry,
-          initialDelay: node.strategyInitialDelay,
-          maxDelay: node.strategyMaxDelay,
-          randomisationFactor: node.strategyRandomisationFactor
+          maxRetry: node.strategyMaxRetry || 2000,
+          initialDelay: node.strategyInitialDelay || 1000,
+          maxDelay: node.strategyMaxDelay || 30000,
+          randomisationFactor: node.strategyRandomisationFactor || 0.2
         }
       }
     }
@@ -466,7 +469,7 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog('Renew With Flex Connector Request On State ' + node.stateMachine.getMachineState())
       node.stateMachine.lock()
       node.setNewParameters(parameters)
-
+      node.initCertificatesAndKeys()
       node.closeSession(() => {
         setTimeout(() => {
           node.renewConnection(done)
@@ -504,6 +507,7 @@ module.exports = function (RED) {
 
     node.stateMachine.onINIT = function (event, oldState, newState) {
       coreConnector.detailDebugLog('Connector Init Event FSM')
+      node.initCertificatesAndKeys()
       try {
         if (clientStartTimeout) {
           clearTimeout(clientStartTimeout)

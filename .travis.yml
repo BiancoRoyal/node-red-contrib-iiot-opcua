@@ -16,7 +16,7 @@ install:
   - npm install -g jest
 script:
   - npm run coverage
-  - npm run upload-coverage
+  - npm run coverage:upload
 cache:
   directories:
     - "node_modules"

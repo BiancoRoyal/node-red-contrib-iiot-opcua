@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(20000)
+jest.setTimeout(30000)
 
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var inputNode = require('../../src/opcua-iiot-flex-connector')

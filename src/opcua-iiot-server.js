@@ -373,20 +373,10 @@ module.exports = function (RED) {
 
     node.closeServer = function (done) {
       if (node.opcuaServer) {
-        if (coreServer.simulatorInterval) {
-          clearInterval(coreServer.simulatorInterval)
-        }
-        coreServer.simulatorInterval = null
-        setTimeout(() => {
-          if (node.opcuaServer) {
-            node.opcuaServer.shutdown(function () {
-              coreServer.destructAddressSpace()
-              done()
-            })
-          } else {
-            done()
-          }
-        }, 600)
+        coreServer.destructAddressSpace()
+        node.opcuaServer.shutdown(function () {
+          done()
+        })
       } else {
         done()
       }

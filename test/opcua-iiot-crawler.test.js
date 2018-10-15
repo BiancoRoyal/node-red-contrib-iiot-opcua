@@ -66,11 +66,7 @@ describe('OPC UA Crawler node Unit Testing', function () {
               'nodeId': 'i=31'
             }
           ],
-          'wires': [
-            [
-              'f2d94c91.f7157'
-            ]
-          ]
+          'wires': [[]]
         }
       ],
       function () {
@@ -80,7 +76,7 @@ describe('OPC UA Crawler node Unit Testing', function () {
         expect(nodeUnderTest.singleResult).toBe(false)
         expect(nodeUnderTest.showStatusActivities).toBe(false)
         expect(nodeUnderTest.showErrors).toBe(false)
-        setTimeout(done, 3000)
+        done()
       })
     })
   })
