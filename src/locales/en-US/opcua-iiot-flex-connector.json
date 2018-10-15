@@ -1,0 +1,9 @@
+{
+  "opcua-iiot-contrib": {
+    "label": {
+      "connector": "Connector",
+      "showActivities": "Show Activities",
+      "showErrors": "Show Errors"
+    }
+  }
+}

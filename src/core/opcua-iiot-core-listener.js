@@ -59,6 +59,7 @@ de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
       'endsub': 'END'
     },
     'ERROR': {
+      'idlesub': 'IDLE',
       'initsub': 'INIT',
       'endsub': 'END'
     },

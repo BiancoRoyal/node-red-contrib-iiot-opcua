@@ -90,23 +90,6 @@ module.exports = function (RED) {
       node.privateKeyFile = null
     }
 
-    node.opcuaClientOptions = {
-      securityPolicy: node.securityPolicy || 'None',
-      securityMode: node.messageSecurityMode || 'NONE',
-      defaultSecureTokenLifetime: node.defaultSecureTokenLifetime,
-      keepSessionAlive: node.keepSessionAlive,
-      certificateFile: node.publicCertificateFile,
-      privateKeyFile: node.privateKeyFile,
-      endpoint_must_exist: node.endpointMustExist,
-      requestedSessionTimeout: node.requestedSessionTimeout,
-      connectionStrategy: {
-        maxRetry: node.strategyMaxRetry,
-        initialDelay: node.strategyInitialDelay,
-        maxDelay: node.strategyMaxDelay,
-        randomisationFactor: node.strategyRandomisationFactor
-      }
-    }
-
     if (node.loginEnabled) {
       if (node.credentials) {
         node.userIdentity = {
@@ -121,6 +104,25 @@ module.exports = function (RED) {
 
     /*  #########   CONNECTION  #########     */
 
+    node.updateServerOptions = function () {
+      node.opcuaClientOptions = {
+        securityPolicy: node.securityPolicy || 'None',
+        securityMode: node.messageSecurityMode || 'NONE',
+        defaultSecureTokenLifetime: node.defaultSecureTokenLifetime,
+        keepSessionAlive: node.keepSessionAlive,
+        certificateFile: node.publicCertificateFile,
+        privateKeyFile: node.privateKeyFile,
+        endpoint_must_exist: node.endpointMustExist,
+        requestedSessionTimeout: node.requestedSessionTimeout,
+        connectionStrategy: {
+          maxRetry: node.strategyMaxRetry,
+          initialDelay: node.strategyInitialDelay,
+          maxDelay: node.strategyMaxDelay,
+          randomisationFactor: node.strategyRandomisationFactor
+        }
+      }
+    }
+
     node.connectOPCUAEndpoint = function () {
       if (!node.endpoint.includes('opc.tcp:')) {
         coreConnector.internalDebugLog('connector endpoint is wrong and needs opc.tcp// ' + node.endpoint)
@@ -131,6 +133,8 @@ module.exports = function (RED) {
       coreConnector.detailDebugLog('Options ' + JSON.stringify(node.opcuaClientOptions))
 
       try {
+        node.opcuaClient = null
+        node.updateServerOptions()
         node.opcuaClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
 
         if (node.autoSelectRightEndpoint) {
@@ -210,11 +214,13 @@ module.exports = function (RED) {
       if (!node.endpoint.includes('opc.tcp://')) {
         coreConnector.internalDebugLog('Endpoint Not Valid -> ' + node.endpoint)
         node.error(new Error('endpoint does not include opc.tcp://'), {payload: 'Client Endpoint Error'})
+        return
       }
 
+      node.stateMachine.unlock()
       node.opcuaClient.connect(node.endpoint, function (err) {
         if (err) {
-          node.stateMachine.lock().end()
+          node.stateMachine.lock()
           node.handleError(err)
         } else {
           coreConnector.internalDebugLog('client is connected now to ' + node.endpoint)
@@ -223,19 +229,12 @@ module.exports = function (RED) {
       })
     }
 
-    node.renewConnection = function () {
+    node.renewConnection = function (done) {
       node.stateMachine.lock()
-      node.opcuaClient.disconnect(function (err) {
-        if (err) {
-          coreConnector.internalDebugLog('Disconnected With Error ' + err + ' From ' + node.endpoint)
-          if (node.showErrors) {
-            node.error(err, {payload: 'Error On Close Connector For Renew'})
-          }
-        } else {
-          coreConnector.internalDebugLog('Disconnected From ' + node.endpoint)
-        }
+      node.disconnectNodeOPCUA(() => {
         node.stateMachine.unlock()
-        node.connectToClient()
+        node.connectOPCUAEndpoint()
+        done()
       })
     }
 
@@ -454,9 +453,43 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.stateMachine.lock().end()
+      node.stateMachine.close().lock().end()
       node.disconnectNodeOPCUA(done)
     })
+
+    node.restartWithNewSettings = function (parameters, done) {
+      coreConnector.internalDebugLog('Renew With Flex Connector Request On State ' + node.stateMachine.getMachineState())
+      node.stateMachine.close()
+      node.setNewParameters(parameters)
+
+      node.closeSession(() => {
+        setTimeout(() => {
+          node.renewConnection(done)
+        }, node.connectionStartDelay)
+      })
+    }
+
+    node.setNewParameters = function (parameters) {
+      node.discoveryUrl = parameters.discoveryUrl || node.discoveryUrl
+      node.endpoint = parameters.endpoint || node.endpoint
+      node.keepSessionAlive = parameters.keepSessionAlive || node.keepSessionAlive
+      node.securityPolicy = parameters.securityPolicy || node.securityPolicy
+      node.securityMode = parameters.securityMode || node.securityMode
+      node.name = parameters.name || node.name
+      node.showErrors = parameters.showErrors || node.showErrors
+      node.publicCertificateFile = parameters.publicCertificateFile || node.publicCertificateFile
+      node.privateKeyFile = parameters.privateKeyFile || node.privateKeyFile
+      node.defaultSecureTokenLifetime = parameters.defaultSecureTokenLifetime || node.defaultSecureTokenLifetime
+      node.endpointMustExist = parameters.endpointMustExist || node.endpointMustExist
+      node.autoSelectRightEndpoint = parameters.autoSelectRightEndpoint || node.autoSelectRightEndpoint
+      node.strategyMaxRetry = parameters.strategyMaxRetry || node.strategyMaxRetry
+      node.strategyInitialDelay = parameters.strategyInitialDelay || node.strategyInitialDelay
+      node.strategyMaxDelay = parameters.strategyMaxDelay || node.strategyMaxDelay
+      node.strategyRandomisationFactor = parameters.strategyRandomisationFactor || node.strategyRandomisationFactor
+      node.requestedSessionTimeout = parameters.requestedSessionTimeout || node.requestedSessionTimeout
+      node.connectionStartDelay = parameters.connectionStartDelay || node.connectionStartDelay
+      node.reconnectDelay = parameters.reconnectDelay || node.reconnectDelay
+    }
 
     /* #########   FSM EVENTS  #########     */
 
@@ -535,7 +568,10 @@ module.exports = function (RED) {
 
     node.stateMachine.onEND = function (event, oldState, newState) {
       coreConnector.detailDebugLog('Connector End Event FSM')
+      node.resetAllTimer()
+    }
 
+    node.resetAllTimer = function () {
       if (clientStartTimeout) {
         clearTimeout(clientStartTimeout)
         clientStartTimeout = null

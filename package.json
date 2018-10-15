@@ -40,6 +40,7 @@
   "node-red": {
     "nodes": {
       "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",
+      "OPCUA-IIoT-Flex-Connector": "opcuaIIoT/opcua-iiot-flex-connector.js",
       "OPCUA-IIoT-Inject": "opcuaIIoT/opcua-iiot-inject.js",
       "OPCUA-IIoT-Node": "opcuaIIoT/opcua-iiot-node.js",
       "OPCUA-IIoT-Event": "opcuaIIoT/opcua-iiot-event.js",

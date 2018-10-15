@@ -1,0 +1,77 @@
+<!--
+ The BSD 3-Clause License
+
+ Copyright 2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ All rights reserved.
+ node-red-contrib-iiot-opcua
+-->
+
+<script type="text/javascript">
+  RED.nodes.registerType('OPCUA-IIoT-Flex-Connector', {
+    category: 'IIoT',
+    color: '#ABCDEF',
+    defaults: {
+      name: {value: ''},
+      showStatusActivities: {value: false},
+      showErrors: {value: false},
+      connector: {type: 'OPCUA-IIoT-Connector', required: true}
+    },
+    inputs: 1,
+    outputs: 1,
+    align: 'left',
+    icon: 'icon.png',
+    label: function () {
+      return this.name || 'Flex Connector'
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : ''
+    },
+    oneditprepare: function () {
+      let node = this
+    }
+  })
+</script>
+
+<script type="text/x-red" data-template-name="OPCUA-IIoT-Flex-Connector">
+    <div class="form-row">
+        <label for="node-input-connector"><i class="icon-tasks"></i> <span data-i18n="opcua-iiot-contrib.label.connector"></span></label>
+        <input type="text" id="node-input-connector" placeholder="opc.tcp://localhost:4334">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" placeholder="">
+    </div>
+    <hr>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
+        <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
+    </div>
+    <div class="form-row">
+        <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+        <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
+        <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="OPCUA-IIoT-Flex-Connector">
+    <h2>OPC UA IIoT Flex Connector</h2>
+
+    <p>
+        The Flex Connector node is to set up an event listener with parameters to change a connectors options.
+        It is to trigger by an Inject of Node-RED or by the OPC UA IIoT Inject.
+        It could also trigger with incoming events from other nodes.
+    </p>
+
+    <h3>Input</h3>
+
+    <p>msg with connector parameters</p>
+
+    <h3>Output</h3>
+
+    <p>msg with connector parameters and result</p>
+
+    <strong>Name</strong>
+    <p>Name in the flow of Node-RED.</p>
+
+</script>
