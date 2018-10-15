@@ -7,7 +7,7 @@
  */
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(5000)
 
 let coreServer = require('../../src/core/opcua-iiot-core-server')
 let opcuaserver = null

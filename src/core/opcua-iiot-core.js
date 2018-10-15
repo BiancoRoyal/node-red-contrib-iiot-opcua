@@ -827,6 +827,23 @@ de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
   core.setNodeInitalState(node.connector.stateMachine.getMachineState(), node)
 }
 
+de.biancoroyal.opcua.iiot.core.deregisterToConnector = function (node, done) {
+  let core = de.biancoroyal.opcua.iiot.core
+  if (!node) {
+    core.internalDebugLog('Node Not Valid On Register To Connector')
+    done()
+    return
+  }
+
+  if (!node.connector) {
+    node.error(new Error('Connector Not Valid On Register To Connector'), {payload: 'No Connector Configured'})
+    done()
+    return
+  }
+
+  node.connector.deregisterForOPCUA(node, done)
+}
+
 de.biancoroyal.opcua.iiot.core.checkSessionNotValid = function (session, callerType) {
   if (!session) {
     this.internalDebugLog('Session Not Valid On Check For ' + callerType)

@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(12000)
+jest.setTimeout(15000)
 
 var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
@@ -757,8 +757,8 @@ var testCrawlerWithAllBasicFilterTypes = [
     'registerServerMethod': '1',
     'discoveryServerEndpointUrl': '',
     'capabilitiesForMDNS': '',
-    'maxNodesPerRead': 10000,
-    'maxNodesPerBrowse': 20000,
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
     'wires': [[]]
   }
 ]
@@ -884,7 +884,6 @@ describe('OPC UA Crawler node Testing', function () {
         let n2 = helper.getNode('ncf2h')
         n2.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
-
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
           expect(msg.payload.crawlerResults.length).toBeLessThan(57)
           done()

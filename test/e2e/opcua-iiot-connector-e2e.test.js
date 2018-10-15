@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(15000)
+jest.setTimeout(20000)
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))

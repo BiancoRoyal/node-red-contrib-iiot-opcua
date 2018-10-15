@@ -42,22 +42,28 @@ module.exports = function (RED) {
     node.on('input', function (msg) {
       coreConnector.internalDebugLog('connector change request input')
 
-      if (node.connector && msg.payload.endpoint && msg.payload.endpoint.includes('opc.tcp:')) {
-        coreConnector.internalDebugLog('connector change possible')
-        coreConnector.internalDebugLog(msg.payload)
-        node.connector.restartWithNewSettings(msg.payload, () => {
-          coreConnector.internalDebugLog('connector change injected')
-          node.send(msg)
-        })
+      if (node.connector) {
+        if (msg.payload.endpoint && msg.payload.endpoint.includes('opc.tcp:')) {
+          coreConnector.internalDebugLog('connector change possible')
+          coreConnector.internalDebugLog(msg.payload)
+          node.connector.restartWithNewSettings(msg.payload, () => {
+            coreConnector.internalDebugLog('connector change injected')
+            node.send(msg)
+          })
+        } else {
+          coreConnector.internalDebugLog('Connector Change Not Possible - Wrong Endpoint')
+          node.error(new Error('Connector Change Not Possible - Wrong Endpoint'), msg)
+        }
       } else {
-        coreConnector.internalDebugLog('Connector Change Not Possible - Wrong Endpoint')
+        coreConnector.internalDebugLog('Connector Change Not Possible - No Connector')
+        node.error(new Error('Connector Change Not Possible - No Connector'), msg)
       }
     })
 
     coreConnector.core.registerToConnector(node)
 
-    node.on('close', function (done) {
-      node.connector.deregisterForOPCUA(node, done)
+    node.on('close', done => {
+      coreConnector.core.deregisterToConnector(node, done)
     })
   }
 

@@ -7,7 +7,7 @@
  */
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(5000)
 
 let coreConnector = require('../../src/core/opcua-iiot-core-connector')
 
@@ -81,7 +81,13 @@ describe('OPC UA Core Connector', function () {
 
     it('should change to INIT state from UNLOCKED', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().lock().unlock().init().getMachineState()).toBe('INIT')
+      expect(fsm.init().open().close().lock().unlock().idle().init().getMachineState()).toBe('INIT')
+      done()
+    })
+
+    it('should change to IDLE state from UNLOCKED', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      expect(fsm.init().open().close().lock().unlock().idle().getMachineState()).toBe('IDLE')
       done()
     })
 

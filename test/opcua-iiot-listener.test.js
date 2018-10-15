@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(5000)
 
 // iiot opc ua nodes
 var injectNode = require('node-red/nodes/core/core/20-inject')
@@ -47,25 +47,21 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         {
           'id': 'bee3e3b0.ca1a08',
           'type': 'OPCUA-IIoT-Listener',
-          'connector': 'c30aa44e.9ed95',
+          'connector': '',
           'action': 'subscribe',
           'queueSize': 10,
           'name': 'TestListener',
           'justValue': true,
           'showStatusActivities': false,
           'showErrors': false,
-          'wires': [
-            [
-              '3497534.af772ac'
-            ]
-          ]
+          'wires': [[]]
         }
       ],
       function () {
         let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
         expect(nodeUnderTest.name).toBe('TestListener')
         expect(nodeUnderTest.action).toBe('subscribe')
-        setTimeout(done, 3000)
+        done()
       })
     })
   })

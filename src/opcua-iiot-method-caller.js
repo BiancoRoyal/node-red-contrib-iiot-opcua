@@ -171,7 +171,7 @@ module.exports = function (RED) {
     coreMethod.core.registerToConnector(node)
 
     node.on('close', done => {
-      node.connector.deregisterForOPCUA(node, done)
+      coreMethod.core.deregisterToConnector(node, done)
     })
   }
 

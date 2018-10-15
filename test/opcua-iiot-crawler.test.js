@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(5000)
 
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
@@ -46,7 +46,7 @@ describe('OPC UA Crawler node Unit Testing', function () {
         {
           'id': '13e5e190.e34516',
           'type': 'OPCUA-IIoT-Crawler',
-          'connector': '951b5d66.94b0d8',
+          'connector': '',
           'name': 'TestNameCrawler',
           'justValue': true,
           'singleResult': false,

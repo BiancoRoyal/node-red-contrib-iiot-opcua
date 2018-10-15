@@ -365,7 +365,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.on('close', function (done) {
+    node.on('close', done => {
       node.closeServer(() => {
         done()
       })
@@ -377,27 +377,18 @@ module.exports = function (RED) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        let timeoutShutdown = 500
-        if (node.opcuaServer.engine && node.opcuaServer.engine.currentSubscriptionCount > 0) {
-          coreServer.internalDebugLog('extended shutdown time - subscriptions: ' + node.opcuaServer.engine.currentSubscriptionCount)
-          timeoutShutdown += 2500
-        }
         setTimeout(() => {
           if (node.opcuaServer) {
             node.opcuaServer.shutdown(function () {
               coreServer.destructAddressSpace()
-              if (done) {
-                done()
-              }
+              done()
             })
           } else {
             done()
           }
-        }, timeoutShutdown)
+        }, 600)
       } else {
-        if (done) {
-          done()
-        }
+        done()
       }
     }
   }

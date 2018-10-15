@@ -821,7 +821,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
             expect(msg.payload).toBeDefined()
             expect(msg.payload.browserResults).toBeDefined()
             expect(msg.payload.recursiveDepth).toBe(0)
-            setTimeout(done, 500)
+            setTimeout(done, 1000)
           }
         })
       })
@@ -839,7 +839,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
 
           if (msgCounter === 2) {
             expect(msg.payload).toBeDefined()
-            setTimeout(done, 500)
+            done()
           }
         })
       })
@@ -853,7 +853,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 1) {
             expect(msg.payload).toBeDefined()
-            setTimeout(done, 500)
+            done()
           }
         })
       })

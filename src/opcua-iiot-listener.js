@@ -550,26 +550,27 @@ module.exports = function (RED) {
 
     coreListener.core.registerToConnector(node)
 
-    node.connector.on('connection_closed', () => {
-      coreListener.internalDebugLog('Subscription Is To Terminate On Connection Close')
-      if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
-        node.stateMachine.terminatesub()
-        uaSubscription.terminate(() => {
-          node.stateMachine.idlesub()
-          coreListener.internalDebugLog('Subscription Was Terminated')
-        })
-      }
-    })
+    if (node.connector) {
+      node.connector.on('connection_closed', () => {
+        coreListener.internalDebugLog('Subscription Is To Terminate On Connection Close')
+        if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
+          node.stateMachine.terminatesub()
+          uaSubscription.terminate(() => {
+            node.stateMachine.idlesub()
+            coreListener.internalDebugLog('Subscription Was Terminated')
+          })
+        }
+      })
+    }
 
     node.on('close', function (done) {
       if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
         node.stateMachine.terminatesub()
         uaSubscription.terminate(() => {
-          node.connector.deregisterForOPCUA(node, done)
+          coreListener.core.deregisterToConnector(node, done)
         })
-        uaSubscription = null
       } else {
-        node.connector.deregisterForOPCUA(node, done)
+        coreListener.core.deregisterToConnector(node, done)
       }
     })
 

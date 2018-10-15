@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(5000)
 
 // opcua iiot
 var injectNode = require('node-red/nodes/core/core/20-inject')

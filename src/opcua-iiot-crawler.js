@@ -246,7 +246,7 @@ module.exports = function (RED) {
     coreBrowser.core.registerToConnector(node)
 
     node.on('close', done => {
-      node.connector.deregisterForOPCUA(node, done)
+      coreBrowser.core.deregisterToConnector(node, done)
     })
   }
 

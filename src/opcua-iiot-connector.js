@@ -155,9 +155,9 @@ module.exports = function (RED) {
       node.opcuaClient.on('close', function (err) {
         if (err) {
           coreConnector.internalDebugLog('Connection Error On Close ' + err)
-          node.stateMachine.close().end()
+          node.stateMachine.close().idle()
         } else {
-          node.stateMachine.close().init()
+          node.stateMachine.close().idle().init()
         }
         coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
         coreConnector.internalDebugLog('CONNECTION CLOSED: ' + node.endpoint)
@@ -173,7 +173,7 @@ module.exports = function (RED) {
       node.opcuaClient.on('connection_reestablished', function () {
         coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!'.bgWhite.orange)
         coreConnector.internalDebugLog('CONNECTION RE-ESTABLISHED: ' + node.endpoint)
-        node.stateMachine.unlock().open()
+        node.stateMachine.unlock()
       })
 
       node.opcuaClient.on('start_reconnection', function () {
@@ -198,7 +198,7 @@ module.exports = function (RED) {
         coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!      CLIENT RECONNECTED     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
         coreConnector.internalDebugLog('CONNECTION RECONNECTED: ' + node.endpoint)
         node.emit('after_reconnection', node.opcuaClient)
-        node.stateMachine.unlock().open()
+        node.stateMachine.unlock()
       })
 
       try {
@@ -405,6 +405,7 @@ module.exports = function (RED) {
     node.closeSession = function (done) {
       if (node.opcuaSession && node.opcuaSession.sessionId !== 'terminated') {
         node.opcuaClient.closeSession(node.opcuaSession, false, function (err) {
+          node.stateMachine.sessionclose()
           if (err) {
             coreConnector.internalDebugLog('Client Session Close ' + err)
             if (node.showErrors) {
@@ -435,6 +436,7 @@ module.exports = function (RED) {
       if (node.opcuaClient) {
         coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
         node.opcuaClient.disconnect(function (err) {
+          node.stateMachine.close()
           if (err) {
             coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
             if (node.showErrors) {
@@ -453,13 +455,16 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.stateMachine.close().lock().end()
-      node.disconnectNodeOPCUA(done)
+      node.stateMachine.lock()
+      node.disconnectNodeOPCUA(() => {
+        node.stateMachine.end()
+        done()
+      })
     })
 
     node.restartWithNewSettings = function (parameters, done) {
       coreConnector.internalDebugLog('Renew With Flex Connector Request On State ' + node.stateMachine.getMachineState())
-      node.stateMachine.close()
+      node.stateMachine.lock()
       node.setNewParameters(parameters)
 
       node.closeSession(() => {
@@ -587,6 +592,10 @@ module.exports = function (RED) {
     node.registeredNodeList = {}
 
     node.registerForOPCUA = function (opcuaNode) {
+      if (!opcuaNode) {
+        coreConnector.internalDebugLog('Node Not Valid To Register In Connector')
+        return
+      }
       node.registeredNodeList[opcuaNode.id] = opcuaNode
       if (Object.keys(node.registeredNodeList).length === 1) {
         node.closingOPCUA = false
@@ -599,6 +608,11 @@ module.exports = function (RED) {
     }
 
     node.deregisterForOPCUA = function (opcuaNode, done) {
+      if (!opcuaNode) {
+        coreConnector.internalDebugLog('Node Not Valid To Deregister In Connector')
+        done()
+        return
+      }
       delete node.registeredNodeList[opcuaNode.id]
 
       if (node.closingOPCUA) {
