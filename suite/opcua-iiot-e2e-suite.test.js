@@ -7,10 +7,9 @@
 
 describe('Test Suite e2e', () => {
   require('../test/e2e/opcua-iiot-connector-e2e.test')
+  require('../test/e2e/opcua-iiot-flex-connector-e2e.test')
   require('../test/e2e/opcua-iiot-browser-e2e.test')
   require('../test/e2e/opcua-iiot-crawler-e2e.test')
-  require('../test/e2e/opcua-iiot-event-listener-e2e.test')
-  require('../test/e2e/opcua-iiot-listener-e2e.test')
   require('../test/e2e/opcua-iiot-method-caller-e2e.test')
   require('../test/e2e/opcua-iiot-read-e2e.test')
   require('../test/e2e/opcua-iiot-response-e2e.test')

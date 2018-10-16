@@ -465,6 +465,12 @@ module.exports = function (RED) {
 
     node.restartWithNewSettings = function (parameters, done) {
       coreConnector.internalDebugLog('Renew With Flex Connector Request On State ' + node.stateMachine.getMachineState())
+
+      if (node.stateMachine.getMachineState() === 'LOCKED') {
+        coreConnector.internalDebugLog('Do Not Renew From Flex Connector Request On State ' + node.stateMachine.getMachineState())
+        return
+      }
+
       node.stateMachine.lock()
       node.setNewParameters(parameters)
       node.initCertificatesAndKeys()
@@ -698,6 +704,7 @@ module.exports = function (RED) {
       if (endpointUrlRequest && !endpointUrlRequest.includes('opc.tcp://')) {
         res.json([])
       } else {
+        const endpointMustExist = node.opcuaClientOptions.endpoint_must_exist // to reset later
         node.opcuaClientOptions.endpoint_must_exist = false
         let discoveryClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
         discoveryClient.connect(endpointUrlRequest).then(function () {
@@ -723,7 +730,6 @@ module.exports = function (RED) {
           coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
           res.json([])
         })
-        let endpointMustExist = node.opcuaClientOptions.endpoint_must_exist
       }
     } else {
       coreConnector.internalDebugLog('Get Endpoints Request None Node ' + JSON.stringify(req.params))

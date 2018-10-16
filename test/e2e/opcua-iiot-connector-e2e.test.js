@@ -76,7 +76,7 @@ var testConnectorBrowseFlow = [
     'id': 'c1cf1',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1962/',
+    'endpoint': 'opc.tcp://localhost:51962/',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -98,7 +98,7 @@ var testConnectorBrowseFlow = [
   {
     'id': 's1cf1',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1962',
+    'port': '51962',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -164,7 +164,7 @@ var testConnectorReadFlow = [
     'id': 'c1cf2',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1980/',
+    'endpoint': 'opc.tcp://localhost:51980/',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -186,7 +186,7 @@ var testConnectorReadFlow = [
   {
     'id': 's1cf2',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1980',
+    'port': '51980',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -249,7 +249,7 @@ var testConnectorListenerFlow = [
     'id': 'c1cf3',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1981/',
+    'endpoint': 'opc.tcp://localhost:51981/',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -272,7 +272,7 @@ var testConnectorListenerFlow = [
   {
     'id': 's1cf3',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1981',
+    'port': '51981',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -333,7 +333,7 @@ var testConnectorWriteFlow = [
     'id': 'c1cf4',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1982/',
+    'endpoint': 'opc.tcp://localhost:51982/',
     'keepSessionAlive': false,
     'loginEnabled': true,
     'securityPolicy': 'Basic256',
@@ -355,7 +355,7 @@ var testConnectorWriteFlow = [
   {
     'id': 's1cf4',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1982',
+    'port': '51982',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -436,7 +436,7 @@ var testConnectorMethodCallerFlow = [
     'id': 'c1cf5',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1983/',
+    'endpoint': 'opc.tcp://localhost:51983/',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -458,7 +458,7 @@ var testConnectorMethodCallerFlow = [
   {
     'id': 's1cf5',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1983',
+    'port': '51983',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -513,7 +513,7 @@ var testConnectorHTTPFlow = [
     'id': 'c1cf6',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1991/',
+    'endpoint': 'opc.tcp://localhost:51991/',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -534,7 +534,7 @@ var testConnectorHTTPFlow = [
   {
     'id': 's1cf6',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1991',
+    'port': '51991',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -717,8 +717,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with topic after browse', function (done) {
-      testConnectorBrowseFlow[3].port = 1962
-      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:1962/'
+      testConnectorBrowseFlow[3].port = 51962
+      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:51962/'
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
@@ -729,8 +729,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with rootNodeId after browse', function (done) {
-      testConnectorBrowseFlow[3].port = 6219
-      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:6219/'
+      testConnectorBrowseFlow[3].port = 56219
+      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:56219/'
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {

@@ -115,7 +115,7 @@ var testListenerEventFlow = [
     'type': 'OPCUA-IIoT-Connector',
     'z': '9deca36b.f0384',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:1988',
+    'endpoint': 'opc.tcp://localhost:51988',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -135,7 +135,7 @@ var testListenerEventFlow = [
   {
     'id': 's1ev',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1988',
+    'port': '51988',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',

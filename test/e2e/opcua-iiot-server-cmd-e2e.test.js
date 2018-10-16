@@ -56,6 +56,58 @@ var testCMDFlow = [
   {id: 'n6cmdf1', type: 'helper'}
 ]
 
+var testCMDWithServerFlow = [
+  {
+    'id': 'n1csf1',
+    'type': 'inject',
+    'payload': 'testpayload',
+    'payloadType': 'str',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'onceDelay': '2.4',
+    'wires': [['n2csf1', 'n3csf1']]
+  },
+  {id: 'n2csf1', type: 'helper'},
+  {
+    'id': 'n3csf1',
+    'type': 'OPCUA-IIoT-Server-Command',
+    'commandtype': 'restart',
+    'nodeId': '',
+    'name': '',
+    'wires': [
+      ['n4csf1', 's1csr']
+    ]
+  },
+  {id: 'n4csf1', type: 'helper'},
+  {
+    'id': 's1csr',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '9819',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': 'TestServer',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': false,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'wires': [['n5csf1']]
+  },
+  {id: 'n5csf1', type: 'helper'}
+]
+
 var testInjectCMDFlow = [
   {
     'id': 'n1cmdf2',
@@ -172,6 +224,19 @@ describe('OPC UA Server Command node e2e Testing', function () {
         n4.on('input', function (msg) {
           expect(msg.commandType).toBe('deleteNode')
           expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('CMD')
+          done()
+        })
+      })
+    })
+
+    it('should get a message with inject to delete ASO', function (done) {
+      helper.load([injectNode, injectOPCUANode, inputNode, serverNode], testCMDWithServerFlow, function () {
+        let n5 = helper.getNode('n5csf1')
+        n5.on('input', function (msg) {
+          expect(msg.commandType).toBe('restart')
+          expect(msg.payload.nodeId).toBeUndefined()
           expect(msg.nodetype).toBe('inject')
           expect(msg.injectType).toBe('CMD')
           done()
