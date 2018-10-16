@@ -28,14 +28,16 @@
       "maxNodesPerBrowse": "Max per Browse",
       "registerServerMethod": "Register Server Method",
       "discoveryServerEndpointUrl": "Endpoint Url",
-      "capabilitiesForMDNS": "MDNS capabilities"
+      "capabilitiesForMDNS": "MDNS capabilities",
+      "delayToClose": "Delay On Close"
     },
     "tabs-label": {
       "users": "Users & Sets",
       "settings": "Settings",
       "security": "Security",
       "ass": "Address Space",
-      "discovery": "Discovery"
+      "discovery": "Discovery",
+      "limits": "Limits"
     }
   }
 }

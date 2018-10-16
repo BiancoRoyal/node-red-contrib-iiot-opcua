@@ -34,6 +34,7 @@
       capabilitiesForMDNS: {value: ''},
       maxNodesPerRead: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 100000))) }},
       maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }},
+      delayToClose: {value: 100, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v >= 100) && (v <= 15000))) }},
       addressSpaceScript: { value: "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    // server = the created node-opcua server\n    // addressSpace = script placeholder\n    // eventObjects = to hold event variables in memory from this script\n    \n    // internal global sandbox objects are \n    // node = node of the flex server, \n    // coreServer = core iiot server object for debug and access to nodeOPCUA,\n    // and scriptObjects to hold variables and functions\n    const LocalizedText = coreServer.core.nodeOPCUA.LocalizedText\n    const namespace = addressSpace.getOwnNamespace()\n\n    coreServer.internalDebugLog('init dynamic address space')\n    node.warn('construct new address space for OPC UA')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    let tanks = namespace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    let oilTankLevel = namespace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    // Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    // ---------------------------------------------------------------------------------\n    let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.assert(exclusiveLimitAlarmType !== null)\n    \n    let oilTankLevelCondition = namespace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    // --------------------------------------------------------------\n    let gasTankLevel = namespace.addVariable({\n        browseName: 'GasTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    node.assert(nonExclusiveLimitAlarmType !== null)\n    \n    let gasTankLevelCondition = namespace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'NonExclusiveLimitAlarmType Condition',\n        conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // variable with value\n    if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = namespace.addObject({\n        browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    if(coreServer.core) {\n        namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            displayName: [\n                new LocalizedText({text: 'Test Read and Write', locale: 'en-US'}),\n                new LocalizedText({text: 'Test Lesen Schreiben', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            value: {\n                get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        dataType: 'Double',\n                        value: scriptObjects.testReadWrite\n                    })\n                },\n                set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        let memoryVariable = namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: [\n                new LocalizedText({text: 'Free Memory', locale: 'en-US'}),\n                new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            \n            value: {\n              get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n       \n    } else {\n        coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}"
       }
     },
@@ -64,6 +65,11 @@
       tabs.addTab({
         id: "opcuaiiot-server-tab-settings",
         label: this._("opcua-iiot-contrib.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-server-tab-limits",
+        label: this._("opcua-iiot-contrib.tabs-label.limits")
       })
 
       tabs.addTab({
@@ -391,29 +397,13 @@
                 <input type="text" id="node-input-endpoint" placeholder="UA/NodeREDFlexIIoTServer">
             </div>
             <div class="form-row">
-                <label for="node-input-maxAllowedSessionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSessionNumber"></span></label>
-                <input type="text" id="node-input-maxAllowedSessionNumber" placeholder="10" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxConnectionsPerEndpoint"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxConnectionsPerEndpoint"></span></label>
-                <input type="text" id="node-input-maxConnectionsPerEndpoint" placeholder="10" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxAllowedSubscriptionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSubscriptionNumber"></span></label>
-                <input type="text" id="node-input-maxAllowedSubscriptionNumber" placeholder="50" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxNodesPerRead"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerRead"></span></label>
-                <input type="text" id="node-input-maxNodesPerRead" placeholder="10" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxNodesPerBrowse"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerBrowse"></span></label>
-                <input type="text" id="node-input-maxNodesPerBrowse" placeholder="10" style="width:80px">
+                <label for="node-input-alternateHostname"><i class="fa fa-server"></i> <span data-i18n="opcua-iiot-contrib.label.alternateHostname"></span></label>
+                <input type="text" id="node-input-alternateHostname" placeholder="">
             </div>
             <hr>
             <div class="form-row">
-                <label for="node-input-alternateHostname"><i class="fa fa-server"></i> <span data-i18n="opcua-iiot-contrib.label.alternateHostname"></span></label>
-                <input type="text" id="node-input-alternateHostname" placeholder="">
+                <label for="node-input-delayToClose"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayToClose"></span></label>
+                <input type="text" id="node-input-delayToClose" placeholder="100" style="width:80px">
             </div>
             <div class="form-row">
                 <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
@@ -434,6 +424,28 @@
                 <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
                 <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+            </div>
+        </div>
+        <div id="opcuaiiot-server-tab-limits" style="display:none">
+            <div class="form-row">
+                <label for="node-input-maxAllowedSessionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSessionNumber"></span></label>
+                <input type="text" id="node-input-maxAllowedSessionNumber" placeholder="10" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxConnectionsPerEndpoint"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxConnectionsPerEndpoint"></span></label>
+                <input type="text" id="node-input-maxConnectionsPerEndpoint" placeholder="10" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxAllowedSubscriptionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSubscriptionNumber"></span></label>
+                <input type="text" id="node-input-maxAllowedSubscriptionNumber" placeholder="50" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxNodesPerRead"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerRead"></span></label>
+                <input type="text" id="node-input-maxNodesPerRead" placeholder="1000" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxNodesPerBrowse"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerBrowse"></span></label>
+                <input type="text" id="node-input-maxNodesPerBrowse" placeholder="2000" style="width:80px">
             </div>
         </div>
         <div id="opcuaiiot-server-tab-security" style="display:none">
@@ -580,6 +592,10 @@
 
     <h3>Options</h3>
     <p>If you need more information about all options read the node-opcua API, please!</p>
+
+    <p>The 'Delay On Close' is to close the server node with delay to all other nodes.
+    That is to handle a node-opcua 0.4 issue with monitoring and subscriptions.
+    Set it higher if you got an exception on deploy, because of subscription has to close before the server close.</p>
 
     <h3>Certificates</h3>
     <p>The server provides simple NodeOPCUA demo certificates and private keys.</p>

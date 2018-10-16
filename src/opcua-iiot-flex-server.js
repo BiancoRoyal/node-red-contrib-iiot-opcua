@@ -52,6 +52,7 @@ module.exports = function (RED) {
     // limits
     this.maxNodesPerRead = config.maxNodesPerRead || 1000
     this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
+    this.delayToClose = config.delayToClose || 100
 
     let node = this
     node.setMaxListeners(UNLIMITED_LISTENERS)
@@ -332,21 +333,13 @@ module.exports = function (RED) {
           clearInterval(coreServer.simulatorInterval)
         }
         coreServer.simulatorInterval = null
-        let timeoutShutdown = 100
-        if (node.opcuaServer.engine.subscriptionCount > 0) {
-          timeoutShutdown += 3000
-        }
         setTimeout(() => {
-          node.opcuaServer.shutdown(function () {
-            if (done) {
-              done()
-            }
+          node.opcuaServer.shutdown(() => {
+            done()
           })
-        }, timeoutShutdown)
+        }, node.delayToClose)
       } else {
-        if (done) {
-          done()
-        }
+        done()
       }
     }
   }
