@@ -1,3 +1,23 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.0.0...v3.1.0) (2018-10-16)
+
+
+### Bug Fixes
+
+* server close improved ([5528e23](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/5528e23))
+* test do not need discovery every time ([26f7fe9](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/26f7fe9))
+
+
+### Features
+
+* new flex connector the send connection data to the connector via events [#44](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/44) ([25df528](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/25df528))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.7.1...v3.0.0) (2018-10-14)
 
@@ -177,6 +197,3 @@
 
 <a name="1.0.17"></a>
 ## 1.0.17 (2017-12-03)
-
-
-
