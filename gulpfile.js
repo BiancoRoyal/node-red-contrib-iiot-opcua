@@ -80,7 +80,7 @@ gulp.task('nodejs', function (cb) {
     gulp.src('src/**/*.js')
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(replace(anchor, 'require(\'source-map-support\').install()'))
-      .pipe(babel({presets: ['es2015']}))
+      .pipe(babel({presets: ['@babel/env']}))
       .pipe(uglify())
       .pipe(sourcemaps.write('maps')), gulp.dest('opcuaIIoT')],
   cb
@@ -89,7 +89,7 @@ gulp.task('nodejs', function (cb) {
 
 gulp.task('nodejsclearly', function (cb) {
   gulp.src('src/**/*.js')
-    .pipe(babel({presets: ['es2015']}))
+    .pipe(babel({presets: ['@babel/env']}))
     .pipe(gulp.dest('code'))
 })
 
@@ -100,6 +100,6 @@ gulp.task('doc', function (cb) {
 
 gulp.task('code', function () {
   gulp.src('src/**/*.js')
-    .pipe(babel({presets: ['es2015']}))
+    .pipe(babel({presets: ['@babel/env']}))
     .pipe(gulp.dest('code'))
 })
