@@ -111,7 +111,7 @@ var testConnectorBrowseFlow = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -198,7 +198,7 @@ var testConnectorReadFlow = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -284,7 +284,7 @@ var testConnectorListenerFlow = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -367,7 +367,7 @@ var testConnectorWriteFlow = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [
       {
         'name': 'peter',
@@ -470,7 +470,7 @@ var testConnectorMethodCallerFlow = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -546,7 +546,7 @@ var testConnectorHTTPFlow = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -716,6 +716,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with topic after browse', function (done) {
+      testConnectorBrowseFlow[3].port = 1962
+      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:1962/'
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
@@ -726,6 +728,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with rootNodeId after browse', function (done) {
+      testConnectorBrowseFlow[3].port = 6219
+      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:6219/'
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {

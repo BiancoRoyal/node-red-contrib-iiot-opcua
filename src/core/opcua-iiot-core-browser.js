@@ -100,7 +100,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
   )
 }
 
-de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl) {
+de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl, msg) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
@@ -114,6 +114,8 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl)
         return
       }
 
+      const message = Object.assign({}, msg)
+
       const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
       let crawlerResult = []
       const data = {
@@ -126,13 +128,13 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl)
         if (err) {
           reject(err)
         } else {
-          resolve(crawlerResult)
+          resolve({ rootNodeId: nodeIdToCrawl, message, crawlerResult })
         }
       })
     })
 }
 
-de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (session, addressSpaceItems) {
+de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (session, msg) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
@@ -141,10 +143,12 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
         return
       }
 
-      if (!addressSpaceItems) {
+      if (!msg.addressSpaceItems) {
         reject(new Error('AddressSpace Items Not Valid To Crawl'))
         return
       }
+
+      const message = Object.assign({}, msg)
 
       const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
       let crawlerResult = []
@@ -157,7 +161,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
           coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
         }
       }
-      addressSpaceItems.forEach(item => {
+      message.addressSpaceItems.forEach(item => {
         if (!item.nodeId) {
           coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
           return
@@ -167,7 +171,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
           if (err) {
             reject(err)
           } else {
-            resolve(crawlerResult)
+            resolve({ rootNodeId: item.nodeId, message, crawlerResult })
           }
         })
       })

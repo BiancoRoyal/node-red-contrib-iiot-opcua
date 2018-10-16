@@ -71,7 +71,7 @@ var testFlexServerWithUserAndISA95 = [
     'showErrors': false,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [
       {
         'name': 'test',

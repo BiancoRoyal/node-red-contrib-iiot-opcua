@@ -57,7 +57,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.filterCrawlerResults = function (msg, crawlerResultToFilter) {
+    node.filterCrawlerResults = function (crawlerResultToFilter) {
       let crawlerResult = crawlerResultToFilter || []
       let filteredEntries = []
 
@@ -147,10 +147,10 @@ module.exports = function (RED) {
         node.setNodeStatusTo('crawling')
       }
 
-      coreBrowser.crawl(session, node.browseTopic)
-        .then(function (crawlerResult) {
-          const filteredCrawlerResult = node.filterCrawlerResults(msg, crawlerResult)
-          node.sendMessage(msg, filteredCrawlerResult)
+      coreBrowser.crawl(session, node.browseTopic, msg)
+        .then(function (result) {
+          coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
+          node.sendMessage(result.message, node.filterCrawlerResults(result.message, result.crawlerResult))
         }).catch(function (err) {
           node.browseErrorHandling(err, msg)
         })
@@ -162,10 +162,10 @@ module.exports = function (RED) {
       }
 
       if (node.singleResult) {
-        coreBrowser.crawlAddressSpaceItems(session, msg.addressSpaceItems)
-          .then(function (crawlerResult) {
-            const filteredCrawlerResult = node.filterCrawlerResults(msg, crawlerResult)
-            node.sendMessage(msg, filteredCrawlerResult)
+        coreBrowser.crawlAddressSpaceItems(session, msg)
+          .then(function (result) {
+            coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
+            node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
             if (node.showStatusActivities) {
               node.setNodeStatusTo('active')
             }
@@ -178,9 +178,9 @@ module.exports = function (RED) {
       } else {
         msg.addressSpaceItems.map((entry) => (
           coreBrowser.crawl(session, entry.nodeId)
-            .then(function (crawlerResult) {
-              const filteredCrawlerResult = node.filterCrawlerResults(msg, crawlerResult)
-              node.sendMessage(msg, filteredCrawlerResult)
+            .then(function (result) {
+              coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
+              node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
               if (node.showStatusActivities) {
                 node.setNodeStatusTo('active')
               }

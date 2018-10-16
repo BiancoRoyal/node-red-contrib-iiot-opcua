@@ -158,10 +158,9 @@ module.exports = function (RED) {
       node.opcuaClient.on('close', function (err) {
         if (err) {
           coreConnector.internalDebugLog('Connection Error On Close ' + err)
-          node.stateMachine.close().idle()
         } else {
-          node.stateMachine.close().idle().init()
         }
+        node.stateMachine.lock().close().idle()
         coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
         coreConnector.internalDebugLog('CONNECTION CLOSED: ' + node.endpoint)
         node.emit('server_connection_close')
@@ -383,6 +382,7 @@ module.exports = function (RED) {
       }
 
       if (node.sessionNodeRequests > 10) {
+        coreConnector.internalDebugLog('Reset Bad Session Request On State ' + node.stateMachine.getMachineState())
         node.stateMachine.lock()
         node.renewSession('ToManyBadSessionRequests')
       }
@@ -432,14 +432,14 @@ module.exports = function (RED) {
     node.handleSessionClose = function (statusCode) {
       coreConnector.internalDebugLog('Session Closed With StatusCode ' + statusCode)
       node.logSessionInformation(node.opcuaSession)
-      node.stateMachine.sessionclose()
+      node.stateMachine.lock().sessionclose()
     }
 
     node.disconnectNodeOPCUA = function (done) {
       if (node.opcuaClient) {
         coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
         node.opcuaClient.disconnect(function (err) {
-          node.stateMachine.close()
+          node.stateMachine.lock().close().idle()
           if (err) {
             coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
             if (node.showErrors) {
@@ -458,9 +458,8 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.stateMachine.lock()
+      node.stateMachine.lock().end()
       node.disconnectNodeOPCUA(() => {
-        node.stateMachine.end()
         done()
       })
     })

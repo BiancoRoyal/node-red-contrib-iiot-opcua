@@ -458,7 +458,7 @@ var testASOFlow = [
     'asoDemo': true,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',

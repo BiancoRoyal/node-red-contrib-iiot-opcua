@@ -33,7 +33,7 @@ var testCrawlerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.6',
+    'startDelay': '2.4',
     'name': 'Limits',
     'addressSpaceItems': [
       {
@@ -82,7 +82,7 @@ var testCrawlerFlow = [
     'asoDemo': false,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -176,7 +176,7 @@ var testCrawlerJustValueFlow = [
     'asoDemo': false,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -270,7 +270,7 @@ var testCrawlerJustValueSingleFlow = [
     'asoDemo': false,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -364,7 +364,7 @@ var testCrawlerJustValueSingleFilteredFlow = [
     'asoDemo': false,
     'allowAnonymous': true,
     'isAuditing': false,
-    'serverDiscovery': true,
+    'serverDiscovery': false,
     'users': [],
     'xmlsets': [],
     'publicCertificateFile': '',
@@ -784,6 +784,8 @@ describe('OPC UA Crawler node Testing', function () {
 
   describe('Crawler node', function () {
     it('should get a message with payload', function (done) {
+      testCrawlerFlow[4].port = 1789
+      testCrawlerFlow[5].endpoint = 'opc.tcp://localhost:1789/'
       helper.load(crawlerNodesToLoad, testCrawlerFlow, function () {
         let n2 = helper.getNode('n2f1')
         n2.on('input', function (msg) {
@@ -791,12 +793,15 @@ describe('OPC UA Crawler node Testing', function () {
         })
         let n4 = helper.getNode('n4f1')
         n4.on('input', function (msg) {
+          expect(msg.payload).toBeDefined()
           done()
         })
       })
     })
 
     it('should verify crawler items as result', function (done) {
+      testCrawlerFlow[4].port = 6519
+      testCrawlerFlow[5].endpoint = 'opc.tcp://localhost:6519/'
       helper.load(crawlerNodesToLoad, testCrawlerFlow, function () {
         let n4 = helper.getNode('n4f1')
         n4.on('input', function (msg) {
