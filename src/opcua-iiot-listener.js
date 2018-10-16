@@ -214,12 +214,12 @@ module.exports = function (RED) {
         } else {
           const itemsToMonitor = msg.addressSpaceItems.filter(addressSpaceItem => {
             const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-            return node.monitoredASO.get(nodeIdToMonitor) === undefined
+            return typeof node.monitoredASO.get(nodeIdToMonitor) === 'undefined'
           })
 
           const itemsToTerminate = msg.addressSpaceItems.filter(addressSpaceItem => {
             const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-            return node.monitoredASO.get(nodeIdToMonitor) !== undefined
+            return typeof node.monitoredASO.get(nodeIdToMonitor) !== 'undefined'
           })
 
           if (itemsToMonitor.length > 0) {
@@ -231,7 +231,7 @@ module.exports = function (RED) {
 
           if (itemsToTerminate.length > 0) {
             coreListener.subscribeDebugLog('itemsToTerminate ' + itemsToTerminate.length)
-            itemsToTerminate.forEach(addressSpaceItem => {
+            itemsToTerminate.forEach((addressSpaceItem) => {
               const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
               const item = node.monitoredASO.get(nodeIdToMonitor)
               if (item && item.monitoredItem) {
@@ -343,7 +343,7 @@ module.exports = function (RED) {
 
     node.setMonitoring = function (monitoredItemToSet) {
       const monitoredItem = monitoredItemToSet
-      if (monitoredItem.monitoredItemId === undefined) {
+      if (typeof monitoredItem.monitoredItemId === 'undefined') {
         coreListener.internalDebugLog('monitoredItem Id from server is not valid Id: ' + monitoredItem.monitoredItemId)
         return
       }
@@ -466,7 +466,7 @@ module.exports = function (RED) {
               msg.error = err.message
             }
           } else {
-            msg.payload = { dataValue: dataValue, eventResults: eventResults, monitoredItem: monitoredItem }
+            msg.payload = { dataValue, eventResults, monitoredItem }
           }
 
           coreListener.detailDebugLog('sendDataFromEvent: ' + msg)

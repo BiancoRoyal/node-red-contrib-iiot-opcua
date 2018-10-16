@@ -34,7 +34,8 @@
       discoveryServerEndpointUrl: {value: ''},
       capabilitiesForMDNS: {value: ''},
       maxNodesPerRead: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 100000))) }},
-      maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }}
+      maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }},
+      delayToClose: {value: 500, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v >= 100) && (v <= 15000))) }}
     },
     inputs: 1,
     outputs: 1,
@@ -326,7 +327,7 @@
         })
       })
 
-      if (node.asoDemo === null || node.asoDemo === undefined) {
+      if (node.asoDemo === null || typeof node.asoDemo === 'undefined') {
         asoDemo = true
       }
 
@@ -369,6 +370,10 @@
             <div class="form-row">
                 <label for="node-input-maxNodesPerBrowse"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerBrowse"></span></label>
                 <input type="text" id="node-input-maxNodesPerBrowse" placeholder="10" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-delayToClose"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayToClose"></span></label>
+                <input type="text" id="node-input-delayToClose" placeholder="500" style="width:80px">
             </div>
             <hr>
             <div class="form-row">
@@ -531,6 +536,10 @@
 
     <h3>Options</h3>
     <p>If you need more information about all options read the node-opcua API, please!</p>
+
+    <p>The 'Delay On Close' is to close the server node with delay to all other nodes.
+    That is to handle a node-opcua 0.4 issue with monitoring and subscriptions.
+    Set it higher if you got an exception on deploy, because of subscription has to close before the server close.</p>
 
     <h3>Certificates</h3>
     <p>The server provides simple NodeOPCUA demo certificates and private keys.</p>

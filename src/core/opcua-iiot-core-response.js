@@ -40,7 +40,7 @@ de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (node, msg
     case 'VariableValue':
       break
     case 'HistoryValue':
-      msg.payload.forEach(item => {
+      msg.payload.forEach((item) => {
         delete item['statusCode']
       })
       break
@@ -234,7 +234,7 @@ de.biancoroyal.opcua.iiot.core.response.defaultCompress = function (msg) {
     msg.payload = msg.payload.value.value
   } else {
     if (msg.payload.length) {
-      msg.payload.forEach(item => {
+      msg.payload.forEach((item) => {
         if (item.hasOwnProperty('value') && item.value.hasOwnProperty('value')) {
           item = item.value.value
         }
@@ -265,7 +265,7 @@ de.biancoroyal.opcua.iiot.core.response.trimMessagePayloadExtensions = function 
 de.biancoroyal.opcua.iiot.core.response.compressBrowseMessageStructure = function (msg) {
   if (msg.payload.hasOwnProperty('browserResults') && msg.payload.browserResults.length) {
     let itemList = []
-    msg.payload.browserResults.forEach(item => {
+    msg.payload.browserResults.forEach((item) => {
       itemList.push({
         nodeId: item.nodeId.toString(),
         browseName: (item.browseName.namespaceIndex) ? item.browseName.namespaceIndex + ':' + item.browseName.name : item.browseName,

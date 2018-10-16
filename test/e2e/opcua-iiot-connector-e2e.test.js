@@ -118,6 +118,7 @@ var testConnectorBrowseFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 100,
     'wires': [[]]
   }
 ]

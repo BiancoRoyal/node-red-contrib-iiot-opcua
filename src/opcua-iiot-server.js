@@ -51,6 +51,7 @@ module.exports = function (RED) {
     // limits
     this.maxNodesPerRead = config.maxNodesPerRead || 1000
     this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
+    this.delayToClose = config.delayToClose || 500
 
     let node = this
     node.initialized = false
@@ -274,13 +275,13 @@ module.exports = function (RED) {
           displayName: new LocalizedText({locale: null, text: msg.payload.displayname}),
           dataType: msg.payload.datatype,
           value: {
-            get: function () {
+            get () {
               return new coreServer.core.nodeOPCUA.Variant({
                 dataType: coreServer.core.nodeOPCUA.DataType[msg.payload.datatype],
                 value: variableData
               })
             },
-            set: function (variant) {
+            set (variant) {
               variableData = variant.value
               return coreServer.core.nodeOPCUA.StatusCodes.Good
             }
@@ -365,7 +366,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.on('close', done => {
+    node.on('close', (done) => {
       node.closeServer(() => {
         done()
       })
@@ -374,9 +375,11 @@ module.exports = function (RED) {
     node.closeServer = function (done) {
       if (node.opcuaServer) {
         coreServer.destructAddressSpace()
-        node.opcuaServer.shutdown(function () {
-          done()
-        })
+        setTimeout(() => {
+          node.opcuaServer.shutdown(() => {
+            done()
+          })
+        }, node.delayToClose)
       } else {
         done()
       }

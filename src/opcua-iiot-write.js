@@ -128,7 +128,7 @@ module.exports = function (RED) {
 
     coreClient.core.registerToConnector(node)
 
-    node.on('close', done => {
+    node.on('close', (done) => {
       coreClient.core.deregisterToConnector(node, done)
     })
   }

@@ -689,7 +689,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
             expect(msg.topic).toBe('TestTopicSubscribe')
             expect(msg.payload.value.dataType).toBe('Int32')
             expect(msg.payload.statusCode).toBeDefined()
-            setTimeout(done, 500)
+            setTimeout(done, 2000)
           }
         })
       })
@@ -707,7 +707,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
             expect(msg.payload.dataType).toBe('Int32')
             expect(msg.payload.nodeId).toBe('ns=1;s=FullCounter')
             expect(msg.payload.statusCode).toBeUndefined()
-            setTimeout(done, 500)
+            setTimeout(done, 2000)
           }
         })
       })
@@ -839,7 +839,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
 
           if (msgCounter === 2) {
             expect(msg.payload).toBeDefined()
-            done()
+            setTimeout(done, 1000)
           }
         })
       })
@@ -883,7 +883,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 1) {
             expect(msg.payload).toBeDefined()
-            setTimeout(done, 500)
+            setTimeout(done, 2000)
           }
         })
       })

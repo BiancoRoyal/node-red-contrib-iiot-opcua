@@ -35,7 +35,7 @@ module.exports = function (RED) {
     this.addressSpaceItems = config.addressSpaceItems || []
 
     let node = this
-    node.interval_id = null
+    node.intervalId = null
     node.cronjob = null
     node.REPEAT_FACTOR = 1000.0
     node.ONE_SECOND = 1000
@@ -60,11 +60,11 @@ module.exports = function (RED) {
         node.verboseLog(RED._('opcuaiiotinject.repeat', node))
         coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
-        if (node.interval_id) {
-          clearInterval(node.interval_id)
+        if (node.intervalId) {
+          clearInterval(node.intervalId)
         }
 
-        node.interval_id = setInterval(function () {
+        node.intervalId = setInterval(function () {
           node.emit('input', {})
         }, node.repeat)
       } else if (node.crontab !== '') {
@@ -149,8 +149,8 @@ module.exports = function (RED) {
       clearTimeout(node.onceTimeout)
     }
 
-    if (node.interval_id) {
-      clearInterval(node.interval_id)
+    if (node.intervalId) {
+      clearInterval(node.intervalId)
       node.verboseLog(RED._('opcuaiiotinject.stopped'))
     }
 

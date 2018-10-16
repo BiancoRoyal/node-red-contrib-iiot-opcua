@@ -383,7 +383,7 @@
     })
 
     let cacheItemCount = 0
-    if (node.addressSpaceItems !== undefined && node.addressSpaceItems.length > 0) {
+    if (node.addressSpaceItems && node.addressSpaceItems.length > 0) {
       cacheItemCount = node.addressSpaceItems.length
       node.addressSpaceItems.forEach(function (element, index, array) {
         generateItemsEntry(element, index)

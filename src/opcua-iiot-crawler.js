@@ -245,7 +245,7 @@ module.exports = function (RED) {
 
     coreBrowser.core.registerToConnector(node)
 
-    node.on('close', done => {
+    node.on('close', (done) => {
       coreBrowser.core.deregisterToConnector(node, done)
     })
   }

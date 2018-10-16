@@ -61,7 +61,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (!msg.hasOwnProperty('payload') || msg.payload === null || msg.payload === undefined) {
+      if (!msg.hasOwnProperty('payload') || msg.payload === null || typeof msg.payload === 'undefined') { // values with false has to be true
         coreFilter.internalDebugLog('filtering message without payload ' + JSON.stringify(msg))
         return
       }
@@ -113,7 +113,7 @@ module.exports = function (RED) {
           coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
       }
 
-      if (result === undefined || result === null) {
+      if (typeof result === 'undefined' || result === null) {
         coreFilter.internalDebugLog('result null or undefined' + JSON.stringify(msg))
         return
       }
@@ -131,7 +131,7 @@ module.exports = function (RED) {
         result = node.convertDataType(result)
       }
 
-      if (result === undefined || result === null) {
+      if (typeof result === 'undefined' || result === null) {
         if (node.showErrors) {
           node.error(new Error('converted result null or undefined'), msg)
         }

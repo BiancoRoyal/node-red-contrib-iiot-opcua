@@ -464,7 +464,7 @@ describe('OPC UA Read node e2e Testing', function () {
           expect(msg.payload[0].value).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.attributeId).toBe(3)
-          done()
+          setTimeout(done, 1000)
         })
       })
     })

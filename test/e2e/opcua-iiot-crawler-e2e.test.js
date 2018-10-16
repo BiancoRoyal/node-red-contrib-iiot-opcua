@@ -783,25 +783,7 @@ describe('OPC UA Crawler node Testing', function () {
   })
 
   describe('Crawler node', function () {
-    it('should get a message with payload', function (done) {
-      testCrawlerFlow[4].port = 1789
-      testCrawlerFlow[5].endpoint = 'opc.tcp://localhost:1789/'
-      helper.load(crawlerNodesToLoad, testCrawlerFlow, function () {
-        let n2 = helper.getNode('n2f1')
-        n2.on('input', function (msg) {
-          expect(msg.payload).toBe('testpayload')
-        })
-        let n4 = helper.getNode('n4f1')
-        n4.on('input', function (msg) {
-          expect(msg.payload).toBeDefined()
-          done()
-        })
-      })
-    })
-
     it('should verify crawler items as result', function (done) {
-      testCrawlerFlow[4].port = 6519
-      testCrawlerFlow[5].endpoint = 'opc.tcp://localhost:6519/'
       helper.load(crawlerNodesToLoad, testCrawlerFlow, function () {
         let n4 = helper.getNode('n4f1')
         n4.on('input', function (msg) {
@@ -811,7 +793,7 @@ describe('OPC UA Crawler node Testing', function () {
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
           expect(msg.payload.crawlerResults.length).toBe(34)
           expect(msg.payload.crawlerResultsCount).toBe(34)
-          done()
+          setTimeout(done, 2000)
         })
       })
     })

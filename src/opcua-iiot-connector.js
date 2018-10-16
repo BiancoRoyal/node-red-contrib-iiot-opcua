@@ -57,7 +57,6 @@ module.exports = function (RED) {
     node.discoveryServer = null
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
-    node.sessionNotInRenewMode = true
 
     node.stateMachine = coreConnector.createStatelyMachine()
     coreConnector.internalDebugLog('Start FSM: ' + node.stateMachine.getMachineState())
@@ -158,7 +157,6 @@ module.exports = function (RED) {
       node.opcuaClient.on('close', function (err) {
         if (err) {
           coreConnector.internalDebugLog('Connection Error On Close ' + err)
-        } else {
         }
         node.stateMachine.lock().close().idle()
         coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
@@ -234,8 +232,7 @@ module.exports = function (RED) {
     node.renewConnection = function (done) {
       node.stateMachine.lock()
       node.disconnectNodeOPCUA(() => {
-        node.stateMachine.unlock()
-        node.connectOPCUAEndpoint()
+        node.stateMachine.idle().init()
         done()
       })
     }
@@ -437,9 +434,10 @@ module.exports = function (RED) {
 
     node.disconnectNodeOPCUA = function (done) {
       if (node.opcuaClient) {
+        node.stateMachine.lock()
         coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
         node.opcuaClient.disconnect(function (err) {
-          node.stateMachine.lock().close().idle()
+          node.stateMachine.close()
           if (err) {
             coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
             if (node.showErrors) {
@@ -453,6 +451,7 @@ module.exports = function (RED) {
         })
       } else {
         coreConnector.internalDebugLog('Close Node Done For Connector Without Client On ' + node.endpoint)
+        node.stateMachine.close()
         done()
       }
     }

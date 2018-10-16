@@ -283,12 +283,12 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
         queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
 
-      let filteredAddressSpaceItems = addressSpaceItems.filter(addressSpaceItem => {
+      let filteredAddressSpaceItems = addressSpaceItems.filter((addressSpaceItem) => {
         return addressSpaceItem.datatypeName !== de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE
       })
 
       let subcriptionItems = []
-      filteredAddressSpaceItems.forEach(item => {
+      filteredAddressSpaceItems.forEach((item) => {
         subcriptionItems.push({
           nodeId: coreListener.core.nodeOPCUA.resolveNodeId(item.nodeId),
           attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value})

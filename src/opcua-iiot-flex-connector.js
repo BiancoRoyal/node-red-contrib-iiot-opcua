@@ -62,7 +62,7 @@ module.exports = function (RED) {
 
     coreConnector.core.registerToConnector(node)
 
-    node.on('close', done => {
+    node.on('close', (done) => {
       coreConnector.core.deregisterToConnector(node, done)
     })
   }

@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(5000)
+jest.setTimeout(10000)
 
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
@@ -211,6 +211,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n6 = helper.getNode('n6rff1')
         n6.on('input', function (msg) {
+          console.log(msg)
           expect(msg.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
           expect(msg.payload).toBe(16.04)
           expect(msg.topic).toBe('TestTopic')

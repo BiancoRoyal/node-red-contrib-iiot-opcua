@@ -153,7 +153,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
       const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
       let crawlerResult = []
       const data = {
-        onBrowse: function (crawler, cacheNode) {
+        onBrowse (crawler, cacheNode) {
           if (!cacheNode) {
             coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
           }
@@ -161,7 +161,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
           coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
         }
       }
-      message.addressSpaceItems.forEach(item => {
+      message.addressSpaceItems.forEach((item) => {
         if (!item.nodeId) {
           coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
           return

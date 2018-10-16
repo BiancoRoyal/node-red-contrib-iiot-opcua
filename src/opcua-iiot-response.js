@@ -105,7 +105,7 @@ module.exports = function (RED) {
     })
 
     node.itemIsNotToFilter = function (item) {
-      let result = item !== null && item !== undefined
+      let result = (item !== null && typeof item !== 'undefined') // values with false has to be true
       let filterValue
       node.filters.forEach(function (element, index, array) {
         try {
