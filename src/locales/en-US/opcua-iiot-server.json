@@ -34,7 +34,8 @@
       "users": "Users & Sets",
       "settings": "Settings",
       "security": "Security",
-      "discovery": "Discovery"
+      "discovery": "Discovery",
+      "limits": "Limits"
     }
   }
 }

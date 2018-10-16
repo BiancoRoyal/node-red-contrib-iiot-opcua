@@ -51,7 +51,7 @@ module.exports = function (RED) {
     // limits
     this.maxNodesPerRead = config.maxNodesPerRead || 1000
     this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
-    this.delayToClose = config.delayToClose || 500
+    this.delayToClose = config.delayToClose || 100
 
     let node = this
     node.initialized = false

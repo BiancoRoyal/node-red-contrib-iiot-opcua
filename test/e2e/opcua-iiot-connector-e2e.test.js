@@ -900,7 +900,7 @@ describe('OPC UA Connector node e2e Testing', function () {
         n2.on('input', function (msg) {
           expect(msg.payload).toBe(1000)
           expect(msg.topic).toBe('TestTopicWrite')
-          done()
+          setTimeout(done, 3000)
         })
       })
     })

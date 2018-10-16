@@ -35,7 +35,7 @@
       capabilitiesForMDNS: {value: ''},
       maxNodesPerRead: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 100000))) }},
       maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }},
-      delayToClose: {value: 500, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v >= 100) && (v <= 15000))) }}
+      delayToClose: {value: 100, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v >= 100) && (v <= 15000))) }}
     },
     inputs: 1,
     outputs: 1,
@@ -64,6 +64,11 @@
       tabs.addTab({
         id: "opcuaiiot-server-tab-settings",
         label: this._("opcua-iiot-contrib.tabs-label.settings")
+      })
+
+      tabs.addTab({
+        id: "opcuaiiot-server-tab-limits",
+        label: this._("opcua-iiot-contrib.tabs-label.limits")
       })
 
       tabs.addTab({
@@ -327,10 +332,6 @@
         })
       })
 
-      if (node.asoDemo === null || typeof node.asoDemo === 'undefined') {
-        asoDemo = true
-      }
-
       // console.log('well done editsave ...')
     }
   })
@@ -352,33 +353,13 @@
                 <input type="text" id="node-input-endpoint" placeholder="UA/NodeREDIIoTServer">
             </div>
             <div class="form-row">
-                <label for="node-input-maxAllowedSessionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSessionNumber"></span></label>
-                <input type="text" id="node-input-maxAllowedSessionNumber" placeholder="10" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxConnectionsPerEndpoint"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxConnectionsPerEndpoint"></span></label>
-                <input type="text" id="node-input-maxConnectionsPerEndpoint" placeholder="10" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxAllowedSubscriptionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSubscriptionNumber"></span></label>
-                <input type="text" id="node-input-maxAllowedSubscriptionNumber" placeholder="50" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxNodesPerRead"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerRead"></span></label>
-                <input type="text" id="node-input-maxNodesPerRead" placeholder="10" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-maxNodesPerBrowse"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerBrowse"></span></label>
-                <input type="text" id="node-input-maxNodesPerBrowse" placeholder="10" style="width:80px">
-            </div>
-            <div class="form-row">
-                <label for="node-input-delayToClose"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayToClose"></span></label>
-                <input type="text" id="node-input-delayToClose" placeholder="500" style="width:80px">
+                <label for="node-input-alternateHostname"><i class="fa fa-server"></i> <span data-i18n="opcua-iiot-contrib.label.alternateHostname"></span></label>
+                <input type="text" id="node-input-alternateHostname" placeholder="">
             </div>
             <hr>
             <div class="form-row">
-                <label for="node-input-alternateHostname"><i class="fa fa-server"></i> <span data-i18n="opcua-iiot-contrib.label.alternateHostname"></span></label>
-                <input type="text" id="node-input-alternateHostname" placeholder="">
+                <label for="node-input-delayToClose"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayToClose"></span></label>
+                <input type="text" id="node-input-delayToClose" placeholder="100" style="width:80px">
             </div>
             <div class="form-row">
                 <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
@@ -405,6 +386,28 @@
                 <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
                 <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
+            </div>
+        </div>
+        <div id="opcuaiiot-server-tab-limits" style="display:none">
+            <div class="form-row">
+                <label for="node-input-maxAllowedSessionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSessionNumber"></span></label>
+                <input type="text" id="node-input-maxAllowedSessionNumber" placeholder="10" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxConnectionsPerEndpoint"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxConnectionsPerEndpoint"></span></label>
+                <input type="text" id="node-input-maxConnectionsPerEndpoint" placeholder="10" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxAllowedSubscriptionNumber"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxAllowedSubscriptionNumber"></span></label>
+                <input type="text" id="node-input-maxAllowedSubscriptionNumber" placeholder="50" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxNodesPerRead"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerRead"></span></label>
+                <input type="text" id="node-input-maxNodesPerRead" placeholder="1000" style="width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-maxNodesPerBrowse"><i class="icon-list"></i> <span data-i18n="opcua-iiot-contrib.label.maxNodesPerBrowse"></span></label>
+                <input type="text" id="node-input-maxNodesPerBrowse" placeholder="2000" style="width:80px">
             </div>
         </div>
         <div id="opcuaiiot-server-tab-security" style="display:none">
