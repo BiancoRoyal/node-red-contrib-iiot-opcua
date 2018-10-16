@@ -28,10 +28,10 @@ module.exports = {
 
   // An array of regexp pattern strings used to skip coverage collection
   coveragePathIgnorePatterns: [
-    'node_modules/',
-    'code/',
-    'opcuaIIoT/',
-    'test/'
+    '<rootDir>/node_modules/',
+    '<rootDir>/code/',
+    '<rootDir>/opcuaIIoT/',
+    '<rootDir>/test/'
   ],
 
   // A list of reporter names that Jest uses when writing coverage reports
@@ -62,8 +62,7 @@ module.exports = {
 
   // An array of directory names to be searched recursively up from the requiring module's location
   moduleDirectories: [
-    'node_modules',
-    'pki'
+    '<rootDir>/node_modules/'
   ],
 
   // An array of file extensions your modules use
@@ -138,22 +137,22 @@ module.exports = {
   // testLocationInResults: false,
 
   // The glob patterns Jest uses to detect test files
-  testMatch: [
-    '**/*suite.test.js?(x)'
-    // '**/test/**/*.js?(x)',
-    // 'test/**/?(*.)+(spec|test).js?(x)'
-  ],
+  // testMatch: [
+  //  '**/*suite.test.js?(x)'
+  // '**/test/**/*.js?(x)',
+  // 'test/**/?(*.)+(spec|test).js?(x)'
+  // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
-    'node_modules/',
-    'code/',
-    'jcoverage/',
-    'opcuaIIoT/'
-  ]
+    '<rootDir>/node_modules/',
+    '<rootDir>/code/',
+    '<rootDir>/jcoverage/',
+    '<rootDir>/opcuaIIoT/'
+  ],
 
   // The regexp pattern Jest uses to detect test files
-  // testRegex: "",
+  testRegex: 'suite.test'
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: null,
