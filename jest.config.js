@@ -150,11 +150,12 @@ module.exports = {
     '<rootDir>/code/',
     '<rootDir>/jcoverage/',
     '<rootDir>/opcuaIIoT/',
-    '<rootDir>/suite/'
+    '<rootDir>/test/'
+    // '<rootDir>/suite/'
   ],
 
   // The regexp pattern Jest uses to detect test files
-  // testRegex: 'suite.test'
+  testRegex: 'suite.test',
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: null,
@@ -166,7 +167,7 @@ module.exports = {
   // testURL: "http://localhost",
 
   // Setting this value to "fake" allows the use of fake timers for functions such as "setTimeout"
-  // timers: "real",
+  timers: 'real',
 
   // A map from regular expressions to paths to transformers
   // transform: null,
