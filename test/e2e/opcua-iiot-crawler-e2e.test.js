@@ -89,6 +89,7 @@ var testCrawlerFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
+
     'wires': [
       []
     ]
@@ -183,6 +184,7 @@ var testCrawlerJustValueFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
+
     'wires': [
       []
     ]
@@ -277,6 +279,7 @@ var testCrawlerJustValueSingleFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
+
     'wires': [
       []
     ]
@@ -371,6 +374,7 @@ var testCrawlerJustValueSingleFilteredFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
+
     'wires': [
       []
     ]
@@ -511,6 +515,7 @@ let testCrawlerWithFilter = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 6000,
     'maxNodesPerBrowse': 6000,
+
     'wires': [ [ ] ]
   }
 ]
@@ -629,6 +634,7 @@ var testCrawlerWithFilterNS0 = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+
     'wires': [[]]
   }
 ]

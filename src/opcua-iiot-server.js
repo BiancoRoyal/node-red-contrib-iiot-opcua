@@ -51,7 +51,7 @@ module.exports = function (RED) {
     // limits
     this.maxNodesPerRead = config.maxNodesPerRead || 1000
     this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
-    this.delayToClose = config.delayToClose || 100
+    this.delayToClose = config.delayToClose || 1000
 
     let node = this
     coreServer.internalDebugLog('Open Server Node')
@@ -375,18 +375,9 @@ module.exports = function (RED) {
     })
 
     node.closeServer = function (done) {
-      if (coreServer.simulatorInterval) {
-        clearInterval(coreServer.simulatorInterval)
-        coreServer.simulatorInterval = null
-      }
-
+      coreServer.destructAddressSpace()
       if (node.opcuaServer) {
-        coreServer.destructAddressSpace()
-        setTimeout(() => {
-          node.opcuaServer.shutdown(() => {
-            done()
-          })
-        }, node.delayToClose)
+        node.opcuaServer.shutdown(node.delayToClose, done)
       } else {
         done()
       }

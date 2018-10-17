@@ -211,7 +211,6 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readTestFlowPayload, function () {
         let n6 = helper.getNode('n6rff1')
         n6.on('input', function (msg) {
-          console.log(msg)
           expect(msg.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
           expect(msg.payload).toBe(16.04)
           expect(msg.topic).toBe('TestTopic')

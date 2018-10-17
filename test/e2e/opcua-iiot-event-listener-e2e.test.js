@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(30000)
+jest.setTimeout(40000)
 
 // iiot opc ua nodes
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -155,7 +155,120 @@ var testListenerEventFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
-    'delayToClose': 2000,
+    'delayToClose': 4000,
+    'wires': [[]]
+  }
+]
+
+var listenToEventsOnServer = [
+  {
+    'id': '7a62a52a.b16114',
+    'type': 'OPCUA-IIoT-Event',
+    'z': 'ef3cce0d.a3af8',
+    'eventType': 'BaseEventType',
+    'eventTypeLabel': 'BaseEventType (i=2041)',
+    'queueSize': '1000',
+    'usingListener': true,
+    'name': 'Base Events',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        '76db0764.6b88c8'
+      ]
+    ]
+  },
+  {
+    'id': 'c4107b6c.885328',
+    'type': 'OPCUA-IIoT-Inject',
+    'z': 'ef3cce0d.a3af8',
+    'injectType': 'listen',
+    'payload': '200',
+    'payloadType': 'num',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '4',
+    'name': 'listen with 200 ms',
+    'addressSpaceItems': [
+      {
+        'name': 'Tanks',
+        'nodeId': 'ns=1;i=1000',
+        'datatypeName': ''
+      },
+      {
+        'name': 'Server',
+        'nodeId': 'ns=0;i=2253',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        '7a62a52a.b16114'
+      ]
+    ]
+  },
+  {
+    'id': '76db0764.6b88c8',
+    'type': 'OPCUA-IIoT-Listener',
+    'z': 'ef3cce0d.a3af8',
+    'connector': '4de0c979.b3757',
+    'action': 'events',
+    'queueSize': '100',
+    'name': '',
+    'justValue': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        'nh1ev'
+      ]
+    ]
+  },
+  {id: 'nh1ev', type: 'helper'},
+  {
+    'id': '4de0c979.b3757',
+    'type': 'OPCUA-IIoT-Connector',
+    'z': '',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:51648/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false
+  },
+  {
+    'id': 's1ev',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '51648',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': 'TestServer',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': false,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'delayToClose': 4000,
     'wires': [[]]
   }
 ]
@@ -274,6 +387,15 @@ describe('OPC UA Listener event node e2e Testing', function () {
             expect(msg.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
+        })
+      })
+    })
+
+    it('should get a message with payload after base event subscribe', function (done) {
+      helper.load(eventNodesToLoad, listenToEventsOnServer, function () {
+        let n1 = helper.getNode('nh1ev')
+        n1.on('input', function (msg) {
+          done()
         })
       })
     })

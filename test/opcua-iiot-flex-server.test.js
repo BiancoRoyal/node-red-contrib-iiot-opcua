@@ -100,46 +100,6 @@ var testFlexServerWithUserAndISA95 = [
   }
 ]
 
-var testFlexServerWithFailureAndUserFlow = [
-  {
-    'id': '85d5edb0.385179',
-    'type': 'OPCUA-IIoT-Flex-Server',
-    'port': '54445',
-    'endpoint': '',
-    'acceptExternalCommands': true,
-    'maxAllowedSessionNumber': '',
-    'maxConnectionsPerEndpoint': '',
-    'maxAllowedSubscriptionNumber': '',
-    'alternateHostname': '',
-    'name': 'DEMOSERVER',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'allowAnonymous': true,
-    'isAuditing': false,
-    'serverDiscovery': false,
-    'users': [
-      {
-        'name': 'user',
-        'password': 'pass0wD1470'
-      }
-    ],
-    'xmlsets': [],
-    'publicCertificateFile': '',
-    'privateCertificateFile': '',
-    'registerServerMethod': '1',
-    'discoveryServerEndpointUrl': '',
-    'capabilitiesForMDNS': '',
-    'maxNodesPerRead': 1000,
-    'maxNodesPerBrowse': 2000,
-    'delayToClose': 500,
-    'addressSpaceScript': 'function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n  let failure = addressSpace.getMyFirstErrorForJestCoverage()\n  done()}',
-    'wires': [
-      [
-      ]
-    ]
-  }
-]
-
 describe('OPC UA Flex Server node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -192,12 +152,6 @@ describe('OPC UA Flex Server node Unit Testing', function () {
           })
         }
       )
-    })
-
-    it('should be loaded with user and failure in function', function (done) {
-      helper.load(flexServerFlowNodes, testFlexServerWithFailureAndUserFlow, () => {
-        setTimeout(done, 4000)
-      })
     })
   })
 })

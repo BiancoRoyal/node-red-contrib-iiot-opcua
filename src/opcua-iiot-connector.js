@@ -20,8 +20,8 @@ module.exports = function (RED) {
   const _ = require('underscore')
 
   function OPCUAIIoTConnectorConfiguration (config) {
-    const CONNECTION_START_DELAY = 1200 // msec.
-    const RECONNECT_DELAY = 600 // msec.
+    const CONNECTION_START_DELAY = 500 // msec.
+    const RECONNECT_DELAY = 500 // msec.
     const UNLIMITED_LISTENERS = 0
 
     RED.nodes.createNode(this, config)
@@ -38,7 +38,7 @@ module.exports = function (RED) {
     this.privateKeyFile = config.privateKeyFile
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 120000
     this.autoSelectRightEndpoint = config.autoSelectRightEndpoint
-    this.strategyMaxRetry = config.strategyMaxRetry || 2000
+    this.strategyMaxRetry = config.strategyMaxRetry || 10000
     this.strategyInitialDelay = config.strategyInitialDelay || 1000
     this.strategyMaxDelay = config.strategyMaxDelay || 30000
     this.strategyRandomisationFactor = config.strategyRandomisationFactor || 0.2
@@ -152,8 +152,8 @@ module.exports = function (RED) {
       }
 
       if (RED.settings.verbose) {
-        coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT INFORMATION !!!!!!!!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
-        coreConnector.internalDebugLog('Client Information: ' + node.opcuaClient.toString())
+        coreConnector.detailDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT INFORMATION !!!!!!!!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
+        coreConnector.detailDebugLog('Client Information: ' + node.opcuaClient.toString())
       }
 
       node.opcuaClient.on('close', function (err) {
@@ -460,16 +460,22 @@ module.exports = function (RED) {
 
     node.on('close', function (done) {
       node.stateMachine.lock().end()
+      node.closeConnector(done)
+    })
+
+    node.closeConnector = (done) => {
       if (node.registeredNodeList.length > 0) {
-        coreConnector.internalDebugLog('Connector Has Registered Nodes On Close Node -> Count: ' + node.registeredNodeList.length)
-      }
-      setTimeout(() => {
+        coreConnector.internalDebugLog('Connector Has Registered Nodes And Can Not Close The Node -> Count: ' + node.registeredNodeList.length)
+        setTimeout(() => {
+          node.closeConnector(done)
+        }, 1000)
+      } else {
         node.disconnectNodeOPCUA(() => {
           coreConnector.internalDebugLog('Close Connector Node')
           done()
         })
-      }, 2000)
-    })
+      }
+    }
 
     node.restartWithNewSettings = function (parameters, done) {
       coreConnector.internalDebugLog('Renew With Flex Connector Request On State ' + node.stateMachine.getMachineState())
@@ -616,6 +622,7 @@ module.exports = function (RED) {
         coreConnector.internalDebugLog('Node Not Valid To Register In Connector')
         return
       }
+      coreConnector.internalDebugLog('Register In Connector NodeId: ' + opcuaNode.id)
       node.registeredNodeList[opcuaNode.id] = opcuaNode
       if (Object.keys(node.registeredNodeList).length === 1) {
         node.closingOPCUA = false
@@ -633,11 +640,14 @@ module.exports = function (RED) {
         done()
         return
       }
+
+      coreConnector.internalDebugLog('Deregister In Connector NodeId: ' + opcuaNode.id)
       delete node.registeredNodeList[opcuaNode.id]
 
       if (node.closingOPCUA) {
         done()
       }
+
       if (Object.keys(node.registeredNodeList).length === 0) {
         node.closingOPCUA = true
         if (node.opcuaClient) {

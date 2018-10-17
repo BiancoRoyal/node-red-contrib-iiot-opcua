@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(20000)
+jest.setTimeout(30000)
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
@@ -134,7 +134,7 @@ var testConnectorReadFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': '',
     'addressSpaceItems': [
       {
@@ -307,7 +307,7 @@ var testConnectorWriteFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': '',
     'addressSpaceItems': [
       {
@@ -400,7 +400,7 @@ var testConnectorMethodCallerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'TestInject',
     'addressSpaceItems': [],
     'wires': [['n2cf5', 'n3cf5']]

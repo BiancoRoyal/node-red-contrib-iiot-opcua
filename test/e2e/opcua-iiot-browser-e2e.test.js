@@ -202,6 +202,7 @@ var testBrowseLevelsFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+
     'wires': [[]]
   }
 ]

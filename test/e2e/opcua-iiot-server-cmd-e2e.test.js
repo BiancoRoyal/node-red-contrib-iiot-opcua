@@ -65,7 +65,7 @@ var testCMDWithServerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'onceDelay': '2.4',
+    'onceDelay': '4',
     'wires': [['n2csf1', 'n3csf1']]
   },
   {id: 'n2csf1', type: 'helper'},
@@ -83,7 +83,7 @@ var testCMDWithServerFlow = [
   {
     'id': 's1csr',
     'type': 'OPCUA-IIoT-Server',
-    'port': '59819',
+    'port': '52819',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -119,7 +119,7 @@ var testInjectCMDFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1',
+    'startDelay': '2.4',
     'name': 'TestName',
     'addressSpaceItems': [
       {
@@ -220,8 +220,8 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
     it('should get a message with inject to delete ASO', function (done) {
       helper.load([injectOPCUANode, inputNode, serverNode], testInjectCMDFlow, function () {
-        let n4 = helper.getNode('n4cmdf2')
-        n4.on('input', function (msg) {
+        let n5 = helper.getNode('n5cmdf2')
+        n5.on('input', function (msg) {
           expect(msg.commandType).toBe('deleteNode')
           expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
           expect(msg.nodetype).toBe('inject')
@@ -231,7 +231,7 @@ describe('OPC UA Server Command node e2e Testing', function () {
       })
     })
 
-    it('should get a message with inject to delete ASO', function (done) {
+    it('should get a message with inject to restart server', function (done) {
       helper.load([injectNode, injectOPCUANode, inputNode, serverNode], testCMDWithServerFlow, function () {
         let n5 = helper.getNode('n5csf1')
         n5.on('input', function (msg) {
@@ -239,7 +239,7 @@ describe('OPC UA Server Command node e2e Testing', function () {
           expect(msg.payload.nodeId).toBeUndefined()
           expect(msg.nodetype).toBe('inject')
           expect(msg.injectType).toBe('CMD')
-          done()
+          setTimeout(done, 4000)
         })
       })
     })

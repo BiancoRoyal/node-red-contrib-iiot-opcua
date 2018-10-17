@@ -27,11 +27,6 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrows
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
-      if (!session) {
-        reject(new Error('Session Not Ready To Browse'))
-        return
-      }
-
       let browseOptions = [
         {
           nodeId: nodeIdToBrowse,
@@ -64,11 +59,6 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
-      if (!session) {
-        reject(new Error('Session Not Ready To Browse'))
-        return
-      }
-
       let browseOptions = []
 
       addressSpaceItems.forEach(function (item) {
@@ -104,11 +94,6 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl,
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
-      if (!session) {
-        reject(new Error('Session Not Ready To Crawl'))
-        return
-      }
-
       if (!nodeIdToCrawl) {
         reject(new Error('NodeId To Crawl Not Valid'))
         return
@@ -138,11 +123,6 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
-      if (!session) {
-        reject(new Error('Session Not Ready To Crawl'))
-        return
-      }
-
       if (!msg.addressSpaceItems) {
         reject(new Error('AddressSpace Items Not Valid To Crawl'))
         return

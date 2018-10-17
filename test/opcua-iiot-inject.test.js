@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(5000)
+jest.setTimeout(10000)
 
 var inputNode = require('../src/opcua-iiot-inject')
 
@@ -53,7 +53,7 @@ var testInjectWithDelayFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.3',
+    'startDelay': '2.4',
     'name': 'TestInject',
     'addressSpaceItems': [
       {
@@ -65,6 +65,31 @@ var testInjectWithDelayFlow = [
     'wires': [['n2ijf2']]
   },
   {id: 'n2ijf2', type: 'helper'}
+]
+
+var testInjectWithLongDelayFlow = [
+  {
+    'id': 'n1ijf3',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'inject',
+    'payload': '12345',
+    'payloadType': 'num',
+    'topic': 'TestTopicInject',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '5',
+    'name': 'TestInject',
+    'addressSpaceItems': [
+      {
+        'name': 'ServerStatus',
+        'nodeId': 'ns=0;i=2256',
+        'datatypeName': 'String'
+      }
+    ],
+    'wires': [['n2ijf3']]
+  },
+  {id: 'n2ijf3', type: 'helper'}
 ]
 
 describe('OPC UA Inject node Unit Testing', function () {
@@ -334,6 +359,17 @@ describe('OPC UA Inject node Unit Testing', function () {
     it('should send a message with types and delay write node', function (done) {
       helper.load([inputNode], testInjectWithDelayFlow, function () {
         let n2 = helper.getNode('n2ijf2')
+        n2.on('input', function (msg) {
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('inject')
+          done()
+        })
+      })
+    })
+
+    it('should send a message with types and long delay', function (done) {
+      helper.load([inputNode], testInjectWithLongDelayFlow, function () {
+        let n2 = helper.getNode('n2ijf3')
         n2.on('input', function (msg) {
           expect(msg.nodetype).toBe('inject')
           expect(msg.injectType).toBe('inject')

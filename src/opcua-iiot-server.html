@@ -35,7 +35,7 @@
       capabilitiesForMDNS: {value: ''},
       maxNodesPerRead: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 100000))) }},
       maxNodesPerBrowse: {value: 2000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v > 0) && (v <= 200000))) }},
-      delayToClose: {value: 100, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v >= 100) && (v <= 15000))) }}
+      delayToClose: {value: 1000, validate:function(v) { return ((v === '') || (RED.validators.number(v) && (v >= 100) && (v <= 15000))) }}
     },
     inputs: 1,
     outputs: 1,
@@ -359,7 +359,7 @@
             <hr>
             <div class="form-row">
                 <label for="node-input-delayToClose"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayToClose"></span></label>
-                <input type="text" id="node-input-delayToClose" placeholder="100" style="width:80px">
+                <input type="text" id="node-input-delayToClose" placeholder="1000" style="width:80px">
             </div>
             <div class="form-row">
                 <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>

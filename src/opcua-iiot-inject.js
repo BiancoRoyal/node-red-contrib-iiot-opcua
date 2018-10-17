@@ -147,17 +147,19 @@ module.exports = function (RED) {
 
     if (node.onceTimeout) {
       clearTimeout(node.onceTimeout)
+      node.onceTimeout = null
     }
 
     if (node.intervalId) {
       clearInterval(node.intervalId)
+      node.intervalId = null
       node.verboseLog(RED._('opcuaiiotinject.stopped'))
     }
 
     if (node.cronjob) {
       node.cronjob.stop()
       node.verboseLog(RED._('opcuaiiotinject.stopped'))
-      delete node.cronjob
+      delete node['cronjob']
     }
   }
 
