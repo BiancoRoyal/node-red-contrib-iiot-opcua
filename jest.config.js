@@ -31,6 +31,7 @@ module.exports = {
     '<rootDir>/node_modules/',
     '<rootDir>/code/',
     '<rootDir>/opcuaIIoT/',
+    '<rootDir>/suite/',
     '<rootDir>/test/'
   ],
 
@@ -148,11 +149,12 @@ module.exports = {
     '<rootDir>/node_modules/',
     '<rootDir>/code/',
     '<rootDir>/jcoverage/',
-    '<rootDir>/opcuaIIoT/'
+    '<rootDir>/opcuaIIoT/',
+    '<rootDir>/suite/'
   ],
 
   // The regexp pattern Jest uses to detect test files
-  testRegex: 'suite.test'
+  // testRegex: 'suite.test'
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: null,
