@@ -33,7 +33,7 @@ var testCrawlerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '4',
     'name': 'Limits',
     'addressSpaceItems': [
       {
