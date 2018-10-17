@@ -15,7 +15,6 @@ install:
   - npm install -g gulp-cli
   - npm install -g jest
 script:
-  - npm run test:ci
   - npm run coverage:ci
   - npm run coverage:upload
 cache:
