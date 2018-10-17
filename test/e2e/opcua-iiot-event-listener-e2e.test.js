@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(20000)
+jest.setTimeout(30000)
 
 // iiot opc ua nodes
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -155,6 +155,7 @@ var testListenerEventFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 2000,
     'wires': [[]]
   }
 ]

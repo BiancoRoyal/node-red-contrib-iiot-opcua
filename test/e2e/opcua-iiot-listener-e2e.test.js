@@ -136,6 +136,7 @@ var testListenerMonitoringFlow = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 2000,
     'wires': [
       []
     ]
@@ -321,6 +322,7 @@ var testListenerMonitoringAboFlow = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 2000,
     'wires': [
       []
     ]
@@ -495,6 +497,7 @@ var recursiveBrowserAboFlow = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 2000,
     'wires': [
       []
     ]
@@ -634,6 +637,7 @@ var feedListenerWithRecursiveBrowse = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 2000,
     'wires': [
       []
     ]
