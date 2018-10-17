@@ -20,8 +20,8 @@ module.exports = function (RED) {
   const _ = require('underscore')
 
   function OPCUAIIoTConnectorConfiguration (config) {
-    const CONNECTION_START_DELAY = 500 // msec.
-    const RECONNECT_DELAY = 500 // msec.
+    const CONNECTION_START_DELAY = 2000 // msec.
+    const RECONNECT_DELAY = 1000 // msec.
     const UNLIMITED_LISTENERS = 0
 
     RED.nodes.createNode(this, config)
@@ -39,7 +39,7 @@ module.exports = function (RED) {
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 120000
     this.autoSelectRightEndpoint = config.autoSelectRightEndpoint
     this.strategyMaxRetry = config.strategyMaxRetry || 10000
-    this.strategyInitialDelay = config.strategyInitialDelay || 1000
+    this.strategyInitialDelay = config.strategyInitialDelay || 500
     this.strategyMaxDelay = config.strategyMaxDelay || 30000
     this.strategyRandomisationFactor = config.strategyRandomisationFactor || 0.2
     this.requestedSessionTimeout = config.requestedSessionTimeout || 60000
@@ -554,11 +554,7 @@ module.exports = function (RED) {
       coreConnector.detailDebugLog('Client Options ' + JSON.stringify(node.opcuaClientOptions))
 
       try {
-        if (sessionStartTimeout) {
-          clearTimeout(sessionStartTimeout)
-          sessionStartTimeout = null
-        }
-        sessionStartTimeout = setTimeout(() => { node.startSession('Open Event') }, RECONNECT_DELAY)
+        node.startSession('Open Event')
       } catch (err) {
         coreConnector.internalDebugLog('OPC UA Open Session ' + err)
         if (node.showErrors) {

@@ -53,7 +53,7 @@ var testInjectWithDelayFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'TestInject',
     'addressSpaceItems': [
       {
@@ -126,7 +126,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           'repeat': '',
           'crontab': '',
           'once': false,
-          'startDelay': '',
           'name': 'TestName',
           'addressSpaceItems': [],
           'wires': [

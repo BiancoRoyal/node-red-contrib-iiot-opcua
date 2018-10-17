@@ -128,7 +128,7 @@ var testCrawlerJustValueFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'Limits',
     'addressSpaceItems': [
       {
@@ -223,7 +223,7 @@ var testCrawlerJustValueSingleFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'Limits',
     'addressSpaceItems': [
       {
@@ -318,7 +318,7 @@ var testCrawlerJustValueSingleFilteredFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'Limits',
     'addressSpaceItems': [
       {
@@ -413,7 +413,7 @@ let testCrawlerWithFilter = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.6',
+    'startDelay': '3',
     'name': 'inject',
     'addressSpaceItems': [
       {
@@ -531,7 +531,7 @@ var testCrawlerWithFilterNS0 = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'correct',
     'addressSpaceItems': [
       {
@@ -650,7 +650,7 @@ var testCrawlerWithAllBasicFilterTypes = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'correct',
     'addressSpaceItems': [
       {

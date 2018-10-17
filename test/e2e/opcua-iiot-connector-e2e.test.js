@@ -49,7 +49,7 @@ var testConnectorBrowseFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'TestInject',
     'addressSpaceItems': [],
     'wires': [['n2cf1', 'n3cf1']]
@@ -221,7 +221,7 @@ var testConnectorListenerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3.4',
+    'startDelay': '3',
     'name': 'TestListen',
     'addressSpaceItems': [
       {

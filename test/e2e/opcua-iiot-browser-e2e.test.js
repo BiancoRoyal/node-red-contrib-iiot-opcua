@@ -33,7 +33,7 @@ var testBrowseFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.6',
+    'startDelay': '3',
     'name': 'Root',
     'addressSpaceItems': [],
     'wires': [['n2f1', 'n3f1']]
@@ -116,7 +116,7 @@ var testBrowseLevelsFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.6',
+    'startDelay': '3',
     'name': 'Root',
     'addressSpaceItems': [],
     'wires': [['n2f2', 'n3f2']]
@@ -218,7 +218,7 @@ var testBrowseItemFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.6',
+    'startDelay': '3',
     'name': 'Root',
     'addressSpaceItems': [
       {

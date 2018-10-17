@@ -49,7 +49,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -86,7 +86,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -123,7 +123,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -160,7 +160,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -197,7 +197,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -234,7 +234,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -271,7 +271,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -308,7 +308,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -345,7 +345,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -382,7 +382,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
@@ -401,7 +401,7 @@ var testASOFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1.2',
+    'startDelay': '2',
     'name': 'JSON',
     'addressSpaceItems': [],
     'wires': [

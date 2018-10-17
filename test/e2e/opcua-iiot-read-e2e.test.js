@@ -37,7 +37,7 @@ var testReadFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'TestName',
     'addressSpaceItems': [
       {
@@ -133,7 +133,7 @@ var testReadHistoryRangeFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': '',
     'addressSpaceItems': [
       {
@@ -158,7 +158,7 @@ var testReadHistoryRangeFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '4.4',
+    'startDelay': '5',
     'name': '',
     'addressSpaceItems': [
       {

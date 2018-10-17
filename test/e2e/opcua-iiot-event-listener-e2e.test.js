@@ -35,7 +35,7 @@ var testListenerEventFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': 'listen with 200 ms',
     'addressSpaceItems': [
       {
@@ -60,7 +60,7 @@ var testListenerEventFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '5.5',
+    'startDelay': '6',
     'name': 'Unsubscribe',
     'addressSpaceItems': [
       {
@@ -189,7 +189,7 @@ var listenToEventsOnServer = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '4',
+    'startDelay': '3',
     'name': 'listen with 200 ms',
     'addressSpaceItems': [
       {

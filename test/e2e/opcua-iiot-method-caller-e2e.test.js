@@ -39,7 +39,7 @@ var testMethodFlowPayload = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '2.4',
+    'startDelay': '3',
     'name': '',
     'addressSpaceItems': [],
     'wires': [
