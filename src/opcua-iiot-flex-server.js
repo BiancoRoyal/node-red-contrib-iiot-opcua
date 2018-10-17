@@ -55,6 +55,7 @@ module.exports = function (RED) {
     this.delayToClose = config.delayToClose || 100
 
     let node = this
+    coreServer.flex.internalDebugLog('Open Flex Server Node')
     node.setMaxListeners(UNLIMITED_LISTENERS)
     node.initialized = false
     node.opcuaServer = null
@@ -207,22 +208,25 @@ module.exports = function (RED) {
 
       try {
         node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
+
         node.opcuaServer.initialize(node.postInitialize)
+
+        node.opcuaServer.on('newChannel', function (channel) {
+          coreServer.flex.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
+        })
+
+        node.opcuaServer.on('closeChannel', function (channel) {
+          coreServer.flex.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
+        })
+
+        node.opcuaServer.on('post_initialize', function () {
+          coreServer.flex.internalDebugLog('Client initialized')
+        })
       } catch (err) {
+        node.emit('server_compile_error')
+        coreServer.flex.internalDebugLog(err.message)
         node.error(err, {payload: 'Server Failure! Please, check the server settings!'})
       }
-
-      node.opcuaServer.on('newChannel', function (channel) {
-        coreServer.flex.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
-      })
-
-      node.opcuaServer.on('closeChannel', function (channel) {
-        coreServer.flex.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
-      })
-
-      node.opcuaServer.on('post_initialize', function () {
-        coreServer.flex.internalDebugLog('Client initialized')
-      })
     }
 
     node.postInitialize = function () {
@@ -324,15 +328,19 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.closeServer(done)
+      node.closeServer(() => {
+        coreServer.flex.internalDebugLog('Close Flex Server Node')
+        done()
+      })
     })
 
     node.closeServer = function (done) {
       if (node.opcuaServer) {
         if (coreServer.simulatorInterval) {
           clearInterval(coreServer.simulatorInterval)
+          coreServer.simulatorInterval = null
         }
-        coreServer.simulatorInterval = null
+
         setTimeout(() => {
           node.opcuaServer.shutdown(() => {
             done()

@@ -47,6 +47,7 @@ module.exports = function (RED) {
     this.reconnectDelay = config.reconnectDelay || RECONNECT_DELAY
 
     let node = this
+    coreConnector.internalDebugLog('Open Connector Node')
     node.setMaxListeners(UNLIMITED_LISTENERS)
     node.client = null
     node.sessionNodeRequests = 0
@@ -57,6 +58,7 @@ module.exports = function (RED) {
     node.discoveryServer = null
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
+    node.createConnectionTimeout = null
 
     node.stateMachine = coreConnector.createStatelyMachine()
     coreConnector.internalDebugLog('Start FSM: ' + node.stateMachine.getMachineState())
@@ -458,9 +460,15 @@ module.exports = function (RED) {
 
     node.on('close', function (done) {
       node.stateMachine.lock().end()
-      node.disconnectNodeOPCUA(() => {
-        done()
-      })
+      if (node.registeredNodeList.length > 0) {
+        coreConnector.internalDebugLog('Connector Has Registered Nodes On Close Node -> Count: ' + node.registeredNodeList.length)
+      }
+      setTimeout(() => {
+        node.disconnectNodeOPCUA(() => {
+          coreConnector.internalDebugLog('Close Connector Node')
+          done()
+        })
+      }, 2000)
     })
 
     node.restartWithNewSettings = function (parameters, done) {
@@ -475,7 +483,11 @@ module.exports = function (RED) {
       node.setNewParameters(parameters)
       node.initCertificatesAndKeys()
       node.closeSession(() => {
-        setTimeout(() => {
+        if (node.createConnectionTimeout) {
+          clearTimeout(node.createConnectionTimeout)
+          node.createConnectionTimeout = null
+        }
+        node.createConnectionTimeout = setTimeout(() => {
           node.renewConnection(done)
         }, node.connectionStartDelay)
       })
@@ -636,7 +648,7 @@ module.exports = function (RED) {
                 node.error(err, {payload: 'OPC UA Unregister Last Node'})
               }
             }
-            node.stateMachine.close().idle()
+            node.stateMachine.lock().close().idle()
             done()
           })
         } else {

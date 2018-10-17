@@ -21,7 +21,7 @@ var testServerFlow = [
   {
     'id': '6ec4ef50.86dc1',
     'type': 'OPCUA-IIoT-Server',
-    'port': '5557',
+    'port': '55557',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -44,6 +44,7 @@ var testServerFlow = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 200,
     'wires': [
       []
     ]
@@ -54,7 +55,7 @@ var testServerWithDiscoveryFlow = [
   {
     'id': '6ec4ef50.86dc2',
     'type': 'OPCUA-IIoT-Server',
-    'port': '7679',
+    'port': '57679',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -64,7 +65,7 @@ var testServerWithDiscoveryFlow = [
     'name': 'DEMOSERVER',
     'showStatusActivities': false,
     'showErrors': false,
-    'asoDemo': true,
+    'asoDemo': false,
     'allowAnonymous': true,
     'isAuditing': false,
     'serverDiscovery': true,
@@ -77,6 +78,7 @@ var testServerWithDiscoveryFlow = [
     'capabilitiesForMDNS': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
+    'delayToClose': 2000,
     'wires': [
       []
     ]

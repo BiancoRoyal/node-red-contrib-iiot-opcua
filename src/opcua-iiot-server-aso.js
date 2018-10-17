@@ -29,6 +29,7 @@ module.exports = function (RED) {
     this.name = config.name
 
     let node = this
+    core.internalDebugLog('Open ASO Node')
 
     node.on('input', function (msg) {
       if (msg.nodetype === 'inject') {
@@ -58,6 +59,11 @@ module.exports = function (RED) {
       } else {
         node.error(new Error('ASO NodeId Is Not Valid'), msg)
       }
+    })
+
+    node.on('close', (done) => {
+      core.internalDebugLog('Close ASO Node')
+      done()
     })
   }
 

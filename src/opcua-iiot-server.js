@@ -54,6 +54,7 @@ module.exports = function (RED) {
     this.delayToClose = config.delayToClose || 100
 
     let node = this
+    coreServer.internalDebugLog('Open Server Node')
     node.initialized = false
     node.opcuaServer = null
 
@@ -368,11 +369,17 @@ module.exports = function (RED) {
 
     node.on('close', (done) => {
       node.closeServer(() => {
+        coreServer.flex.internalDebugLog('Close Server Node')
         done()
       })
     })
 
     node.closeServer = function (done) {
+      if (coreServer.simulatorInterval) {
+        clearInterval(coreServer.simulatorInterval)
+        coreServer.simulatorInterval = null
+      }
+
       if (node.opcuaServer) {
         coreServer.destructAddressSpace()
         setTimeout(() => {

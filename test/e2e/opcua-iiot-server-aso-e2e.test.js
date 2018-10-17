@@ -445,7 +445,7 @@ var testASOFlow = [
   {
     'id': 's1cf5',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1998',
+    'port': '51798',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',

@@ -568,9 +568,11 @@ module.exports = function (RED) {
         node.stateMachine.terminatesub()
         uaSubscription.terminate(() => {
           coreListener.core.deregisterToConnector(node, done)
+          coreListener.internalDebugLog('Close Listener Node')
         })
       } else {
         coreListener.core.deregisterToConnector(node, done)
+        coreListener.internalDebugLog('Close Listener Node')
       }
     })
 

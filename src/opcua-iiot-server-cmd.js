@@ -14,6 +14,7 @@
  */
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
+  let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTCMD (config) {
     RED.nodes.createNode(this, config)
@@ -22,6 +23,7 @@ module.exports = function (RED) {
     this.name = config.name
 
     let node = this
+    core.internalDebugLog('Open CMD Node')
 
     node.on('input', function (msg) {
       msg.nodetype = 'inject'
@@ -46,6 +48,11 @@ module.exports = function (RED) {
         }
         node.send(msg)
       }
+    })
+
+    node.on('close', (done) => {
+      core.internalDebugLog('Close CMD Node')
+      done()
     })
   }
 

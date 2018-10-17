@@ -31,8 +31,8 @@ module.exports = {
     '<rootDir>/node_modules/',
     '<rootDir>/code/',
     '<rootDir>/opcuaIIoT/',
-    '<rootDir>/suite/',
-    '<rootDir>/test/'
+    '<rootDir>/test/',
+    '<rootDir>/src/public/'
   ],
 
   // A list of reporter names that Jest uses when writing coverage reports
@@ -150,12 +150,11 @@ module.exports = {
     '<rootDir>/code/',
     '<rootDir>/jcoverage/',
     '<rootDir>/opcuaIIoT/',
-    '<rootDir>/test/'
-    // '<rootDir>/suite/'
+    '<rootDir>/src/'
   ],
 
   // The regexp pattern Jest uses to detect test files
-  testRegex: 'suite.test',
+  // testRegex: 'suite.test',
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: null,

@@ -63,9 +63,11 @@
     "node": ">=6.10"
   },
   "scripts": {
-    "test": "standard --fix && gulp clean && jest",
+    "test": "standard --fix && gulp clean && jest --verbose --detectOpenHandles --forceExit -i --logHeapUsage",
+    "test:ci": "standard --fix && gulp clean && jest --verbose --detectOpenHandles --forceExit -i --logHeapUsage --ci",
     "test:clearCache": "gulp clean && jest --clearCache",
-    "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage && ls -lAh",
+    "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --verbose --detectOpenHandles --forceExit -i --logHeapUsage",
+    "coverage:ci": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --verbose --detectOpenHandles --forceExit -i --logHeapUsage --ci",
     "coverage:upload": "cat ./jcoverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "npm test && npm run build",

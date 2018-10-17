@@ -83,7 +83,7 @@ var testCMDWithServerFlow = [
   {
     'id': 's1csr',
     'type': 'OPCUA-IIoT-Server',
-    'port': '9819',
+    'port': '59819',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -145,7 +145,7 @@ var testInjectCMDFlow = [
   {
     'id': 's1cf5',
     'type': 'OPCUA-IIoT-Server',
-    'port': '1998',
+    'port': '51698',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
