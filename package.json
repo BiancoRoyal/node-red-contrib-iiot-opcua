@@ -64,10 +64,10 @@
   },
   "scripts": {
     "test": "standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug --maxWorkers=4",
-    "test:ci": "standard --fix && gulp clean && jest --verbose --detectOpenHandles --forceExit -i --logHeapUsage --ci --debug --maxWorkers=4",
+    "test:ci": "standard --fix && gulp clean && jest --verbose --detectOpenHandles --forceExit --logHeapUsage --ci --debug --maxWorkers=4",
     "test:clearCache": "gulp clean && jest --clearCache",
     "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --bail --logHeapUsage --debug --maxWorkers=4",
-    "coverage:ci": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --verbose --detectOpenHandles --forceExit -i --logHeapUsage --ci --debug --maxWorkers=4",
+    "coverage:ci": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --verbose --detectOpenHandles --forceExit --logHeapUsage --ci --debug --maxWorkers=4",
     "coverage:upload": "cat ./jcoverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4",
     "build": "standard --fix && gulp publish",
     "prepublishOnly": "npm test && npm run build",
