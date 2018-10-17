@@ -264,9 +264,21 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
       }
       break
     default:
-      variantValue = {
-        dataType: opcua.DataType.String,
-        value: value
+      if (datatype !== '') {
+        const datatypeList = this.getBasicDataTypes()
+        datatypeList.forEach((item) => {
+          if (item.name === datatype || item.dataType === datatype) {
+            variantValue = {
+              dataType: item.dataType,
+              value: value
+            }
+          }
+        })
+      } else {
+        variantValue = {
+          dataType: opcua.DataType.String,
+          value: value
+        }
       }
       break
   }
