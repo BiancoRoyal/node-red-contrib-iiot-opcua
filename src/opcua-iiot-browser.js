@@ -220,6 +220,10 @@ module.exports = function (RED) {
 
       node.messageList.push(msg)
 
+      if (node.showStatusActivities && node.status.text !== 'active') {
+        node.setNodeStatusTo('active')
+      }
+
       setTimeout(() => {
         node.send(node.messageList.shift())
       }, node.delayPerMessage * node.messageList.length * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
@@ -280,6 +284,9 @@ module.exports = function (RED) {
         return
       }
 
+      if (node.showStatusActivities) {
+        node.setNodeStatusTo('browsing')
+      }
       node.startBrowser(msg)
     })
 
