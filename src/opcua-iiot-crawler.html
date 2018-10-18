@@ -19,7 +19,9 @@
       singleResult: {value: false},
       showStatusActivities: {value: false},
       showErrors: {value: false},
+      activateUnsetFilter: {value: false},
       activateFilters: {value: false},
+      negateFilter: {value: false},
       filters: {value: []},
       delayPerMessage: {value: 0.2},
     },
@@ -236,7 +238,7 @@
             </div>
             <div class="form-row">
                     <label for="node-input-delayPerMessage"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayPerMessage"></span></label>
-                    <input type="text" id="node-input-delayPerMessage" placeholder="0.2"> sec.
+                    <input type="text" id="node-input-delayPerMessage" placeholder="0.2" style="max-width:80px"> sec.
                 </div>
             <hr>
             <div class="form-row">
@@ -245,7 +247,7 @@
                 <input type="checkbox" id="node-input-justValue" style="max-width:30px">
             </div>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-singleResult"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-singleResult"><i class="fa fa-simplybuilt"></i>
                 <span data-i18n="opcua-iiot-contrib.label.singleResult"></span></label>
                 <input type="checkbox" id="node-input-singleResult" style="max-width:30px">
             </div>
@@ -264,9 +266,19 @@
         <div id="opcuaiiot-crawler-tab-filter" style="display:none">
             <h4><span data-i18n="opcua-iiot-contrib.label.filters"></span></h4>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-activateFilters"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-activateUnsetFilter"><i class="fa fa-filter"></i>
+                <span data-i18n="opcua-iiot-contrib.label.activateUnsetFilter"></span></label>
+                <input type="checkbox" id="node-input-activateUnsetFilter" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-activateFilters"><i class="fa fa-check-circle"></i>
                 <span data-i18n="opcua-iiot-contrib.label.activateFilters"></span></label>
                 <input type="checkbox" id="node-input-activateFilters" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-negateFilter"><i class="fa fa-minus-circle"></i>
+                <span data-i18n="opcua-iiot-contrib.label.negateFilter"></span></label>
+                <input type="checkbox" id="node-input-negateFilter" style="max-width:30px">
             </div>
             <div class="form-row node-input-crawler-filter-container-row" style="margin-bottom: 0px;">
                 <div id="node-input-crawler-filter-container-div"

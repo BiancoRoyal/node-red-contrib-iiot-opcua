@@ -5,7 +5,9 @@
       "filter": "Filter"
     },
     "label": {
+      "activateUnsetFilter": "Unset filtering",
       "activateFilters": "Activate filters",
+      "negateFilter": "Negate filter",
       "filters": "Filter List",
       "connector": "Connector",
       "justValue": "Remove References",

@@ -24,7 +24,9 @@ module.exports = function (RED) {
     this.singleResult = config.singleResult
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.activateUnsetFilter = config.activateUnsetFilter
     this.activateFilters = config.activateFilters
+    this.negateFilter = config.negateFilter
     this.filters = config.filters
     this.delayPerMessage = config.delayPerMessage || 0.2
     this.connector = RED.nodes.getNode(config.connector)
@@ -84,6 +86,19 @@ module.exports = function (RED) {
     node.itemIsNotToFilter = function (item) {
       let result = true
       let filterValue
+
+      if (node.activateUnsetFilter) {
+        result &= item !== null
+
+        if (item.value) {
+          if (item.value.hasOwnProperty('value')) {
+            result &= item.value.value !== null
+          } else {
+            result &= item.value !== null
+          }
+        }
+      }
+
       node.filters.forEach(function (element, index, array) {
         try {
           switch (element.name) {
@@ -133,7 +148,7 @@ module.exports = function (RED) {
         }
       })
 
-      return result
+      return (node.negateFilter) ? !result : result
     }
 
     node.crawl = function (session, msg) {
