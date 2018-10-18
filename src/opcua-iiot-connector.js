@@ -177,7 +177,7 @@ module.exports = function (RED) {
 
     node.renewConnection = function (done) {
       node.stateMachine.lock() // start delay used before
-      node.disconnectNodeOPCUA(() => {
+      node.closeConnector(() => {
         node.stateMachine.idle().init()
         done()
       })
@@ -350,19 +350,21 @@ module.exports = function (RED) {
       if (node.opcuaClient) {
         node.stateMachine.lock()
         coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
-        node.opcuaClient.disconnect(function (err) {
-          node.stateMachine.close()
-          if (err) {
-            coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
-            if (node.showErrors) {
-              node.error(err, {payload: 'Client Close Error On Close Connector'})
+        setTimeout(() => {
+          node.opcuaClient.disconnect(function (err) {
+            node.stateMachine.close()
+            if (err) {
+              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
+              if (node.showErrors) {
+                node.error(err, {payload: 'Client Close Error On Close Connector'})
+              }
+            } else {
+              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint)
             }
-          } else {
-            coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint)
-          }
-          coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
-          done() // closed state
-        })
+            coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
+            done() // closed state
+          })
+        }, node.connectionStopDelay)
       } else {
         coreConnector.internalDebugLog('Close Node Done For Connector Without Client On ' + node.endpoint)
         node.stateMachine.close()
@@ -402,13 +404,7 @@ module.exports = function (RED) {
       node.setNewParameters(parameters)
       node.initCertificatesAndKeys()
       node.closeSession(() => {
-        if (node.createConnectionTimeout) {
-          clearTimeout(node.createConnectionTimeout)
-          node.createConnectionTimeout = null
-        }
-        node.createConnectionTimeout = setTimeout(() => {
-          node.renewConnection(done)
-        }, node.connectionStartDelay)
+        node.renewConnection(done)
       })
     }
 
