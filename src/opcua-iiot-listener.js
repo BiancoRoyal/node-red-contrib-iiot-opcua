@@ -557,7 +557,7 @@ module.exports = function (RED) {
           node.stateMachine.terminatesub()
           uaSubscription.terminate(() => {
             node.stateMachine.idlesub()
-            coreListener.internalDebugLog('Subscription Was Terminated')
+            coreListener.internalDebugLog('Subscription Was Terminated On Connector Close Event')
           })
         }
       })
