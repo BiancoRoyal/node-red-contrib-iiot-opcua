@@ -111,6 +111,14 @@ module.exports = function (RED) {
 
       if (node.activateUnsetFilter) {
         result &= item !== null
+
+        if (item.value) {
+          if (item.value.hasOwnProperty('value')) {
+            result &= item.value.value !== null
+          } else {
+            result &= item.value !== null
+          }
+        }
       }
 
       let filterValue
@@ -162,7 +170,7 @@ module.exports = function (RED) {
         }
       })
 
-      return result && node.negateFilter
+      return (node.negateFilter) ? !result : result
     }
   }
 
