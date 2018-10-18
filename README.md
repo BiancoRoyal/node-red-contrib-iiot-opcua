@@ -114,9 +114,10 @@ see Node-RED menu (right upper corner) -> Import -> Examples -> iiot opcua
 ### Known Issues and TODO's
 
 Ideas
-* dynamic methods
-* complex methods
-* dynamic IP for connector
+* methods calls
+  * complex
+  * dynamic
+  * structured object parameters
 
 Errors
 * more Bad status situations handling
