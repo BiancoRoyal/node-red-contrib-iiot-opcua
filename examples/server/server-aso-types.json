@@ -1,15 +1,15 @@
 [
   {
-    "id": "4565f254.eb8b3c",
+    "id": "c744dbaa.fb2188",
     "type": "tab",
     "label": "IIoT OPC UA ASO Types",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "c0cb6ebf.6cee88",
+    "id": "9cd15cd9.93704",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestVariables",
     "browsename": "TestVariables",
     "displayname": "Test Variables",
@@ -23,14 +23,14 @@
     "y": 60,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "55199477.34620c",
+    "id": "241ce94a.6205e6",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -45,14 +45,14 @@
     "y": 60,
     "wires": [
       [
-        "c0cb6ebf.6cee88"
+        "9cd15cd9.93704"
       ]
     ]
   },
   {
-    "id": "733a6f60.596d38",
+    "id": "973f8d41.f50c58",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestDateTime",
     "browsename": "TestDateTime",
     "displayname": "Test DateTime",
@@ -66,14 +66,14 @@
     "y": 120,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "cadc26b5.5b76a",
+    "id": "cd97386a.45c1a8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -88,14 +88,14 @@
     "y": 120,
     "wires": [
       [
-        "733a6f60.596d38"
+        "973f8d41.f50c58"
       ]
     ]
   },
   {
-    "id": "63d23a7.9933444",
+    "id": "89a5d165.d5c3d8",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestBoolean",
     "browsename": "TestBoolean",
     "displayname": "Test Boolean",
@@ -109,14 +109,14 @@
     "y": 160,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "2081fb1d.06fb9c",
+    "id": "156de795.459da",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "true",
     "payloadType": "bool",
@@ -131,14 +131,14 @@
     "y": 160,
     "wires": [
       [
-        "63d23a7.9933444"
+        "89a5d165.d5c3d8"
       ]
     ]
   },
   {
-    "id": "44bbe9e7.f8082",
+    "id": "5ac7841b.0b9b24",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestDouble",
     "browsename": "TestDouble",
     "displayname": "Test Double",
@@ -152,14 +152,14 @@
     "y": 200,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "92189de3.c740e",
+    "id": "c1653227.567818",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "10.2",
     "payloadType": "num",
@@ -174,14 +174,14 @@
     "y": 200,
     "wires": [
       [
-        "44bbe9e7.f8082"
+        "5ac7841b.0b9b24"
       ]
     ]
   },
   {
-    "id": "44e605b5.ff7a0c",
+    "id": "57c398f6.4621e8",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestUInt16",
     "browsename": "TestUInt16",
     "displayname": "Test UInt16",
@@ -195,14 +195,14 @@
     "y": 240,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "437ca1e6.43555",
+    "id": "d21d2854.d0c24",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "65000",
     "payloadType": "num",
@@ -217,14 +217,14 @@
     "y": 240,
     "wires": [
       [
-        "44e605b5.ff7a0c"
+        "57c398f6.4621e8"
       ]
     ]
   },
   {
-    "id": "a27fce9f.53dbc",
+    "id": "f76a88d7.535fa8",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestUInt32",
     "browsename": "TestUInt32",
     "displayname": "Test UInt32",
@@ -238,14 +238,14 @@
     "y": 280,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "6e21a3f8.9ed27c",
+    "id": "995ef851.0b9dd8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "125000",
     "payloadType": "num",
@@ -260,14 +260,14 @@
     "y": 280,
     "wires": [
       [
-        "a27fce9f.53dbc"
+        "f76a88d7.535fa8"
       ]
     ]
   },
   {
-    "id": "1bd0411d.e0e92f",
+    "id": "54583c84.e416fc",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestUInt64",
     "browsename": "TestUInt64",
     "displayname": "Test UInt64",
@@ -281,14 +281,14 @@
     "y": 320,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "aa3b28d6.2690a8",
+    "id": "b573966e.8c0d",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "125000000",
     "payloadType": "num",
@@ -303,14 +303,14 @@
     "y": 320,
     "wires": [
       [
-        "1bd0411d.e0e92f"
+        "54583c84.e416fc"
       ]
     ]
   },
   {
-    "id": "1ab16b5f.622ecd",
+    "id": "9ae4df32.8ea3a8",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestString",
     "browsename": "TestString",
     "displayname": "Test String",
@@ -324,14 +324,14 @@
     "y": 360,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "b6f7a4d7.ff16c",
+    "id": "9411309.3a4ff5",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "Hello IIoT World!",
     "payloadType": "str",
@@ -346,14 +346,14 @@
     "y": 360,
     "wires": [
       [
-        "1ab16b5f.622ecd"
+        "9ae4df32.8ea3a8"
       ]
     ]
   },
   {
-    "id": "6e81c3aa.e6193c",
+    "id": "e886718c.d3956",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestInt16",
     "browsename": "TestInt16",
     "displayname": "Test Int16",
@@ -367,14 +367,14 @@
     "y": 400,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "6a580a84.3e4e04",
+    "id": "9605ca1f.5a26e8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "-6000",
     "payloadType": "num",
@@ -389,14 +389,14 @@
     "y": 400,
     "wires": [
       [
-        "6e81c3aa.e6193c"
+        "e886718c.d3956"
       ]
     ]
   },
   {
-    "id": "d20cb491.ff24d",
+    "id": "6827108c.8e4c18",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestInt32",
     "browsename": "TestInt32",
     "displayname": "Test Int32",
@@ -410,14 +410,14 @@
     "y": 440,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "a8a2bcf6.b7e108",
+    "id": "e16e6dfe.0abaf",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "-165000",
     "payloadType": "num",
@@ -432,14 +432,14 @@
     "y": 440,
     "wires": [
       [
-        "d20cb491.ff24d"
+        "6827108c.8e4c18"
       ]
     ]
   },
   {
-    "id": "227f8b1f.934494",
+    "id": "bb54a2cb.9486",
     "type": "OPCUA-IIoT-Inject",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "injectType": "inject",
     "payload": "[{\"text\":\"Hallo Welt!\",\"locale\":\"de\"},{\"text\":\"Hello World!\",\"locale\":\"en\"},{\"text\":\"Bonjour Monde!\",\"locale\":\"fr\"}]",
     "payloadType": "json",
@@ -454,14 +454,14 @@
     "y": 480,
     "wires": [
       [
-        "2cae7b2.7391184"
+        "df402216.5bfcd8"
       ]
     ]
   },
   {
-    "id": "2cae7b2.7391184",
+    "id": "df402216.5bfcd8",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "nodeId": "ns=1;s=TestLocalizedText",
     "browsename": "TestLocalizedText",
     "displayname": "Test LocalizedText",
@@ -475,14 +475,14 @@
     "y": 480,
     "wires": [
       [
-        "eff457ae.7e749"
+        "1aad6d3d.57fc53"
       ]
     ]
   },
   {
-    "id": "4f4e48d9.9510b",
+    "id": "ab8cab11.654ac8",
     "type": "comment",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "name": "information",
     "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
     "x": 740,
@@ -490,9 +490,9 @@
     "wires": []
   },
   {
-    "id": "eff457ae.7e749",
+    "id": "1aad6d3d.57fc53",
     "type": "function",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "name": "thru",
     "func": "\nreturn msg;",
     "outputs": 1,
@@ -501,14 +501,14 @@
     "y": 260,
     "wires": [
       [
-        "920108b3.753a68"
+        "5c919bd6.5287fc"
       ]
     ]
   },
   {
-    "id": "920108b3.753a68",
+    "id": "5c919bd6.5287fc",
     "type": "OPCUA-IIoT-Server",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "port": "55389",
     "endpoint": "",
     "acceptExternalCommands": true,
@@ -530,20 +530,21 @@
     "registerServerMethod": "1",
     "discoveryServerEndpointUrl": "",
     "capabilitiesForMDNS": "",
-    "maxNodesPerRead": 1000,
-    "maxNodesPerBrowse": 2000,
+    "maxNodesPerRead": "",
+    "maxNodesPerBrowse": "",
+    "delayToClose": "",
     "x": 750,
     "y": 260,
     "wires": [
       [
-        "c52df7cd.518078"
+        "8a1b670c.ec8ce8"
       ]
     ]
   },
   {
-    "id": "c52df7cd.518078",
+    "id": "8a1b670c.ec8ce8",
     "type": "debug",
-    "z": "4565f254.eb8b3c",
+    "z": "c744dbaa.fb2188",
     "name": "",
     "active": true,
     "tosidebar": true,

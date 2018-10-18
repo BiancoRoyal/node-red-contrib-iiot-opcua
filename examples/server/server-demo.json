@@ -1,15 +1,15 @@
 [
   {
-    "id": "7aca0197.504818",
+    "id": "5c574024.b4f8b",
     "type": "tab",
     "label": "IIoT OPC UA Demo",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "79ca1ba6.e90d5c",
+    "id": "948b47e3.12006",
     "type": "OPCUA-IIoT-Server-Command",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "commandtype": "restart",
     "nodeId": "",
     "name": "restart",
@@ -17,15 +17,15 @@
     "y": 140,
     "wires": [
       [
-        "6390cb96.50f36c",
-        "48a87742.973928"
+        "fae69d4.42f43e",
+        "77e05a5b.5418b4"
       ]
     ]
   },
   {
-    "id": "35e8eea9.d9a7a2",
+    "id": "6f9ea196.603618",
     "type": "OPCUA-IIoT-Server-ASO",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "nodeId": "s=TestFolder",
     "browsename": "TestFolder",
     "displayname": "Test Folder",
@@ -39,14 +39,14 @@
     "y": 200,
     "wires": [
       [
-        "6390cb96.50f36c"
+        "fae69d4.42f43e"
       ]
     ]
   },
   {
-    "id": "6b09b730.63652",
+    "id": "ca04589a.3702a",
     "type": "comment",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "name": "information",
     "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
     "x": 680,
@@ -54,9 +54,9 @@
     "wires": []
   },
   {
-    "id": "7e4dcf5.cd3843",
+    "id": "28976fc9.b05868",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -71,15 +71,15 @@
     "y": 140,
     "wires": [
       [
-        "79ca1ba6.e90d5c",
-        "32021947.01b856"
+        "948b47e3.12006",
+        "8d37cc1f.a39e28"
       ]
     ]
   },
   {
-    "id": "f460776b.a4f678",
+    "id": "1c500b3b.6f72b5",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -94,14 +94,14 @@
     "y": 200,
     "wires": [
       [
-        "35e8eea9.d9a7a2"
+        "6f9ea196.603618"
       ]
     ]
   },
   {
-    "id": "6390cb96.50f36c",
+    "id": "fae69d4.42f43e",
     "type": "OPCUA-IIoT-Server",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "port": "55388",
     "endpoint": "",
     "acceptExternalCommands": true,
@@ -120,22 +120,24 @@
     "xmlsets": [],
     "publicCertificateFile": "",
     "privateCertificateFile": "",
+    "registerServerMethod": "1",
     "discoveryServerEndpointUrl": "",
     "capabilitiesForMDNS": "",
     "maxNodesPerRead": "",
     "maxNodesPerBrowse": "",
+    "delayToClose": "",
     "x": 570,
     "y": 140,
     "wires": [
       [
-        "a1bdc3c2.972778"
+        "61a9c094.334de8"
       ]
     ]
   },
   {
-    "id": "a1bdc3c2.972778",
+    "id": "61a9c094.334de8",
     "type": "debug",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -147,9 +149,9 @@
     "wires": []
   },
   {
-    "id": "48a87742.973928",
+    "id": "77e05a5b.5418b4",
     "type": "debug",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -161,9 +163,9 @@
     "wires": []
   },
   {
-    "id": "32021947.01b856",
+    "id": "8d37cc1f.a39e28",
     "type": "debug",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -175,9 +177,9 @@
     "wires": []
   },
   {
-    "id": "b0ad646a.f0a5e",
+    "id": "b3f5ac70.b65888",
     "type": "OPCUA-IIoT-Server-Command",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "commandtype": "deleteNode",
     "nodeId": "ns=1;s=TestFolder",
     "name": "delete Test Folder",
@@ -185,14 +187,14 @@
     "y": 240,
     "wires": [
       [
-        "6390cb96.50f36c"
+        "fae69d4.42f43e"
       ]
     ]
   },
   {
-    "id": "118a8d65.0de7fb",
+    "id": "b6743890.b4a878",
     "type": "OPCUA-IIoT-Inject",
-    "z": "7aca0197.504818",
+    "z": "5c574024.b4f8b",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -207,7 +209,7 @@
     "y": 240,
     "wires": [
       [
-        "b0ad646a.f0a5e"
+        "b3f5ac70.b65888"
       ]
     ]
   }

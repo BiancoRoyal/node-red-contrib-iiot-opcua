@@ -1,0 +1,134 @@
+[
+  {
+    "id": "46d021c2.343228",
+    "type": "tab",
+    "label": "OPC UA IIoT Flex Connector",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "71cfcb05.f60b84",
+    "type": "OPCUA-IIoT-Flex-Connector",
+    "z": "46d021c2.343228",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": true,
+    "connector": "a272334e.5bc6b8",
+    "x": 400,
+    "y": 140,
+    "wires": [
+      [
+        "a22e8935.27f0c8"
+      ]
+    ]
+  },
+  {
+    "id": "9769470a.578618",
+    "type": "inject",
+    "z": "46d021c2.343228",
+    "name": "Server 86",
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "x": 160,
+    "y": 140,
+    "wires": [
+      [
+        "71cfcb05.f60b84"
+      ]
+    ]
+  },
+  {
+    "id": "a22e8935.27f0c8",
+    "type": "debug",
+    "z": "46d021c2.343228",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 570,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "91d65585.b61808",
+    "type": "inject",
+    "z": "46d021c2.343228",
+    "name": "Server 89",
+    "topic": "",
+    "payload": "{\"endpoint\":\"opc.tcp://localhost:55389/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
+    "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "x": 160,
+    "y": 100,
+    "wires": [
+      [
+        "71cfcb05.f60b84"
+      ]
+    ]
+  },
+  {
+    "id": "acf494ce.fd57a",
+    "type": "inject",
+    "z": "46d021c2.343228",
+    "name": "Server 88",
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55388/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "x": 160,
+    "y": 180,
+    "wires": [
+      [
+        "71cfcb05.f60b84"
+      ]
+    ]
+  },
+  {
+    "id": "3d27cd8.d132db2",
+    "type": "comment",
+    "z": "46d021c2.343228",
+    "name": "Please, use the client browser flow!",
+    "info": "see Node-RED menu -> \nImport -> Examples -> \niiot opcua -> client -> browser",
+    "x": 500,
+    "y": 80,
+    "wires": []
+  },
+  {
+    "id": "a272334e.5bc6b8",
+    "type": "OPCUA-IIoT-Connector",
+    "z": "",
+    "discoveryUrl": "",
+    "endpoint": "opc.tcp://localhost:55388/",
+    "keepSessionAlive": true,
+    "loginEnabled": false,
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "LOCAL DEMO SERVER",
+    "showErrors": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "60000",
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": "",
+    "requestedSessionTimeout": "",
+    "connectionStartDelay": "",
+    "reconnectDelay": ""
+  }
+]

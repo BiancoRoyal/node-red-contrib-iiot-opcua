@@ -1,15 +1,15 @@
 [
   {
-    "id": "715d7f38.475918",
+    "id": "ade2bb45.1c9a2",
     "type": "tab",
     "label": "IIoT OPC UA Server ISA95",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "907cd781.2275",
+    "id": "2b0a9d8f.fda952",
     "type": "comment",
-    "z": "715d7f38.475918",
+    "z": "ade2bb45.1c9a2",
     "name": "information",
     "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
     "x": 210,
@@ -17,9 +17,9 @@
     "wires": []
   },
   {
-    "id": "bf675756.c5ad5",
+    "id": "4088e400.34f28c",
     "type": "comment",
-    "z": "715d7f38.475918",
+    "z": "ade2bb45.1c9a2",
     "name": "ISA95",
     "info": "Some links\nhttps://opcfoundation.org/markets-collaboration/isa-95/\n\n\nhttps://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/\n\n56 min video by Paul Hunkar\n“OPC UA for ISA-95 Common Object Model Companion Specification”\nhttps://youtu.be/OobhzbQoUnA",
     "x": 350,
@@ -27,9 +27,9 @@
     "wires": []
   },
   {
-    "id": "18a13f62.979b19",
+    "id": "cd0b3a6a.197f18",
     "type": "OPCUA-IIoT-Server",
-    "z": "715d7f38.475918",
+    "z": "ade2bb45.1c9a2",
     "port": "55395",
     "endpoint": "",
     "acceptExternalCommands": true,
@@ -39,7 +39,7 @@
     "alternateHostname": "",
     "name": "ISA95 Server",
     "showStatusActivities": false,
-    "showErrors": false,
+    "showErrors": true,
     "asoDemo": true,
     "allowAnonymous": true,
     "isAuditing": false,
@@ -53,8 +53,12 @@
     ],
     "publicCertificateFile": "",
     "privateCertificateFile": "",
-    "maxNodesPerRead": 1000,
-    "maxNodesPerBrowse": 2000,
+    "registerServerMethod": "1",
+    "discoveryServerEndpointUrl": "",
+    "capabilitiesForMDNS": "",
+    "maxNodesPerRead": "",
+    "maxNodesPerBrowse": "",
+    "delayToClose": "",
     "x": 200,
     "y": 100,
     "wires": [
