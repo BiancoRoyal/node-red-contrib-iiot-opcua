@@ -22,7 +22,9 @@ module.exports = function (RED) {
     this.compressStructure = config.compressStructure
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
+    this.activateUnsetFilter = config.activateUnsetFilter
     this.activateFilters = config.activateFilters
+    this.negateFilter = config.negateFilter
     this.filters = config.filters
 
     let node = this
@@ -105,7 +107,12 @@ module.exports = function (RED) {
     })
 
     node.itemIsNotToFilter = function (item) {
-      let result = (item !== null && typeof item !== 'undefined') // values with false has to be true
+      let result = true
+
+      if (node.activateUnsetFilter) {
+        result &= item !== null
+      }
+
       let filterValue
       node.filters.forEach(function (element, index, array) {
         try {
@@ -155,7 +162,7 @@ module.exports = function (RED) {
         }
       })
 
-      return result
+      return result && node.negateFilter
     }
   }
 

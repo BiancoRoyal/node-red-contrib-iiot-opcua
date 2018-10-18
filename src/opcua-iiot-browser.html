@@ -104,12 +104,12 @@
                 <input type="text" id="node-input-connector">
             </div>
             <div class="form-row">
-                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" placeholder="Name">
             </div>
             <hr>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-justValue"><i class="fa fa-simplybuilt"></i>
                 <span data-i18n="opcua-iiot-contrib.label.justValue"></span></label>
                 <input type="checkbox" id="node-input-justValue" style="max-width:30px">
             </div>
@@ -129,43 +129,45 @@
                 <input type="checkbox" id="node-input-sendNodesToBrowser" style="max-width:30px">
             </div>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-singleBrowseResult"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-singleBrowseResult"><i class="fa fa-object-group"></i>
                 <span data-i18n="opcua-iiot-contrib.label.singleBrowseResult"></span></label>
                 <input type="checkbox" id="node-input-singleBrowseResult" style="max-width:30px">
             </div>
             <hr>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-bolt"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
                 <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
             </div>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-exclamation-circle"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
                 <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
             </div>
         </div>
         <div id="opcuaiiot-browser-tab-browse" style="display:none">
             <div class="form-row">
+                <div style="margin: 15px">
+                    <span data-i18n="opcua-iiot-contrib.label.lookupUseHint"></span>
+                </div>
+            </div>
+            <div class="form-row">
                 <label for="node-input-nodeId"><i class="icon-search"></i> <span data-i18n="opcua-iiot-contrib.label.nodeId"></span></label>
                 <input type="text" id="node-input-nodeId" style="width:40%;" placeholder="ns=0;i=84">
                 <a id="node-lookup-nodeId" class="btn"><i id="node-lookup-topic-icon" class="fa fa-search"></i></a>
-                <div>
-                    <span data-i18n="opcua-iiot-contrib.label.lookupUseHint"></span>
-                </div>
-                <div class="form-row">
-                    <label style="min-width:160px" for="node-input-recursiveBrowse"><i class="fa fa-th"></i>
-                    <span data-i18n="opcua-iiot-contrib.label.recursiveBrowse"></span></label>
-                    <input type="checkbox" id="node-input-recursiveBrowse" style="max-width:30px">
-                </div>
-                <div class="form-row">
-                    <label for="node-input-recursiveDepth"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.recursiveDepth"></span></label>
-                    <input type="text" id="node-input-recursiveDepth" placeholder="1">
-                </div>
-                <div class="form-row">
-                    <label for="node-input-delayPerMessage"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayPerMessage"></span></label>
-                    <input type="text" id="node-input-delayPerMessage" placeholder="0.2"> sec.
-                </div>
+            </div>
+            <div class="form-row">
+                <label for="node-input-recursiveBrowse"><i class="icon-repeat"></i>
+                <span data-i18n="opcua-iiot-contrib.label.recursiveBrowse"></span></label>
+                <input type="checkbox" id="node-input-recursiveBrowse" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-recursiveDepth"><i class="icon-tag"></i> <span data-i18n="opcua-iiot-contrib.label.recursiveDepth"></span></label>
+                <input type="text" id="node-input-recursiveDepth" placeholder="1" style="max-width:80px">
+            </div>
+            <div class="form-row">
+                <label for="node-input-delayPerMessage"><i class="icon-time"></i> <span data-i18n="opcua-iiot-contrib.label.delayPerMessage"></span></label>
+                <input type="text" id="node-input-delayPerMessage" placeholder="0.2" style="max-width:80px"> sec.
             </div>
         </div>
     </div>

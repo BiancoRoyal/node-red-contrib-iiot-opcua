@@ -5,6 +5,8 @@
       "filter": "Filter"
     },
     "label": {
+      "activateUnsetFilter": "Unset filtering",
+      "negateFilter": "Negate filter",
       "activateFilters": "Activate filters",
       "compressStructure": "Simplify results",
       "showActivities": "Show Activities",

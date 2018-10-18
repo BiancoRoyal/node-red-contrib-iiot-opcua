@@ -15,6 +15,7 @@
       compressStructure: {value: true},
       showStatusActivities: {value: false},
       showErrors: {value: false},
+      activateUnsetFilter: {value: false},
       activateFilters: {value: false},
       filters: {value: []},
     },
@@ -226,23 +227,23 @@
     <div id="node-input-response-tabs-content" style="min-height: 170px;">
         <div id="opcuaiiot-response-tab-settings" style="display:none">
             <div class="form-row" style="min-width:640px">
-                <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+                <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" placeholder="">
             </div>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-compressStructure"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-compressStructure"><i class="fa fa-simplybuilt"></i>
                 <span data-i18n="opcua-iiot-contrib.label.compressStructure"></span></label>
                 <input type="checkbox" id="node-input-compressStructure" style="max-width:30px">
             </div>
             <!-- StatusCodes to add and remove to filter for in a second output -->
             <hr>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-showStatusActivities"><i class="fa fa-bolt"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showActivities"></span></label>
                 <input type="checkbox" id="node-input-showStatusActivities" style="max-width:30px">
             </div>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-showErrors"><i class="fa fa-exclamation-circle"></i>
                 <span data-i18n="opcua-iiot-contrib.label.showErrors"></span></label>
                 <input type="checkbox" id="node-input-showErrors" style="max-width:30px">
             </div>
@@ -250,9 +251,19 @@
         <div id="opcuaiiot-response-tab-filter" style="display:none">
             <h4><span data-i18n="opcua-iiot-contrib.label.filters"></span></h4>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-activateFilters"><i class="fa fa-th"></i>
+                <label style="min-width:160px" for="node-input-activateUnsetFilter"><i class="fa fa-filter"></i>
+                <span data-i18n="opcua-iiot-contrib.label.activateUnsetFilter"></span></label>
+                <input type="checkbox" id="node-input-activateUnsetFilter" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-activateFilters"><i class="fa fa-check-circle"></i>
                 <span data-i18n="opcua-iiot-contrib.label.activateFilters"></span></label>
                 <input type="checkbox" id="node-input-activateFilters" style="max-width:30px">
+            </div>
+            <div class="form-row">
+                <label style="min-width:160px" for="node-input-negateFilter"><i class="fa fa-minus-circle"></i>
+                <span data-i18n="opcua-iiot-contrib.label.negateFilter"></span></label>
+                <input type="checkbox" id="node-input-negateFilter" style="max-width:30px">
             </div>
             <div class="form-row node-input-response-filter-container-row" style="margin-bottom: 0px;">
                 <div id="node-input-response-filter-container-div"

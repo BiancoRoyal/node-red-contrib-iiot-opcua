@@ -16,7 +16,7 @@
       "showErrors": "Show Errors",
       "topic": "Topic",
       "nodeId": "Node-Id",
-      "lookupUseHint": "You can browse with the lookup by select and lookup agian.",
+      "lookupUseHint": "Start browsing with the lookup button! Select and lookup again to go deeper in hierarchy. Restart at root by deleting the input content.",
       "recursiveBrowse": "Recursive",
       "recursiveDepth": "Depth",
       "delayPerMessage": "Delay msg"
