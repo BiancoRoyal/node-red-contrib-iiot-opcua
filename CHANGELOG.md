@@ -1,27 +1,28 @@
-# Change Log
-
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-
 <a name="3.1.0"></a>
-# [3.1.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.0.0...v3.1.0) (2018-10-16)
+# [3.1.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.0.0...v3.1.0) (2018-10-18)
 
 
 ### Bug Fixes
 
+* Byte and other datatypes to write to server [#52](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/52) ([02bfb71](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/02bfb71))
+* flex connector error on deploy to Node-RED ([ed336c3](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/ed336c3))
 * server close improved ([5528e23](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/5528e23))
 * test do not need discovery every time ([26f7fe9](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/26f7fe9))
+* timing in connecting with actual node-opcua server inside node-red ([56ae397](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/56ae397))
 
 
 ### Features
 
+* limits tab for flex server and option to set delay on close for the flex server ([b8321a7](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/b8321a7))
 * new flex connector the send connection data to the connector via events [#44](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/44) ([25df528](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/25df528))
+* new option to to get some delay on server close ([0f89d73](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0f89d73))
 
 
 
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.7.1...v3.0.0) (2018-10-14)
 
-#### BREAKING CHANGES with new node-opcua version 0.4 in output objects and parameters
+### Breaking Changes base on node-opcua 0.4
 
 ### Bug Fixes
 
@@ -31,18 +32,20 @@ All notable changes to this project will be documented in this file. See [standa
 * **browser:** wrong result used ([0db0aac](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0db0aac))
 * **listener:** browser to listener parameters and options ([ee1c7b3](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/ee1c7b3))
 * **method:** variable was not declared anymore ([60acae8](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/60acae8))
+* **tests:** working with the new v0.4.1 of node-opcua ([f8a2bd6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/f8a2bd6))
+* API getEndpoints ([63f5c00](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/63f5c00))
 * code for standard.js ([346dac6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/346dac6))
-* **test:** test did not end while interval was running ([e38e3d1](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/e38e3d1))
 * examples namespace since 0.4.4 of node-opcua ([1088074](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/1088074))
 * issue  [#54](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/54) - new historyStart and historyEnd option parameter via msg or to set from node options ([abffca0](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/abffca0))
+* **test:** test did not end while interval was running ([e38e3d1](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/e38e3d1))
 * listener monitored item select from list ([8213bef](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/8213bef))
-* **read:** history read ([9c1b2be](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/9c1b2be))
-* **test:** failed on Windows 10 and nodejs 9 ([8cef89d](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/8cef89d))
-* **test:** with patterns of codacy ([c0b493a](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/c0b493a))
-* **tests:** working with the new v0.4.1 of node-opcua ([f8a2bd6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/f8a2bd6))
 * new version node-opcua 0.4.6 to fix grouped monitored items problem ([c922231](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/c922231))
 * server delay on shutdown for listener subscriptions ([82ba6f7](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/82ba6f7))
+* test crawler error travis ([029fa76](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/029fa76))
+* **read:** history read ([9c1b2be](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/9c1b2be))
+* **test:** failed on Windows 10 and nodejs 9 ([8cef89d](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/8cef89d))
 * testing suites ([72adde6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/72adde6))
+* **test:** with patterns of codacy ([c0b493a](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/c0b493a))
 
 
 ### Features
@@ -197,3 +200,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 <a name="1.0.17"></a>
 ## 1.0.17 (2017-12-03)
+
+
+
