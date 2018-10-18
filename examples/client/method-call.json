@@ -230,7 +230,7 @@
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://innoreactor.local:55388/UA/NodeREDIIoTServer",
+    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIoTServer",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "Basic256",
