@@ -80,8 +80,12 @@ With the flex server you could create your own information model with the OPC UA
 
 ![Flex server Example](images/wiki/flexServerAddressSapceExamplev3.png)
 
+### Learn with the examples!
+
 The server node contains demo objects and variables
 to start playing with OPC UA method call, read and write operations.
+
+see Node-RED menu (right upper corner) -> Import -> Examples -> iiot opcua
 
 ![Flow Example](images/wiki/method-call3-active.png)
 
@@ -100,6 +104,10 @@ to start playing with OPC UA method call, read and write operations.
 | Node-RED        | UAExpert / Client     |
 |-----------------|-----------------------|
 |![ASO Example](images/wiki/server-aso-flow3.png)|![ASO UAExpert](images/wiki/ASOTestVariablesUAExpert.png)|
+
+### Reconnect via events with the Flex Connector!
+
+![Flow Flex Connector](images/wiki/flex-connector-flow31.png)
 
 ## Package Information
 
