@@ -129,7 +129,7 @@ module.exports = function (RED) {
             transformedItemsToRead.push(transformedItem)
           }
 
-          coreClient.read(session, transformedItemsToRead, node.maxAge, msg).then(function (readResult) {
+          coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg).then(function (readResult) {
             try {
               let message = node.buildResultMessage('Default', readResult)
               message.maxAge = node.maxAge

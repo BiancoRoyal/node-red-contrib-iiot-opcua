@@ -93,7 +93,7 @@
        </div>
     </div>
     <div class="form-row">
-        <label for="node-input-maxAge"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.maxAge"></span></label>
+        <label for="node-input-maxAge"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.maxAge"></span></label>
         <input type="text" id="node-input-maxAge" placeholder="1">
     </div>
     <div class="form-row" id="node-input-depth-row">
@@ -141,6 +141,12 @@
     <div>
         <ul>
             <li>nodesToRead or addressSpaceItems (Array of Objects with property nodeId)
+            <li>payload (optional)
+                <ul>
+                    <li>maxAge (number)
+                    <li>historyStart (date)
+                    <li>historyEnd (date)
+                </ul>
         </ul>
     </div>
 
