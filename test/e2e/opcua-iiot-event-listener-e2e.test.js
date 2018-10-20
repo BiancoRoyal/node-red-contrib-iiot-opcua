@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(40000)
+jest.setTimeout(60000)
 
 // iiot opc ua nodes
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -189,12 +189,17 @@ var listenToEventsOnServer = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '4',
     'name': 'listen with 200 ms',
     'addressSpaceItems': [
       {
         'name': 'BiancoRoyal',
         'nodeId': 'ns=1;i=1234',
+        'datatypeName': ''
+      },
+      {
+        'name': 'Tanks',
+        'nodeId': 'ns=1;i=1000',
         'datatypeName': ''
       },
       {
