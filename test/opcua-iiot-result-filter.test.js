@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(5000)
+jest.setTimeout(10000)
 
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
