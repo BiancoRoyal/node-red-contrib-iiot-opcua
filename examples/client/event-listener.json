@@ -1,15 +1,15 @@
 [
   {
-    "id": "59dffae1.4cded4",
+    "id": "b3974c60.a56ab8",
     "type": "tab",
     "label": "IIoT OPC UA Events",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "1a06cfb3.9fb668",
+    "id": "d9bca212.ee7d3",
     "type": "debug",
-    "z": "59dffae1.4cded4",
+    "z": "b3974c60.a56ab8",
     "name": "",
     "active": true,
     "console": "false",
@@ -19,11 +19,12 @@
     "wires": []
   },
   {
-    "id": "f6df8a61.4856f8",
+    "id": "cbc425f4.8b596",
     "type": "OPCUA-IIoT-Event",
-    "z": "59dffae1.4cded4",
+    "z": "b3974c60.a56ab8",
     "eventType": "BaseEventType",
     "eventTypeLabel": "BaseEventType (i=2041)",
+    "resultType": "basic",
     "queueSize": "1000",
     "usingListener": true,
     "name": "Base Events",
@@ -33,14 +34,14 @@
     "y": 120,
     "wires": [
       [
-        "129770b1.17f8f7"
+        "d4e7bb7a.8ba54"
       ]
     ]
   },
   {
-    "id": "be0aa839.283e4",
+    "id": "99ea348a.48cfd8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "59dffae1.4cded4",
+    "z": "b3974c60.a56ab8",
     "injectType": "listen",
     "payload": "200",
     "payloadType": "num",
@@ -66,31 +67,33 @@
     "y": 120,
     "wires": [
       [
-        "f6df8a61.4856f8"
+        "cbc425f4.8b596"
       ]
     ]
   },
   {
-    "id": "129770b1.17f8f7",
+    "id": "d4e7bb7a.8ba54",
     "type": "OPCUA-IIoT-Listener",
-    "z": "59dffae1.4cded4",
-    "connector": "e7696995.cf7358",
+    "z": "b3974c60.a56ab8",
+    "connector": "fe9e7411.128358",
     "action": "events",
     "queueSize": "100",
     "name": "",
+    "topic": "",
     "justValue": true,
+    "useGroupItems": false,
     "showStatusActivities": false,
-    "showErrors": false,
+    "showErrors": true,
     "x": 580,
     "y": 120,
     "wires": [
       [
-        "1a06cfb3.9fb668"
+        "d9bca212.ee7d3"
       ]
     ]
   },
   {
-    "id": "e7696995.cf7358",
+    "id": "fe9e7411.128358",
     "type": "OPCUA-IIoT-Connector",
     "z": "",
     "discoveryUrl": "",
@@ -99,13 +102,19 @@
     "loginEnabled": false,
     "securityPolicy": "None",
     "securityMode": "NONE",
-    "name": "LOCAL DEMO SERVER",
-    "showStatusActivities": false,
+    "name": "LOCAL EVENT SERVER",
     "showErrors": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
-    "defaultSecureTokenLifetime": "60000",
+    "defaultSecureTokenLifetime": "",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": "",
+    "requestedSessionTimeout": "",
+    "connectionStartDelay": "",
+    "reconnectDelay": ""
   }
 ]

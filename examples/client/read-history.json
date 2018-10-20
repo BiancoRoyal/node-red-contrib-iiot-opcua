@@ -1,15 +1,15 @@
 [
   {
-    "id": "a8aae2e9.224af",
+    "id": "62b77fc7.2b70f",
     "type": "tab",
     "label": "IIoT OPC UA History Read",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "5ab9594f.f9358",
+    "id": "3d4d0de9.b1dbca",
     "type": "OPCUA-IIoT-Inject",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "injectType": "read",
     "payload": "{\"historyStart\":0,\"historyEnd\":0}",
     "payloadType": "json",
@@ -30,37 +30,37 @@
     "y": 140,
     "wires": [
       [
-        "cb36ad39.f475b8"
+        "13fe8617.ba64fa"
       ]
     ]
   },
   {
-    "id": "ed779eb9.7b89",
+    "id": "220ff5e2.de5442",
     "type": "OPCUA-IIoT-Read",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "attributeId": "130",
     "maxAge": 1,
     "depth": 1,
-    "connector": "ef9763f4.0e6728",
+    "connector": "c3117db1.3ba618",
     "name": "Read History",
     "justValue": true,
     "showStatusActivities": false,
-    "showErrors": false,
+    "showErrors": true,
     "parseStrings": false,
     "historyDays": "",
     "x": 450,
     "y": 80,
     "wires": [
       [
-        "37d1d8fb.5f4908",
-        "dd2554f4.e88bd8"
+        "e226a029.634db",
+        "dd5f7dbd.0212b8"
       ]
     ]
   },
   {
-    "id": "37d1d8fb.5f4908",
+    "id": "e226a029.634db",
     "type": "OPCUA-IIoT-Response",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
@@ -68,14 +68,14 @@
     "y": 140,
     "wires": [
       [
-        "6e7bcaa9.db5154"
+        "c9dac953.015e38"
       ]
     ]
   },
   {
-    "id": "6e7bcaa9.db5154",
+    "id": "c9dac953.015e38",
     "type": "debug",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -87,9 +87,9 @@
     "wires": []
   },
   {
-    "id": "dd2554f4.e88bd8",
+    "id": "dd5f7dbd.0212b8",
     "type": "OPCUA-IIoT-Response",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -100,14 +100,14 @@
     "y": 80,
     "wires": [
       [
-        "de785573.8766c"
+        "b8cbcc95.6c655"
       ]
     ]
   },
   {
-    "id": "de785573.8766c",
+    "id": "b8cbcc95.6c655",
     "type": "debug",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -119,9 +119,9 @@
     "wires": []
   },
   {
-    "id": "cb36ad39.f475b8",
+    "id": "13fe8617.ba64fa",
     "type": "function",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "name": "set timeline",
     "func": "let startDate = new Date()\n\nlet historyStart = new Date()\nhistoryStart.setDate(startDate.getDate() - 2)\n\nlet historyEnd = new Date()\n\nmsg.payload.historyStart = historyStart\nmsg.payload.historyEnd = historyEnd\n\nreturn msg;",
     "outputs": 1,
@@ -130,15 +130,15 @@
     "y": 140,
     "wires": [
       [
-        "ed779eb9.7b89",
-        "ce21e707.8829e"
+        "220ff5e2.de5442",
+        "9127f37.884629"
       ]
     ]
   },
   {
-    "id": "b6e5bc66.864128",
+    "id": "ff6c4fbe.00e9a8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "injectType": "read",
     "payload": "{\"historyStart\":0,\"historyEnd\":0}",
     "payloadType": "json",
@@ -159,14 +159,14 @@
     "y": 80,
     "wires": [
       [
-        "ed779eb9.7b89"
+        "220ff5e2.de5442"
       ]
     ]
   },
   {
-    "id": "ce21e707.8829e",
+    "id": "9127f37.884629",
     "type": "debug",
-    "z": "a8aae2e9.224af",
+    "z": "62b77fc7.2b70f",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -178,16 +178,16 @@
     "wires": []
   },
   {
-    "id": "ef9763f4.0e6728",
+    "id": "c3117db1.3ba618",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "62b77fc7.2b70f",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:55389/UA/NodeREDIIoTServer",
+    "endpoint": "opc.tcp://localhost:55388/",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "Basic256",
     "securityMode": "SIGN",
-    "name": "LOCAL DEMO SERVER",
+    "name": "LOCAL HISTORY SERVER",
     "showErrors": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",

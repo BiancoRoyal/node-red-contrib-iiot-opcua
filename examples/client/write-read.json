@@ -1,16 +1,16 @@
 [
   {
-    "id": "781c2a04.19a86c",
+    "id": "775ab575.871ddc",
     "type": "tab",
     "label": "IIoT OPC UA Write Read",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "d37f3aa9.3da4f8",
+    "id": "fa23b334.2d52f",
     "type": "OPCUA-IIoT-Write",
-    "z": "781c2a04.19a86c",
-    "connector": "ef9763f4.0e6728",
+    "z": "775ab575.871ddc",
+    "connector": "3323c1da.1ef116",
     "name": "",
     "justValue": false,
     "showStatusActivities": false,
@@ -19,14 +19,14 @@
     "y": 120,
     "wires": [
       [
-        "65c81892.711578"
+        "e56c8f7f.17d7c8"
       ]
     ]
   },
   {
-    "id": "a9ca1835.011f2",
+    "id": "115cecf.1982d13",
     "type": "OPCUA-IIoT-Inject",
-    "z": "781c2a04.19a86c",
+    "z": "775ab575.871ddc",
     "injectType": "write",
     "payload": "",
     "payloadType": "date",
@@ -47,14 +47,14 @@
     "y": 120,
     "wires": [
       [
-        "7b13cffb.de59c8"
+        "fb20eb7c.f8035"
       ]
     ]
   },
   {
-    "id": "7b13cffb.de59c8",
+    "id": "fb20eb7c.f8035",
     "type": "data-generator",
-    "z": "781c2a04.19a86c",
+    "z": "775ab575.871ddc",
     "name": "dGen",
     "field": "valuesToWrite",
     "fieldType": "msg",
@@ -64,14 +64,14 @@
     "y": 120,
     "wires": [
       [
-        "d37f3aa9.3da4f8"
+        "fa23b334.2d52f"
       ]
     ]
   },
   {
-    "id": "8ebafbf4.ae5ce",
+    "id": "7176ab2a.35878c",
     "type": "comment",
-    "z": "781c2a04.19a86c",
+    "z": "775ab575.871ddc",
     "name": "install node-red-node-data-generator",
     "info": "",
     "x": 250,
@@ -79,13 +79,13 @@
     "wires": []
   },
   {
-    "id": "126cd256.cb234e",
+    "id": "2297a2c4.711e86",
     "type": "OPCUA-IIoT-Read",
-    "z": "781c2a04.19a86c",
+    "z": "775ab575.871ddc",
     "attributeId": "0",
     "maxAge": 1,
     "depth": 1,
-    "connector": "ef9763f4.0e6728",
+    "connector": "3323c1da.1ef116",
     "name": "",
     "justValue": true,
     "showStatusActivities": false,
@@ -96,14 +96,14 @@
     "y": 120,
     "wires": [
       [
-        "364895c1.0edfca"
+        "20abccf2.8e467c"
       ]
     ]
   },
   {
-    "id": "6f24462b.9238e",
+    "id": "c71ff0c1.92ebd8",
     "type": "debug",
-    "z": "781c2a04.19a86c",
+    "z": "775ab575.871ddc",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -115,9 +115,9 @@
     "wires": []
   },
   {
-    "id": "364895c1.0edfca",
+    "id": "20abccf2.8e467c",
     "type": "OPCUA-IIoT-Response",
-    "z": "781c2a04.19a86c",
+    "z": "775ab575.871ddc",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -128,14 +128,14 @@
     "y": 120,
     "wires": [
       [
-        "6f24462b.9238e"
+        "c71ff0c1.92ebd8"
       ]
     ]
   },
   {
-    "id": "65c81892.711578",
+    "id": "e56c8f7f.17d7c8",
     "type": "function",
-    "z": "781c2a04.19a86c",
+    "z": "775ab575.871ddc",
     "name": "toReadMsg",
     "func": "msg.nodetype = 'inject';\nmsg.injectType = 'read'\ndelete msg['valuesToWrite'];\nmsg.payload = {}\nreturn msg;",
     "outputs": 1,
@@ -144,21 +144,21 @@
     "y": 120,
     "wires": [
       [
-        "126cd256.cb234e"
+        "2297a2c4.711e86"
       ]
     ]
   },
   {
-    "id": "ef9763f4.0e6728",
+    "id": "3323c1da.1ef116",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "775ab575.871ddc",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:55389/UA/NodeREDIIoTServer",
+    "endpoint": "opc.tcp://localhost:55388",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "Basic256",
     "securityMode": "SIGN",
-    "name": "LOCAL DEMO SERVER",
+    "name": "LOCAL WRITE READ SERVER",
     "showErrors": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",

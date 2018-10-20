@@ -290,12 +290,29 @@ de.biancoroyal.opcua.iiot.core.response.compressReadMessageStructure = function 
       break
     case 'VariableValue':
       let itemList = []
-      msg.payload.forEach((item, index) => {
+      let results = msg.payload
+      let nodesToRead = msg.nodesToRead
+
+      if (msg.payload.results) {
+        results = msg.payload.results
+        nodesToRead = msg.payload.nodesToRead
+      }
+
+      results.forEach((item, index) => {
         if (item.hasOwnProperty('value') && item.value.hasOwnProperty('value')) {
+          let nodeId = null
+          if (nodesToRead && index < nodesToRead.length) {
+            nodeId = nodesToRead[index]
+          } else {
+            if (msg.addressSpaceItems && index < msg.addressSpaceItems.length) {
+              nodeId = msg.addressSpaceItems[index]
+            }
+          }
+
           itemList.push({
             value: item.value.value,
             dataType: item.value.dataType,
-            nodeId: (msg.nodesToRead) ? msg.nodesToRead[index] : msg.addressSpaceItems[index]
+            nodeId
           })
         }
       })

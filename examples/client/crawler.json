@@ -1,22 +1,24 @@
 [
   {
-    "id": "9398cadc.ff083",
+    "id": "dab270b5.2a5ae",
     "type": "tab",
     "label": "OPC UA IIoT Crawler",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "23fcf6d.13b5d8a",
+    "id": "529f1a8a.288564",
     "type": "OPCUA-IIoT-Crawler",
-    "z": "9398cadc.ff083",
-    "connector": "ef9763f4.0e6728",
+    "z": "dab270b5.2a5ae",
+    "connector": "7ce493ee.6c0b24",
     "name": "",
     "justValue": true,
     "singleResult": false,
     "showStatusActivities": true,
     "showErrors": false,
+    "activateUnsetFilter": false,
     "activateFilters": true,
+    "negateFilter": false,
     "filters": [
       {
         "name": "nodeClass",
@@ -40,14 +42,14 @@
     "y": 100,
     "wires": [
       [
-        "21684708.36ef"
+        "18f29fb6.046ae"
       ]
     ]
   },
   {
-    "id": "21684708.36ef",
+    "id": "18f29fb6.046ae",
     "type": "debug",
-    "z": "9398cadc.ff083",
+    "z": "dab270b5.2a5ae",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -59,9 +61,9 @@
     "wires": []
   },
   {
-    "id": "bb36ac76.436a7",
+    "id": "2498f9d7.fe8726",
     "type": "OPCUA-IIoT-Inject",
-    "z": "9398cadc.ff083",
+    "z": "dab270b5.2a5ae",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -82,28 +84,28 @@
     "y": 100,
     "wires": [
       [
-        "23fcf6d.13b5d8a"
+        "529f1a8a.288564"
       ]
     ]
   },
   {
-    "id": "add50513.726488",
+    "id": "b78b2804.9078f",
     "type": "catch",
-    "z": "9398cadc.ff083",
+    "z": "dab270b5.2a5ae",
     "name": "",
     "scope": null,
     "x": 860,
     "y": 60,
     "wires": [
       [
-        "78e09232.affe14"
+        "8f8d6498.678a9"
       ]
     ]
   },
   {
-    "id": "78e09232.affe14",
+    "id": "8f8d6498.678a9",
     "type": "debug",
-    "z": "9398cadc.ff083",
+    "z": "dab270b5.2a5ae",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -115,16 +117,18 @@
     "wires": []
   },
   {
-    "id": "99b6cc9a.be7568",
+    "id": "7fab3f2c.80cc9",
     "type": "OPCUA-IIoT-Crawler",
-    "z": "9398cadc.ff083",
-    "connector": "ef9763f4.0e6728",
+    "z": "dab270b5.2a5ae",
+    "connector": "7ce493ee.6c0b24",
     "name": "",
     "justValue": false,
     "singleResult": true,
     "showStatusActivities": true,
     "showErrors": false,
+    "activateUnsetFilter": false,
     "activateFilters": true,
+    "negateFilter": false,
     "filters": [
       {
         "name": "nodeClass",
@@ -160,14 +164,14 @@
     "y": 180,
     "wires": [
       [
-        "96a352e7.b46148"
+        "15abdb5c.670ca5"
       ]
     ]
   },
   {
-    "id": "848ce5aa.9991d",
+    "id": "2e048e6.6fea1f2",
     "type": "OPCUA-IIoT-Inject",
-    "z": "9398cadc.ff083",
+    "z": "dab270b5.2a5ae",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -188,14 +192,14 @@
     "y": 180,
     "wires": [
       [
-        "99b6cc9a.be7568"
+        "7fab3f2c.80cc9"
       ]
     ]
   },
   {
-    "id": "96a352e7.b46148",
+    "id": "15abdb5c.670ca5",
     "type": "debug",
-    "z": "9398cadc.ff083",
+    "z": "dab270b5.2a5ae",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -207,20 +211,20 @@
     "wires": []
   },
   {
-    "id": "ef9763f4.0e6728",
+    "id": "7ce493ee.6c0b24",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "dab270b5.2a5ae",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:55389/UA/NodeREDIIoTServer",
+    "endpoint": "opc.tcp://localhost:55388/",
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "Basic256",
-    "securityMode": "SIGN",
-    "name": "LOCAL DEMO SERVER",
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "LOCAL CRAWLER SERVER",
     "showErrors": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
-    "defaultSecureTokenLifetime": "60000",
+    "defaultSecureTokenLifetime": "",
     "endpointMustExist": false,
     "autoSelectRightEndpoint": false,
     "strategyMaxRetry": "",

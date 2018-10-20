@@ -1,16 +1,16 @@
 [
   {
-    "id": "30fb1223.b814d6",
+    "id": "f49a0646.6b54a8",
     "type": "tab",
     "label": "IIoT OPC UA Read Write",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "9ad93df6.eb23a8",
+    "id": "68b2953e.23fe94",
     "type": "OPCUA-IIoT-Write",
-    "z": "30fb1223.b814d6",
-    "connector": "ef9763f4.0e6728",
+    "z": "f49a0646.6b54a8",
+    "connector": "7316e0da.4324d",
     "name": "",
     "justValue": false,
     "showStatusActivities": false,
@@ -19,14 +19,14 @@
     "y": 80,
     "wires": [
       [
-        "ac931d8.5d33a6"
+        "13fe0f0e.0ca0e9"
       ]
     ]
   },
   {
-    "id": "280ff277.fbdf66",
+    "id": "51907704.7ca4d",
     "type": "OPCUA-IIoT-Inject",
-    "z": "30fb1223.b814d6",
+    "z": "f49a0646.6b54a8",
     "injectType": "read",
     "payload": "",
     "payloadType": "date",
@@ -47,18 +47,18 @@
     "y": 80,
     "wires": [
       [
-        "134774b8.5a5f2b"
+        "d4817dc5.a09168"
       ]
     ]
   },
   {
-    "id": "134774b8.5a5f2b",
+    "id": "d4817dc5.a09168",
     "type": "OPCUA-IIoT-Read",
-    "z": "30fb1223.b814d6",
+    "z": "f49a0646.6b54a8",
     "attributeId": "13",
     "maxAge": 1,
     "depth": 1,
-    "connector": "ef9763f4.0e6728",
+    "connector": "7316e0da.4324d",
     "name": "",
     "justValue": true,
     "showStatusActivities": false,
@@ -69,14 +69,14 @@
     "y": 80,
     "wires": [
       [
-        "8344d408.f32b98"
+        "30116e36.369d22"
       ]
     ]
   },
   {
-    "id": "ac931d8.5d33a6",
+    "id": "13fe0f0e.0ca0e9",
     "type": "OPCUA-IIoT-Response",
-    "z": "30fb1223.b814d6",
+    "z": "f49a0646.6b54a8",
     "name": "",
     "compressStructure": false,
     "showStatusActivities": false,
@@ -87,14 +87,14 @@
     "y": 80,
     "wires": [
       [
-        "843eb939.a239f"
+        "afa379a1.804f18"
       ]
     ]
   },
   {
-    "id": "843eb939.a239f",
+    "id": "afa379a1.804f18",
     "type": "debug",
-    "z": "30fb1223.b814d6",
+    "z": "f49a0646.6b54a8",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -106,9 +106,9 @@
     "wires": []
   },
   {
-    "id": "8344d408.f32b98",
+    "id": "30116e36.369d22",
     "type": "function",
-    "z": "30fb1223.b814d6",
+    "z": "f49a0646.6b54a8",
     "name": "toWriteMsg",
     "func": "msg.nodetype = 'inject';\nmsg.injectType = 'write'\nmsg.valuesToWrite = [16.04]\nreturn msg;",
     "outputs": 1,
@@ -117,16 +117,16 @@
     "y": 80,
     "wires": [
       [
-        "9ad93df6.eb23a8"
+        "68b2953e.23fe94"
       ]
     ]
   },
   {
-    "id": "ef9763f4.0e6728",
+    "id": "7316e0da.4324d",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "f49a0646.6b54a8",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:55389/UA/NodeREDIIoTServer",
+    "endpoint": "opc.tcp://localhost:55388",
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "Basic256",

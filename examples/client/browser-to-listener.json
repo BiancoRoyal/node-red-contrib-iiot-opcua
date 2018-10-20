@@ -1,15 +1,15 @@
 [
   {
-    "id": "f1af7e40.d439c",
+    "id": "507d8e18.767b68",
     "type": "tab",
     "label": "IIoT OPC UA Browse2Listener",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "788605c4.a9d404",
+    "id": "1e35aae1.a75845",
     "type": "OPCUA-IIoT-Inject",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "injectType": "listen",
     "payload": "{\"interval\":500,\"queueSize\":4,\"options\":{\"requestedPublishingInterval\":1000,\"requestedLifetimeCount\":60,\"requestedMaxKeepAliveCount\":10,\"maxNotificationsPerPublish\":4,\"publishingEnabled\":true,\"priority\":1}}",
     "payloadType": "json",
@@ -24,15 +24,15 @@
     "y": 300,
     "wires": [
       [
-        "781c3c8f.e99154"
+        "503d5c1e.c4c514"
       ]
     ]
   },
   {
-    "id": "781c3c8f.e99154",
+    "id": "503d5c1e.c4c514",
     "type": "OPCUA-IIoT-Browser",
-    "z": "f1af7e40.d439c",
-    "connector": "8c9e0ce6.c1837",
+    "z": "507d8e18.767b68",
+    "connector": "bc2b9a1a.83b5f",
     "nodeId": "ns=0;i=85",
     "name": "Recursive Browser",
     "justValue": true,
@@ -48,15 +48,15 @@
     "y": 300,
     "wires": [
       [
-        "996020ae.5fb968",
-        "6f5405c0.50d15c"
+        "eed41fa1.1f7048",
+        "d9709d68.bc27d8"
       ]
     ]
   },
   {
-    "id": "1f0aefd0.6cf6c",
+    "id": "c3070d9c.db3508",
     "type": "debug",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "active": false,
     "console": "false",
@@ -66,9 +66,9 @@
     "wires": []
   },
   {
-    "id": "dd91dfdc.495ad8",
+    "id": "80eb5c96.604498",
     "type": "debug",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "active": true,
     "console": "false",
@@ -78,10 +78,10 @@
     "wires": []
   },
   {
-    "id": "996020ae.5fb968",
+    "id": "eed41fa1.1f7048",
     "type": "OPCUA-IIoT-Listener",
-    "z": "f1af7e40.d439c",
-    "connector": "8c9e0ce6.c1837",
+    "z": "507d8e18.767b68",
+    "connector": "bc2b9a1a.83b5f",
     "action": "subscribe",
     "queueSize": 10,
     "name": "",
@@ -92,14 +92,14 @@
     "y": 300,
     "wires": [
       [
-        "1f0aefd0.6cf6c"
+        "c3070d9c.db3508"
       ]
     ]
   },
   {
-    "id": "6f5405c0.50d15c",
+    "id": "d9709d68.bc27d8",
     "type": "OPCUA-IIoT-Response",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -110,14 +110,14 @@
     "y": 240,
     "wires": [
       [
-        "dd91dfdc.495ad8"
+        "80eb5c96.604498"
       ]
     ]
   },
   {
-    "id": "3cd334e4.7b014c",
+    "id": "39cdf744.28ca18",
     "type": "OPCUA-IIoT-Inject",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "injectType": "listen",
     "payload": "{\"interval\":500,\"queueSize\":4,\"options\":{\"requestedPublishingInterval\":1000,\"requestedLifetimeCount\":60,\"requestedMaxKeepAliveCount\":10,\"maxNotificationsPerPublish\":4,\"publishingEnabled\":true,\"priority\":1}}",
     "payloadType": "json",
@@ -132,15 +132,15 @@
     "y": 440,
     "wires": [
       [
-        "f0d483aa.aa8938"
+        "8b969a42.65dad8"
       ]
     ]
   },
   {
-    "id": "f0d483aa.aa8938",
+    "id": "8b969a42.65dad8",
     "type": "OPCUA-IIoT-Browser",
-    "z": "f1af7e40.d439c",
-    "connector": "8c9e0ce6.c1837",
+    "z": "507d8e18.767b68",
+    "connector": "bc2b9a1a.83b5f",
     "nodeId": "ns=1;i=1234",
     "name": "Single Browser",
     "justValue": true,
@@ -156,15 +156,15 @@
     "y": 440,
     "wires": [
       [
-        "83a75a0d.b7a938",
-        "cf4d0c8c.653b3"
+        "95f8eefc.7f68a8",
+        "a25d95be.e95488"
       ]
     ]
   },
   {
-    "id": "5feef883.d78418",
+    "id": "243f0736.abdc18",
     "type": "debug",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "active": false,
     "console": "false",
@@ -174,9 +174,9 @@
     "wires": []
   },
   {
-    "id": "d6f7c3bd.aee44",
+    "id": "788bf50c.f10a0c",
     "type": "debug",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "active": true,
     "console": "false",
@@ -186,10 +186,10 @@
     "wires": []
   },
   {
-    "id": "83a75a0d.b7a938",
+    "id": "95f8eefc.7f68a8",
     "type": "OPCUA-IIoT-Listener",
-    "z": "f1af7e40.d439c",
-    "connector": "8c9e0ce6.c1837",
+    "z": "507d8e18.767b68",
+    "connector": "bc2b9a1a.83b5f",
     "action": "subscribe",
     "queueSize": 10,
     "name": "",
@@ -200,14 +200,14 @@
     "y": 440,
     "wires": [
       [
-        "5feef883.d78418"
+        "243f0736.abdc18"
       ]
     ]
   },
   {
-    "id": "cf4d0c8c.653b3",
+    "id": "a25d95be.e95488",
     "type": "OPCUA-IIoT-Response",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -218,14 +218,14 @@
     "y": 380,
     "wires": [
       [
-        "d6f7c3bd.aee44"
+        "788bf50c.f10a0c"
       ]
     ]
   },
   {
-    "id": "1b4080c9.0e552f",
+    "id": "89bdb777.661f98",
     "type": "OPCUA-IIoT-Inject",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "injectType": "listen",
     "payload": "{\"interval\":500,\"queueSize\":4,\"options\":{\"requestedPublishingInterval\":1000,\"requestedLifetimeCount\":60,\"requestedMaxKeepAliveCount\":10,\"maxNotificationsPerPublish\":4,\"publishingEnabled\":true,\"priority\":1}}",
     "payloadType": "json",
@@ -240,15 +240,15 @@
     "y": 160,
     "wires": [
       [
-        "4586094.14b2c78"
+        "72f08e2e.98973"
       ]
     ]
   },
   {
-    "id": "4586094.14b2c78",
+    "id": "72f08e2e.98973",
     "type": "OPCUA-IIoT-Browser",
-    "z": "f1af7e40.d439c",
-    "connector": "8c9e0ce6.c1837",
+    "z": "507d8e18.767b68",
+    "connector": "bc2b9a1a.83b5f",
     "nodeId": "ns=1;i=1234",
     "name": "",
     "justValue": false,
@@ -258,21 +258,22 @@
     "singleBrowseResult": false,
     "recursiveBrowse": false,
     "recursiveDepth": "",
+    "delayPerMessage": "",
     "showStatusActivities": false,
     "showErrors": true,
     "x": 340,
     "y": 160,
     "wires": [
       [
-        "c0e8e38.ec361a",
-        "e79190f1.7e1b98"
+        "dc61977.47f9de8",
+        "d7847f51.43b898"
       ]
     ]
   },
   {
-    "id": "8ab2a683.7599d",
+    "id": "3e9259f6.cd199e",
     "type": "debug",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "active": false,
     "console": "false",
@@ -282,9 +283,9 @@
     "wires": []
   },
   {
-    "id": "542bbbdb.31664c",
+    "id": "ddfeb2e4.afc41",
     "type": "debug",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "active": true,
     "console": "false",
@@ -294,10 +295,10 @@
     "wires": []
   },
   {
-    "id": "c0e8e38.ec361a",
+    "id": "dc61977.47f9de8",
     "type": "OPCUA-IIoT-Listener",
-    "z": "f1af7e40.d439c",
-    "connector": "8c9e0ce6.c1837",
+    "z": "507d8e18.767b68",
+    "connector": "bc2b9a1a.83b5f",
     "action": "subscribe",
     "queueSize": 10,
     "name": "",
@@ -308,14 +309,14 @@
     "y": 160,
     "wires": [
       [
-        "8ab2a683.7599d"
+        "3e9259f6.cd199e"
       ]
     ]
   },
   {
-    "id": "e79190f1.7e1b98",
+    "id": "d7847f51.43b898",
     "type": "OPCUA-IIoT-Response",
-    "z": "f1af7e40.d439c",
+    "z": "507d8e18.767b68",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -326,14 +327,14 @@
     "y": 100,
     "wires": [
       [
-        "542bbbdb.31664c"
+        "ddfeb2e4.afc41"
       ]
     ]
   },
   {
-    "id": "8c9e0ce6.c1837",
+    "id": "bc2b9a1a.83b5f",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "507d8e18.767b68",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388/",
     "keepSessionAlive": true,
@@ -346,7 +347,13 @@
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
     "endpointMustExist": false,
-    "autoSelectRightEndpoint": false
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": "",
+    "requestedSessionTimeout": "",
+    "connectionStartDelay": "",
+    "reconnectDelay": ""
   }
 ]
-
