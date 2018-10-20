@@ -161,39 +161,21 @@ module.exports = function (RED) {
         return false
       }
 
-      switch (msg.nodetype) {
+      switch (msg.injectType) {
         case 'CMD':
           node.executeOpcuaCommand(msg)
           break
         default:
-          node.error(new Error('Unknown Node Type ' + msg.nodetype), msg)
+          node.error(new Error('Unknown Inject Type ' + msg.injectType), msg)
       }
 
       node.send(msg)
     })
 
     node.executeOpcuaCommand = function (msg) {
-      let addressSpace = node.opcuaServer.engine.addressSpace
-      if (!addressSpace) {
-        node.error(new Error('Server AddressSpace Not Valid'), msg)
-      }
-
-      switch (msg.payload.commandtype) {
+      switch (msg.commandtype) {
         case 'restart':
           node.restartServer()
-          break
-        case 'deleteNode':
-          if (msg.payload.nodeId) {
-            let searchedNode = addressSpace.findNode(msg.payload.nodeId)
-            if (searchedNode) {
-              coreServer.flex.internalDebugLog('Delete NodeId ' + msg.payload.nodeId)
-              addressSpace.deleteNode(searchedNode)
-            } else {
-              coreServer.flex.internalDebugLog('Delete NodeId Not Found ' + msg.payload.nodeId)
-            }
-          } else {
-            node.error(new Error('OPC UA Command NodeId Not Valid'), msg)
-          }
           break
         default:
           node.error(new Error('Unknown OPC UA Command'), msg)

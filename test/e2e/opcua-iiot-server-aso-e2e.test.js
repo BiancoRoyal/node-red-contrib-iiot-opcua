@@ -496,6 +496,9 @@ describe('Address Space Operation node e2e Testing', function () {
       let n4 = helper.getNode('n4')
       let test = 0
       n4.on('input', function (msg) {
+        expect(msg.nodetype).toBe('inject')
+        expect(msg.injectType).toBe('ASO')
+
         switch (msg.payload.datatype) {
           case 'FolderType':
             expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')
@@ -557,6 +560,9 @@ describe('Address Space Operation node e2e Testing', function () {
       let n4 = helper.getNode('n4')
       let test = 0
       n4.on('input', function (msg) {
+        expect(msg.nodetype).toBe('inject')
+        expect(msg.injectType).toBe('ASO')
+
         switch (msg.payload.datatype) {
           case 'FolderType':
             expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')

@@ -224,28 +224,31 @@ module.exports = function (RED) {
       }
     }
 
-    node.executeOpcuaCommand = function (msg) {
+    node.deleteNOdeFromAddressSpace = function (msg) {
       let addressSpace = node.opcuaServer.engine.addressSpace
       if (!addressSpace) {
         node.error(new Error('Server AddressSpace Not Valid'), msg)
       }
+      if (msg.payload.nodeId) {
+        let searchedNode = addressSpace.findNode(msg.payload.nodeId)
+        if (searchedNode) {
+          coreServer.internalDebugLog('Delete NodeId ' + msg.payload.nodeId)
+          addressSpace.deleteNode(searchedNode)
+        } else {
+          coreServer.internalDebugLog('Delete NodeId Not Found ' + msg.payload.nodeId)
+        }
+      } else {
+        node.error(new Error('OPC UA Command NodeId Not Valid'), msg)
+      }
+    }
 
+    node.executeOpcuaCommand = function (msg) {
       switch (msg.commandType) {
         case 'restart':
           node.restartServer()
           break
         case 'deleteNode':
-          if (msg.payload.nodeId) {
-            let searchedNode = addressSpace.findNode(msg.payload.nodeId)
-            if (searchedNode) {
-              coreServer.internalDebugLog('Delete NodeId ' + msg.payload.nodeId)
-              addressSpace.deleteNode(searchedNode)
-            } else {
-              coreServer.internalDebugLog('Delete NodeId Not Found ' + msg.payload.nodeId)
-            }
-          } else {
-            node.error(new Error('OPC UA Command NodeId Not Valid'), msg)
-          }
+          node.deleteNOdeFromAddressSpace(msg)
           break
         default:
           node.error(new Error('Unknown OPC UA Command'), msg)
