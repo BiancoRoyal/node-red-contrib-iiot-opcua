@@ -16,16 +16,17 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
-  let path = require('path')
   const {VM} = require('vm2')
   let scriptObjects = {}
 
   function OPCUAIIoTFlexServer (config) {
     RED.nodes.createNode(this, config)
-
-    this = coreServer.readConfigOfServerNode(this, config)
-    let node = coreServer.initServerNode(this)
     coreServer.flex.internalDebugLog('Open Server Node')
+
+    let node = coreServer.readConfigOfServerNode(this, config)
+    node = coreServer.initServerNode(this)
+    node = coreServer.loadNodeSets(node, __dirname)
+    node = coreServer.loadCertificates(node)
 
     const vm = new VM({
       sandbox: {
@@ -43,29 +44,20 @@ module.exports = function (RED) {
     vm.run('node.constructAddressSpaceScript = ' + config.addressSpaceScript)
 
     coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
-      
-    node = coreServer.loadNodeSets(node)
-    node = coreServer.loadCertificates(node)
 
-    coreServer.core.setNodeStatusTo(node, 'waiting')
-    coreServer.flex.internalDebugLog('flex node sets:' + xmlFiles.toString()) 
-
-    let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
-    let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
-  
-    node.initNewServer = function () {
-      node.initialized = false
-      node.opcuaServer = null
-      node = coreServer.initRegisterServerMethod(node)
+    node.buildServerOptions = function () {
+      let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
+      let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
+      let today = new Date()
 
       let serverOptions = {
         port: node.port,
-        nodeset_filename: xmlFiles,
+        nodeset_filename: node.xmlFiles,
         resourcePath: node.endpoint || 'UA/NodeREDFlexIIoTServer',
         buildInfo: {
           productName: node.name || 'Node-RED Flex IIoT Server',
-          buildNumber: '20181022',
-          buildDate: new Date()
+          buildNumber: today.timestamp,
+          buildDate: today
         },
         serverCapabilities: {
           operationLimits: {
@@ -97,40 +89,38 @@ module.exports = function (RED) {
         disableDiscovery: node.disableDiscovery
       }
 
-      if (!node.disableDiscovery) {
-        serverOptions.registerServerMethod = node.registerServerMethod
+      return coreServer.setDiscoveryOptions(node, serverOptions)
+    }
 
-        if (node.discoveryServerEndpointUrl && node.discoveryServerEndpointUrl !== '') {
-          serverOptions.discoveryServerEndpointUrl = node.discoveryServerEndpointUrl
-        }
+    node.createServer = function (serverOptions) {
+      node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
+      coreServer.core.setNodeStatusTo(node, 'waiting')
+      node.opcuaServer.initialize(node.postInitialize)
 
-        if (node.capabilitiesForMDNS && node.capabilitiesForMDNS.length) {
-          serverOptions.capabilitiesForMDNS = node.capabilitiesForMDNS
-        }
-      }
+      node.opcuaServer.on('newChannel', function (channel) {
+        coreServer.flex.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
+      })
 
+      node.opcuaServer.on('closeChannel', function (channel) {
+        coreServer.flex.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
+      })
+
+      node.opcuaServer.on('post_initialize', function () {
+        coreServer.flex.internalDebugLog('Client initialized')
+      })
+    }
+
+    node.initNewServer = function () {
+      node = coreServer.initRegisterServerMethod(node)
+      let serverOptions = node.buildServerOptions()
       coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
 
       try {
-        node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
-
-        node.opcuaServer.initialize(node.postInitialize)
-
-        node.opcuaServer.on('newChannel', function (channel) {
-          coreServer.flex.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
-        })
-
-        node.opcuaServer.on('closeChannel', function (channel) {
-          coreServer.flex.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
-        })
-
-        node.opcuaServer.on('post_initialize', function () {
-          coreServer.flex.internalDebugLog('Client initialized')
-        })
+        node.createServer(serverOptions)
       } catch (err) {
         node.emit('server_compile_error')
         coreServer.flex.internalDebugLog(err.message)
-        node.error(err, {payload: 'Server Failure! Please, check the server settings!'})
+        node.error(err, {payload: 'Flex Server Failure! Please, check the server settings!'})
       }
     }
 
@@ -145,13 +135,13 @@ module.exports = function (RED) {
             coreServer.core.setNodeStatusTo(node, 'errors')
             coreServer.flex.internalDebugLog(err)
             if (node.showErrors) {
-              node.error(err, {payload: ''})
+              node.error(err, {payload: 'start'})
             }
           })
         }).catch(function (err) {
           coreServer.flex.internalDebugLog(err)
           if (node.showErrors) {
-            node.error(err, {payload: ''})
+            node.error(err, {payload: 'constructAddressSpaceFromScript'})
           }
         })
       } else {

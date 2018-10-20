@@ -606,30 +606,33 @@ de.biancoroyal.opcua.iiot.core.server.initServerNode = function (node) {
   return node
 }
 
-de.biancoroyal.opcua.iiot.core.server.loadNodeSets = function (node) {
+de.biancoroyal.opcua.iiot.core.server.loadNodeSets = function (node, dirname) {
+  let coreServer = this
   let standardNodeSetFile = this.core.nodeOPCUA.standard_nodeset_file
   let xmlFiles = [standardNodeSetFile]
 
   if (node.xmlsets) {
-    node.xmlsets.forEach(function (xmlsetFileName, i) {
-      this.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
+    node.xmlsets.forEach((xmlsetFileName) => {
+      coreServer.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
       if (xmlsetFileName.path) {
         if (xmlsetFileName.path.startsWith('public/vendor/')) {
-          xmlFiles.push(this.path.join(__dirname, xmlsetFileName.path))
+          xmlFiles.push(this.path.join(dirname, xmlsetFileName.path))
         } else {
           xmlFiles.push(xmlsetFileName.path)
         }
 
         if (xmlsetFileName.path.includes('ISA95')) {
           // add server ISA95 extension to node-opcua
-          this.isa95DebugLog('installing ISA95 extend')
+          coreServer.isa95DebugLog('installing ISA95 extend')
           // require('node-opcua-isa95')(this.core.nodeOPCUA)
         }
       }
     })
-    this.detailDebugLog('append xmlFiles: ' + xmlFiles.toString())
+    this.detailDebugLog('appending xmlFiles: ' + xmlFiles.toString())
   }
 
+  this.detailDebugLog('node set:' + xmlFiles.toString())
+  node.xmlFiles = xmlFiles
   return node
 }
 
@@ -664,6 +667,9 @@ de.biancoroyal.opcua.iiot.core.server.checkUser = function (node, userName, pass
 }
 
 de.biancoroyal.opcua.iiot.core.server.initRegisterServerMethod = function (node) {
+  node.initialized = false
+  node.opcuaServer = null
+
   if (!node.registerServerMethod) {
     node.registerServerMethod = this.core.nodeOPCUA.RegisterServerMethod.HIDDEN
   } else {
@@ -680,4 +686,20 @@ de.biancoroyal.opcua.iiot.core.server.initRegisterServerMethod = function (node)
   }
   return node
 }
+
+de.biancoroyal.opcua.iiot.core.server.setDiscoveryOptions = function (node, serverOptions) {
+  if (!node.disableDiscovery) {
+    serverOptions.registerServerMethod = node.registerServerMethod
+
+    if (node.discoveryServerEndpointUrl && node.discoveryServerEndpointUrl !== '') {
+      serverOptions.discoveryServerEndpointUrl = node.discoveryServerEndpointUrl
+    }
+
+    if (node.capabilitiesForMDNS && node.capabilitiesForMDNS.length) {
+      serverOptions.capabilitiesForMDNS = node.capabilitiesForMDNS
+    }
+  }
+  return serverOptions
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.server

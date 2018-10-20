@@ -16,45 +16,33 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
-  let path = require('path')
   let LocalizedText = require('node-opcua').LocalizedText
 
   function OPCUAIIoTServer (config) {
-    const UNLIMITED_LISTENERS = 0
-    
     RED.nodes.createNode(this, config)
-
-    this = coreServer.readConfigOfServerNode(this, config)
-    this.asoDemo = config.asoDemo // ASO (address space objects) Demo
-    let node = coreServer.initServerNode(this)
-    
     coreServer.internalDebugLog('Open Server Node')
-    coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
 
-    node = coreServer.loadNodeSets(node)
+    this.asoDemo = config.asoDemo // ASO (address space objects) Demo
+    let node = coreServer.readConfigOfServerNode(this, config)
+    node = coreServer.initServerNode(this)
+    node = coreServer.loadNodeSets(node, __dirname)
     node = coreServer.loadCertificates(node)
 
-    coreServer.core.setNodeStatusTo(node, 'waiting')
-    coreServer.internalDebugLog('node set:' + xmlFiles.toString())
+    coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
 
-    node.checkUser = coreServer.checkUser
-    
-    let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
-    let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
-
-    node.initNewServer = function () {
-      node.initialized = false
-      node.opcuaServer = null
-      node = coreServer.initRegisterServerMethod(node)
+    node.buildServerOptions = function () {
+      let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
+      let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
+      let today = new Date()
 
       let serverOptions = {
         port: node.port,
-        nodeset_filename: xmlFiles,
+        nodeset_filename: node.xmlFiles,
         resourcePath: node.endpoint || 'UA/NodeREDIIoTServer',
         buildInfo: {
           productName: node.name || 'NodeOPCUA IIoT Server',
-          buildNumber: '20181022',
-          buildDate: new Date()
+          buildNumber: today.timestamp,
+          buildDate: today
         },
         serverCapabilities: {
           operationLimits: {
@@ -86,20 +74,12 @@ module.exports = function (RED) {
         disableDiscovery: node.disableDiscovery
       }
 
-      if (!node.disableDiscovery) {
-        serverOptions.registerServerMethod = node.registerServerMethod
+      return coreServer.setDiscoveryOptions(node, serverOptions)
+    }
 
-        if (node.discoveryServerEndpointUrl && node.discoveryServerEndpointUrl !== '') {
-          serverOptions.discoveryServerEndpointUrl = node.discoveryServerEndpointUrl
-        }
-
-        if (node.capabilitiesForMDNS && node.capabilitiesForMDNS.length) {
-          serverOptions.capabilitiesForMDNS = node.capabilitiesForMDNS
-        }
-      }
-
-      coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+    node.createServer = function (serverOptions) {
       node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
+      coreServer.core.setNodeStatusTo(node, 'waiting')
       node.opcuaServer.initialize(node.postInitialize)
 
       node.opcuaServer.on('newChannel', function (channel) {
@@ -109,6 +89,22 @@ module.exports = function (RED) {
       node.opcuaServer.on('closeChannel', function (channel) {
         coreServer.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
       })
+    }
+
+    node.initNewServer = function () {
+      node = coreServer.initRegisterServerMethod(node)
+
+      let serverOptions = node.buildServerOptions()
+      serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
+      coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+
+      try {
+        node.createServer(serverOptions)
+      } catch (err) {
+        node.emit('server_start_error')
+        coreServer.internalDebugLog(err.message)
+        node.error(err, {payload: 'Server Failure! Please, check the server settings!'})
+      }
     }
 
     node.postInitialize = function () {
