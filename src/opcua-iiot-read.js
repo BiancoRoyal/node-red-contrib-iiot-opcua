@@ -30,23 +30,7 @@ module.exports = function (RED) {
     this.historyDays = parseInt(config.historyDays) || 1
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = this
-    node.reconnectTimeout = 1000
-    node.sessionTimeout = null
-    node.opcuaClient = null
-    node.opcuaSession = null
-
-    node.statusLog = function (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        coreClient.readDebugLog('Status: ' + logMessage)
-      }
-    }
-
-    node.setNodeStatusTo = function (statusValue) {
-      node.statusLog(statusValue)
-      let statusParameter = coreClient.core.getNodeStatus(statusValue, node.showStatusActivities)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
+    let node = coreClient.core.initClientNode(this)
 
     node.handleReadError = function (err, msg) {
       coreClient.readDebugLog(err)
@@ -144,48 +128,62 @@ module.exports = function (RED) {
     }
 
     node.buildResultMessage = function (readType, readResult) {
-      let message = readResult.msg
+      let message = Object.assign({}, readResult.msg)
       message.payload = {}
       message.nodetype = 'read'
       message.readtype = readType
       message.attributeId = node.attributeId
+      message.justValue = node.justValue
 
+      let dataValuesString = node.extractDataValueString(readResult)
+      message = node.setMessageProperties(message, readResult, dataValuesString)
+
+      if (!node.justValue) {
+        message = node.enhanceMessage(message, readResult)
+      }
+
+      return message
+    }
+
+    node.extractDataValueString = function (readResult) {
       let dataValuesString = {}
       if (node.justValue) {
         dataValuesString = JSON.stringify(readResult.results, null, 2)
       } else {
         dataValuesString = JSON.stringify(readResult, null, 2)
       }
+      return dataValuesString
+    }
 
+    node.setMessageProperties = function (message, readResult, stringValue) {
       try {
-        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
+        RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
       } catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
           node.error(err, readResult.msg)
         }
 
-        message.payload = dataValuesString
+        message.payload = stringValue
         message.error = err.message
       }
+      return message
+    }
 
-      message.justValue = node.justValue
-      if (!node.justValue) {
-        try {
-          message.resultsConverted = {}
-          let dataValuesString = JSON.stringify(readResult.results, null, 2)
-          RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
-        } catch (err) {
-          if (node.showErrors) {
-            node.warn('JSON not to parse from string for dataValues type ' + readResult.results)
-            node.error(err, readResult.msg)
-          }
-
-          message.resultsConverted = null
-          message.error = err.message
+    node.enhanceMessage = function (message, readResult) {
+      try {
+        message.resultsConverted = {}
+        let dataValuesString = JSON.stringify(readResult.results, null, 2)
+        RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
+      } catch (err) {
+        if (node.showErrors) {
+          node.warn('JSON not to parse from string for dataValues type ' + readResult.results)
+          node.error(err, readResult.msg)
         }
-      }
 
+        message.resultsConverted = null
+        message.error = err.message
+      }
       return message
     }
 

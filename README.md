@@ -15,6 +15,7 @@
 [![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
 [![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
+* v3.x is now LTS version until Oktober 2019 (branch 3.0)
 * tested with Node.js v10 and Node-RED v0.19
 * based on node-opcua v0.4
 * extendable with node-opcua-isa95

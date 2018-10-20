@@ -88,7 +88,9 @@ de.biancoroyal.opcua.iiot.core.response.setNodeStatus = function (node, entrySta
     }
   }
 
-  node.status({fill: fillColor, shape: 'dot', text: informationText})
+  if (node.status.text !== informationText) {
+    node.status({fill: fillColor, shape: 'dot', text: informationText})
+  }
 }
 
 de.biancoroyal.opcua.iiot.core.response.analyzeWriteResults = function (node, msg) {

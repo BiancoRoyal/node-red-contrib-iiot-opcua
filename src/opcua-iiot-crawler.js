@@ -31,18 +31,7 @@ module.exports = function (RED) {
     this.delayPerMessage = config.delayPerMessage || 0.2
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = this
-    node.items = []
-    node.browseTopic = coreBrowser.core.OBJECTS_ROOT
-    node.opcuaClient = null
-    node.opcuaSession = null
-    node.reconnectTimeout = 1000
-    node.messageList = []
-
-    node.setNodeStatusTo = function (statusValue) {
-      let statusParameter = coreBrowser.core.getNodeStatus(statusValue, node.showStatusActivities)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
+    let node = coreBrowser.initClientNode(this)
 
     node.browseErrorHandling = function (err, msg) {
       if (err) {
@@ -159,7 +148,7 @@ module.exports = function (RED) {
       coreBrowser.internalDebugLog('Browse Topic To Call Crawler ' + node.browseTopic)
 
       if (node.showStatusActivities) {
-        node.setNodeStatusTo('crawling')
+        coreBrowser.core.setNodeStatusTo(node, 'crawling')
       }
 
       coreBrowser.crawl(session, node.browseTopic, msg)
@@ -173,7 +162,7 @@ module.exports = function (RED) {
 
     node.crawlNodeList = function (session, msg) {
       if (node.showStatusActivities) {
-        node.setNodeStatusTo('crawling')
+        coreBrowser.core.setNodeStatusTo(node, 'crawling')
       }
 
       if (node.singleResult) {
@@ -181,13 +170,10 @@ module.exports = function (RED) {
           .then(function (result) {
             coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
             node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
-            if (node.showStatusActivities) {
-              node.setNodeStatusTo('active')
-            }
           }).catch(function (err) {
             node.browseErrorHandling(err, msg)
             if (node.showStatusActivities) {
-              node.setNodeStatusTo('error')
+              coreBrowser.core.setNodeStatusTo(node, 'error')
             }
           })
       } else {
@@ -196,13 +182,10 @@ module.exports = function (RED) {
             .then(function (result) {
               coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
               node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
-              if (node.showStatusActivities) {
-                node.setNodeStatusTo('active')
-              }
             }).catch(function (err) {
               node.browseErrorHandling(err, msg)
               if (node.showStatusActivities) {
-                node.setNodeStatusTo('error')
+                coreBrowser.core.setNodeStatusTo(node, 'error')
               }
             })))
       }
@@ -230,9 +213,13 @@ module.exports = function (RED) {
 
       node.messageList.push(msg)
 
+      if (node.showStatusActivities) {
+        coreBrowser.core.setNodeStatusTo(node, 'active')
+      }
+
       setTimeout(() => {
         node.send(node.messageList.shift())
-      }, node.delayPerMessage * node.messageList.length * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
+      }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
     }
 
     node.on('input', function (msg) {

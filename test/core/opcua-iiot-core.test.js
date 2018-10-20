@@ -220,7 +220,7 @@ describe('OPC UA Core', function () {
 
     it('should return array of nodes to listen from payload of addressSpaceItems', function (done) {
       let addressSapceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
-      expect(core.buildNodesToListen({ addressSpaceItems: [addressSapceItem]})).to.be.an('array').that.does.include(addressSapceItem)
+      expect(core.buildNodesToListen({ addressSpaceItems: [addressSapceItem] })).to.be.an('array').that.does.include(addressSapceItem)
       done()
     })
 
@@ -232,7 +232,7 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state init', function (done) {
       let node = {}
-      node.setNodeStatusTo = function (state) {
+      core.setNodeStatusTo = function (node, state) {
         if (state === 'connecting') {
           done()
         }
@@ -249,7 +249,7 @@ describe('OPC UA Core', function () {
           opcuaSession: {}
         }
       }
-      node.setNodeStatusTo = function (state) {
+      core.setNodeStatusTo = function (node, state) {
         if (state === 'connected' && node.opcuaClient === node.connector.opcuaClient) {
           done()
         }
@@ -259,7 +259,7 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state locked', function (done) {
       let node = {}
-      node.setNodeStatusTo = function (state) {
+      core.setNodeStatusTo = function (node, state) {
         if (state === 'locked') {
           done()
         }
@@ -276,7 +276,7 @@ describe('OPC UA Core', function () {
           opcuaSession: {}
         }
       }
-      node.setNodeStatusTo = function (state) {
+      core.setNodeStatusTo = function (node, state) {
         if (state === 'active' && node.opcuaSession === node.connector.opcuaSession) {
           done()
         }
@@ -286,7 +286,7 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state unlocked', function (done) {
       let node = {}
-      node.setNodeStatusTo = function (state) {
+      core.setNodeStatusTo = function (node, state) {
         if (state === 'unlocked') {
           done()
         }
@@ -296,7 +296,7 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state unknown', function (done) {
       let node = {}
-      node.setNodeStatusTo = function (state) {
+      core.setNodeStatusTo = function (node, state) {
         if (state === 'waiting') {
           done()
         }

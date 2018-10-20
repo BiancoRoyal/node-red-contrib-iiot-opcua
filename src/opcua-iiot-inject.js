@@ -41,12 +41,6 @@ module.exports = function (RED) {
     node.ONE_SECOND = 1000
     node.INPUT_TIMEOUT_MILLISECONDS = 1000
 
-    node.verboseLog = function (logMessage) {
-      if (RED.settings.verbose) {
-        coreInject.internalDebugLog(logMessage)
-      }
-    }
-
     node.repeaterSetup = function () {
       coreInject.internalDebugLog('Repeat Is ' + node.repeat)
       coreInject.internalDebugLog('Crontab Is ' + node.crontab)
@@ -57,7 +51,7 @@ module.exports = function (RED) {
         if (node.repeat === 0) {
           node.repeat = node.ONE_SECOND
         }
-        node.verboseLog(RED._('opcuaiiotinject.repeat', node))
+
         coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
         if (node.intervalId) {
@@ -68,8 +62,6 @@ module.exports = function (RED) {
           node.emit('input', {})
         }, node.repeat)
       } else if (node.crontab !== '') {
-        node.verboseLog(RED._('opcuaiiotinject.crontab', node))
-
         node.cronjob = new cron.CronJob(node.crontab,
           function () {
             node.emit('input', {})
@@ -120,7 +112,6 @@ module.exports = function (RED) {
 
         node.send(msg)
       } catch (err) {
-        node.verboseLog(err)
         if (RED.settings.verbose) {
           node.error(err, msg)
         }
@@ -153,12 +144,10 @@ module.exports = function (RED) {
     if (node.intervalId) {
       clearInterval(node.intervalId)
       node.intervalId = null
-      node.verboseLog(RED._('opcuaiiotinject.stopped'))
     }
 
     if (node.cronjob) {
       node.cronjob.stop()
-      node.verboseLog(RED._('opcuaiiotinject.stopped'))
       delete node['cronjob']
     }
   }

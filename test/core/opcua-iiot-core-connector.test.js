@@ -10,6 +10,7 @@
 jest.setTimeout(5000)
 
 let coreConnector = require('../../src/core/opcua-iiot-core-connector')
+const events = require('events')
 
 describe('OPC UA Core Connector', function () {
   describe('core functions', function () {
@@ -94,6 +95,87 @@ describe('OPC UA Core Connector', function () {
     it('should change to OPEN state from UNLOCKED', function (done) {
       let fsm = coreConnector.createStatelyMachine()
       expect(fsm.init().open().close().lock().unlock().open().getMachineState()).toBe('OPEN')
+      done()
+    })
+
+    it('should change to LOCKED state on OPC UA event backoff', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      coreConnector.setListenerToClient(node)
+      node.opcuaClient.emit('backoff')
+      expect(fsm.getMachineState()).toBe('LOCKED')
+      done()
+    })
+
+    it('should change to UNLOCKED state on OPC UA event connection reestablished', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      coreConnector.setListenerToClient(node)
+      fsm.lock()
+      node.opcuaClient.emit('connection_reestablished')
+      expect(fsm.getMachineState()).toBe('UNLOCKED')
+      done()
+    })
+
+    it('should change to LOCKED state on OPC UA event start reconnection', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      coreConnector.setListenerToClient(node)
+      fsm.idle().init().open()
+      node.opcuaClient.emit('start_reconnection')
+      expect(fsm.getMachineState()).toBe('LOCKED')
+      done()
+    })
+
+    it('should change to OPEN state on OPC UA event timed out request', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      coreConnector.setListenerToClient(node)
+      fsm.idle().init().open()
+      node.opcuaClient.emit('timed_out_request')
+      expect(fsm.getMachineState()).toBe('OPEN')
+      done()
+    })
+
+    it('should change to SESSIONACTIVE state on OPC UA event security token renewed', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      coreConnector.setListenerToClient(node)
+      fsm.idle().init().open().sessionrequest().sessionactive()
+      node.opcuaClient.emit('security_token_renewed')
+      expect(fsm.getMachineState()).toBe('SESSIONACTIVE')
+      done()
+    })
+
+    it('should change to UNLOCKED state on OPC UA event after reconnection', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = new events.EventEmitter()
+      node.opcuaClient = new events.EventEmitter()
+      node.stateMachine = fsm
+      coreConnector.setListenerToClient(node)
+      fsm.idle().init().open().sessionrequest().sessionactive().lock()
+      node.opcuaClient.emit('after_reconnection')
+      expect(fsm.getMachineState()).toBe('UNLOCKED')
+      done()
+    })
+
+    it('should be IDLE state on OPC UA log session parameter', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = new events.EventEmitter()
+      node.opcuaClient = new events.EventEmitter()
+      node.endpoint = 'opc.tcp://localhost'
+      node.opcuaSession = {
+        name: 'name',
+        sessionId: 1,
+        authenticationToken: '23434cc34566',
+        serverSignature: 'serverSignature',
+        lastRequestSentTime: new Date(),
+        lastResponseReceivedTime: new Date()
+      }
+      node.stateMachine = fsm
+      coreConnector.logSessionInformation(node)
+      expect(fsm.getMachineState()).toBe('IDLE')
+      expect(node.opcuaSession.name).toBe('name')
       done()
     })
   })

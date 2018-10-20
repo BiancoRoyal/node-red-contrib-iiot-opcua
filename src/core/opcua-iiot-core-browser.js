@@ -203,4 +203,12 @@ de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference) {
   }
 }
 
+de.biancoroyal.opcua.iiot.core.browser.initClientNode = function (node) {
+  let browseNode = this.core.initClientNode(node)
+  browseNode.items = []
+  browseNode.browseTopic = this.core.OBJECTS_ROOT
+  browseNode.messageList = []
+  return browseNode
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.browser

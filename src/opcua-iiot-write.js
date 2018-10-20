@@ -25,29 +25,7 @@ module.exports = function (RED) {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = this
-    node.reconnectTimeout = 1000
-    node.sessionTimeout = null
-    node.opcuaClient = null
-    node.opcuaSession = null
-
-    node.verboseLog = function (logMessage) {
-      if (RED.settings.verbose) {
-        coreClient.writeDebugLog(logMessage)
-      }
-    }
-
-    node.statusLog = function (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        node.verboseLog('Status: ' + logMessage)
-      }
-    }
-
-    node.setNodeStatusTo = function (statusValue) {
-      node.statusLog(statusValue)
-      let statusParameter = coreClient.core.getNodeStatus(statusValue, node.showStatusActivities)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
+    let node = coreClient.core.initClientNode(this)
 
     node.handleWriteError = function (err, msg) {
       coreClient.writeDebugLog(err)
@@ -80,9 +58,16 @@ module.exports = function (RED) {
     }
 
     node.buildResultMessage = function (result) {
-      let message = result.msg
+      let message = Object.assign({}, result.msg)
       message.nodetype = 'write'
+      message.justValue = node.justValue
 
+      let dataValuesString = node.extractDataValueString(message, result)
+      message = node.setMessageProperties(message, result, dataValuesString)
+      return message
+    }
+
+    node.extractDataValueString = function (message, result) {
       let dataValuesString = {}
       if (node.justValue) {
         dataValuesString = JSON.stringify({
@@ -95,19 +80,21 @@ module.exports = function (RED) {
       } else {
         dataValuesString = JSON.stringify(result, null, 2)
       }
+      return dataValuesString
+    }
 
+    node.setMessageProperties = function (message, result, stringValue) {
       try {
-        RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
+        RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
       } catch (err) {
         coreClient.writeDebugLog(err)
         if (node.showErrors) {
           node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
           node.error(err, result.msg)
         }
-        message.resultsConverted = dataValuesString
+        message.resultsConverted = stringValue
         message.error = err.message
       }
-
       return message
     }
 

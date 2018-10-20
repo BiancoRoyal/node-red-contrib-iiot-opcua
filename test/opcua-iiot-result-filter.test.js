@@ -10,7 +10,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+jest.setTimeout(5000)
 
 var injectNode = require('node-red/nodes/core/core/20-inject')
 var functionNode = require('node-red/nodes/core/core/80-function')
@@ -111,6 +111,100 @@ var listenTestFlowPayload = [
     'wires': [['n6rff2']]
   },
   {id: 'n6rff2', type: 'helper'}
+]
+
+var listenTestFlowWithPrecisionPayload = [
+  {
+    'id': 'n1rff3',
+    'type': 'inject',
+    'name': '',
+    'topic': 'TestTopic',
+    'payload': '{"value":{"dataType":"Double","arrayType":"Scalar","value":16.041979},"statusCode":{"value":0,"description":"No Error","name":"Good"},"sourceTimestamp":"2018-03-13T21:43:10.470Z","sourcePicoseconds":0,"serverTimestamp":"2018-03-13T21:43:11.051Z","serverPicoseconds":3}',
+    'payloadType': 'json',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'onceDelay': 0.1,
+    'wires': [['n2rff3', 'n3rff3']]
+  },
+  {id: 'n2rff3', type: 'helper'},
+  {
+    'id': 'n3rff3',
+    'type': 'function',
+    'name': '',
+    'func': "msg.nodetype = 'listen'\nmsg.injectType = 'subscribe'\nmsg.addressSpaceItems = [{\"name\":\"\",\"nodeId\":\"ns=1;s=Pressure\",\"datatypeName\":\"\"}]\nreturn msg;",
+    'outputs': 1,
+    'noerr': 0,
+    'wires': [['n4rff3', 'n5rff3']]
+  },
+  {id: 'n4rff3', type: 'helper'},
+  {id: 'n5rff3',
+    'type': 'OPCUA-IIoT-Result-Filter',
+    'nodeId': 'ns=1;s=Pressure',
+    'datatype': 'Double',
+    'fixedValue': false,
+    'fixPoint': 2,
+    'withPrecision': true,
+    'precision': 2,
+    'entry': 1,
+    'justValue': true,
+    'withValueCheck': false,
+    'minvalue': '',
+    'maxvalue': '',
+    'defaultvalue': '',
+    'topic': '',
+    'name': 'AnalogItem',
+    'showErrors': true,
+    'wires': [['n6rff3']]
+  },
+  {id: 'n6rff3', type: 'helper'}
+]
+
+var writeTestFlowPayload = [
+  {
+    id: 'n1rff4',
+    type: 'inject',
+    name: 'TestName',
+    topic: 'TestTopic',
+    payload: '{"statusCodes":[{"value":0,"description":"No Error","name":"Good"}],"nodesToWrite":[{"nodeId":"ns=1;s=TestReadWrite","attributeId":13,"indexRange":null,"value":{"value":{"dataType":"Double","value":22980.7896,"arrayType":"Scalar"}}}],"msg":{"_msgid":"11cc64dd.bde67b","topic":"","nodetype":"inject","injectType":"write","addressSpaceItems":[{"name":"TestReadWrite","nodeId":"ns=1;s=TestReadWrite","datatypeName":"Double"}],"payload":1539981968143,"valuesToWrite":[22980.7896]}}',
+    payloadType: 'json',
+    repeat: '',
+    crontab: '',
+    once: true,
+    onceDelay: 0.1,
+    wires: [['n2rff4', 'n3rff4']]
+  },
+  {id: 'n2rff4', type: 'helper'},
+  {
+    id: 'n3rff4',
+    type: 'function',
+    name: '',
+    func: "msg.nodetype = 'write'\nmsg.injectType = 'write'\nmsg.addressSpaceItems = [{name:'',nodeId:'ns=1;s=TestReadWrite',datatypeName:''}]\nreturn msg;",
+    outputs: 1,
+    noerr: 0,
+    wires: [['n4rff4', 'n5rff4']]
+  },
+  {id: 'n4rff4', type: 'helper'},
+  {id: 'n5rff4',
+    'type': 'OPCUA-IIoT-Result-Filter',
+    'nodeId': 'ns=1;s=TestReadWrite',
+    'datatype': 'Double',
+    'fixedValue': false,
+    'fixPoint': 2,
+    'withPrecision': false,
+    'precision': 2,
+    'entry': 1,
+    'justValue': true,
+    'withValueCheck': false,
+    'minvalue': '',
+    'maxvalue': '',
+    'defaultvalue': '',
+    'topic': '',
+    'name': 'AnalogItem',
+    'showErrors': true,
+    'wires': [['n6rff4']]
+  },
+  {id: 'n6rff4', type: 'helper'}
 ]
 
 describe('OPC UA Result Filter node Testing', function () {
@@ -251,12 +345,109 @@ describe('OPC UA Result Filter node Testing', function () {
       })
     })
 
-    it('should have nodeId, payload and topic as result', function (done) {
+    it('should have nodeId, payload and topic as result with fixed of two', function (done) {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n6 = helper.getNode('n6rff2')
         n6.on('input', function (msg) {
           expect(msg.nodeId).toBe('ns=1;s=Pressure')
           expect(msg.payload).toBe(16.04)
+          expect(msg.topic).toBe('TestTopic')
+          done()
+        })
+      })
+    })
+
+    it('should have nodeId, payload and topic with precision of two as result', function (done) {
+      helper.load([injectNode, functionNode, inputNode], listenTestFlowWithPrecisionPayload, function () {
+        let n6 = helper.getNode('n6rff3')
+        n6.on('input', function (msg) {
+          expect(msg.nodeId).toBe('ns=1;s=Pressure')
+          let expectedResult = Number.parseFloat('16.041979').toPrecision(2)
+          expectedResult = parseFloat(expectedResult)
+          expect(msg.payload).toBe(expectedResult)
+          expect(msg.topic).toBe('TestTopic')
+          done()
+        })
+      })
+    })
+  })
+
+  describe('Result Filter node after write', function () {
+    it('should get a message with payload', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestFlowPayload, function () {
+        let n2 = helper.getNode('n2rff4')
+        n2.on('input', function (msg) {
+          expect(msg.payload).toMatchObject({
+            'statusCodes': [
+              {
+                'value': 0,
+                'description': 'No Error',
+                'name': 'Good'
+              }
+            ],
+            'nodesToWrite': [
+              {
+                'nodeId': 'ns=1;s=TestReadWrite',
+                'attributeId': 13,
+                'indexRange': null,
+                'value': {
+                  'value': {
+                    'dataType': 'Double',
+                    'value': 22980.7896,
+                    'arrayType': 'Scalar'
+                  }
+                }
+              }
+            ],
+            'msg': {
+              '_msgid': '11cc64dd.bde67b',
+              'topic': '',
+              'nodetype': 'inject',
+              'injectType': 'write',
+              'addressSpaceItems': [
+                {
+                  'name': 'TestReadWrite',
+                  'nodeId': 'ns=1;s=TestReadWrite',
+                  'datatypeName': 'Double'
+                }
+              ],
+              'payload': 1539981968143,
+              'valuesToWrite': [
+                22980.7896
+              ]
+            }
+          })
+          done()
+        })
+      })
+    })
+
+    it('should get a message with payload TestReadWrite', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestFlowPayload, function () {
+        let n2 = helper.getNode('n2rff4')
+        n2.on('input', function (msg) {
+          expect(msg.payload.nodesToWrite[0].nodeId).toMatch(/TestReadWrite/)
+          done()
+        })
+      })
+    })
+
+    it('should contain TestReadWrite in message', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestFlowPayload, function () {
+        let n4 = helper.getNode('n4rff4')
+        n4.on('input', function (msg) {
+          expect(msg.payload.msg.addressSpaceItems[0].nodeId).toMatch(/TestReadWrite/)
+          done()
+        })
+      })
+    })
+
+    it('should have nodeId, payload and topic as result', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestFlowPayload, function () {
+        let n6 = helper.getNode('n6rff4')
+        n6.on('input', function (msg) {
+          expect(msg.nodeId).toBe('ns=1;s=TestReadWrite')
+          expect(msg.payload.nodesToWrite[0].value.value.value).toBe(22980.7896)
           expect(msg.topic).toBe('TestTopic')
           done()
         })

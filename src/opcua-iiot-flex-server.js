@@ -118,12 +118,7 @@ module.exports = function (RED) {
       coreServer.flex.detailDebugLog('default key: ' + node.privateCertificateFile)
     }
 
-    node.setNodeStatusTo = function (statusValue) {
-      let statusParameter = coreServer.core.getNodeStatus(statusValue)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
-
-    node.setNodeStatusTo('waiting')
+    coreServer.core.setNodeStatusTo(node, 'waiting')
     coreServer.flex.internalDebugLog('flex node sets:' + xmlFiles.toString())
 
     node.checkUser = function (userName, password) {
@@ -234,10 +229,10 @@ module.exports = function (RED) {
         node.eventObjects = {} // event objects should stay in memory
         coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects).then(function () {
           coreServer.start(node.opcuaServer, node).then(function () {
-            node.setNodeStatusTo('active')
+            coreServer.core.setNodeStatusTo(node, 'active')
             node.emit('server_running')
           }).catch(function (err) {
-            node.setNodeStatusTo('errors')
+            coreServer.core.setNodeStatusTo(node, 'errors')
             coreServer.flex.internalDebugLog(err)
             if (node.showErrors) {
               node.error(err, {payload: ''})

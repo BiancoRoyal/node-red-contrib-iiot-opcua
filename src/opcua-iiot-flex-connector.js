@@ -27,18 +27,6 @@ module.exports = function (RED) {
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
-    node.statusLog = function (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        node.verboseLog('Status: ' + logMessage)
-      }
-    }
-
-    node.setNodeStatusTo = function (statusValue) {
-      node.statusLog(statusValue)
-      let statusParameter = coreConnector.core.getNodeStatus(statusValue, node.showStatusActivities)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
-
     node.on('input', function (msg) {
       coreConnector.internalDebugLog('connector change request input')
 

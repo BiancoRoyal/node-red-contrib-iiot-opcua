@@ -238,7 +238,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           } else {
             fullcounterValue = -100000
           }
-        }, 1000))
+        }, 500))
 
         let fullcounterVariable = namespace.addVariable({
           componentOf: vendorName,

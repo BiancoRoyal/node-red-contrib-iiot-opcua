@@ -47,7 +47,7 @@ module.exports = function (RED) {
 
     node.nodeIdToFilter = function (msg) {
       let doFilter = true
-      let nodeList = coreFilter.core.buildNodesToRead(msg)
+      let nodeList = coreFilter.core.buildNodeListFromClient(msg)
       let elementNodeId = null
 
       if (nodeList && nodeList.length) {
@@ -60,42 +60,53 @@ module.exports = function (RED) {
       return doFilter
     }
 
-    node.on('input', function (msg) {
-      if (!msg.hasOwnProperty('payload') || msg.payload === null || typeof msg.payload === 'undefined') { // values with false has to be true
-        coreFilter.internalDebugLog('filtering message without payload ' + JSON.stringify(msg))
-        return
-      }
-
-      if (node.nodeIdToFilter(msg)) {
-        return
-      } else if (msg.addressSpaceItems) {
+    node.isNodeIdToFindInsideMsg = function (msg) {
+      if (msg.addressSpaceItems) {
         let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry) {
           return entry.nodeId === node.nodeId
         })
 
         if (filteredNodeIds.length < 1) {
-          return
+          return true
         }
       } else {
         if (msg.topic !== node.nodeId) { // TODO: that is very old and should be deleted
-          return
+          return true
         }
+      }
+    }
+
+    node.messageIsToFilter = function (msg) {
+      if (node.nodeIdToFilter(msg)) {
+        return true
+      } else {
+        return node.isNodeIdToFindInsideMsg(msg)
+      }
+    }
+
+    node.on('input', function (msg) {
+      if (!msg.hasOwnProperty('payload') || msg.payload === null || typeof msg.payload === 'undefined') { // values with false has to be true
+        coreFilter.internalDebugLog('filtering message without payload')
+        return
+      }
+
+      if (node.messageIsToFilter(msg)) {
+        coreFilter.internalDebugLog('filtering message on filter')
+        return
       }
 
       const message = Object.assign({}, msg)
       const result = node.filterResult(message)
 
       if (node.justValue) {
-        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId})
+        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId, justValue: node.justValue})
       } else {
-        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId, input: message})
+        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId, input: message, justValue: node.justValue})
       } // here node topic first to overwrite for dashboard
     })
 
-    node.filterResult = function (msg) {
-      msg.filtertype = 'filter'
-      let result = msg.payload
-
+    node.filterByType = function (msg) {
+      let result = null
       switch (msg.nodetype) {
         case 'read':
           result = node.filterByReadType(msg)
@@ -106,15 +117,64 @@ module.exports = function (RED) {
         case 'listen':
           result = node.filterByListenType(msg)
           break
+        case 'browse':
+        case 'crawl':
+          result = node.filterByBrowserType(msg)
+          break
         default:
+          coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
           if (node.showErrors) {
             node.error(new Error('unknown node type injected to filter for ' + msg.nodetype), msg)
           }
-          coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
       }
 
-      if (typeof result === 'undefined' || result === null) {
-        coreFilter.internalDebugLog('result null or undefined' + JSON.stringify(msg))
+      return result
+    }
+
+    node.convertResult = function (msg, result) {
+      try {
+        let convertedResult = null
+        if (node.fixPoint >= 0 && node.fixedValue) {
+          convertedResult = Number.parseFloat(result).toFixed(node.fixPoint)
+          convertedResult = parseFloat(convertedResult)
+        }
+
+        if (node.precision >= 0 && node.withPrecision) {
+          convertedResult = Number.parseFloat(result).toPrecision(node.precision)
+          convertedResult = parseFloat(convertedResult)
+        }
+
+        if (node.withValueCheck) {
+          if (convertedResult < node.minvalue || convertedResult > node.maxvalue) {
+            convertedResult = node.defaultvalue
+          }
+        }
+
+        return convertedResult
+      } catch (err) {
+        coreFilter.internalDebugLog('result converting error ' + err.message)
+        if (node.showErrors) {
+          node.error(err, msg)
+        }
+        return result
+      }
+    }
+
+    node.convertResultByDataType = function (msg, result) {
+      let resultDataType = typeof result
+      if (result.hasOwnProperty('datatype')) {
+        resultDataType = result.datatype || resultDataType
+      }
+
+      if (resultDataType && resultDataType.toString() !== node.datatype.toString()) {
+        result = node.convertDataType(result)
+      }
+      return result
+    }
+
+    node.convertResultValue = function (result) {
+      if (result === null) {
+        coreFilter.internalDebugLog('result null or undefined')
         return
       }
 
@@ -122,59 +182,27 @@ module.exports = function (RED) {
         result = result.value
       }
 
-      let resultDataType = typeof result
-      if (result.hasOwnProperty('datatype')) {
-        resultDataType = result.datatype || typeof result
-      }
+      result = node.convertResultByDataType(msg, result)
 
-      if (resultDataType && resultDataType.toString() !== node.datatype.toString()) {
-        result = node.convertDataType(result)
-      }
-
-      if (typeof result === 'undefined' || result === null) {
+      if (result === null) {
+        coreFilter.internalDebugLog('converted result null or undefined')
         if (node.showErrors) {
           node.error(new Error('converted result null or undefined'), msg)
         }
       } else {
-        try {
-          if (node.fixPoint >= 0 && node.fixedValue) {
-            result = Number.parseFloat(result).toFixed(node.fixPoint)
-            result = parseFloat(result)
-          }
-
-          if (node.precision >= 0 && node.withPrecision) {
-            result = Number.parseFloat(result).toPrecision(node.precision)
-            result = parseFloat(result)
-          }
-
-          if (node.withValueCheck) {
-            if (result < node.minvalue || result > node.maxvalue) {
-              result = node.defaultvalue
-            }
-          }
-        } catch (err) {
-          if (node.showErrors) {
-            node.error(err, msg)
-          }
-        }
+        result = node.convertResult(msg, result)
       }
 
       return result
     }
 
-    node.filterByReadType = function (msg) {
-      let result = null
+    node.filterResult = function (msg) {
+      msg.filtertype = 'filter'
+      let result = node.filterByType(msg) || msg.payload
 
-      if (msg.payload.length >= node.entry) {
-        result = node.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
-      } else {
-        result = node.extractValueFromOPCUAStructure(msg)
+      if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
+        result = node.convertResultValue(result)
       }
-
-      if (result.hasOwnProperty('value')) {
-        result = result.value
-      }
-
       return result
     }
 
@@ -215,20 +243,24 @@ module.exports = function (RED) {
       return result
     }
 
-    node.filterByWriteType = function (msg) {
+    node.filterByReadType = function (msg) {
       let result = null
 
-      if (msg.payload.hasOwnProperty('value')) {
-        result = msg.payload.value
+      if (msg.payload.length >= node.entry) {
+        result = node.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
       } else {
-        result = msg.payload
+        result = node.extractValueFromOPCUAStructure(msg)
       }
 
-      if (result && result.hasOwnProperty('value')) {
+      if (result.hasOwnProperty('value')) {
         result = result.value
       }
 
       return result
+    }
+
+    node.filterByWriteType = function (msg) {
+      return null // has no value
     }
 
     node.filterByListenType = function (msg) {
@@ -245,6 +277,10 @@ module.exports = function (RED) {
       }
 
       return result
+    }
+
+    node.filterByBrowserType = function (msg) {
+      return null // has no value
     }
 
     node.convertDataType = function (result) {

@@ -46,24 +46,6 @@ module.exports = function (RED) {
     coreListener.internalDebugLog('Start FSM: ' + node.stateMachine.getMachineState())
     coreListener.detailDebugLog('FSM events:' + node.stateMachine.getMachineEvents())
 
-    node.verboseLog = function (logMessage) {
-      if (RED.settings.verbose) {
-        coreListener.internalDebugLog(logMessage)
-      }
-    }
-
-    node.statusLog = function (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        node.verboseLog('Status: ' + logMessage)
-      }
-    }
-
-    node.setNodeStatusTo = function (statusValue) {
-      node.statusLog(statusValue)
-      let statusParameter = coreListener.core.getNodeStatus(statusValue, node.showStatusActivities)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
-
     node.createSubscription = function (msg) {
       if (node.stateMachine.getMachineState() !== 'IDLE') {
         coreListener.internalDebugLog('New Subscription Request On State ' + node.stateMachine.getMachineState())
@@ -104,19 +86,19 @@ module.exports = function (RED) {
 
       uaSubscription.on('initialized', function () {
         coreListener.internalDebugLog('Subscription initialized')
-        node.setNodeStatusTo('initialized')
+        coreListener.core.setNodeStatusTo(node, 'initialized')
       })
 
       uaSubscription.on('started', function () {
         coreListener.internalDebugLog('Subscription started')
-        node.setNodeStatusTo('started')
+        coreListener.core.setNodeStatusTo(node, 'started')
         node.monitoredItems.clear()
         node.stateMachine.startsub()
       })
 
       uaSubscription.on('terminated', function () {
         coreListener.internalDebugLog('Subscription terminated')
-        node.setNodeStatusTo('terminated')
+        coreListener.core.setNodeStatusTo(node, 'terminated')
         node.stateMachine.terminatesub().idlesub()
         node.resetSubscription()
       })
@@ -126,7 +108,7 @@ module.exports = function (RED) {
         if (node.showErrors) {
           node.error(err, {payload: 'Internal Error'})
         }
-        node.setNodeStatusTo('error')
+        coreListener.core.setNodeStatusTo(node, 'error')
         node.stateMachine.errorsub()
         node.resetSubscription()
       })
@@ -171,7 +153,7 @@ module.exports = function (RED) {
 
     node.updateSubscriptionStatus = function () {
       coreListener.internalDebugLog('listening' + ' (' + node.monitoredItems.size + ')')
-      node.setNodeStatusTo('listening' + ' (' + node.monitoredItems.size + ')')
+      coreListener.core.setNodeStatusTo(node, 'listening' + ' (' + node.monitoredItems.size + ')')
     }
 
     node.subscribeMonitoredItem = function (msg) {

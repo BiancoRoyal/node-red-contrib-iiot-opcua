@@ -99,12 +99,7 @@ module.exports = function (RED) {
       coreServer.detailDebugLog('default key: ' + node.privateCertificateFile)
     }
 
-    node.setNodeStatusTo = function (statusValue) {
-      let statusParameter = coreServer.core.getNodeStatus(statusValue)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
-
-    node.setNodeStatusTo('waiting')
+    coreServer.core.setNodeStatusTo(node, 'waiting')
     coreServer.internalDebugLog('node set:' + xmlFiles.toString())
 
     node.checkUser = function (userName, password) {
@@ -207,11 +202,11 @@ module.exports = function (RED) {
           }
         } else {
           coreServer.start(node.opcuaServer, node).then(function () {
-            node.setNodeStatusTo('active')
+            coreServer.core.setNodeStatusTo(node, 'active')
             node.emit('server_running')
           }).catch(function (err) {
             node.opcuaServer = null
-            node.setNodeStatusTo('errors')
+            coreServer.core.setNodeStatusTo(node, 'errors')
             coreServer.internalDebugLog(err)
             if (node.showErrors) {
               node.error(err, {payload: ''})
@@ -358,7 +353,7 @@ module.exports = function (RED) {
       }
 
       node.send({payload: 'server shutdown'})
-      node.setNodeStatusTo('shutdown')
+      coreServer.core.setNodeStatusTo(node, 'shutdown')
 
       if (node.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')

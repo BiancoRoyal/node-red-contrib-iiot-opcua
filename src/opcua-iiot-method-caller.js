@@ -29,27 +29,7 @@ module.exports = function (RED) {
     this.inputArguments = config.inputArguments
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = this
-    node.reconnectTimeout = 1000
-    node.sessionTimeout = null
-
-    node.verboseLog = function (logMessage) {
-      if (RED.settings.verbose) {
-        coreMethod.internalDebugLog(logMessage)
-      }
-    }
-
-    node.statusLog = function (logMessage) {
-      if (RED.settings.verbose && node.showStatusActivities) {
-        node.verboseLog('Status: ' + logMessage)
-      }
-    }
-
-    node.setNodeStatusTo = function (statusValue) {
-      node.statusLog(statusValue)
-      let statusParameter = coreMethod.core.getNodeStatus(statusValue, node.showStatusActivities)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
+    let node = coreMethod.core.initClientNode(this)
 
     node.handleMethodError = function (err, msg) {
       coreMethod.internalDebugLog(err)

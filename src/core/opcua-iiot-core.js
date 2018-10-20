@@ -26,8 +26,10 @@ de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJ
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.RUNNING_STATE = de.biancoroyal.opcua.iiot.core.RUNNING_STATE || 'SESSIONACTIVE' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.os = de.biancoroyal.opcua.iiot.core.os || require('os') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.underscore = de.biancoroyal.opcua.iiot.core.underscore || require('underscore') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.isWindows = de.biancoroyal.opcua.iiot.core.isWindows || /^win/.test(de.biancoroyal.opcua.iiot.core.os.platform()) // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.FAKTOR_SEC_TO_MSEC = de.biancoroyal.opcua.iiot.core.FAKTOR_SEC_TO_MSEC || 1000 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.DEFAULT_TIMEOUT = de.biancoroyal.opcua.iiot.core.DEFAULT_TIMEOUT || 1000 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.endianness())
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.hostname())
 de.biancoroyal.opcua.iiot.core.internalDebugLog(de.biancoroyal.opcua.iiot.core.os.platform())
@@ -694,6 +696,26 @@ de.biancoroyal.opcua.iiot.core.buildNodesToListen = function (msg) {
   return msg.addressItemsToRead || msg.addressSpaceItems
 }
 
+de.biancoroyal.opcua.iiot.core.buildNodesFromBrowser = function (msg) {
+  return msg.addressItemsToRead || msg.addressSpaceItems
+}
+
+de.biancoroyal.opcua.iiot.core.buildNodeListFromClient = function (msg) {
+  switch (msg.nodetype) {
+    case 'read':
+    case 'write':
+      return this.buildNodesToRead(msg)
+    case 'listen':
+      return this.buildNodesToListen(msg)
+    case 'browse':
+    case 'crawl':
+      return this.buildNodesFromBrowser(msg)
+    default:
+      this.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
+      return []
+  }
+}
+
 de.biancoroyal.opcua.iiot.core.availableMemory = function () {
   return this.os.freemem() / this.os.totalmem() * 100.0
 }
@@ -706,28 +728,28 @@ de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (nodeState, node) {
   switch (nodeState) {
     case 'INIT':
     case 'SESSIONREQUESTED':
-      node.setNodeStatusTo('connecting')
+      this.setNodeStatusTo(node, 'connecting')
       break
     case 'OPEN':
     case 'SESSIONCLOSED':
       node.opcuaClient = node.connector.opcuaClient
-      node.setNodeStatusTo('connected')
+      this.setNodeStatusTo(node, 'connected')
       break
     case 'SESSIONACTIVE':
       node.opcuaSession = node.connector.opcuaSession
-      node.setNodeStatusTo('active')
+      this.setNodeStatusTo(node, 'active')
       break
     case 'LOCKED':
-      node.setNodeStatusTo('locked')
+      this.setNodeStatusTo(node, 'locked')
       break
     case 'UNLOCKED':
-      node.setNodeStatusTo('unlocked')
+      this.setNodeStatusTo(node, 'unlocked')
       break
     case 'END':
-      node.setNodeStatusTo('end')
+      this.setNodeStatusTo(node, 'end')
       break
     default:
-      node.setNodeStatusTo('waiting')
+      this.setNodeStatusTo(node, 'waiting')
   }
 }
 
@@ -762,27 +784,27 @@ de.biancoroyal.opcua.iiot.core.checkConnectorState = function (node, msg, caller
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUAConnected = function (node, opcuaClient) {
   node.opcuaClient = opcuaClient
-  node.setNodeStatusTo('connecting')
+  this.setNodeStatusTo(node, 'connecting')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUAClosed = function (node) {
   node.opcuaClient = null
-  node.setNodeStatusTo('disconnected')
+  this.setNodeStatusTo(node, 'disconnected')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionStarted = function (node, opcuaSession) {
   node.opcuaSession = opcuaSession
-  node.setNodeStatusTo('active')
+  this.setNodeStatusTo(node, 'active')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionClosed = function (node) {
   node.opcuaSession = null
-  node.setNodeStatusTo('connecting')
+  this.setNodeStatusTo(node, 'connecting')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionError = function (node) {
   node.opcuaSession = null
-  node.setNodeStatusTo('connecting')
+  this.setNodeStatusTo(node, 'connecting')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUARestart = function (node, opcuaClient) {
@@ -790,7 +812,7 @@ de.biancoroyal.opcua.iiot.core.setNodeOPCUARestart = function (node, opcuaClient
   if (opcuaClient) {
     node.opcuaClient = opcuaClient
   }
-  node.setNodeStatusTo('connecting')
+  this.setNodeStatusTo(node, 'connecting')
 }
 
 de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
@@ -868,6 +890,23 @@ de.biancoroyal.opcua.iiot.core.checkSessionNotValid = function (session, callerT
   }
 
   return false
+}
+
+de.biancoroyal.opcua.iiot.core.setNodeStatusTo = function (node, statusValue) {
+  let statusParameter = this.getNodeStatus(statusValue, node.showStatusActivities)
+  if (!this.underscore.isEqual(node.oldStatusParameter, statusParameter)) {
+    this.detailDebugLog('Node ' + node.id + ' Status To ' + statusValue)
+    node.oldStatusParameter = statusParameter
+    node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.initClientNode = function (node) {
+  node.reconnectTimeout = this.DEFAULT_TIMEOUT
+  node.sessionTimeout = null
+  node.opcuaSession = null
+  node.opcuaClient = null
+  return node
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core

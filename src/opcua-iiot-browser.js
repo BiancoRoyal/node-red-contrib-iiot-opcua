@@ -33,18 +33,10 @@ module.exports = function (RED) {
     this.delayPerMessage = config.delayPerMessage || 0.2
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = this
+    let node = coreBrowser.initClientNode(this)
     node.items = []
     node.browseTopic = coreBrowser.core.OBJECTS_ROOT
-    node.opcuaClient = null
-    node.opcuaSession = null
-    node.reconnectTimeout = 1000
     node.messageList = []
-
-    node.setNodeStatusTo = function (statusValue) {
-      let statusParameter = coreBrowser.core.getNodeStatus(statusValue, node.showStatusActivities)
-      node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
-    }
 
     node.browseErrorHandling = function (err, msg, lists) {
       let results = lists.browserResults || []
@@ -166,6 +158,7 @@ module.exports = function (RED) {
     node.sendMessage = function (rootNodeId, depth, originMessage, lists) {
       let msg = Object.assign({}, originMessage)
       msg.nodetype = 'browse'
+      msg.justValue = node.justValue
 
       if (!lists) {
         coreBrowser.internalDebugLog('Lists Not Valid!')
@@ -174,12 +167,7 @@ module.exports = function (RED) {
         }
       }
 
-      let listenerParameters
-      if (msg.injectType === 'listen') {
-        listenerParameters = msg.payload
-      } else {
-        listenerParameters = null
-      }
+      let listenerParameters = node.getListenParameters(msg)
 
       msg.payload = {
         rootNodeId,
@@ -190,7 +178,29 @@ module.exports = function (RED) {
         listenerParameters
       }
 
-      msg.justValue = node.justValue
+      msg = node.enhanceMessage(msg, lists)
+      msg = node.setMessageLists(msg, lists)
+
+      node.messageList.push(msg)
+
+      if (node.showStatusActivities && node.status.text !== 'active') {
+        coreBrowser.core.setNodeStatusTo(node, 'active')
+      }
+
+      setTimeout(() => {
+        node.send(node.messageList.shift())
+      }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
+    }
+
+    node.getListenParameters = function (msg) {
+      if (msg.injectType === 'listen') {
+        return msg.payload
+      } else {
+        return null
+      }
+    }
+
+    node.enhanceMessage = function (msg, lists) {
       if (!node.justValue) {
         msg.payload.browseTopic = node.browseTopic
         msg.payload.addressSpaceItems = msg.addressSpaceItems
@@ -202,7 +212,10 @@ module.exports = function (RED) {
       } else {
         msg.payload.browserResults = lists.addressItemList
       }
+      return msg
+    }
 
+    node.setMessageLists = function (msg, lists) {
       if (node.sendNodesToRead && lists.nodesToRead) {
         msg.nodesToRead = lists.nodesToRead
         msg.nodesToReadCount = lists.nodesToRead.length
@@ -217,16 +230,7 @@ module.exports = function (RED) {
         msg.addressItemsToBrowse = lists.addressItemList
         msg.addressItemsToBrowseCount = lists.addressItemList.length
       }
-
-      node.messageList.push(msg)
-
-      if (node.showStatusActivities && node.status.text !== 'active') {
-        node.setNodeStatusTo('active')
-      }
-
-      setTimeout(() => {
-        node.send(node.messageList.shift())
-      }, node.delayPerMessage * node.messageList.length * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
+      return msg
     }
 
     node.browseSendResult = function (rootNodeId, depth, msg, lists) {
@@ -285,7 +289,7 @@ module.exports = function (RED) {
       }
 
       if (node.showStatusActivities) {
-        node.setNodeStatusTo('browsing')
+        coreBrowser.core.setNodeStatusTo(node, 'browsing')
       }
       node.startBrowser(msg)
     })

@@ -193,8 +193,8 @@ var listenToEventsOnServer = [
     'name': 'listen with 200 ms',
     'addressSpaceItems': [
       {
-        'name': 'Tanks',
-        'nodeId': 'ns=1;i=1000',
+        'name': 'BiancoRoyal',
+        'nodeId': 'ns=1;i=1234',
         'datatypeName': ''
       },
       {
