@@ -20,12 +20,12 @@ module.exports = function (RED) {
   function OPCUAIIoTDiscovery (config) {
     RED.nodes.createNode(this, config)
     this.name = config.name
-    this.discoveryPort = config.discoveryPort || 4840
+    this.discoveryPort = config.discoveryPort || coreDiscovery.DEFAULT_OPCUA_DISCOVERY_PORT
 
     let node = this
-    let discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({port: node.discoveryPort})
+    const discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({port: node.discoveryPort})
 
-    node.status({fill: 'blue', shape: 'ring', text: 'new'})
+    node.status({fill: 'yellow', shape: 'ring', text: 'starting'})
 
     coreDiscovery.detailDebugLog('discovery endpoints:' + discoveryServer._get_endpoints())
 
@@ -35,22 +35,19 @@ module.exports = function (RED) {
     })
 
     node.on('input', function (msg) {
-      if (discoveryServer !== null) {
-        msg.payload = {
-          discoveryUrls: discoveryServer.getDiscoveryUrls() || [],
-          endpoints: discoveryServer.endpoints || []
-        }
+      msg.payload = {
+        discoveryUrls: discoveryServer.getDiscoveryUrls() || [],
+        endpoints: discoveryServer.endpoints || []
       }
       node.send(msg)
     })
 
     node.on('close', function (done) {
-      if (discoveryServer !== null) {
+      if (discoveryServer) {
         discoveryServer.shutdown(function () {
           coreDiscovery.internalDebugLog('shutdown')
           done()
         })
-        discoveryServer = null
       } else {
         done()
       }

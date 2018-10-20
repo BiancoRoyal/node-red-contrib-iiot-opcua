@@ -20,11 +20,13 @@ var connectorNode = require('../../src/opcua-iiot-connector')
 var inputNode = require('../../src/opcua-iiot-read')
 var responseNode = require('../../src/opcua-iiot-response')
 var serverNode = require('../../src/opcua-iiot-server')
+var flexServerNode = require('../../src/opcua-iiot-flex-server')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
 var readNodesToLoad = [injectNode, functionNode, connectorNode, inputNode, responseNode, serverNode]
+var readNodesToLoadWithFlexServer = [injectNode, functionNode, connectorNode, inputNode, responseNode, flexServerNode]
 
 var testReadFlow = [
   {
@@ -294,6 +296,106 @@ var testReadHistoryRangeFlow = [
   }
 ]
 
+var testReadFlexServerFlow = [
+  {
+    'id': 'n1rdf3',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'read',
+    'payload': 'testpayload',
+    'payloadType': 'str',
+    'topic': 'TestTopicRead',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': 'TestName',
+    'addressSpaceItems': [
+      {
+        'name': 'ServerStatus',
+        'nodeId': 'ns=0;i=2256',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [['n2rdf3', 'n3rdf3']]
+  },
+  {id: 'n2rdf3', type: 'helper'},
+  {
+    'id': 'n3rdf3',
+    'type': 'OPCUA-IIoT-Read',
+    'attributeId': 0,
+    'maxAge': 1,
+    'depth': 1,
+    'connector': 'c1rdf3',
+    'name': 'ReadAll',
+    'justValue': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'parseStrings': false,
+    'wires': [['n4rdf3', 'n5rdf3']]
+  },
+  {id: 'n4rdf3', type: 'helper'},
+  {
+    'id': 'n5rdf3',
+    'type': 'OPCUA-IIoT-Response',
+    'name': 'TestResponse',
+    'compressedStruct': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [['n6rdf3']]
+  },
+  {id: 'n6rdf3', type: 'helper'},
+  {
+    'id': 'c1rdf3',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:49979/',
+    'keepSessionAlive': false,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': ''
+  },
+  {
+    'id': 's1rdf3',
+    'type': 'OPCUA-IIoT-Flex-Server',
+    'port': '49979',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': 'DEMOFLEXSERVER',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': false,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': '1',
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'delayToClose': 500,
+    'addressSpaceScript': 'function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n  done()\n}',
+    'wires': [[]]
+  }
+]
+
 describe('OPC UA Read node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -347,6 +449,19 @@ describe('OPC UA Read node e2e Testing', function () {
       testReadFlow[2].attributeId = 0
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
+        n6.on('input', function (msg) {
+          expect(msg.entryStatus).toMatchObject([1, 0, 0])
+          expect(msg.topic).toBe('TestTopicRead')
+          expect(msg.attributeId).toBe(0)
+          done()
+        })
+      })
+    })
+
+    it('should have read results with response for attributeId 0 from flex server', function (done) {
+      testReadFlow[2].attributeId = 0
+      helper.load(readNodesToLoadWithFlexServer, testReadFlexServerFlow, function () {
+        let n6 = helper.getNode('n6rdf3')
         n6.on('input', function (msg) {
           expect(msg.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.topic).toBe('TestTopicRead')
