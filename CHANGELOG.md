@@ -1,3 +1,25 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="3.2.0"></a>
+# [3.2.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.1.0...v3.2.0) (2018-10-20)
+
+
+### Bug Fixes
+
+* msg object missed in convert value ([387aacd](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/387aacd))
+* response multiple results ([50510f5](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/50510f5))
+
+
+### Features
+
+* new negate for filtering crawler results [#63](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/63) ([de80c33](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/de80c33))
+* response unset value filter [#61](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/61) ([4260d13](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/4260d13))
+* status browsing on show activities  [#62](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/62) ([3a2b6f6](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/3a2b6f6))
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.0.0...v3.1.0) (2018-10-18)
 
@@ -200,6 +222,3 @@
 
 <a name="1.0.17"></a>
 ## 1.0.17 (2017-12-03)
-
-
-
