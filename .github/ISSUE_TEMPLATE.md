@@ -11,15 +11,21 @@ IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOU
  <!-- Describe the motivation or the concrete use case in detail please! -->
  <!-- some screenshots, documents or flows, then send it via E-Mail -->
  
+
+
+
+<!-- IF IT IS A FEATURE REQUEST DELETE FROM HERE, PLEASE -->
 ## Support
  - support request => **Please do not submit support requests here**, instead see use [the link to our support page](https://bianco-royal.cloud/supporter/#/content/backer)
  - ( ) simple question => please visit the Wiki and Info tab by clicking on the node inside Node-RED before
  - FAQ: Can I send you individual support requests via E-Mail? 
    - Yes, sure! :-D
+   
+   
+   
 <!--
 IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOUT INVESTIGATING
--->
-
+IF THIS IS A FEATURE REQUEST OR SUPPORT DELETE FROM HERE, PLEASE -->
 ## Problem
  - ( ) bug report => please search github for a similar issue or PR before submitting
  - ( ) unexpected behavior => please visit the Wiki before
@@ -29,7 +35,7 @@ IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOU
  <!-- Describe how the bug or problem manifests. -->
  
  **Expected behavior**
- <!-- Describe what the behavior would be without the bug or problem. -->
+ <!-- Describe a complete use case or test case for the bug or problem. -->
  
  **Minimal reproduction of the problem with instructions**
  <!--
@@ -40,6 +46,7 @@ IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOU
    2. 
    3. 
    
+<!-- OPTIONAL IF YOU REQUEST SOME - MANDATORY IF YOU REPORT SOME -->
 #### Your Environment
 **Please tell us about your environment:**
 <!-- system, opcua server or client type, package manager, equipment, vendor info -->
