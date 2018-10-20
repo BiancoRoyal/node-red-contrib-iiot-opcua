@@ -21,46 +21,11 @@ module.exports = function (RED) {
   let scriptObjects = {}
 
   function OPCUAIIoTFlexServer (config) {
-    const UNLIMITED_LISTENERS = 0
-
     RED.nodes.createNode(this, config)
 
-    this.port = config.port
-    this.endpoint = config.endpoint
-    this.maxAllowedSessionNumber = parseInt(config.maxAllowedSessionNumber) || 10
-    this.maxConnectionsPerEndpoint = parseInt(config.maxConnectionsPerEndpoint) || 10
-    this.maxAllowedSubscriptionNumber = parseInt(config.maxAllowedSubscriptionNumber) || 50
-    this.alternateHostname = config.alternateHostname
-    this.name = config.name
-    this.showStatusActivities = config.showStatusActivities
-    this.showErrors = config.showErrors
-    this.publicCertificateFile = config.publicCertificateFile
-    this.privateCertificateFile = config.privateCertificateFile
-    // Security
-    this.allowAnonymous = config.allowAnonymous
-    // User Management
-    this.users = config.users
-    // XML-Set Management
-    this.xmlsets = config.xmlsets
-    // Audit
-    this.isAuditing = config.isAuditing
-    // discovery
-    this.disableDiscovery = !config.serverDiscovery
-    this.registerServerMethod = config.registerServerMethod || 1
-    this.discoveryServerEndpointUrl = config.discoveryServerEndpointUrl
-    this.capabilitiesForMDNS = (config.capabilitiesForMDNS) ? config.capabilitiesForMDNS.split(',') : [config.capabilitiesForMDNS]
-    // limits
-    this.maxNodesPerRead = config.maxNodesPerRead || 1000
-    this.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
-    this.delayToClose = config.delayToClose || 1000
-
-    let node = this
-    coreServer.flex.internalDebugLog('Open Flex Server Node')
-    node.setMaxListeners(UNLIMITED_LISTENERS)
-    node.initialized = false
-    node.opcuaServer = null
-
-    node.assert = require('better-assert')
+    this = coreServer.readConfigOfServerNode(this, config)
+    let node = coreServer.initServerNode(this)
+    coreServer.flex.internalDebugLog('Open Server Node')
 
     const vm = new VM({
       sandbox: {
@@ -78,77 +43,20 @@ module.exports = function (RED) {
     vm.run('node.constructAddressSpaceScript = ' + config.addressSpaceScript)
 
     coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
-    let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
-    let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
-
-    let standardNodeSetFile = coreServer.core.nodeOPCUA.standard_nodeset_file
-    let xmlFiles = [standardNodeSetFile]
-
-    if (node.xmlsets) {
-      node.xmlsets.forEach(function (xmlsetFileName, i) {
-        coreServer.flex.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
-        if (xmlsetFileName.path) {
-          if (xmlsetFileName.path.startsWith('public/vendor/')) {
-            xmlFiles.push(path.join(__dirname, xmlsetFileName.path))
-          } else {
-            xmlFiles.push(xmlsetFileName.path)
-          }
-
-          if (xmlsetFileName.path.includes('ISA95')) {
-            // add server ISA95 extension to node-opcua
-            coreServer.isa95DebugLog('installing ISA95 extend')
-            // require('node-opcua-isa95')(coreServer.core.nodeOPCUA)
-          }
-        }
-      })
-      coreServer.flex.detailDebugLog('append xmlFiles: ' + xmlFiles.toString())
-    }
-
-    let nodeOPCUAServerPath = coreServer.core.getNodeOPCUAServerPath()
-
-    coreServer.flex.detailDebugLog('config: ' + node.publicCertificateFile)
-    if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
-      node.publicCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
-      coreServer.flex.detailDebugLog('default key: ' + node.publicCertificateFile)
-    }
-
-    coreServer.flex.detailDebugLog('config: ' + node.privateCertificateFile)
-    if (node.privateCertificateFile === null || node.privateCertificateFile === '') {
-      node.privateCertificateFile = path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
-      coreServer.flex.detailDebugLog('default key: ' + node.privateCertificateFile)
-    }
+      
+    node = coreServer.loadNodeSets(node)
+    node = coreServer.loadCertificates(node)
 
     coreServer.core.setNodeStatusTo(node, 'waiting')
-    coreServer.flex.internalDebugLog('flex node sets:' + xmlFiles.toString())
+    coreServer.flex.internalDebugLog('flex node sets:' + xmlFiles.toString()) 
 
-    node.checkUser = function (userName, password) {
-      let isValid = false
-      coreServer.flex.internalDebugLog('Is Valid Server User?')
-
-      node.users.forEach(function (user, index, array) {
-        if (userName === user.name && password === user.password) {
-          coreServer.flex.internalDebugLog('Valid Server User Found')
-          isValid = true
-        }
-      })
-
-      return isValid
-    }
-
+    let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
+    let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
+  
     node.initNewServer = function () {
       node.initialized = false
       node.opcuaServer = null
-
-      switch (parseInt(node.registerServerMethod)) {
-        case 2:
-          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.MDNS
-          break
-        case 3:
-          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.LDS
-          break
-        default:
-          node.registerServerMethod = coreServer.core.nodeOPCUA.RegisterServerMethod.HIDDEN
-      }
+      node = coreServer.initRegisterServerMethod(node)
 
       let serverOptions = {
         port: node.port,
@@ -156,8 +64,8 @@ module.exports = function (RED) {
         resourcePath: node.endpoint || 'UA/NodeREDFlexIIoTServer',
         buildInfo: {
           productName: node.name || 'Node-RED Flex IIoT Server',
-          buildNumber: '20180701',
-          buildDate: new Date(2018, 7, 1)
+          buildNumber: '20181022',
+          buildDate: new Date()
         },
         serverCapabilities: {
           operationLimits: {
@@ -181,7 +89,9 @@ module.exports = function (RED) {
         privateKeyFile: node.privateCertificateFile,
         alternateHostname: node.alternateHostname || '',
         userManager: {
-          isValidUser: node.checkUser
+          isValidUser: function (userName, password) {
+            coreServer.checkUser(node, userName, password)
+          }
         },
         isAuditing: node.isAuditing,
         disableDiscovery: node.disableDiscovery

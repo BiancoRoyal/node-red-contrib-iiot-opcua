@@ -63,10 +63,10 @@
     "node": ">=6.10"
   },
   "scripts": {
-    "test": "DEBUG=opcuaIIoT* && standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
+    "test": "standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
     "test:ci": "standard --fix && gulp clean && jest --verbose --detectOpenHandles --forceExit --logHeapUsage --ci --debug",
     "test:clearCache": "gulp clean && jest --clearCache",
-    "coverage": "DEBUG=opcuaIIoT* && standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
+    "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
     "coverage:ci": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --verbose --detectOpenHandles --forceExit --logHeapUsage --ci --debug",
     "coverage:upload": "cat ./jcoverage/lcov.info | codacy-coverage --token eded179f99764906b775603a52e8a5b4",
     "build": "standard --fix && gulp publish",

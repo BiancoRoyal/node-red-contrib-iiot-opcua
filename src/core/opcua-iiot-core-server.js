@@ -28,8 +28,9 @@ de.biancoroyal.opcua.iiot.core.server.flex.detailDebugLog = de.biancoroyal.opcua
 de.biancoroyal.opcua.iiot.core.server.simulatorInterval = de.biancoroyal.opcua.iiot.core.server.simulatorInterval || null // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.maxTimeInterval = de.biancoroyal.opcua.iiot.core.server.maxTimeInterval || 500000 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.timeInterval = de.biancoroyal.opcua.iiot.core.server.timeInterval || 1 // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.server.UNLIMITED_LISTENERS = de.biancoroyal.opcua.iiot.core.server.UNLIMITED_LISTENERS || 0 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.intervalList = de.biancoroyal.opcua.iiot.core.server.intervalList || [] // eslint-disable-line no-use-before-define
-
+de.biancoroyal.opcua.iiot.core.server.path = de.biancoroyal.opcua.iiot.core.server.path || require('path') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.simulateVariation = function (data) {
   let server = de.biancoroyal.opcua.iiot.core.server
 
@@ -556,4 +557,127 @@ de.biancoroyal.opcua.iiot.core.server.start = function (server, node) {
     })
 }
 
+de.biancoroyal.opcua.iiot.core.server.readConfigOfServerNode = function (node, config) {
+  node.name = config.name
+
+  // network
+  node.port = config.port
+  node.endpoint = config.endpoint
+  node.alternateHostname = config.alternateHostname
+
+  // limits
+  node.maxAllowedSessionNumber = parseInt(config.maxAllowedSessionNumber) || 10
+  node.maxConnectionsPerEndpoint = parseInt(config.maxConnectionsPerEndpoint) || 10
+  node.maxAllowedSubscriptionNumber = parseInt(config.maxAllowedSubscriptionNumber) || 50
+  node.maxNodesPerRead = config.maxNodesPerRead || 1000
+  node.maxNodesPerBrowse = config.maxNodesPerBrowse || 2000
+
+  node.delayToClose = config.delayToClose || 1000
+  node.showStatusActivities = config.showStatusActivities
+  node.showErrors = config.showErrors
+
+  // certificates
+  node.publicCertificateFile = config.publicCertificateFile
+  node.privateCertificateFile = config.privateCertificateFile
+
+  // Security
+  node.allowAnonymous = config.allowAnonymous
+  // User Management
+  node.users = config.users
+  // XML-Set Management
+  node.xmlsets = config.xmlsets
+  // Audit
+  node.isAuditing = config.isAuditing
+
+  // discovery
+  node.disableDiscovery = !config.serverDiscovery
+  node.registerServerMethod = config.registerServerMethod || 1
+  node.discoveryServerEndpointUrl = config.discoveryServerEndpointUrl
+  node.capabilitiesForMDNS = (config.capabilitiesForMDNS) ? config.capabilitiesForMDNS.split(',') : [config.capabilitiesForMDNS]
+
+  return node
+}
+
+de.biancoroyal.opcua.iiot.core.server.initServerNode = function (node) {
+  node.assert = require('better-assert')
+  node.setMaxListeners(this.UNLIMITED_LISTENERS)
+  node.initialized = false
+  node.opcuaServer = null
+  return node
+}
+
+de.biancoroyal.opcua.iiot.core.server.loadNodeSets = function (node) {
+  let standardNodeSetFile = this.core.nodeOPCUA.standard_nodeset_file
+  let xmlFiles = [standardNodeSetFile]
+
+  if (node.xmlsets) {
+    node.xmlsets.forEach(function (xmlsetFileName, i) {
+      this.detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
+      if (xmlsetFileName.path) {
+        if (xmlsetFileName.path.startsWith('public/vendor/')) {
+          xmlFiles.push(this.path.join(__dirname, xmlsetFileName.path))
+        } else {
+          xmlFiles.push(xmlsetFileName.path)
+        }
+
+        if (xmlsetFileName.path.includes('ISA95')) {
+          // add server ISA95 extension to node-opcua
+          this.isa95DebugLog('installing ISA95 extend')
+          // require('node-opcua-isa95')(this.core.nodeOPCUA)
+        }
+      }
+    })
+    this.detailDebugLog('append xmlFiles: ' + xmlFiles.toString())
+  }
+
+  return node
+}
+
+de.biancoroyal.opcua.iiot.core.server.loadCertificates = function (node) {
+  const nodeOPCUAServerPath = this.core.getNodeOPCUAServerPath()
+
+  this.detailDebugLog('config: ' + node.publicCertificateFile)
+  if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
+    node.publicCertificateFile = this.path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
+    this.detailDebugLog('default key: ' + node.publicCertificateFile)
+  }
+
+  this.detailDebugLog('config: ' + node.privateCertificateFile)
+  if (node.privateCertificateFile === null || node.privateCertificateFile === '') {
+    node.privateCertificateFile = this.path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
+    this.detailDebugLog('default key: ' + node.privateCertificateFile)
+  }
+
+  return node
+}
+
+de.biancoroyal.opcua.iiot.core.server.checkUser = function (node, userName, password) {
+  this.internalDebugLog('Is Valid Server User?')
+  node.users.forEach(function (user, index, array) {
+    if (userName === user.name && password === user.password) {
+      this.internalDebugLog('Valid Server User Found')
+      return true
+    }
+  })
+  this.internalDebugLog('Invalid Server User')
+  return false
+}
+
+de.biancoroyal.opcua.iiot.core.server.initRegisterServerMethod = function (node) {
+  if (!node.registerServerMethod) {
+    node.registerServerMethod = this.core.nodeOPCUA.RegisterServerMethod.HIDDEN
+  } else {
+    switch (parseInt(node.registerServerMethod)) {
+      case 2:
+        node.registerServerMethod = this.core.nodeOPCUA.RegisterServerMethod.MDNS
+        break
+      case 3:
+        node.registerServerMethod = this.core.nodeOPCUA.RegisterServerMethod.LDS
+        break
+      default:
+        node.registerServerMethod = this.core.nodeOPCUA.RegisterServerMethod.HIDDEN
+    }
+  }
+  return node
+}
 module.exports = de.biancoroyal.opcua.iiot.core.server
