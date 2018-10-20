@@ -172,7 +172,7 @@ module.exports = function (RED) {
       return result
     }
 
-    node.convertResultValue = function (result) {
+    node.convertResultValue = function (msg, result) {
       if (result === null) {
         coreFilter.internalDebugLog('result null or undefined')
         return
@@ -201,7 +201,7 @@ module.exports = function (RED) {
       let result = node.filterByType(msg) || msg.payload
 
       if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
-        result = node.convertResultValue(result)
+        result = node.convertResultValue(msg, result)
       }
       return result
     }
