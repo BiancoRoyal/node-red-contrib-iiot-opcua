@@ -16,6 +16,7 @@ var injectNode = require('node-red/nodes/core/core/20-inject')
 var injectOPCUANode = require('../../src/opcua-iiot-inject')
 var inputNode = require('../../src/opcua-iiot-server-cmd')
 var serverNode = require('../../src/opcua-iiot-server')
+var flexServerNode = require('../../src/opcua-iiot-flex-server')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
@@ -170,6 +171,64 @@ var testInjectCMDFlow = [
   {id: 'n5cmdf2', type: 'helper'}
 ]
 
+var testCMDWithFlexServerFlow = [
+  {
+    'id': 'n1csf3',
+    'type': 'inject',
+    'payload': 'testpayload',
+    'payloadType': 'str',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'onceDelay': '4',
+    'wires': [['n2csf3', 'n3csf3']]
+  },
+  {id: 'n2csf3', type: 'helper'},
+  {
+    'id': 'n3csf3',
+    'type': 'OPCUA-IIoT-Server-Command',
+    'commandtype': 'restart',
+    'nodeId': '',
+    'name': '',
+    'wires': [
+      ['n4csf3', 's3csfr']
+    ]
+  },
+  {id: 'n4csf3', type: 'helper'},
+  {
+    'id': 's3csfr',
+    'type': 'OPCUA-IIoT-Flex-Server',
+    'port': '54120',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': 'DEMOSERVERWITHUSERANDISA95',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': false,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': '1',
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'delayToClose': 500,
+    'addressSpaceScript': 'function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n  done()\n}',
+    'wires': [
+      ['n5csf3']
+    ]
+  },
+  {id: 'n5csf3', type: 'helper'}
+]
+
 describe('OPC UA Server Command node e2e Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -234,6 +293,19 @@ describe('OPC UA Server Command node e2e Testing', function () {
     it('should get a message with inject to restart server', function (done) {
       helper.load([injectNode, injectOPCUANode, inputNode, serverNode], testCMDWithServerFlow, function () {
         let n5 = helper.getNode('n5csf1')
+        n5.on('input', function (msg) {
+          expect(msg.commandType).toBe('restart')
+          expect(msg.payload.nodeId).toBeUndefined()
+          expect(msg.nodetype).toBe('inject')
+          expect(msg.injectType).toBe('CMD')
+          setTimeout(done, 4000)
+        })
+      })
+    })
+
+    it('should get a message with inject to restart flex server', function (done) {
+      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testCMDWithFlexServerFlow, function () {
+        let n5 = helper.getNode('n5csf3')
         n5.on('input', function (msg) {
           expect(msg.commandType).toBe('restart')
           expect(msg.payload.nodeId).toBeUndefined()
