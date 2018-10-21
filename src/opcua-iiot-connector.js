@@ -339,7 +339,7 @@ module.exports = function (RED) {
 
     node.closeSession = function (done) {
       if (node.opcuaSession) {
-        console.log('Delete Subscriptions From Session ' + node.stateMachine.getMachineState())
+        coreConnector.detailDebugLog('Delete Subscriptions From Session ' + node.stateMachine.getMachineState())
         node.opcuaClient.closeSession(node.opcuaSession, true, function (err) {
           node.stateMachine.sessionclose().sessionrestart()
           if (err) {
@@ -404,7 +404,7 @@ module.exports = function (RED) {
     })
 
     node.closeConnector = (done) => {
-      console.log('Close Connector ' + node.stateMachine.getMachineState())
+      coreConnector.detailDebugLog('Close Connector ' + node.stateMachine.getMachineState())
       if (node.registeredNodeList.length > 0) {
         coreConnector.internalDebugLog('Connector Has Registered Nodes And Can Not Close The Node -> Count: ' + node.registeredNodeList.length)
         setTimeout(() => {
@@ -412,7 +412,7 @@ module.exports = function (RED) {
         }, node.connectionStopDelay)
       } else {
         node.disconnectNodeOPCUA(() => {
-          console.log('Disconnect ' + node.stateMachine.getMachineState())
+          coreConnector.detailDebugLog('Disconnect ' + node.stateMachine.getMachineState())
           coreConnector.internalDebugLog('Close Connector Node On State ' + node.stateMachine.getMachineState())
           assert(node.stateMachine.getMachineState() === 'CLOSED' || node.stateMachine.getMachineState() === 'END')
           done()
