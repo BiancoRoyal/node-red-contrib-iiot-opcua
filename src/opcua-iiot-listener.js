@@ -120,6 +120,10 @@ module.exports = function (RED) {
       uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
       coreListener.internalDebugLog('New Subscription Created')
 
+      if (node.connector) {
+        node.connector.hasOpcUaSubscriptions = true
+      }
+
       node.setSubscriptionEvents(uaSubscription)
       node.stateMachine.initsub()
     }
@@ -136,8 +140,13 @@ module.exports = function (RED) {
       })
 
       node.send({payload: payload, addressSpaceItems: addressSpaceItems})
+
       node.monitoredItems.clear()
       node.monitoredASO.clear()
+
+      if (node.connector) {
+        node.connector.hasOpcUaSubscriptions = false
+      }
     }
 
     node.subscribeActionInput = function (msg) {
@@ -558,10 +567,10 @@ module.exports = function (RED) {
       coreListener.internalDebugLog('Subscription Is To Terminate On Connection Event ' + event)
       if (uaSubscription !== null && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
         node.stateMachine.terminatesub()
-        uaSubscription.terminate(() => {
-          node.stateMachine.idlesub()
-          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event ' + event)
-        })
+        // uaSubscription.terminate(() => {
+        node.stateMachine.idlesub()
+        coreListener.internalDebugLog('Subscription Was Terminated On Connector Event ' + event)
+        // })
       }
     }
 
@@ -570,10 +579,10 @@ module.exports = function (RED) {
     node.on('close', function (done) {
       if (uaSubscription !== null && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
         node.stateMachine.terminatesub()
-        uaSubscription.terminate(() => {
-          coreListener.core.deregisterToConnector(node, done)
-          coreListener.internalDebugLog('Close Listener Node')
-        })
+        // uaSubscription.terminate(() => {
+        coreListener.core.deregisterToConnector(node, done)
+        coreListener.internalDebugLog('Close Listener Node')
+        // })
       } else {
         coreListener.core.deregisterToConnector(node, done)
         coreListener.internalDebugLog('Close Listener Node')

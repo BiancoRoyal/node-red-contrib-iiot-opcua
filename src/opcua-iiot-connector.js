@@ -63,6 +63,7 @@ module.exports = function (RED) {
     node.serverCertificate = null
     node.discoveryServerEndpointUrl = null
     node.createConnectionTimeout = null
+    node.hasOpcUaSubscriptions = false
 
     node.stateMachine = coreConnector.createStatelyMachine()
     coreConnector.internalDebugLog('Start FSM: ' + node.stateMachine.getMachineState())
@@ -340,7 +341,7 @@ module.exports = function (RED) {
     node.closeSession = function (done) {
       if (node.opcuaSession) {
         coreConnector.detailDebugLog('Delete Subscriptions From Session ' + node.stateMachine.getMachineState())
-        node.opcuaClient.closeSession(node.opcuaSession, true, function (err) {
+        node.opcuaClient.closeSession(node.opcuaSession, node.hasOpcUaSubscriptions, function (err) {
           node.stateMachine.sessionclose().sessionrestart()
           if (err) {
             coreConnector.internalDebugLog('Client Session Close ' + err)
