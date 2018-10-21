@@ -51,7 +51,7 @@ module.exports = function (RED) {
         coreListener.internalDebugLog('New Subscription Request On State ' + node.stateMachine.getMachineState())
         return
       }
-
+      coreListener.internalDebugLog('Create Subscription On State ' + node.stateMachine.getMachineState())
       uaSubscription = null
       node.stateMachine.requestinitsub()
 
@@ -130,10 +130,12 @@ module.exports = function (RED) {
 
     node.sendAllMonitoredItems = function (payload) {
       let addressSpaceItems = []
+
       node.monitoredASO.forEach(function (value, key) {
         addressSpaceItems.push({name: '', nodeId: key, datatypeName: ''})
       })
-      node.send({payload: payload, monitoredASO: node.monitoredASO, addressSpaceItems: addressSpaceItems})
+
+      node.send({payload: payload, addressSpaceItems: addressSpaceItems})
       node.monitoredItems.clear()
       node.monitoredASO.clear()
     }
@@ -552,23 +554,21 @@ module.exports = function (RED) {
       }
     })
 
-    coreListener.core.registerToConnector(node)
-
-    if (node.connector) {
-      node.connector.on('connection_closed', () => {
-        coreListener.internalDebugLog('Subscription Is To Terminate On Connection Close')
-        if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
-          node.stateMachine.terminatesub()
-          uaSubscription.terminate(() => {
-            node.stateMachine.idlesub()
-            coreListener.internalDebugLog('Subscription Was Terminated On Connector Close Event')
-          })
-        }
-      })
+    node.terminateSubscriptions = function (event) {
+      coreListener.internalDebugLog('Subscription Is To Terminate On Connection Event ' + event)
+      if (uaSubscription !== null && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
+        node.stateMachine.terminatesub()
+        uaSubscription.terminate(() => {
+          node.stateMachine.idlesub()
+          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event ' + event)
+        })
+      }
     }
 
+    coreListener.core.registerToConnector(node)
+
     node.on('close', function (done) {
-      if (uaSubscription !== null && node.stateMachine.getMachineState() !== 'TERMINATED') {
+      if (uaSubscription !== null && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
         node.stateMachine.terminatesub()
         uaSubscription.terminate(() => {
           coreListener.core.deregisterToConnector(node, done)

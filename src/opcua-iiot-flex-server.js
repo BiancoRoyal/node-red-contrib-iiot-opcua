@@ -173,7 +173,7 @@ module.exports = function (RED) {
     })
 
     node.executeOpcuaCommand = function (msg) {
-      switch (msg.commandtype) {
+      switch (msg.commandType) {
         case 'restart':
           node.restartServer()
           break

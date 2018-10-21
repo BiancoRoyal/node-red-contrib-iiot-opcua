@@ -18,6 +18,7 @@ module.exports = function (RED) {
   let coreConnector = require('./core/opcua-iiot-core-connector')
   let path = require('path')
   const _ = require('underscore')
+  const assert = require('better-assert')
 
   function OPCUAIIoTConnectorConfiguration (config) {
     const CONNECTION_START_DELAY = 2000 // msec.
@@ -177,7 +178,6 @@ module.exports = function (RED) {
     }
 
     node.renewConnection = function (done) {
-      node.stateMachine.lock() // start delay used before
       node.closeConnector(() => {
         node.stateMachine.idle().init()
         done()
@@ -301,6 +301,8 @@ module.exports = function (RED) {
       }
 
       node.closeSession(() => {
+        assert(node.stateMachine.getMachineState() === 'SESSIONRESTART')
+
         if (sessionStartTimeout) {
           clearTimeout(sessionStartTimeout)
           sessionStartTimeout = null
@@ -317,20 +319,40 @@ module.exports = function (RED) {
       })
     }
 
+    node.deleteSubscriptionsFromSession = function (done) {
+      if (node.opcuaSession) {
+        node.opcuaSession.deleteSubscriptions({}, (err, response) => {
+          if (err) {
+            coreConnector.internalDebugLog(err.message)
+            if (node.showErrors) {
+              node.error(err, {payload: 'Client Delete Subscriptions Error'})
+            }
+          }
+          coreConnector.internalDebugLog(response)
+          done()
+        })
+      } else {
+        coreConnector.internalDebugLog('Delete Subscriptions From Session Without Session')
+        done()
+      }
+    }
+
     node.closeSession = function (done) {
-      if (node.opcuaSession && node.opcuaSession.sessionId !== 'terminated') {
-        node.opcuaClient.closeSession(node.opcuaSession, false, function (err) {
-          node.stateMachine.sessionclose()
+      if (node.opcuaSession) {
+        console.log('Delete Subscriptions From Session ' + node.stateMachine.getMachineState())
+        node.opcuaClient.closeSession(node.opcuaSession, true, function (err) {
+          node.stateMachine.sessionclose().sessionrestart()
           if (err) {
             coreConnector.internalDebugLog('Client Session Close ' + err)
             if (node.showErrors) {
               node.error(err, {payload: 'Client Session Close Error'})
             }
           }
-          done() // closed session state
+          done()
         })
       } else {
-        done() // session restart or locked state
+        coreConnector.internalDebugLog('Close Session Without Session')
+        done()
       }
     }
 
@@ -349,7 +371,6 @@ module.exports = function (RED) {
 
     node.disconnectNodeOPCUA = function (done) {
       if (node.opcuaClient) {
-        node.stateMachine.lock()
         coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
         setTimeout(() => {
           node.opcuaClient.disconnect(function (err) {
@@ -374,12 +395,16 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.emit('connection_closed')
       node.stateMachine.lock().end()
-      node.closeConnector(done) // end state
+      assert(node.stateMachine.getMachineState() === 'END')
+      node.emit('connection_end')
+      node.closeSession(() => {
+        node.closeConnector(done) // end state
+      })
     })
 
     node.closeConnector = (done) => {
+      console.log('Close Connector ' + node.stateMachine.getMachineState())
       if (node.registeredNodeList.length > 0) {
         coreConnector.internalDebugLog('Connector Has Registered Nodes And Can Not Close The Node -> Count: ' + node.registeredNodeList.length)
         setTimeout(() => {
@@ -387,7 +412,9 @@ module.exports = function (RED) {
         }, node.connectionStopDelay)
       } else {
         node.disconnectNodeOPCUA(() => {
-          coreConnector.internalDebugLog('Close Connector Node')
+          console.log('Disconnect ' + node.stateMachine.getMachineState())
+          coreConnector.internalDebugLog('Close Connector Node On State ' + node.stateMachine.getMachineState())
+          assert(node.stateMachine.getMachineState() === 'CLOSED' || node.stateMachine.getMachineState() === 'END')
           done()
         })
       }
@@ -396,15 +423,16 @@ module.exports = function (RED) {
     node.restartWithNewSettings = function (parameters, done) {
       coreConnector.internalDebugLog('Renew With Flex Connector Request On State ' + node.stateMachine.getMachineState())
 
-      if (node.stateMachine.getMachineState() === 'LOCKED') {
+      if (node.stateMachine.getMachineState() === 'SESSIONRESTART') {
         coreConnector.internalDebugLog('Do Not Renew From Flex Connector Request On State ' + node.stateMachine.getMachineState())
         return
       }
 
-      node.stateMachine.lock()
+      node.stateMachine.lock().sessionrestart()
       node.setNewParameters(parameters)
       node.initCertificatesAndKeys()
       node.closeSession(() => {
+        assert(node.stateMachine.getMachineState() === 'SESSIONRESTART')
         node.renewConnection(done)
       })
     }
@@ -414,7 +442,7 @@ module.exports = function (RED) {
       node.endpoint = parameters.endpoint || node.endpoint
       node.keepSessionAlive = parameters.keepSessionAlive || node.keepSessionAlive
       node.securityPolicy = parameters.securityPolicy || node.securityPolicy
-      node.securityMode = parameters.securityMode || node.securityMode
+      node.messageSecurityMode = parameters.securityMode || node.messageSecurityMode
       node.name = parameters.name || node.name
       node.showErrors = parameters.showErrors || node.showErrors
       node.publicCertificateFile = parameters.publicCertificateFile || node.publicCertificateFile
@@ -487,6 +515,11 @@ module.exports = function (RED) {
       coreConnector.detailDebugLog('Connector Session Close Event FSM')
       node.emit('session_closed')
       node.opcuaSession = null
+    }
+
+    node.stateMachine.onSESSIONRESTART = function (event, oldState, newState) {
+      coreConnector.detailDebugLog('Connector Session Restart Event FSM')
+      node.emit('session_restart')
     }
 
     node.stateMachine.onCLOSED = function (event, oldState, newState) {
