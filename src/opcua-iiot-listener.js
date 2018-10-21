@@ -120,6 +120,10 @@ module.exports = function (RED) {
       uaSubscription = new coreListener.core.nodeOPCUA.ClientSubscription(node.opcuaSession, parameters)
       coreListener.internalDebugLog('New Subscription Created')
 
+      if (node.connector) {
+        node.connector.hasSubscriptions = true
+      }
+
       node.setSubscriptionEvents(uaSubscription)
       node.stateMachine.initsub()
     }
