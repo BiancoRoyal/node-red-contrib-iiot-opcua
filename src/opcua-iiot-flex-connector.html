@@ -58,18 +58,43 @@
     <h2>OPC UA IIoT Flex Connector</h2>
 
     <p>
-        The Flex Connector node is to set up an event listener with parameters to change a connectors options.
-        It is to trigger by an Inject of Node-RED or by the OPC UA IIoT Inject.
-        It could also trigger with incoming events from other nodes.
+        The Flex Connector node is to set up an event listener with parameters
+        to change the linked connector settings and restart the connection.
+        It is to trigger by an Inject of Node-RED or by the IIoT OPC UA Inject.
+        It could also get a trigger with incoming events from other nodes.
     </p>
 
     <h3>Input</h3>
 
+    <p>The node takes the parameters from the msg object or from the node setting as default.
+    That means - an empty msg object will just reset the connection and is like a command to just restart the connector with the node parameters.</p>
+
     <p>msg with connector parameters</p>
+
+    <ul>
+        <li>endpoint (string with opc.tcp://)
+        <li>keepSessionAlive (boolean)
+        <li>securityPolicy (string)
+        <li>securityMode (string)
+        <li>name (string)
+        <li>showErrors (boolean)
+        <li>publicCertificateFile (path string)
+        <li>privateKeyFile (path string)
+        <li>defaultSecureTokenLifetime (number)
+        <li>endpointMustExist (boolean)
+        <li>autoSelectRightEndpoint (boolean)
+        <li>strategyMaxRetry (number)
+        <li>strategyInitialDelay (number)
+        <li>strategyMaxDelay (number)
+        <li>strategyRandomisationFactor (float from 0 .. 1)
+        <li>requestedSessionTimeout (number)
+        <li>connectionStartDelay (number)
+        <li>reconnectDelay (number)
+    </ul>
 
     <h3>Output</h3>
 
-    <p>msg with connector parameters and result</p>
+    <p>A msg object with connector parameters and a result if the restart with new settings was done.</p>
 
     <strong>Name</strong>
     <p>Name in the flow of Node-RED.</p>

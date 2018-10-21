@@ -36,7 +36,7 @@
       node.lookupItems = []
 
       let objecttypeLookupButton = $("#node-lookup-objecttype")
-      let objecttypeField = $("#node-input-objecttype")
+      let objecttypeInputField = $("#node-input-objecttype")
 
       objecttypeLookupButton.click(function () {
         objecttypeLookupButton.addClass('disabled')
@@ -48,19 +48,19 @@
             node.lookupItems.push({value: entry.nodeId, label: entry.label})
           })
 
-          objecttypeField.autocomplete({
+          objecttypeInputField.autocomplete({
             source: node.lookupItems,
             minLength: 0,
             focus: function (event, ui) {
-              objecttypeField.val(ui.item.label);
+              objecttypeInputField.val(ui.item.label);
               return false;
             },
             select: function (event, ui) {
-              objecttypeField.val(ui.item.label)
+              objecttypeInputField.val(ui.item.label)
               return false;
             },
             close: function (event, ui) {
-              objecttypeField.autocomplete("destroy")
+              objecttypeInputField.autocomplete("destroy")
             }
           }).autocomplete("search", "")
         })
@@ -128,11 +128,10 @@
         })
       })
 
-      let objectTypeCheckbox = $("#node-input-objecttype")
       let dataTypeRow = $("#node-input-datatype-row")
       let referenceTypeRow = $("#node-input-referencetype-row")
 
-      objectTypeCheckbox.change(function () {
+      objecttypeInputField.change(function () {
         if ($(this).val() !== '61') {
           node.datatype.required = true
           node.referencetype.required = true
