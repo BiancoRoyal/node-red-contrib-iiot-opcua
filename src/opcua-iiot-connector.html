@@ -31,6 +31,7 @@
       requestedSessionTimeout: {value: ''},
       connectionStartDelay: {value: ''},
       reconnectDelay: {value: ''},
+      maxBadSessionRequests: {value: 10}
     },
     credentials: {
       user: {type: "text"},
@@ -305,6 +306,10 @@
             <div class="form-row">
               <label for="node-config-input-requestedSessionTimeout"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.requestedSessionTimeout"></span></label>
               <input type="text" id="node-config-input-requestedSessionTimeout" placeholder="60000" style="width:80px"> &nbsp; msec.
+            </div>
+            <div class="form-row">
+              <label for="node-config-input-maxBadSessionRequests"><i class="fa fa-power-off"></i> <span data-i18n="opcua-iiot-contrib.label.maxBadSessionRequests"></span></label>
+              <input type="text" id="node-config-input-maxBadSessionRequests" placeholder="10" style="width:80px"> &nbsp; times
             </div>
             <hr>
             <h4><span data-i18n="opcua-iiot-contrib.label.serverConnectionDelays"></span></h4>

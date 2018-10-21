@@ -28,7 +28,8 @@
       "connectionStartDelay": "Start",
       "reconnectDelay": "Reconnect",
       "connectionStopDelay": "Stop",
-      "serverConnectionDelays": "Server Connection Delays"
+      "serverConnectionDelays": "Server Connection Delays",
+      "maxBadSessionRequests": "Max. BadSession Requests"
     },
     "tabs-label": {
       "settings": "Settings",

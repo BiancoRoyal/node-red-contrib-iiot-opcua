@@ -47,6 +47,7 @@ module.exports = function (RED) {
     this.connectionStartDelay = config.connectionStartDelay || CONNECTION_START_DELAY
     this.reconnectDelay = config.reconnectDelay || RECONNECT_DELAY
     this.connectionStopDelay = config.connectionStopDelay || CONNECTION_STOP_DELAY
+    this.maxBadSessionRequests = config.maxBadSessionRequests || 10
 
     let node = this
     coreConnector.internalDebugLog('Open Connector Node')
@@ -286,15 +287,15 @@ module.exports = function (RED) {
         coreConnector.logSessionInformation(node)
       }
 
-      if (node.sessionNodeRequests > 10) {
+      if (node.sessionNodeRequests > node.maxBadSessionRequests) {
         coreConnector.internalDebugLog('Reset Bad Session Request On State ' + node.stateMachine.getMachineState())
-        node.stateMachine.lock()
+        node.stateMachine.lock().sessionrestart()
         node.renewSession('ToManyBadSessionRequests')
       }
     }
 
     node.renewSession = function (callerInfo) {
-      if (node.stateMachine.getMachineState() !== 'LOCKED') {
+      if (node.stateMachine.getMachineState() !== 'SESSIONRESTART') {
         coreConnector.internalDebugLog('Renew Session Request Not Allowed On State ' + node.stateMachine.getMachineState())
         return
       }
@@ -329,7 +330,7 @@ module.exports = function (RED) {
           done() // closed session state
         })
       } else {
-        done() // locked state
+        done() // session restart or locked state
       }
     }
 
