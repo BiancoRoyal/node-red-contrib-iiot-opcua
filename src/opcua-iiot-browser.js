@@ -38,26 +38,6 @@ module.exports = function (RED) {
     node.browseTopic = coreBrowser.core.OBJECTS_ROOT
     node.messageList = []
 
-    node.browseErrorHandling = function (err, msg, lists) {
-      let results = lists.browserResults || []
-
-      if (err) {
-        coreBrowser.internalDebugLog('Browser Error ' + err)
-        if (node.showErrors) {
-          node.error(err, msg)
-        }
-
-        if (coreBrowser.core.isSessionBad(err) && node.connector) {
-          node.connector.resetBadSession()
-        }
-      } else {
-        coreBrowser.internalDebugLog('Browse Done With Error')
-        if (results.length) {
-          coreBrowser.detailDebugLog(results.length + 'items in lists of browser results')
-        }
-      }
-    }
-
     node.extractDataFromBrowserResults = (browserResultToFilter, lists) => {
       browserResultToFilter.forEach(function (result) {
         result.references.forEach(function (reference) {
@@ -108,7 +88,7 @@ module.exports = function (RED) {
             coreBrowser.internalDebugLog('No Browse Results On ' + rootNodeId)
           }
         }).catch(function (err) {
-          node.browseErrorHandling(err, msg, lists)
+          coreBrowser.browseErrorHandling(node, err, msg, lists)
         })
     }
 
@@ -150,7 +130,7 @@ module.exports = function (RED) {
               callback(rootNode, depth, msg, lists)
             }
           }).catch(function (err) {
-            node.browseErrorHandling(err, msg, lists)
+            coreBrowser.browseErrorHandling(node, err, msg, lists)
           })
       }
     }
@@ -251,6 +231,24 @@ module.exports = function (RED) {
       lists = node.createListsObject()
     }
 
+    node.browseWithAddressSpaceItems = function (msg, depth, lists) {
+      if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length > 0) {
+        msg.addressSpaceItems = msg.addressItemsToBrowse
+      }
+
+      if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
+        node.browseNodeList(msg.addressSpaceItems, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
+          node.browseSendResult(rootNodeId, depth, msg, subLists)
+        })
+      } else {
+        coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
+        node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
+        node.browse(node.browseTopic, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
+          node.browseSendResult(rootNodeId, depth, msg, subLists)
+        })
+      }
+    }
+
     node.startBrowser = function (msg) {
       if (coreBrowser.core.checkSessionNotValid(node.opcuaSession, 'Browser')) {
         return
@@ -265,21 +263,7 @@ module.exports = function (RED) {
           node.browseSendResult(rootNodeId, depth, msg, subLists)
         })
       } else {
-        if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length > 0) {
-          msg.addressSpaceItems = msg.addressItemsToBrowse
-        }
-
-        if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
-          node.browseNodeList(msg.addressSpaceItems, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
-            node.browseSendResult(rootNodeId, depth, msg, subLists)
-          })
-        } else {
-          coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
-          node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
-          node.browse(node.browseTopic, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
-            node.browseSendResult(rootNodeId, depth, msg, subLists)
-          })
-        }
+        node.browseWithAddressSpaceItems(msg, depth, lists)
       }
     }
 

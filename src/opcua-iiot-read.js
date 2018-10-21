@@ -43,6 +43,74 @@ module.exports = function (RED) {
       }
     }
 
+    node.readAllFromNodeId = function (session, itemsToRead, msg) {
+      coreClient.readAllAttributes(session, itemsToRead, msg)
+        .then(function (readResult) {
+          try {
+            node.send(node.buildResultMessage('AllAttributes', readResult))
+          } catch (err) {
+            node.handleReadError(err, readResult.msg)
+          }
+        }).catch(function (err) {
+          node.handleReadError(err, msg)
+        })
+    }
+
+    node.readValueFromNodeId = function (session, itemsToRead, msg) {
+      coreClient.readVariableValue(session, itemsToRead, msg)
+        .then(function (readResult) {
+          let message = node.buildResultMessage('VariableValue', readResult)
+          node.send(message)
+        }).catch(function (err) {
+          node.handleReadError(err, msg)
+        })
+    }
+
+    node.readHistoryDataFromNodeId = function (session, itemsToRead, msg) {
+      const startDate = new Date()
+      node.historyStart = new Date()
+      node.historyStart.setDate(startDate.getDate() - node.historyDays)
+      node.historyEnd = new Date()
+
+      coreClient.readHistoryValue(
+        session,
+        itemsToRead,
+        msg.payload.historyStart || node.historyStart,
+        msg.payload.historyEnd || node.historyEnd,
+        msg)
+        .then(function (readResult) {
+          let message = node.buildResultMessage('HistoryValue', readResult)
+          message.historyStart = readResult.startDate || node.historyStart
+          message.historyEnd = readResult.endDate || node.historyEnd
+          node.send(message)
+        }).catch(function (err) {
+          node.handleReadError(err, msg)
+        })
+    }
+
+    node.readFromNodeId = function (session, itemsToRead, msg) {
+      let item = null
+      let transformedItem = null
+      let transformedItemsToRead = []
+
+      for (item of itemsToRead) {
+        transformedItem = {
+          nodeId: item,
+          attributeId: Number(node.attributeId) || null
+        }
+        transformedItemsToRead.push(transformedItem)
+      }
+
+      coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg)
+        .then(function (readResult) {
+          let message = node.buildResultMessage('Default', readResult)
+          message.maxAge = node.maxAge
+          node.send(message)
+        }).catch(function (err) {
+          node.handleReadError(err, msg)
+        })
+    }
+
     node.readFromSession = function (session, itemsToRead, originMsg) {
       let msg = Object.assign({}, originMsg)
       if (coreClient.core.checkSessionNotValid(session, 'Reader')) {
@@ -50,80 +118,18 @@ module.exports = function (RED) {
       }
 
       coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
-
       switch (parseInt(node.attributeId)) {
         case coreClient.READ_TYPE.ALL:
-          coreClient.readAllAttributes(session, itemsToRead, msg).then(function (readResult) {
-            try {
-              node.send(node.buildResultMessage('AllAttributes', readResult))
-            } catch (err) {
-              node.handleReadError(err, readResult.msg)
-            }
-          }).catch(function (err) {
-            node.handleReadError(err, msg)
-          })
+          node.readAllFromNodeId(session, itemsToRead, msg)
           break
         case coreClient.READ_TYPE.VALUE:
-          coreClient.readVariableValue(session, itemsToRead, msg).then(function (readResult) {
-            try {
-              let message = node.buildResultMessage('VariableValue', readResult)
-              node.send(message)
-            } catch (err) {
-              node.handleReadError(err, readResult.msg)
-            }
-          }).catch(function (err) {
-            node.handleReadError(err, msg)
-          })
+          node.readValueFromNodeId(session, itemsToRead, msg)
           break
         case coreClient.READ_TYPE.HISTORY:
-          const startDate = new Date()
-          node.historyStart = new Date()
-          node.historyStart.setDate(startDate.getDate() - node.historyDays)
-          node.historyEnd = new Date()
-
-          coreClient.readHistoryValue(
-            session,
-            itemsToRead,
-            msg.payload.historyStart || node.historyStart,
-            msg.payload.historyEnd || node.historyEnd,
-            msg)
-            .then(function (readResult) {
-              try {
-                let message = node.buildResultMessage('HistoryValue', readResult)
-                message.historyStart = readResult.startDate || node.historyStart
-                message.historyEnd = readResult.endDate || node.historyEnd
-                node.send(message)
-              } catch (err) {
-                node.handleReadError(err, readResult.msg)
-              }
-            }).catch(function (err) {
-              node.handleReadError(err, msg)
-            })
+          node.readHistoryDataFromNodeId(session, itemsToRead, msg)
           break
         default:
-          let item = null
-          let transformedItem = null
-          let transformedItemsToRead = []
-
-          for (item of itemsToRead) {
-            transformedItem = {
-              nodeId: item,
-              attributeId: Number(node.attributeId) || null
-            }
-            transformedItemsToRead.push(transformedItem)
-          }
-
-          coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg).then(function (readResult) {
-            try {
-              let message = node.buildResultMessage('Default', readResult)
-              message.maxAge = node.maxAge
-              node.send(message)
-            } catch (err) {
-              node.handleReadError(err, readResult.msg)
-            }
-          }).catch(function (err) {
-            node.handleReadError(err, msg)
-          })
+          node.readFromNodeId(session, itemsToRead, msg)
       }
     }
 
@@ -192,7 +198,11 @@ module.exports = function (RED) {
         return
       }
 
-      node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
+      try {
+        node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
+      } catch (err) {
+        node.handleReadError(err, msg)
+      }
     })
 
     coreClient.core.registerToConnector(node)

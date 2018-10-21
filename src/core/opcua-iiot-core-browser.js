@@ -159,25 +159,25 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
 }
 
 de.biancoroyal.opcua.iiot.core.browser.browseToRoot = function () {
-  let coreBrowser = this
-  coreBrowser.detailDebugLog('Browse To Root ' + coreBrowser.core.OBJECTS_ROOT)
-  return coreBrowser.core.OBJECTS_ROOT
+  this.detailDebugLog('Browse To Root ' + this.core.OBJECTS_ROOT)
+  return this.core.OBJECTS_ROOT
 }
 
 de.biancoroyal.opcua.iiot.core.browser.extractNodeIdFromTopic = function (msg, node) {
-  let coreBrowser = this
   let rootNodeId = null
 
   if (msg.payload.actiontype === 'browse') { // event driven browsing
     if (msg.payload.root && msg.payload.root.nodeId) {
-      coreBrowser.internalDebugLog('Root Selected External ' + msg.payload.root)
-      rootNodeId = msg.payload.root.nodeId || coreBrowser.browseToRoot()
+      this.internalDebugLog('Root Selected External ' + msg.payload.root)
+      rootNodeId = msg.payload.root.nodeId
     } else {
-      rootNodeId = node.nodeId || coreBrowser.browseToRoot()
+      rootNodeId = node.nodeId
     }
+    this.detailDebugLog('Extracted NodeId ' + rootNodeId)
+
+    rootNodeId = rootNodeId || this.browseToRoot()
   }
 
-  coreBrowser.detailDebugLog('Extracted NodeId ' + rootNodeId)
   return rootNodeId
 }
 
@@ -188,19 +188,22 @@ de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference) {
     } catch (err) {
       this.internalDebugLog(err)
 
-      return {
-        referenceTypeId: reference.referenceTypeId.toString(),
-        isForward: reference.isForward,
-        nodeId: reference.nodeId.toString(),
-        browseName: reference.browseName.toString(),
-        displayName: reference.displayName,
-        nodeClass: reference.nodeClass.toString(),
-        typeDefinition: reference.typeDefinition.toString()
+      if (reference.referenceTypeId) {
+        return {
+          referenceTypeId: reference.referenceTypeId.toString(),
+          isForward: reference.isForward,
+          nodeId: reference.nodeId.toString(),
+          browseName: reference.browseName.toString(),
+          displayName: reference.displayName.toString(),
+          nodeClass: reference.nodeClass.toString(),
+          typeDefinition: reference.typeDefinition.toString()
+        }
       }
     }
   } else {
     this.internalDebugLog('Empty Reference On Browse')
   }
+  return reference
 }
 
 de.biancoroyal.opcua.iiot.core.browser.initClientNode = function (node) {
@@ -209,6 +212,30 @@ de.biancoroyal.opcua.iiot.core.browser.initClientNode = function (node) {
   browseNode.browseTopic = this.core.OBJECTS_ROOT
   browseNode.messageList = []
   return browseNode
+}
+
+de.biancoroyal.opcua.iiot.core.browser.browseErrorHandling = function (node, err, msg, lists) {
+  let results = lists.browserResults || []
+
+  if (err) {
+    this.internalDebugLog(typeof node + 'Error ' + err)
+    if (node.showErrors) {
+      node.error(err, msg)
+    }
+
+    if (this.core.isSessionBad(err) && node.connector) {
+      node.connector.resetBadSession()
+    }
+  } else {
+    this.internalDebugLog(typeof node + ' Done With Error')
+    if (results.length) {
+      this.detailDebugLog(results.length + 'items in lists of browser results')
+    }
+  }
+
+  if (node.showStatusActivities) {
+    this.core.setNodeStatusTo(node, 'error')
+  }
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.browser

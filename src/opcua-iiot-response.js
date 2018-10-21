@@ -31,72 +31,118 @@ module.exports = function (RED) {
 
     node.status({fill: 'green', shape: 'ring', text: 'active'})
 
+    node.handleBrowserMsg = function (msg) {
+      coreResponse.analyzeBrowserResults(node, msg)
+      if (node.compressStructure) {
+        coreResponse.compressBrowseMessageStructure(msg)
+      }
+      return msg
+    }
+
+    node.handleReadMsg = function (msg) {
+      coreResponse.analyzeReadResults(node, msg)
+      if (node.compressStructure) {
+        coreResponse.compressReadMessageStructure(msg)
+      }
+      return msg
+    }
+
+    node.handleWriteMsg = function (msg) {
+      coreResponse.analyzeWriteResults(node, msg)
+      if (node.compressStructure) {
+        coreResponse.compressWriteMessageStructure(msg)
+      }
+      return msg
+    }
+
+    node.handleListenerMsg = function (msg) {
+      coreResponse.analyzeListenerResults(node, msg)
+      if (node.compressStructure) {
+        coreResponse.compressListenMessageStructure(msg)
+      }
+      return msg
+    }
+
+    node.handleMethodMsg = function (msg) {
+      coreResponse.analyzeMethodResults(node, msg)
+      if (node.compressStructure) {
+        coreResponse.compressMethodMessageStructure(msg)
+      }
+      return msg
+    }
+
+    node.handleDefaultMsg = function (msg) {
+      if (msg && msg.payload) {
+        coreResponse.handlePayloadStatusCode(node, msg)
+        if (node.compressStructure) {
+          coreResponse.compressDefaultMessageStructure(msg)
+        }
+      }
+      return msg
+    }
+
+    node.handleNodeTypeOfMsg = function (msg) {
+      let message = Object.assign({}, msg)
+
+      switch (msg.nodetype) {
+        case 'browse':
+          message = node.handleBrowserMsg(message)
+          break
+        case 'read':
+          message = node.handleReadMsg(message)
+          break
+        case 'write':
+          message = node.handleWriteMsg(message)
+          break
+        case 'listen':
+          message = node.handleListenerMsg(message)
+          break
+        case 'method':
+          message = node.handleMethodMsg(message)
+          break
+        default:
+          message = node.handleDefaultMsg(message)
+      }
+
+      return message
+    }
+
+    node.extractEntries = function (msg) {
+      let filteredEntries = []
+      msg.payload.forEach((item) => {
+        if (node.itemIsNotToFilter(item)) {
+          filteredEntries.push(item)
+        }
+      })
+      return filteredEntries
+    }
+
+    node.filterMsg = function (msg) {
+      if (msg.payload.length) {
+        let filteredEntries = node.extractEntries(msg)
+        if (filteredEntries.length) {
+          msg.payload = filteredEntries
+          return msg
+        }
+      } else {
+        if (node.itemIsNotToFilter(msg.payload)) {
+          return msg
+        }
+      }
+      return null
+    }
+
     node.on('input', function (msg) {
       try {
-        if (msg.nodetype) {
-          switch (msg.nodetype) {
-            case 'browse':
-              coreResponse.analyzeBrowserResults(node, msg)
-              if (node.compressStructure) {
-                coreResponse.compressBrowseMessageStructure(msg)
-              }
-              break
-            case 'read':
-              coreResponse.analyzeReadResults(node, msg)
-              if (node.compressStructure) {
-                coreResponse.compressReadMessageStructure(msg)
-              }
-              break
-
-            case 'write':
-              coreResponse.analyzeWriteResults(node, msg)
-              if (node.compressStructure) {
-                coreResponse.compressWriteMessageStructure(msg)
-              }
-              break
-
-            case 'listen':
-              coreResponse.analyzeListenerResults(node, msg)
-              if (node.compressStructure) {
-                coreResponse.compressListenMessageStructure(msg)
-              }
-              break
-
-            case 'method':
-              coreResponse.analyzeMethodResults(node, msg)
-              if (node.compressStructure) {
-                coreResponse.compressMethodMessageStructure(msg)
-              }
-              break
-
-            default:
-              if (msg && msg.payload) {
-                coreResponse.handlePayloadStatusCode(node, msg)
-                if (node.compressStructure) {
-                  coreResponse.compressDefaultMessageStructure(msg)
-                }
-              }
-          }
-        }
-
-        let filteredEntries = []
+        let message = node.handleNodeTypeOfMsg(msg)
 
         if (node.activateFilters && node.filters && node.filters.length > 0) {
-          if (msg.payload.length) {
-            msg.payload.forEach(function (item) {
-              if (node.itemIsNotToFilter(item)) {
-                filteredEntries.push(item)
-              }
-            })
-            msg.payload = filteredEntries
-            node.send(msg)
-          } else {
-            if (node.itemIsNotToFilter(msg.payload)) {
-              node.send(msg)
-            }
+          message = node.filterMsg(message)
+          if (message) {
+            node.send(message)
           }
         } else {
-          node.send(msg)
+          node.send(message)
         }
       } catch (err) {
         coreResponse.internalDebugLog(err)
@@ -121,53 +167,8 @@ module.exports = function (RED) {
         }
       }
 
-      let filterValue
-      node.filters.forEach(function (element, index, array) {
-        try {
-          switch (element.name) {
-            case 'browseName':
-            case 'statusCode':
-              filterValue = item[element.name].name
-              break
-            case 'displayName':
-              filterValue = item[element.name].text
-              break
-            case 'value':
-            case 'dataType':
-              if (item.value && item.value.hasOwnProperty('value')) {
-                filterValue = item.value[element.name]
-              } else {
-                filterValue = item[element.name]
-              }
-              break
-            default:
-              filterValue = item[element.name]
-          }
-
-          if (filterValue) {
-            if (filterValue.key && filterValue.key.match) {
-              result &= filterValue.key.match(element.value) !== null
-            } else {
-              if (filterValue.match) {
-                result &= filterValue.match(element.value) !== null
-              } else {
-                if (filterValue.toString) {
-                  filterValue = filterValue.toString()
-                  if (filterValue.match) {
-                    result &= filterValue.match(element.value) !== null
-                  }
-                }
-              }
-            }
-          } else {
-            result &= false // undefined items
-          }
-        } catch (e) {
-          coreResponse.crawler.internalDebugLog(e)
-          if (node.showErrors) {
-            node.error(e, {payload: e.message})
-          }
-        }
+      node.filters.forEach((element) => {
+        result = coreResponse.core.checkResponseItemIsNotToFilter(node, item, element, result)
       })
 
       return (node.negateFilter) ? !result : result

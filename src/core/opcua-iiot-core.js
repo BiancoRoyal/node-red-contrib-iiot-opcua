@@ -909,4 +909,103 @@ de.biancoroyal.opcua.iiot.core.initClientNode = function (node) {
   return node
 }
 
+de.biancoroyal.opcua.iiot.core.getItemFilterValueWithElement = function (item, element) {
+  let filterValue = null
+
+  switch (element.name) {
+    case 'browseName':
+    case 'statusCode':
+      filterValue = item[element.name].name
+      break
+    case 'displayName':
+      filterValue = item[element.name].text
+      break
+    case 'value':
+      if (item.value && item.value.hasOwnProperty('value')) {
+        filterValue = item.value[element.name]
+      } else {
+        filterValue = item[element.name]
+      }
+      break
+    case 'dataType':
+      if (item.value && item.value.hasOwnProperty('value')) {
+        filterValue = item.value[element.name]
+      } else {
+        filterValue = item[element.name]
+      }
+      break
+    default:
+      filterValue = item[element.name]
+  }
+
+  return filterValue
+}
+
+de.biancoroyal.opcua.iiot.core.handleErrorInsideNode = function (node, err) {
+  this.internalDebugLog(typeof node + ' ' + err.message)
+  if (node.showErrors) {
+    node.error(err, {payload: err.message})
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.checkCrawlerItemIsNotToFilter = function (node, item, element, result) {
+  try {
+    let filterValue = this.getItemFilterValueWithElement(item, element)
+
+    if (filterValue && filterValue.key && filterValue.key.match) {
+      if (filterValue.key.match(element.value)) {
+        result &= false
+      }
+    } else {
+      if (filterValue && filterValue.match) {
+        if (filterValue.match(element.value)) {
+          result &= false
+        }
+      } else {
+        if (filterValue && filterValue.toString) {
+          filterValue = filterValue.toString()
+          if (filterValue && filterValue.match) {
+            if (filterValue.match(element.value)) {
+              result &= false
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    this.handleErrorInsideNode(node, err)
+  }
+
+  return result
+}
+
+de.biancoroyal.opcua.iiot.core.checkResponseItemIsNotToFilter = function (node, item, element, result) {
+  try {
+    let filterValue = this.getItemFilterValueWithElement(item, element)
+
+    if (filterValue) {
+      if (filterValue.key && filterValue.key.match) {
+        result &= filterValue.key.match(element.value) !== null
+      } else {
+        if (filterValue.match) {
+          result &= filterValue.match(element.value) !== null
+        } else {
+          if (filterValue.toString) {
+            filterValue = filterValue.toString()
+            if (filterValue.match) {
+              result &= filterValue.match(element.value) !== null
+            }
+          }
+        }
+      }
+    } else {
+      result &= false // undefined items
+    }
+  } catch (err) {
+    this.handleErrorInsideNode(node, err)
+  }
+
+  return result
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core

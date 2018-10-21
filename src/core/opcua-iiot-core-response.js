@@ -28,24 +28,11 @@ de.biancoroyal.opcua.iiot.core.response.analyzeBrowserResults = function (node, 
 }
 
 de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (node, msg) {
-  if (msg.readtype !== 'Meta') {
-    this.handlePayloadStatusCode(node, msg)
-  }
-  switch (msg.readtype) {
-    case 'Meta':
-      this.setNodeStatus([this.NONE, this.NONE, this.NONE], 'None')
-      break
-    case 'AllAttributes':
-      break
-    case 'VariableValue':
-      break
-    case 'HistoryValue':
-      msg.payload.forEach((item) => {
-        delete item['statusCode']
-      })
-      break
-    default:
-      break
+  this.handlePayloadStatusCode(node, msg)
+  if (msg.readtype === 'HistoryValue') {
+    msg.payload.forEach((item) => {
+      delete item['statusCode']
+    })
   }
 }
 

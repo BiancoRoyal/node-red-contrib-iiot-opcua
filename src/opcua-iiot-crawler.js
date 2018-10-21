@@ -33,21 +33,6 @@ module.exports = function (RED) {
 
     let node = coreBrowser.initClientNode(this)
 
-    node.browseErrorHandling = function (err, msg) {
-      if (err) {
-        coreBrowser.internalDebugLog('Crawler Error ' + err)
-        if (node.showErrors) {
-          node.error(err, msg)
-        }
-
-        if (coreBrowser.core.isSessionBad(err) && node.connector) {
-          node.connector.resetBadSession()
-        }
-      } else {
-        coreBrowser.internalDebugLog('Crawling Done With Error')
-      }
-    }
-
     node.filterCrawlerResults = function (crawlerResultToFilter) {
       let crawlerResult = crawlerResultToFilter || []
       let filteredEntries = []
@@ -72,9 +57,8 @@ module.exports = function (RED) {
       return crawlerResult
     }
 
-    node.itemIsNotToFilter = function (item) {
+    node.checkItemForUnsetState = function (item) {
       let result = true
-      let filterValue
 
       if (node.activateUnsetFilter) {
         result &= item !== null
@@ -88,54 +72,17 @@ module.exports = function (RED) {
         }
       }
 
-      node.filters.forEach(function (element, index, array) {
-        try {
-          switch (element.name) {
-            case 'browseName':
-            case 'statusCode':
-              filterValue = item[element.name].name
-              break
-            case 'displayName':
-              filterValue = item[element.name].text
-              break
-            case 'value':
-              if (item.value && item.value.hasOwnProperty('value')) {
-                filterValue = item.value[element.name]
-              } else {
-                filterValue = item[element.name]
-              }
-              break
-            default:
-              filterValue = item[element.name]
-          }
+      return result
+    }
 
-          if (filterValue && filterValue.key && filterValue.key.match) {
-            if (filterValue.key.match(element.value)) {
-              result &= false
-            }
-          } else {
-            if (filterValue && filterValue.match) {
-              if (filterValue.match(element.value)) {
-                result &= false
-              }
-            } else {
-              if (filterValue && filterValue.toString) {
-                filterValue = filterValue.toString()
-                if (filterValue && filterValue.match) {
-                  if (filterValue.match(element.value)) {
-                    result &= false
-                  }
-                }
-              }
-            }
-          }
-        } catch (e) {
-          coreBrowser.crawler.internalDebugLog(e)
-          if (node.showErrors) {
-            node.error(e, {payload: e.message})
-          }
-        }
-      })
+    node.itemIsNotToFilter = function (item) {
+      let result = node.checkItemForUnsetState(item)
+
+      if (result) {
+        node.filters.forEach(function (element) {
+          result = coreBrowser.core.checkCrawlerItemIsNotToFilter(node, item, element, result)
+        })
+      }
 
       return (node.negateFilter) ? !result : result
     }
@@ -156,8 +103,30 @@ module.exports = function (RED) {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
           node.sendMessage(result.message, node.filterCrawlerResults(result.message, result.crawlerResult))
         }).catch(function (err) {
-          node.browseErrorHandling(err, msg)
+          coreBrowser.browseErrorHandling(node, err, msg)
         })
+    }
+
+    node.crawlForSingleResult = function (session, msg) {
+      coreBrowser.crawlAddressSpaceItems(session, msg)
+        .then(function (result) {
+          coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
+          node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
+        }).catch(function (err) {
+          coreBrowser.browseErrorHandling(node, err, msg)
+        })
+    }
+
+    node.crawlForResults = function (session, msg) {
+      msg.addressSpaceItems.map((entry) => {
+        coreBrowser.crawl(session, entry.nodeId)
+          .then(function (result) {
+            coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
+            node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
+          }).catch(function (err) {
+            coreBrowser.browseErrorHandling(node, err, msg)
+          })
+      })
     }
 
     node.crawlNodeList = function (session, msg) {
@@ -166,28 +135,9 @@ module.exports = function (RED) {
       }
 
       if (node.singleResult) {
-        coreBrowser.crawlAddressSpaceItems(session, msg)
-          .then(function (result) {
-            coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-            node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
-          }).catch(function (err) {
-            node.browseErrorHandling(err, msg)
-            if (node.showStatusActivities) {
-              coreBrowser.core.setNodeStatusTo(node, 'error')
-            }
-          })
+        node.crawlForSingleResult(session, msg)
       } else {
-        msg.addressSpaceItems.map((entry) => (
-          coreBrowser.crawl(session, entry.nodeId)
-            .then(function (result) {
-              coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-              node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
-            }).catch(function (err) {
-              node.browseErrorHandling(err, msg)
-              if (node.showStatusActivities) {
-                coreBrowser.core.setNodeStatusTo(node, 'error')
-              }
-            })))
+        node.crawlForResults(session, msg)
       }
     }
 
@@ -222,13 +172,7 @@ module.exports = function (RED) {
       }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
     }
 
-    node.on('input', function (msg) {
-      if (!coreBrowser.core.checkConnectorState(node, msg, 'Crawler')) {
-        return
-      }
-
-      node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node)
-
+    node.startCrawling = function (msg) {
       if (node.browseTopic && node.browseTopic !== '') {
         node.crawl(node.opcuaSession, msg)
       } else {
@@ -243,6 +187,15 @@ module.exports = function (RED) {
           node.error(new Error('No AddressSpace Items Or Root To Crawl'), msg)
         }
       }
+    }
+
+    node.on('input', function (msg) {
+      if (!coreBrowser.core.checkConnectorState(node, msg, 'Crawler')) {
+        return
+      }
+
+      node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node)
+      node.startCrawling(msg)
     })
 
     coreBrowser.core.registerToConnector(node)
