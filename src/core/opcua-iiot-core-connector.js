@@ -153,9 +153,6 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
 de.biancoroyal.opcua.iiot.core.connector.logSessionInformation = function (node) {
   if (!node.opcuaSession) {
     this.detailDebugLog('Session Not Valid To Log Information')
-    if (node.showErrors) {
-      node.error(new Error('Session Not Valid To Log Information'), {payload: 'No Session Information Log'})
-    }
     return
   }
 
