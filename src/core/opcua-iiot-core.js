@@ -1016,4 +1016,22 @@ de.biancoroyal.opcua.iiot.core.checkResponseItemIsNotToFilter = function (node, 
   return result
 }
 
+de.biancoroyal.opcua.iiot.core.checkItemForUnsetState = function (node, item) {
+  let result = true
+
+  if (node.activateUnsetFilter) {
+    result &= item !== null
+
+    if (item && item.hasOwnProperty('value')) {
+      if (item.value && item.value.hasOwnProperty('value')) {
+        result &= item.value.value !== null
+      } else {
+        result &= item.value !== null
+      }
+    }
+  }
+
+  return result
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core

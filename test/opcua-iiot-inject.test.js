@@ -376,5 +376,25 @@ describe('OPC UA Inject node Unit Testing', function () {
         })
       })
     })
+
+    it('should fail on inject button request with wrong id', function (done) {
+      helper.load([inputNode], testInjectFlow, function () {
+        helper.request()
+          .get('/opcuaIIoT/inject/1')
+          .expect(404)
+          .end(done)
+      })
+    })
+
+    it('should success on inject button request', function (done) {
+      helper.load([inputNode], testInjectFlow, function () {
+        setTimeout(() => {
+          helper.request()
+            .post('/opcuaIIoT/inject/n1ijf1')
+            .expect(200)
+            .end(done)
+        }, 1000)
+      })
+    })
   })
 })

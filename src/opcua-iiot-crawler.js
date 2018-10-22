@@ -57,26 +57,8 @@ module.exports = function (RED) {
       return crawlerResult
     }
 
-    node.checkItemForUnsetState = function (item) {
-      let result = true
-
-      if (node.activateUnsetFilter) {
-        result &= item !== null
-
-        if (item && item.hasOwnProperty('value')) {
-          if (item.value && item.value.hasOwnProperty('value')) {
-            result &= item.value.value !== null
-          } else {
-            result &= item.value !== null
-          }
-        }
-      }
-
-      return result
-    }
-
     node.itemIsNotToFilter = function (item) {
-      let result = node.checkItemForUnsetState(item)
+      let result = coreBrowser.core.checkItemForUnsetState(node, item)
 
       if (result) {
         node.filters.forEach(function (element) {

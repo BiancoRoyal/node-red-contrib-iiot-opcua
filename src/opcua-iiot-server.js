@@ -288,11 +288,7 @@ module.exports = function (RED) {
 
     node.closeServer = function (done) {
       coreServer.destructAddressSpace()
-      if (node.opcuaServer) {
-        node.opcuaServer.shutdown(node.delayToClose, done)
-      } else {
-        done()
-      }
+      node.opcuaServer.shutdown(node.delayToClose, done)
     }
   }
 

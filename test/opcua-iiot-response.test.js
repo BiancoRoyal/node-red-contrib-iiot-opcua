@@ -29,6 +29,7 @@ var testResponseFlow = [
     'compressStructure': false,
     'showStatusActivities': false,
     'showErrors': false,
+    'activateUnsetFilter': true,
     'activateFilters': true,
     'filters': [
       {
@@ -188,6 +189,16 @@ describe('OPC UA Response node Unit Testing', function () {
             expect(msg.payload[0].dataType).toBe('DateTime')
             done()
           })
+        })
+    })
+
+    it('should handle default msg', function (done) {
+      helper.load(responseFlowNodes, testCompressedResponseFlow,
+        function () {
+          let nodeUnderTest = helper.getNode('76202549.fd7c1c')
+          expect(nodeUnderTest).toBeDefined()
+          nodeUnderTest.handleNodeTypeOfMsg({payload: {}})
+          done()
         })
     })
   })

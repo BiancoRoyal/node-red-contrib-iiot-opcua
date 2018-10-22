@@ -82,35 +82,5 @@ describe('OPC UA Crawler node Unit Testing', function () {
           done()
         })
     })
-
-    it('should be loaded and handle null item on check for unset state', function (done) {
-      helper.load(crawlerNodesToLoad, crawlerUnitFlow, () => {
-        let n1 = helper.getNode('13e5e190.e34516')
-        if (n1) {
-          expect(n1.checkItemForUnsetState(null)).toBe(0)
-          done()
-        }
-      })
-    })
-
-    it('should be loaded and handle null item value on check for unset state', function (done) {
-      helper.load(crawlerNodesToLoad, crawlerUnitFlow, () => {
-        let n1 = helper.getNode('13e5e190.e34516')
-        if (n1) {
-          expect(n1.checkItemForUnsetState({value: null})).toBe(0)
-          done()
-        }
-      })
-    })
-
-    it('should be loaded and handle null item value on check for unset state', function (done) {
-      helper.load(crawlerNodesToLoad, crawlerUnitFlow, () => {
-        let n1 = helper.getNode('13e5e190.e34516')
-        if (n1) {
-          expect(n1.checkItemForUnsetState({value: 1})).toBe(1)
-          done()
-        }
-      })
-    })
   })
 })

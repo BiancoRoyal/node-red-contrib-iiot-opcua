@@ -153,19 +153,7 @@ module.exports = function (RED) {
     })
 
     node.itemIsNotToFilter = function (item) {
-      let result = true
-
-      if (node.activateUnsetFilter) {
-        result &= item !== null
-
-        if (item.value) {
-          if (item.value.hasOwnProperty('value')) {
-            result &= item.value.value !== null
-          } else {
-            result &= item.value !== null
-          }
-        }
-      }
+      let result = coreResponse.core.checkItemForUnsetState(node, item)
 
       node.filters.forEach((element) => {
         result = coreResponse.core.checkResponseItemIsNotToFilter(node, item, element, result)

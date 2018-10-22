@@ -204,17 +204,17 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes to read in payload', function (done) {
-      expect(core.buildNodesToRead({payload: { nodesToRead: ['ns=4;s=TestReadWrite']} })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({ payload: { nodesToRead: ['ns=4;s=TestReadWrite'] } })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to write in payload', function (done) {
-      expect(core.buildNodesToRead({payload: { nodesToWrite: ['ns=4;s=TestReadWrite']} })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({ payload: { nodesToWrite: ['ns=4;s=TestReadWrite'] } })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes in payload from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead({payload: { addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]} })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({ payload: { addressSpaceItems: [{ name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }] } })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
@@ -843,6 +843,21 @@ describe('OPC UA Core', function () {
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal('22.33')
       expect(variantFromObject).is.equal('22.33')
+      done()
+    })
+
+    it('should handle null item on check for unset state', function (done) {
+      expect(core.checkItemForUnsetState({ activateUnsetFilter: true }, null)).is.equal(0)
+      done()
+    })
+
+    it('should handle null item value on check for unset state', function (done) {
+      expect(core.checkItemForUnsetState({ activateUnsetFilter: true }, {value: null})).is.equal(0)
+      done()
+    })
+
+    it('should handle null item value on check for unset state', function (done) {
+      expect(core.checkItemForUnsetState({ activateUnsetFilter: true }, {value: 1})).is.equal(1)
       done()
     })
   })
