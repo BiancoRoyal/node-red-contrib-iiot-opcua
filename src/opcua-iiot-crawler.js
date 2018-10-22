@@ -63,8 +63,8 @@ module.exports = function (RED) {
       if (node.activateUnsetFilter) {
         result &= item !== null
 
-        if (item.value) {
-          if (item.value.hasOwnProperty('value')) {
+        if (item && item.hasOwnProperty('value')) {
+          if (item.value && item.value.hasOwnProperty('value')) {
             result &= item.value.value !== null
           } else {
             result &= item.value !== null

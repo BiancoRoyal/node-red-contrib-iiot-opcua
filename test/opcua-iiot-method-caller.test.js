@@ -22,6 +22,53 @@ helper.init(require.resolve('node-red'))
 
 var methodCallerNodesToLoad = [injectNode, functionNode, inputNode]
 
+var methodUnitFlow = [
+  {
+    'id': '706d43c1.90baac',
+    'type': 'OPCUA-IIoT-Method-Caller',
+    'connector': '',
+    'objectId': 'ns=1;i=1234',
+    'methodId': 'ns=1;i=12345',
+    'methodType': 'basic',
+    'value': '',
+    'justValue': false,
+    'name': 'TestName',
+    'showStatusActivities': false,
+    'showErrors': true,
+    'inputArguments': [
+      {
+        'name': 'barks',
+        'dataType': 'UInt32',
+        'value': '3'
+      },
+      {
+        'name': 'volume',
+        'dataType': 'UInt32',
+        'value': '6'
+      }
+    ],
+    'wires': [[]]
+  }
+]
+
+var methodNotConfiguredUnitFlow = [
+  {
+    'id': '706d43c1.90babc',
+    'type': 'OPCUA-IIoT-Method-Caller',
+    'connector': '',
+    'objectId': '',
+    'methodId': '',
+    'methodType': 'basic',
+    'value': '',
+    'justValue': false,
+    'name': 'TestName',
+    'showStatusActivities': false,
+    'showErrors': true,
+    'inputArguments': [],
+    'wires': [[]]
+  }
+]
+
 describe('OPC UA Method Caller node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -45,35 +92,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
 
   describe('Method Caller node', function () {
     it('should load with basic settings', function (done) {
-      helper.load(methodCallerNodesToLoad, [
-        {
-          'id': '706d43c1.90baac',
-          'type': 'OPCUA-IIoT-Method-Caller',
-          'connector': '',
-          'objectId': 'ns=1;i=1234',
-          'methodId': 'ns=1;i=12345',
-          'methodType': 'basic',
-          'value': '',
-          'justValue': false,
-          'name': 'TestName',
-          'showStatusActivities': false,
-          'showErrors': true,
-          'inputArguments': [
-            {
-              'name': 'barks',
-              'dataType': 'UInt32',
-              'value': '3'
-            },
-            {
-              'name': 'volume',
-              'dataType': 'UInt32',
-              'value': '6'
-            }
-          ],
-          'wires': [[]]
-        }
-      ],
-      function () {
+      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
         let nodeUnderTest = helper.getNode('706d43c1.90baac')
         expect(nodeUnderTest.name).toBe('TestName')
         expect(nodeUnderTest.methodType).toBe('basic')
@@ -92,7 +111,106 @@ describe('OPC UA Method Caller node Unit Testing', function () {
             'value': '6'
           }
         ])
-        setTimeout(done, 3000)
+        done()
+      })
+    })
+
+    it('should be loaded and handle error', function (done) {
+      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90baac')
+        expect(n1).toBeDefined()
+        n1.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90baac')
+        expect(n1).toBeDefined()
+        n1.receive({payload: { objectId: 1 }})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90baac')
+        expect(n1).toBeDefined()
+        n1.receive({payload: { objectId: 1, methodId: 1 }})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90baac')
+        expect(n1).toBeDefined()
+        n1.receive({payload: { objectId: 1, methodId: 1, inputArguments: [] }})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90baac')
+        expect(n1).toBeDefined()
+        n1.receive({payload: {}})
+        done()
+      })
+    })
+
+    it('should be loaded and handle error', function (done) {
+      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90babc')
+        expect(n1).toBeDefined()
+        n1.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90babc')
+        expect(n1).toBeDefined()
+        n1.receive({payload: { objectId: 1 }})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90babc')
+        expect(n1).toBeDefined()
+        n1.receive({payload: {}, objectId: 1, methodId: 1})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90babc')
+        expect(n1).toBeDefined()
+        n1.receive({payload: { objectId: 1, methodId: 1, inputArguments: [] }})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing input', function (done) {
+      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90babc')
+        expect(n1).toBeDefined()
+        n1.receive({payload: {}})
+        done()
+      })
+    })
+
+    it('should be loaded and handle missing session', function (done) {
+      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90baac')
+        expect(n1).toBeDefined()
+        n1.callMethodOnSession(null)
+        done()
       })
     })
   })

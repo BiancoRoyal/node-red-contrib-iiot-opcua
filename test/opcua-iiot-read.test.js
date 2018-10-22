@@ -161,5 +161,15 @@ describe('OPC UA Read node Unit Testing', function () {
           setTimeout(done, 2000)
         })
     })
+
+    it('should be loaded and handle error', function (done) {
+      helper.load(readNodesToLoad, testReadNodeToBeLoaded, () => {
+        let n1 = helper.getNode('41cb29d.1ab50d8')
+        if (n1) {
+          n1.handleReadError(new Error('Testing Error To Handle'), {payload: {}})
+          done()
+        }
+      })
+    })
   })
 })

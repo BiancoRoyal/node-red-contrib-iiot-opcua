@@ -33,7 +33,7 @@ var testCrawlerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '4',
+    'startDelay': '3',
     'name': 'Limits',
     'addressSpaceItems': [
       {
@@ -799,7 +799,7 @@ describe('OPC UA Crawler node Testing', function () {
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
           expect(msg.payload.crawlerResults.length).toBe(34)
           expect(msg.payload.crawlerResultsCount).toBe(34)
-          setTimeout(done, 2000)
+          setTimeout(done, 3000)
         })
       })
     })

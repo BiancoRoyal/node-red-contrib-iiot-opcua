@@ -51,7 +51,7 @@ module.exports = function (RED) {
     }
 
     node.callMethodOnSession = function (session, msg) {
-      if (coreMethod.core.checkSessionNotValid(session, 'Writer')) {
+      if (coreMethod.core.checkSessionNotValid(session, 'MethodCaller')) {
         return
       }
 

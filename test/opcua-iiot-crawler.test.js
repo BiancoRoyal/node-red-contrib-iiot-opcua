@@ -21,6 +21,35 @@ helper.init(require.resolve('node-red'))
 
 var crawlerNodesToLoad = [injectNode, functionNode, inputNode]
 
+var crawlerUnitFlow = [
+  {
+    'id': '13e5e190.e34516',
+    'type': 'OPCUA-IIoT-Crawler',
+    'connector': '',
+    'name': 'TestNameCrawler',
+    'justValue': true,
+    'singleResult': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'filters': [
+      {
+        'name': 'Organizes',
+        'nodeId': 'i=35'
+      },
+      {
+        'name': 'GeneratesEvent',
+        'nodeId': 'i=41'
+      },
+      {
+        'name': 'References',
+        'nodeId': 'i=31'
+      }
+    ],
+    'wires': [[]]
+  }
+]
+
 describe('OPC UA Crawler node Unit Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -42,41 +71,45 @@ describe('OPC UA Crawler node Unit Testing', function () {
 
   describe('Crawler node', function () {
     it('should be loaded', function (done) {
-      helper.load(crawlerNodesToLoad, [
-        {
-          'id': '13e5e190.e34516',
-          'type': 'OPCUA-IIoT-Crawler',
-          'connector': '',
-          'name': 'TestNameCrawler',
-          'justValue': true,
-          'singleResult': false,
-          'showStatusActivities': false,
-          'showErrors': false,
-          'filters': [
-            {
-              'name': 'Organizes',
-              'nodeId': 'i=35'
-            },
-            {
-              'name': 'GeneratesEvent',
-              'nodeId': 'i=41'
-            },
-            {
-              'name': 'References',
-              'nodeId': 'i=31'
-            }
-          ],
-          'wires': [[]]
+      helper.load(crawlerNodesToLoad, crawlerUnitFlow,
+        function () {
+          let nodeUnderTest = helper.getNode('13e5e190.e34516')
+          expect(nodeUnderTest.name).toBe('TestNameCrawler')
+          expect(nodeUnderTest.justValue).toBe(true)
+          expect(nodeUnderTest.singleResult).toBe(false)
+          expect(nodeUnderTest.showStatusActivities).toBe(false)
+          expect(nodeUnderTest.showErrors).toBe(false)
+          done()
+        })
+    })
+
+    it('should be loaded and handle null item on check for unset state', function (done) {
+      helper.load(crawlerNodesToLoad, crawlerUnitFlow, () => {
+        let n1 = helper.getNode('13e5e190.e34516')
+        if (n1) {
+          expect(n1.checkItemForUnsetState(null)).toBe(0)
+          done()
         }
-      ],
-      function () {
-        let nodeUnderTest = helper.getNode('13e5e190.e34516')
-        expect(nodeUnderTest.name).toBe('TestNameCrawler')
-        expect(nodeUnderTest.justValue).toBe(true)
-        expect(nodeUnderTest.singleResult).toBe(false)
-        expect(nodeUnderTest.showStatusActivities).toBe(false)
-        expect(nodeUnderTest.showErrors).toBe(false)
-        done()
+      })
+    })
+
+    it('should be loaded and handle null item value on check for unset state', function (done) {
+      helper.load(crawlerNodesToLoad, crawlerUnitFlow, () => {
+        let n1 = helper.getNode('13e5e190.e34516')
+        if (n1) {
+          expect(n1.checkItemForUnsetState({value: null})).toBe(0)
+          done()
+        }
+      })
+    })
+
+    it('should be loaded and handle null item value on check for unset state', function (done) {
+      helper.load(crawlerNodesToLoad, crawlerUnitFlow, () => {
+        let n1 = helper.getNode('13e5e190.e34516')
+        if (n1) {
+          expect(n1.checkItemForUnsetState({value: 1})).toBe(1)
+          done()
+        }
       })
     })
   })
