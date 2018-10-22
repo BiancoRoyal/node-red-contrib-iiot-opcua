@@ -70,11 +70,6 @@ module.exports = function (RED) {
     }
 
     node.setSubscriptionEvents = function (subscription) {
-      subscription.on('initialized', function () {
-        coreListener.internalDebugLog('Subscription initialized')
-        coreListener.core.setNodeStatusTo(node, 'initialized')
-      })
-
       subscription.on('started', function () {
         coreListener.internalDebugLog('Subscription started')
         coreListener.core.setNodeStatusTo(node, 'started')
@@ -313,7 +308,11 @@ module.exports = function (RED) {
 
     node.monitoredItemTerminated = function (msg, monitoredItem, nodeId, err) {
       if (err) {
-        coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.monitoredItemId)
+        if (monitoredItem && monitoredItem.monitoredItemId) {
+          coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.monitoredItemId)
+        } else {
+          coreListener.internalDebugLog(err.message + ' on monitoredItem')
+        }
         if (node.showErrors) {
           node.error(err, msg)
         }
@@ -351,7 +350,7 @@ module.exports = function (RED) {
 
     node.setMonitoring = function (monitoredItemToSet) {
       const monitoredItem = monitoredItemToSet
-      if (typeof monitoredItem.monitoredItemId === 'undefined') {
+      if (!monitoredItem || monitoredItem.monitoredItemId === void 0) {
         coreListener.internalDebugLog('monitoredItem Id from server is not valid Id: ' + monitoredItem.monitoredItemId)
         return
       }
@@ -565,24 +564,30 @@ module.exports = function (RED) {
 
     node.terminateSubscriptions = function (event) {
       coreListener.internalDebugLog('Subscription Is To Terminate On Connection Event ' + event)
-      if (uaSubscription !== null && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
+      if (uaSubscription && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
         node.stateMachine.terminatesub()
-        // uaSubscription.terminate(() => {
-        node.stateMachine.idlesub()
-        coreListener.internalDebugLog('Subscription Was Terminated On Connector Event ' + event)
-        // })
+        uaSubscription.terminate(() => {
+          node.stateMachine.idlesub()
+          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event ' + event)
+        })
       }
     }
 
     coreListener.core.registerToConnector(node)
 
+    if (node.connector) {
+      node.connector.on('connection_end', () => {
+        node.terminateSubscriptions('connection ends')
+      })
+    }
+
     node.on('close', function (done) {
-      if (uaSubscription !== null && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
+      if (uaSubscription && node.stateMachine.getMachineState() !== 'TERMINATED') {
         node.stateMachine.terminatesub()
-        // uaSubscription.terminate(() => {
-        coreListener.core.deregisterToConnector(node, done)
-        coreListener.internalDebugLog('Close Listener Node')
-        // })
+        uaSubscription.terminate(() => {
+          coreListener.core.deregisterToConnector(node, done)
+          coreListener.internalDebugLog('Close Listener Node')
+        })
       } else {
         coreListener.core.deregisterToConnector(node, done)
         coreListener.internalDebugLog('Close Listener Node')

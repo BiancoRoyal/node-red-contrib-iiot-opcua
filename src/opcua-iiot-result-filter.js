@@ -85,7 +85,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
-      if (!msg.hasOwnProperty('payload') || msg.payload === null || typeof msg.payload === 'undefined') { // values with false has to be true
+      if (!msg.hasOwnProperty('payload') || msg.payload === null || msg.payload === void 0) { // values with false has to be true
         coreFilter.internalDebugLog('filtering message without payload')
         return
       }
@@ -173,7 +173,7 @@ module.exports = function (RED) {
     }
 
     node.convertResultValue = function (msg, result) {
-      if (result === null) {
+      if (result === null || result === void 0) {
         coreFilter.internalDebugLog('result null or undefined')
         return
       }
@@ -184,7 +184,7 @@ module.exports = function (RED) {
 
       result = node.convertResultByDataType(msg, result)
 
-      if (result === null) {
+      if (result === null || result === void 0) {
         coreFilter.internalDebugLog('converted result null or undefined')
         if (node.showErrors) {
           node.error(new Error('converted result null or undefined'), msg)

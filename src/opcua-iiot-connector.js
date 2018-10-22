@@ -132,9 +132,18 @@ module.exports = function (RED) {
       }
     }
 
+    node.checkEndpoint = function () {
+      if (node.endpoint.includes('opc.tcp://')) {
+        return true
+      } else {
+        coreConnector.internalDebugLog('Endpoint Not Valid -> ' + node.endpoint)
+        node.error(new Error('endpoint does not include opc.tcp://'), {payload: 'Client Endpoint Error'})
+        return false
+      }
+    }
+
     node.connectOPCUAEndpoint = function () {
-      if (!node.endpoint.includes('opc.tcp:')) {
-        coreConnector.internalDebugLog('connector endpoint is wrong and needs opc.tcp// ' + node.endpoint)
+      if (!node.checkEndpoint()) {
         return
       }
 
@@ -160,9 +169,7 @@ module.exports = function (RED) {
     }
 
     node.connectToClient = function () {
-      if (!node.endpoint.includes('opc.tcp://')) {
-        coreConnector.internalDebugLog('Endpoint Not Valid -> ' + node.endpoint)
-        node.error(new Error('endpoint does not include opc.tcp://'), {payload: 'Client Endpoint Error'})
+      if (!node.checkEndpoint()) {
         return
       }
 
@@ -185,48 +192,58 @@ module.exports = function (RED) {
       })
     }
 
+    node.endpointMatchForConnecting = function (endpoint) {
+      coreConnector.internalDebugLog('Auto Endpoint ' + endpoint.endpointUrl.toString() + ' ' + endpoint.securityPolicyUri.toString())
+      let securityMode = endpoint.securityMode.key || endpoint.securityMode
+      let securityPolicy = (endpoint.securityPolicyUri.includes('SecurityPolicy#')) ? endpoint.securityPolicyUri.split('#')[1] : endpoint.securityPolicyUri
+
+      coreConnector.internalDebugLog('node-mode:' + node.messageSecurityMode + ' securityMode: ' + securityMode)
+      coreConnector.internalDebugLog('node-policy:' + node.securityPolicy + ' securityPolicy: ' + securityPolicy)
+
+      return (securityMode === node.messageSecurityMode && securityPolicy === node.securityPolicy)
+    }
+
+    node.selectEndpointFromSettings = function (discoverClient) {
+      discoverClient.getEndpoints(function (err, endpoints) {
+        if (err) {
+          coreConnector.internalDebugLog('Auto Switch To Endpoint Error ' + err)
+          if (node.showErrors) {
+            node.error(err, {payload: 'Get Endpoints Request Error'})
+          }
+        } else {
+          endpoints.forEach(function (endpoint) {
+            if (node.endpointMatchForConnecting(endpoint)) {
+              node.endpoint = endpoint.endpointUrl
+              coreConnector.internalDebugLog('Auto Switch To Endpoint ' + node.endpoint)
+            }
+          })
+        }
+
+        discoverClient.disconnect(function (err) {
+          if (err) {
+            coreConnector.internalDebugLog('Endpoints Auto Request Error ' + err)
+            if (node.showErrors) {
+              node.error(err, {payload: 'Discover Client Disconnect Error'})
+            }
+          } else {
+            coreConnector.internalDebugLog('Endpoints Auto Request Done With Endpoint ' + node.endpoint)
+          }
+        })
+      })
+    }
+
     node.autoSelectEndpointFromConnection = function () {
       coreConnector.internalDebugLog('Auto Searching For Endpoint On ' + node.endpoint)
 
       let endpointMustExist = node.opcuaClientOptions.endpoint_must_exist
       node.opcuaClientOptions.endpoint_must_exist = false
+
       let discoverClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.opcuaClientOptions)
+
       discoverClient.connect(node.endpoint).then(function () {
         coreConnector.internalDebugLog('Auto Searching Endpoint Connected To ' + node.endpoint)
-
-        discoverClient.getEndpoints(function (err, endpoints) {
-          if (err) {
-            coreConnector.internalDebugLog('Auto Switch To Endpoint Error ' + err)
-            if (node.showErrors) {
-              node.error(err, {payload: 'Get Endpoints Request Error'})
-            }
-          } else {
-            endpoints.forEach(function (endpoint, i) {
-              coreConnector.internalDebugLog('Auto Endpoint ' + endpoint.endpointUrl.toString() + ' ' + endpoint.securityPolicyUri.toString())
-              let securityMode = endpoint.securityMode.key || endpoint.securityMode
-              let securityPolicy = (endpoint.securityPolicyUri.includes('SecurityPolicy#')) ? endpoint.securityPolicyUri.split('#')[1] : endpoint.securityPolicyUri
-
-              coreConnector.internalDebugLog('node-mode:' + node.messageSecurityMode + ' securityMode: ' + securityMode)
-              coreConnector.internalDebugLog('node-policy:' + node.securityPolicy + ' securityPolicy: ' + securityPolicy)
-
-              if (securityMode === node.messageSecurityMode && securityPolicy === node.securityPolicy) {
-                node.endpoint = endpoint.endpointUrl
-                coreConnector.internalDebugLog('Auto Switch To Endpoint ' + node.endpoint)
-              }
-            })
-          }
-          node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
-          discoverClient.disconnect(function (err) {
-            if (err) {
-              coreConnector.internalDebugLog('Endpoints Auto Request Error ' + err)
-              if (node.showErrors) {
-                node.error(err, {payload: 'Discover Client Disconnect Error'})
-              }
-            } else {
-              coreConnector.internalDebugLog('Endpoints Auto Request Done With Endpoint ' + node.endpoint)
-            }
-          })
-        })
+        node.selectEndpointFromSettings(discoverClient)
+        node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
       }).catch(function (err) {
         coreConnector.internalDebugLog('Get Auto Endpoint Request Error ' + err.message)
         node.opcuaClientOptions.endpoint_must_exist = endpointMustExist
@@ -320,24 +337,6 @@ module.exports = function (RED) {
       })
     }
 
-    node.deleteSubscriptionsFromSession = function (done) {
-      if (node.opcuaSession) {
-        node.opcuaSession.deleteSubscriptions({}, (err, response) => {
-          if (err) {
-            coreConnector.internalDebugLog(err.message)
-            if (node.showErrors) {
-              node.error(err, {payload: 'Client Delete Subscriptions Error'})
-            }
-          }
-          coreConnector.internalDebugLog(response)
-          done()
-        })
-      } else {
-        coreConnector.internalDebugLog('Delete Subscriptions From Session Without Session')
-        done()
-      }
-    }
-
     node.closeSession = function (done) {
       if (node.opcuaSession) {
         coreConnector.detailDebugLog('Delete Subscriptions From Session ' + node.stateMachine.getMachineState())
@@ -367,7 +366,9 @@ module.exports = function (RED) {
     node.handleSessionClose = function (statusCode) {
       coreConnector.internalDebugLog('Session Closed With StatusCode ' + statusCode)
       coreConnector.logSessionInformation(node)
-      node.stateMachine.lock().sessionclose()
+      if (node.stateMachine.getMachineState() !== 'SESSIONRESTART') {
+        node.stateMachine.lock().sessionclose()
+      }
     }
 
     node.disconnectNodeOPCUA = function (done) {
@@ -413,9 +414,13 @@ module.exports = function (RED) {
         }, node.connectionStopDelay)
       } else {
         node.disconnectNodeOPCUA(() => {
-          coreConnector.detailDebugLog('Disconnect ' + node.stateMachine.getMachineState())
-          coreConnector.internalDebugLog('Close Connector Node On State ' + node.stateMachine.getMachineState())
-          assert(node.stateMachine.getMachineState() === 'CLOSED' || node.stateMachine.getMachineState() === 'END')
+          let fsmState = node.stateMachine.getMachineState()
+          coreConnector.detailDebugLog('Disconnect On State ' + fsmState)
+          if (fsmState !== 'CLOSED' && fsmState !== 'END') {
+            console.log(fsmState)
+            done()
+            assert(false)
+          }
           done()
         })
       }
@@ -424,8 +429,9 @@ module.exports = function (RED) {
     node.restartWithNewSettings = function (parameters, done) {
       coreConnector.internalDebugLog('Renew With Flex Connector Request On State ' + node.stateMachine.getMachineState())
 
-      if (node.stateMachine.getMachineState() === 'SESSIONRESTART') {
-        coreConnector.internalDebugLog('Do Not Renew From Flex Connector Request On State ' + node.stateMachine.getMachineState())
+      let fsmState = node.stateMachine.getMachineState()
+      if (fsmState === 'SESSIONRESTART' || fsmState === 'END') {
+        coreConnector.internalDebugLog('Do Not Renew From Flex Connector Request On State ' + fsmState)
         return
       }
 
