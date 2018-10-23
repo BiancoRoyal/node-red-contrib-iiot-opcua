@@ -374,21 +374,19 @@ module.exports = function (RED) {
     node.disconnectNodeOPCUA = function (done) {
       if (node.opcuaClient) {
         coreConnector.internalDebugLog('Close Node Disconnect Connector From ' + node.endpoint)
-        setTimeout(() => {
-          node.opcuaClient.disconnect(function (err) {
-            node.stateMachine.close()
-            if (err) {
-              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
-              if (node.showErrors) {
-                node.error(err, {payload: 'Client Close Error On Close Connector'})
-              }
-            } else {
-              coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint)
+        node.opcuaClient.disconnect(function (err) {
+          node.stateMachine.close()
+          if (err) {
+            coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint + ' with Error ' + err)
+            if (node.showErrors) {
+              node.error(err, {payload: 'Client Close Error On Close Connector'})
             }
-            coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
-            done() // closed state
-          })
-        }, node.connectionStopDelay)
+          } else {
+            coreConnector.internalDebugLog('Close Node Disconnected Connector From ' + node.endpoint)
+          }
+          coreConnector.internalDebugLog('Close Node Done For Connector On ' + node.endpoint)
+          done() // closed state
+        })
       } else {
         coreConnector.internalDebugLog('Close Node Done For Connector Without Client On ' + node.endpoint)
         node.stateMachine.close()
@@ -405,8 +403,9 @@ module.exports = function (RED) {
       })
     })
 
-    node.closeConnector = (done) => {
-      coreConnector.detailDebugLog('Close Connector ' + node.stateMachine.getMachineState())
+    node.opcuaDisconnect = function (done) {
+      coreConnector.detailDebugLog('OPC UA Disconnect From Connector ' + node.stateMachine.getMachineState())
+
       if (node.registeredNodeList.length > 0) {
         coreConnector.internalDebugLog('Connector Has Registered Nodes And Can Not Close The Node -> Count: ' + node.registeredNodeList.length)
         setTimeout(() => {
@@ -414,6 +413,7 @@ module.exports = function (RED) {
         }, node.connectionStopDelay)
       } else {
         node.disconnectNodeOPCUA(() => {
+          node.opcuaClient = null
           let fsmState = node.stateMachine.getMachineState()
           coreConnector.detailDebugLog('Disconnect On State ' + fsmState)
           if (fsmState !== 'CLOSED' && fsmState !== 'END') {
@@ -423,6 +423,18 @@ module.exports = function (RED) {
           }
           done()
         })
+      }
+    }
+
+    node.closeConnector = (done) => {
+      coreConnector.detailDebugLog('Close Connector ' + node.stateMachine.getMachineState())
+      if (node.opcuaClient) {
+        setTimeout(() => {
+          node.opcuaDisconnect(done)
+        }, node.connectionStopDelay)
+      } else {
+        coreConnector.detailDebugLog('OPC UA Client Is Not Valid On Close Connector')
+        done()
       }
     }
 
