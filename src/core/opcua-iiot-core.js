@@ -525,37 +525,8 @@ de.biancoroyal.opcua.iiot.core.parseNamspaceFromItemNodeId = function (item) {
   return nodeNamespace
 }
 
-de.biancoroyal.opcua.iiot.core.parseIdentifierFromMsgTopic = function (msg) {
+de.biancoroyal.opcua.iiot.core.parseForNodeIdentifier = function (nodeItem) {
   let nodeIdentifier = null
-
-  if (msg && msg.topic) {
-    // TODO: real parsing instead of string operations
-    if (msg.topic.toString().includes(';i=')) {
-      nodeIdentifier = {
-        identifier: parseInt(msg.topic.substring(msg.topic.indexOf(';i=') + 3)),
-        type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.NUMERIC
-      }
-    } else {
-      if (msg.topic.toString().includes(';b=')) {
-        nodeIdentifier = {
-          identifier: msg.topic.substring(msg.topic.indexOf(';b=') + 3),
-          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.BYTESTRING
-        }
-      } else {
-        nodeIdentifier = {
-          identifier: msg.topic.substring(msg.topic.indexOf(';s=') + 3),
-          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
-        }
-      }
-    }
-  }
-
-  return nodeIdentifier
-}
-
-de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId = function (item) {
-  let nodeIdentifier = null
-  let nodeItem = item.nodeId || item
 
   if (nodeItem) {
     // TODO: real parsing instead of string operations
@@ -578,8 +549,15 @@ de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId = function (item) {
       }
     }
   }
-
   return nodeIdentifier
+}
+
+de.biancoroyal.opcua.iiot.core.parseIdentifierFromMsgTopic = function (msg) {
+  return this.parseForNodeIdentifier(msg.topic)
+}
+
+de.biancoroyal.opcua.iiot.core.parseIdentifierFromItemNodeId = function (item) {
+  return this.parseForNodeIdentifier(item.nodeId || item)
 }
 
 de.biancoroyal.opcua.iiot.core.newOPCUANodeIdFromItemNodeId = function (item) {
@@ -598,8 +576,18 @@ de.biancoroyal.opcua.iiot.core.newOPCUANodeIdFromMsgTopic = function (msg) {
   return new de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
-de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
+de.biancoroyal.opcua.iiot.core.pushItemToWriteList = function (msg, nodesToWrite, item, value) {
   let opcua = de.biancoroyal.opcua.iiot.core.nodeOPCUA
+
+  nodesToWrite.push({
+    nodeId: this.newOPCUANodeIdFromItemNodeId(item),
+    attributeId: opcua.AttributeIds.Value,
+    indexRange: null,
+    value
+  })
+}
+de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
+  let core = this
   let nodesToWrite = []
 
   this.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
@@ -617,29 +605,14 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
     let index = 0
     if (msg.valuesToWrite) {
       for (item of msg.addressSpaceItems) {
-        nodesToWrite.push({
-          nodeId: this.newOPCUANodeIdFromItemNodeId(item),
-          attributeId: opcua.AttributeIds.Value,
-          indexRange: null,
-          value: {value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++])}
-        })
+        core.pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++])})
       }
     } else {
       for (item of msg.addressSpaceItems) {
         if (item.value) {
-          nodesToWrite.push({
-            nodeId: this.newOPCUANodeIdFromItemNodeId(item),
-            attributeId: opcua.AttributeIds.Value,
-            indexRange: null,
-            value: {value: this.buildNewVariant(item.datatypeName, item.value)}
-          })
+          core.pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, item.value)})
         } else {
-          nodesToWrite.push({
-            nodeId: this.newOPCUANodeIdFromItemNodeId(item),
-            attributeId: opcua.AttributeIds.Value,
-            indexRange: null,
-            value: {value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload)}
-          })
+          core.pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload)})
         }
       }
     }
@@ -929,12 +902,6 @@ de.biancoroyal.opcua.iiot.core.getItemFilterValueWithElement = function (item, e
       filterValue = item[element.name].text
       break
     case 'value':
-      if (item.value && item.value.hasOwnProperty('value')) {
-        filterValue = item.value[element.name]
-      } else {
-        filterValue = item[element.name]
-      }
-      break
     case 'dataType':
       if (item.value && item.value.hasOwnProperty('value')) {
         filterValue = item.value[element.name]

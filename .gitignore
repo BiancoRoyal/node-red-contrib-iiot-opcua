@@ -13,3 +13,5 @@ coverage/
 pki/
 .vscode/
 jcoverage/
+
+\.jsinspect-results\.json

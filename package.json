@@ -73,6 +73,7 @@
     "prepublishOnly": "npm test && npm run build",
     "ci-publish": "ci-publish",
     "release": "standard-version -a",
+    "inspect": "jsinspect ./src > .jsinspect-results.json",
     "rewrite-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "files": [
