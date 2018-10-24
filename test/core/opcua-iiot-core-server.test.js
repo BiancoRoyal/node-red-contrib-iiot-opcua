@@ -29,14 +29,12 @@ describe('OPC UA Core Server', function () {
 
   afterEach(function (done) {
     opcuaserver.shutdown(function () {
-      coreServer.destructAddressSpace()
-      done()
+      coreServer.destructAddressSpace(done)
     })
   })
 
   afterAll(function (done) {
     opcuaserver = null
-    coreServer.destructAddressSpace()
     coreServer = null
     done()
   })

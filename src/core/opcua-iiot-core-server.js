@@ -31,6 +31,7 @@ de.biancoroyal.opcua.iiot.core.server.timeInterval = de.biancoroyal.opcua.iiot.c
 de.biancoroyal.opcua.iiot.core.server.UNLIMITED_LISTENERS = de.biancoroyal.opcua.iiot.core.server.UNLIMITED_LISTENERS || 0 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.intervalList = de.biancoroyal.opcua.iiot.core.server.intervalList || [] // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.path = de.biancoroyal.opcua.iiot.core.server.path || require('path') // eslint-disable-line no-use-before-define
+
 de.biancoroyal.opcua.iiot.core.server.simulateVariation = function (data) {
   let server = de.biancoroyal.opcua.iiot.core.server
 
@@ -471,12 +472,13 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
     })
 }
 
-de.biancoroyal.opcua.iiot.core.server.destructAddressSpace = function () {
+de.biancoroyal.opcua.iiot.core.server.destructAddressSpace = function (done) {
   de.biancoroyal.opcua.iiot.core.server.intervalList.forEach(function (value, index, list) {
     clearInterval(value)
     list[index] = null
   })
   de.biancoroyal.opcua.iiot.core.server.intervalList = []
+  done()
 }
 
 de.biancoroyal.opcua.iiot.core.server.start = function (server, node) {
@@ -700,6 +702,188 @@ de.biancoroyal.opcua.iiot.core.server.setDiscoveryOptions = function (node, serv
     }
   }
   return serverOptions
+}
+
+de.biancoroyal.opcua.iiot.core.server.getAddressSpace = function (node, msg) {
+  if (!node.opcuaServer.engine.addressSpace) {
+    node.error(new Error('Server AddressSpace Not Valid'), msg)
+    return null
+  }
+
+  return node.opcuaServer.engine.addressSpace
+}
+
+de.biancoroyal.opcua.iiot.core.server.addVariableToAddressSpace = function (node, msg, humanReadableType) {
+  let coreServer = this
+  let addressSpace = this.getAddressSpace(node)
+
+  if (!addressSpace) {
+    return
+  }
+
+  let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
+  let variableData = this.core.getVariantValue(msg.payload.datatype, msg.payload.value)
+  const LocalizedText = this.core.nodeOPCUA.LocalizedText
+
+  addressSpace.getOwnNamespace().addVariable({
+    componentOf: rootFolder,
+    nodeId: msg.payload.nodeId,
+    browseName: msg.payload.browsename,
+    displayName: new LocalizedText({locale: null, text: msg.payload.displayname}),
+    dataType: msg.payload.datatype,
+    value: {
+      get () {
+        return new coreServer.core.nodeOPCUA.Variant({
+          dataType: coreServer.core.nodeOPCUA.DataType[msg.payload.datatype],
+          value: variableData
+        })
+      },
+      set (variant) {
+        variableData = variant.value
+        return coreServer.core.nodeOPCUA.StatusCodes.Good
+      }
+    }
+  })
+  coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
+}
+
+de.biancoroyal.opcua.iiot.core.server.addObjectToAddressSpace = function (node, msg, humanReadableType) {
+  let coreServer = this
+  let addressSpace = this.getAddressSpace(node)
+
+  if (!addressSpace) {
+    return
+  }
+
+  let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
+  const LocalizedText = this.core.nodeOPCUA.LocalizedText
+
+  if (rootFolder) {
+    addressSpace.getOwnNamespace().addObject({
+      organizedBy: rootFolder,
+      nodeId: msg.payload.nodeId,
+      browseName: msg.payload.browsename,
+      displayName: new LocalizedText({locale: null, text: msg.payload.displayname})
+    })
+    coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
+  } else {
+    node.error(new Error('Root Reference Not Found'), msg)
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.server.deleteNOdeFromAddressSpace = function (node, msg) {
+  let addressSpace = this.getAddressSpace(node)
+
+  if (!addressSpace) {
+    return
+  }
+
+  if (msg.payload.nodeId) {
+    let searchedNode = addressSpace.findNode(msg.payload.nodeId)
+    if (searchedNode) {
+      this.internalDebugLog('Delete NodeId ' + msg.payload.nodeId)
+      addressSpace.deleteNode(searchedNode)
+    } else {
+      this.internalDebugLog('Delete NodeId Not Found ' + msg.payload.nodeId)
+    }
+  } else {
+    node.error(new Error('OPC UA Command NodeId Not Valid'), msg)
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.server.restartServer = function (node) {
+  if (node.opcuaServer) {
+    node.opcuaServer.shutdown(function () {
+      node.emit('shutdown')
+      node.initNewServer()
+    })
+  } else {
+    node.opcuaServer = null
+    node.emit('shutdown')
+    node.initNewServer()
+  }
+
+  node.send({payload: 'server shutdown'})
+  this.core.setNodeStatusTo(node, 'shutdown')
+}
+
+de.biancoroyal.opcua.iiot.core.server.handleServerError = function (node, err, msg) {
+  this.internalDebugLog(err)
+  if (node.showErrors) {
+    node.error(err, msg)
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.server.createServerNameWithPrefix = function (prefix) {
+  let serverPrefix = (prefix !== '') ? prefix + '-' : prefix
+  return 'NodeRED-IIoT-' + serverPrefix + 'Server'
+}
+
+de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefix) {
+  let coreServer = this
+  let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
+  let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
+  let today = new Date()
+
+  return {
+    port: node.port,
+    nodeset_filename: node.xmlFiles,
+    resourcePath: node.endpoint || 'UA/NodeRED' + prefix + 'IIoTServer',
+    buildInfo: {
+      productName: node.name || 'NodeOPCUA IIoT Server',
+      buildNumber: today.timestamp,
+      buildDate: today
+    },
+    serverCapabilities: {
+      operationLimits: {
+        maxNodesPerRead: node.maxNodesPerRead,
+        maxNodesPerBrowse: node.maxNodesPerBrowse
+      }
+    },
+    serverInfo: {
+      // applicationType: ApplicationType.CLIENTANDSERVER,
+      applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), coreServer.createServerNameWithPrefix(prefix)),
+      productUri: coreServer.createServerNameWithPrefix(prefix),
+      applicationName: {text: 'Node-RED', locale: 'en'},
+      gatewayServerUri: null,
+      discoveryProfileUri: null,
+      discoveryUrls: []
+    },
+    maxAllowedSessionNumber: node.maxAllowedSessionNumber,
+    maxConnectionsPerEndpoint: node.maxConnectionsPerEndpoint,
+    allowAnonymous: node.allowAnonymous,
+    certificateFile: node.publicCertificateFile,
+    privateKeyFile: node.privateCertificateFile,
+    alternateHostname: node.alternateHostname || '',
+    userManager: {
+      isValidUser: function (userName, password) {
+        return coreServer.checkUser(node, userName, password)
+      }
+    },
+    isAuditing: node.isAuditing,
+    disableDiscovery: node.disableDiscovery
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.server.createServerObject = function (node, serverOptions) {
+  this.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
+  return new this.core.nodeOPCUA.OPCUAServer(serverOptions)
+}
+
+de.biancoroyal.opcua.iiot.core.server.setOPCUAServerListener = function (node) {
+  let coreServer = this
+
+  node.opcuaServer.on('newChannel', function (channel) {
+    coreServer.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
+  })
+
+  node.opcuaServer.on('closeChannel', function (channel) {
+    coreServer.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
+  })
+
+  node.opcuaServer.on('post_initialize', function () {
+    coreServer.internalDebugLog('initialized')
+  })
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.server

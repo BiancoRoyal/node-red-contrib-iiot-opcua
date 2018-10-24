@@ -238,7 +238,7 @@ var testWrongCMDWithFlexServerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'onceDelay': '4',
+    'onceDelay': '3',
     'wires': [['n2csf4', 'n3csf4']]
   },
   {id: 'n2csf4', type: 'helper'},
@@ -296,7 +296,7 @@ var testWrongInjectWithFlexServerFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'onceDelay': '4',
+    'onceDelay': '3',
     'commandType': 'test',
     'nodetype': 'inject',
     'injecType': 'TEST',
@@ -424,29 +424,23 @@ describe('OPC UA Server Command node e2e Testing', function () {
       })
     })
 
-    it('should get a message with wrong command inject to restart flex server', function (done) {
+    it('should get no message with wrong command inject to restart flex server', function (done) {
       helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testWrongCMDWithFlexServerFlow, function () {
         let n5 = helper.getNode('n5csf4')
         n5.on('input', function (msg) {
-          expect(msg.commandType).toBe('test')
-          expect(msg.payload.nodeId).toBeUndefined()
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('CMD')
-          setTimeout(done, 3000)
+          expect(false).toBeTruthy()
         })
+        setTimeout(done, 3500)
       })
     })
 
-    it('should get a message with wrong inject type inject to restart flex server', function (done) {
+    it('should get no message on wrong inject type sent to flex server', function (done) {
       helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testWrongInjectWithFlexServerFlow, function () {
         let n5 = helper.getNode('n5csf4')
         n5.on('input', function (msg) {
-          expect(msg.payload).toBe('testpayload')
-          expect(msg.commandType).toBeUndefined()
-          expect(msg.nodetype).toBeUndefined()
-          expect(msg.injectType).toBeUndefined()
-          setTimeout(done, 3000)
+          expect(false).toBeTruthy()
         })
+        setTimeout(done, 3500)
       })
     })
   })

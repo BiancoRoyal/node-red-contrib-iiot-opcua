@@ -43,170 +43,90 @@ module.exports = function (RED) {
 
     vm.run('node.constructAddressSpaceScript = ' + config.addressSpaceScript)
 
-    coreServer.core.nodeOPCUA.OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
-
     node.buildServerOptions = function () {
-      let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
-      let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
-      let today = new Date()
-
-      let serverOptions = {
-        port: node.port,
-        nodeset_filename: node.xmlFiles,
-        resourcePath: node.endpoint || 'UA/NodeREDFlexIIoTServer',
-        buildInfo: {
-          productName: node.name || 'Node-RED Flex IIoT Server',
-          buildNumber: today.timestamp,
-          buildDate: today
-        },
-        serverCapabilities: {
-          operationLimits: {
-            maxNodesPerRead: node.maxNodesPerRead,
-            maxNodesPerBrowse: node.maxNodesPerBrowse
-          }
-        },
-        serverInfo: {
-          // applicationType: ApplicationType.CLIENTANDSERVER,
-          applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), 'NodeRED-Flex-IIoT-Server'),
-          productUri: 'NodeRED-Flex-IIoT-Server',
-          applicationName: {text: 'NodeRED', locale: 'en'},
-          gatewayServerUri: null,
-          discoveryProfileUri: null,
-          discoveryUrls: []
-        },
-        maxAllowedSessionNumber: node.maxAllowedSessionNumber,
-        maxConnectionsPerEndpoint: node.maxConnectionsPerEndpoint,
-        allowAnonymous: node.allowAnonymous,
-        certificateFile: node.publicCertificateFile,
-        privateKeyFile: node.privateCertificateFile,
-        alternateHostname: node.alternateHostname || '',
-        userManager: {
-          isValidUser: function (userName, password) {
-            coreServer.checkUser(node, userName, password)
-          }
-        },
-        isAuditing: node.isAuditing,
-        disableDiscovery: node.disableDiscovery
-      }
-
+      let serverOptions = coreServer.buildServerOptions(node, 'Flex')
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
     node.createServer = function (serverOptions) {
-      node.opcuaServer = new coreServer.core.nodeOPCUA.OPCUAServer(serverOptions)
+      if (RED.settings.verbose) {
+        coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+      }
+      node.opcuaServer = coreServer.createServerObject(node, serverOptions)
       coreServer.core.setNodeStatusTo(node, 'waiting')
       node.opcuaServer.initialize(node.postInitialize)
-
-      node.opcuaServer.on('newChannel', function (channel) {
-        coreServer.flex.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
-      })
-
-      node.opcuaServer.on('closeChannel', function (channel) {
-        coreServer.flex.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
-      })
-
-      node.opcuaServer.on('post_initialize', function () {
-        coreServer.flex.internalDebugLog('Client initialized')
-      })
+      coreServer.setOPCUAServerListener(node)
     }
 
     node.initNewServer = function () {
       node = coreServer.initRegisterServerMethod(node)
       let serverOptions = node.buildServerOptions()
-      coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+      serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
 
       try {
         node.createServer(serverOptions)
       } catch (err) {
-        node.emit('server_compile_error')
+        node.emit('server_create_error')
         coreServer.flex.internalDebugLog(err.message)
-        node.error(err, {payload: 'Flex Server Failure! Please, check the server settings!'})
+        coreServer.handleServerError(node, err, {payload: 'Flex Server Failure! Please, check the server settings!'})
       }
     }
 
     node.postInitialize = function () {
-      if (node.opcuaServer) {
-        node.eventObjects = {} // event objects should stay in memory
-        coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects).then(function () {
+      node.eventObjects = {} // event objects should stay in memory
+      coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects)
+        .then(function () {
           coreServer.start(node.opcuaServer, node).then(function () {
             coreServer.core.setNodeStatusTo(node, 'active')
             node.emit('server_running')
           }).catch(function (err) {
+            node.emit('server_start_error')
             coreServer.core.setNodeStatusTo(node, 'errors')
-            coreServer.flex.internalDebugLog(err)
-            if (node.showErrors) {
-              node.error(err, {payload: 'start'})
-            }
+            coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
           })
         }).catch(function (err) {
-          coreServer.flex.internalDebugLog(err)
-          if (node.showErrors) {
-            node.error(err, {payload: 'constructAddressSpaceFromScript'})
-          }
+          coreServer.handleServerError(node, err, {payload: 'Server Address Space Failure'})
         })
-      } else {
-        node.initialized = false
-        coreServer.flex.internalDebugLog('OPC UA Server Is Not Ready'.red)
-        if (node.showErrors) {
-          node.error(new Error('OPC UA Server Is Not Ready'), {payload: ''})
-        }
-      }
     }
 
     node.initNewServer()
 
     node.on('input', function (msg) {
       if (!node.opcuaServer || !node.initialized) {
-        node.error(new Error('Server Not Ready For Inputs'), msg)
-        return false
+        coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
+        return
       }
 
-      switch (msg.injectType) {
-        case 'CMD':
-          node.executeOpcuaCommand(msg)
-          break
-        default:
-          node.error(new Error('Unknown Inject Type ' + msg.injectType), msg)
+      if (msg.injectType === 'CMD') {
+        node.executeOpcuaCommand(msg)
+      } else {
+        coreServer.handleServerError(node, new Error('Unknown Flex Inject Type ' + msg.injectType), msg)
       }
-
-      node.send(msg)
     })
 
     node.executeOpcuaCommand = function (msg) {
-      switch (msg.commandType) {
-        case 'restart':
-          node.restartServer()
-          break
-        default:
-          node.error(new Error('Unknown OPC UA Command'), msg)
+      if (msg.commandType === 'restart') {
+        node.restartServer()
+        node.send(msg)
+      } else {
+        coreServer.handleServerError(node, new Error('Unknown Flex OPC UA Command'), msg)
       }
     }
 
     node.restartServer = function () {
       coreServer.flex.internalDebugLog('Restart OPC UA Server')
-
-      if (node.opcuaServer) {
-        node.opcuaServer.shutdown(function () {
-          node.opcuaServer = null
-          node.emit('shutdown')
-          node.initNewServer()
-        })
-      } else {
-        node.opcuaServer = null
-        node.emit('shutdown')
-        node.initNewServer()
-      }
+      coreServer.restartServer(node)
 
       if (node.opcuaServer) {
         coreServer.flex.internalDebugLog('OPC UA Server restarted')
       } else {
-        coreServer.flex.internalDebugLogr('Can not restart OPC UA Server')
+        coreServer.flex.internalDebugLog('Can not restart OPC UA Server')
       }
     }
 
     node.on('close', function (done) {
       node.closeServer(() => {
-        coreServer.flex.internalDebugLog('Close Flex Server Node')
+        coreServer.flex.internalDebugLog('Close Server Node')
         done()
       })
     })
