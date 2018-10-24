@@ -1,31 +1,31 @@
 [
   {
-    "id": "804328d6.75aa48",
+    "id": "45689007.c2c51",
     "type": "tab",
     "label": "OPC UA IIoT JWT EFC",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "57cf46e8.a4ab3",
+    "id": "83836f37.817158",
     "type": "OPCUA-IIoT-Flex-Connector",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "showStatusActivities": false,
     "showErrors": true,
-    "connector": "9431c9c2.79e098",
+    "connector": "c441ba33.56b788",
     "x": 1000,
     "y": 220,
     "wires": [
       [
-        "306c3edd.35f06a"
+        "35f9ab6c.f9e5fc"
       ]
     ]
   },
   {
-    "id": "e5badfe6.2b986",
+    "id": "9b0e53cf.81f448",
     "type": "inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Server 86",
     "topic": "",
     "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
@@ -35,17 +35,17 @@
     "once": false,
     "onceDelay": 0.1,
     "x": 760,
-    "y": 200,
+    "y": 160,
     "wires": [
       [
-        "57cf46e8.a4ab3"
+        "83836f37.817158"
       ]
     ]
   },
   {
-    "id": "306c3edd.35f06a",
+    "id": "35f9ab6c.f9e5fc",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -57,9 +57,9 @@
     "wires": []
   },
   {
-    "id": "36ec39eb.53476e",
+    "id": "c0121b6b.5efed",
     "type": "inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Server 89",
     "topic": "",
     "payload": "{\"endpoint\":\"opc.tcp://localhost:55389/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
@@ -69,17 +69,17 @@
     "once": false,
     "onceDelay": 0.1,
     "x": 760,
-    "y": 160,
+    "y": 240,
     "wires": [
       [
-        "57cf46e8.a4ab3"
+        "83836f37.817158"
       ]
     ]
   },
   {
-    "id": "75234645.c660e8",
+    "id": "51c6e598.bbb54c",
     "type": "inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Server 88",
     "topic": "",
     "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55388/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
@@ -89,17 +89,17 @@
     "once": false,
     "onceDelay": 0.1,
     "x": 760,
-    "y": 240,
+    "y": 200,
     "wires": [
       [
-        "57cf46e8.a4ab3"
+        "83836f37.817158"
       ]
     ]
   },
   {
-    "id": "a928455d.b3054",
+    "id": "37eeab5f.7b5204",
     "type": "OPCUA-IIoT-Server",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "port": "55386",
     "endpoint": "",
     "acceptExternalCommands": true,
@@ -131,17 +131,17 @@
     ]
   },
   {
-    "id": "325d7982.4eeb46",
+    "id": "181cf4fa.a57d1b",
     "type": "OPCUA-IIoT-Flex-Server",
-    "z": "804328d6.75aa48",
-    "port": "55389",
+    "z": "45689007.c2c51",
+    "port": "55378",
     "endpoint": "",
     "acceptExternalCommands": true,
     "maxAllowedSessionNumber": "",
     "maxConnectionsPerEndpoint": "",
     "maxAllowedSubscriptionNumber": "",
     "alternateHostname": "",
-    "name": "Flex Server 89",
+    "name": "Flex Server 78",
     "showStatusActivities": false,
     "showErrors": true,
     "allowAnonymous": true,
@@ -165,9 +165,9 @@
     ]
   },
   {
-    "id": "1a08a86e.7a6248",
+    "id": "2ec8dabd.dd9246",
     "type": "comment",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Server 88 is Default Demo Server",
     "info": "",
     "x": 310,
@@ -175,10 +175,10 @@
     "wires": []
   },
   {
-    "id": "b3488e69.2403d8",
+    "id": "7aabc096.22f898",
     "type": "OPCUA-IIoT-Browser",
-    "z": "804328d6.75aa48",
-    "connector": "9431c9c2.79e098",
+    "z": "45689007.c2c51",
+    "connector": "c441ba33.56b788",
     "nodeId": "ns=1;i=1234",
     "name": "",
     "justValue": true,
@@ -195,16 +195,17 @@
     "y": 520,
     "wires": [
       [
-        "1424acb6.c7f2fb",
-        "a2e78b14.0715e8",
-        "3b833362.538ea4"
+        "3d8e0d88.f3829a",
+        "7c4d582a.9602",
+        "53d8b17b.0c7688",
+        "92b651a5.62441"
       ]
     ]
   },
   {
-    "id": "cfff4f9.8c8113",
+    "id": "ecc74a99.a94b38",
     "type": "OPCUA-IIoT-Inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -219,14 +220,14 @@
     "y": 520,
     "wires": [
       [
-        "b3488e69.2403d8"
+        "7aabc096.22f898"
       ]
     ]
   },
   {
-    "id": "1424acb6.c7f2fb",
+    "id": "3d8e0d88.f3829a",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -238,9 +239,9 @@
     "wires": []
   },
   {
-    "id": "a2e78b14.0715e8",
+    "id": "7c4d582a.9602",
     "type": "OPCUA-IIoT-Response",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -251,15 +252,15 @@
     "y": 580,
     "wires": [
       [
-        "b248c6c3.3daa1",
-        "8a384dab.c0ba1"
+        "75d66df8.232fbc",
+        "ccc15fa3.258c68"
       ]
     ]
   },
   {
-    "id": "b248c6c3.3daa1",
+    "id": "75d66df8.232fbc",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -271,9 +272,9 @@
     "wires": []
   },
   {
-    "id": "8a384dab.c0ba1",
+    "id": "ccc15fa3.258c68",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -285,9 +286,9 @@
     "wires": []
   },
   {
-    "id": "3b833362.538ea4",
+    "id": "53d8b17b.0c7688",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": false,
     "tosidebar": true,
@@ -299,9 +300,9 @@
     "wires": []
   },
   {
-    "id": "33ea9e96.941a3a",
+    "id": "bbc9cee9.e4ba1",
     "type": "inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Server 78",
     "topic": "",
     "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55378/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
@@ -314,15 +315,15 @@
     "y": 280,
     "wires": [
       [
-        "57cf46e8.a4ab3"
+        "83836f37.817158"
       ]
     ]
   },
   {
-    "id": "d6ec3715.901f4",
+    "id": "23cbf8b0.8d702",
     "type": "OPCUA-IIoT-Browser",
-    "z": "804328d6.75aa48",
-    "connector": "9431c9c2.79e098",
+    "z": "45689007.c2c51",
+    "connector": "c441ba33.56b788",
     "nodeId": "ns=1;i=1234",
     "name": "",
     "justValue": false,
@@ -339,17 +340,17 @@
     "y": 580,
     "wires": [
       [
-        "3b833362.538ea4",
-        "1424acb6.c7f2fb",
-        "a2e78b14.0715e8",
-        "eadc20d4.6ffd2"
+        "53d8b17b.0c7688",
+        "3d8e0d88.f3829a",
+        "7c4d582a.9602",
+        "92b651a5.62441"
       ]
     ]
   },
   {
-    "id": "8ea03a17.db22a",
+    "id": "ddc2a09c.6929e8",
     "type": "OPCUA-IIoT-Inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -364,14 +365,14 @@
     "y": 580,
     "wires": [
       [
-        "d6ec3715.901f4"
+        "23cbf8b0.8d702"
       ]
     ]
   },
   {
-    "id": "94f5e689.3adc78",
+    "id": "1f51b891.b195d7",
     "type": "JWT-OUT",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "algoType": "HASH",
     "signature": "",
@@ -397,15 +398,15 @@
     "y": 380,
     "wires": [
       [
-        "8bdd8a74.c8564",
-        "73978c80.7fadac"
+        "972dc8a8.6837c",
+        "40186644.91411"
       ]
     ]
   },
   {
-    "id": "a90762aa.18c178",
+    "id": "35357b9f.7e6264",
     "type": "JWT-IN",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Correct JWT In",
     "algoType": "HASH",
     "signature": "",
@@ -430,15 +431,15 @@
     "y": 380,
     "wires": [
       [
-        "57cf46e8.a4ab3",
-        "17910c4e.e817b4"
+        "83836f37.817158",
+        "d55ad35e.bfa44"
       ]
     ]
   },
   {
-    "id": "5692180d.602988",
+    "id": "dd30bd0f.d5e8b",
     "type": "inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Server 86",
     "topic": "",
     "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
@@ -451,14 +452,14 @@
     "y": 380,
     "wires": [
       [
-        "94f5e689.3adc78"
+        "1f51b891.b195d7"
       ]
     ]
   },
   {
-    "id": "8bdd8a74.c8564",
+    "id": "972dc8a8.6837c",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -470,9 +471,9 @@
     "wires": []
   },
   {
-    "id": "73978c80.7fadac",
+    "id": "40186644.91411",
     "type": "delay",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Network Delay",
     "pauseType": "delay",
     "timeout": "5",
@@ -488,14 +489,14 @@
     "y": 380,
     "wires": [
       [
-        "a90762aa.18c178"
+        "35357b9f.7e6264"
       ]
     ]
   },
   {
-    "id": "17910c4e.e817b4",
+    "id": "d55ad35e.bfa44",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -507,9 +508,9 @@
     "wires": []
   },
   {
-    "id": "564a37cc.2249b",
+    "id": "b4997eda.d58de8",
     "type": "JWT-IN",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Wrong JWT In",
     "algoType": "HASH",
     "signature": "heh",
@@ -534,15 +535,15 @@
     "y": 80,
     "wires": [
       [
-        "5bd9daa0.7c8d64",
-        "57cf46e8.a4ab3"
+        "9a47a373.8aa918",
+        "83836f37.817158"
       ]
     ]
   },
   {
-    "id": "5bd9daa0.7c8d64",
+    "id": "9a47a373.8aa918",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -554,9 +555,9 @@
     "wires": []
   },
   {
-    "id": "ed95dddc.7b1d5",
+    "id": "53e12b73.1a62f4",
     "type": "JWT-OUT",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "algoType": "HASH",
     "signature": "",
@@ -582,15 +583,15 @@
     "y": 80,
     "wires": [
       [
-        "f5364603.d6b0d",
-        "564a37cc.2249b"
+        "7a4ead94.7b51c4",
+        "b4997eda.d58de8"
       ]
     ]
   },
   {
-    "id": "fbfaf4a0.eb7708",
+    "id": "83857d33.c303b8",
     "type": "inject",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "Server 86",
     "topic": "",
     "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
@@ -603,14 +604,14 @@
     "y": 80,
     "wires": [
       [
-        "ed95dddc.7b1d5"
+        "53e12b73.1a62f4"
       ]
     ]
   },
   {
-    "id": "f5364603.d6b0d",
+    "id": "7a4ead94.7b51c4",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -622,9 +623,9 @@
     "wires": []
   },
   {
-    "id": "eadc20d4.6ffd2",
+    "id": "92b651a5.62441",
     "type": "debug",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -636,9 +637,29 @@
     "wires": []
   },
   {
-    "id": "9431c9c2.79e098",
+    "id": "d2200982.614e",
+    "type": "inject",
+    "z": "45689007.c2c51",
+    "name": "Server 80",
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55380/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "x": 760,
+    "y": 320,
+    "wires": [
+      [
+        "83836f37.817158"
+      ]
+    ]
+  },
+  {
+    "id": "c441ba33.56b788",
     "type": "OPCUA-IIoT-Connector",
-    "z": "804328d6.75aa48",
+    "z": "45689007.c2c51",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388/",
     "keepSessionAlive": true,

@@ -1,34 +1,34 @@
 [
   {
-    "id": "8489f834.547c48",
+    "id": "c23b6c91.59828",
     "type": "tab",
     "label": "OPC UA IIoT Flex Connector",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "e6c00a15.bf00c",
+    "id": "cac3c43b.22962",
     "type": "OPCUA-IIoT-Flex-Connector",
-    "z": "8489f834.547c48",
+    "z": "c23b6c91.59828",
     "name": "",
     "showStatusActivities": false,
     "showErrors": true,
-    "connector": "397be9e1.8e92fe",
+    "connector": "4545bd8a.162794",
     "x": 400,
     "y": 140,
     "wires": [
       [
-        "f4ad3ef7.f1cb58"
+        "9b8fcce6.503a68"
       ]
     ]
   },
   {
-    "id": "5869e06e.51ad9",
+    "id": "45fdf711.8ee38",
     "type": "inject",
-    "z": "8489f834.547c48",
-    "name": "Server 86",
+    "z": "c23b6c91.59828",
+    "name": "Server 81",
     "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55381/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
     "payloadType": "json",
     "repeat": "",
     "crontab": "",
@@ -38,14 +38,14 @@
     "y": 140,
     "wires": [
       [
-        "e6c00a15.bf00c"
+        "cac3c43b.22962"
       ]
     ]
   },
   {
-    "id": "f4ad3ef7.f1cb58",
+    "id": "9b8fcce6.503a68",
     "type": "debug",
-    "z": "8489f834.547c48",
+    "z": "c23b6c91.59828",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -57,32 +57,32 @@
     "wires": []
   },
   {
-    "id": "5d04aedd.85bc58",
+    "id": "d245fa66.fd39e",
     "type": "inject",
-    "z": "8489f834.547c48",
-    "name": "Server 89",
+    "z": "c23b6c91.59828",
+    "name": "Server 82 wrong",
     "topic": "",
-    "payload": "{\"endpoint\":\"opc.tcp://localhost:55389/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
+    "payload": "{\"endpoint\":\"opc.tcp://localhost:55382/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
     "payloadType": "json",
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
-    "x": 160,
+    "x": 180,
     "y": 100,
     "wires": [
       [
-        "e6c00a15.bf00c"
+        "cac3c43b.22962"
       ]
     ]
   },
   {
-    "id": "ec6987a7.cf37a",
+    "id": "a2df0434.aa3b88",
     "type": "inject",
-    "z": "8489f834.547c48",
-    "name": "Server 88",
+    "z": "c23b6c91.59828",
+    "name": "Server 80",
     "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55388/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55380/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
     "payloadType": "json",
     "repeat": "",
     "crontab": "",
@@ -92,14 +92,14 @@
     "y": 180,
     "wires": [
       [
-        "e6c00a15.bf00c"
+        "cac3c43b.22962"
       ]
     ]
   },
   {
-    "id": "ac063358.ef96b8",
+    "id": "1d4990a8.c5c607",
     "type": "comment",
-    "z": "8489f834.547c48",
+    "z": "c23b6c91.59828",
     "name": "Please, use the client browser flow!",
     "info": "see Node-RED menu -> \nImport -> Examples -> \niiot opcua -> client -> browser",
     "x": 500,
@@ -107,17 +107,17 @@
     "wires": []
   },
   {
-    "id": "6586bea.55cbac",
+    "id": "a5c82001.09fb58",
     "type": "OPCUA-IIoT-Server",
-    "z": "8489f834.547c48",
-    "port": "55386",
+    "z": "c23b6c91.59828",
+    "port": "55381",
     "endpoint": "",
     "acceptExternalCommands": true,
     "maxAllowedSessionNumber": "",
     "maxConnectionsPerEndpoint": "",
     "maxAllowedSubscriptionNumber": "",
     "alternateHostname": "",
-    "name": "Demos Server 86",
+    "name": "Demos Server 81",
     "showStatusActivities": false,
     "showErrors": true,
     "asoDemo": true,
@@ -141,43 +141,9 @@
     ]
   },
   {
-    "id": "c807ba9.7303148",
-    "type": "OPCUA-IIoT-Flex-Server",
-    "z": "8489f834.547c48",
-    "port": "55389",
-    "endpoint": "",
-    "acceptExternalCommands": true,
-    "maxAllowedSessionNumber": "",
-    "maxConnectionsPerEndpoint": "",
-    "maxAllowedSubscriptionNumber": "",
-    "alternateHostname": "",
-    "name": "Flex Server 89",
-    "showStatusActivities": false,
-    "showErrors": true,
-    "allowAnonymous": true,
-    "isAuditing": false,
-    "serverDiscovery": true,
-    "users": [],
-    "xmlsets": [],
-    "publicCertificateFile": "",
-    "privateCertificateFile": "",
-    "registerServerMethod": 1,
-    "discoveryServerEndpointUrl": "",
-    "capabilitiesForMDNS": "",
-    "maxNodesPerRead": 1000,
-    "maxNodesPerBrowse": 2000,
-    "delayToClose": 1000,
-    "addressSpaceScript": "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    // server = the created node-opcua server\n    // addressSpace = script placeholder\n    // eventObjects = to hold event variables in memory from this script\n    \n    // internal global sandbox objects are \n    // node = node of the flex server, \n    // coreServer = core iiot server object for debug and access to nodeOPCUA,\n    // and scriptObjects to hold variables and functions\n    const LocalizedText = coreServer.core.nodeOPCUA.LocalizedText\n    const namespace = addressSpace.getOwnNamespace()\n\n    coreServer.internalDebugLog('init dynamic address space')\n    node.warn('construct new address space for OPC UA')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    let tanks = namespace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    let oilTankLevel = namespace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    // Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    // ---------------------------------------------------------------------------------\n    let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.assert(exclusiveLimitAlarmType !== null)\n    \n    let oilTankLevelCondition = namespace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    // --------------------------------------------------------------\n    let gasTankLevel = namespace.addVariable({\n        browseName: 'GasTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    node.assert(nonExclusiveLimitAlarmType !== null)\n    \n    let gasTankLevelCondition = namespace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'NonExclusiveLimitAlarmType Condition',\n        conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // variable with value\n    if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = namespace.addObject({\n        browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    if(coreServer.core) {\n        namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            displayName: [\n                new LocalizedText({text: 'Test Read and Write', locale: 'en-US'}),\n                new LocalizedText({text: 'Test Lesen Schreiben', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            value: {\n                get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        dataType: 'Double',\n                        value: scriptObjects.testReadWrite\n                    })\n                },\n                set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        let memoryVariable = namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: [\n                new LocalizedText({text: 'Free Memory', locale: 'en-US'}),\n                new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            \n            value: {\n              get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n       \n    } else {\n        coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}",
-    "x": 400,
-    "y": 260,
-    "wires": [
-      []
-    ]
-  },
-  {
-    "id": "146078cc.bd067f",
+    "id": "2db23b70.cee92c",
     "type": "comment",
-    "z": "8489f834.547c48",
+    "z": "c23b6c91.59828",
     "name": "Server 88 is Default Demo Server",
     "info": "",
     "x": 450,
@@ -185,9 +151,9 @@
     "wires": []
   },
   {
-    "id": "397be9e1.8e92fe",
+    "id": "4545bd8a.162794",
     "type": "OPCUA-IIoT-Connector",
-    "z": "8489f834.547c48",
+    "z": "c23b6c91.59828",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388/",
     "keepSessionAlive": true,
@@ -207,6 +173,7 @@
     "strategyRandomisationFactor": "",
     "requestedSessionTimeout": "",
     "connectionStartDelay": "",
-    "reconnectDelay": ""
+    "reconnectDelay": "",
+    "maxBadSessionRequests": ""
   }
 ]
