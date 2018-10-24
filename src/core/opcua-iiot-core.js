@@ -535,11 +535,16 @@ de.biancoroyal.opcua.iiot.core.parseForNodeIdentifier = function (nodeItem) {
         identifier: parseInt(nodeItem.substring(nodeItem.indexOf(';i=') + 3)),
         type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.NUMERIC
       }
+    } else if (nodeItem.includes(';g=')) {
+      nodeIdentifier = {
+        identifier: nodeItem.substring(nodeItem.indexOf(';g=') + 3),
+        type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.GUID
+      }
     } else {
       if (nodeItem.includes(';b=')) {
         nodeIdentifier = {
           identifier: nodeItem.substring(nodeItem.indexOf(';b=') + 3),
-          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.STRING
+          type: de.biancoroyal.opcua.iiot.core.nodeOPCUAId.NodeIdType.BYTESTRING
         }
       } else {
         nodeIdentifier = {

@@ -132,7 +132,7 @@ describe('OPC UA Core', function () {
       done()
     })
 
-    it('should return the right identifier zero from msg topic', function (done) {
+    it('should return the right identifier zero from numeric msg topic', function (done) {
       let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
       assert(result)
       let resultExpected = { identifier: 85, type: core.nodeOPCUAId.NodeIdType.NUMERIC }
@@ -140,7 +140,7 @@ describe('OPC UA Core', function () {
       done()
     })
 
-    it('should return the right identifier five from msg topic', function (done) {
+    it('should return the right identifier five from string msg topic', function (done) {
       let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
       assert(result)
       let resultExpected = { identifier: 'TestReadWrite', type: core.nodeOPCUAId.NodeIdType.STRING }
@@ -148,10 +148,18 @@ describe('OPC UA Core', function () {
       done()
     })
 
-    it('should return the right identifier two from msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
+    it('should return the right identifier two from byte string msg topic', function (done) {
+      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;b=M/RbkPCxe45TX=='})
       assert(result)
-      let resultExpected = { identifier: 'TestReadWrite', type: core.nodeOPCUAId.NodeIdType.BYTESTRING }
+      let resultExpected = { identifier: 'M/RbkPCxe45TX==', type: core.nodeOPCUAId.NodeIdType.BYTESTRING }
+      expect(result).to.deep.equal(resultExpected)
+      done()
+    })
+
+    it('should return the right identifier two from GUID msg topic', function (done) {
+      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;g=034595a-545i-5e456-64f4-ab345e456cb3'})
+      assert(result)
+      let resultExpected = { identifier: '034595a-545i-5e456-64f4-ab345e456cb3', type: core.nodeOPCUAId.NodeIdType.GUID }
       expect(result).to.deep.equal(resultExpected)
       done()
     })
