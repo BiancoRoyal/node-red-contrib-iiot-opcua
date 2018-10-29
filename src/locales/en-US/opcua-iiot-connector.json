@@ -29,7 +29,8 @@
       "reconnectDelay": "Reconnect",
       "connectionStopDelay": "Stop",
       "serverConnectionDelays": "Server Connection Delays",
-      "maxBadSessionRequests": "Max. BadSession Requests"
+      "maxBadSessionRequests": "Max. BadSession Requests",
+      "individualCerts": "Use individual Certificate Files"
     },
     "tabs-label": {
       "settings": "Settings",

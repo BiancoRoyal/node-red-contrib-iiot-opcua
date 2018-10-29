@@ -12,7 +12,8 @@
       "certificateFiles": "Zertifikatdateien",
       "endpointMustExist": "Endpoint muss exakt sein",
       "autoSelectRightEndpoint": "Automatische Endpoint-Auswahl",
-      "showErrors": "Zeige Fehler"
+      "showErrors": "Zeige Fehler",
+      "individualCerts": "Nutze individuelle Zertifikate"
     },
     "tabs-label": {
       "settings": "Einstellungen",

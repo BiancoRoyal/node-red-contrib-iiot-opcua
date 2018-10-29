@@ -29,7 +29,8 @@
       "registerServerMethod": "Register Server Method",
       "discoveryServerEndpointUrl": "Endpoint Url",
       "capabilitiesForMDNS": "MDNS capabilities",
-      "delayToClose": "Delay On Close"
+      "delayToClose": "Delay On Close",
+      "individualCerts": "Use individual Certificate Files"
     },
     "tabs-label": {
       "users": "Users & Sets",

@@ -12,7 +12,8 @@
       "publicCertificateFile": "Öffentlich",
       "privateCertificateFile": "Privat",
       "certificateFiles": "Zertifikatdateien",
-      "users": "Benutzer"
+      "users": "Benutzer",
+      "individualCerts": "Nutze individuelle Zertifikate"
     },
     "tabs-label": {
       "users": "Benutzer & Sets",

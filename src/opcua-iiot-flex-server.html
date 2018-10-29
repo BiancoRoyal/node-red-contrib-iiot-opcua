@@ -14,7 +14,7 @@
     defaults: {
       port: {value: '55380', required: true},
       endpoint: {value: ''},
-      acceptExternalCommands: {value: true, required: true},
+      acceptExternalCommands: {value: true},
       maxAllowedSessionNumber: {value: ''},
       maxConnectionsPerEndpoint: {value: ''},
       maxAllowedSubscriptionNumber: {value: ''},
@@ -22,7 +22,8 @@
       name: {value: ''},
       showStatusActivities: {value: false},
       showErrors: {value: false},
-      allowAnonymous: {value: true, required: true},
+      allowAnonymous: {value: true},
+      individualCerts: {value: false},
       isAuditing: {value: false},
       serverDiscovery: {value: true},
       users: { value: [] },
@@ -350,6 +351,32 @@
         node.editorAddressSpaceScript.resize()
       }
 
+      // Certificate Management
+      try {
+        let certsCheckbox = $("#node-config-input-individualCerts");
+        let configCertFields = $("#node-config-certFiles");
+
+        if (this.individualCerts) {
+          certsCheckbox.prop('checked', true);
+          configCertFields.show();
+        } else {
+          certsCheckbox.prop('checked', false);
+          configCertFields.hide();
+        }
+
+        certsCheckbox.change(function () {
+          if ($(this).is(":checked")) {
+            configCertFields.show();
+          } else {
+            configCertFields.hide();
+            $('#node-config-input-publicCertificateFile').val('');
+            $('#node-config-input-privateKeyFile').val('');
+          }
+        });
+
+      } catch (err) {
+        this.error(err);
+      }
     },
     oneditsave: function () {
       let node = this
@@ -481,14 +508,25 @@
                 </label>
             </div>
             <div class="form-row">
-                <label for="node-input-publicCertificateFile"><i class="fa fa-file"></i>
-                <span data-i18n="opcua-iiot-contrib.label.publicCertificateFile"></span></label>
-                <input type="text" id="node-input-publicCertificateFile" placeholder="./certificates/server_selfsigned_cert_2048.pem" style="min-width:480px">
+                <label style="min-width:240px">
+                    <i class="fa fa-file"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.individualCerts"></span>
+                    <input type="checkbox" id="node-config-input-individualCerts" style="max-width:30px">
+                </label>
             </div>
-            <div class="form-row">
-                <label for="node-input-privateCertificateFile"><i class="fa fa-file"></i>
-                <span data-i18n="opcua-iiot-contrib.label.privateCertificateFile"></span></label>
-                <input type="text" id="node-input-privateCertificateFile" placeholder="./certificates/PKI/own/private/private_key.pem" style="min-width:480px">
+            <div id="node-config-certFiles">
+                <hr>
+                <div class="form-row">
+                    <label for="node-input-publicCertificateFile"><i class="fa fa-file"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.publicCertificateFile"></span></label>
+                    <input type="text" id="node-input-publicCertificateFile" placeholder="./certificates/server_selfsigned_cert_2048.pem" style="min-width:480px">
+                </div>
+                <div class="form-row">
+                    <label for="node-input-privateCertificateFile"><i class="fa fa-file"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.privateCertificateFile"></span></label>
+                    <input type="text" id="node-input-privateCertificateFile" placeholder="./certificates/PKI/own/private/private_key.pem" style="min-width:480px">
+                </div>
+                <hr>
             </div>
             <div class="form-row">
                  <label for="node-input-allowAnonymous" style="min-width:140px"><i class="icon-lock"></i>

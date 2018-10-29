@@ -19,6 +19,7 @@
       securityMode: {value: 'NONE', required: true},
       name: {value: "LOCAL SERVER"},
       showErrors: {value: false},
+      individualCerts: {value: false},
       publicCertificateFile: {value: ''},
       privateKeyFile: {value: ''},
       defaultSecureTokenLifetime: {value: ''},
@@ -67,6 +68,7 @@
         label: this._("opcua-iiot-contrib.tabs-label.strategy")
       })
 
+
       // Security Management
       try {
         let loginCheckbox = $("#node-config-input-loginEnabled");
@@ -87,6 +89,33 @@
             loginFields.hide();
             $('#node-config-input-user').val('');
             $('#node-config-input-password').val('');
+          }
+        });
+
+      } catch (err) {
+        this.error(err);
+      }
+
+      // Certificate Management
+      try {
+        let certsCheckbox = $("#node-config-input-individualCerts");
+        let configCertFields = $("#node-config-certFiles");
+
+        if (this.individualCerts) {
+          certsCheckbox.prop('checked', true);
+          configCertFields.show();
+        } else {
+          certsCheckbox.prop('checked', false);
+          configCertFields.hide();
+        }
+
+        certsCheckbox.change(function () {
+          if ($(this).is(":checked")) {
+            configCertFields.show();
+          } else {
+            configCertFields.hide();
+            $('#node-config-input-publicCertificateFile').val('');
+            $('#node-config-input-privateKeyFile').val('');
           }
         });
 
@@ -252,14 +281,25 @@
                 </label>
             </div>
             <div class="form-row">
-                <label for="node-config-input-publicCertificateFile"><i class="fa fa-file"></i>
-                <span data-i18n="opcua-iiot-contrib.label.publicCertificateFile"></span></label>
-                <input type="text" id="node-config-input-publicCertificateFile" placeholder="./certificates/client_selfsigned_cert_1024.pem" style="min-width:480px">
+                <label style="min-width:240px">
+                    <i class="fa fa-file"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.individualCerts"></span>
+                    <input type="checkbox" id="node-config-input-individualCerts" style="max-width:30px">
+                </label>
             </div>
-            <div class="form-row">
-                <label for="node-config-input-privateKeyFile"><i class="fa fa-file"></i>
-                <span data-i18n="opcua-iiot-contrib.label.privateKeyFile"></span></label>
-                <input type="text" id="node-config-input-privateKeyFile" placeholder="./certificates/PKI/own/private/private_key.pem" style="min-width:480px">
+            <div id="node-config-certFiles">
+                <hr>
+                <div class="form-row">
+                    <label for="node-config-input-publicCertificateFile"><i class="fa fa-file"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.publicCertificateFile"></span></label>
+                    <input type="text" id="node-config-input-publicCertificateFile" placeholder="./certificates/client_selfsigned_cert_1024.pem" style="min-width:480px">
+                </div>
+                <div class="form-row">
+                    <label for="node-config-input-privateKeyFile"><i class="fa fa-file"></i>
+                    <span data-i18n="opcua-iiot-contrib.label.privateKeyFile"></span></label>
+                    <input type="text" id="node-config-input-privateKeyFile" placeholder="./certificates/PKI/own/private/private_key.pem" style="min-width:480px">
+                </div>
+                <hr>
             </div>
             <div class="form-row">
                 <label for="node-config-input-defaultSecureTokenLifetime"><i class="fa fa-file"></i>
