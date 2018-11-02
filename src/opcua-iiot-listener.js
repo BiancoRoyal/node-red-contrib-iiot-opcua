@@ -169,6 +169,7 @@ module.exports = function (RED) {
       if (node.monitoredItemGroup && node.monitoredItemGroup.groupId !== null) {
         node.monitoredItemGroup.terminate(function (err) {
           if (err) {
+            coreListener.internalDebugLog('Monitoring Terminate Error')
             coreListener.internalDebugLog(err)
           }
           node.monitoredItems.clear()
@@ -186,6 +187,7 @@ module.exports = function (RED) {
               node.monitoredItemGroup = result.monitoredItemGroup
             }
           }).catch(function (err) {
+            coreListener.subscribeDebugLog('Monitoring Build Item Group Error')
             coreListener.subscribeDebugLog(err)
             if (node.showErrors) {
               node.error(err, msg)
@@ -278,6 +280,7 @@ module.exports = function (RED) {
                 node.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
               }
             }).catch(function (err) {
+              coreListener.eventDebugLog('Build Event Error')
               coreListener.eventDebugLog(err)
               if (node.showErrors) {
                 node.error(err, msg)
@@ -383,9 +386,11 @@ module.exports = function (RED) {
 
         node.updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
 
-        if (node.connector && err.message && err.message.includes('BadSession')) {
+        if (node.connector && coreListener.core.isSessionBad(err)) {
           node.sendAllMonitoredItems('BAD SESSION')
-          node.connector.resetBadSession()
+          node.terminateSubscription(() => {
+            node.connector.resetBadSession()
+          })
         }
       })
 
@@ -488,6 +493,7 @@ module.exports = function (RED) {
     }
 
     node.errorHandling = function (err) {
+      coreListener.internalDebugLog('Basic Error Handling')
       coreListener.internalDebugLog(err)
       if (node.showErrors) {
         node.error(err, {payload: 'Error Handling'})
@@ -497,7 +503,9 @@ module.exports = function (RED) {
         if (coreListener.core.isSessionBad(err)) {
           node.sendAllMonitoredItems('BAD SESSION')
           if (node.connector) {
-            node.connector.resetBadSession()
+            node.terminateSubscription(() => {
+              node.connector.resetBadSession()
+            })
           }
         }
       }
@@ -554,7 +562,7 @@ module.exports = function (RED) {
         node.messageQueue.push(msg)
         node.createSubscription(msg)
       } else {
-        if (!coreListener.checkState(node, msg, 'Event')) {
+        if (!coreListener.checkState(node, msg, 'Input')) {
           node.messageQueue.push(msg)
           return
         }
@@ -575,23 +583,39 @@ module.exports = function (RED) {
 
     coreListener.core.registerToConnector(node)
 
+    node.connector.on('connector_init', () => {
+      coreListener.internalDebugLog('Reset Subscription On Connector Init')
+      uaSubscription = null
+      node.monitoredItems = new Map()
+      node.monitoredASO = new Map()
+      node.stateMachine = coreListener.createStatelyMachine()
+      node.monitoredItemGroup = null
+    })
+
     if (node.connector) {
       node.connector.on('connection_end', () => {
         node.terminateSubscriptions('connection ends')
       })
     }
 
-    node.on('close', function (done) {
+    node.terminateSubscription = function (done) {
       if (uaSubscription && node.stateMachine.getMachineState() !== 'TERMINATED') {
         node.stateMachine.terminatesub()
         uaSubscription.terminate(() => {
-          coreListener.core.deregisterToConnector(node, done)
-          coreListener.internalDebugLog('Close Listener Node')
+          node.stateMachine.idlesub()
+          done()
         })
       } else {
+        node.stateMachine.idlesub()
+        done()
+      }
+    }
+
+    node.on('close', function (done) {
+      node.terminateSubscription(() => {
         coreListener.core.deregisterToConnector(node, done)
         coreListener.internalDebugLog('Close Listener Node')
-      }
+      })
     })
 
     /* #########   FSM EVENTS  #########     */

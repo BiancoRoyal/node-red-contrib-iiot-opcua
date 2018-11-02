@@ -80,6 +80,7 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
       'open': 'OPEN',
       'close': 'CLOSED',
       'unlock': 'UNLOCKED',
+      'lock': 'LOCKED',
       'sessionrestart': 'SESSIONRESTART',
       'end': 'END'
     },
@@ -108,7 +109,7 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
     if (err) {
       connector.internalDebugLog('Connection Error On Close ' + err)
     }
-    node.stateMachine.lock().close().idle()
+    node.stateMachine.lock().close().idle().init()
     connector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
     connector.internalDebugLog('CONNECTION CLOSED: ' + node.endpoint)
     node.emit('server_connection_close')
@@ -118,6 +119,12 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
     connector.internalDebugLog('!!! CONNECTION FAILED (backoff) FOR #'.bgWhite.yellow, number, ' retrying ', delay / 1000.0, ' sec. !!!')
     connector.internalDebugLog('CONNECTION FAILED: ' + node.endpoint)
     node.stateMachine.lock()
+  })
+
+  node.opcuaClient.on('abort', function () {
+    connector.internalDebugLog('!!! Abort backoff !!!')
+    connector.internalDebugLog('CONNECTION BROKEN: ' + node.endpoint)
+    node.stateMachine.lock().close().idle().init()
   })
 
   node.opcuaClient.on('connection_reestablished', function () {

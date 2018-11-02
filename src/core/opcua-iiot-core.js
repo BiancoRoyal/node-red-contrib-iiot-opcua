@@ -699,7 +699,11 @@ de.biancoroyal.opcua.iiot.core.availableMemory = function () {
 }
 
 de.biancoroyal.opcua.iiot.core.isSessionBad = function (err) {
-  return (err.toString().includes('BadSession') || err.toString().includes('Invalid Channel'))
+  return (err.toString().includes('Session') ||
+    err.toString().includes('Channel') ||
+    err.toString().includes('Transaction') ||
+    err.toString().includes('timeout') ||
+    err.toString().includes('Connection'))
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (nodeState, node) {
@@ -811,6 +815,16 @@ de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
   }
 
   node.connector.registerForOPCUA(node)
+
+  node.connector.on('connector_init', () => {
+    if (node.opcuaClient) {
+      node.opcuaClient = null
+    }
+
+    if (node.opcuaSession) {
+      node.opcuaSession = null
+    }
+  })
 
   node.connector.on('connection_started', (opcuaClient) => {
     core.setNodeOPCUAConnected(node, opcuaClient)

@@ -299,13 +299,19 @@ module.exports = function (RED) {
 
     node.resetBadSession = function () {
       node.sessionNodeRequests += 1
-      coreConnector.detailDebugLog('Session Node Requests At Connection ' + node.sessionNodeRequests)
+      coreConnector.detailDebugLog('Session Node Requests At Connector No.: ' + node.sessionNodeRequests)
       if (node.showErrors) {
         coreConnector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!   BAD SESSION ON CONNECTOR   !!!!!!!!!!!!!!!!!!'.bgWhite.red)
         coreConnector.logSessionInformation(node)
       }
 
       if (node.sessionNodeRequests > node.maxBadSessionRequests) {
+        if (node.stateMachine.getMachineState() === 'INIT' || node.stateMachine.getMachineState() === 'SESSIONRESTART') {
+          coreConnector.internalDebugLog('Renew Session Request Not Allowed On State ' + node.stateMachine.getMachineState())
+          node.sessionNodeRequests = 0
+          return
+        }
+
         coreConnector.internalDebugLog('Reset Bad Session Request On State ' + node.stateMachine.getMachineState())
         node.stateMachine.lock().sessionrestart()
         node.renewSession('ToManyBadSessionRequests')
@@ -313,11 +319,6 @@ module.exports = function (RED) {
     }
 
     node.renewSession = function (callerInfo) {
-      if (node.stateMachine.getMachineState() !== 'SESSIONRESTART') {
-        coreConnector.internalDebugLog('Renew Session Request Not Allowed On State ' + node.stateMachine.getMachineState())
-        return
-      }
-
       node.closeSession(() => {
         assert(node.stateMachine.getMachineState() === 'SESSIONRESTART')
 
@@ -326,14 +327,12 @@ module.exports = function (RED) {
           sessionStartTimeout = null
         }
 
-        if (node.opcuaClient) {
-          sessionStartTimeout = setTimeout(() => {
-            node.stateMachine.open()
-            node.startSession('Renew Session From' + callerInfo)
-          }, node.reconnectDelay)
-        } else {
+        node.opcuaClient = null
+        coreConnector.core.nodeOPCUA = null
+        coreConnector.core.nodeOPCUA = require('node-opcua')
+        sessionStartTimeout = setTimeout(() => {
           node.stateMachine.idle().init()
-        }
+        }, node.reconnectDelay)
       })
     }
 
@@ -482,10 +481,15 @@ module.exports = function (RED) {
 
     node.stateMachine.onIDLE = function (event, oldState, newState) {
       coreConnector.detailDebugLog('Connector IDLE Event FSM')
+      node.sessionNodeRequests = 0
     }
 
     node.stateMachine.onINIT = function (event, oldState, newState) {
       coreConnector.detailDebugLog('Connector Init Event FSM')
+      node.sessionNodeRequests = 0
+      node.opcuaClient = null
+      node.opcuaSession = null
+      node.emit('connector_init')
       node.initCertificatesAndKeys()
       try {
         if (clientStartTimeout) {
