@@ -277,7 +277,10 @@ module.exports = function (RED) {
             .then(function (result) {
               if (result.monitoredItem.monitoredItemId) {
                 coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-                node.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
+                node.monitoredASO.set(result.nodeId.toString(), {
+                  monitoredItem: result.monitoredItem,
+                  topic: msg.topic || node.topic
+                })
               }
             }).catch(function (err) {
               coreListener.eventDebugLog('Build Event Error')
@@ -413,7 +416,7 @@ module.exports = function (RED) {
       let msg = {
         payload: {},
         topic: topic,
-        addressSpaceItems: [{ name: '', nodeId, datatypeName: '' }],
+        addressSpaceItems: [{name: '', nodeId, datatypeName: ''}],
         nodetype: 'listen',
         injectType: 'subscribe'
       }
@@ -436,7 +439,7 @@ module.exports = function (RED) {
           msg.error = err.message
         }
       } else {
-        msg.payload = { dataValue, monitoredItem }
+        msg.payload = {dataValue, monitoredItem}
       }
 
       node.send(msg)
@@ -447,7 +450,7 @@ module.exports = function (RED) {
 
       let dataValuesString = {}
       if (node.justValue) {
-        dataValuesString = JSON.stringify({ dataValue: dataValue }, null, 2)
+        dataValuesString = JSON.stringify({dataValue: dataValue}, null, 2)
         try {
           RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
         } catch (err) {
@@ -460,7 +463,7 @@ module.exports = function (RED) {
           msg.error = err.message
         }
       } else {
-        msg.payload = { dataValue, eventResults, monitoredItem }
+        msg.payload = {dataValue, eventResults, monitoredItem}
       }
 
       node.send(msg)
@@ -583,16 +586,16 @@ module.exports = function (RED) {
 
     coreListener.core.registerToConnector(node)
 
-    node.connector.on('connector_init', () => {
-      coreListener.internalDebugLog('Reset Subscription On Connector Init')
-      uaSubscription = null
-      node.monitoredItems = new Map()
-      node.monitoredASO = new Map()
-      node.stateMachine = coreListener.createStatelyMachine()
-      node.monitoredItemGroup = null
-    })
-
     if (node.connector) {
+      node.connector.on('connector_init', () => {
+        coreListener.internalDebugLog('Reset Subscription On Connector Init')
+        uaSubscription = null
+        node.monitoredItems = new Map()
+        node.monitoredASO = new Map()
+        node.stateMachine = coreListener.createStatelyMachine()
+        node.monitoredItemGroup = null
+      })
+
       node.connector.on('connection_end', () => {
         node.terminateSubscriptions('connection ends')
       })
