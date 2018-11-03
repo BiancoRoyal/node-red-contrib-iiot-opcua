@@ -160,24 +160,23 @@ describe('OPC UA Connector node Unit Testing', function () {
       })
     })
 
-    it('should be loaded and do not restart session on state is not SESSIONRESTART', function (done) {
+    // TODO whole new functions
+    it('should be loaded and do restart session on state is not RECONFIGURED', function (done) {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.stateMachine.lock().open()
-          n4.renewSession('Test Connector')
-          done()
+          n4.renewConnection(done)
         }
       })
     })
 
-    it('should be loaded and do not restart session on state is SESSIONRESTART', function (done) {
+    it('should be loaded and do restart connection on state is RECONFIGURED', function (done) {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock().open().sessionactive().sessionrestart()
-          n4.renewSession('Test Connector')
-          done()
+          n4.stateMachine.lock().reconfigure()
+          n4.renewConnection(done)
         }
       })
     })

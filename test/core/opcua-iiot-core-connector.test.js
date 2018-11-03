@@ -22,79 +22,79 @@ describe('OPC UA Core Connector', function () {
 
     it('should change to INIT state', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().getMachineState()).toBe('INIT')
+      expect(fsm.initopcua().getMachineState()).toBe('INITOPCUA')
       done()
     })
 
     it('should change to OPEN state', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().getMachineState()).toBe('OPEN')
+      expect(fsm.initopcua().open().getMachineState()).toBe('OPEN')
       done()
     })
 
     it('should change to CLOSED state', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().getMachineState()).toBe('CLOSED')
+      expect(fsm.initopcua().open().close().getMachineState()).toBe('CLOSED')
       done()
     })
 
     it('should change to END state from OPEN', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().end().getMachineState()).toBe('END')
+      expect(fsm.initopcua().open().end().getMachineState()).toBe('END')
       done()
     })
 
     it('should change to END state from CLOSE', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().end().getMachineState()).toBe('END')
+      expect(fsm.initopcua().open().close().end().getMachineState()).toBe('END')
       done()
     })
 
     it('should change to END state from LOCKED', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().lock().end().getMachineState()).toBe('END')
+      expect(fsm.initopcua().open().lock().end().getMachineState()).toBe('END')
       done()
     })
 
     it('should change to LOCKED state from INIT', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().lock().getMachineState()).toBe('LOCKED')
+      expect(fsm.initopcua().lock().getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to LOCKED state from OPEN', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().lock().getMachineState()).toBe('LOCKED')
+      expect(fsm.initopcua().open().lock().getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to LOCKED state from CLOSE', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().lock().getMachineState()).toBe('LOCKED')
+      expect(fsm.initopcua().open().close().lock().getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to UNLOCKED state from CLOSE', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().lock().unlock().getMachineState()).toBe('UNLOCKED')
+      expect(fsm.initopcua().open().close().lock().unlock().getMachineState()).toBe('UNLOCKED')
       done()
     })
 
     it('should change to INIT state from UNLOCKED', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().lock().unlock().idle().init().getMachineState()).toBe('INIT')
+      expect(fsm.initopcua().open().close().lock().unlock().idle().initopcua().getMachineState()).toBe('INITOPCUA')
       done()
     })
 
     it('should change to IDLE state from UNLOCKED', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().lock().unlock().idle().getMachineState()).toBe('IDLE')
+      expect(fsm.initopcua().open().close().lock().unlock().idle().getMachineState()).toBe('IDLE')
       done()
     })
 
     it('should change to OPEN state from UNLOCKED', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      expect(fsm.init().open().close().lock().unlock().open().getMachineState()).toBe('OPEN')
+      expect(fsm.initopcua().open().close().lock().unlock().open().getMachineState()).toBe('OPEN')
       done()
     })
 
@@ -121,7 +121,7 @@ describe('OPC UA Core Connector', function () {
       let fsm = coreConnector.createStatelyMachine()
       let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
       coreConnector.setListenerToClient(node)
-      fsm.idle().init().open()
+      fsm.idle().initopcua().open()
       node.opcuaClient.emit('start_reconnection')
       expect(fsm.getMachineState()).toBe('LOCKED')
       done()
@@ -131,7 +131,7 @@ describe('OPC UA Core Connector', function () {
       let fsm = coreConnector.createStatelyMachine()
       let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
       coreConnector.setListenerToClient(node)
-      fsm.idle().init().open()
+      fsm.idle().initopcua().open()
       node.opcuaClient.emit('timed_out_request')
       expect(fsm.getMachineState()).toBe('OPEN')
       done()
@@ -141,7 +141,7 @@ describe('OPC UA Core Connector', function () {
       let fsm = coreConnector.createStatelyMachine()
       let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
       coreConnector.setListenerToClient(node)
-      fsm.idle().init().open().sessionrequest().sessionactive()
+      fsm.idle().initopcua().open().sessionrequest().sessionactive()
       node.opcuaClient.emit('security_token_renewed')
       expect(fsm.getMachineState()).toBe('SESSIONACTIVE')
       done()
@@ -153,7 +153,7 @@ describe('OPC UA Core Connector', function () {
       node.opcuaClient = new events.EventEmitter()
       node.stateMachine = fsm
       coreConnector.setListenerToClient(node)
-      fsm.idle().init().open().sessionrequest().sessionactive().lock()
+      fsm.idle().initopcua().open().sessionrequest().sessionactive().lock()
       node.opcuaClient.emit('after_reconnection')
       expect(fsm.getMachineState()).toBe('UNLOCKED')
       done()

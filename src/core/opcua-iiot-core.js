@@ -708,7 +708,7 @@ de.biancoroyal.opcua.iiot.core.isSessionBad = function (err) {
 
 de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (nodeState, node) {
   switch (nodeState) {
-    case 'INIT':
+    case 'INITOPCUA':
     case 'SESSIONREQUESTED':
       this.setNodeStatusTo(node, 'connecting')
       break
@@ -726,6 +726,9 @@ de.biancoroyal.opcua.iiot.core.setNodeInitalState = function (nodeState, node) {
       break
     case 'UNLOCKED':
       this.setNodeStatusTo(node, 'unlocked')
+      break
+    case 'STOPPED':
+      this.setNodeStatusTo(node, 'stopped')
       break
     case 'END':
       this.setNodeStatusTo(node, 'end')
@@ -810,7 +813,7 @@ de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
   }
 
   if (!node.connector) {
-    node.error(new Error('Connector Not Valid On Register To Connector'), {payload: 'No Connector Configured'})
+    node.error(new Error('Connector Config Node Not Valid On Registering Client Node ' + node.id), {payload: 'No Connector Configured'})
     return
   }
 

@@ -176,12 +176,32 @@ describe('OPC UA Core', function () {
       done()
     })
 
-    it('should return false if message includes some of Session', function (done) {
-      assert.equal(core.isSessionBad(new Error('That is a Session Test!')), false)
+    it('should return true if message includes some of BadSession', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a BadSession Test!')), true)
       done()
     })
 
-    it('should return false if message not includes Invalid Channel', function (done) {
+    it('should return true if message includes some of Session', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a Session Test!')), true)
+      done()
+    })
+
+    it('should return true if message includes some of Transaction', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a Transaction Test!')), true)
+      done()
+    })
+
+    it('should return true if message includes some of Connection', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a Connection Test!')), true)
+      done()
+    })
+
+    it('should return true if message includes some of timeout', function (done) {
+      assert.equal(core.isSessionBad(new Error('That is a timeout Test!')), true)
+      done()
+    })
+
+    it('should return true if message not includes Invalid Channel', function (done) {
       assert.equal(core.isSessionBad(new Error('That is a Invalid Channel Test!')), true)
       done()
     })
@@ -245,7 +265,7 @@ describe('OPC UA Core', function () {
           done()
         }
       }
-      core.setNodeInitalState('INIT', node)
+      core.setNodeInitalState('INITOPCUA', node)
     })
 
     it('should set node initial state open', function (done) {

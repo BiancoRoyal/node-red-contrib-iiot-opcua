@@ -25,12 +25,13 @@ de.biancoroyal.opcua.iiot.core.connector.Stately = de.biancoroyal.opcua.iiot.cor
 de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
   return de.biancoroyal.opcua.iiot.core.connector.Stately.machine({
     'IDLE': {
-      'init': 'INIT',
+      'initopcua': 'INITOPCUA',
       'lock': 'LOCKED',
       'end': 'END'
     },
-    'INIT': {
+    'INITOPCUA': {
       'open': 'OPEN',
+      'close': 'CLOSED',
       'lock': 'LOCKED',
       'end': 'END'
     },
@@ -63,6 +64,7 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
     'SESSIONCLOSED': {
       'idle': 'IDLE',
       'open': 'OPEN',
+      'close': 'CLOSED',
       'sessionrestart': 'SESSIONRESTART',
       'lock': 'LOCKED',
       'unlock': 'UNLOCKED',
@@ -82,6 +84,9 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
       'unlock': 'UNLOCKED',
       'lock': 'LOCKED',
       'sessionrestart': 'SESSIONRESTART',
+      'reconfigure': 'RECONFIGURED',
+      'stopopcua': 'STOPPED',
+      'renew': 'RENEW',
       'end': 'END'
     },
     'UNLOCKED': {
@@ -90,6 +95,9 @@ de.biancoroyal.opcua.iiot.core.connector.createStatelyMachine = function () {
       'open': 'OPEN',
       'end': 'END'
     },
+    'RECONFIGURED': {},
+    'RENEW': {},
+    'STOPPED': {},
     'END': {}
   }, 'IDLE')
 }
@@ -109,7 +117,13 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
     if (err) {
       connector.internalDebugLog('Connection Error On Close ' + err)
     }
-    node.stateMachine.lock().close().idle().init()
+
+    if (node.isInactiveOnOPCUA()) {
+      connector.detailDebugLog('Connector Not Active On OPC UA Close Event')
+    } else {
+      node.resetOPCUAConnection('Connector To Server Close')
+    }
+
     connector.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
     connector.internalDebugLog('CONNECTION CLOSED: ' + node.endpoint)
     node.emit('server_connection_close')
@@ -124,7 +138,12 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
   node.opcuaClient.on('abort', function () {
     connector.internalDebugLog('!!! Abort backoff !!!')
     connector.internalDebugLog('CONNECTION BROKEN: ' + node.endpoint)
-    node.stateMachine.lock().close().idle().init()
+
+    if (node.isInactiveOnOPCUA()) {
+      connector.detailDebugLog('Connector Not Active On OPC UA Backoff Abort Event')
+    } else {
+      node.resetOPCUAConnection('Connector To Server Backoff Abort')
+    }
   })
 
   node.opcuaClient.on('connection_reestablished', function () {
@@ -189,6 +208,16 @@ de.biancoroyal.opcua.iiot.core.connector.logSessionInformation = function (node)
   if (node.opcuaSession.lastResponseReceivedTime) {
     this.detailDebugLog('lastResponseReceivedTime : ' + node.opcuaSession.lastResponseReceivedTime)
     this.internalDebugLog('lastResponseReceivedTime converted :' + node.opcuaSession.lastResponseReceivedTime ? new Date(node.opcuaSession.lastResponseReceivedTime).toISOString() : 'none')
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.connector.checkEndpoint = function (node) {
+  if (node.endpoint && node.endpoint.includes('opc.tcp://')) {
+    return true
+  } else {
+    this.internalDebugLog('Endpoint Not Valid -> ' + node.endpoint)
+    node.error(new Error('endpoint does not include opc.tcp://'), {payload: 'Client Endpoint Error'})
+    return false
   }
 }
 

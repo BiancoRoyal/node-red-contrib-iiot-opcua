@@ -596,6 +596,10 @@ module.exports = function (RED) {
         node.monitoredItemGroup = null
       })
 
+      node.connector.on('connection_stopped', () => {
+        node.terminateSubscriptions('connection stopped')
+      })
+
       node.connector.on('connection_end', () => {
         node.terminateSubscriptions('connection ends')
       })
