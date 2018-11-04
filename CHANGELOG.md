@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.4.0"></a>
+# [3.4.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.3.0...v3.4.0) (2018-11-04)
+
+
+### Bug Fixes
+
+* issue [#69](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/69) ([8477185](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/8477185))
+* listener should not terminate group items on reconnection ([75b8dfa](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/75b8dfa))
+
+
+### Features
+
+* check option and hide certificates and private key settings on default ([0f68a40](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0f68a40))
+
+
+
 <a name="3.3.0"></a>
 # [3.3.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.2.0...v3.3.0) (2018-10-21)
 
