@@ -178,5 +178,61 @@ describe('OPC UA Core Connector', function () {
       expect(node.opcuaSession.name).toBe('name')
       done()
     })
+
+    it('should handle OPC UA close event on State Lock', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = new events.EventEmitter()
+      node.opcuaClient = new events.EventEmitter()
+      node.stateMachine = fsm
+      node.isInactiveOnOPCUA = () => { return false }
+      node.resetOPCUAConnection = () => { return true }
+      coreConnector.setListenerToClient(node)
+      fsm.lock()
+      expect(fsm.getMachineState()).toBe('LOCKED')
+      node.on('server_connection_close', () => {
+        done()
+      })
+      node.opcuaClient.emit('close')
+    })
+
+    it('should handle OPC UA close event on State Stopped', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = new events.EventEmitter()
+      node.opcuaClient = new events.EventEmitter()
+      node.stateMachine = fsm
+      node.isInactiveOnOPCUA = () => { return true }
+      node.resetOPCUAConnection = () => { return true }
+      coreConnector.setListenerToClient(node)
+      fsm.lock().stopopcua()
+      expect(fsm.getMachineState()).toBe('STOPPED')
+      node.on('server_connection_close', () => {
+        done()
+      })
+      node.opcuaClient.emit('close')
+    })
+
+    it('should handle OPC UA abort event on State Stopped', function (done) {
+      let fsm = coreConnector.createStatelyMachine()
+      let node = new events.EventEmitter()
+      node.opcuaClient = new events.EventEmitter()
+      node.stateMachine = fsm
+      node.isInactiveOnOPCUA = () => { return true }
+      node.resetOPCUAConnection = () => { return true }
+      coreConnector.setListenerToClient(node)
+      fsm.lock().stopopcua()
+      expect(fsm.getMachineState()).toBe('STOPPED')
+      node.on('server_connection_abort', () => {
+        done()
+      })
+      node.opcuaClient.emit('abort')
+    })
+
+    it('should handle no session on session information log', function (done) {
+      let node = new events.EventEmitter()
+      node.opcuaClient = null
+      node.opcuaSession = null
+      coreConnector.logSessionInformation(node)
+      done()
+    })
   })
 })

@@ -117,34 +117,10 @@ module.exports = function (RED) {
         return
       }
 
-      let message = msg
-
-      message.objectId = msg.payload.objectId || node.objectId
-      message.methodId = msg.payload.methodId || node.methodId
-      message.methodType = msg.payload.methodType || node.methodType
-      message.inputArguments = msg.payload.inputArguments || node.inputArguments
-      message.nodetype = 'method'
-
-      if (!message.objectId) {
-        node.handleMethodWarn('No Object-Id Found For Method Call')
+      const message = coreMethod.buildCallMessage(node, msg)
+      if (coreMethod.invalidMessage(node, message)) {
         return
       }
-
-      if (!message.methodId) {
-        node.handleMethodWarn('No Method-Id Found For Method Call')
-        return
-      }
-
-      if (!message.inputArguments) {
-        node.handleMethodWarn('No Input Arguments Found For Method Call')
-        return
-      }
-
-      if (!message.methodType) {
-        node.handleMethodWarn('No Method Type Found For Method Call')
-        return
-      }
-
       node.callMethodOnSession(node.opcuaSession, message)
     })
 

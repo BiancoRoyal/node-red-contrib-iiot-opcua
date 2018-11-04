@@ -16,11 +16,12 @@ var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
 var inputNode = require('../../src/opcua-iiot-browser')
 var serverNode = require('../../src/opcua-iiot-server')
+var responseNode = require('../../src/opcua-iiot-response')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var browseNodesToLoad = [injectNode, connectorNode, inputNode, serverNode]
+var browseNodesToLoad = [injectNode, connectorNode, inputNode, serverNode, responseNode]
 
 var testBrowseFlow = [
   {
@@ -54,8 +55,18 @@ var testBrowseFlow = [
     'singleBrowseResult': true,
     'showStatusActivities': false,
     'showErrors': false,
-    'wires': [['n5f1']]
+    'wires': [['n5f1', 'n4rf1']]
   },
+  {
+    'id': 'n4rf1',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressedStruct': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [['n3rf1']]
+  },
+  {id: 'n3rf1', type: 'helper'},
   {
     'id': 'c1f1',
     'type': 'OPCUA-IIoT-Connector',

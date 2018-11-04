@@ -312,6 +312,7 @@ module.exports = function (RED) {
       }
 
       node.stateMachine.lock().renew()
+      node.emit('reset_opcua_connection')
       node.closeSession(() => {
         node.renewConnection(() => {
           coreConnector.detailDebugLog('OPC UA Connection Reset Done')
@@ -333,6 +334,8 @@ module.exports = function (RED) {
         } catch (err) {
           node.handleError(err)
           done()
+        } finally {
+          node.opcuaSession = null
         }
       } else {
         coreConnector.internalDebugLog('Close Session Without Session On State ' + node.stateMachine.getMachineState())
@@ -377,6 +380,8 @@ module.exports = function (RED) {
         } catch (err) {
           node.handleError(err)
           done()
+        } finally {
+          node.opcuaClient = null
         }
       } else {
         coreConnector.internalDebugLog('Close Node Done For Connector Without Client On ' + node.endpoint)
@@ -387,8 +392,16 @@ module.exports = function (RED) {
     node.on('close', function (done) {
       if (node.isInactiveOnOPCUA()) {
         coreConnector.detailDebugLog('OPC UA Client Is Not Active On Close Node')
+        done()
+      } else {
+        coreConnector.detailDebugLog('OPC UA Client Is Active On Close Node With State ' + node.stateMachine.getMachineState())
+        if (node.stateMachine.getMachineState() === 'SESSIONACTIVE') {
+          node.closeConnector(done)
+        } else {
+          coreConnector.internalDebugLog(node.stateMachine.getMachineState() + ' -> !!!  CHECK CONNECTOR STATE ON CLOSE  !!!'.bgWhite.red)
+          done()
+        }
       }
-      done()
     })
 
     node.opcuaDisconnect = function (done) {
@@ -597,8 +610,14 @@ module.exports = function (RED) {
         coreConnector.internalDebugLog('Node Not Valid To Register In Connector')
         return
       }
+
       coreConnector.internalDebugLog('Register In Connector NodeId: ' + opcuaNode.id)
       node.registeredNodeList[opcuaNode.id] = opcuaNode
+
+      opcuaNode.on('opcua_client_not_ready', () => {
+        node.resetBadSession()
+      })
+
       if (Object.keys(node.registeredNodeList).length === 1) {
         coreConnector.internalDebugLog('Start Connector OPC UA Connection')
         node.renewFiniteStateMachine()
@@ -635,6 +654,8 @@ module.exports = function (RED) {
           } catch (err) {
             node.handleError(err)
             done()
+          } finally {
+            node.opcuaClient = null
           }
         } else {
           done()

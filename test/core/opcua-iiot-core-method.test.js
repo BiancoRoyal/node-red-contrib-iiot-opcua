@@ -10,55 +10,118 @@
 jest.setTimeout(5000)
 
 describe('OPC UA Core Method', function () {
-  let assert = require('chai').assert
-  let expect = require('chai').expect
   let coreMethod = require('../../src/core/opcua-iiot-core-method')
 
   describe('getArgumentDefinition', function () {
     it('should return Error object, if none value is present', function (done) {
       coreMethod.getArgumentDefinition(null, null).catch(function (err) {
-        assert.equal('Method Argument Definition Session Not Valid', err.message)
+        expect(err.message).toBe('Method Argument Definition Session Not Valid')
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreMethod.getArgumentDefinition(null, null).catch(function (err) {
-        assert.equal('Method Argument Definition Session Not Valid', err.message)
+        expect(err.message).toBe('Method Argument Definition Session Not Valid')
         done()
-      })).to.be.instanceOf(Promise)
+      })).toBeInstanceOf(Promise)
     })
   })
 
   describe('callMethods', function () {
+    it('should be truthy on wrong message missing all', function (done) {
+      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {})).toBeTruthy()
+      done()
+    })
+
+    it('should be truthy on wrong message missing methodId, inputArguments, methodType', function (done) {
+      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1})).toBeTruthy()
+      done()
+    })
+
+    it('should be truthy on wrong message missing inputArguments, methodType', function (done) {
+      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1, methodId: 1})).toBeTruthy()
+      done()
+    })
+
+    it('should be truthy on wrong message missing methodType', function (done) {
+      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1, methodId: 1, inputArguments: {}})).toBeTruthy()
+      done()
+    })
+
+    it('should be false on filled message', function (done) {
+      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1})).toBeFalsy()
+      done()
+    })
+
+    it('should fill new message', function (done) {
+      const node = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1, handleMethodWarn: (text) => {}}
+      const msg = { payload: {objectId: 2, methodId: 2, inputArguments: {}, methodType: 2} }
+      const msgResult = {objectId: 2, methodId: 2, inputArguments: {}, methodType: 2, nodetype: 'method', payload: {objectId: 2, methodId: 2, inputArguments: {}, methodType: 2}}
+      expect(coreMethod.buildCallMessage(node, msg)).toEqual(msgResult)
+      done()
+    })
+
+    it('should fill new message without objectId', function (done) {
+      const node = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1, handleMethodWarn: (text) => {}}
+      const msg = { payload: {methodId: 2, inputArguments: {}, methodType: 2} }
+      const msgResult = {objectId: 1, methodId: 2, inputArguments: {}, methodType: 2, nodetype: 'method', payload: {methodId: 2, inputArguments: {}, methodType: 2}}
+      expect(coreMethod.buildCallMessage(node, msg)).toEqual(msgResult)
+      done()
+    })
+
+    it('should fill new message without objectId, methodId', function (done) {
+      const node = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1, handleMethodWarn: (text) => {}}
+      const msg = { payload: {inputArguments: {}, methodType: 2} }
+      const msgResult = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 2, nodetype: 'method', payload: {inputArguments: {}, methodType: 2}}
+      expect(coreMethod.buildCallMessage(node, msg)).toEqual(msgResult)
+      done()
+    })
+
+    it('should fill new message without objectId, methodId, inputArguments', function (done) {
+      const node = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1, handleMethodWarn: (text) => {}}
+      const msg = { payload: {methodType: 2} }
+      const msgResult = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 2, nodetype: 'method', payload: {methodType: 2}}
+      expect(coreMethod.buildCallMessage(node, msg)).toEqual(msgResult)
+      done()
+    })
+
+    it('should fill new message without parameters', function (done) {
+      const node = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1, handleMethodWarn: (text) => {}}
+      const msg = { payload: {} }
+      const msgResult = {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1, nodetype: 'method', payload: {}}
+      expect(coreMethod.buildCallMessage(node, msg)).toEqual(msgResult)
+      done()
+    })
+
     it('should return Error object, if none value is present', function (done) {
       coreMethod.callMethods(null, null).catch(function (err) {
-        assert.equal('Methods Call Session Not Valid', err.message)
+        expect(err.message).toBe('Methods Call Session Not Valid')
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreMethod.callMethods(null, null).catch(function (err) {
-        assert.equal('Methods Call Session Not Valid', err.message)
+        expect(err.message).toBe('Methods Call Session Not Valid')
         done()
-      })).to.be.instanceOf(Promise)
+      })).toBeInstanceOf(Promise)
     })
   })
 
   describe('buildMessagesFromMethodCalls', function () {
     it('should return Error object, if none value is present', function (done) {
       coreMethod.buildMessagesFromMethodCalls(null).catch(function (err) {
-        assert.equal('Methods Call Results To Messages Session Not Valid', err.message)
+        expect(err.message).toBe('Methods Call Results To Messages Session Not Valid')
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreMethod.buildMessagesFromMethodCalls(null).catch(function (err) {
-        assert.equal('Methods Call Results To Messages Session Not Valid', err.message)
+        expect(err.message).toBe('Methods Call Results To Messages Session Not Valid')
         done()
-      })).to.be.instanceOf(Promise)
+      })).toBeInstanceOf(Promise)
     })
   })
 })

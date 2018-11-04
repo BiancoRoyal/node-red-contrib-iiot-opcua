@@ -97,4 +97,40 @@ de.biancoroyal.opcua.iiot.core.method.buildMessagesFromMethodCalls = function (m
     })
 }
 
+de.biancoroyal.opcua.iiot.core.method.invalidMessage = function (node, message) {
+  let response = false
+
+  if (!message.objectId) {
+    node.handleMethodWarn('No Object-Id Found For Method Call')
+    response = true
+  }
+
+  if (!message.methodId) {
+    node.handleMethodWarn('No Method-Id Found For Method Call')
+    response = true
+  }
+
+  if (!message.inputArguments) {
+    node.handleMethodWarn('No Input Arguments Found For Method Call')
+    response = true
+  }
+
+  if (!message.methodType) {
+    node.handleMethodWarn('No Method Type Found For Method Call')
+    response = true
+  }
+
+  return response
+}
+
+de.biancoroyal.opcua.iiot.core.method.buildCallMessage = function (node, msg) {
+  let message = msg
+  message.objectId = msg.payload.objectId || node.objectId
+  message.methodId = msg.payload.methodId || node.methodId
+  message.methodType = msg.payload.methodType || node.methodType
+  message.inputArguments = msg.payload.inputArguments || node.inputArguments
+  message.nodetype = 'method'
+  return message
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core.method

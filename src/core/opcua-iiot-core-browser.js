@@ -90,6 +90,11 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
   )
 }
 
+de.biancoroyal.opcua.iiot.core.browser.createCrawler = function (session) {
+  this.core.assert(session !== null)
+  return new this.core.nodeOPCUA.NodeCrawler(session)
+}
+
 de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl, msg) {
   let coreBrowser = this
   return new Promise(
@@ -100,15 +105,16 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl,
       }
 
       const message = Object.assign({}, msg)
-
-      const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
+      const crawler = coreBrowser.createCrawler(session)
       let crawlerResult = []
+
       const data = {
         onBrowse: function (crawler, cacheNode) {
           crawlerResult.push(cacheNode)
           coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
         }
       }
+
       crawler.crawl(nodeIdToCrawl, data, function (err) {
         if (err) {
           reject(err)
@@ -129,9 +135,9 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
       }
 
       const message = Object.assign({}, msg)
-
-      const crawler = new coreBrowser.core.nodeOPCUA.NodeCrawler(session)
+      const crawler = coreBrowser.createCrawler(session)
       let crawlerResult = []
+
       const data = {
         onBrowse (crawler, cacheNode) {
           if (!cacheNode) {
@@ -141,6 +147,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
           coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
         }
       }
+
       message.addressSpaceItems.forEach((item) => {
         if (!item.nodeId) {
           coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')

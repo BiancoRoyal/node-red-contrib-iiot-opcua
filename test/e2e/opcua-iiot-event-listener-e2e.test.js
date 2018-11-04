@@ -339,7 +339,7 @@ var listenToEventsWithResponseOnServer = [
     'showErrors': false,
     'wires': [
       [
-        'nh1evf2', 'nh2evf2'
+        'nh1evf2', 'nh2evf2', 'nh21evf2'
       ]
     ]
   },
@@ -360,6 +360,22 @@ var listenToEventsWithResponseOnServer = [
     ]
   },
   {id: 'nh3evf2', type: 'helper'},
+  {
+    'id': 'nh21evf2',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': false,
+    'filters': [],
+    'wires': [
+      [
+        'nh31evf2'
+      ]
+    ]
+  },
+  {id: 'nh31evf2', type: 'helper'},
   {
     'id': 'nhcf2',
     'type': 'OPCUA-IIoT-Connector',

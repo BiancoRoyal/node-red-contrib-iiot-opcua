@@ -181,6 +181,30 @@ describe('OPC UA Connector node Unit Testing', function () {
       })
     })
 
+    it('should be loaded and do reset BadSession on state is LOCKED', function (done) {
+      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+        let n4 = helper.getNode('n4')
+        if (n4) {
+          n4.stateMachine.lock()
+          n4.sessionNodeRequests = 10
+          n4.resetBadSession()
+          setTimeout(done, 1000)
+        }
+      })
+    })
+
+    it('should be loaded and do reset BadSession on state is RECONFIGURED', function (done) {
+      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+        let n4 = helper.getNode('n4')
+        if (n4) {
+          n4.stateMachine.lock().reconfigure()
+          n4.sessionNodeRequests = 10
+          n4.resetBadSession()
+          setTimeout(done, 1000)
+        }
+      })
+    })
+
     it('should be loaded and handle error', function (done) {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
