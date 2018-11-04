@@ -26,6 +26,7 @@ de.biancoroyal.opcua.iiot.core.OBJECTS_ROOT = de.biancoroyal.opcua.iiot.core.OBJ
 de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT = de.biancoroyal.opcua.iiot.core.TEN_SECONDS_TIMEOUT || 10 // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.RUNNING_STATE = de.biancoroyal.opcua.iiot.core.RUNNING_STATE || 'SESSIONACTIVE' // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.os = de.biancoroyal.opcua.iiot.core.os || require('os') // eslint-disable-line no-use-before-define
+de.biancoroyal.opcua.iiot.core.assert = de.biancoroyal.opcua.iiot.core.assert || require('better-assert') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.underscore = de.biancoroyal.opcua.iiot.core.underscore || require('underscore') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.isWindows = de.biancoroyal.opcua.iiot.core.isWindows || /^win/.test(de.biancoroyal.opcua.iiot.core.os.platform()) // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.FAKTOR_SEC_TO_MSEC = de.biancoroyal.opcua.iiot.core.FAKTOR_SEC_TO_MSEC || 1000 // eslint-disable-line no-use-before-define
@@ -761,6 +762,8 @@ de.biancoroyal.opcua.iiot.core.checkConnectorState = function (node, msg, caller
     if (node.showErrors) {
       node.error(new Error('Client Not ' + this.RUNNING_STATE + ' On ' + callerType), msg)
     }
+    this.setNodeStatusTo(node, 'not running')
+    node.emit('opcua_client_not_ready')
     return false
   } else {
     return true
@@ -834,6 +837,10 @@ de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
   })
 
   node.connector.on('server_connection_close', () => {
+    core.setNodeOPCUAClosed(node)
+  })
+
+  node.connector.on('server_connection_abort', () => {
     core.setNodeOPCUAClosed(node)
   })
 

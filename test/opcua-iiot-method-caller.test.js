@@ -205,6 +205,15 @@ describe('OPC UA Method Caller node Unit Testing', function () {
       })
     })
 
+    it('should be loaded and handle method warn message', function (done) {
+      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+        let n1 = helper.getNode('706d43c1.90babc')
+        expect(n1).toBeDefined()
+        n1.handleMethodWarn('Test')
+        done()
+      })
+    })
+
     it('should be loaded and handle missing session', function (done) {
       helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')

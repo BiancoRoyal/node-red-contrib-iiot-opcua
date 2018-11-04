@@ -28,7 +28,7 @@ var testInjectFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '1',
+    'startDelay': '0.1',
     'name': 'TestInject',
     'addressSpaceItems': [
       {
@@ -53,7 +53,7 @@ var testInjectWithDelayFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '0.3',
     'name': 'TestInject',
     'addressSpaceItems': [
       {
@@ -78,7 +78,7 @@ var testInjectWithLongDelayFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '5',
+    'startDelay': '0.5',
     'name': 'TestInject',
     'addressSpaceItems': [
       {

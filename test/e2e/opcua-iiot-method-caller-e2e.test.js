@@ -77,7 +77,8 @@ var testMethodFlowPayload = [
     'wires': [
       [
         'n4mcf1',
-        'n5mcf1'
+        'n5mcf1',
+        'n51mcf1'
       ]
     ]
   },
@@ -92,7 +93,17 @@ var testMethodFlowPayload = [
       ['n6mcf1']
     ]
   },
+  {
+    'id': 'n51mcf1',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressedStruct': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [['n7mcf1']]
+  },
   {id: 'n6mcf1', type: 'helper'},
+  {id: 'n7mcf1', type: 'helper'},
   {
     'id': 'c1mcf1',
     'type': 'OPCUA-IIoT-Connector',

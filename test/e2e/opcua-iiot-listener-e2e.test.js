@@ -428,11 +428,13 @@ var recursiveBrowserAboFlow = [
     'queueSize': '1',
     'name': '',
     'justValue': true,
+    'useGroupItems': true,
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [
       [
         'c2a66a6.1940198',
+        'c2a66a6.1940123',
         'n4abo'
       ]
     ]
@@ -454,6 +456,22 @@ var recursiveBrowserAboFlow = [
     ]
   },
   {id: 'n5abo', type: 'helper'},
+  {
+    'id': 'c2a66a6.1940123',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': false,
+    'filters': [],
+    'wires': [
+      [
+        'n6abo'
+      ]
+    ]
+  },
+  {id: 'n6abo', type: 'helper'},
   {
     'id': '296a2f29.56e248',
     'type': 'OPCUA-IIoT-Connector',

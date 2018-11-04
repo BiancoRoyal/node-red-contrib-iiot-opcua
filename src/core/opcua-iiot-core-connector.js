@@ -144,6 +144,8 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
     } else {
       node.resetOPCUAConnection('Connector To Server Backoff Abort')
     }
+
+    node.emit('server_connection_abort')
   })
 
   node.opcuaClient.on('connection_reestablished', function () {
