@@ -575,6 +575,18 @@ module.exports = function (RED) {
         node.resetAllTimer()
         node.emit('connection_end')
       }
+
+      fsm.onRECONFIGURED = function (event, oldState, newState) {
+        coreConnector.detailDebugLog('Connector Reconfigure Event FSM')
+        node.resetAllTimer()
+        node.emit('connection_reconfigure')
+      }
+
+      fsm.onRENEW = function (event, oldState, newState) {
+        coreConnector.detailDebugLog('Connector Renew Event FSM')
+        node.resetAllTimer()
+        node.emit('connection_renew')
+      }
     }
 
     node.resetAllTimer = function () {

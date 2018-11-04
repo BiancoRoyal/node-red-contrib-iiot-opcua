@@ -139,9 +139,11 @@ module.exports = function (RED) {
       node.monitoredItems.clear()
       node.monitoredASO.clear()
 
+      /*
       if (node.connector) {
         node.connector.hasOpcUaSubscriptions = false
       }
+       */
     }
 
     node.subscribeActionInput = function (msg) {
@@ -602,6 +604,14 @@ module.exports = function (RED) {
 
       node.connector.on('connection_end', () => {
         node.terminateSubscriptions('connection ends')
+      })
+
+      node.connector.on('connection_reconfigure', () => {
+        node.terminateSubscriptions('connection reconfigure')
+      })
+
+      node.connector.on('connection_renew', () => {
+        node.terminateSubscriptions('connection renew')
       })
     }
 
