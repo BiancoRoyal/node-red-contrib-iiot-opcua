@@ -118,7 +118,6 @@ var testConnectorBrowseFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 1000,
     'maxNodesPerBrowse': 2000,
-    'delayToClose': 100,
     'wires': [[]]
   }
 ]
@@ -215,7 +214,7 @@ var testConnectorListenerFlow = [
     'id': 'n1cf3',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
-    'payload': '{"interval":100,"queueSize":1,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":10,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":10,"publishingEnabled":true,"priority":1}}',
+    'payload': '{"interval":100,"queueSize":1,"options":{"requestedPublishingInterval":500,"requestedLifetimeCount":10,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":10,"publishingEnabled":true,"priority":1}}',
     'payloadType': 'json',
     'topic': 'TestTopicListen',
     'repeat': '',
