@@ -657,16 +657,22 @@ de.biancoroyal.opcua.iiot.core.server.loadCertificates = function (node) {
 }
 
 de.biancoroyal.opcua.iiot.core.server.checkUser = function (node, userName, password) {
-  let coreServer = this
-  coreServer.internalDebugLog('Is Valid Server User?')
+  let isValidUser = false
+  this.detailDebugLog('Server User Request For ' + userName)
+
   node.users.forEach(function (user) {
     if (userName === user.name && password === user.password) {
-      coreServer.internalDebugLog('Valid Server User Found')
-      return true
+      isValidUser = true
     }
   })
-  coreServer.internalDebugLog('Invalid Server User')
-  return false
+
+  if (isValidUser) {
+    this.detailDebugLog('Valid Server User Found')
+  } else {
+    this.detailDebugLog('Server User ' + userName + ' Not Found')
+  }
+
+  return isValidUser
 }
 
 de.biancoroyal.opcua.iiot.core.server.initRegisterServerMethod = function (node) {
@@ -856,11 +862,7 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
     certificateFile: node.publicCertificateFile,
     privateKeyFile: node.privateCertificateFile,
     alternateHostname: node.alternateHostname || '',
-    userManager: {
-      isValidUser: function (userName, password) {
-        return coreServer.checkUser(node, userName, password)
-      }
-    },
+    userManager: null,
     isAuditing: node.isAuditing,
     disableDiscovery: node.disableDiscovery
   }

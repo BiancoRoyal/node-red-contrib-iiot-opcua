@@ -306,7 +306,7 @@ var testConnectorWriteFlow = [
     'repeat': '',
     'crontab': '',
     'once': true,
-    'startDelay': '3',
+    'startDelay': '4',
     'name': '',
     'addressSpaceItems': [
       {
@@ -334,7 +334,7 @@ var testConnectorWriteFlow = [
     'discoveryUrl': '',
     'endpoint': 'opc.tcp://localhost:51982/',
     'keepSessionAlive': false,
-    'loginEnabled': true,
+    'loginEnabled': false,
     'securityPolicy': 'Basic256',
     'securityMode': 'SIGNANDENCRYPT',
     'name': 'TESTSERVER',
@@ -825,6 +825,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with payload after inject with read', function (done) {
+      testConnectorReadFlow[3].port = 56220
+      testConnectorReadFlow[5].endpoint = 'opc.tcp://localhost:56220/'
       helper.load(nodesToLoadForReader, testConnectorReadFlow, function () {
         let n2 = helper.getNode('n2cf2')
         n2.on('input', function (msg) {
@@ -836,6 +838,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with nodeId in payload after read', function (done) {
+      testConnectorReadFlow[3].port = 56221
+      testConnectorReadFlow[5].endpoint = 'opc.tcp://localhost:56221/'
       helper.load(nodesToLoadForReader, testConnectorReadFlow, function () {
         let n5 = helper.getNode('n5cf2')
         n5.on('input', function (msg) {
@@ -870,18 +874,10 @@ describe('OPC UA Connector node e2e Testing', function () {
       })
     })
 
-    it('should get a message with payload after inject with write', function (done) {
-      helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
-        let n2 = helper.getNode('n2cf4')
-        n2.on('input', function (msg) {
-          expect(msg.payload).toBe(1000)
-          expect(msg.topic).toBe('TestTopicWrite')
-          setTimeout(done, 3000)
-        })
-      })
-    })
-
     it('should get a message with addressSpaceItems after write', function (done) {
+      testConnectorWriteFlow[3].endpoint = 'opc.tcp://localhost:56442/'
+      testConnectorWriteFlow[3].credentials = {user: 'peter', password: 'peter'}
+      testConnectorWriteFlow[5].port = 56442
       helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
@@ -892,20 +888,9 @@ describe('OPC UA Connector node e2e Testing', function () {
       })
     })
 
-    it('should get a message with payload after inject with autoselect endpoint', function (done) {
-      testConnectorWriteFlow[3].autoSelectRightEndpoint = true
-      helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
-        let n2 = helper.getNode('n2cf4')
-        n2.on('input', function (msg) {
-          expect(msg.payload).toBe(1000)
-          expect(msg.topic).toBe('TestTopicWrite')
-          setTimeout(done, 3000)
-        })
-      })
-    })
-
     it('should get a message with addressSpaceItems after write with autoselect endpoint', function (done) {
       testConnectorWriteFlow[3].autoSelectRightEndpoint = true
+      testConnectorWriteFlow[3].credentials = {user: 'peter', password: 'peter'}
       helper.load(nodesToLoadForWriter, testConnectorWriteFlow, testCredentials, function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
@@ -917,6 +902,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with payload after inject with method', function (done) {
+      testConnectorMethodCallerFlow[3].endpoint = 'opc.tcp://localhost:56446/'
+      testConnectorMethodCallerFlow[5].port = 56446
       helper.load(nodesToLoadForMethodCaller, testConnectorMethodCallerFlow, function () {
         let n2 = helper.getNode('n2cf5')
         n2.on('input', function (msg) {

@@ -45,6 +45,11 @@ module.exports = function (RED) {
 
     node.buildServerOptions = function () {
       let serverOptions = coreServer.buildServerOptions(node, 'Flex')
+      serverOptions.userManager = {
+        isValidUser: function (userName, password) {
+          return coreServer.checkUser(node, userName, password)
+        }
+      }
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
