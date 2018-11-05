@@ -575,17 +575,6 @@ module.exports = function (RED) {
       }
     })
 
-    node.terminateSubscriptions = function (event) {
-      coreListener.internalDebugLog('Subscription Is To Terminate On Connection Event ' + event)
-      if (uaSubscription && node.stateMachine.getMachineState() === 'STARTED') {
-        node.stateMachine.terminatesub()
-        uaSubscription.terminate(() => {
-          node.stateMachine.idlesub()
-          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event ' + event)
-        })
-      }
-    }
-
     coreListener.core.registerToConnector(node)
 
     if (node.connector) {
@@ -599,24 +588,36 @@ module.exports = function (RED) {
       })
 
       node.connector.on('connection_stopped', () => {
-        node.terminateSubscriptions('connection stopped')
+        node.terminateSubscription(() => {
+          uaSubscription = null
+          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection stopped')
+        })
       })
 
       node.connector.on('connection_end', () => {
-        node.terminateSubscriptions('connection ends')
+        node.terminateSubscription(() => {
+          uaSubscription = null
+          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection ends')
+        })
       })
 
       node.connector.on('connection_reconfigure', () => {
-        node.terminateSubscriptions('connection reconfigure')
+        node.terminateSubscription(() => {
+          uaSubscription = null
+          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection reconfigure')
+        })
       })
 
       node.connector.on('connection_renew', () => {
-        node.terminateSubscriptions('connection renew')
+        node.terminateSubscription(() => {
+          uaSubscription = null
+          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection renew')
+        })
       })
     }
 
     node.terminateSubscription = function (done) {
-      if (uaSubscription && node.stateMachine.getMachineState() !== 'TERMINATED') {
+      if (uaSubscription && node.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
         node.stateMachine.terminatesub()
         uaSubscription.terminate(() => {
           node.stateMachine.idlesub()
@@ -630,6 +631,7 @@ module.exports = function (RED) {
 
     node.on('close', function (done) {
       node.terminateSubscription(() => {
+        uaSubscription = null
         coreListener.core.deregisterToConnector(node, done)
         coreListener.internalDebugLog('Close Listener Node')
       })
