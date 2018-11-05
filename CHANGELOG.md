@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.4.1"></a>
+## [3.4.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.0...v3.4.1) (2018-11-05)
+
+
+### Bug Fixes
+
+* check user core function ([2908f87](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/2908f87))
+* terminate only started subscription  ([3fd767d](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/3fd767d))
+
+
+
 <a name="3.4.0"></a>
 # [3.4.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.3.0...v3.4.0) (2018-11-04)
 
