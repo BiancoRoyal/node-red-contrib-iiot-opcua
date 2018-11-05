@@ -657,14 +657,15 @@ de.biancoroyal.opcua.iiot.core.server.loadCertificates = function (node) {
 }
 
 de.biancoroyal.opcua.iiot.core.server.checkUser = function (node, userName, password) {
-  this.internalDebugLog('Is Valid Server User?')
-  node.users.forEach(function (user, index, array) {
+  let coreServer = this
+  coreServer.internalDebugLog('Is Valid Server User?')
+  node.users.forEach(function (user) {
     if (userName === user.name && password === user.password) {
-      this.internalDebugLog('Valid Server User Found')
+      coreServer.internalDebugLog('Valid Server User Found')
       return true
     }
   })
-  this.internalDebugLog('Invalid Server User')
+  coreServer.internalDebugLog('Invalid Server User')
   return false
 }
 
