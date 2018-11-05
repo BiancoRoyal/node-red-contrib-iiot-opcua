@@ -577,7 +577,7 @@ module.exports = function (RED) {
 
     node.terminateSubscriptions = function (event) {
       coreListener.internalDebugLog('Subscription Is To Terminate On Connection Event ' + event)
-      if (uaSubscription && uaSubscription.isActive() && node.stateMachine.getMachineState() !== 'TERMINATED') {
+      if (uaSubscription && node.stateMachine.getMachineState() === 'STARTED') {
         node.stateMachine.terminatesub()
         uaSubscription.terminate(() => {
           node.stateMachine.idlesub()
