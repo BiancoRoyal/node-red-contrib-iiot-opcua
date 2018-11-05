@@ -470,7 +470,7 @@ let testCrawlerWithFilter = [
     'type': 'OPCUA-IIoT-Connector',
     'z': '',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:55388',
+    'endpoint': 'opc.tcp://localhost:51188',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'Basic256',
@@ -493,7 +493,7 @@ let testCrawlerWithFilter = [
   {
     'id': '88f582a2.3b9028',
     'type': 'OPCUA-IIoT-Server',
-    'port': '55388',
+    'port': '51188',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
