@@ -60,17 +60,13 @@ var testCrawlerFlow = [
     'showStatusActivities': false,
     'showErrors': false,
     'filters': [],
-    'wires': [
-      [
-        'n4f1'
-      ]
-    ]
+    'wires': [['n4f1']]
   },
   {id: 'n4f1', type: 'helper'},
   {
     'id': '6aff8d91.2081b4',
     'type': 'OPCUA-IIoT-Server',
-    'port': '51965',
+    'port': '51999',
     'endpoint': '',
     'acceptExternalCommands': true,
     'maxAllowedSessionNumber': '',
@@ -90,16 +86,13 @@ var testCrawlerFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
-
-    'wires': [
-      []
-    ]
+    'wires': [[]]
   },
   {
     'id': 'n1c1',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
-    'endpoint': 'opc.tcp://localhost:51965/',
+    'endpoint': 'opc.tcp://localhost:51999/',
     'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
@@ -185,10 +178,7 @@ var testCrawlerJustValueFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
-
-    'wires': [
-      []
-    ]
+    'wires': [[]]
   },
   {
     'id': 'n1c2',
@@ -215,7 +205,7 @@ var testCrawlerJustValueFlow = [
 
 var testCrawlerJustValueSingleFlow = [
   {
-    'id': 'n1f2',
+    'id': 'n1f3',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': 'testpayload',
@@ -235,15 +225,15 @@ var testCrawlerJustValueSingleFlow = [
     ],
     'wires': [
       [
-        'n2f2', 'n3f2'
+        'n2f3', 'n3f3'
       ]
     ]
   },
-  {id: 'n2f2', type: 'helper'},
+  {id: 'n2f3', type: 'helper'},
   {
-    'id': 'n3f2',
+    'id': 'n3f3',
     'type': 'OPCUA-IIoT-Crawler',
-    'connector': 'n1c2',
+    'connector': 'n1c3',
     'name': 'TestCrawler',
     'justValue': true,
     'singleResult': true,
@@ -252,13 +242,13 @@ var testCrawlerJustValueSingleFlow = [
     'filters': [],
     'wires': [
       [
-        'n4f2'
+        'n4f3'
       ]
     ]
   },
-  {id: 'n4f2', type: 'helper'},
+  {id: 'n4f3', type: 'helper'},
   {
-    'id': 's1f2',
+    'id': 's1f3',
     'type': 'OPCUA-IIoT-Server',
     'port': '51967',
     'endpoint': '',
@@ -280,13 +270,10 @@ var testCrawlerJustValueSingleFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
-
-    'wires': [
-      []
-    ]
+    'wires': [[]]
   },
   {
-    'id': 'n1c2',
+    'id': 'n1c3',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
     'endpoint': 'opc.tcp://localhost:51967/',
@@ -310,7 +297,7 @@ var testCrawlerJustValueSingleFlow = [
 
 var testCrawlerJustValueSingleFilteredFlow = [
   {
-    'id': 'n1f2',
+    'id': 'n1f4',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': 'testpayload',
@@ -330,15 +317,15 @@ var testCrawlerJustValueSingleFilteredFlow = [
     ],
     'wires': [
       [
-        'n2f2', 'n3f2'
+        'n2f4', 'n3f4'
       ]
     ]
   },
-  {id: 'n2f2', type: 'helper'},
+  {id: 'n2f4', type: 'helper'},
   {
-    'id': 'n3f2',
+    'id': 'n3f4',
     'type': 'OPCUA-IIoT-Crawler',
-    'connector': 'n1c2',
+    'connector': 'n1c4',
     'name': 'TestCrawler',
     'justValue': true,
     'singleResult': true,
@@ -347,13 +334,13 @@ var testCrawlerJustValueSingleFilteredFlow = [
     'filters': [{'name': 'Limits', 'nodeId': 'ns=0;i=11704'}],
     'wires': [
       [
-        'n4f2'
+        'n4f4'
       ]
     ]
   },
-  {id: 'n4f2', type: 'helper'},
+  {id: 'n4f4', type: 'helper'},
   {
-    'id': 's1f2',
+    'id': 's1f4',
     'type': 'OPCUA-IIoT-Server',
     'port': '52967',
     'endpoint': '',
@@ -375,13 +362,10 @@ var testCrawlerJustValueSingleFilteredFlow = [
     'privateCertificateFile': '',
     'maxNodesPerRead': 10000,
     'maxNodesPerBrowse': 10000,
-
-    'wires': [
-      []
-    ]
+    'wires': [[]]
   },
   {
-    'id': 'n1c2',
+    'id': 'n1c4',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
     'endpoint': 'opc.tcp://localhost:52967/',
@@ -832,7 +816,7 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify crawler items as just values as single result', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFlow, function () {
-        let n4 = helper.getNode('n4f2')
+        let n4 = helper.getNode('n4f3')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBe(undefined)
@@ -846,7 +830,7 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify filtered crawler items as just values as single result', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFilteredFlow, function () {
-        let n4 = helper.getNode('n4f2')
+        let n4 = helper.getNode('n4f4')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBe(undefined)

@@ -716,8 +716,8 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with topic after browse', function (done) {
-      testConnectorBrowseFlow[3].port = 51962
-      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:51962/'
+      testConnectorBrowseFlow[3].port = 51963
+      testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:51963/'
       helper.load(nodesToLoadForBrowser, testConnectorBrowseFlow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {

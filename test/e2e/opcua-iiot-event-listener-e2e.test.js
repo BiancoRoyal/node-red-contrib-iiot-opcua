@@ -443,38 +443,6 @@ describe('OPC UA Listener event node e2e Testing', function () {
   describe('Listen event node', function () {
     let msgCounter = 0
 
-    it('should get a message without addressSpaceItems in payload after inject node subscribe', function (done) {
-      helper.load(eventNodesToLoad, testListenerEventFlow, function () {
-        msgCounter = 0
-        let n2 = helper.getNode('n2ev')
-        n2.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.topic).toBe('TestTopicEvent')
-            expect(msg.nodetype).toBe('inject')
-            expect(msg.injectType).toBe('listen')
-            setTimeout(done, 2000)
-          }
-        })
-      })
-    })
-
-    it('should get a message with payload after inject node subscribe', function (done) {
-      helper.load(eventNodesToLoad, testListenerEventFlow, function () {
-        msgCounter = 0
-        let n2 = helper.getNode('n2ev')
-        n2.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.topic).toBe('TestTopicEvent')
-            expect(msg.nodetype).toBe('inject')
-            expect(msg.injectType).toBe('listen')
-            setTimeout(done, 2000)
-          }
-        })
-      })
-    })
-
     it('should get a message with nodetype events after base event node subscribe', function (done) {
       helper.load(eventNodesToLoad, testListenerEventFlow, function () {
         msgCounter = 0
