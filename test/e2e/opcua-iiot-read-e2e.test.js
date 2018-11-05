@@ -243,7 +243,7 @@ var testReadHistoryRangeFlow = [
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
     'endpoint': 'opc.tcp://localhost:55603/',
-    'keepSessionAlive': true,
+    'keepSessionAlive': false,
     'loginEnabled': false,
     'securityPolicy': 'None',
     'securityMode': 'NONE',
