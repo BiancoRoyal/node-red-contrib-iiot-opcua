@@ -134,7 +134,12 @@ module.exports = function (RED) {
 
     node.on('input', function (msg) {
       try {
+        if (node.activateUnsetFilter) {
+          if (msg.payload === void 0 || msg.payload === null || msg.payload === {}) { return }
+        }
+
         let message = node.handleNodeTypeOfMsg(msg)
+        message.compressed = node.compressStructure
 
         if (node.activateFilters && node.filters && node.filters.length > 0) {
           message = node.filterMsg(message)

@@ -29,7 +29,7 @@ de.biancoroyal.opcua.iiot.core.response.analyzeBrowserResults = function (node, 
 
 de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (node, msg) {
   this.handlePayloadStatusCode(node, msg)
-  if (msg.readtype === 'HistoryValue') {
+  if (msg.readtype === 'HistoryValue' && msg.payload && msg.payload.length) {
     msg.payload.forEach((item) => {
       delete item['statusCode']
     })
@@ -245,6 +245,10 @@ de.biancoroyal.opcua.iiot.core.response.trimMessageExtensions = function (msg) {
   delete msg['nodetype']
   delete msg['entryStatus']
   delete msg['entryStatusText']
+
+  if (msg.filter) {
+    msg = this.compressFilteredMessage(msg)
+  }
 }
 
 de.biancoroyal.opcua.iiot.core.response.trimMessagePayloadExtensions = function (msg) {
@@ -269,6 +273,51 @@ de.biancoroyal.opcua.iiot.core.response.compressBrowseMessageStructure = functio
   }
 }
 
+de.biancoroyal.opcua.iiot.core.response.compressVariableValueMessage = function (msg) {
+  let itemList = []
+  let results = msg.payload
+  let nodesToRead = msg.nodesToRead
+
+  if (msg.payload.results) {
+    results = msg.payload.results
+    nodesToRead = msg.payload.nodesToRead
+  }
+
+  if (results && results.length) {
+    results.forEach((item, index) => {
+      if (item.hasOwnProperty('value') && item.value.hasOwnProperty('value')) {
+        let nodeId = null
+        if (nodesToRead && index < nodesToRead.length) {
+          nodeId = nodesToRead[index]
+        } else {
+          if (msg.addressSpaceItems && index < msg.addressSpaceItems.length) {
+            nodeId = msg.addressSpaceItems[index]
+          }
+        }
+
+        itemList.push({
+          value: item.value.value,
+          dataType: item.value.dataType,
+          nodeId
+        })
+      }
+    })
+
+    msg.payload = itemList
+  }
+
+  delete msg['nodesToRead']
+  delete msg['nodesToReadCount']
+  delete msg['addressSpaceItems']
+
+  return msg
+}
+
+de.biancoroyal.opcua.iiot.core.response.compressFilteredMessage = function (msg) {
+  delete msg['filter']
+  delete msg['filtertype']
+}
+
 de.biancoroyal.opcua.iiot.core.response.compressReadMessageStructure = function (msg) {
   switch (msg.readtype) {
     case 'AllAttributes':
@@ -276,37 +325,7 @@ de.biancoroyal.opcua.iiot.core.response.compressReadMessageStructure = function 
       delete msg['resultsConverted']
       break
     case 'VariableValue':
-      let itemList = []
-      let results = msg.payload
-      let nodesToRead = msg.nodesToRead
-
-      if (msg.payload.results) {
-        results = msg.payload.results
-        nodesToRead = msg.payload.nodesToRead
-      }
-
-      results.forEach((item, index) => {
-        if (item.hasOwnProperty('value') && item.value.hasOwnProperty('value')) {
-          let nodeId = null
-          if (nodesToRead && index < nodesToRead.length) {
-            nodeId = nodesToRead[index]
-          } else {
-            if (msg.addressSpaceItems && index < msg.addressSpaceItems.length) {
-              nodeId = msg.addressSpaceItems[index]
-            }
-          }
-
-          itemList.push({
-            value: item.value.value,
-            dataType: item.value.dataType,
-            nodeId
-          })
-        }
-      })
-      msg.payload = itemList
-      delete msg['nodesToRead']
-      delete msg['nodesToReadCount']
-      delete msg['addressSpaceItems']
+      msg = this.compressVariableValueMessage(msg)
       break
     default:
       break

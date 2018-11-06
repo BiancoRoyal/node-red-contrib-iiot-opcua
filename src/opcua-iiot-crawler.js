@@ -127,8 +127,19 @@ module.exports = function (RED) {
       let msg = Object.assign({}, originMessage)
       msg.nodetype = 'crawl'
 
-      msg.payload = {
+      const results = {
         crawlerResults: crawlerResult
+      }
+
+      try {
+        RED.util.setMessageProperty(msg, 'payload', JSON.parse(JSON.stringify(results, null, 2)))
+      } catch (err) {
+        coreBrowser.writeDebugLog(err)
+        if (node.showErrors) {
+          node.error(err, msg)
+        }
+        msg.resultsConverted = JSON.stringify(results, null, 2)
+        msg.error = err.message
       }
 
       if (node.browseTopic && node.browseTopic !== '') {
@@ -148,6 +159,8 @@ module.exports = function (RED) {
       if (node.showStatusActivities) {
         coreBrowser.core.setNodeStatusTo(node, 'active')
       }
+
+      // TODO: maybe here RED.util.set ...
 
       setTimeout(() => {
         node.send(node.messageList.shift())

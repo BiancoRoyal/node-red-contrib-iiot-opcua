@@ -676,7 +676,11 @@ de.biancoroyal.opcua.iiot.core.buildNodesToListen = function (msg) {
 }
 
 de.biancoroyal.opcua.iiot.core.buildNodesFromBrowser = function (msg) {
-  return msg.addressItemsToRead || msg.addressSpaceItems
+  return msg.payload.browserResults || msg.addressSpaceItems
+}
+
+de.biancoroyal.opcua.iiot.core.buildNodesFromCrawler = function (msg) {
+  return msg.payload.crawlerResults || msg.addressSpaceItems
 }
 
 de.biancoroyal.opcua.iiot.core.buildNodeListFromClient = function (msg) {
@@ -687,8 +691,9 @@ de.biancoroyal.opcua.iiot.core.buildNodeListFromClient = function (msg) {
     case 'listen':
       return this.buildNodesToListen(msg)
     case 'browse':
-    case 'crawl':
       return this.buildNodesFromBrowser(msg)
+    case 'crawl':
+      return this.buildNodesFromCrawler(msg)
     default:
       this.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
       return []
