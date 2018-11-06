@@ -194,14 +194,14 @@ var writeTestFlowPayload = [
     'withPrecision': false,
     'precision': 2,
     'entry': 1,
-    'justValue': true,
+    'justValue': false,
     'withValueCheck': false,
     'minvalue': '',
     'maxvalue': '',
     'defaultvalue': '',
     'topic': '',
     'name': 'AnalogItem',
-    'showErrors': true,
+    'showErrors': false,
     'wires': [['n6rff4']]
   },
   {id: 'n6rff4', type: 'helper'}

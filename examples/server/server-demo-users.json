@@ -1,0 +1,386 @@
+[
+  {
+    "id": "bfbeda89.a83b08",
+    "type": "tab",
+    "label": "IIoT OPC UA User Demo",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "24f873cd.295d8c",
+    "type": "OPCUA-IIoT-Server-Command",
+    "z": "bfbeda89.a83b08",
+    "commandtype": "restart",
+    "nodeId": "",
+    "name": "restart",
+    "x": 330,
+    "y": 140,
+    "wires": [
+      [
+        "5c9db1b6.2b4488",
+        "5fa489e7.124b98"
+      ]
+    ]
+  },
+  {
+    "id": "abd720d5.d4277",
+    "type": "OPCUA-IIoT-Server-ASO",
+    "z": "bfbeda89.a83b08",
+    "nodeId": "s=TestFolder",
+    "browsename": "TestFolder",
+    "displayname": "Test Folder",
+    "objecttype": "FolderType",
+    "datatype": "",
+    "value": "",
+    "referenceNodeId": "ns=0;i=85",
+    "referencetype": "Organizes",
+    "name": "ASO Test Folder",
+    "x": 340,
+    "y": 200,
+    "wires": [
+      [
+        "5c9db1b6.2b4488"
+      ]
+    ]
+  },
+  {
+    "id": "5f42514b.37f4f8",
+    "type": "comment",
+    "z": "bfbeda89.a83b08",
+    "name": "information",
+    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
+    "x": 680,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "5a80711.75d3b1",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "bfbeda89.a83b08",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 180,
+    "y": 140,
+    "wires": [
+      [
+        "24f873cd.295d8c",
+        "968cf5f7.7ff3e8"
+      ]
+    ]
+  },
+  {
+    "id": "4f3c0991.80a558",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "bfbeda89.a83b08",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 160,
+    "y": 200,
+    "wires": [
+      [
+        "abd720d5.d4277"
+      ]
+    ]
+  },
+  {
+    "id": "5c9db1b6.2b4488",
+    "type": "OPCUA-IIoT-Server",
+    "z": "bfbeda89.a83b08",
+    "port": "55123",
+    "endpoint": "",
+    "acceptExternalCommands": true,
+    "maxAllowedSessionNumber": "",
+    "maxConnectionsPerEndpoint": "",
+    "maxAllowedSubscriptionNumber": "",
+    "alternateHostname": "",
+    "name": "",
+    "showStatusActivities": false,
+    "showErrors": false,
+    "asoDemo": true,
+    "allowAnonymous": false,
+    "isAuditing": false,
+    "serverDiscovery": true,
+    "users": [
+      {
+        "name": "peter",
+        "password": "peter"
+      },
+      {
+        "name": "klaus",
+        "password": "klaus"
+      }
+    ],
+    "xmlsets": [],
+    "publicCertificateFile": "",
+    "privateCertificateFile": "",
+    "registerServerMethod": "1",
+    "discoveryServerEndpointUrl": "",
+    "capabilitiesForMDNS": "",
+    "maxNodesPerRead": "",
+    "maxNodesPerBrowse": "",
+    "delayToClose": "",
+    "x": 570,
+    "y": 140,
+    "wires": [
+      [
+        "d6f253eb.247f3"
+      ]
+    ]
+  },
+  {
+    "id": "d6f253eb.247f3",
+    "type": "debug",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 730,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "5fa489e7.124b98",
+    "type": "debug",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 510,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "968cf5f7.7ff3e8",
+    "type": "debug",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 330,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "38668963.8e85ce",
+    "type": "OPCUA-IIoT-Server-Command",
+    "z": "bfbeda89.a83b08",
+    "commandtype": "deleteNode",
+    "nodeId": "ns=1;s=TestFolder",
+    "name": "delete Test Folder",
+    "x": 350,
+    "y": 240,
+    "wires": [
+      [
+        "5c9db1b6.2b4488"
+      ]
+    ]
+  },
+  {
+    "id": "a50744eb.0cc51",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "bfbeda89.a83b08",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 160,
+    "y": 240,
+    "wires": [
+      [
+        "38668963.8e85ce"
+      ]
+    ]
+  },
+  {
+    "id": "506ffe7b.6a859",
+    "type": "OPCUA-IIoT-Browser",
+    "z": "bfbeda89.a83b08",
+    "connector": "a37f1449.2cceb",
+    "nodeId": "ns=1;i=1234",
+    "name": "",
+    "justValue": true,
+    "sendNodesToRead": false,
+    "sendNodesToListener": false,
+    "sendNodesToBrowser": false,
+    "singleBrowseResult": true,
+    "recursiveBrowse": false,
+    "recursiveDepth": "",
+    "delayPerMessage": "",
+    "showStatusActivities": false,
+    "showErrors": true,
+    "x": 360,
+    "y": 400,
+    "wires": [
+      [
+        "34588e9a.d36c5a",
+        "c935c457.4a8ad",
+        "b0b357d4.2f3b9"
+      ]
+    ]
+  },
+  {
+    "id": "c653492b.5fdc3",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "bfbeda89.a83b08",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "",
+    "name": "Root",
+    "addressSpaceItems": [],
+    "x": 190,
+    "y": 400,
+    "wires": [
+      [
+        "506ffe7b.6a859"
+      ]
+    ]
+  },
+  {
+    "id": "34588e9a.d36c5a",
+    "type": "debug",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 550,
+    "y": 360,
+    "wires": []
+  },
+  {
+    "id": "c935c457.4a8ad",
+    "type": "OPCUA-IIoT-Response",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "compressStructure": true,
+    "showStatusActivities": false,
+    "showErrors": false,
+    "activateFilters": false,
+    "filters": [],
+    "x": 540,
+    "y": 400,
+    "wires": [
+      [
+        "a5f6a821.ea78d",
+        "27102c6b.85c924"
+      ]
+    ]
+  },
+  {
+    "id": "a5f6a821.ea78d",
+    "type": "debug",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 730,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "27102c6b.85c924",
+    "type": "debug",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 710,
+    "y": 440,
+    "wires": []
+  },
+  {
+    "id": "b0b357d4.2f3b9",
+    "type": "debug",
+    "z": "bfbeda89.a83b08",
+    "name": "",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 530,
+    "y": 320,
+    "wires": []
+  },
+  {
+    "id": "14d7b379.9307d5",
+    "type": "comment",
+    "z": "bfbeda89.a83b08",
+    "name": "connected by user and password",
+    "info": "",
+    "x": 650,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "a37f1449.2cceb",
+    "type": "OPCUA-IIoT-Connector",
+    "z": "bfbeda89.a83b08",
+    "discoveryUrl": "",
+    "endpoint": "opc.tcp://localhost:55123/",
+    "keepSessionAlive": true,
+    "loginEnabled": true,
+    "securityPolicy": "Basic256",
+    "securityMode": "SIGNANDENCRYPT",
+    "name": "LOCAL DEMO SERVER",
+    "showErrors": true,
+    "individualCerts": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "60000",
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": "",
+    "requestedSessionTimeout": "",
+    "connectionStartDelay": "",
+    "reconnectDelay": "",
+    "maxBadSessionRequests": "2"
+  }
+]

@@ -25,7 +25,7 @@ module.exports = function (RED) {
     this.fixPoint = parseInt(config.fixPoint) | 2
     this.withPrecision = config.withPrecision
     this.precision = parseInt(config.precision) | 2
-    this.entry = config.entry
+    this.entry = config.entry || 1
     this.justValue = config.justValue
     this.withValueCheck = config.withValueCheck
     this.minvalue = config.minvalue
@@ -60,7 +60,7 @@ module.exports = function (RED) {
       return doFilter
     }
 
-    node.isNodeIdToFindInsideMsg = function (msg) {
+    node.isNodeIdNotToFindInAddressSpaceItems = function (msg) {
       if (msg.addressSpaceItems) {
         let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry) {
           return entry.nodeId === node.nodeId
@@ -77,11 +77,7 @@ module.exports = function (RED) {
     }
 
     node.messageIsToFilter = function (msg) {
-      if (node.nodeIdToFilter(msg)) {
-        return true
-      } else {
-        return node.isNodeIdToFindInsideMsg(msg)
-      }
+      return node.nodeIdToFilter(msg) && node.isNodeIdNotToFindInAddressSpaceItems(msg)
     }
 
     node.on('input', function (msg) {
@@ -96,13 +92,19 @@ module.exports = function (RED) {
       }
 
       const message = Object.assign({}, msg)
-      const result = node.filterResult(message)
+
+      message.topic = node.topic || message.topic
+      message.nodeId = node.nodeId
+      message.justValue = node.justValue
+      message.filter = true
+      message.filtertype = 'filter'
+      message.payload = node.filterByType(msg) || msg.payload
 
       if (node.justValue) {
-        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId, justValue: node.justValue})
-      } else {
-        node.send({payload: result, topic: node.topic || message.topic, nodeId: node.nodeId, input: message, justValue: node.justValue})
-      } // here node topic first to overwrite for dashboard
+        message.payload = node.filterResult(message)
+      }
+
+      node.send(message)
     })
 
     node.filterByType = function (msg) {
@@ -118,8 +120,10 @@ module.exports = function (RED) {
           result = node.filterByListenType(msg)
           break
         case 'browse':
-        case 'crawl':
           result = node.filterByBrowserType(msg)
+          break
+        case 'crawl':
+          result = node.filterByCrawlerType(msg)
           break
         default:
           coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
@@ -160,34 +164,32 @@ module.exports = function (RED) {
       }
     }
 
-    node.convertResultByDataType = function (msg, result) {
-      let resultDataType = typeof result
-      if (result.hasOwnProperty('datatype')) {
-        resultDataType = result.datatype || resultDataType
-      }
+    node.convertResultValue = function (msg) {
+      let result = msg.payload
 
-      if (resultDataType && resultDataType.toString() !== node.datatype.toString()) {
-        result = node.convertDataType(result)
-      }
-      return result
-    }
-
-    node.convertResultValue = function (msg, result) {
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('result null or undefined')
-        return
+        if (node.showErrors) {
+          node.error(new Error('converted result null or undefined'), msg)
+        }
+        return result
       }
 
       if (result.hasOwnProperty('value')) {
         result = result.value
       }
 
-      result = node.convertResultByDataType(msg, result)
+      if (!node.datatype) {
+        coreFilter.internalDebugLog('data type unknown - set the data type inside the result filter node')
+        return result
+      }
+
+      result = node.convertDataType(result)
 
       if (result === null || result === void 0) {
-        coreFilter.internalDebugLog('converted result null or undefined')
+        coreFilter.internalDebugLog('data type result null or undefined')
         if (node.showErrors) {
-          node.error(new Error('converted result null or undefined'), msg)
+          node.error(new Error('converted by data type result null or undefined'), msg)
         }
       } else {
         result = node.convertResult(msg, result)
@@ -196,12 +198,9 @@ module.exports = function (RED) {
       return result
     }
 
-    node.filterResult = function (msg) {
-      msg.filtertype = 'filter'
-      let result = node.filterByType(msg) || msg.payload
-
+    node.filterResult = function (msg, result) {
       if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
-        result = node.convertResultValue(msg, result)
+        result = node.convertResultValue(msg) || msg.payload
       }
       return result
     }
@@ -280,7 +279,31 @@ module.exports = function (RED) {
     }
 
     node.filterByBrowserType = function (msg) {
-      return null // has no value
+      let result = []
+
+      if (msg.nodetype === 'browse' && msg.payload.browserResults && msg.payload.browserResults.length) {
+        msg.payload.browserResults.forEach((item) => {
+          if (item.nodeId === node.nodeId) {
+            result.push(item)
+          }
+        })
+      }
+
+      return result
+    }
+
+    node.filterByCrawlerType = function (msg) {
+      let result = []
+
+      if (msg.nodetype === 'crawl' && msg.payload.crawlerResults && msg.payload.crawlerResults.length) {
+        msg.payload.crawlerResults.forEach((item) => {
+          if (item.nodeId === node.nodeId) {
+            result.push(item)
+          }
+        })
+      }
+
+      return result
     }
 
     node.convertDataType = function (result) {
