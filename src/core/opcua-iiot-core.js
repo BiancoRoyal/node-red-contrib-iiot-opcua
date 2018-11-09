@@ -905,7 +905,6 @@ de.biancoroyal.opcua.iiot.core.deregisterToConnector = function (node, done) {
   }
 
   node.connector.removeAllListeners()
-
   node.connector.bianco.iiot.deregisterForOPCUA(node, done)
 }
 

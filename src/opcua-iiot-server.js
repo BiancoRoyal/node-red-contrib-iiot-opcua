@@ -149,6 +149,7 @@ module.exports = function (RED) {
 
     node.bianco.iiot.closeServer = function (done) {
       coreServer.destructAddressSpace(() => {
+        node.bianco.iiot.opcuaServer.removeAllListeners()
         node.bianco.iiot.opcuaServer.shutdown(node.delayToClose, done)
       })
     }

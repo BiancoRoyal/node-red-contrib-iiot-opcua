@@ -389,6 +389,7 @@ module.exports = function (RED) {
       })
 
       monitoredItem.on('terminated', function () {
+        monitoredItem.removeAllListeners()
         coreListener.internalDebugLog('Terminated For ' + monitoredItem.monitoredItemId)
         node.bianco.iiot.updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
       })
@@ -607,6 +608,7 @@ module.exports = function (RED) {
       if (node.bianco.iiot.opcuaSubscription && node.bianco.iiot.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
         node.bianco.iiot.stateMachine.terminatesub()
         node.bianco.iiot.opcuaSubscription.terminate(() => {
+          node.bianco.iiot.opcuaSubscription.removeAllListeners()
           node.bianco.iiot.stateMachine.idlesub()
           done()
         })

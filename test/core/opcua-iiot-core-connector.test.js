@@ -104,6 +104,7 @@ describe('OPC UA Core Connector', function () {
       coreConnector.setListenerToClient(node)
       node.bianco.iiot.opcuaClient.emit('backoff')
       expect(fsm.getMachineState()).toBe('LOCKED')
+      node.bianco.iiot.opcuaClient.removeAllListeners()
       done()
     })
 
@@ -114,6 +115,7 @@ describe('OPC UA Core Connector', function () {
       fsm.lock()
       node.bianco.iiot.opcuaClient.emit('connection_reestablished')
       expect(fsm.getMachineState()).toBe('UNLOCKED')
+      node.bianco.iiot.opcuaClient.removeAllListeners()
       done()
     })
 
@@ -124,6 +126,7 @@ describe('OPC UA Core Connector', function () {
       fsm.idle().initopcua().open()
       node.bianco.iiot.opcuaClient.emit('start_reconnection')
       expect(fsm.getMachineState()).toBe('LOCKED')
+      node.bianco.iiot.opcuaClient.removeAllListeners()
       done()
     })
 
@@ -134,6 +137,7 @@ describe('OPC UA Core Connector', function () {
       fsm.idle().initopcua().open()
       node.bianco.iiot.opcuaClient.emit('timed_out_request')
       expect(fsm.getMachineState()).toBe('OPEN')
+      node.bianco.iiot.opcuaClient.removeAllListeners()
       done()
     })
 
@@ -144,6 +148,7 @@ describe('OPC UA Core Connector', function () {
       fsm.idle().initopcua().open().sessionrequest().sessionactive()
       node.bianco.iiot.opcuaClient.emit('security_token_renewed')
       expect(fsm.getMachineState()).toBe('SESSIONACTIVE')
+      node.bianco.iiot.opcuaClient.removeAllListeners()
       done()
     })
 
@@ -157,6 +162,7 @@ describe('OPC UA Core Connector', function () {
       fsm.idle().initopcua().open().sessionrequest().sessionactive().lock()
       node.bianco.iiot.opcuaClient.emit('after_reconnection')
       expect(fsm.getMachineState()).toBe('UNLOCKED')
+      node.bianco.iiot.opcuaClient.removeAllListeners()
       done()
     })
 
@@ -178,6 +184,7 @@ describe('OPC UA Core Connector', function () {
       coreConnector.logSessionInformation(node)
       expect(fsm.getMachineState()).toBe('IDLE')
       expect(node.bianco.iiot.opcuaSession.name).toBe('name')
+      node.bianco.iiot.opcuaClient.removeAllListeners()
       done()
     })
 
@@ -210,6 +217,8 @@ describe('OPC UA Core Connector', function () {
       fsm.lock().stopopcua()
       expect(fsm.getMachineState()).toBe('STOPPED')
       node.on('server_connection_close', () => {
+        node.bianco.iiot.opcuaClient.removeAllListeners()
+        node.removeAllListeners()
         done()
       })
       node.bianco.iiot.opcuaClient.emit('close')
@@ -227,6 +236,8 @@ describe('OPC UA Core Connector', function () {
       fsm.lock().stopopcua()
       expect(fsm.getMachineState()).toBe('STOPPED')
       node.on('server_connection_abort', () => {
+        node.bianco.iiot.opcuaClient.removeAllListeners()
+        node.removeAllListeners()
         done()
       })
       node.bianco.iiot.opcuaClient.emit('abort')

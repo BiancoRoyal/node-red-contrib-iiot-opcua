@@ -145,6 +145,7 @@ module.exports = function (RED) {
       }
 
       if (node.bianco.iiot.opcuaServer) {
+        node.bianco.iiot.opcuaServer.removeAllListeners()
         node.bianco.iiot.opcuaServer.shutdown(node.delayToClose, done)
       } else {
         done()

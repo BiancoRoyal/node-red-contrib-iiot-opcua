@@ -324,6 +324,7 @@ module.exports = function (RED) {
         coreConnector.detailDebugLog('Close Session And Remove Subscriptions From Session On State ' + node.bianco.iiot.stateMachine.getMachineState())
 
         try {
+          node.bianco.iiot.opcuaSession.removeAllListeners()
           node.bianco.iiot.opcuaClient.closeSession(node.bianco.iiot.opcuaSession, node.bianco.iiot.hasOpcUaSubscriptions, function (err) {
             if (err) {
               node.bianco.iiot.handleError(err)
@@ -490,7 +491,14 @@ module.exports = function (RED) {
     node.bianco.iiot.resetOPCUAObjects = function () {
       coreConnector.detailDebugLog('Reset All OPC UA Objects')
       node.bianco.iiot.sessionNodeRequests = 0
+      if (node.bianco.iiot.opcuaClient) {
+        node.bianco.iiot.opcuaClient.removeAllListeners()
+      }
       node.bianco.iiot.opcuaClient = null
+
+      if (node.bianco.iiot.opcuaSession) {
+        node.bianco.iiot.opcuaSession.removeAllListeners()
+      }
       node.bianco.iiot.opcuaSession = null
     }
 
@@ -565,6 +573,9 @@ module.exports = function (RED) {
       fsm.onCLOSED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Client Close Event FSM')
         node.emit('connection_closed')
+        if (node.bianco.iiot.opcuaClient) {
+          node.bianco.iiot.opcuaClient.removeAllListeners()
+        }
         node.bianco.iiot.opcuaClient = null
       }
 
@@ -682,6 +693,8 @@ module.exports = function (RED) {
           } catch (err) {
             node.bianco.iiot.handleError(err)
             done()
+          } finally {
+            node.bianco.iiot.opcuaClient.removeAllListeners()
           }
         } else {
           done()
