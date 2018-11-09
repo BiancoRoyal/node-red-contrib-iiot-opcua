@@ -1,34 +1,15 @@
-# Change Log
-
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-
 <a name="3.5.0"></a>
-# [3.5.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.5...v3.5.0) (2018-11-09)
-
-
-
-<a name="3.4.5"></a>
-## [3.4.5](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.4...v3.4.5) (2018-11-09)
-
-
-
-<a name="3.4.4"></a>
-## [3.4.4](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.3...v3.4.4) (2018-11-09)
+# [3.5.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.3...v3.5.0) (2018-11-09)
 
 
 
 <a name="3.4.3"></a>
-## [3.4.3](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.2...v3.4.3) (2018-11-06)
+## [3.4.3](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.1...v3.4.3) (2018-11-06)
 
 
 ### Bug Fixes
 
 * issue [#70](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/70) ([30f152d](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/30f152d))
-
-
-
-<a name="3.4.2"></a>
-## [3.4.2](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.1...v3.4.2) (2018-11-05)
 
 
 
@@ -60,12 +41,22 @@ All notable changes to this project will be documented in this file. See [standa
 
 
 <a name="3.3.0"></a>
-# [3.3.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.2.0...v3.3.0) (2018-10-21)
+# [3.3.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.2.0...v3.3.0) (2018-10-25)
+
+
+### Bug Fixes
+
+* extract nodeId for all types i, s, g, b ([bd16b42](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/bd16b42))
+* no error log to nodes ([bf39208](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/bf39208))
+* remove console log ([a6a0b4b](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/a6a0b4b))
+* typos ([298ce5a](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/298ce5a))
 
 
 ### Features
 
 * [#65](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/65) max bad session requests before reconnect starts ([77cf255](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/77cf255))
+* [#68](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/68) connector option to set if the connector has subscriptions or not ([bbba493](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/bbba493))
+* [#68](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/68) connector option to set if the connector has subscriptions or not ([38155ca](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/38155ca))
 
 
 
@@ -77,6 +68,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 * msg object missed in convert value ([387aacd](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/387aacd))
 * response multiple results ([50510f5](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/50510f5))
+* **test:** failing event subscription ([7591119](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/7591119))
 
 
 ### Features
@@ -111,7 +103,6 @@ All notable changes to this project will be documented in this file. See [standa
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v2.7.1...v3.0.0) (2018-10-14)
 
-### Breaking Changes base on node-opcua 0.4
 
 ### Bug Fixes
 
@@ -289,3 +280,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 <a name="1.0.17"></a>
 ## 1.0.17 (2017-12-03)
+
+
+
