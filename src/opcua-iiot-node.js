@@ -28,17 +28,19 @@ module.exports = function (RED) {
     this.showErrors = config.showErrors
 
     let node = this
-    node.subscribed = false
+    node.bianco = core.createBiancoIIoT()
+    core.assert(node.bianco.iiot)
+    node.bianco.iiot.subscribed = false
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     node.on('input', function (msg) {
       msg.nodetype = 'node'
       msg.injectType = msg.injectType || node.injectType
-      node.subscribed = !node.subscribed
+      node.bianco.iiot.subscribed = !node.bianco.iiot.subscribed
 
       if (node.injectType === 'listen') {
-        if (node.subscribed) {
+        if (node.bianco.iiot.subscribed) {
           node.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
           node.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})

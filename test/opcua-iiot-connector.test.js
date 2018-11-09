@@ -98,6 +98,8 @@ describe('OPC UA Connector node Unit Testing', function () {
         ], () => {
           let n4 = helper.getNode('n4')
           if (n4) {
+            expect(n4.bianco).toBeDefined()
+            expect(n4.bianco.iiot).toBeDefined()
             done()
           }
         })
@@ -110,8 +112,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.connectToClient()
-          n4.connectOPCUAEndpoint()
+          n4.bianco.iiot.connectToClient()
+          n4.bianco.iiot.connectOPCUAEndpoint()
           done()
         }
       })
@@ -121,7 +123,7 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.resetBadSession()
+          n4.bianco.iiot.resetBadSession()
           done()
         }
       })
@@ -131,8 +133,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock().end()
-          n4.startSession()
+          n4.bianco.iiot.stateMachine.lock().end()
+          n4.bianco.iiot.startSession()
           done()
         }
       })
@@ -142,8 +144,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock()
-          n4.startSession()
+          n4.bianco.iiot.stateMachine.lock()
+          n4.bianco.iiot.startSession()
           done()
         }
       })
@@ -153,8 +155,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock().open()
-          n4.startSession()
+          n4.bianco.iiot.stateMachine.lock().open()
+          n4.bianco.iiot.startSession()
           done()
         }
       })
@@ -165,8 +167,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock().open()
-          n4.renewConnection(done)
+          n4.bianco.iiot.stateMachine.lock().open()
+          n4.bianco.iiot.renewConnection(done)
         }
       })
     })
@@ -175,8 +177,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock().reconfigure()
-          n4.renewConnection(done)
+          n4.bianco.iiot.stateMachine.lock().reconfigure()
+          n4.bianco.iiot.renewConnection(done)
         }
       })
     })
@@ -185,9 +187,9 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock()
-          n4.sessionNodeRequests = 10
-          n4.resetBadSession()
+          n4.bianco.iiot.stateMachine.lock()
+          n4.bianco.iiot.sessionNodeRequests = 10
+          n4.bianco.iiot.resetBadSession()
           setTimeout(done, 1000)
         }
       })
@@ -197,9 +199,9 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.stateMachine.lock().reconfigure()
-          n4.sessionNodeRequests = 10
-          n4.resetBadSession()
+          n4.bianco.iiot.stateMachine.lock().reconfigure()
+          n4.bianco.iiot.sessionNodeRequests = 10
+          n4.bianco.iiot.resetBadSession()
           setTimeout(done, 1000)
         }
       })
@@ -209,7 +211,7 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.handleError(new Error('Testing Error To Handle'))
+          n4.bianco.iiot.handleError(new Error('Testing Error To Handle'))
           done()
         }
       })
@@ -219,7 +221,7 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.registerForOPCUA(null)
+          n4.bianco.iiot.registerForOPCUA(null)
           done()
         }
       })
@@ -229,7 +231,7 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.deregisterForOPCUA(null, done)
+          n4.bianco.iiot.deregisterForOPCUA(null, done)
         }
       })
     })

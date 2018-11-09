@@ -215,7 +215,7 @@ var testListenerMonitoringAboFlow = [
     'id': 'c9ca1bbe.d1cb5',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
-    'payload': '{"interval":500,"queueSize":4,"options":{"requestedPublishingInterval":1000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
+    'payload': '{"interval":250,"queueSize":4,"options":{"requestedPublishingInterval":500,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":4,"publishingEnabled":true,"priority":1}}',
     'payloadType': 'json',
     'topic': 'TestTopicSubscribe2',
     'repeat': '',

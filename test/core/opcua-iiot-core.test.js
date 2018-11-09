@@ -270,11 +270,19 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state open', function (done) {
       let node = {
-        opcuaClient: null,
-        opcuaSession: null,
+        bianco: {
+          iiot: {
+            opcuaClient: null,
+            opcuaSession: null
+          }
+        },
         connector: {
-          opcuaClient: {},
-          opcuaSession: {}
+          bianco: {
+            iiot: {
+              opcuaClient: {},
+              opcuaSession: {}
+            }
+          }
         }
       }
       core.setNodeStatusTo = function (node, state) {
@@ -297,15 +305,23 @@ describe('OPC UA Core', function () {
 
     it('should set node initial state sessionactive', function (done) {
       let node = {
-        opcuaClient: null,
-        opcuaSession: null,
+        bianco: {
+          iiot: {
+            opcuaClient: null,
+            opcuaSession: null
+          }
+        },
         connector: {
-          opcuaClient: {},
-          opcuaSession: {}
+          bianco: {
+            iiot: {
+              opcuaClient: {},
+              opcuaSession: {}
+            }
+          }
         }
       }
       core.setNodeStatusTo = function (node, state) {
-        if (state === 'active' && node.opcuaSession === node.connector.opcuaSession) {
+        if (state === 'active' && node.bianco.iiot.opcuaSession === node.connector.bianco.iiot.opcuaSession) {
           done()
         }
       }

@@ -197,7 +197,7 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('76202549.fd7c1c')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.handleNodeTypeOfMsg({payload: {}})
+          nodeUnderTest.bianco.iiot.handleNodeTypeOfMsg({payload: {}})
           done()
         })
     })

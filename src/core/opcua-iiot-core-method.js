@@ -101,22 +101,22 @@ de.biancoroyal.opcua.iiot.core.method.invalidMessage = function (node, message) 
   let response = false
 
   if (!message.objectId) {
-    node.handleMethodWarn('No Object-Id Found For Method Call')
+    node.bianco.iiot.handleMethodWarn('No Object-Id Found For Method Call')
     response = true
   }
 
   if (!message.methodId) {
-    node.handleMethodWarn('No Method-Id Found For Method Call')
+    node.bianco.iiot.handleMethodWarn('No Method-Id Found For Method Call')
     response = true
   }
 
   if (!message.inputArguments) {
-    node.handleMethodWarn('No Input Arguments Found For Method Call')
+    node.bianco.iiot.handleMethodWarn('No Input Arguments Found For Method Call')
     response = true
   }
 
   if (!message.methodType) {
-    node.handleMethodWarn('No Method Type Found For Method Call')
+    node.bianco.iiot.handleMethodWarn('No Method Type Found For Method Call')
     response = true
   }
 

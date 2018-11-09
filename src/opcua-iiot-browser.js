@@ -19,6 +19,7 @@ module.exports = function (RED) {
 
   function OPCUAIIoTBrowser (config) {
     RED.nodes.createNode(this, config)
+
     this.nodeId = config.nodeId
     this.name = config.name
     this.justValue = config.justValue
@@ -31,14 +32,14 @@ module.exports = function (RED) {
     this.recursiveBrowse = config.recursiveBrowse
     this.recursiveDepth = config.recursiveDepth || 1
     this.delayPerMessage = config.delayPerMessage || 0.2
+
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = coreBrowser.initClientNode(this)
-    node.items = []
-    node.browseTopic = coreBrowser.core.OBJECTS_ROOT
-    node.messageList = []
+    let node = coreBrowser.initBrowserNode(this)
+    coreBrowser.core.assert(node.bianco.iiot)
+    node.bianco.iiot.delayMessageTimer = []
 
-    node.extractDataFromBrowserResults = (browserResultToFilter, lists) => {
+    node.bianco.iiot.extractDataFromBrowserResults = (browserResultToFilter, lists) => {
       browserResultToFilter.forEach(function (result) {
         result.references.forEach(function (reference) {
           coreBrowser.detailDebugLog('Add Reference To List :' + reference)
@@ -58,22 +59,22 @@ module.exports = function (RED) {
       })
     }
 
-    node.browse = function (rootNodeId, msg, depth, lists, callback) {
-      if (coreBrowser.core.checkSessionNotValid(node.opcuaSession, 'Browse')) {
+    node.bianco.iiot.browse = function (rootNodeId, msg, depth, lists, callback) {
+      if (coreBrowser.core.checkSessionNotValid(node.bianco.iiot.opcuaSession, 'Browse')) {
         return
       }
 
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + rootNodeId)
 
-      coreBrowser.browse(node.opcuaSession, rootNodeId)
+      coreBrowser.browse(node.bianco.iiot.opcuaSession, rootNodeId)
         .then(function (browserResults) {
           if (browserResults.length) {
             coreBrowser.detailDebugLog('Browser Result To String: ' + browserResults.toString())
-            node.extractDataFromBrowserResults(browserResults, lists)
+            node.bianco.iiot.extractDataFromBrowserResults(browserResults, lists)
             if (node.recursiveBrowse) {
               if (depth > 0) {
                 let newDepth = depth - 1
-                node.browseNodeList(lists.addressItemList, msg, newDepth, lists, callback)
+                node.bianco.iiot.browseNodeList(lists.addressItemList, msg, newDepth, lists, callback)
                 if (!node.singleBrowseResult) {
                   callback(rootNodeId, depth, msg, lists)
                 }
@@ -92,7 +93,7 @@ module.exports = function (RED) {
         })
     }
 
-    node.createListsObject = () => {
+    node.bianco.iiot.createListsObject = () => {
       return {
         nodesToBrowse: [],
         nodesToRead: [],
@@ -101,24 +102,24 @@ module.exports = function (RED) {
       }
     }
 
-    node.browseNodeList = function (addressSpaceItems, msg, depth, lists, callback) {
-      if (coreBrowser.core.checkSessionNotValid(node.opcuaSession, 'BrowseList')) {
+    node.bianco.iiot.browseNodeList = function (addressSpaceItems, msg, depth, lists, callback) {
+      if (coreBrowser.core.checkSessionNotValid(node.bianco.iiot.opcuaSession, 'BrowseList')) {
         return
       }
 
       coreBrowser.internalDebugLog('Browse For NodeId List')
       let rootNode = 'list'
 
-      if (node.opcuaSession) {
-        coreBrowser.browseAddressSpaceItems(node.opcuaSession, addressSpaceItems)
+      if (node.bianco.iiot.opcuaSession) {
+        coreBrowser.browseAddressSpaceItems(node.bianco.iiot.opcuaSession, addressSpaceItems)
           .then(function (browserResults) {
             coreBrowser.detailDebugLog('List Browser Result To String: ' + browserResults.toString())
-            node.extractDataFromBrowserResults(browserResults, lists)
+            node.bianco.iiot.extractDataFromBrowserResults(browserResults, lists)
             if (node.recursiveBrowse) {
               if (depth > 0) {
                 let newDepth = depth - 1
-                let subLists = node.createListsObject()
-                node.browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
+                let subLists = node.bianco.iiot.createListsObject()
+                node.bianco.iiot.browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
                 if (!node.singleBrowseResult) {
                   callback(rootNode, depth, msg, lists)
                 }
@@ -135,7 +136,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.sendMessage = function (rootNodeId, depth, originMessage, lists) {
+    node.bianco.iiot.sendMessage = function (rootNodeId, depth, originMessage, lists) {
       let msg = Object.assign({}, originMessage)
       msg.nodetype = 'browse'
       msg.justValue = node.justValue
@@ -147,7 +148,7 @@ module.exports = function (RED) {
         }
       }
 
-      let listenerParameters = node.getListenParameters(msg)
+      let listenerParameters = node.bianco.iiot.getListenParameters(msg)
 
       msg.payload = {
         rootNodeId,
@@ -158,21 +159,28 @@ module.exports = function (RED) {
         listenerParameters
       }
 
-      msg = node.enhanceMessage(msg, lists)
-      msg = node.setMessageLists(msg, lists)
+      msg = node.bianco.iiot.enhanceMessage(msg, lists)
+      msg = node.bianco.iiot.setMessageLists(msg, lists)
 
-      node.messageList.push(msg)
+      node.bianco.iiot.messageList.push(msg)
 
       if (node.showStatusActivities && node.status.text !== 'active') {
         coreBrowser.core.setNodeStatusTo(node, 'active')
       }
 
-      setTimeout(() => {
-        node.send(node.messageList.shift())
-      }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
+      node.bianco.iiot.delayMessageTimer.push(setTimeout(() => {
+        node.send(node.bianco.iiot.messageList.shift())
+      }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC))
     }
 
-    node.getListenParameters = function (msg) {
+    node.bianco.iiot.resetAllTimer = function () {
+      node.bianco.iiot.delayMessageTimer.forEach((timerId) => {
+        clearTimeout(timerId)
+        timerId = null
+      })
+    }
+
+    node.bianco.iiot.getListenParameters = function (msg) {
       if (msg.injectType === 'listen') {
         return msg.payload
       } else {
@@ -180,7 +188,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.enhanceMessage = function (msg, lists) {
+    node.bianco.iiot.enhanceMessage = function (msg, lists) {
       if (!node.justValue) {
         msg.payload.browseTopic = node.browseTopic
         msg.payload.addressSpaceItems = msg.addressSpaceItems
@@ -188,14 +196,14 @@ module.exports = function (RED) {
         if (node.connector) {
           msg.payload.endpoint = node.connector.endpoint
         }
-        msg.payload.session = (node.opcuaSession) ? node.opcuaSession.name : 'none'
+        msg.payload.session = (node.bianco.iiot.opcuaSession) ? node.bianco.iiot.opcuaSession.name : 'none'
       } else {
         msg.payload.browserResults = lists.addressItemList
       }
       return msg
     }
 
-    node.setMessageLists = function (msg, lists) {
+    node.bianco.iiot.setMessageLists = function (msg, lists) {
       if (node.sendNodesToRead && lists.nodesToRead) {
         msg.nodesToRead = lists.nodesToRead
         msg.nodesToReadCount = lists.nodesToRead.length
@@ -213,57 +221,57 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.browseSendResult = function (rootNodeId, depth, msg, lists) {
+    node.bianco.iiot.browseSendResult = function (rootNodeId, depth, msg, lists) {
       coreBrowser.internalDebugLog(rootNodeId + ' called by depth ' + depth)
 
       if (node.singleBrowseResult) {
         if (depth <= 0) {
-          node.sendMessage(rootNodeId, depth, msg, lists)
-          node.reset(lists)
+          node.bianco.iiot.sendMessage(rootNodeId, depth, msg, lists)
+          node.bianco.iiot.reset(lists)
         }
       } else {
-        node.sendMessage(rootNodeId, depth, msg, lists)
-        node.reset(lists)
+        node.bianco.iiot.sendMessage(rootNodeId, depth, msg, lists)
+        node.bianco.iiot.reset(lists)
       }
     }
 
-    node.reset = function (lists) {
-      lists = node.createListsObject()
+    node.bianco.iiot.reset = function (lists) {
+      lists = node.bianco.iiot.createListsObject()
     }
 
-    node.browseWithAddressSpaceItems = function (msg, depth, lists) {
+    node.bianco.iiot.browseWithAddressSpaceItems = function (msg, depth, lists) {
       if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length > 0) {
         msg.addressSpaceItems = msg.addressItemsToBrowse
       }
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
-        node.browseNodeList(msg.addressSpaceItems, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
-          node.browseSendResult(rootNodeId, depth, msg, subLists)
+        node.bianco.iiot.browseNodeList(msg.addressSpaceItems, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
+          node.bianco.iiot.browseSendResult(rootNodeId, depth, msg, subLists)
         })
       } else {
         coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
         node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
-        node.browse(node.browseTopic, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
-          node.browseSendResult(rootNodeId, depth, msg, subLists)
+        node.bianco.iiot.browse(node.browseTopic, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
+          node.bianco.iiot.browseSendResult(rootNodeId, depth, msg, subLists)
         })
       }
     }
 
-    node.startBrowser = function (msg) {
-      if (coreBrowser.core.checkSessionNotValid(node.opcuaSession, 'Browser')) {
+    node.bianco.iiot.startBrowser = function (msg) {
+      if (coreBrowser.core.checkSessionNotValid(node.bianco.iiot.opcuaSession, 'Browser')) {
         return
       }
 
-      let lists = node.createListsObject()
+      let lists = node.bianco.iiot.createListsObject()
       let depth = (node.recursiveBrowse) ? node.recursiveDepth : 0
       node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node) // set topic to the node object for HTTP requests at node
 
       if (node.browseTopic && node.browseTopic !== '') {
-        node.browse(node.browseTopic, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
-          node.browseSendResult(rootNodeId, depth, msg, subLists)
+        node.bianco.iiot.browse(node.browseTopic, msg, depth, lists, (rootNodeId, depth, msg, subLists) => {
+          node.bianco.iiot.browseSendResult(rootNodeId, depth, msg, subLists)
         })
       } else {
-        node.browseWithAddressSpaceItems(msg, depth, lists)
+        node.bianco.iiot.browseWithAddressSpaceItems(msg, depth, lists)
       }
     }
 
@@ -275,13 +283,16 @@ module.exports = function (RED) {
       if (node.showStatusActivities) {
         coreBrowser.core.setNodeStatusTo(node, 'browsing')
       }
-      node.startBrowser(msg)
+      node.bianco.iiot.startBrowser(msg)
     })
 
     coreBrowser.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreBrowser.core.deregisterToConnector(node, done)
+      coreBrowser.core.deregisterToConnector(node, () => {
+        coreBrowser.core.resetBiancoNode(node)
+        done()
+      })
     })
   }
 
@@ -293,8 +304,8 @@ module.exports = function (RED) {
     let nodeRootId = decodeURIComponent(req.params.nodeId) || coreBrowser.core.OBJECTS_ROOT
     coreBrowser.detailDebugLog('request for ' + req.params.nodeId)
 
-    if (node.opcuaSession) {
-      coreBrowser.browse(node.opcuaSession, nodeRootId).then(function (browserResult) {
+    if (node.bianco.iiot.opcuaSession) {
+      coreBrowser.browse(node.bianco.iiot.opcuaSession, nodeRootId).then(function (browserResult) {
         browserResult.forEach(function (result) {
           if (result.references && result.references.length) {
             result.references.forEach(function (reference) {

@@ -24,6 +24,8 @@ module.exports = function (RED) {
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = this
+    node.bianco = coreConnector.core.createBiancoIIoT()
+    coreConnector.core.assert(node.bianco.iiot)
 
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
@@ -34,7 +36,7 @@ module.exports = function (RED) {
         if (msg.payload.endpoint && msg.payload.endpoint.includes('opc.tcp:')) {
           coreConnector.internalDebugLog('connector change possible')
           coreConnector.internalDebugLog(msg.payload)
-          node.connector.restartWithNewSettings(msg.payload, () => {
+          node.connector.bianco.iiot.restartWithNewSettings(msg.payload, () => {
             coreConnector.internalDebugLog('connector change injected')
             node.send(msg)
           })
@@ -51,7 +53,10 @@ module.exports = function (RED) {
     coreConnector.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreConnector.core.deregisterToConnector(node, done)
+      coreConnector.core.deregisterToConnector(node, () => {
+        coreConnector.core.resetBiancoNode(node)
+        done()
+      })
     })
   }
 

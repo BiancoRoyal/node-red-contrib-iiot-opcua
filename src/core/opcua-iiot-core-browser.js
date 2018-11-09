@@ -213,12 +213,12 @@ de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference) {
   return reference
 }
 
-de.biancoroyal.opcua.iiot.core.browser.initClientNode = function (node) {
-  let browseNode = this.core.initClientNode(node)
-  browseNode.items = []
-  browseNode.browseTopic = this.core.OBJECTS_ROOT
-  browseNode.messageList = []
-  return browseNode
+de.biancoroyal.opcua.iiot.core.browser.initBrowserNode = function (node) {
+  this.core.initClientNode(node)
+  node.browseTopic = this.core.OBJECTS_ROOT
+  node.bianco.iiot.items = []
+  node.bianco.iiot.messageList = []
+  return node
 }
 
 de.biancoroyal.opcua.iiot.core.browser.browseErrorHandling = function (node, err, msg, lists) {
@@ -230,8 +230,8 @@ de.biancoroyal.opcua.iiot.core.browser.browseErrorHandling = function (node, err
       node.error(err, msg)
     }
 
-    if (this.core.isSessionBad(err) && node.connector) {
-      node.connector.resetBadSession()
+    if (this.core.isSessionBad(err)) {
+      node.emit('opcua_client_not_ready')
     }
   } else {
     this.internalDebugLog(typeof node + ' Done With Error')

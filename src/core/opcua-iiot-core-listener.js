@@ -193,7 +193,7 @@ de.biancoroyal.opcua.iiot.core.listener.monitorItems = function (node, msg, uaSu
         .then(function (result) {
           if (result.monitoredItem.monitoredItemId) {
             coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-            node.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
+            node.bianco.iiot.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
           }
         }).catch(function (err) {
           coreListener.subscribeDebugLog(err)
@@ -466,10 +466,10 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
 }
 
 de.biancoroyal.opcua.iiot.core.listener.checkState = function (node, msg, callerType) {
-  this.internalDebugLog('Check Listener State ' + node.stateMachine.getMachineState() + ' By ' + callerType)
+  this.internalDebugLog('Check Listener State ' + node.bianco.iiot.stateMachine.getMachineState() + ' By ' + callerType)
 
-  if (node.connector && node.stateMachine && node.stateMachine.getMachineState() !== this.RUNNING_STATE) {
-    this.internalDebugLog('Wrong Listener State ' + node.stateMachine.getMachineState() + ' By ' + callerType)
+  if (node.connector && node.bianco.iiot.stateMachine && node.bianco.iiot.stateMachine.getMachineState() !== this.RUNNING_STATE) {
+    this.internalDebugLog('Wrong Listener State ' + node.bianco.iiot.stateMachine.getMachineState() + ' By ' + callerType)
     if (node.showErrors) {
       node.error(new Error('Listener Not ' + this.RUNNING_STATE + ' On ' + callerType), msg)
     }
@@ -477,6 +477,15 @@ de.biancoroyal.opcua.iiot.core.listener.checkState = function (node, msg, caller
   } else {
     return true
   }
+}
+
+de.biancoroyal.opcua.iiot.core.listener.initListenerNode = function (node) {
+  let listenerNode = this.core.initClientNode(node)
+  listenerNode.bianco.iiot.opcuaSubscription = null
+  listenerNode.bianco.iiot.monitoredItems = new Map()
+  listenerNode.bianco.iiot.monitoredASO = new Map()
+  listenerNode.bianco.iiot.messageQueue = []
+  return listenerNode
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core.listener

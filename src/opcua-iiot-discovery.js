@@ -23,6 +23,9 @@ module.exports = function (RED) {
     this.discoveryPort = config.discoveryPort || coreDiscovery.DEFAULT_OPCUA_DISCOVERY_PORT
 
     let node = this
+    node.bianco = coreDiscovery.core.createBiancoIIoT()
+    coreDiscovery.core.assert(node.bianco.iiot)
+
     const discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({port: node.discoveryPort})
 
     node.status({fill: 'yellow', shape: 'ring', text: 'starting'})

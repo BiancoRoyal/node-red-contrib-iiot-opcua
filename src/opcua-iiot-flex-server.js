@@ -24,11 +24,12 @@ module.exports = function (RED) {
     coreServer.flex.internalDebugLog('Open Server Node')
 
     let node = coreServer.readConfigOfServerNode(this, config)
-    node = coreServer.initServerNode(this)
+    node = coreServer.initServerNode(node)
     node = coreServer.loadNodeSets(node, __dirname)
     node = coreServer.loadCertificates(node)
+    coreServer.core.assert(node.bianco.iiot)
 
-    const vm = new VM({
+    node.bianco.iiot.vm = new VM({
       sandbox: {
         node,
         coreServer,
@@ -37,13 +38,13 @@ module.exports = function (RED) {
       }
     })
 
-    node.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
+    node.bianco.iiot.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
       server.internalDebugLog('Init Function Block Flex Server')
     }
 
-    vm.run('node.constructAddressSpaceScript = ' + config.addressSpaceScript)
+    node.bianco.iiot.vm.run('node.bianco.iiot.constructAddressSpaceScript = ' + config.addressSpaceScript)
 
-    node.buildServerOptions = function () {
+    node.bianco.iiot.buildServerOptions = function () {
       let serverOptions = coreServer.buildServerOptions(node, 'Flex')
       serverOptions.userManager = {
         isValidUser: function (userName, password) {
@@ -53,23 +54,23 @@ module.exports = function (RED) {
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    node.createServer = function (serverOptions) {
+    node.bianco.iiot.createServer = function (serverOptions) {
       if (RED.settings.verbose) {
         coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
-      node.opcuaServer = coreServer.createServerObject(node, serverOptions)
+      node.bianco.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
       coreServer.core.setNodeStatusTo(node, 'waiting')
-      node.opcuaServer.initialize(node.postInitialize)
+      node.bianco.iiot.opcuaServer.initialize(node.bianco.iiot.postInitialize)
       coreServer.setOPCUAServerListener(node)
     }
 
-    node.initNewServer = function () {
+    node.bianco.iiot.initNewServer = function () {
       node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = node.buildServerOptions()
+      let serverOptions = node.bianco.iiot.buildServerOptions()
       serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
 
       try {
-        node.createServer(serverOptions)
+        node.bianco.iiot.createServer(serverOptions)
       } catch (err) {
         node.emit('server_create_error')
         coreServer.flex.internalDebugLog(err.message)
@@ -77,11 +78,11 @@ module.exports = function (RED) {
       }
     }
 
-    node.postInitialize = function () {
-      node.eventObjects = {} // event objects should stay in memory
-      coreServer.constructAddressSpaceFromScript(node.opcuaServer, node.constructAddressSpaceScript, node.eventObjects)
+    node.bianco.iiot.postInitialize = function () {
+      node.bianco.iiot.eventObjects = {} // event objects should stay in memory
+      coreServer.constructAddressSpaceFromScript(node.bianco.iiot.opcuaServer, node.bianco.iiot.constructAddressSpaceScript, node.bianco.iiot.eventObjects)
         .then(function () {
-          coreServer.start(node.opcuaServer, node).then(function () {
+          coreServer.start(node.bianco.iiot.opcuaServer, node).then(function () {
             coreServer.core.setNodeStatusTo(node, 'active')
             node.emit('server_running')
           }).catch(function (err) {
@@ -94,35 +95,35 @@ module.exports = function (RED) {
         })
     }
 
-    node.initNewServer()
+    node.bianco.iiot.initNewServer()
 
     node.on('input', function (msg) {
-      if (!node.opcuaServer || !node.initialized) {
+      if (!node.bianco.iiot.opcuaServer || !node.bianco.iiot.initialized) {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
       }
 
       if (msg.injectType === 'CMD') {
-        node.executeOpcuaCommand(msg)
+        node.bianco.iiot.executeOpcuaCommand(msg)
       } else {
         coreServer.handleServerError(node, new Error('Unknown Flex Inject Type ' + msg.injectType), msg)
       }
     })
 
-    node.executeOpcuaCommand = function (msg) {
+    node.bianco.iiot.executeOpcuaCommand = function (msg) {
       if (msg.commandType === 'restart') {
-        node.restartServer()
+        node.bianco.iiot.restartServer()
         node.send(msg)
       } else {
         coreServer.handleServerError(node, new Error('Unknown Flex OPC UA Command'), msg)
       }
     }
 
-    node.restartServer = function () {
+    node.bianco.iiot.restartServer = function () {
       coreServer.flex.internalDebugLog('Restart OPC UA Server')
       coreServer.restartServer(node)
 
-      if (node.opcuaServer) {
+      if (node.bianco.iiot.opcuaServer) {
         coreServer.flex.internalDebugLog('OPC UA Server restarted')
       } else {
         coreServer.flex.internalDebugLog('Can not restart OPC UA Server')
@@ -130,20 +131,21 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.closeServer(() => {
+      node.bianco.iiot.closeServer(() => {
         coreServer.flex.internalDebugLog('Close Server Node')
+        coreServer.core.resetBiancoNode(node)
         done()
       })
     })
 
-    node.closeServer = function (done) {
+    node.bianco.iiot.closeServer = function (done) {
       if (coreServer.simulatorInterval) {
         clearInterval(coreServer.simulatorInterval)
         coreServer.simulatorInterval = null
       }
 
-      if (node.opcuaServer) {
-        node.opcuaServer.shutdown(node.delayToClose, done)
+      if (node.bianco.iiot.opcuaServer) {
+        node.bianco.iiot.opcuaServer.shutdown(node.delayToClose, done)
       } else {
         done()
       }

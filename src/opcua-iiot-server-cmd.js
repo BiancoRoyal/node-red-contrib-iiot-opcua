@@ -23,6 +23,8 @@ module.exports = function (RED) {
     this.name = config.name
 
     let node = this
+    node.bianco = core.createBiancoIIoT()
+    core.assert(node.bianco.iiot)
     core.internalDebugLog('Open CMD Node')
 
     node.on('input', function (msg) {
@@ -52,6 +54,7 @@ module.exports = function (RED) {
 
     node.on('close', (done) => {
       core.internalDebugLog('Close CMD Node')
+      core.resetBiancoNode(node)
       done()
     })
   }

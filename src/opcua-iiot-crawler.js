@@ -19,6 +19,7 @@ module.exports = function (RED) {
 
   function OPCUAIIoTCrawler (config) {
     RED.nodes.createNode(this, config)
+
     this.name = config.name
     this.justValue = config.justValue
     this.singleResult = config.singleResult
@@ -29,17 +30,20 @@ module.exports = function (RED) {
     this.negateFilter = config.negateFilter
     this.filters = config.filters
     this.delayPerMessage = config.delayPerMessage || 0.2
+
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = coreBrowser.initClientNode(this)
+    let node = coreBrowser.initBrowserNode(this)
+    coreBrowser.core.assert(node.bianco.iiot)
+    node.bianco.iiot.delayMessageTimer = []
 
-    node.filterCrawlerResults = function (crawlerResultToFilter) {
+    node.bianco.iiot.filterCrawlerResults = function (crawlerResultToFilter) {
       let crawlerResult = crawlerResultToFilter || []
       let filteredEntries = []
 
       if (node.activateFilters && node.filters && node.filters.length > 0) {
         crawlerResult.forEach(function (item) {
-          if (node.itemIsNotToFilter(item)) {
+          if (node.bianco.iiot.itemIsNotToFilter(item)) {
             filteredEntries.push(item)
           }
         })
@@ -57,7 +61,7 @@ module.exports = function (RED) {
       return crawlerResult
     }
 
-    node.itemIsNotToFilter = function (item) {
+    node.bianco.iiot.itemIsNotToFilter = function (item) {
       let result = coreBrowser.core.checkItemForUnsetState(node, item)
 
       if (result) {
@@ -69,8 +73,8 @@ module.exports = function (RED) {
       return (node.negateFilter) ? !result : result
     }
 
-    node.crawl = function (session, msg) {
-      if (coreBrowser.core.checkSessionNotValid(node.opcuaSession, 'Crawler')) {
+    node.bianco.iiot.crawl = function (session, msg) {
+      if (coreBrowser.core.checkSessionNotValid(node.bianco.iiot.opcuaSession, 'Crawler')) {
         return
       }
 
@@ -83,47 +87,47 @@ module.exports = function (RED) {
       coreBrowser.crawl(session, node.browseTopic, msg)
         .then(function (result) {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          node.sendMessage(result.message, node.filterCrawlerResults(result.message, result.crawlerResult))
+          node.bianco.iiot.sendMessage(result.message, node.bianco.iiot.filterCrawlerResults(result.message, result.crawlerResult))
         }).catch(function (err) {
           coreBrowser.browseErrorHandling(node, err, msg)
         })
     }
 
-    node.crawlForSingleResult = function (session, msg) {
+    node.bianco.iiot.crawlForSingleResult = function (session, msg) {
       coreBrowser.crawlAddressSpaceItems(session, msg)
         .then(function (result) {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
+          node.bianco.iiot.sendMessage(result.message, node.bianco.iiot.filterCrawlerResults(result.crawlerResult))
         }).catch(function (err) {
           coreBrowser.browseErrorHandling(node, err, msg)
         })
     }
 
-    node.crawlForResults = function (session, msg) {
+    node.bianco.iiot.crawlForResults = function (session, msg) {
       msg.addressSpaceItems.map((entry) => {
         coreBrowser.crawl(session, entry.nodeId)
           .then(function (result) {
             coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-            node.sendMessage(result.message, node.filterCrawlerResults(result.crawlerResult))
+            node.bianco.iiot.sendMessage(result.message, node.bianco.iiot.filterCrawlerResults(result.crawlerResult))
           }).catch(function (err) {
             coreBrowser.browseErrorHandling(node, err, msg)
           })
       })
     }
 
-    node.crawlNodeList = function (session, msg) {
+    node.bianco.iiot.crawlNodeList = function (session, msg) {
       if (node.showStatusActivities) {
         coreBrowser.core.setNodeStatusTo(node, 'crawling')
       }
 
       if (node.singleResult) {
-        node.crawlForSingleResult(session, msg)
+        node.bianco.iiot.crawlForSingleResult(session, msg)
       } else {
-        node.crawlForResults(session, msg)
+        node.bianco.iiot.crawlForResults(session, msg)
       }
     }
 
-    node.sendMessage = function (originMessage, crawlerResult) {
+    node.bianco.iiot.sendMessage = function (originMessage, crawlerResult) {
       let msg = Object.assign({}, originMessage)
       msg.nodetype = 'crawl'
 
@@ -151,10 +155,10 @@ module.exports = function (RED) {
         if (node.connector) {
           msg.payload.endpoint = node.connector.endpoint
         }
-        msg.payload.session = node.opcuaSession.name || 'none'
+        msg.payload.session = node.bianco.iiot.opcuaSession.name || 'none'
       }
 
-      node.messageList.push(msg)
+      node.bianco.iiot.messageList.push(msg)
 
       if (node.showStatusActivities) {
         coreBrowser.core.setNodeStatusTo(node, 'active')
@@ -162,14 +166,21 @@ module.exports = function (RED) {
 
       // TODO: maybe here RED.util.set ...
 
-      setTimeout(() => {
-        node.send(node.messageList.shift())
-      }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC)
+      node.bianco.iiot.delayMessageTimer.push(setTimeout(() => {
+        node.send(node.bianco.iiot.messageList.shift())
+      }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC))
     }
 
-    node.startCrawling = function (msg) {
+    node.bianco.iiot.resetAllTimer = function () {
+      node.bianco.iiot.delayMessageTimer.forEach((timerId) => {
+        clearTimeout(timerId)
+        timerId = null
+      })
+    }
+
+    node.bianco.iiot.startCrawling = function (msg) {
       if (node.browseTopic && node.browseTopic !== '') {
-        node.crawl(node.opcuaSession, msg)
+        node.bianco.iiot.crawl(node.bianco.iiot.opcuaSession, msg)
       } else {
         if (msg.addressItemsToBrowse) {
           msg.addressSpaceItems = msg.addressItemsToBrowse
@@ -177,7 +188,7 @@ module.exports = function (RED) {
 
         if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
           coreBrowser.internalDebugLog('Start Crawling On AddressSpace Items')
-          node.crawlNodeList(node.opcuaSession, msg)
+          node.bianco.iiot.crawlNodeList(node.bianco.iiot.opcuaSession, msg)
         } else {
           node.error(new Error('No AddressSpace Items Or Root To Crawl'), msg)
         }
@@ -190,13 +201,16 @@ module.exports = function (RED) {
       }
 
       node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node)
-      node.startCrawling(msg)
+      node.bianco.iiot.startCrawling(msg)
     })
 
     coreBrowser.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreBrowser.core.deregisterToConnector(node, done)
+      coreBrowser.core.deregisterToConnector(node, () => {
+        coreBrowser.core.resetBiancoNode(node)
+        done()
+      })
     })
   }
 

@@ -71,7 +71,7 @@ describe('OPC UA Write node Unit Testing', function () {
       helper.load(writeNodesToLoad, writeUnitFlow, () => {
         let n1 = helper.getNode('34d2c6bc.43275b')
         if (n1) {
-          n1.handleWriteError(new Error('Testing Error To Handle'), {payload: {}})
+          n1.bianco.iiot.handleWriteError(new Error('Testing Error To Handle'), {payload: {}})
           done()
         }
       })

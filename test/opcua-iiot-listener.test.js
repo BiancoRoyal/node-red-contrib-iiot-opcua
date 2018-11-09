@@ -72,8 +72,8 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.stateMachine.endsub()
-          nodeUnderTest.createSubscription({ payload: {} })
+          nodeUnderTest.bianco.iiot.stateMachine.endsub()
+          nodeUnderTest.bianco.iiot.createSubscription({ payload: {} })
           done()
         })
     })
@@ -83,8 +83,8 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.stateMachine.endsub()
-          nodeUnderTest.subscribeActionInput({ payload: {} })
+          nodeUnderTest.bianco.iiot.stateMachine.endsub()
+          nodeUnderTest.bianco.iiot.subscribeActionInput({ payload: {} })
           done()
         })
     })
@@ -94,9 +94,9 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.stateMachine.endsub()
-          nodeUnderTest.opcuaSession = null
-          nodeUnderTest.subscribeMonitoredItem({ payload: {} })
+          nodeUnderTest.bianco.iiot.stateMachine.endsub()
+          nodeUnderTest.bianco.iiot.opcuaSession = null
+          nodeUnderTest.bianco.iiot.subscribeMonitoredItem({ payload: {} })
           done()
         })
     })
@@ -106,8 +106,8 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.stateMachine.endsub()
-          nodeUnderTest.monitoredItemTerminated({ payload: {} }, null, {}, new Error('Test Error Monitored Item'))
+          nodeUnderTest.bianco.iiot.stateMachine.endsub()
+          nodeUnderTest.bianco.iiot.monitoredItemTerminated({ payload: {} }, null, {}, new Error('Test Error Monitored Item'))
           done()
         })
     })
@@ -117,9 +117,9 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.stateMachine.endsub()
+          nodeUnderTest.bianco.iiot.stateMachine.endsub()
           let testItem
-          nodeUnderTest.setMonitoring({ monitoredItemId: testItem })
+          nodeUnderTest.bianco.iiot.setMonitoring({ monitoredItemId: testItem })
           done()
         })
     })

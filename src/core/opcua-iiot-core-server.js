@@ -499,7 +499,7 @@ de.biancoroyal.opcua.iiot.core.server.start = function (server, node) {
         if (err) {
           reject(err)
         } else {
-          node.initialized = true
+          node.bianco.iiot.initialized = true
 
           if (server.endpoints && server.endpoints.length) {
             server.endpoints.forEach(function (endpoint) {
@@ -585,7 +585,7 @@ de.biancoroyal.opcua.iiot.core.server.readConfigOfServerNode = function (node, c
   // Security
   node.allowAnonymous = config.allowAnonymous
   // User Management
-  node.users = config.users
+  node.opcuaUsers = config.users
   // XML-Set Management
   node.xmlsets = config.xmlsets
   // Audit
@@ -601,11 +601,10 @@ de.biancoroyal.opcua.iiot.core.server.readConfigOfServerNode = function (node, c
 }
 
 de.biancoroyal.opcua.iiot.core.server.initServerNode = function (node) {
-  node.assert = require('better-assert')
-  node.setMaxListeners(this.UNLIMITED_LISTENERS)
-  node.initialized = false
-  node.opcuaServer = null
-  return node
+  let serverNode = this.core.initCoreServerNode(node)
+  serverNode.bianco.iiot.assert = require('better-assert')
+  serverNode.setMaxListeners(this.UNLIMITED_LISTENERS)
+  return serverNode
 }
 
 de.biancoroyal.opcua.iiot.core.server.loadNodeSets = function (node, dirname) {
@@ -634,7 +633,7 @@ de.biancoroyal.opcua.iiot.core.server.loadNodeSets = function (node, dirname) {
   }
 
   this.detailDebugLog('node set:' + xmlFiles.toString())
-  node.xmlFiles = xmlFiles
+  node.bianco.iiot.xmlFiles = xmlFiles
   return node
 }
 
@@ -660,7 +659,7 @@ de.biancoroyal.opcua.iiot.core.server.checkUser = function (node, userName, pass
   let isValidUser = false
   this.detailDebugLog('Server User Request For ' + userName)
 
-  node.users.forEach(function (user) {
+  node.opcuaUsers.forEach(function (user) {
     if (userName === user.name && password === user.password) {
       isValidUser = true
     }
@@ -676,8 +675,8 @@ de.biancoroyal.opcua.iiot.core.server.checkUser = function (node, userName, pass
 }
 
 de.biancoroyal.opcua.iiot.core.server.initRegisterServerMethod = function (node) {
-  node.initialized = false
-  node.opcuaServer = null
+  node.bianco.iiot.initialized = false
+  node.bianco.iiot.opcuaServer = null
 
   if (!node.registerServerMethod) {
     node.registerServerMethod = this.core.nodeOPCUA.RegisterServerMethod.HIDDEN
@@ -712,12 +711,12 @@ de.biancoroyal.opcua.iiot.core.server.setDiscoveryOptions = function (node, serv
 }
 
 de.biancoroyal.opcua.iiot.core.server.getAddressSpace = function (node, msg) {
-  if (!node.opcuaServer.engine.addressSpace) {
+  if (!node.bianco.iiot.opcuaServer.engine.addressSpace) {
     node.error(new Error('Server AddressSpace Not Valid'), msg)
     return null
   }
 
-  return node.opcuaServer.engine.addressSpace
+  return node.bianco.iiot.opcuaServer.engine.addressSpace
 }
 
 de.biancoroyal.opcua.iiot.core.server.addVariableToAddressSpace = function (node, msg, humanReadableType) {
@@ -799,15 +798,15 @@ de.biancoroyal.opcua.iiot.core.server.deleteNOdeFromAddressSpace = function (nod
 }
 
 de.biancoroyal.opcua.iiot.core.server.restartServer = function (node) {
-  if (node.opcuaServer) {
-    node.opcuaServer.shutdown(function () {
+  if (node.bianco.iiot.opcuaServer) {
+    node.bianco.iiot.opcuaServer.shutdown(function () {
       node.emit('shutdown')
-      node.initNewServer()
+      node.bianco.iiot.initNewServer()
     })
   } else {
-    node.opcuaServer = null
+    node.bianco.iiot.opcuaServer = null
     node.emit('shutdown')
-    node.initNewServer()
+    node.bianco.iiot.initNewServer()
   }
 
   node.send({payload: 'server shutdown'})
@@ -834,7 +833,7 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
 
   return {
     port: node.port,
-    nodeset_filename: node.xmlFiles,
+    nodeset_filename: node.bianco.iiot.xmlFiles,
     resourcePath: node.endpoint || 'UA/NodeRED' + prefix + 'IIoTServer',
     buildInfo: {
       productName: node.name || 'NodeOPCUA IIoT Server',
@@ -876,15 +875,15 @@ de.biancoroyal.opcua.iiot.core.server.createServerObject = function (node, serve
 de.biancoroyal.opcua.iiot.core.server.setOPCUAServerListener = function (node) {
   let coreServer = this
 
-  node.opcuaServer.on('newChannel', function (channel) {
+  node.bianco.iiot.opcuaServer.on('newChannel', function (channel) {
     coreServer.internalDebugLog('Client connected new channel with address = '.bgYellow, channel.remoteAddress, ' port = ', channel.remotePort)
   })
 
-  node.opcuaServer.on('closeChannel', function (channel) {
+  node.bianco.iiot.opcuaServer.on('closeChannel', function (channel) {
     coreServer.internalDebugLog('Client disconnected close channel with address = '.bgCyan, channel.remoteAddress, ' port = ', channel.remotePort)
   })
 
-  node.opcuaServer.on('post_initialize', function () {
+  node.bianco.iiot.opcuaServer.on('post_initialize', function () {
     coreServer.internalDebugLog('initialized')
   })
 }

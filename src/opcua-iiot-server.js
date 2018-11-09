@@ -23,11 +23,12 @@ module.exports = function (RED) {
 
     this.asoDemo = config.asoDemo // ASO (address space objects) Demo
     let node = coreServer.readConfigOfServerNode(this, config)
-    node = coreServer.initServerNode(this)
+    node = coreServer.initServerNode(node)
     node = coreServer.loadNodeSets(node, __dirname)
     node = coreServer.loadCertificates(node)
+    coreServer.core.assert(node.bianco.iiot)
 
-    node.buildServerOptions = function () {
+    node.bianco.iiot.buildServerOptions = function () {
       let serverOptions = coreServer.buildServerOptions(node, 'Fix')
       serverOptions.userManager = {
         isValidUser: function (userName, password) {
@@ -37,41 +38,43 @@ module.exports = function (RED) {
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    node.createServer = function (serverOptions) {
+    node.bianco.iiot.createServer = function (serverOptions) {
       if (RED.settings.verbose) {
         coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
-      node.opcuaServer = coreServer.createServerObject(node, serverOptions)
+      node.bianco.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
       coreServer.core.setNodeStatusTo(node, 'waiting')
-      node.opcuaServer.initialize(node.postInitialize)
+      node.bianco.iiot.opcuaServer.initialize(node.bianco.iiot.postInitialize)
       coreServer.setOPCUAServerListener(node)
     }
 
-    node.initNewServer = function () {
+    node.bianco.iiot.initNewServer = function () {
       node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = node.buildServerOptions()
+      let serverOptions = node.bianco.iiot.buildServerOptions()
       serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
 
       try {
-        node.createServer(serverOptions)
+        node.bianco.iiot.createServer(serverOptions)
       } catch (err) {
         node.emit('server_create_error')
         coreServer.handleServerError(node, err, {payload: 'Server Failure! Please, check the server settings!'})
       }
     }
 
-    node.postInitialize = function () {
-      coreServer.constructAddressSpace(node.opcuaServer, node.asoDemo)
+    node.bianco.iiot.postInitialize = function () {
+      coreServer.constructAddressSpace(node.bianco.iiot.opcuaServer, node.asoDemo)
         .then(function (err) {
           if (err) {
             coreServer.handleServerError(node, err, {payload: 'Server Address Space Problem'})
           } else {
-            coreServer.start(node.opcuaServer, node)
+            coreServer.start(node.bianco.iiot.opcuaServer, node)
               .then(function () {
                 coreServer.core.setNodeStatusTo(node, 'active')
                 node.emit('server_running')
               }).catch(function (err) {
-                node.opcuaServer = null
+                if (node.bianco && node.bianco.iiot) {
+                  node.bianco.iiot.opcuaServer = null
+                }
                 node.emit('server_start_error')
                 coreServer.core.setNodeStatusTo(node, 'errors')
                 coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
@@ -82,20 +85,20 @@ module.exports = function (RED) {
         })
     }
 
-    node.initNewServer()
+    node.bianco.iiot.initNewServer()
 
     node.on('input', function (msg) {
-      if (!node.opcuaServer || !node.initialized) {
+      if (!node.bianco.iiot.opcuaServer || !node.bianco.iiot.initialized) {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
       }
 
       switch (msg.injectType) {
         case 'ASO':
-          node.changeAddressSpace(msg)
+          node.bianco.iiot.changeAddressSpace(msg)
           break
         case 'CMD':
-          node.executeOpcuaCommand(msg)
+          node.bianco.iiot.executeOpcuaCommand(msg)
           break
         default:
           coreServer.handleServerError(node, new Error('Unknown Inject Type ' + msg.injectType), msg)
@@ -104,7 +107,7 @@ module.exports = function (RED) {
       node.send(msg)
     })
 
-    node.changeAddressSpace = function (msg) { // TODO: refactor to work with the new OPC UA type list
+    node.bianco.iiot.changeAddressSpace = function (msg) { // TODO: refactor to work with the new OPC UA type list
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
         coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype)
       } else {
@@ -112,10 +115,10 @@ module.exports = function (RED) {
       }
     }
 
-    node.executeOpcuaCommand = function (msg) {
+    node.bianco.iiot.executeOpcuaCommand = function (msg) {
       switch (msg.commandType) {
         case 'restart':
-          node.restartServer()
+          node.bianco.iiot.restartServer()
           break
         case 'deleteNode':
           coreServer.deleteNOdeFromAddressSpace(node, msg)
@@ -125,11 +128,11 @@ module.exports = function (RED) {
       }
     }
 
-    node.restartServer = function () {
+    node.bianco.iiot.restartServer = function () {
       coreServer.internalDebugLog('Restart OPC UA Server')
       coreServer.restartServer(node)
 
-      if (node.opcuaServer) {
+      if (node.bianco.iiot.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')
       } else {
         coreServer.internalDebugLog('Can not restart OPC UA Server')
@@ -137,15 +140,16 @@ module.exports = function (RED) {
     }
 
     node.on('close', (done) => {
-      node.closeServer(() => {
+      node.bianco.iiot.closeServer(() => {
         coreServer.internalDebugLog('Close Server Node')
+        coreServer.core.resetBiancoNode(node)
         done()
       })
     })
 
-    node.closeServer = function (done) {
+    node.bianco.iiot.closeServer = function (done) {
       coreServer.destructAddressSpace(() => {
-        node.opcuaServer.shutdown(node.delayToClose, done)
+        node.bianco.iiot.opcuaServer.shutdown(node.delayToClose, done)
       })
     }
   }

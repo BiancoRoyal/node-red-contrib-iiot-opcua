@@ -28,10 +28,12 @@ module.exports = function (RED) {
     this.filters = config.filters
 
     let node = this
+    node.bianco = coreResponse.core.createBiancoIIoT()
+    coreResponse.core.assert(node.bianco.iiot)
 
     node.status({fill: 'green', shape: 'ring', text: 'active'})
 
-    node.handleBrowserMsg = function (msg) {
+    node.bianco.iiot.handleBrowserMsg = function (msg) {
       coreResponse.analyzeBrowserResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressBrowseMessageStructure(msg)
@@ -39,7 +41,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.handleReadMsg = function (msg) {
+    node.bianco.iiot.handleReadMsg = function (msg) {
       coreResponse.analyzeReadResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressReadMessageStructure(msg)
@@ -47,7 +49,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.handleWriteMsg = function (msg) {
+    node.bianco.iiot.handleWriteMsg = function (msg) {
       coreResponse.analyzeWriteResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressWriteMessageStructure(msg)
@@ -55,7 +57,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.handleListenerMsg = function (msg) {
+    node.bianco.iiot.handleListenerMsg = function (msg) {
       coreResponse.analyzeListenerResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressListenMessageStructure(msg)
@@ -63,7 +65,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.handleMethodMsg = function (msg) {
+    node.bianco.iiot.handleMethodMsg = function (msg) {
       coreResponse.analyzeMethodResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressMethodMessageStructure(msg)
@@ -71,7 +73,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.handleDefaultMsg = function (msg) {
+    node.bianco.iiot.handleDefaultMsg = function (msg) {
       if (msg && msg.payload) {
         coreResponse.handlePayloadStatusCode(node, msg)
         if (node.compressStructure) {
@@ -81,51 +83,51 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.handleNodeTypeOfMsg = function (msg) {
+    node.bianco.iiot.handleNodeTypeOfMsg = function (msg) {
       let message = Object.assign({}, msg)
 
       switch (msg.nodetype) {
         case 'browse':
-          message = node.handleBrowserMsg(message)
+          message = node.bianco.iiot.handleBrowserMsg(message)
           break
         case 'read':
-          message = node.handleReadMsg(message)
+          message = node.bianco.iiot.handleReadMsg(message)
           break
         case 'write':
-          message = node.handleWriteMsg(message)
+          message = node.bianco.iiot.handleWriteMsg(message)
           break
         case 'listen':
-          message = node.handleListenerMsg(message)
+          message = node.bianco.iiot.handleListenerMsg(message)
           break
         case 'method':
-          message = node.handleMethodMsg(message)
+          message = node.bianco.iiot.handleMethodMsg(message)
           break
         default:
-          message = node.handleDefaultMsg(message)
+          message = node.bianco.iiot.handleDefaultMsg(message)
       }
 
       return message
     }
 
-    node.extractEntries = function (msg) {
+    node.bianco.iiot.extractEntries = function (msg) {
       let filteredEntries = []
       msg.payload.forEach((item) => {
-        if (node.itemIsNotToFilter(item)) {
+        if (node.bianco.iiot.itemIsNotToFilter(item)) {
           filteredEntries.push(item)
         }
       })
       return filteredEntries
     }
 
-    node.filterMsg = function (msg) {
+    node.bianco.iiot.filterMsg = function (msg) {
       if (msg.payload.length) {
-        let filteredEntries = node.extractEntries(msg)
+        let filteredEntries = node.bianco.iiot.extractEntries(msg)
         if (filteredEntries.length) {
           msg.payload = filteredEntries
           return msg
         }
       } else {
-        if (node.itemIsNotToFilter(msg.payload)) {
+        if (node.bianco.iiot.itemIsNotToFilter(msg.payload)) {
           return msg
         }
       }
@@ -138,11 +140,11 @@ module.exports = function (RED) {
           if (msg.payload === void 0 || msg.payload === null || msg.payload === {}) { return }
         }
 
-        let message = node.handleNodeTypeOfMsg(msg)
+        let message = node.bianco.iiot.handleNodeTypeOfMsg(msg)
         message.compressed = node.compressStructure
 
         if (node.activateFilters && node.filters && node.filters.length > 0) {
-          message = node.filterMsg(message)
+          message = node.bianco.iiot.filterMsg(message)
           if (message) {
             node.send(message)
           }
@@ -157,7 +159,7 @@ module.exports = function (RED) {
       }
     })
 
-    node.itemIsNotToFilter = function (item) {
+    node.bianco.iiot.itemIsNotToFilter = function (item) {
       let result = coreResponse.core.checkItemForUnsetState(node, item)
 
       node.filters.forEach((element) => {

@@ -30,19 +30,20 @@ module.exports = function (RED) {
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = coreMethod.core.initClientNode(this)
+    coreMethod.core.assert(node.bianco.iiot)
 
-    node.handleMethodError = function (err, msg) {
+    node.bianco.iiot.handleMethodError = function (err, msg) {
       coreMethod.internalDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      if (node.connector && coreMethod.core.isSessionBad(err)) {
-        node.connector.resetBadSession()
+      if (coreMethod.core.isSessionBad(err)) {
+        node.emit('opcua_client_not_ready')
       }
     }
 
-    node.handleMethodWarn = function (message) {
+    node.bianco.iiot.handleMethodWarn = function (message) {
       if (node.showErrors) {
         node.warn(message)
       }
@@ -50,23 +51,25 @@ module.exports = function (RED) {
       coreMethod.internalDebugLog(message)
     }
 
-    node.callMethodOnSession = function (session, msg) {
+    node.bianco.iiot.callMethodOnSession = function (session, msg) {
       if (coreMethod.core.checkSessionNotValid(session, 'MethodCaller')) {
         return
       }
 
       if (msg.methodId && msg.inputArguments) {
-        coreMethod.getArgumentDefinition(node.opcuaSession, msg).then(function (results) {
+        coreMethod.getArgumentDefinition(node.bianco.iiot.opcuaSession, msg).then(function (results) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
-          node.callMethod(msg, results)
-        }).catch(node.handleMethodError)
+          node.bianco.iiot.callMethod(msg, results)
+        }).catch((err) => {
+          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
+        })
       } else {
         coreMethod.internalDebugLog(new Error('No Method Id And/Or Parameters'))
       }
     }
 
-    node.callMethod = function (msg, definitionResults) {
-      coreMethod.callMethods(node.opcuaSession, msg).then(function (data) {
+    node.bianco.iiot.callMethod = function (msg, definitionResults) {
+      coreMethod.callMethods(node.bianco.iiot.opcuaSession, msg).then(function (data) {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
         let result = null
@@ -121,13 +124,16 @@ module.exports = function (RED) {
       if (coreMethod.invalidMessage(node, message)) {
         return
       }
-      node.callMethodOnSession(node.opcuaSession, message)
+      node.bianco.iiot.callMethodOnSession(node.bianco.iiot.opcuaSession, message)
     })
 
     coreMethod.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreMethod.core.deregisterToConnector(node, done)
+      coreMethod.core.deregisterToConnector(node, () => {
+        coreMethod.core.resetBiancoNode(node)
+        done()
+      })
     })
   }
 

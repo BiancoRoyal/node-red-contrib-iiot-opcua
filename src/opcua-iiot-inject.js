@@ -35,39 +35,55 @@ module.exports = function (RED) {
     this.addressSpaceItems = config.addressSpaceItems || []
 
     let node = this
-    node.intervalId = null
-    node.cronjob = null
-    node.REPEAT_FACTOR = 1000.0
-    node.ONE_SECOND = 1000
-    node.INPUT_TIMEOUT_MILLISECONDS = 1000
+    node.bianco = coreInject.core.createBiancoIIoT()
+    coreInject.core.assert(node.bianco.iiot)
 
-    node.repeaterSetup = function () {
+    node.bianco.iiot.intervalId = null
+    node.bianco.iiot.onceTimeout = null
+    node.bianco.iiot.cronjob = null
+    node.bianco.iiot.REPEAT_FACTOR = 1000.0
+    node.bianco.iiot.ONE_SECOND = 1000
+    node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS = 1000
+
+    node.bianco.iiot.repeaterSetup = function () {
       coreInject.internalDebugLog('Repeat Is ' + node.repeat)
       coreInject.internalDebugLog('Crontab Is ' + node.crontab)
 
       if (node.repeat !== '') {
-        node.repeat = parseFloat(config.repeat) * node.REPEAT_FACTOR
+        node.repeat = parseFloat(config.repeat) * node.bianco.iiot.REPEAT_FACTOR
 
         if (node.repeat === 0) {
-          node.repeat = node.ONE_SECOND
+          node.repeat = node.bianco.iiot.ONE_SECOND
         }
 
         coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
-        if (node.intervalId) {
-          clearInterval(node.intervalId)
+        if (node.bianco.iiot.intervalId) {
+          clearInterval(node.bianco.iiot.intervalId)
         }
 
-        node.intervalId = setInterval(function () {
+        node.bianco.iiot.intervalId = setInterval(function () {
           node.emit('input', {})
         }, node.repeat)
       } else if (node.crontab !== '') {
-        node.cronjob = new cron.CronJob(node.crontab,
+        node.bianco.iiot.cronjob = new cron.CronJob(node.crontab,
           function () {
             node.emit('input', {})
           },
           null,
           true)
+      }
+    }
+
+    node.bianco.iiot.resetAllTimer = function () {
+      if (node.bianco.iiot.onceTimeout) {
+        clearTimeout(node.bianco.iiot.onceTimeout)
+        node.bianco.iiot.onceTimeout = null
+      }
+
+      if (node.bianco.iiot.intervalId) {
+        clearInterval(node.bianco.iiot.intervalId)
+        node.bianco.iiot.intervalId = null
       }
     }
 
@@ -119,15 +135,20 @@ module.exports = function (RED) {
     })
 
     if (node.once) {
-      let timeout = parseInt(node.INPUT_TIMEOUT_MILLISECONDS * node.startDelay)
+      if (node.bianco.iiot.onceTimeout) {
+        clearTimeout(node.bianco.iiot.onceTimeout)
+        node.bianco.iiot.onceTimeout = null
+      }
+
+      let timeout = parseInt(node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS * node.startDelay)
       coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
-      node.onceTimeout = setTimeout(function () {
+      node.bianco.iiot.onceTimeout = setTimeout(function () {
         coreInject.internalDebugLog('injecting once at start')
         node.emit('input', {})
-        node.repeaterSetup()
+        node.bianco.iiot.repeaterSetup()
       }, timeout)
     } else {
-      node.repeaterSetup()
+      node.bianco.iiot.repeaterSetup()
     }
   }
 
@@ -136,20 +157,12 @@ module.exports = function (RED) {
   OPCUAIIoTInject.prototype.close = function () {
     let node = this
 
-    if (node.onceTimeout) {
-      clearTimeout(node.onceTimeout)
-      node.onceTimeout = null
-    }
-
-    if (node.intervalId) {
-      clearInterval(node.intervalId)
-      node.intervalId = null
-    }
-
-    if (node.cronjob) {
-      node.cronjob.stop()
+    if (node.bianco.iiot.cronjob) {
+      node.bianco.iiot.cronjob.stop()
       delete node['cronjob']
     }
+
+    coreInject.core.resetBiancoNode(node)
   }
 
   RED.httpAdmin.post('/opcuaIIoT/inject/:id', RED.auth.needsPermission('opcuaIIoT.inject.write'), function (req, res) {

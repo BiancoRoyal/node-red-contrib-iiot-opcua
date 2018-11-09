@@ -186,7 +186,7 @@ var testListenerFilterFlow = [
     'id': 'b8ff62e0.eccb98',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
-    'payload': '{ "interval": 200, "queueSize": 10 }',
+    'payload': '{ "interval": 250, "queueSize": 10 }',
     'payloadType': 'json',
     'topic': '',
     'repeat': '',

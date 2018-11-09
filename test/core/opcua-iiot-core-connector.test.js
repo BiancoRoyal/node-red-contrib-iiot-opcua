@@ -100,49 +100,49 @@ describe('OPC UA Core Connector', function () {
 
     it('should change to LOCKED state on OPC UA event backoff', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
       coreConnector.setListenerToClient(node)
-      node.opcuaClient.emit('backoff')
+      node.bianco.iiot.opcuaClient.emit('backoff')
       expect(fsm.getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to UNLOCKED state on OPC UA event connection reestablished', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
       coreConnector.setListenerToClient(node)
       fsm.lock()
-      node.opcuaClient.emit('connection_reestablished')
+      node.bianco.iiot.opcuaClient.emit('connection_reestablished')
       expect(fsm.getMachineState()).toBe('UNLOCKED')
       done()
     })
 
     it('should change to LOCKED state on OPC UA event start reconnection', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
       coreConnector.setListenerToClient(node)
       fsm.idle().initopcua().open()
-      node.opcuaClient.emit('start_reconnection')
+      node.bianco.iiot.opcuaClient.emit('start_reconnection')
       expect(fsm.getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to OPEN state on OPC UA event timed out request', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
       coreConnector.setListenerToClient(node)
       fsm.idle().initopcua().open()
-      node.opcuaClient.emit('timed_out_request')
+      node.bianco.iiot.opcuaClient.emit('timed_out_request')
       expect(fsm.getMachineState()).toBe('OPEN')
       done()
     })
 
     it('should change to SESSIONACTIVE state on OPC UA event security token renewed', function (done) {
       let fsm = coreConnector.createStatelyMachine()
-      let node = { opcuaClient: new events.EventEmitter(), stateMachine: fsm }
+      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
       coreConnector.setListenerToClient(node)
       fsm.idle().initopcua().open().sessionrequest().sessionactive()
-      node.opcuaClient.emit('security_token_renewed')
+      node.bianco.iiot.opcuaClient.emit('security_token_renewed')
       expect(fsm.getMachineState()).toBe('SESSIONACTIVE')
       done()
     })
@@ -150,11 +150,12 @@ describe('OPC UA Core Connector', function () {
     it('should change to UNLOCKED state on OPC UA event after reconnection', function (done) {
       let fsm = coreConnector.createStatelyMachine()
       let node = new events.EventEmitter()
-      node.opcuaClient = new events.EventEmitter()
-      node.stateMachine = fsm
+      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.bianco.iiot.opcuaClient = new events.EventEmitter()
+      node.bianco.iiot.stateMachine = fsm
       coreConnector.setListenerToClient(node)
       fsm.idle().initopcua().open().sessionrequest().sessionactive().lock()
-      node.opcuaClient.emit('after_reconnection')
+      node.bianco.iiot.opcuaClient.emit('after_reconnection')
       expect(fsm.getMachineState()).toBe('UNLOCKED')
       done()
     })
@@ -162,9 +163,10 @@ describe('OPC UA Core Connector', function () {
     it('should be IDLE state on OPC UA log session parameter', function (done) {
       let fsm = coreConnector.createStatelyMachine()
       let node = new events.EventEmitter()
-      node.opcuaClient = new events.EventEmitter()
+      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.bianco.iiot.opcuaClient = new events.EventEmitter()
       node.endpoint = 'opc.tcp://localhost'
-      node.opcuaSession = {
+      node.bianco.iiot.opcuaSession = {
         name: 'name',
         sessionId: 1,
         authenticationToken: '23434cc34566',
@@ -172,65 +174,69 @@ describe('OPC UA Core Connector', function () {
         lastRequestSentTime: new Date(),
         lastResponseReceivedTime: new Date()
       }
-      node.stateMachine = fsm
+      node.bianco.iiot.stateMachine = fsm
       coreConnector.logSessionInformation(node)
       expect(fsm.getMachineState()).toBe('IDLE')
-      expect(node.opcuaSession.name).toBe('name')
+      expect(node.bianco.iiot.opcuaSession.name).toBe('name')
       done()
     })
 
     it('should handle OPC UA close event on State Lock', function (done) {
       let fsm = coreConnector.createStatelyMachine()
       let node = new events.EventEmitter()
-      node.opcuaClient = new events.EventEmitter()
-      node.stateMachine = fsm
-      node.isInactiveOnOPCUA = () => { return false }
-      node.resetOPCUAConnection = () => { return true }
+      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.bianco.iiot.opcuaClient = new events.EventEmitter()
+      node.bianco.iiot.stateMachine = fsm
+      node.bianco.iiot.isInactiveOnOPCUA = () => { return false }
+      node.bianco.iiot.resetOPCUAConnection = () => { return true }
       coreConnector.setListenerToClient(node)
       fsm.lock()
       expect(fsm.getMachineState()).toBe('LOCKED')
       node.on('server_connection_close', () => {
         done()
       })
-      node.opcuaClient.emit('close')
+      node.bianco.iiot.opcuaClient.emit('close')
     })
 
     it('should handle OPC UA close event on State Stopped', function (done) {
       let fsm = coreConnector.createStatelyMachine()
       let node = new events.EventEmitter()
-      node.opcuaClient = new events.EventEmitter()
-      node.stateMachine = fsm
-      node.isInactiveOnOPCUA = () => { return true }
-      node.resetOPCUAConnection = () => { return true }
+      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.bianco.iiot.opcuaClient = new events.EventEmitter()
+      node.bianco.iiot.stateMachine = fsm
+      node.bianco.iiot.isInactiveOnOPCUA = () => { return true }
+      node.bianco.iiot.resetOPCUAConnection = () => { return true }
       coreConnector.setListenerToClient(node)
       fsm.lock().stopopcua()
       expect(fsm.getMachineState()).toBe('STOPPED')
       node.on('server_connection_close', () => {
         done()
       })
-      node.opcuaClient.emit('close')
+      node.bianco.iiot.opcuaClient.emit('close')
     })
 
     it('should handle OPC UA abort event on State Stopped', function (done) {
       let fsm = coreConnector.createStatelyMachine()
       let node = new events.EventEmitter()
-      node.opcuaClient = new events.EventEmitter()
-      node.stateMachine = fsm
-      node.isInactiveOnOPCUA = () => { return true }
-      node.resetOPCUAConnection = () => { return true }
+      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.bianco.iiot.opcuaClient = new events.EventEmitter()
+      node.bianco.iiot.stateMachine = fsm
+      node.bianco.iiot.isInactiveOnOPCUA = () => { return true }
+      node.bianco.iiot.resetOPCUAConnection = () => { return true }
       coreConnector.setListenerToClient(node)
       fsm.lock().stopopcua()
       expect(fsm.getMachineState()).toBe('STOPPED')
       node.on('server_connection_abort', () => {
         done()
       })
-      node.opcuaClient.emit('abort')
+      node.bianco.iiot.opcuaClient.emit('abort')
     })
 
     it('should handle no session on session information log', function (done) {
       let node = new events.EventEmitter()
-      node.opcuaClient = null
-      node.opcuaSession = null
+      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.bianco.iiot.opcuaClient = null
+      node.bianco.iiot.opcuaSession = null
       coreConnector.logSessionInformation(node)
       done()
     })

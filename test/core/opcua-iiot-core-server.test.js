@@ -84,9 +84,9 @@ describe('OPC UA Core Server', function () {
     it('should work on server start callback', function (done) {
       opcuaserver.initialize(function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
-          let node = {initialized: false}
+          let node = { bianco: { iiot: {initialized: false} } }
           coreServer.start(opcuaserver, node).then(function () {
-            expect(node.initialized).toBe(true)
+            expect(node.bianco.iiot.initialized).toBe(true)
             done()
           })
         })

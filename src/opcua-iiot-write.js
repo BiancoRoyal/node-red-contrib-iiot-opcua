@@ -26,19 +26,20 @@ module.exports = function (RED) {
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = coreClient.core.initClientNode(this)
+    coreClient.core.assert(node.bianco.iiot)
 
-    node.handleWriteError = function (err, msg) {
+    node.bianco.iiot.handleWriteError = function (err, msg) {
       coreClient.writeDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      if (node.connector && coreClient.core.isSessionBad(err)) {
-        node.connector.resetBadSession()
+      if (coreClient.core.isSessionBad(err)) {
+        node.emit('opcua_client_not_ready')
       }
     }
 
-    node.writeToSession = function (session, originMsg) {
+    node.bianco.iiot.writeToSession = function (session, originMsg) {
       if (coreClient.core.checkSessionNotValid(session, 'Writer')) {
         return
       }
@@ -47,27 +48,27 @@ module.exports = function (RED) {
       let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
       coreClient.write(session, nodesToWrite, msg).then(function (writeResult) {
         try {
-          let message = node.buildResultMessage(writeResult)
+          let message = node.bianco.iiot.buildResultMessage(writeResult)
           node.send(message)
         } catch (err) {
-          node.handleWriteError(err, msg)
+          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err) {
-        node.handleWriteError(err, msg)
+        (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    node.buildResultMessage = function (result) {
+    node.bianco.iiot.buildResultMessage = function (result) {
       let message = Object.assign({}, result.msg)
       message.nodetype = 'write'
       message.justValue = node.justValue
 
-      let dataValuesString = node.extractDataValueString(message, result)
-      message = node.setMessageProperties(message, result, dataValuesString)
+      let dataValuesString = node.bianco.iiot.extractDataValueString(message, result)
+      message = node.bianco.iiot.setMessageProperties(message, result, dataValuesString)
       return message
     }
 
-    node.extractDataValueString = function (message, result) {
+    node.bianco.iiot.extractDataValueString = function (message, result) {
       let dataValuesString = {}
       if (node.justValue) {
         dataValuesString = JSON.stringify({
@@ -83,7 +84,7 @@ module.exports = function (RED) {
       return dataValuesString
     }
 
-    node.setMessageProperties = function (message, result, stringValue) {
+    node.bianco.iiot.setMessageProperties = function (message, result, stringValue) {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
       } catch (err) {
@@ -104,7 +105,7 @@ module.exports = function (RED) {
       }
 
       if (msg.injectType === 'write') {
-        node.writeToSession(node.opcuaSession, msg)
+        node.bianco.iiot.writeToSession(node.bianco.iiot.opcuaSession, msg)
       } else {
         coreClient.writeDebugLog('Wrong Inject Type ' + msg.injectType + '! The Type has to be write.')
         if (node.showErrors) {
@@ -116,7 +117,10 @@ module.exports = function (RED) {
     coreClient.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreClient.core.deregisterToConnector(node, done)
+      coreClient.core.deregisterToConnector(node, () => {
+        coreClient.core.resetBiancoNode(node)
+        done()
+      })
     })
   }
 

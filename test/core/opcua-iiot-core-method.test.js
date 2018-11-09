@@ -30,27 +30,27 @@ describe('OPC UA Core Method', function () {
 
   describe('callMethods', function () {
     it('should be truthy on wrong message missing all', function (done) {
-      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {})).toBeTruthy()
+      expect(coreMethod.invalidMessage({bianco: {iiot: {handleMethodWarn: (text) => {}}}}, {})).toBeTruthy()
       done()
     })
 
     it('should be truthy on wrong message missing methodId, inputArguments, methodType', function (done) {
-      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1})).toBeTruthy()
+      expect(coreMethod.invalidMessage({bianco: {iiot: {handleMethodWarn: (text) => {}}}}, {objectId: 1})).toBeTruthy()
       done()
     })
 
     it('should be truthy on wrong message missing inputArguments, methodType', function (done) {
-      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1, methodId: 1})).toBeTruthy()
+      expect(coreMethod.invalidMessage({bianco: {iiot: {handleMethodWarn: (text) => {}}}}, {objectId: 1, methodId: 1})).toBeTruthy()
       done()
     })
 
     it('should be truthy on wrong message missing methodType', function (done) {
-      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1, methodId: 1, inputArguments: {}})).toBeTruthy()
+      expect(coreMethod.invalidMessage({bianco: {iiot: {handleMethodWarn: (text) => {}}}}, {objectId: 1, methodId: 1, inputArguments: {}})).toBeTruthy()
       done()
     })
 
     it('should be false on filled message', function (done) {
-      expect(coreMethod.invalidMessage({handleMethodWarn: (text) => {}}, {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1})).toBeFalsy()
+      expect(coreMethod.invalidMessage({bianco: {iiot: {handleMethodWarn: (text) => {}}}}, {objectId: 1, methodId: 1, inputArguments: {}, methodType: 1})).toBeFalsy()
       done()
     })
 

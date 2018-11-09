@@ -31,64 +31,65 @@ module.exports = function (RED) {
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = coreClient.core.initClientNode(this)
+    coreClient.core.assert(node.bianco.iiot)
 
-    node.handleReadError = function (err, msg) {
+    node.bianco.iiot.handleReadError = function (err, msg) {
       coreClient.readDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      if (node.connector && coreClient.core.isSessionBad(err)) {
-        node.connector.resetBadSession()
+      if (coreClient.core.isSessionBad(err)) {
+        node.emit('opcua_client_not_ready')
       }
     }
 
-    node.readAllFromNodeId = function (session, itemsToRead, msg) {
+    node.bianco.iiot.readAllFromNodeId = function (session, itemsToRead, msg) {
       coreClient.readAllAttributes(session, itemsToRead, msg)
         .then(function (readResult) {
           try {
-            node.send(node.buildResultMessage('AllAttributes', readResult))
+            node.send(node.bianco.iiot.buildResultMessage('AllAttributes', readResult))
           } catch (err) {
-            node.handleReadError(err, readResult.msg)
+            node.bianco.iiot.handleReadError(err, readResult.msg)
           }
         }).catch(function (err) {
-          node.handleReadError(err, msg)
+          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.readValueFromNodeId = function (session, itemsToRead, msg) {
+    node.bianco.iiot.readValueFromNodeId = function (session, itemsToRead, msg) {
       coreClient.readVariableValue(session, itemsToRead, msg)
         .then(function (readResult) {
-          let message = node.buildResultMessage('VariableValue', readResult)
+          let message = node.bianco.iiot.buildResultMessage('VariableValue', readResult)
           node.send(message)
         }).catch(function (err) {
-          node.handleReadError(err, msg)
+          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.readHistoryDataFromNodeId = function (session, itemsToRead, msg) {
+    node.bianco.iiot.readHistoryDataFromNodeId = function (session, itemsToRead, msg) {
       const startDate = new Date()
-      node.historyStart = new Date()
-      node.historyStart.setDate(startDate.getDate() - node.historyDays)
-      node.historyEnd = new Date()
+      node.bianco.iiot.historyStart = new Date()
+      node.bianco.iiot.historyStart.setDate(startDate.getDate() - node.historyDays)
+      node.bianco.iiot.historyEnd = new Date()
 
       coreClient.readHistoryValue(
         session,
         itemsToRead,
-        msg.payload.historyStart || node.historyStart,
-        msg.payload.historyEnd || node.historyEnd,
+        msg.payload.historyStart || node.bianco.iiot.historyStart,
+        msg.payload.historyEnd || node.bianco.iiot.historyEnd,
         msg)
         .then(function (readResult) {
-          let message = node.buildResultMessage('HistoryValue', readResult)
-          message.historyStart = readResult.startDate || node.historyStart
-          message.historyEnd = readResult.endDate || node.historyEnd
+          let message = node.bianco.iiot.buildResultMessage('HistoryValue', readResult)
+          message.historyStart = readResult.startDate || node.bianco.iiot.historyStart
+          message.historyEnd = readResult.endDate || node.bianco.iiot.historyEnd
           node.send(message)
         }).catch(function (err) {
-          node.handleReadError(err, msg)
+          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.readFromNodeId = function (session, itemsToRead, msg) {
+    node.bianco.iiot.readFromNodeId = function (session, itemsToRead, msg) {
       let item = null
       let transformedItem = null
       let transformedItemsToRead = []
@@ -103,15 +104,15 @@ module.exports = function (RED) {
 
       coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg)
         .then(function (readResult) {
-          let message = node.buildResultMessage('Default', readResult)
+          let message = node.bianco.iiot.buildResultMessage('Default', readResult)
           message.maxAge = node.maxAge
           node.send(message)
         }).catch(function (err) {
-          node.handleReadError(err, msg)
+          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.readFromSession = function (session, itemsToRead, originMsg) {
+    node.bianco.iiot.readFromSession = function (session, itemsToRead, originMsg) {
       let msg = Object.assign({}, originMsg)
       if (coreClient.core.checkSessionNotValid(session, 'Reader')) {
         return
@@ -120,20 +121,20 @@ module.exports = function (RED) {
       coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
       switch (parseInt(node.attributeId)) {
         case coreClient.READ_TYPE.ALL:
-          node.readAllFromNodeId(session, itemsToRead, msg)
+          node.bianco.iiot.readAllFromNodeId(session, itemsToRead, msg)
           break
         case coreClient.READ_TYPE.VALUE:
-          node.readValueFromNodeId(session, itemsToRead, msg)
+          node.bianco.iiot.readValueFromNodeId(session, itemsToRead, msg)
           break
         case coreClient.READ_TYPE.HISTORY:
-          node.readHistoryDataFromNodeId(session, itemsToRead, msg)
+          node.bianco.iiot.readHistoryDataFromNodeId(session, itemsToRead, msg)
           break
         default:
-          node.readFromNodeId(session, itemsToRead, msg)
+          node.bianco.iiot.readFromNodeId(session, itemsToRead, msg)
       }
     }
 
-    node.buildResultMessage = function (readType, readResult) {
+    node.bianco.iiot.buildResultMessage = function (readType, readResult) {
       let message = Object.assign({}, readResult.msg)
       message.payload = {}
       message.nodetype = 'read'
@@ -141,17 +142,17 @@ module.exports = function (RED) {
       message.attributeId = node.attributeId
       message.justValue = node.justValue
 
-      let dataValuesString = node.extractDataValueString(readResult)
-      message = node.setMessageProperties(message, readResult, dataValuesString)
+      let dataValuesString = node.bianco.iiot.extractDataValueString(readResult)
+      message = node.bianco.iiot.setMessageProperties(message, readResult, dataValuesString)
 
       if (!node.justValue) {
-        message = node.enhanceMessage(message, readResult)
+        message = node.bianco.iiot.enhanceMessage(message, readResult)
       }
 
       return message
     }
 
-    node.extractDataValueString = function (readResult) {
+    node.bianco.iiot.extractDataValueString = function (readResult) {
       let dataValuesString = {}
       if (node.justValue) {
         dataValuesString = JSON.stringify(readResult.results, null, 2)
@@ -161,7 +162,7 @@ module.exports = function (RED) {
       return dataValuesString
     }
 
-    node.setMessageProperties = function (message, readResult, stringValue) {
+    node.bianco.iiot.setMessageProperties = function (message, readResult, stringValue) {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
       } catch (err) {
@@ -176,7 +177,7 @@ module.exports = function (RED) {
       return message
     }
 
-    node.enhanceMessage = function (message, readResult) {
+    node.bianco.iiot.enhanceMessage = function (message, readResult) {
       try {
         message.resultsConverted = {}
         let dataValuesString = JSON.stringify(readResult.results, null, 2)
@@ -199,16 +200,19 @@ module.exports = function (RED) {
       }
 
       try {
-        node.readFromSession(node.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
+        node.bianco.iiot.readFromSession(node.bianco.iiot.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
       } catch (err) {
-        node.handleReadError(err, msg)
+        node.bianco.iiot.handleReadError(err, msg)
       }
     })
 
     coreClient.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreClient.core.deregisterToConnector(node, done)
+      coreClient.core.deregisterToConnector(node, () => {
+        coreClient.core.resetBiancoNode(node)
+        done()
+      })
     })
   }
 

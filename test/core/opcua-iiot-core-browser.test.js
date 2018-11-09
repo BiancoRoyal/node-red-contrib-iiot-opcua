@@ -11,6 +11,7 @@ jest.setTimeout(5000)
 
 describe('OPC UA Core Browser', function () {
   let coreBrowser = require('../../src/core/opcua-iiot-core-browser')
+  const events = require('events')
 
   describe('Core Browser unit test', function () {
     it('should return the objects root nodeId', function (done) {
@@ -44,35 +45,6 @@ describe('OPC UA Core Browser', function () {
       }
       coreBrowser.browseErrorHandling(node, new Error('Error'), { payload: {} }, [])
       expect(statusText).toBe('error')
-      done()
-    })
-
-    it('should handle browse error and reconnect after ten times', function (done) {
-      let statusText = 'idle'
-      let counter = 0
-      let node = {
-        connector: { resetBadSession: () => {
-          counter++
-          if (counter > 10) {
-            statusText = 'active'
-          }
-        } },
-        showErrors: true,
-        showStatusActivities: true,
-        statusText: statusText,
-        status: (state) => { statusText = state.text },
-        error: (err, msg) => { coreBrowser.internalDebugLog(err.message) }
-      }
-      const requests = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-      requests.forEach((item) => {
-        coreBrowser.browseErrorHandling(node, new Error('BadSession'), {payload: {}}, [])
-        if (item > 10) {
-          expect(statusText).toBe('active')
-        } else {
-          expect(statusText).toBe('error')
-        }
-      })
-
       done()
     })
 
