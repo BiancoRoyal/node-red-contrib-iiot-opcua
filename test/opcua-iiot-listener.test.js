@@ -112,6 +112,16 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         })
     })
 
+    it('should be loaded and call monitoredItemTerminated with null item to monitor', function (done) {
+      helper.load(listenerNodesToLoad, listenerUnitFlow,
+        function () {
+          let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
+          expect(nodeUnderTest).toBeDefined()
+          nodeUnderTest.bianco.iiot.errorHandling(new Error('Test Error'))
+          done()
+        })
+    })
+
     it('should be loaded and call setMonitoring with undefined item id to monitor', function (done) {
       helper.load(listenerNodesToLoad, listenerUnitFlow,
         function () {
