@@ -40,13 +40,14 @@
       "Sunday"
     ],
     "on": "on",
-    "onstart": "Inject once at start",
+    "onstart": "inject once and then",
     "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
     "success": "Successfully injected: __label__",
     "errors": {
       "failed": "inject failed, see log for details"
     },
-    "startDelay": "Delay sec. at start",
+    "startDelay": "Delay at start",
+    "startDelayAddon": "sec. then",
     "addButton": "Add",
     "tabs-label": {
       "addressSpaceItems": "OPC UA Nodes",

@@ -99,12 +99,13 @@ module.exports = function (RED) {
       message.justValue = node.justValue
       message.filter = true
       message.filtertype = 'filter'
-      message.payload = node.bianco.iiot.filterByType(msg) || msg.payload
+      message.payload = node.bianco.iiot.filterByType(message) || message.payload
 
       if (node.justValue) {
         message.payload = node.bianco.iiot.filterResult(message)
       }
 
+      coreFilter.core.assert(message.payload)
       node.send(message)
     })
 
@@ -199,11 +200,11 @@ module.exports = function (RED) {
       return result
     }
 
-    node.bianco.iiot.filterResult = function (msg, result) {
+    node.bianco.iiot.filterResult = function (msg) {
       if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
-        result = node.bianco.iiot.convertResultValue(msg) || msg.payload
+        return node.bianco.iiot.convertResultValue(msg) || msg.payload
       }
-      return result
+      return msg.payload
     }
 
     node.bianco.iiot.extractValueFromOPCUAArrayStructure = function (msg, entryIndex) {
@@ -279,11 +280,25 @@ module.exports = function (RED) {
       return result
     }
 
-    node.bianco.iiot.filterByBrowserType = function (msg) {
+    node.bianco.iiot.filterListEntryByNodeId = function (list) {
       let result = []
 
-      if (msg.nodetype === 'browse' && msg.payload.browserResults && msg.payload.browserResults.length) {
-        msg.payload.browserResults.forEach((item) => {
+      if (list && list.length) {
+        list.forEach((item) => {
+          if (item === node.nodeId) {
+            result.push(item)
+          }
+        })
+      }
+
+      return result
+    }
+
+    node.bianco.iiot.filterListByNodeId = function (list) {
+      let result = []
+
+      if (list && list.length) {
+        list.forEach((item) => {
           if (item.nodeId === node.nodeId) {
             result.push(item)
           }
@@ -293,15 +308,36 @@ module.exports = function (RED) {
       return result
     }
 
-    node.bianco.iiot.filterByCrawlerType = function (msg) {
-      let result = []
+    node.bianco.iiot.filterByBrowserType = function (msg) {
+      let result = node.bianco.iiot.filterListByNodeId(msg.payload.browserResults)
 
-      if (msg.nodetype === 'crawl' && msg.payload.crawlerResults && msg.payload.crawlerResults.length) {
-        msg.payload.crawlerResults.forEach((item) => {
-          if (item.nodeId === node.nodeId) {
-            result.push(item)
-          }
-        })
+      if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
+        msg.addressSpaceItems = node.bianco.iiot.filterListByNodeId(msg.addressSpaceItems)
+      }
+
+      if (msg.nodesToRead && msg.nodesToRead.length) {
+        msg.nodesToRead = node.bianco.iiot.filterListEntryByNodeId(msg.nodesToRead)
+        msg.nodesToReadCount = msg.nodesToRead.length
+      }
+
+      if (msg.addressItemsToRead && msg.addressItemsToRead.length) {
+        msg.addressItemsToRead = node.bianco.iiot.filterListByNodeId(msg.addressItemsToRead)
+        msg.addressItemsToReadCount = msg.addressItemsToRead.length
+      }
+
+      if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) {
+        msg.addressItemsToBrowse = node.bianco.iiot.filterListByNodeId(msg.addressItemsToBrowse)
+        msg.addressItemsToBrowseCount = msg.addressItemsToBrowse.length
+      }
+
+      return result
+    }
+
+    node.bianco.iiot.filterByCrawlerType = function (msg) {
+      let result = node.bianco.iiot.filterListByNodeId(msg.payload.crawlerResults)
+
+      if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
+        msg.addressItems = node.bianco.iiot.filterListByNodeId(msg.addressSpaceItems)
       }
 
       return result

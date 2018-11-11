@@ -38,6 +38,8 @@
     "success": "Erfolgreich injected: __label__",
     "errors": {
       "failed": "inject failed, see log for details"
-    }
+    },
+    "startDelay": "Delay beim Start",
+    "startDelayAddon": "Sek. und dann"
   }
 }

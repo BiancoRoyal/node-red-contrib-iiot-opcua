@@ -134,17 +134,23 @@ module.exports = function (RED) {
       }
     })
 
-    if (node.once) {
-      if (node.bianco.iiot.onceTimeout) {
-        clearTimeout(node.bianco.iiot.onceTimeout)
-        node.bianco.iiot.onceTimeout = null
-      }
+    if (node.bianco.iiot.onceTimeout) {
+      clearTimeout(node.bianco.iiot.onceTimeout)
+      node.bianco.iiot.onceTimeout = null
+    }
+    let timeout = parseInt(node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS * node.startDelay)
 
-      let timeout = parseInt(node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS * node.startDelay)
-      coreInject.internalDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
+    if (node.once) {
+      coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
       node.bianco.iiot.onceTimeout = setTimeout(function () {
-        coreInject.internalDebugLog('injecting once at start')
+        coreInject.detailDebugLog('injecting once at start')
         node.emit('input', {})
+        node.bianco.iiot.repeaterSetup()
+      }, timeout)
+    } else if (node.repeat || node.crontab) {
+      coreInject.detailDebugLog('start with delay timeout ' + timeout + ' msec.')
+      node.bianco.iiot.onceTimeout = setTimeout(function () {
+        coreInject.detailDebugLog('had a start delay of ' + timeout + ' msec. to setup inject interval')
         node.bianco.iiot.repeaterSetup()
       }, timeout)
     } else {

@@ -357,7 +357,8 @@
     })
 
     $('#node-input-once').change(function () {
-      if ($(this).is(':checked')) {
+
+      if ($(this).is(':checked') || $('#opcuaiiotinject-time-type-select').val() !== 'none') {
         $('#node-delay').show()
       } else {
         $('#node-delay').hide()
@@ -655,7 +656,8 @@
       suffix = ' ¹'
     }
 
-    if (this.repeat || this.crontab) {
+    let hasRepeat = ( this.repeat && this.repeat !== 'none' )
+    if (hasRepeat || this.crontab) {
       suffix = suffix + ' ↻'
     }
 
@@ -723,6 +725,17 @@
             <div class="form-row">
                 <label for="node-input-topic"><i class="icon-tag"></i> <span data-i18n="node-red:common.label.topic"></span></label>
                 <input type="text" id="node-input-topic">
+            </div>
+
+            <div class="form-row" id="node-delay">
+                <label for="node-input-startDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcuaiiotinject.startDelay"></span></label>
+                <input type="text" id="node-input-startDelay" placeholder="10" style="width:60px"> <span data-i18n="opcuaiiotinject.startDelayAddon"></span>
+            </div>
+
+            <div class="form-row" id="node-once">
+                <label for="node-input-once" style="width:160px">
+                <i class="fa fa-power-off"></i> <span data-i18n="opcuaiiotinject.onstart"></span></label>
+                <input type="checkbox" id="node-input-once" style="width:40px">
             </div>
 
             <div class="form-row">
@@ -807,16 +820,6 @@
                 </div>
             </div>
 
-            <div class="form-row" id="node-once">
-                <label for="node-input-once" style="width:140px">
-                <i class="fa fa-power-off"></i> <span data-i18n="opcuaiiotinject.onstart"></span></label>
-                <input type="checkbox" id="node-input-once" style="width:40px">
-            </div>
-            <div class="form-row" id="node-delay">
-                <label for="node-input-startDelay"><i class="fa fa-clock-o"></i> <span data-i18n="opcuaiiotinject.startDelay"></span></label>
-                <input type="text" id="node-input-startDelay" placeholder="10" style="width:80px">
-            </div>
-
             <div class="form-row">
                 <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
                 <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
@@ -896,6 +899,7 @@
 
     <strong>Repeat</strong>
     <p>With the repeat settings you can set a cron configuration.</p>
+    <p>The interval settings needs a short delay on start. This is equal to the once option but without any inject at to start working.</p>
 
     <strong>Inject once at start</strong>
     <p>The 'Delay sec. at start' has to be set to a minimum for starting injects toward the OPC UA server.</p>

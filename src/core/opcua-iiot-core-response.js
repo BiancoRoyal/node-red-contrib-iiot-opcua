@@ -27,6 +27,10 @@ de.biancoroyal.opcua.iiot.core.response.analyzeBrowserResults = function (node, 
   this.handlePayloadStatusCode(node, msg)
 }
 
+de.biancoroyal.opcua.iiot.core.response.analyzeCrawlerResults = function (node, msg) {
+  this.handlePayloadStatusCode(node, msg)
+}
+
 de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (node, msg) {
   this.handlePayloadStatusCode(node, msg)
   if (msg.readtype === 'HistoryValue' && msg.payload && msg.payload.length) {
@@ -96,7 +100,7 @@ de.biancoroyal.opcua.iiot.core.response.analyzeEventResultStatus = function (nod
 de.biancoroyal.opcua.iiot.core.response.handlePayloadStatusCode = function (node, msg) {
   let entryStatus = [0, 0, 0]
 
-  if (msg.payload.length || msg.payload.results || msg.payload.statusCodes) {
+  if (msg.payload.length || msg.payload.results || msg.payload.browserResults || msg.payload.crawlerResults || msg.payload.statusCodes) {
     entryStatus = this.handlePayloadArrayOfObjects(msg)
   } else {
     entryStatus = this.handlePayloadObject(msg)
@@ -117,6 +121,10 @@ de.biancoroyal.opcua.iiot.core.response.handlePayloadArrayOfObjects = function (
 
   if (msg.payload.results) {
     results = msg.payload.results
+  } else if (msg.payload.browserResults) {
+    results = msg.payload.browserResults
+  } else if (msg.payload.crawlerResults) {
+    results = msg.payload.crawlerResults
   } else if (msg.payload.statusCodes) {
     results = msg.payload.statusCodes
   } else {
@@ -259,6 +267,24 @@ de.biancoroyal.opcua.iiot.core.response.compressBrowseMessageStructure = functio
   if (msg.payload.hasOwnProperty('browserResults') && msg.payload.browserResults.length) {
     let itemList = []
     msg.payload.browserResults.forEach((item) => {
+      itemList.push({
+        nodeId: item.nodeId.toString(),
+        browseName: (item.browseName.namespaceIndex) ? item.browseName.namespaceIndex + ':' + item.browseName.name : item.browseName,
+        displayName: item.displayName.text
+      })
+    })
+    msg.payload = itemList
+    this.trimMessageExtensions(msg)
+    this.trimMessagePayloadExtensions(msg)
+  } else {
+    this.defaultCompress(msg)
+  }
+}
+
+de.biancoroyal.opcua.iiot.core.response.compressCrawlerMessageStructure = function (msg) {
+  if (msg.payload.hasOwnProperty('crawlerResults') && msg.payload.crawlerResults.length) {
+    let itemList = []
+    msg.payload.crawlerResults.forEach((item) => {
       itemList.push({
         nodeId: item.nodeId.toString(),
         browseName: (item.browseName.namespaceIndex) ? item.browseName.namespaceIndex + ':' + item.browseName.name : item.browseName,
