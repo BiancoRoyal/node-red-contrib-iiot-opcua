@@ -17,13 +17,15 @@ var connectorNode = require('../../src/opcua-iiot-connector')
 var serverNode = require('../../src/opcua-iiot-server')
 var readNode = require('../../src/opcua-iiot-read')
 var browserNode = require('../../src/opcua-iiot-browser')
+var crawlerNode = require('../../src/opcua-iiot-crawler')
+var methodsNode = require('../../src/opcua-iiot-method-caller')
 var resultFilterNode = require('../../src/opcua-iiot-result-filter')
 var responseNode = require('../../src/opcua-iiot-response')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testResponseNodes = [injectNode, connectorNode, browserNode, readNode, resultFilterNode, responseNode, serverNode]
+var testResponseNodes = [injectNode, connectorNode, browserNode, crawlerNode, methodsNode, readNode, resultFilterNode, responseNode, serverNode]
 
 var testReadResponseFlow = [
   {
@@ -734,6 +736,422 @@ var testAllResponseTypesWithBrowser = [
   }
 ]
 
+var testCrawlerResponseFlow = [
+  {
+    'id': '9dbd1593.4b149',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'inject',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': 'Bianco Royal',
+    'addressSpaceItems': [
+      {
+        'name': 'Bianco Royal',
+        'nodeId': 'ns=1;i=1234',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        '9e58470.16fa6b8'
+      ]
+    ]
+  },
+  {
+    'id': '9e58470.16fa6b8',
+    'type': 'OPCUA-IIoT-Crawler',
+    'connector': '42ae0274.4a66e4',
+    'name': '',
+    'justValue': false,
+    'singleResult': true,
+    'showStatusActivities': true,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': true,
+    'negateFilter': true,
+    'filters': [
+      {
+        'name': 'nodeClass',
+        'value': 'Method'
+      },
+      {
+        'name': 'nodeId',
+        'value': 'ns=0;*'
+      },
+      {
+        'name': 'browseName',
+        'value': 'PumpSpeed'
+      },
+      {
+        'name': 'dataType',
+        'value': 'ns=0;i=21'
+      },
+      {
+        'name': 'browseName',
+        'value': 'BiancoRoyal'
+      },
+      {
+        'name': 'dataValue',
+        'value': '100'
+      },
+      {
+        'name': 'typeDefinition',
+        'value': 'ns=0;i=68'
+      },
+      {
+        'name': 'nodeClass',
+        'value': 'Object*'
+      }
+    ],
+    'delayPerMessage': '1',
+    'wires': [
+      [
+        '1aa0bec0.a7b991',
+        'a071159c.41eb58',
+        'b23c181d.d36158',
+        '7b931bc3.82370c',
+        '122d8908.53e8af',
+        'f5c39f77.42dc68'
+      ]
+    ]
+  },
+  {
+    'id': '1aa0bec0.a7b991',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      [
+        'n1rsf4'
+      ]
+    ]
+  },
+  {
+    'id': 'a071159c.41eb58',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': true,
+    'negateFilter': false,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=PumpSpeed'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf4'
+      ]
+    ]
+  },
+  {
+    'id': 'b23c181d.d36158',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': true,
+    'negateFilter': false,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=PumpSpeed'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf4'
+      ]
+    ]
+  },
+  {
+    'id': '7b931bc3.82370c',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': true,
+    'negateFilter': true,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=PumpSpeed'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf4'
+      ]
+    ]
+  },
+  {
+    'id': '122d8908.53e8af',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      [
+        'n1rsf4'
+      ]
+    ]
+  },
+  {
+    'id': 'f5c39f77.42dc68',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      [
+        'n1rsf4'
+      ]
+    ]
+  },
+  {id: 'n1rsf4', type: 'helper'},
+  {
+    'id': '42ae0274.4a66e4',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:49700/',
+    'keepSessionAlive': false,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL CRAWLER SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': '',
+    'connectionStartDelay': '',
+    'reconnectDelay': ''
+  },
+  {
+    'id': '7417bc65.d8a334',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '49700',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'individualCerts': false,
+    'isAuditing': false,
+    'serverDiscovery': true,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'delayToClose': 1000,
+    'wires': [
+      []
+    ]
+  }
+]
+
+var testMethodResponseFlow = [
+  {
+    'id': '255a4521.cd2092',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'inject',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': '',
+    'addressSpaceItems': [],
+    'wires': [
+      [
+        'd48a0e23.4ab278'
+      ]
+    ]
+  },
+  {
+    'id': 'd48a0e23.4ab278',
+    'type': 'OPCUA-IIoT-Method-Caller',
+    'connector': 'ae72fc9e.f521f8',
+    'objectId': 'ns=1;i=1234',
+    'methodId': 'ns=1;i=12345',
+    'methodType': 'basic',
+    'value': '',
+    'justValue': false,
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': true,
+    'inputArguments': [
+      {
+        'name': 'barks',
+        'dataType': 'UInt32',
+        'value': '3'
+      },
+      {
+        'name': 'volume',
+        'dataType': 'UInt32',
+        'value': '6'
+      }
+    ],
+    'wires': [
+      [
+        '53a3842f.0c7fcc',
+        '619fd732.5db74',
+        '1fd82ec0.7786f9'
+      ]
+    ]
+  },
+  {
+    'id': '53a3842f.0c7fcc',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      ['n1rsf5']
+    ]
+  },
+  {
+    'id': '619fd732.5db74',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      ['n1rsf5']
+    ]
+  },
+  {
+    'id': '1fd82ec0.7786f9',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      ['n1rsf5']
+    ]
+  },
+  {id: 'n1rsf5', type: 'helper'},
+  {
+    'id': 'ae72fc9e.f521f8',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:49750/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'Basic256',
+    'securityMode': 'SIGN',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': '',
+    'connectionStartDelay': '',
+    'reconnectDelay': ''
+  },
+  {
+    'id': '7417bc65.d8a334',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '49750',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'individualCerts': false,
+    'isAuditing': false,
+    'serverDiscovery': true,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'delayToClose': 1000,
+    'wires': [
+      []
+    ]
+  }
+]
+
 describe('OPC UA Response node e2e Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -832,7 +1250,7 @@ describe('OPC UA Response node e2e Testing', function () {
       })
     })
 
-    it('should get six messages with payload on browse with six response nodes on all possibel setting of options', function (done) {
+    it('should get six messages with payload on browse with six response nodes on all possible setting of options', function (done) {
       helper.load(testResponseNodes, testAllResponseTypesWithBrowser, function () {
         let n1 = helper.getNode('n1rsf3')
         let counter = 0
@@ -848,6 +1266,45 @@ describe('OPC UA Response node e2e Testing', function () {
           }
 
           if (counter === 6) {
+            done()
+          }
+        })
+      })
+    })
+
+    it('should get six messages with payload on crawler with six response nodes on all possible setting of options', function (done) {
+      helper.load(testResponseNodes, testCrawlerResponseFlow, function () {
+        let n1 = helper.getNode('n1rsf4')
+        let counter = 0
+        n1.on('input', function (msg) {
+          counter++
+          expect(msg.payload).toBeDefined()
+
+          if (msg.payload.length) {
+            expect(msg.payload.length).toBeGreaterThan(0)
+          } else {
+            expect(msg.payload.crawlerResults).toBeDefined()
+            expect(msg.payload.crawlerResults.length).toBeGreaterThan(0)
+          }
+
+          if (counter === 6) {
+            done()
+          }
+        })
+      })
+    })
+
+    it('should get three messages with payload on method call with three response nodes on all possible setting of options', function (done) {
+      helper.load(testResponseNodes, testMethodResponseFlow, function () {
+        let n1 = helper.getNode('n1rsf5')
+        let counter = 0
+        n1.on('input', function (msg) {
+          counter++
+          expect(msg.payload).toBeDefined()
+          expect(msg.payload.results).toBeDefined()
+          expect(msg.payload.results.length).toBeGreaterThan(0)
+
+          if (counter === 3) {
             done()
           }
         })
