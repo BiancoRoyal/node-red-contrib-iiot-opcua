@@ -175,7 +175,7 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('n1rh')
           nodeUnderTest.on('input', msg => {
-            expect(msg.payload[0].value.dataType).toBe('DateTime')
+            expect(msg.payload[0].dataType).toBe('DateTime')
             done()
           })
         })
