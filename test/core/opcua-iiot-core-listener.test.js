@@ -139,22 +139,6 @@ describe('OPC UA Core Listener', function () {
     })
   })
 
-  describe('getAllEventTypes', function () {
-    it('should return Error object, if none value is present', function (done) {
-      coreListener.getAllEventTypes().catch(function (err) {
-        assert.equal('Session Is Not Valid To Browse For Event Types', err.message)
-        done()
-      })
-    })
-
-    it('should be instance of Promise, if none value is present', function (done) {
-      expect(coreListener.getAllEventTypes().catch(function (err) {
-        assert.equal('Session Is Not Valid To Browse For Event Types', err.message)
-        done()
-      })).to.be.instanceOf(Promise)
-    })
-  })
-
   describe('analyzeEvent', function () {
     it('should return Error object, if none session is present', function (done) {
       coreListener.analyzeEvent().catch(function (err) {
