@@ -503,6 +503,237 @@ var testReadAllAttributesResponseFlow = [
   }
 ]
 
+var testAllResponseTypesWithBrowser = [
+  {
+    'id': '7417bc65.d8a5fc',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '49600',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'individualCerts': false,
+    'isAuditing': false,
+    'serverDiscovery': true,
+    'users': [],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': 1,
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': 1000,
+    'maxNodesPerBrowse': 2000,
+    'delayToClose': 1000,
+    'wires': [
+      []
+    ]
+  },
+  {
+    'id': '8b417812.2d6b3',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'inject',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': '',
+    'addressSpaceItems': [],
+    'wires': [
+      [
+        'ea686e22.1f8a78'
+      ]
+    ]
+  },
+  {
+    'id': 'ea686e22.1f8a78',
+    'type': 'OPCUA-IIoT-Browser',
+    'connector': '1c83d9b3.afba8e',
+    'nodeId': 'ns=1;i=1234',
+    'name': '',
+    'justValue': true,
+    'sendNodesToRead': false,
+    'sendNodesToListener': false,
+    'sendNodesToBrowser': false,
+    'singleBrowseResult': false,
+    'recursiveBrowse': false,
+    'recursiveDepth': 1,
+    'delayPerMessage': 0.2,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        'abf469b7.094758',
+        '9764f105.7c8df8',
+        'f73eb010.203d78',
+        '4325c2c7.8d17e4',
+        '98e6951e.bf8608',
+        'e8e71c61.dd0e08'
+      ]
+    ]
+  },
+  {
+    'id': 'abf469b7.094758',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      [
+        'n1rsf3'
+      ]
+    ]
+  },
+  {
+    'id': '9764f105.7c8df8',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      [
+        'n1rsf3'
+      ]
+    ]
+  },
+  {
+    'id': 'f73eb010.203d78',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': true,
+    'negateFilter': false,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=FanSpeed'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf3'
+      ]
+    ]
+  },
+  {
+    'id': '4325c2c7.8d17e4',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': true,
+    'negateFilter': false,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=FanSpeed'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf3'
+      ]
+    ]
+  },
+  {
+    'id': '98e6951e.bf8608',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': true,
+    'negateFilter': false,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=FanSpeed'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf3'
+      ]
+    ]
+  },
+  {
+    'id': 'e8e71c61.dd0e08',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': true,
+    'activateFilters': true,
+    'negateFilter': true,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=FanSpeed'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf3'
+      ]
+    ]
+  },
+  {id: 'n1rsf3', type: 'helper'},
+  {
+    'id': '1c83d9b3.afba8e',
+    'type': 'OPCUA-IIoT-Connector',
+    'z': '',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:49600/',
+    'keepSessionAlive': true,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL SERVER',
+    'showErrors': false,
+    'individualCerts': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': '',
+    'connectionStartDelay': '',
+    'reconnectDelay': '',
+    'maxBadSessionRequests': '10'
+  }
+]
+
 describe('OPC UA Response node e2e Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -595,6 +826,28 @@ describe('OPC UA Response node e2e Testing', function () {
           expect(msg.payload.length).toBeGreaterThan(0)
 
           if (counter === 4) {
+            done()
+          }
+        })
+      })
+    })
+
+    it('should get six messages with payload on browse with six response nodes on all possibel setting of options', function (done) {
+      helper.load(testResponseNodes, testAllResponseTypesWithBrowser, function () {
+        let n1 = helper.getNode('n1rsf3')
+        let counter = 0
+        n1.on('input', function (msg) {
+          counter++
+          expect(msg.payload).toBeDefined()
+
+          if (msg.payload.length) {
+            expect(msg.payload.length).toBeGreaterThan(0)
+          } else {
+            expect(msg.payload.browserResults).toBeDefined()
+            expect(msg.payload.browserResults.length).toBeGreaterThan(0)
+          }
+
+          if (counter === 6) {
             done()
           }
         })

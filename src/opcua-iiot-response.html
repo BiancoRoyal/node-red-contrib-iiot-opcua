@@ -27,7 +27,13 @@
     label: function () {
       let suffix = ''
       if (this.compressStructure) {
-        suffix += ' ½'
+        suffix += ' ☇'
+      }
+      if (this.activateUnsetFilter) {
+        suffix += ' ø'
+      }
+      if (this.activateFilters) {
+        suffix += (this.negateFilter) ? ' ⊄' : ' ⊂'
       }
       return (this.name) ? this.name + suffix : "Response" + suffix;
     },

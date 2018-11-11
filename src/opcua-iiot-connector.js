@@ -151,22 +151,30 @@ module.exports = function (RED) {
 
       node.bianco.iiot.stateMachine.unlock()
       node.bianco.iiot.opcuaClient.connect(node.endpoint, function (err) {
-        if (err) {
-          node.bianco.iiot.stateMachine.lock().stopopcua()
-          node.bianco.iiot.handleError(err)
+        if (node.bianco && node.bianco.iiot) {
+          if (err) {
+            node.bianco.iiot.stateMachine.lock().stopopcua()
+            node.bianco.iiot.handleError(err)
+          } else {
+            coreConnector.internalDebugLog('Client Is Connected To ' + node.endpoint)
+            node.bianco.iiot.stateMachine.open()
+          }
         } else {
-          coreConnector.internalDebugLog('Client Is Connected To ' + node.endpoint)
-          node.bianco.iiot.stateMachine.open()
+          coreConnector.internalDebugLog('bianco.iiot not valid on connect resolve')
         }
       })
     }
 
     node.bianco.iiot.renewConnection = function (done) {
-      node.bianco.iiot.opcuaDirectDisconnect(() => {
-        node.bianco.iiot.renewFiniteStateMachine()
-        node.bianco.iiot.stateMachine.idle().initopcua()
-        done()
-      })
+      if (node.bianco && node.bianco.iiot) {
+        node.bianco.iiot.opcuaDirectDisconnect(() => {
+          node.bianco.iiot.renewFiniteStateMachine()
+          node.bianco.iiot.stateMachine.idle().initopcua()
+          done()
+        })
+      } else {
+        coreConnector.internalDebugLog('bianco.iiot not valid on renew connection')
+      }
     }
 
     node.bianco.iiot.endpointMatchForConnecting = function (endpoint) {
@@ -543,10 +551,12 @@ module.exports = function (RED) {
 
       fsm.onOPEN = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Open Event FSM')
-        node.emit('connection_started', node.bianco.iiot.opcuaClient)
-        coreConnector.internalDebugLog('Client Connected To ' + node.endpoint)
-        coreConnector.detailDebugLog('Client Options ' + JSON.stringify(node.bianco.iiot.opcuaClientOptions))
-        node.bianco.iiot.startSession('Open Event')
+        if (node.bianco && node.bianco.iiot) {
+          node.emit('connection_started', node.bianco.iiot.opcuaClient)
+          coreConnector.internalDebugLog('Client Connected To ' + node.endpoint)
+          coreConnector.detailDebugLog('Client Options ' + JSON.stringify(node.bianco.iiot.opcuaClientOptions))
+          node.bianco.iiot.startSession('Open Event')
+        }
       }
 
       fsm.onSESSIONREQUESTED = function (event, oldState, newState) {
@@ -562,7 +572,9 @@ module.exports = function (RED) {
       fsm.onSESSIONCLOSED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Session Close Event FSM')
         node.emit('session_closed')
-        node.bianco.iiot.opcuaSession = null
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.opcuaSession = null
+        }
       }
 
       fsm.onSESSIONRESTART = function (event, oldState, newState) {
@@ -573,10 +585,12 @@ module.exports = function (RED) {
       fsm.onCLOSED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Client Close Event FSM')
         node.emit('connection_closed')
-        if (node.bianco.iiot.opcuaClient) {
-          node.bianco.iiot.opcuaClient.removeAllListeners()
+        if (node.bianco && node.bianco.iiot) {
+          if (node.bianco.iiot.opcuaClient) {
+            node.bianco.iiot.opcuaClient.removeAllListeners()
+          }
+          node.bianco.iiot.opcuaClient = null
         }
-        node.bianco.iiot.opcuaClient = null
       }
 
       fsm.onLOCKED = function (event, oldState, newState) {
@@ -589,26 +603,34 @@ module.exports = function (RED) {
 
       fsm.onSTOPPED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Stopped Event FSM')
-        node.bianco.iiot.resetAllTimer()
         node.emit('connection_stopped')
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.resetAllTimer()
+        }
       }
 
       fsm.onEND = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector End Event FSM')
-        node.bianco.iiot.resetAllTimer()
         node.emit('connection_end')
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.resetAllTimer()
+        }
       }
 
       fsm.onRECONFIGURED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Reconfigure Event FSM')
-        node.bianco.iiot.resetAllTimer()
         node.emit('connection_reconfigure')
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.resetAllTimer()
+        }
       }
 
       fsm.onRENEW = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Renew Event FSM')
-        node.bianco.iiot.resetAllTimer()
         node.emit('connection_renew')
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.resetAllTimer()
+        }
       }
     }
 
