@@ -363,53 +363,6 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId, ms
     })
 }
 
-// TODO: implement this to use server known events
-de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session) {
-  return new Promise(
-    function (resolve, reject) {
-      if (!session) {
-        reject(new Error('Session Is Not Valid To Browse For Event Types'))
-        return
-      }
-
-      let entries = []
-      let makeNodeId = this.core.nodeOPCUA.makeNodeId
-      let ObjectTypeIds = this.core.nodeOPCUA.ObjectTypeIds
-
-      let browseEventTypes = {
-        nodeId: makeNodeId(ObjectTypeIds.BaseEventType),
-        referenceTypeId: this.core.nodeOPCUA.resolveNodeId('HasSubtype'),
-        browseDirection: this.core.nodeOPCUA.BrowseDirection.Forward,
-        includeSubtypes: true,
-        nodeClassMask: this.core.nodeOPCUA.NodeClassMask.ObjectType,
-        resultMask: 63 // All ResultMask_Schema
-      }
-
-      let nodesToBrowse = [browseEventTypes]
-
-      session.browse(nodesToBrowse, function (err, results, diagnostics) {
-        if (err) {
-          reject(err)
-        } else {
-          if (results) {
-            if (results.length > 0) {
-              results[0].references.forEach(function (reference) {
-                entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
-              })
-            } else {
-              if (results.references) {
-                results.references.forEach(function (reference) {
-                  entries.push({displayName: reference.displayName.text, nodeId: reference.nodeId, reference: reference})
-                })
-              }
-            }
-          }
-          resolve(entries)
-        }
-      })
-    })
-}
-
 de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browseForBrowseName, dataValue) {
   let core = de.biancoroyal.opcua.iiot.core.listener.core
   let coreListener = de.biancoroyal.opcua.iiot.core.listener
