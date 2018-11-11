@@ -17,11 +17,12 @@ var connectorNode = require('../../src/opcua-iiot-connector')
 var inputNode = require('../../src/opcua-iiot-browser')
 var serverNode = require('../../src/opcua-iiot-server')
 var responseNode = require('../../src/opcua-iiot-response')
+var resultFilterNode = require('../../src/opcua-iiot-result-filter')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var browseNodesToLoad = [injectNode, connectorNode, inputNode, serverNode, responseNode]
+var browseNodesToLoad = [injectNode, connectorNode, resultFilterNode, inputNode, serverNode, responseNode]
 
 var testBrowseFlow = [
   {
@@ -55,8 +56,33 @@ var testBrowseFlow = [
     'singleBrowseResult': true,
     'showStatusActivities': false,
     'showErrors': false,
-    'wires': [['n5f1', 'n4rf1']]
+    'wires': [['n5f1', 'n4rf1', '14bba4a7.aa0f1b']]
   },
+  {
+    'id': '14bba4a7.aa0f1b',
+    'type': 'OPCUA-IIoT-Result-Filter',
+    'nodeId': 'ns=1;s=TestReadWrite',
+    'datatype': 'Double',
+    'fixedValue': false,
+    'fixPoint': 2,
+    'withPrecision': false,
+    'precision': 2,
+    'entry': '1',
+    'justValue': false,
+    'withValueCheck': false,
+    'minvalue': '',
+    'maxvalue': '',
+    'defaultvalue': '',
+    'topic': '',
+    'name': '',
+    'showErrors': false,
+    'wires': [
+      [
+        'n21rf1'
+      ]
+    ]
+  },
+  {id: 'n21rf1', type: 'helper'},
   {
     'id': 'n4rf1',
     'type': 'OPCUA-IIoT-Response',

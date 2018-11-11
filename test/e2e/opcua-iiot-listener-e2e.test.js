@@ -376,6 +376,37 @@ var recursiveBrowserAboFlow = [
       ]
     ]
   },
+  {
+    'id': '8a761f37.f69818',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'listen',
+    'payload': '{}',
+    'payloadType': 'json',
+    'topic': 'unsub',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '6',
+    'name': 'Root',
+    'addressSpaceItems': [
+      {
+        'name': 'BiancoRoyal',
+        'nodeId': 'ns=1;i=1234',
+        'datatypeName': ''
+      },
+      {
+        'name': 'Tanks',
+        'nodeId': 'ns=1;i=1001',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        '18b3e5b9.f9ba4a',
+        'n1abo'
+      ]
+    ]
+  },
   {id: 'n1abo', type: 'helper'},
   {
     'id': '18b3e5b9.f9ba4a',
@@ -817,7 +848,12 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
 
           if (msgCounter === 2) {
             expect(msg.payload.browserResults).toBeDefined()
-            setTimeout(done, 5000)
+          }
+
+          if (msgCounter === 3) {
+            expect(msg.payload).toBeDefined()
+            expect(msg.topic).toBe('unsub')
+            setTimeout(done, 3000)
           }
         })
       })
@@ -857,7 +893,7 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
 
           if (msgCounter === 2) {
             expect(msg.payload).toBeDefined()
-            setTimeout(done, 2000)
+            setTimeout(done, 3000)
           }
         })
       })

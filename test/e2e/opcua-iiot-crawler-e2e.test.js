@@ -540,7 +540,7 @@ var testCrawlerWithFilterNS0 = [
     'name': '',
     'justValue': false,
     'singleResult': false,
-    'showStatusActivities': true,
+    'showStatusActivities': false,
     'showErrors': false,
     'activateFilters': true,
     'filters': [

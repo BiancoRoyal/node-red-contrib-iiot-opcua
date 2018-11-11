@@ -363,6 +363,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId, ms
     })
 }
 
+// TODO: implement this to use server known events
 de.biancoroyal.opcua.iiot.core.listener.getAllEventTypes = function (session) {
   return new Promise(
     function (resolve, reject) {

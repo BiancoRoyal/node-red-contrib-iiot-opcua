@@ -207,6 +207,54 @@ var writeTestFlowPayload = [
   {id: 'n6rff4', type: 'helper'}
 ]
 
+var writeTestValueCheckFlowPayload = [
+  {
+    id: 'n1rff5',
+    type: 'inject',
+    name: 'TestName',
+    topic: 'TestTopic',
+    payload: '{}',
+    payloadType: 'json',
+    repeat: '',
+    crontab: '',
+    once: true,
+    onceDelay: 0.2,
+    wires: [['n2rff5', 'n3rff5']]
+  },
+  {id: 'n2rff5', type: 'helper'},
+  {
+    id: 'n3rff5',
+    type: 'function',
+    name: '',
+    func: 'msg = {"topic":"TestTopic","nodetype":"read","injectType":"read","addressSpaceItems":[],"payload":[{"node":"ns=1;s=Pressure","nodeId":"ns=1;s=Pressure","nodeClass":2,"browseName":{"namespaceIndex":1,"name":"Pressure"},"displayName":{"text":"Pressure"},"description":{},"writeMask":0,"userWriteMask":0,"value":0.37883857546881394,"dataType":"ns=0;i=11","valueRank":-1,"arrayDimensions":{},"accessLevel":3,"userAccessLevel":3,"minimumSamplingInterval":0,"historizing":false,"statusCode":{"value":0,"description":"No Error","name":"Good"}}],"justValue":true,"nodesToRead":["ns=1;s=Pressure"],"nodesToReadCount":1,"addressItemsToRead":[{"nodeId":"ns=1;s=Pressure","browseName":"1:Pressure","displayName":"locale=null text=Pressure","nodeClass":"Variable","datatypeName":"ns=0;i=63"}],"addressItemsToReadCount":1,"addressItemsToBrowse":[{"nodeId":"ns=1;s=Pressure","browseName":"1:Pressure","displayName":"locale=null text=Pressure","nodeClass":"Variable","datatypeName":"ns=0;i=63"}],"addressItemsToBrowseCount":1,"nodeId":"ns=1;s=Pressure","filter":true,"filtertype":"filter","_event":"node:37af887d.3001c8","readtype":"AllAttributes","attributeId":0};\nreturn msg;',
+    outputs: 1,
+    noerr: 0,
+    wires: [['n4rff5', 'n5rff5']]
+  },
+  {id: 'n4rff5', type: 'helper'},
+  {
+    id: 'n5rff5',
+    'type': 'OPCUA-IIoT-Result-Filter',
+    'nodeId': 'ns=1;s=Pressure',
+    'datatype': 'Double',
+    'fixedValue': false,
+    'fixPoint': 2,
+    'withPrecision': false,
+    'precision': 2,
+    'entry': 1,
+    'justValue': false,
+    'withValueCheck': true,
+    'minvalue': 0.30,
+    'maxvalue': 0.60,
+    'defaultvalue': 0.30,
+    'topic': '',
+    'name': 'AnalogItem',
+    'showErrors': false,
+    'wires': [['n6rff5']]
+  },
+  {id: 'n6rff5', type: 'helper'}
+]
+
 describe('OPC UA Result Filter node Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -451,6 +499,99 @@ describe('OPC UA Result Filter node Testing', function () {
           expect(msg.topic).toBe('TestTopic')
           done()
         })
+      })
+    })
+
+    it('should have nodeId, payload and topic as result with value check', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n6 = helper.getNode('n6rff5')
+        n6.on('input', function (msg) {
+          expect(msg.nodesToRead[0]).toBe('ns=1;s=Pressure')
+          expect(msg.payload).toBe(0.37883857546881394)
+          expect(msg.topic).toBe('TestTopic')
+          expect(msg.filter).toBe(true)
+          expect(msg.justValue).toBe(false)
+          expect(msg.filtertype).toBe('filter')
+          done()
+        })
+      })
+    })
+
+    it('should have nodeId, payload and topic as result with value check on just value', function (done) {
+      writeTestValueCheckFlowPayload[4].justValue = true
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n6 = helper.getNode('n6rff5')
+        n6.on('input', function (msg) {
+          expect(msg.nodesToRead[0]).toBe('ns=1;s=Pressure')
+          expect(msg.payload).toBe(0.37883857546881394)
+          expect(msg.topic).toBe('TestTopic')
+          expect(msg.filter).toBe(true)
+          expect(msg.justValue).toBe(true)
+          expect(msg.filtertype).toBe('filter')
+
+          writeTestValueCheckFlowPayload[4].justValue = false
+          done()
+        })
+      })
+    })
+
+    it('should have nodeId, payload and topic as result with value check on just value with precision two', function (done) {
+      writeTestValueCheckFlowPayload[4].justValue = true
+      writeTestValueCheckFlowPayload[4].withPrecision = true
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n6 = helper.getNode('n6rff5')
+        n6.on('input', function (msg) {
+          expect(msg.nodesToRead[0]).toBe('ns=1;s=Pressure')
+          expect(msg.payload).toBe(0.38)
+          expect(msg.topic).toBe('TestTopic')
+          expect(msg.filter).toBe(true)
+          expect(msg.justValue).toBe(true)
+          expect(msg.filtertype).toBe('filter')
+
+          writeTestValueCheckFlowPayload[4].justValue = false
+          writeTestValueCheckFlowPayload[4].withPrecision = false
+          done()
+        })
+      })
+    })
+
+    it('should return null on null input to convertResultValue', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n5 = helper.getNode('n5rff5')
+        expect(n5.bianco.iiot.convertResultValue({ payload: null })).toBe(null)
+        done()
+      })
+    })
+
+    it('should return given object on missing datatype input to convertResultValue', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n5 = helper.getNode('n5rff5')
+        expect(n5.bianco.iiot.convertResultValue({ payload: {test: 'Test'} })).toMatchObject({test: 'Test'})
+        done()
+      })
+    })
+
+    it('should return null on null with datatype input to convertResultValue', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n5 = helper.getNode('n5rff5')
+        expect(n5.bianco.iiot.convertResultValue({ payload: { value: null, datatype: 'Double' } })).toBeFalsy()
+        done()
+      })
+    })
+
+    it('should return min value with datatype input to convertResultValue', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n5 = helper.getNode('n5rff5')
+        expect(n5.bianco.iiot.convertResultValue({ payload: { value: 0.6778, datatype: 'Double' } })).toBe(0.30)
+        done()
+      })
+    })
+
+    it('should return value in range with datatype input to convertResultValue', function (done) {
+      helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
+        let n5 = helper.getNode('n5rff5')
+        expect(n5.bianco.iiot.convertResultValue({ payload: { value: 0.4778, datatype: 'Double' } })).toBe(0.4778)
+        done()
       })
     })
   })

@@ -233,7 +233,7 @@ module.exports = function (RED) {
       }
 
       if (msg.addressSpaceItems.length) {
-        if (node.bianco.iiot.useGroupItems) {
+        if (node.useGroupItems) {
           node.bianco.iiot.handleMonitoringOfGroupedItems(msg)
         } else {
           node.bianco.iiot.handleMonitoringOfItems(msg)

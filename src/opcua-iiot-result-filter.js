@@ -39,11 +39,6 @@ module.exports = function (RED) {
     node.bianco = coreFilter.core.createBiancoIIoT()
     coreFilter.core.assert(node.bianco.iiot)
 
-    if (node.withValueCheck) {
-      node.minvalue = node.convertDataType(node.minvalue)
-      node.maxvalue = node.convertDataType(node.maxvalue)
-    }
-
     node.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     node.bianco.iiot.nodeIdToFilter = function (msg) {
@@ -140,6 +135,7 @@ module.exports = function (RED) {
     node.bianco.iiot.convertResult = function (msg, result) {
       try {
         let convertedResult = null
+
         if (node.fixPoint >= 0 && node.fixedValue) {
           convertedResult = Number.parseFloat(result).toFixed(node.fixPoint)
           convertedResult = parseFloat(convertedResult)
@@ -148,6 +144,10 @@ module.exports = function (RED) {
         if (node.precision >= 0 && node.withPrecision) {
           convertedResult = Number.parseFloat(result).toPrecision(node.precision)
           convertedResult = parseFloat(convertedResult)
+        }
+
+        if (convertedResult === null) {
+          convertedResult = result
         }
 
         if (node.withValueCheck) {
@@ -318,6 +318,11 @@ module.exports = function (RED) {
     node.bianco.iiot.convertDataType = function (result) {
       coreFilter.internalDebugLog('data type convert for ' + node.nodeId)
       return coreFilter.core.convertDataValueByDataType({value: result}, node.datatype)
+    }
+
+    if (node.withValueCheck) {
+      node.minvalue = node.bianco.iiot.convertDataType(node.minvalue)
+      node.maxvalue = node.bianco.iiot.convertDataType(node.maxvalue)
     }
 
     node.status({fill: 'green', shape: 'dot', text: 'active'})
