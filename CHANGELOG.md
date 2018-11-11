@@ -1,3 +1,24 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="3.6.0"></a>
+# [3.6.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.5.0...v3.6.0) (2018-11-11)
+
+
+### Bug Fixes
+
+* model is cleaned up in every case ([a96510d](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/a96510d))
+* **issue:** issue [#74](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/74) - less memory on restart via CDM ([1e2662a](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/1e2662a))
+
+
+### Features
+
+* **result-filter:** filter from browser and crawler ([f7662cc](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/f7662cc)), closes [#70](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/70)
+* **result-filter:** issue [#73](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/73) ([b6a4653](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/b6a4653))
+
+
+
 <a name="3.5.0"></a>
 # [3.5.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.4.3...v3.5.0) (2018-11-09)
 
@@ -280,6 +301,3 @@
 
 <a name="1.0.17"></a>
 ## 1.0.17 (2017-12-03)
-
-
-
