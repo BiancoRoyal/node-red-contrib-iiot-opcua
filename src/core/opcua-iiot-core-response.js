@@ -38,6 +38,7 @@ de.biancoroyal.opcua.iiot.core.response.analyzeReadResults = function (node, msg
       delete item['statusCode']
     })
   }
+  this.reconsturctNodeIdOnRead(msg)
 }
 
 de.biancoroyal.opcua.iiot.core.response.analyzeListenerResults = function (node, msg) {
@@ -299,15 +300,10 @@ de.biancoroyal.opcua.iiot.core.response.compressCrawlerMessageStructure = functi
   }
 }
 
-de.biancoroyal.opcua.iiot.core.response.compressVariableValueMessage = function (msg) {
+de.biancoroyal.opcua.iiot.core.response.reconsturctNodeIdOnRead = function (msg) {
   let itemList = []
-  let results = msg.payload
+  let results = msg.payload.results || msg.payload
   let nodesToRead = msg.nodesToRead
-
-  if (msg.payload.results) {
-    results = msg.payload.results
-    nodesToRead = msg.payload.nodesToRead
-  }
 
   if (results && results.length) {
     results.forEach((item, index) => {
@@ -326,12 +322,16 @@ de.biancoroyal.opcua.iiot.core.response.compressVariableValueMessage = function 
           dataType: item.value.dataType,
           nodeId
         })
+      } else {
+        itemList.push(item)
       }
     })
 
     msg.payload = itemList
   }
+}
 
+de.biancoroyal.opcua.iiot.core.response.compressVariableValueMessage = function (msg) {
   delete msg['nodesToRead']
   delete msg['nodesToReadCount']
   delete msg['addressSpaceItems']

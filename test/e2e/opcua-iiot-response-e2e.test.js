@@ -16,13 +16,14 @@ var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
 var serverNode = require('../../src/opcua-iiot-server')
 var readNode = require('../../src/opcua-iiot-read')
+var browserNode = require('../../src/opcua-iiot-browser')
 var resultFilterNode = require('../../src/opcua-iiot-result-filter')
 var responseNode = require('../../src/opcua-iiot-response')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testResponseNodes = [injectNode, connectorNode, readNode, resultFilterNode, responseNode, serverNode]
+var testResponseNodes = [injectNode, connectorNode, browserNode, readNode, resultFilterNode, responseNode, serverNode]
 
 var testReadResponseFlow = [
   {
@@ -289,6 +290,219 @@ var testReadResponseFlow = [
   }
 ]
 
+var testReadAllAttributesResponseFlow = [
+  {
+    'id': '6ee19719.8f30e8',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'read',
+    'payload': '',
+    'payloadType': 'date',
+    'topic': '',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': 'Root',
+    'addressSpaceItems': [
+      {
+        'name': 'Bianco Royal',
+        'nodeId': 'ns=1;i=1234',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        '781a3759.15c1e8'
+      ]
+    ]
+  },
+  {
+    'id': '781a3759.15c1e8',
+    'type': 'OPCUA-IIoT-Browser',
+    'connector': 'fc0c4360.d2f2b',
+    'nodeId': '',
+    'name': '',
+    'justValue': true,
+    'sendNodesToRead': true,
+    'sendNodesToListener': false,
+    'sendNodesToBrowser': false,
+    'singleBrowseResult': true,
+    'recursiveBrowse': false,
+    'recursiveDepth': '',
+    'delayPerMessage': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'wires': [
+      [
+        '83ac5514.5b6128'
+      ]
+    ]
+  },
+
+  {
+    'id': '83ac5514.5b6128',
+    'type': 'OPCUA-IIoT-Read',
+    'attributeId': '0',
+    'maxAge': '0',
+    'depth': 1,
+    'connector': 'fc0c4360.d2f2b',
+    'name': 'Read browsed All',
+    'justValue': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'parseStrings': false,
+    'historyDays': '',
+    'wires': [
+      [
+        'bc7ca6b4.bf3708',
+        'fff0a5ff.dffe6',
+        '149c68af.68d6b7',
+        'fc7278e4.b49838'
+      ]
+    ]
+  },
+  {
+    'id': 'bc7ca6b4.bf3708',
+    'type': 'OPCUA-IIoT-Response',
+    'name': 'Pressure',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': true,
+    'negateFilter': false,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=Pressure'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf2'
+      ]
+    ]
+  },
+  {
+    'id': 'fff0a5ff.dffe6',
+    'type': 'OPCUA-IIoT-Response',
+    'name': 'Pressure',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': true,
+    'negateFilter': false,
+    'filters': [
+      {
+        'name': 'nodeId',
+        'value': 'ns=1;s=Pressure'
+      }
+    ],
+    'wires': [
+      [
+        'n1rsf2'
+      ]
+    ]
+  },
+  {
+    'id': '149c68af.68d6b7',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': false,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      [
+        'n1rsf2'
+      ]
+    ]
+  },
+  {
+    'id': 'fc7278e4.b49838',
+    'type': 'OPCUA-IIoT-Response',
+    'name': '',
+    'compressStructure': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateUnsetFilter': false,
+    'activateFilters': false,
+    'negateFilter': false,
+    'filters': [],
+    'wires': [
+      [
+        'n1rsf2'
+      ]
+    ]
+  },
+  {id: 'n1rsf2', type: 'helper'},
+  {
+    'id': 'fc0c4360.d2f2b',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:49500/',
+    'keepSessionAlive': false,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': '',
+    'requestedSessionTimeout': '',
+    'connectionStartDelay': '',
+    'reconnectDelay': ''
+  },
+  {
+    'id': '5c9db1b6.2b3512',
+    'type': 'OPCUA-IIoT-Server',
+    'port': '49500',
+    'endpoint': '',
+    'acceptExternalCommands': true,
+    'maxAllowedSessionNumber': '',
+    'maxConnectionsPerEndpoint': '',
+    'maxAllowedSubscriptionNumber': '',
+    'alternateHostname': '',
+    'name': '',
+    'showStatusActivities': false,
+    'showErrors': false,
+    'asoDemo': true,
+    'allowAnonymous': true,
+    'isAuditing': false,
+    'serverDiscovery': false,
+    'users': [
+      {
+        'name': 'peter',
+        'password': 'peter'
+      }
+    ],
+    'xmlsets': [],
+    'publicCertificateFile': '',
+    'privateCertificateFile': '',
+    'registerServerMethod': '1',
+    'discoveryServerEndpointUrl': '',
+    'capabilitiesForMDNS': '',
+    'maxNodesPerRead': '',
+    'maxNodesPerBrowse': '',
+    'delayToClose': '',
+    'wires': [
+      [
+      ]
+    ]
+  }
+]
+
 describe('OPC UA Response node e2e Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -367,6 +581,22 @@ describe('OPC UA Response node e2e Testing', function () {
         nut.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
           done()
+        })
+      })
+    })
+
+    it('should get four messages with payload on read after browse with four response nodes', function (done) {
+      helper.load(testResponseNodes, testReadAllAttributesResponseFlow, function () {
+        let n1 = helper.getNode('n1rsf2')
+        let counter = 0
+        n1.on('input', function (msg) {
+          counter++
+          expect(msg.payload).toBeDefined()
+          expect(msg.payload.length).toBeGreaterThan(0)
+
+          if (counter === 4) {
+            done()
+          }
         })
       })
     })

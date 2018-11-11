@@ -1072,4 +1072,36 @@ de.biancoroyal.opcua.iiot.core.resetBiancoNode = function (node) {
   node.bianco = null
 }
 
+de.biancoroyal.opcua.iiot.core.filterListEntryByNodeId = function (nodeId, list) {
+  let result = []
+
+  if (list && list.length) {
+    list.forEach((item) => {
+      if (item === nodeId) {
+        result.push(item)
+      }
+    })
+  }
+
+  return result
+}
+
+de.biancoroyal.opcua.iiot.core.filterListByNodeId = function (nodeId, list) {
+  let result = []
+
+  if (list && list.length) {
+    list.forEach((item) => {
+      if (item.nodeId === nodeId) {
+        result.push(item)
+      }
+    })
+  }
+
+  return result
+}
+
+de.biancoroyal.opcua.iiot.core.isNodeTypeToFilterResponse = function (msg) {
+  return msg.nodetype === 'read' || msg.nodetype === 'browse' || msg.nodetype === 'crawl' || msg.nodetype === 'method'
+}
+
 module.exports = de.biancoroyal.opcua.iiot.core

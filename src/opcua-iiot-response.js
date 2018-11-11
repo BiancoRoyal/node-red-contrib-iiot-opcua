@@ -120,6 +120,28 @@ module.exports = function (RED) {
       return message
     }
 
+    node.bianco.iiot.extractReadEntriesFromFilter = function (message) {
+      let filteredEntries = []
+      let filteredValues = []
+
+      if (message.payload && message.payload.length) {
+        message.payload.forEach((item, index) => {
+          if (node.bianco.iiot.itemIsNotToFilter(item)) {
+            filteredEntries.push(item)
+            filteredValues.push(index)
+          }
+        })
+      }
+
+      if (message.nodesToRead) {
+        message.nodesToRead = message.nodesToRead.filter((item, index) => {
+          return filteredValues.includes(index)
+        })
+      }
+
+      return filteredEntries
+    }
+
     node.bianco.iiot.extractBrowserEntriesFromFilter = function (message) {
       let filteredEntries = []
       message.payload.browserResults.forEach((item) => {
@@ -184,6 +206,8 @@ module.exports = function (RED) {
 
     node.bianco.iiot.extractEntries = function (message) {
       switch (message.nodetype) {
+        case 'read':
+          return node.bianco.iiot.extractReadEntriesFromFilter(message)
         case 'browse':
           return node.bianco.iiot.extractBrowserEntriesFromFilter(message)
         case 'crawl':
@@ -196,7 +220,7 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.filterMsg = function (msg) {
-      if (msg.payload.length || msg.nodetype === 'browse' || msg.nodetype === 'crawl' || msg.nodetype === 'method') {
+      if (msg.payload.length || coreResponse.core.isNodeTypeToFilterResponse(msg)) {
         let filteredEntries = node.bianco.iiot.extractEntries(msg)
         if (filteredEntries.length) {
           msg.payload = filteredEntries

@@ -280,53 +280,25 @@ module.exports = function (RED) {
       return result
     }
 
-    node.bianco.iiot.filterListEntryByNodeId = function (list) {
-      let result = []
-
-      if (list && list.length) {
-        list.forEach((item) => {
-          if (item === node.nodeId) {
-            result.push(item)
-          }
-        })
-      }
-
-      return result
-    }
-
-    node.bianco.iiot.filterListByNodeId = function (list) {
-      let result = []
-
-      if (list && list.length) {
-        list.forEach((item) => {
-          if (item.nodeId === node.nodeId) {
-            result.push(item)
-          }
-        })
-      }
-
-      return result
-    }
-
     node.bianco.iiot.filterByBrowserType = function (msg) {
-      let result = node.bianco.iiot.filterListByNodeId(msg.payload.browserResults)
+      let result = coreFilter.core.filterListByNodeId(node.nodeId, msg.payload.browserResults)
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-        msg.addressSpaceItems = node.bianco.iiot.filterListByNodeId(msg.addressSpaceItems)
+        msg.addressSpaceItems = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressSpaceItems)
       }
 
       if (msg.nodesToRead && msg.nodesToRead.length) {
-        msg.nodesToRead = node.bianco.iiot.filterListEntryByNodeId(msg.nodesToRead)
+        msg.nodesToRead = coreFilter.core.filterListEntryByNodeId(node.nodeId, msg.nodesToRead)
         msg.nodesToReadCount = msg.nodesToRead.length
       }
 
       if (msg.addressItemsToRead && msg.addressItemsToRead.length) {
-        msg.addressItemsToRead = node.bianco.iiot.filterListByNodeId(msg.addressItemsToRead)
+        msg.addressItemsToRead = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressItemsToRead)
         msg.addressItemsToReadCount = msg.addressItemsToRead.length
       }
 
       if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) {
-        msg.addressItemsToBrowse = node.bianco.iiot.filterListByNodeId(msg.addressItemsToBrowse)
+        msg.addressItemsToBrowse = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressItemsToBrowse)
         msg.addressItemsToBrowseCount = msg.addressItemsToBrowse.length
       }
 
@@ -334,10 +306,10 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.filterByCrawlerType = function (msg) {
-      let result = node.bianco.iiot.filterListByNodeId(msg.payload.crawlerResults)
+      let result = coreFilter.core.filterListByNodeId(node.nodeId, msg.payload.crawlerResults)
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-        msg.addressItems = node.bianco.iiot.filterListByNodeId(msg.addressSpaceItems)
+        msg.addressItems = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressSpaceItems)
       }
 
       return result
