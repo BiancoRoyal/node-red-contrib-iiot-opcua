@@ -801,12 +801,10 @@ de.biancoroyal.opcua.iiot.core.server.restartServer = function (node) {
   if (node.bianco.iiot.opcuaServer) {
     node.bianco.iiot.opcuaServer.shutdown(function () {
       node.emit('shutdown')
-      node.bianco.iiot.initNewServer()
     })
   } else {
     node.bianco.iiot.opcuaServer = null
     node.emit('shutdown')
-    node.bianco.iiot.initNewServer()
   }
 
   node.send({payload: 'server shutdown'})

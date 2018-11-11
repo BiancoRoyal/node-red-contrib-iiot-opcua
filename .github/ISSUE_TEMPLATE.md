@@ -1,5 +1,5 @@
 <!--
-IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOUT INVESTIGATING
+IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION, WE MIGHT CLOSE YOUR ISSUE WITHOUT INVESTIGATING
 -->
 
 **I'm submitting a ...**  (check one with "x")
@@ -24,22 +24,22 @@ IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOU
    
    
 <!--
-IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION WE MIGHT CLOSE YOUR ISSUE WITHOUT INVESTIGATING
+IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION, WE MIGHT CLOSE YOUR ISSUE WITHOUT INVESTIGATING
 IF THIS IS A FEATURE REQUEST OR SUPPORT DELETE FROM HERE, PLEASE -->
 ## Problem
- - ( ) bug report => please search github for a similar issue or PR before submitting
- - ( ) unexpected behavior => please visit the Wiki before
+ - ( ) bug report => please search GitHub for a similar issue or PR before submitting
+ - ( ) unexpected behaviour => please visit the Wiki before
 
 ### Information
- **Current behavior**
+ **Current behaviour**
  <!-- Describe how the bug or problem manifests. -->
  
- **Expected behavior**
+ **Expected behaviour**
  <!-- Describe a complete use case or test case for the bug or problem. -->
  
  **Minimal reproduction of the problem with instructions**
  <!--
- If the current behavior is a bug or you can illustrate your feature request better with an example, 
+ If the current behaviour is a bug or you can illustrate your feature request better with an example, 
  please provide the *STEPS TO REPRODUCE* and if possible a *MINIMAL DEMO FLOW* for Node-RED of the problem.
  -->
    1. 
@@ -80,4 +80,4 @@ IF THIS IS A FEATURE REQUEST OR SUPPORT DELETE FROM HERE, PLEASE -->
 * **Node:** (min. 8.x)
    `node --version` =
 
-<!-- Thank you for your issue and happy wiring! best to you ... -->
+<!-- Thank you for your issue and happy wiring! Best to you ... -->

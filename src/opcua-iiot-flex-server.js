@@ -138,6 +138,11 @@ module.exports = function (RED) {
       })
     })
 
+    node.on('shutdown', () => {
+      node.bianco.iiot.opcuaServer = null
+      node.bianco.iiot.initNewServer()
+    })
+
     node.bianco.iiot.closeServer = function (done) {
       if (coreServer.simulatorInterval) {
         clearInterval(coreServer.simulatorInterval)
