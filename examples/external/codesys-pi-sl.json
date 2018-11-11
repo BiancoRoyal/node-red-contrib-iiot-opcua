@@ -1,0 +1,432 @@
+[
+  {
+    "id": "1baded6c.84b76b",
+    "type": "tab",
+    "label": "OPC UA IIoT Codesys PI SL",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "dc77ac86.a1a74",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "1baded6c.84b76b",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 180,
+    "y": 280,
+    "wires": [
+      [
+        "757704e5.7bbcfc"
+      ]
+    ]
+  },
+  {
+    "id": "757704e5.7bbcfc",
+    "type": "OPCUA-IIoT-Browser",
+    "z": "1baded6c.84b76b",
+    "connector": "898961e0.b1349",
+    "nodeId": "ns=4;s=|var|CODESYS Control for Raspberry Pi SL.Application.PLC_PRG",
+    "name": "browse PLC_PRG",
+    "justValue": true,
+    "sendNodesToRead": true,
+    "sendNodesToListener": true,
+    "sendNodesToBrowser": true,
+    "singleBrowseResult": true,
+    "recursiveBrowse": false,
+    "recursiveDepth": "1",
+    "delayPerMessage": "1",
+    "showStatusActivities": true,
+    "showErrors": true,
+    "x": 350,
+    "y": 280,
+    "wires": [
+      [
+        "f1de1bf2.f6663",
+        "b5221a48.0759c8"
+      ]
+    ]
+  },
+  {
+    "id": "f1de1bf2.f6663",
+    "type": "debug",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 530,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "22a19c2.07cb4e4",
+    "type": "OPCUA-IIoT-Browser",
+    "z": "1baded6c.84b76b",
+    "connector": "898961e0.b1349",
+    "nodeId": "ns=2;i=5001",
+    "name": "",
+    "justValue": true,
+    "sendNodesToRead": true,
+    "sendNodesToListener": true,
+    "sendNodesToBrowser": true,
+    "singleBrowseResult": true,
+    "recursiveBrowse": true,
+    "recursiveDepth": "3",
+    "delayPerMessage": "1",
+    "showStatusActivities": true,
+    "showErrors": true,
+    "x": 320,
+    "y": 160,
+    "wires": [
+      [
+        "b7f9c60.8634cb8"
+      ]
+    ]
+  },
+  {
+    "id": "b7f9c60.8634cb8",
+    "type": "debug",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 530,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "4c185f65.19017",
+    "type": "OPCUA-IIoT-Crawler",
+    "z": "1baded6c.84b76b",
+    "connector": "898961e0.b1349",
+    "name": "crawl all is not ns=0",
+    "justValue": true,
+    "singleResult": true,
+    "showStatusActivities": true,
+    "showErrors": true,
+    "activateUnsetFilter": false,
+    "activateFilters": true,
+    "negateFilter": false,
+    "filters": [
+      {
+        "name": "nodeId",
+        "value": "ns=0;*"
+      }
+    ],
+    "delayPerMessage": "0.5",
+    "x": 360,
+    "y": 100,
+    "wires": [
+      [
+        "a18a609d.d30e"
+      ]
+    ]
+  },
+  {
+    "id": "603793ae.430acc",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "1baded6c.84b76b",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [
+      {
+        "name": "Objects",
+        "nodeId": "ns=0;i=85",
+        "datatypeName": ""
+      }
+    ],
+    "x": 180,
+    "y": 100,
+    "wires": [
+      [
+        "4c185f65.19017"
+      ]
+    ]
+  },
+  {
+    "id": "a18a609d.d30e",
+    "type": "debug",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 530,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "1dee7dd9.035c32",
+    "type": "OPCUA-IIoT-Crawler",
+    "z": "1baded6c.84b76b",
+    "connector": "898961e0.b1349",
+    "name": "crawl ns=4",
+    "justValue": true,
+    "singleResult": true,
+    "showStatusActivities": true,
+    "showErrors": true,
+    "activateUnsetFilter": false,
+    "activateFilters": true,
+    "negateFilter": true,
+    "filters": [
+      {
+        "name": "nodeId",
+        "value": "ns=4;*"
+      }
+    ],
+    "delayPerMessage": "0.5",
+    "x": 930,
+    "y": 100,
+    "wires": [
+      [
+        "d2ead759.664358"
+      ]
+    ]
+  },
+  {
+    "id": "9f1b4ab4.ea3cf8",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "1baded6c.84b76b",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [
+      {
+        "name": "Objects",
+        "nodeId": "ns=0;i=85",
+        "datatypeName": ""
+      }
+    ],
+    "x": 760,
+    "y": 100,
+    "wires": [
+      [
+        "1dee7dd9.035c32"
+      ]
+    ]
+  },
+  {
+    "id": "d2ead759.664358",
+    "type": "debug",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 1070,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "23f7364e.7fa7ea",
+    "type": "comment",
+    "z": "1baded6c.84b76b",
+    "name": "CODESYS Control for Raspberry Pi SL",
+    "info": "",
+    "x": 250,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "66bf8c8c.1bf34c",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "1baded6c.84b76b",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "startDelay": "",
+    "name": "",
+    "addressSpaceItems": [],
+    "x": 180,
+    "y": 160,
+    "wires": [
+      [
+        "22a19c2.07cb4e4"
+      ]
+    ]
+  },
+  {
+    "id": "b5221a48.0759c8",
+    "type": "OPCUA-IIoT-Result-Filter",
+    "z": "1baded6c.84b76b",
+    "nodeId": "ns=4;s=|var|CODESYS Control for Raspberry Pi SL.Application.PLC_PRG.bSimulationActive",
+    "datatype": "",
+    "fixedValue": false,
+    "fixPoint": 2,
+    "withPrecision": false,
+    "precision": 2,
+    "entry": 1,
+    "justValue": true,
+    "withValueCheck": false,
+    "minvalue": "",
+    "maxvalue": "",
+    "defaultvalue": "",
+    "topic": "",
+    "name": "SimulationActive",
+    "showErrors": false,
+    "x": 570,
+    "y": 280,
+    "wires": [
+      [
+        "2711fb1b.265fac",
+        "9d77ec1e.b57c68"
+      ]
+    ]
+  },
+  {
+    "id": "5d6912f1.77408c",
+    "type": "debug",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 1070,
+    "y": 280,
+    "wires": []
+  },
+  {
+    "id": "2711fb1b.265fac",
+    "type": "OPCUA-IIoT-Read",
+    "z": "1baded6c.84b76b",
+    "attributeId": 0,
+    "maxAge": 1,
+    "depth": 1,
+    "connector": "898961e0.b1349",
+    "name": "",
+    "justValue": true,
+    "showStatusActivities": false,
+    "showErrors": false,
+    "parseStrings": false,
+    "historyDays": 1,
+    "x": 750,
+    "y": 280,
+    "wires": [
+      [
+        "c27f268e.ea2218",
+        "8308b771.89a668"
+      ]
+    ]
+  },
+  {
+    "id": "c27f268e.ea2218",
+    "type": "OPCUA-IIoT-Response",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "compressStructure": true,
+    "showStatusActivities": false,
+    "showErrors": false,
+    "activateUnsetFilter": false,
+    "activateFilters": false,
+    "negateFilter": false,
+    "filters": [],
+    "x": 930,
+    "y": 280,
+    "wires": [
+      [
+        "5d6912f1.77408c"
+      ]
+    ]
+  },
+  {
+    "id": "8308b771.89a668",
+    "type": "debug",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 910,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "9d77ec1e.b57c68",
+    "type": "debug",
+    "z": "1baded6c.84b76b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 750,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "94af5420.d98358",
+    "type": "comment",
+    "z": "1baded6c.84b76b",
+    "name": "Factory Control",
+    "info": "",
+    "x": 180,
+    "y": 360,
+    "wires": []
+  },
+  {
+    "id": "898961e0.b1349",
+    "type": "OPCUA-IIoT-Connector",
+    "z": "",
+    "discoveryUrl": "",
+    "endpoint": "opc.tcp://192.168.1.105:4840/",
+    "keepSessionAlive": true,
+    "loginEnabled": false,
+    "securityPolicy": "None",
+    "securityMode": "NONE",
+    "name": "LOCAL SERVER",
+    "showErrors": false,
+    "individualCerts": false,
+    "publicCertificateFile": "",
+    "privateKeyFile": "",
+    "defaultSecureTokenLifetime": "",
+    "endpointMustExist": false,
+    "autoSelectRightEndpoint": false,
+    "strategyMaxRetry": "",
+    "strategyInitialDelay": "",
+    "strategyMaxDelay": "",
+    "strategyRandomisationFactor": "",
+    "requestedSessionTimeout": "",
+    "connectionStartDelay": "",
+    "reconnectDelay": "",
+    "maxBadSessionRequests": "10"
+  }
+]
