@@ -151,7 +151,7 @@ module.exports = function (RED) {
 
       node.bianco.iiot.stateMachine.unlock()
       node.bianco.iiot.opcuaClient.connect(node.endpoint, function (err) {
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           if (err) {
             node.bianco.iiot.stateMachine.lock().stopopcua()
             node.bianco.iiot.handleError(err)
@@ -166,7 +166,7 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.renewConnection = function (done) {
-      if (node.bianco && node.bianco.iiot) {
+      if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
         node.bianco.iiot.opcuaDirectDisconnect(() => {
           node.bianco.iiot.renewFiniteStateMachine()
           node.bianco.iiot.stateMachine.idle().initopcua()
@@ -231,7 +231,7 @@ module.exports = function (RED) {
         node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
       }).catch(function (err) {
         coreConnector.internalDebugLog('Get Auto Endpoint Request Error ' + err.message)
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
         }
       })
@@ -280,7 +280,7 @@ module.exports = function (RED) {
             node.bianco.iiot.handleSessionClose(statusCode)
           })
         }).catch(function (err) {
-          if (node.bianco && node.bianco.iiot) {
+          if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
             node.bianco.iiot.stateMachine.lock().stopopcua()
             node.bianco.iiot.handleError(err)
           } else {
@@ -398,21 +398,25 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      if (node.bianco.iiot.isInactiveOnOPCUA()) {
-        coreConnector.detailDebugLog('OPC UA Client Is Not Active On Close Node')
-        coreConnector.core.resetBiancoNode(node)
-        done()
+      if (!coreConnector.core.isInitializedBiancoIIoTNode(node)) {
+        done() // if we have a very fast deploy clicking uer
       } else {
-        coreConnector.detailDebugLog('OPC UA Client Is Active On Close Node With State ' + node.bianco.iiot.stateMachine.getMachineState())
-        if (node.bianco.iiot.stateMachine.getMachineState() === 'SESSIONACTIVE') {
-          node.bianco.iiot.closeConnector(() => {
-            coreConnector.core.resetBiancoNode(node)
-            done()
-          })
-        } else {
-          coreConnector.internalDebugLog(node.bianco.iiot.stateMachine.getMachineState() + ' -> !!!  CHECK CONNECTOR STATE ON CLOSE  !!!'.bgWhite.red)
+        if (node.bianco.iiot.isInactiveOnOPCUA()) {
+          coreConnector.detailDebugLog('OPC UA Client Is Not Active On Close Node')
           coreConnector.core.resetBiancoNode(node)
           done()
+        } else {
+          coreConnector.detailDebugLog('OPC UA Client Is Active On Close Node With State ' + node.bianco.iiot.stateMachine.getMachineState())
+          if (node.bianco.iiot.stateMachine.getMachineState() === 'SESSIONACTIVE') {
+            node.bianco.iiot.closeConnector(() => {
+              coreConnector.core.resetBiancoNode(node)
+              done()
+            })
+          } else {
+            coreConnector.internalDebugLog(node.bianco.iiot.stateMachine.getMachineState() + ' -> !!!  CHECK CONNECTOR STATE ON CLOSE  !!!'.bgWhite.red)
+            coreConnector.core.resetBiancoNode(node)
+            done()
+          }
         }
       }
     })
@@ -425,7 +429,7 @@ module.exports = function (RED) {
           disconnectTimeout = null
         }
         disconnectTimeout = setTimeout(() => {
-          if (node.bianco && node.bianco.iiot) {
+          if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
             node.bianco.iiot.closeConnector(done)
           }
         }, node.connectionStopDelay)
@@ -537,7 +541,7 @@ module.exports = function (RED) {
 
         coreConnector.detailDebugLog('connecting OPC UA with delay of msec: ' + node.connectionStartDelay)
         clientStartTimeout = setTimeout(() => {
-          if (node.bianco && node.bianco.iiot) {
+          if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
             try {
               node.bianco.iiot.connectOPCUAEndpoint()
             } catch (err) {
@@ -551,7 +555,7 @@ module.exports = function (RED) {
 
       fsm.onOPEN = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Open Event FSM')
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           node.emit('connection_started', node.bianco.iiot.opcuaClient)
           coreConnector.internalDebugLog('Client Connected To ' + node.endpoint)
           coreConnector.detailDebugLog('Client Options ' + JSON.stringify(node.bianco.iiot.opcuaClientOptions))
@@ -572,7 +576,7 @@ module.exports = function (RED) {
       fsm.onSESSIONCLOSED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Session Close Event FSM')
         node.emit('session_closed')
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           node.bianco.iiot.opcuaSession = null
         }
       }
@@ -585,7 +589,7 @@ module.exports = function (RED) {
       fsm.onCLOSED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Client Close Event FSM')
         node.emit('connection_closed')
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           if (node.bianco.iiot.opcuaClient) {
             node.bianco.iiot.opcuaClient.removeAllListeners()
           }
@@ -604,7 +608,7 @@ module.exports = function (RED) {
       fsm.onSTOPPED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Stopped Event FSM')
         node.emit('connection_stopped')
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           node.bianco.iiot.resetAllTimer()
         }
       }
@@ -612,7 +616,7 @@ module.exports = function (RED) {
       fsm.onEND = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector End Event FSM')
         node.emit('connection_end')
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           node.bianco.iiot.resetAllTimer()
         }
       }
@@ -620,7 +624,7 @@ module.exports = function (RED) {
       fsm.onRECONFIGURED = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Reconfigure Event FSM')
         node.emit('connection_reconfigure')
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           node.bianco.iiot.resetAllTimer()
         }
       }
@@ -628,7 +632,7 @@ module.exports = function (RED) {
       fsm.onRENEW = function (event, oldState, newState) {
         coreConnector.detailDebugLog('Connector Renew Event FSM')
         node.emit('connection_renew')
-        if (node.bianco && node.bianco.iiot) {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
           node.bianco.iiot.resetAllTimer()
         }
       }
@@ -669,10 +673,16 @@ module.exports = function (RED) {
       }
 
       coreConnector.internalDebugLog('Register In Connector NodeId: ' + opcuaNode.id)
+
+      if (!node.bianco) {
+        coreConnector.internalDebugLog('Node Not Initialized With Bianco To Register In Connector')
+        return
+      }
+
       node.bianco.iiot.registeredNodeList[opcuaNode.id] = opcuaNode
 
       opcuaNode.on('opcua_client_not_ready', () => {
-        if (node.bianco && node.bianco.iiot && node.bianco.iiot.stateMachine.getMachineState() !== 'END') {
+        if (coreConnector.core.isInitializedBiancoIIoTNode(node) && node.bianco.iiot.stateMachine.getMachineState() !== 'END') {
           node.bianco.iiot.resetBadSession()
         }
       })
@@ -692,6 +702,11 @@ module.exports = function (RED) {
       }
 
       opcuaNode.removeAllListeners('opcua_client_not_ready')
+
+      if (!node.bianco) {
+        coreConnector.internalDebugLog('Node Not Initialized With Bianco To Deregister In Connector')
+        return
+      }
 
       coreConnector.internalDebugLog('Deregister In Connector NodeId: ' + opcuaNode.id)
       delete node.bianco.iiot.registeredNodeList[opcuaNode.id]
@@ -805,7 +820,7 @@ module.exports = function (RED) {
             node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
           })
         }).catch(function (err) {
-          if (node.bianco && node.bianco.iiot) {
+          if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
             node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
           }
           coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
