@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.7.1"></a>
+## [3.7.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.7.0...v3.7.1) (2018-11-14)
+
+
+### Bug Fixes
+
+* **connector:** namespace could be null on deregister nodes ([86f73d1](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/86f73d1))
+* **flex-server:** default model has to use node.bianco.iiot.assert  ([6b2ce0a](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/6b2ce0a))
+
+
+
 <a name="3.7.0"></a>
 # [3.7.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.5.0...v3.7.0) (2018-11-11)
 
