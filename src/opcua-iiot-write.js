@@ -51,10 +51,10 @@ module.exports = function (RED) {
           let message = node.bianco.iiot.buildResultMessage(writeResult)
           node.send(message)
         } catch (err) {
-          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err) {
-        (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+        (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 

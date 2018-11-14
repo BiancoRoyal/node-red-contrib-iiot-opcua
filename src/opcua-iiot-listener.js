@@ -483,7 +483,7 @@ module.exports = function (RED) {
         .then(function (eventResults) {
           node.bianco.iiot.handleEventResults(msg, dataValue, eventResults, monitoredItem)
         }).catch(function (err) {
-          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.errorHandling(err) : coreListener.internalDebugLog(err.message)
+          (coreListener.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.errorHandling(err) : coreListener.internalDebugLog(err.message)
         })
     }
 

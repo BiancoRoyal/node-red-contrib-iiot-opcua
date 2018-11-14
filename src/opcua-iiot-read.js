@@ -53,7 +53,7 @@ module.exports = function (RED) {
             node.bianco.iiot.handleReadError(err, readResult.msg)
           }
         }).catch(function (err) {
-          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
@@ -63,7 +63,7 @@ module.exports = function (RED) {
           let message = node.bianco.iiot.buildResultMessage('VariableValue', readResult)
           node.send(message)
         }).catch(function (err) {
-          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
@@ -85,7 +85,7 @@ module.exports = function (RED) {
           message.historyEnd = readResult.endDate || node.bianco.iiot.historyEnd
           node.send(message)
         }).catch(function (err) {
-          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
@@ -108,7 +108,7 @@ module.exports = function (RED) {
           message.maxAge = node.maxAge
           node.send(message)
         }).catch(function (err) {
-          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 

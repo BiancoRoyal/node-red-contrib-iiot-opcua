@@ -72,7 +72,7 @@ module.exports = function (RED) {
                 coreServer.core.setNodeStatusTo(node, 'active')
                 node.emit('server_running')
               }).catch(function (err) {
-                if (node.bianco && node.bianco.iiot) {
+                if (coreServer.core.isInitializedBiancoIIoTNode(node)) {
                   node.bianco.iiot.opcuaServer = null
                 }
                 node.emit('server_start_error')

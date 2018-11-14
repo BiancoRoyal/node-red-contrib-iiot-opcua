@@ -61,7 +61,7 @@ module.exports = function (RED) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
           node.bianco.iiot.callMethod(msg, results)
         }).catch((err) => {
-          (node.bianco && node.bianco.iiot) ? node.bianco.iiot.handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
+          (coreMethod.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
         })
       } else {
         coreMethod.internalDebugLog(new Error('No Method Id And/Or Parameters'))

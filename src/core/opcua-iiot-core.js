@@ -776,28 +776,28 @@ de.biancoroyal.opcua.iiot.core.checkConnectorState = function (node, msg, caller
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUAConnected = function (node, opcuaClient) {
-  if (node.bianco && node.bianco.iiot) {
+  if (this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot.opcuaClient = opcuaClient
   }
   this.setNodeStatusTo(node, 'connecting')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUAClosed = function (node) {
-  if (node.bianco && node.bianco.iiot) {
+  if (this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot.opcuaClient = null
   }
   this.setNodeStatusTo(node, 'disconnected')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionStarted = function (node, opcuaSession) {
-  if (node.bianco && node.bianco.iiot) {
+  if (this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot.opcuaSession = opcuaSession
   }
   this.setNodeStatusTo(node, 'active')
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionClosed = function (node) {
-  if (node.bianco && node.bianco.iiot) {
+  if (this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot.opcuaSession = null
   }
   this.setNodeStatusTo(node, 'connecting')
@@ -808,7 +808,7 @@ de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionRestart = function (node) {
 }
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionError = function (node) {
-  if (node.bianco && node.bianco.iiot) {
+  if (this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot.opcuaSession = null
   }
   this.setNodeStatusTo(node, 'connecting')
@@ -816,7 +816,7 @@ de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionError = function (node) {
 
 de.biancoroyal.opcua.iiot.core.setNodeOPCUARestart = function (node, opcuaClient) {
   this.internalDebugLog('Connector Restart')
-  if (opcuaClient && node.bianco && node.bianco.iiot) {
+  if (opcuaClient && this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot.opcuaClient = opcuaClient
   }
   this.setNodeStatusTo(node, 'connecting')
@@ -905,7 +905,9 @@ de.biancoroyal.opcua.iiot.core.deregisterToConnector = function (node, done) {
   }
 
   node.connector.removeAllListeners()
-  node.connector.bianco.iiot.deregisterForOPCUA(node, done)
+  if (node.connector.bianco && node.connector.bianco.iiot) {
+    node.connector.bianco.iiot.deregisterForOPCUA(node, done)
+  }
 }
 
 de.biancoroyal.opcua.iiot.core.checkSessionNotValid = function (session, callerType) {
@@ -1063,10 +1065,10 @@ de.biancoroyal.opcua.iiot.core.checkItemForUnsetState = function (node, item) {
 }
 
 de.biancoroyal.opcua.iiot.core.resetBiancoNode = function (node) {
-  if (node.bianco && node.bianco.iiot && node.bianco.iiot.resetAllTimer) {
+  if (this.isInitializedBiancoIIoTNode(node) && node.bianco.iiot.resetAllTimer) {
     node.bianco.iiot.resetAllTimer()
   }
-  if (node.bianco && node.bianco.iiot) {
+  if (this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot = null
   }
   node.bianco = null
@@ -1102,6 +1104,10 @@ de.biancoroyal.opcua.iiot.core.filterListByNodeId = function (nodeId, list) {
 
 de.biancoroyal.opcua.iiot.core.isNodeTypeToFilterResponse = function (msg) {
   return msg.nodetype === 'read' || msg.nodetype === 'browse' || msg.nodetype === 'crawl' || msg.nodetype === 'method'
+}
+
+de.biancoroyal.opcua.iiot.core.isInitializedBiancoIIoTNode = function (node) {
+  return node && node.bianco && node.bianco.iiot
 }
 
 module.exports = de.biancoroyal.opcua.iiot.core
