@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.7.2"></a>
+## [3.7.2](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.7.1...v3.7.2) (2018-11-17)
+
+
+### Bug Fixes
+
+* **listener:** issue [#71](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/71) context global was broken by collections map require ([cec1606](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/cec1606))
+
+
+
 <a name="3.7.1"></a>
 ## [3.7.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.7.0...v3.7.1) (2018-11-14)
 
