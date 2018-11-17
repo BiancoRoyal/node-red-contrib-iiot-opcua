@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "better-assert": "1.0.2",
-    "collections": "5.1.5",
     "cron": "1.4.1",
     "debug": "4.1.0",
     "easy-table": "1.1.1",
+    "es6-map": "0.1.5",
     "node-opcua": "0.4.6",
     "node-opcua-isa95": "0.0.2",
     "source-map-support": "0.5.6",
