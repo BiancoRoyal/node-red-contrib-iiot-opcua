@@ -17,7 +17,7 @@
 
 * v3.x is now LTS version until Oktober 2019 (branch 3.0)
 * tested with Node.js v10 and Node-RED v0.19
-* based on node-opcua v0.4
+* based on node-opcua v0.4 (OPC UA v1.03)
 * extendable with node-opcua-isa95
 
 **If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3]!**
