@@ -40,6 +40,8 @@ module.exports = function (RED) {
     node.bianco.iiot.delayMessageTimer = []
 
     node.bianco.iiot.extractDataFromBrowserResults = (browserResultToFilter, lists) => {
+      lists.addressItemList = []
+
       browserResultToFilter.forEach(function (result) {
         result.references.forEach(function (reference) {
           coreBrowser.detailDebugLog('Add Reference To List :' + reference)
@@ -65,6 +67,7 @@ module.exports = function (RED) {
       }
 
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + rootNodeId)
+      let rootNode = 'list'
 
       coreBrowser.browse(node.bianco.iiot.opcuaSession, rootNodeId)
         .then(function (browserResults) {
@@ -74,10 +77,15 @@ module.exports = function (RED) {
             if (node.recursiveBrowse) {
               if (depth > 0) {
                 let newDepth = depth - 1
-                node.bianco.iiot.browseNodeList(lists.addressItemList, msg, newDepth, lists, callback)
+
+                let subLists = node.bianco.iiot.createListsObject()
                 if (!node.singleBrowseResult) {
-                  callback(rootNodeId, depth, msg, lists)
+                  callback(rootNode, depth, msg, lists)
+                } else {
+                  subLists = lists
                 }
+
+                node.bianco.iiot.browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
               } else {
                 coreBrowser.internalDebugLog('Minimum Depth Reached On Browse At ' + rootNodeId)
                 callback(rootNodeId, depth, msg, lists)
@@ -118,11 +126,14 @@ module.exports = function (RED) {
             if (node.recursiveBrowse) {
               if (depth > 0) {
                 let newDepth = depth - 1
+
                 let subLists = node.bianco.iiot.createListsObject()
-                node.bianco.iiot.browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
                 if (!node.singleBrowseResult) {
                   callback(rootNode, depth, msg, lists)
+                } else {
+                  subLists = lists
                 }
+                node.bianco.iiot.browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
               } else {
                 coreBrowser.internalDebugLog('Minimum Depth Reached On Browse List')
                 callback(rootNode, depth, msg, lists)
