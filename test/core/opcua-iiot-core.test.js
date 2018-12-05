@@ -688,26 +688,6 @@ describe('OPC UA Core', function () {
       done()
     })
 
-    it('should convert Boolean string to True', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
-      let value = {value: 'true'}
-      let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
-      let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
-      assert.equal(variantFromString, true)
-      assert.equal(variantFromObject, true)
-      done()
-    })
-
-    it('should convert Boolean string to False', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
-      let value = {value: 'false'}
-      let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
-      let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
-      assert.equal(variantFromString, false)
-      assert.equal(variantFromObject, false)
-      done()
-    })
-
     it('should convert Boolean True', function (done) {
       let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
       let value = {value: true}
@@ -849,13 +829,23 @@ describe('OPC UA Core', function () {
       done()
     })
 
-    it('should get Boolean False String', function (done) {
+    it('should get Boolean object false', function (done) {
       let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
-      let value = {value: 'false'}
+      let value = {'value': {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false}}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
-      expect(variantFromString).is.equal(false)
-      expect(variantFromObject).is.equal(false)
+      expect(variantFromString).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false})
+      expect(variantFromObject).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false})
+      done()
+    })
+
+    it('should get Boolean object true', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let value = {'value': {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true}}
+      let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
+      let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
+      expect(variantFromString).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true})
+      expect(variantFromObject).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true})
       done()
     })
 
