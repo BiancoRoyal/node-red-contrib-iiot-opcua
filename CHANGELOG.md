@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.7.3"></a>
+## [3.7.3](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.7.2...v3.7.3) (2018-12-05)
+
+
+### Bug Fixes
+
+* handle issue [#76](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/76) different type of boolean results from node-opcua ([87cebed](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/87cebed))
+* recursive browse on simple structures issue [#77](https://github.com/biancode/node-red-contrib-iiot-opcua/issues/77) ([dcf17c5](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/dcf17c5))
+
+
+
 <a name="3.7.2"></a>
 ## [3.7.2](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.7.1...v3.7.2) (2018-11-17)
 
