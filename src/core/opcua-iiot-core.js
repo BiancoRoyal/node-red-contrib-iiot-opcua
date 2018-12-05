@@ -456,15 +456,7 @@ de.biancoroyal.opcua.iiot.core.convertDataValueByDataType = function (value, dat
         break
       case 'Boolean':
       case opcua.DataType.Boolean:
-        if (valueType === 'boolean') {
-          convertedValue = value.value
-        } else {
-          if (isNaN(value.value)) {
-            convertedValue = (value.value && value.value.toString().toLowerCase() !== 'false')
-          } else {
-            convertedValue = (value.value)
-          }
-        }
+        convertedValue = value.value
         break
       case 'String':
       case opcua.DataType.String:
