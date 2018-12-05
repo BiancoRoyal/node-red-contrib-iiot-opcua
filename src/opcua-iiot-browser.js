@@ -59,6 +59,8 @@ module.exports = function (RED) {
           }
         })
       })
+
+      lists.addressSpaceItemList = lists.addressSpaceItemList.concat(lists.addressItemList)
     }
 
     node.bianco.iiot.browse = function (rootNodeId, msg, depth, lists, callback) {
@@ -106,6 +108,7 @@ module.exports = function (RED) {
         nodesToBrowse: [],
         nodesToRead: [],
         addressItemList: [],
+        addressSpaceItemList: [],
         browserResults: []
       }
     }
@@ -221,13 +224,13 @@ module.exports = function (RED) {
       }
 
       if (node.sendNodesToListener && lists.addressItemList) {
-        msg.addressItemsToRead = lists.addressItemList
-        msg.addressItemsToReadCount = lists.addressItemList.length
+        msg.addressItemsToRead = lists.addressSpaceItemList
+        msg.addressItemsToReadCount = lists.addressSpaceItemList.length
       }
 
       if (node.sendNodesToBrowser && lists.addressItemList) {
-        msg.addressItemsToBrowse = lists.addressItemList
-        msg.addressItemsToBrowseCount = lists.addressItemList.length
+        msg.addressItemsToBrowse = lists.addressSpaceItemList
+        msg.addressItemsToBrowseCount = lists.addressSpaceItemList.length
       }
       return msg
     }
