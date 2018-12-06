@@ -110,6 +110,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         de.biancoroyal.opcua.iiot.core.server.intervalList.push(de.biancoroyal.opcua.iiot.core.server.simulatorInterval)
         let vendorName = namespace.addObject({
           organizedBy: addressSpace.rootFolder.objects,
+          typeDefinition: 'FolderType',
           nodeId: 'i=1234',
           browseName: 'BiancoRoyal',
           displayName: [
@@ -719,7 +720,7 @@ de.biancoroyal.opcua.iiot.core.server.getAddressSpace = function (node, msg) {
   return node.bianco.iiot.opcuaServer.engine.addressSpace
 }
 
-de.biancoroyal.opcua.iiot.core.server.addVariableToAddressSpace = function (node, msg, humanReadableType) {
+de.biancoroyal.opcua.iiot.core.server.addVariableToAddressSpace = function (node, msg, humanReadableType, isProperty) {
   let coreServer = this
   let addressSpace = this.getAddressSpace(node)
 
@@ -731,25 +732,37 @@ de.biancoroyal.opcua.iiot.core.server.addVariableToAddressSpace = function (node
   let variableData = this.core.getVariantValue(msg.payload.datatype, msg.payload.value)
   const LocalizedText = this.core.nodeOPCUA.LocalizedText
 
-  addressSpace.getOwnNamespace().addVariable({
-    componentOf: rootFolder,
-    nodeId: msg.payload.nodeId,
-    browseName: msg.payload.browsename,
-    displayName: new LocalizedText({locale: null, text: msg.payload.displayname}),
-    dataType: msg.payload.datatype,
-    value: {
-      get () {
-        return new coreServer.core.nodeOPCUA.Variant({
-          dataType: coreServer.core.nodeOPCUA.DataType[msg.payload.datatype],
-          value: variableData
-        })
-      },
-      set (variant) {
-        variableData = variant.value
-        return coreServer.core.nodeOPCUA.StatusCodes.Good
-      }
+  let newNodeOPCUAVariable = {}
+
+  if (isProperty) {
+    newNodeOPCUAVariable = {
+      propertyOf: rootFolder,
+      // modellingRule: 'Mandatory'
     }
-  })
+  } else {
+    newNodeOPCUAVariable = {
+      componentOf: rootFolder
+    }
+  }
+
+  newNodeOPCUAVariable.nodeId = msg.payload.nodeId
+  newNodeOPCUAVariable.browseName = msg.payload.browsename
+  newNodeOPCUAVariable.displayName = new LocalizedText({locale: null, text: msg.payload.displayname})
+  newNodeOPCUAVariable.dataType = msg.payload.datatype
+  newNodeOPCUAVariable.value = {
+    get () {
+      return new coreServer.core.nodeOPCUA.Variant({
+        dataType: coreServer.core.nodeOPCUA.DataType[msg.payload.datatype],
+        value: variableData
+      })
+    },
+    set (variant) {
+      variableData = variant.value
+      return coreServer.core.nodeOPCUA.StatusCodes.Good
+    }
+  }
+
+  addressSpace.getOwnNamespace().addVariable(newNodeOPCUAVariable)
   coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
 }
 
@@ -765,12 +778,15 @@ de.biancoroyal.opcua.iiot.core.server.addObjectToAddressSpace = function (node, 
   const LocalizedText = this.core.nodeOPCUA.LocalizedText
 
   if (rootFolder) {
-    addressSpace.getOwnNamespace().addObject({
+    let newNodeOPCUObject = {
       organizedBy: rootFolder,
+      typeDefinition: msg.payload.objecttype,
       nodeId: msg.payload.nodeId,
       browseName: msg.payload.browsename,
       displayName: new LocalizedText({locale: null, text: msg.payload.displayname})
-    })
+    }
+
+    addressSpace.getOwnNamespace().addObject(newNodeOPCUObject)
     coreServer.internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
   } else {
     node.error(new Error('Root Reference Not Found'), msg)

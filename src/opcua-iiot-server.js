@@ -107,9 +107,12 @@ module.exports = function (RED) {
       node.send(msg)
     })
 
-    node.bianco.iiot.changeAddressSpace = function (msg) { // TODO: refactor to work with the new OPC UA type list
+    node.bianco.iiot.changeAddressSpace = function (msg) {
+      // TODO: refactor to work with the new OPC UA type list and option to set add type
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
-        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype)
+        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false)
+      } else if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Property') > -1) {
+        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, true)
       } else {
         coreServer.addObjectToAddressSpace(node, msg, msg.payload.objecttype)
       }

@@ -23,13 +23,16 @@
  */
 'use strict'
 
-let assert = require('better-assert')
+const assert = require('better-assert')
+const nodeOpcuaLib = require('node-opcua')
 
 function constructAlarmAddressSpaceDemo (test, addressSpace) {
   addressSpace.installAlarmsAndConditionsService()
+  const LocalizedText = nodeOpcuaLib.LocalizedText
 
   let tanks = addressSpace.getOwnNamespace().addObject({
     browseName: 'Tanks',
+    typeDefinition: 'FolderType',
     description: 'The Object representing some tanks',
     organizedBy: addressSpace.rootFolder.objects,
     notifierOf: addressSpace.rootFolder.objects.server
@@ -37,7 +40,10 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
 
   let oilTankLevel = addressSpace.getOwnNamespace().addVariable({
     browseName: 'OilTankLevel',
-    displayName: 'Oil Tank Level',
+    displayName: [
+      new LocalizedText({text: 'Oil Tank Level', locale: 'en-US'}),
+      new LocalizedText({text: 'Oil Tank Stand', locale: 'de-DE'})
+    ],
     description: 'Fill level in percentage (0% to 100%) of the oil tank',
     propertyOf: tanks,
     dataType: 'Double',
@@ -55,7 +61,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
     componentOf: tanks,
     conditionSource: oilTankLevel,
     browseName: 'OilTankLevelCondition',
-    displayName: 'Oil Tank Level Condition',
+    displayName: [ new LocalizedText({text: 'Oil Tank Level Condition', locale: 'en-US'}) ],
     description: 'ExclusiveLimitAlarmType Condition',
     conditionName: 'OilLevelCondition',
     optionals: [
@@ -72,7 +78,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
   // --------------------------------------------------------------
   let gasTankLevel = addressSpace.getOwnNamespace().addVariable({
     browseName: 'GasTankLevel',
-    displayName: 'Gas Tank Level',
+    displayName: [ new LocalizedText({text: 'Gas Tank Level', locale: 'en-US'}) ],
     description: 'Fill level in percentage (0% to 100%) of the gas tank',
     propertyOf: tanks,
     dataType: 'Double',
@@ -86,7 +92,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
     componentOf: tanks,
     conditionSource: gasTankLevel,
     browseName: 'GasTankLevelCondition',
-    displayName: 'Gas Tank Level Condition',
+    displayName: [ new LocalizedText({text: 'Gas Tank Level Condition', locale: 'en-US'}) ],
     description: 'NonExclusiveLimitAlarmType Condition',
     conditionName: 'GasLevelCondition',
     optionals: [
