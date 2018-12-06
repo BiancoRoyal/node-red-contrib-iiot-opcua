@@ -212,7 +212,7 @@ module.exports = function (RED) {
         }
         msg.payload.session = (node.bianco.iiot.opcuaSession) ? node.bianco.iiot.opcuaSession.name : 'none'
       } else {
-        msg.payload.browserResults = lists.addressItemList
+        msg.payload.browserResults = lists.addressSpaceItemList
       }
       return msg
     }
@@ -223,12 +223,12 @@ module.exports = function (RED) {
         msg.nodesToReadCount = lists.nodesToRead.length
       }
 
-      if (node.sendNodesToListener && lists.addressItemList) {
+      if (node.sendNodesToListener && lists.addressSpaceItemList) {
         msg.addressItemsToRead = lists.addressSpaceItemList
         msg.addressItemsToReadCount = lists.addressSpaceItemList.length
       }
 
-      if (node.sendNodesToBrowser && lists.addressItemList) {
+      if (node.sendNodesToBrowser && lists.addressSpaceItemList) {
         msg.addressItemsToBrowse = lists.addressSpaceItemList
         msg.addressItemsToBrowseCount = lists.addressSpaceItemList.length
       }

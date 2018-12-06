@@ -736,7 +736,7 @@ de.biancoroyal.opcua.iiot.core.server.addVariableToAddressSpace = function (node
 
   if (isProperty) {
     newNodeOPCUAVariable = {
-      propertyOf: rootFolder,
+      propertyOf: rootFolder
       // modellingRule: 'Mandatory'
     }
   } else {

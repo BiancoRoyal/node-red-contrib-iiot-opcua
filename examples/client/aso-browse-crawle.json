@@ -63,7 +63,7 @@
     "name": "",
     "showStatusActivities": false,
     "showErrors": false,
-    "asoDemo": true,
+    "asoDemo": false,
     "allowAnonymous": true,
     "isAuditing": false,
     "serverDiscovery": true,
@@ -527,7 +527,7 @@
     "repeat": "",
     "crontab": "",
     "once": false,
-    "startDelay": "",
+    "startDelay": "17",
     "name": "",
     "addressSpaceItems": [
       {
@@ -652,8 +652,8 @@
     "value": "",
     "referenceNodeId": "ns=0;i=85",
     "referencetype": "Organizes",
-    "name": "Folder",
-    "x": 405.6999816894531,
+    "name": "Folder TestVariables",
+    "x": 455.6999816894531,
     "y": 790.0000305175781,
     "wires": [
       [
@@ -1374,6 +1374,113 @@
         "88f2cf5f.add12"
       ]
     ]
+  },
+  {
+    "id": "a20e6297.569b5",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "9fc081ae.7fb22",
+    "injectType": "inject",
+    "payload": "",
+    "payloadType": "date",
+    "topic": "",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "17",
+    "name": "",
+    "addressSpaceItems": [
+      {
+        "name": "",
+        "nodeId": "ns=1;s=TestFolderA",
+        "datatypeName": ""
+      }
+    ],
+    "x": 1070,
+    "y": 520,
+    "wires": [
+      [
+        "961c9a46.c4a6d",
+        "365f9325.f78724"
+      ]
+    ]
+  },
+  {
+    "id": "961c9a46.c4a6d",
+    "type": "OPCUA-IIoT-Browser",
+    "z": "9fc081ae.7fb22",
+    "connector": "96627b0a.ff3a18",
+    "nodeId": "",
+    "name": "",
+    "justValue": false,
+    "sendNodesToRead": false,
+    "sendNodesToListener": false,
+    "sendNodesToBrowser": false,
+    "singleBrowseResult": true,
+    "recursiveBrowse": true,
+    "recursiveDepth": "5",
+    "delayPerMessage": "0.5",
+    "showStatusActivities": true,
+    "showErrors": true,
+    "x": 1260,
+    "y": 520,
+    "wires": [
+      [
+        "f2fec752.cc5698"
+      ]
+    ]
+  },
+  {
+    "id": "f2fec752.cc5698",
+    "type": "debug",
+    "z": "9fc081ae.7fb22",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 1410,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "365f9325.f78724",
+    "type": "OPCUA-IIoT-Browser",
+    "z": "9fc081ae.7fb22",
+    "connector": "96627b0a.ff3a18",
+    "nodeId": "",
+    "name": "",
+    "justValue": true,
+    "sendNodesToRead": false,
+    "sendNodesToListener": false,
+    "sendNodesToBrowser": false,
+    "singleBrowseResult": true,
+    "recursiveBrowse": true,
+    "recursiveDepth": "5",
+    "delayPerMessage": "0.5",
+    "showStatusActivities": true,
+    "showErrors": true,
+    "x": 1260,
+    "y": 580,
+    "wires": [
+      [
+        "8de78eaf.8cc2f8"
+      ]
+    ]
+  },
+  {
+    "id": "8de78eaf.8cc2f8",
+    "type": "debug",
+    "z": "9fc081ae.7fb22",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "x": 1410,
+    "y": 580,
+    "wires": []
   },
   {
     "id": "96627b0a.ff3a18",
