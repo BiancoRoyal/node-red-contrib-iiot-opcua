@@ -781,6 +781,10 @@ de.biancoroyal.opcua.iiot.core.setNodeOPCUAClosed = function (node) {
   this.setNodeStatusTo(node, 'disconnected')
 }
 
+de.biancoroyal.opcua.iiot.core.setNodeOPCUALost = function (node) {
+  this.setNodeStatusTo(node, 'lost')
+}
+
 de.biancoroyal.opcua.iiot.core.setNodeOPCUASessionStarted = function (node, opcuaSession) {
   if (this.isInitializedBiancoIIoTNode(node)) {
     node.bianco.iiot.opcuaSession = opcuaSession
@@ -853,6 +857,10 @@ de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
 
   node.connector.on('connection_closed', () => {
     core.setNodeOPCUAClosed(node)
+  })
+
+  node.connector.on('server_connection_lost', () => {
+    core.setNodeOPCUALost(node)
   })
 
   node.connector.on('reset_opcua_connection', () => {

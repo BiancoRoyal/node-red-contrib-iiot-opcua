@@ -164,6 +164,13 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
     node.emit('server_connection_abort')
   })
 
+  node.bianco.iiot.opcuaClient.on('connection_lost', function () {
+    connectorLib.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION LOST !!!!!!!!!!!!!!!!!!!'.bgWhite.orange)
+    connectorLib.internalDebugLog('CONNECTION LOST: ' + node.endpoint)
+    node.bianco.iiot.stateMachine.lock()
+    node.emit('server_connection_lost')
+  })
+
   node.bianco.iiot.opcuaClient.on('connection_reestablished', function () {
     connectorLib.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!'.bgWhite.orange)
     connectorLib.internalDebugLog('CONNECTION RE-ESTABLISHED: ' + node.endpoint)
