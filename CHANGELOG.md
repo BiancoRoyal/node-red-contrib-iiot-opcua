@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.8.0"></a>
+# [3.8.0](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.7.4...v3.8.0) (2018-12-21)
+
+
+### Features
+
+* use connection lost event of node-opcua ([0dde329](https://github.com/biancode/node-red-contrib-iiot-opcua/commit/0dde329))
+
+
+
 <a name="3.7.4"></a>
 ## [3.7.4](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.7.3...v3.7.4) (2018-12-06)
 
