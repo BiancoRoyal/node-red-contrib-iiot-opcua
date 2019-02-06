@@ -54,8 +54,8 @@ IF THIS IS A FEATURE REQUEST OR SUPPORT DELETE FROM HERE, PLEASE -->
 
   * ( ) I am using just the Node-RED package and got node-opcua installed with it
   * ( ) I have installed node-opcua global from source (using git clone)
-  * ( ) I have installed node-opcua as a global package (using npm i -g)
-        
+  * ( ) I have installed node-opcua as a global package (using npm i -g) 
+  
   * Device :
     
     - ( ) macOS: v 
@@ -73,7 +73,9 @@ IF THIS IS A FEATURE REQUEST OR SUPPORT DELETE FROM HERE, PLEASE -->
      - Vendor :
      - Link   : https://
      
-    
+* **Node-RED version:** 
+<!-- Check which is the ode-RED version (beta, stable) -->
+
 * **node-red-contrib-iiot-opcua version:** ``
 <!-- Check which is the hash of the last commit from node-red-contrib-iiot-opcua that you have locally -->
 
