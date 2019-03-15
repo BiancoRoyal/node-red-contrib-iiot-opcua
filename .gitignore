@@ -15,3 +15,5 @@ pki/
 jcoverage/
 
 \.jsinspect-results\.json
+
+certificates/
