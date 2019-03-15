@@ -10,8 +10,8 @@ matrix:
     - node_js: 9
     - node_js: 8
 install:
-  - npm install --only=dev
   - npm install
+  - npm install --only=dev
 script:
   - npm run coverage:ci
   - npm run coverage:upload
