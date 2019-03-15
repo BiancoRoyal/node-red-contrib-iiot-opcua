@@ -1,7 +1,6 @@
 {
   "name": "node-red-contrib-iiot-opcua",
-  "version": "3.8.1",
-  "private": false,
+  "version": "3.9.0",
   "description": "The next evolution IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
@@ -63,6 +62,7 @@
     "node": ">=6.10"
   },
   "scripts": {
+    "postinstall": "node ./create_certificates.js demo --dev -s -r ./certificates",
     "test:clearCache": "jest --clearCache",
     "test": "standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
     "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
