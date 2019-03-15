@@ -79,7 +79,8 @@
   "files": [
     "docs",
     "examples",
-    "opcuaIIoT"
+    "opcuaIIoT",
+    "create_certificates.js"
   ],
   "devDependencies": {
     "@babel/cli": "^7.1.2",
