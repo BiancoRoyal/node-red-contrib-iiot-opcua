@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.10.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.9.0...v3.10.0) (2019-03-15)
+
+
+### Bug Fixes
+
+* issue [#1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/1) ([fe0da33](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/fe0da33))
+* separate servers by port for LDS ([034f563](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/034f563))
+
+
+### Features
+
+* set requestedMaxReferencesPerNode to 100k ([a62f5bb](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/a62f5bb))
+
+
+
 <a name="3.8.1"></a>
 ## [3.8.1](https://github.com/biancode/node-red-contrib-iiot-opcua/compare/v3.8.0...v3.8.1) (2019-03-15)
 
