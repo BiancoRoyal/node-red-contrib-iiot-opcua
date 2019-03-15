@@ -26,15 +26,15 @@ module.exports = function (RED) {
     node.bianco = coreDiscovery.core.createBiancoIIoT()
     coreDiscovery.core.assert(node.bianco.iiot)
 
-    const discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({port: node.discoveryPort})
+    const discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({ port: node.discoveryPort })
 
-    node.status({fill: 'yellow', shape: 'ring', text: 'starting'})
+    node.status({ fill: 'yellow', shape: 'ring', text: 'starting' })
 
     coreDiscovery.detailDebugLog('discovery endpoints:' + discoveryServer._get_endpoints())
 
     discoveryServer.start(function () {
       coreDiscovery.internalDebugLog('discovery server started')
-      node.status({fill: 'green', shape: 'dot', text: 'active'})
+      node.status({ fill: 'green', shape: 'dot', text: 'active' })
     })
 
     node.on('input', function (msg) {

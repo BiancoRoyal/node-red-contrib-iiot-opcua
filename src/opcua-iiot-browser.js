@@ -331,11 +331,11 @@ module.exports = function (RED) {
       }).catch(function (err) {
         coreBrowser.internalDebugLog('Browser Error ' + err)
         if (node.showErrors) {
-          node.error(err, {payload: 'Browse Internal Error'})
+          node.error(err, { payload: 'Browse Internal Error' })
         }
 
         entries.push({
-          displayName: {text: 'Objects'},
+          displayName: { text: 'Objects' },
           nodeId: coreBrowser.core.OBJECTS_ROOT,
           browseName: 'Objects'
         })

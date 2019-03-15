@@ -41,8 +41,8 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
   let oilTankLevel = addressSpace.getOwnNamespace().addVariable({
     browseName: 'OilTankLevel',
     displayName: [
-      new LocalizedText({text: 'Oil Tank Level', locale: 'en-US'}),
-      new LocalizedText({text: 'Oil Tank Stand', locale: 'de-DE'})
+      new LocalizedText({ text: 'Oil Tank Level', locale: 'en-US' }),
+      new LocalizedText({ text: 'Oil Tank Stand', locale: 'de-DE' })
     ],
     description: 'Fill level in percentage (0% to 100%) of the oil tank',
     propertyOf: tanks,
@@ -61,7 +61,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
     componentOf: tanks,
     conditionSource: oilTankLevel,
     browseName: 'OilTankLevelCondition',
-    displayName: [ new LocalizedText({text: 'Oil Tank Level Condition', locale: 'en-US'}) ],
+    displayName: [ new LocalizedText({ text: 'Oil Tank Level Condition', locale: 'en-US' }) ],
     description: 'ExclusiveLimitAlarmType Condition',
     conditionName: 'OilLevelCondition',
     optionals: [
@@ -78,7 +78,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
   // --------------------------------------------------------------
   let gasTankLevel = addressSpace.getOwnNamespace().addVariable({
     browseName: 'GasTankLevel',
-    displayName: [ new LocalizedText({text: 'Gas Tank Level', locale: 'en-US'}) ],
+    displayName: [ new LocalizedText({ text: 'Gas Tank Level', locale: 'en-US' }) ],
     description: 'Fill level in percentage (0% to 100%) of the gas tank',
     propertyOf: tanks,
     dataType: 'Double',
@@ -92,7 +92,7 @@ function constructAlarmAddressSpaceDemo (test, addressSpace) {
     componentOf: tanks,
     conditionSource: gasTankLevel,
     browseName: 'GasTankLevelCondition',
-    displayName: [ new LocalizedText({text: 'Gas Tank Level Condition', locale: 'en-US'}) ],
+    displayName: [ new LocalizedText({ text: 'Gas Tank Level Condition', locale: 'en-US' }) ],
     description: 'NonExclusiveLimitAlarmType Condition',
     conditionName: 'GasLevelCondition',
     optionals: [

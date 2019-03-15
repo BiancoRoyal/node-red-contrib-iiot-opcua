@@ -15,7 +15,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.connector
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {connector: {}}}}}} // eslint-disable-line no-use-before-define
+var de = de || { biancoroyal: { opcua: { iiot: { core: { connector: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.core = de.biancoroyal.opcua.iiot.core.connector.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.internalDebugLog = de.biancoroyal.opcua.iiot.core.connector.internalDebugLog || require('debug')('opcuaIIoT:connector') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.connector.detailDebugLog = de.biancoroyal.opcua.iiot.core.connector.detailDebugLog || require('debug')('opcuaIIoT:connector:details') // eslint-disable-line no-use-before-define
@@ -124,7 +124,7 @@ de.biancoroyal.opcua.iiot.core.connector.setListenerToClient = function (node) {
   if (!node.bianco.iiot.opcuaClient) {
     connectorLib.internalDebugLog('Client Not Valid On Setting Events To Client')
     if (node.showErrors) {
-      node.error(new Error('Client Not Valid To Set Event Listeners'), {payload: 'No Client To Set Event Listeners'})
+      node.error(new Error('Client Not Valid To Set Event Listeners'), { payload: 'No Client To Set Event Listeners' })
     }
     return
   }
@@ -241,7 +241,7 @@ de.biancoroyal.opcua.iiot.core.connector.checkEndpoint = function (node) {
     return true
   } else {
     this.internalDebugLog('Endpoint Not Valid -> ' + node.endpoint)
-    node.error(new Error('endpoint does not include opc.tcp://'), {payload: 'Client Endpoint Error'})
+    node.error(new Error('endpoint does not include opc.tcp://'), { payload: 'Client Endpoint Error' })
     return false
   }
 }

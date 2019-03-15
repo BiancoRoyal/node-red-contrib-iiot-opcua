@@ -16,7 +16,7 @@
 module.exports = function (RED) {
   // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
-  const {VM} = require('vm2')
+  const { VM } = require('vm2')
   let scriptObjects = {}
 
   function OPCUAIIoTFlexServer (config) {
@@ -30,11 +30,59 @@ module.exports = function (RED) {
     coreServer.core.assert(node.bianco.iiot)
 
     node.bianco.iiot.vm = new VM({
+      require: {
+        builtin: ['fs', 'Math', 'Date', 'console']
+      },
       sandbox: {
         node,
         coreServer,
         scriptObjects,
-        RED
+        RED,
+        sandboxNodeContext: {
+          set: function () {
+            node.context().set.apply(node, arguments)
+          },
+          get: function () {
+            return node.context().get.apply(node, arguments)
+          },
+          keys: function () {
+            return node.context().keys.apply(node, arguments)
+          },
+          get global () {
+            return node.context().global
+          },
+          get flow () {
+            return node.context().flow
+          }
+        },
+        sandboxFlowContext: {
+          set: function () {
+            node.context().flow.set.apply(node, arguments)
+          },
+          get: function () {
+            return node.context().flow.get.apply(node, arguments)
+          },
+          keys: function () {
+            return node.context().flow.keys.apply(node, arguments)
+          }
+        },
+        sandboxGlobalContext: {
+          set: function () {
+            node.context().global.set.apply(node, arguments)
+          },
+          get: function () {
+            return node.context().global.get.apply(node, arguments)
+          },
+          keys: function () {
+            return node.context().global.keys.apply(node, arguments)
+          }
+        },
+        sandboxEnv: {
+          get: function (envVar) {
+            let flow = node._flow
+            return flow.getSetting(envVar)
+          }
+        }
       }
     })
 
@@ -74,7 +122,7 @@ module.exports = function (RED) {
       } catch (err) {
         node.emit('server_create_error')
         coreServer.flex.internalDebugLog(err.message)
-        coreServer.handleServerError(node, err, {payload: 'Flex Server Failure! Please, check the server settings!'})
+        coreServer.handleServerError(node, err, { payload: 'Flex Server Failure! Please, check the server settings!' })
       }
     }
 
@@ -88,10 +136,10 @@ module.exports = function (RED) {
           }).catch(function (err) {
             node.emit('server_start_error')
             coreServer.core.setNodeStatusTo(node, 'errors')
-            coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
+            coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
           })
         }).catch(function (err) {
-          coreServer.handleServerError(node, err, {payload: 'Server Address Space Failure'})
+          coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
         })
     }
 

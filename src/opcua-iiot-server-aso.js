@@ -40,7 +40,7 @@ module.exports = function (RED) {
         node.value = msg.payload || node.value
       }
 
-      msg = {payload: {}} // clean message
+      msg = { payload: {} } // clean message
       msg.topic = 'ServerAddressSpaceObject'
       msg.nodetype = 'inject'
       msg.injectType = 'ASO'

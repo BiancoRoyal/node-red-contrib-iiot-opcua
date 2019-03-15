@@ -32,7 +32,7 @@ module.exports = function (RED) {
     core.assert(node.bianco.iiot)
     node.bianco.iiot.subscribed = false
 
-    node.status({fill: 'blue', shape: 'ring', text: 'new'})
+    node.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
     node.on('input', function (msg) {
       msg.nodetype = 'node'
@@ -41,12 +41,12 @@ module.exports = function (RED) {
 
       if (node.injectType === 'listen') {
         if (node.bianco.iiot.subscribed) {
-          node.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
+          node.status({ fill: 'blue', shape: 'dot', text: 'subscribed' })
         } else {
-          node.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})
+          node.status({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
         }
       } else {
-        node.status({fill: 'blue', shape: 'dot', text: 'injected'})
+        node.status({ fill: 'blue', shape: 'dot', text: 'injected' })
       }
 
       msg.topic = msg.topic || node.topic
@@ -54,10 +54,10 @@ module.exports = function (RED) {
 
       if (node.injectType === 'write') {
         msg.valuesToWrite = msg.valuesToWrite || [] // eslint-disable-line
-        msg.addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
+        msg.addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
 
         try {
-          msg.valuesToWrite.push(core.convertDataValueByDataType({value: msg.payload || node.value}, node.datatype))
+          msg.valuesToWrite.push(core.convertDataValueByDataType({ value: msg.payload || node.value }, node.datatype))
         } catch (err) {
           core.internalDebugLog(err)
           if (node.showErrors) {
@@ -65,7 +65,7 @@ module.exports = function (RED) {
           }
         }
       } else {
-        msg.addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
+        msg.addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
       }
 
       core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))

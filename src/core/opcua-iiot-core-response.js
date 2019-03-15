@@ -16,7 +16,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.response
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {response: {}}}}}} // eslint-disable-line no-use-before-define
+var de = de || { biancoroyal: { opcua: { iiot: { core: { response: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.response.core = de.biancoroyal.opcua.iiot.core.response.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.response.internalDebugLog = de.biancoroyal.opcua.iiot.core.response.internalDebugLog || require('debug')('opcuaIIoT:response') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.response.detailDebugLog = de.biancoroyal.opcua.iiot.core.response.detailDebugLog || require('debug')('opcuaIIoT:response:details') // eslint-disable-line no-use-before-define
@@ -81,7 +81,7 @@ de.biancoroyal.opcua.iiot.core.response.setNodeStatus = function (node, entrySta
   }
 
   if (node.status.text !== informationText) {
-    node.status({fill: fillColor, shape: 'dot', text: informationText})
+    node.status({ fill: fillColor, shape: 'dot', text: informationText })
   }
 }
 

@@ -99,7 +99,7 @@ module.exports = function (RED) {
         }
         coreConnector.internalDebugLog('Connecting With Login Data On ' + node.endpoint)
       } else {
-        node.error(new Error('Login Enabled But No Credentials'), {payload: ''})
+        node.error(new Error('Login Enabled But No Credentials'), { payload: '' })
       }
     }
 
@@ -193,7 +193,7 @@ module.exports = function (RED) {
         if (err) {
           coreConnector.internalDebugLog('Auto Switch To Endpoint Error ' + err)
           if (node.showErrors) {
-            node.error(err, {payload: 'Get Endpoints Request Error'})
+            node.error(err, { payload: 'Get Endpoints Request Error' })
           }
         } else {
           endpoints.forEach(function (endpoint) {
@@ -208,7 +208,7 @@ module.exports = function (RED) {
           if (err) {
             coreConnector.internalDebugLog('Endpoints Auto Request Error ' + err)
             if (node.showErrors) {
-              node.error(err, {payload: 'Discover Client Disconnect Error'})
+              node.error(err, { payload: 'Discover Client Disconnect Error' })
             }
           } else {
             coreConnector.internalDebugLog('Endpoints Auto Request Done With Endpoint ' + node.endpoint)
@@ -245,7 +245,7 @@ module.exports = function (RED) {
       if (node.bianco.iiot.isInactiveOnOPCUA()) {
         coreConnector.internalDebugLog('State Is Not Active While Start Session-> ' + node.bianco.iiot.stateMachine.getMachineState())
         if (node.showErrors) {
-          node.error(new Error('OPC UA Connector Is Not Active'), {payload: 'Create Session Error'})
+          node.error(new Error('OPC UA Connector Is Not Active'), { payload: 'Create Session Error' })
         }
         return
       }
@@ -253,7 +253,7 @@ module.exports = function (RED) {
       if (node.bianco.iiot.stateMachine.getMachineState() !== 'OPEN') {
         coreConnector.internalDebugLog('Session Request Not Allowed On State ' + node.bianco.iiot.stateMachine.getMachineState())
         if (node.showErrors) {
-          node.error(new Error('OPC UA Connector Is Not Open'), {payload: 'Create Session Error'})
+          node.error(new Error('OPC UA Connector Is Not Open'), { payload: 'Create Session Error' })
         }
         return
       }
@@ -261,7 +261,7 @@ module.exports = function (RED) {
       if (!node.bianco.iiot.opcuaClient) {
         coreConnector.internalDebugLog('OPC UA Client Connection Is Not Valid On State ' + node.bianco.iiot.stateMachine.getMachineState())
         if (node.showErrors) {
-          node.error(new Error('OPC UA Client Connection Is Not Valid'), {payload: 'Create Session Error'})
+          node.error(new Error('OPC UA Client Connection Is Not Valid'), { payload: 'Create Session Error' })
         }
         return
       }
@@ -354,7 +354,7 @@ module.exports = function (RED) {
     node.bianco.iiot.handleError = function (err) {
       coreConnector.internalDebugLog('Handle Error On ' + node.endpoint + ' err: ' + err)
       if (node.showErrors) {
-        node.error(err, {payload: 'Handle Connector Error'})
+        node.error(err, { payload: 'Handle Connector Error' })
       }
     }
 
@@ -745,8 +745,8 @@ module.exports = function (RED) {
   try {
     RED.nodes.registerType('OPCUA-IIoT-Connector', OPCUAIIoTConnectorConfiguration, {
       credentials: {
-        user: {type: 'text'},
-        password: {type: 'password'}
+        user: { type: 'text' },
+        password: { type: 'password' }
       }
     })
   } catch (e) {
@@ -778,7 +778,7 @@ module.exports = function (RED) {
           } else {
             coreConnector.internalDebugLog('Perform Find Servers Request ' + err)
             if (node.showErrors) {
-              node.error(err, {payload: ''})
+              node.error(err, { payload: '' })
             }
             res.json([])
           }
@@ -806,7 +806,7 @@ module.exports = function (RED) {
           discoveryClient.getEndpoints(function (err, endpoints) {
             if (err) {
               if (node.showErrors) {
-                node.error(err, {payload: ''})
+                node.error(err, { payload: '' })
               }
               coreConnector.internalDebugLog('Get Endpoints Request Error ' + err)
               res.json([])

@@ -16,7 +16,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.server
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {server: {}}}}}} // eslint-disable-line no-use-before-define
+var de = de || { biancoroyal: { opcua: { iiot: { core: { server: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.core = de.biancoroyal.opcua.iiot.core.server.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.internalDebugLog = de.biancoroyal.opcua.iiot.core.server.internalDebugLog || require('debug')('opcuaIIoT:server') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.server.detailDebugLog = de.biancoroyal.opcua.iiot.core.server.detailDebugLog || require('debug')('opcuaIIoT:server:details') // eslint-disable-line no-use-before-define
@@ -43,11 +43,11 @@ de.biancoroyal.opcua.iiot.core.server.simulateVariation = function (data) {
   }
 
   if (data.tankLevel) {
-    data.tankLevel.setValueFromSource({dataType: 'Double', value})
+    data.tankLevel.setValueFromSource({ dataType: 'Double', value })
   }
 
   if (data.tankLevel2) {
-    data.tankLevel2.setValueFromSource({dataType: 'Double', value})
+    data.tankLevel2.setValueFromSource({ dataType: 'Double', value })
   }
 }
 
@@ -90,8 +90,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         organizedBy: addressSpace.rootFolder.views,
         browseName: 'BiancoRoyalView',
         displayName: [
-          new LocalizedText({text: 'Bianco Royal View', locale: 'en-US'}),
-          new LocalizedText({text: 'Bianco Royal Sicht', locale: 'de-DE'})
+          new LocalizedText({ text: 'Bianco Royal View', locale: 'en-US' }),
+          new LocalizedText({ text: 'Bianco Royal Sicht', locale: 'de-DE' })
         ]
       })
 
@@ -114,8 +114,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           nodeId: 'i=1234',
           browseName: 'BiancoRoyal',
           displayName: [
-            new LocalizedText({text: 'Bianco Royal', locale: 'en-US'}),
-            new LocalizedText({text: 'Bianco Royal', locale: 'de-DE'})
+            new LocalizedText({ text: 'Bianco Royal', locale: 'en-US' }),
+            new LocalizedText({ text: 'Bianco Royal', locale: 'de-DE' })
           ],
           description: 'Bianco Royal - Software Innovations®'
         })
@@ -192,8 +192,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           nodeId: 's=free_memory',
           browseName: 'FreeMemory',
           displayName: [
-            new LocalizedText({text: 'Free Memory', locale: 'en-US'}),
-            new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})
+            new LocalizedText({ text: 'Free Memory', locale: 'en-US' }),
+            new LocalizedText({ text: 'ungenutzer RAM', locale: 'de-DE' })
           ],
           dataType: 'Double',
 
@@ -261,7 +261,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
         addressSpace.installHistoricalDataNode(fullcounterVariable)
 
         let externalValueWithSourceTimestamp = new coreServer.core.nodeOPCUA.DataValue({
-          value: new coreServer.core.nodeOPCUA.Variant({dataType: 'Double', value: 10.0}),
+          value: new coreServer.core.nodeOPCUA.Variant({ dataType: 'Double', value: 10.0 }),
           sourceTimestamp: null,
           sourcePicoseconds: 0
         })
@@ -325,8 +325,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           nodeId: 's=PumpSpeed',
           browseName: 'PumpSpeed',
           displayName: [
-            new LocalizedText({text: 'Pump Speed', locale: 'en-US'}),
-            new LocalizedText({text: 'Geschwindigkeit Pumpe', locale: 'de-DE'})
+            new LocalizedText({ text: 'Pump Speed', locale: 'en-US' }),
+            new LocalizedText({ text: 'Geschwindigkeit Pumpe', locale: 'de-DE' })
           ],
           dataType: 'Double',
           value: {
@@ -344,8 +344,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           nodeId: 's=SomeDate',
           browseName: 'SomeDate',
           displayName: [
-            new LocalizedText({text: 'Some Date', locale: 'en-US'}),
-            new LocalizedText({text: 'Einfaches Datum', locale: 'de-DE'})
+            new LocalizedText({ text: 'Some Date', locale: 'en-US' }),
+            new LocalizedText({ text: 'Einfaches Datum', locale: 'de-DE' })
           ],
           dataType: 'DateTime',
           value: {
@@ -363,17 +363,17 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           nodeId: 's=MultiLanguageText',
           browseName: 'MultiLanguageText',
           displayName: [
-            new LocalizedText({text: 'Multi Language Text', locale: 'en-US'}),
-            new LocalizedText({text: 'Mehrsprachiger Text', locale: 'de-DE'})
+            new LocalizedText({ text: 'Multi Language Text', locale: 'en-US' }),
+            new LocalizedText({ text: 'Mehrsprachiger Text', locale: 'de-DE' })
           ],
           dataType: 'LocalizedText',
           value: {
             get: function () {
               return new coreServer.core.nodeOPCUA.Variant({
                 dataType: coreServer.core.nodeOPCUA.DataType.LocalizedText,
-                value: [{text: 'multilingual text', locale: 'en'},
-                  {text: 'mehrsprachiger Text', locale: 'de'},
-                  {text: 'texte multilingue', locale: 'fr'}]
+                value: [{ text: 'multilingual text', locale: 'en' },
+                  { text: 'mehrsprachiger Text', locale: 'de' },
+                  { text: 'texte multilingue', locale: 'fr' }]
               })
             }
           }
@@ -384,7 +384,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           nodeId: 's=FanSpeed',
           browseName: 'FanSpeed',
           dataType: 'Double',
-          value: new coreServer.core.nodeOPCUA.Variant({dataType: 'Double', value: 1000.0})
+          value: new coreServer.core.nodeOPCUA.Variant({ dataType: 'Double', value: 1000.0 })
         })
 
         de.biancoroyal.opcua.iiot.core.server.intervalList.push(setInterval(function () {
@@ -404,12 +404,12 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
                 name: 'barks',
                 dataType: 'UInt32',
                 arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Scalar,
-                description: {text: 'specifies the number of time I should bark'}
+                description: { text: 'specifies the number of time I should bark' }
               }, {
                 name: 'volume',
                 dataType: 'UInt32',
                 arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Scalar,
-                description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'}
+                description: { text: 'specifies the sound volume [0 = quiet ,100 = loud]' }
               }
             ],
 
@@ -417,7 +417,7 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
               name: 'Barks',
               dataType: 'String',
               arrayType: coreServer.core.nodeOPCUA.VariantArrayType.Array,
-              description: {text: 'the generated barks'},
+              description: { text: 'the generated barks' },
               valueRank: 1
             }]
           })
@@ -449,8 +449,8 @@ de.biancoroyal.opcua.iiot.core.server.constructAddressSpace = function (server, 
           browseName: 'TemperatureAnalogItem',
           definition: '(tempA -25) + tempB',
           valuePrecision: 0.5,
-          engineeringUnitsRange: {low: 100, high: 200},
-          instrumentRange: {low: -100, high: +200},
+          engineeringUnitsRange: { low: 100, high: 200 },
+          instrumentRange: { low: -100, high: +200 },
           engineeringUnits: coreServer.core.nodeOPCUA.standardUnits.degree_celsius,
           dataType: 'Double',
           value: {
@@ -747,7 +747,7 @@ de.biancoroyal.opcua.iiot.core.server.addVariableToAddressSpace = function (node
 
   newNodeOPCUAVariable.nodeId = msg.payload.nodeId
   newNodeOPCUAVariable.browseName = msg.payload.browsename
-  newNodeOPCUAVariable.displayName = new LocalizedText({locale: null, text: msg.payload.displayname})
+  newNodeOPCUAVariable.displayName = new LocalizedText({ locale: null, text: msg.payload.displayname })
   newNodeOPCUAVariable.dataType = msg.payload.datatype
   newNodeOPCUAVariable.value = {
     get () {
@@ -783,7 +783,7 @@ de.biancoroyal.opcua.iiot.core.server.addObjectToAddressSpace = function (node, 
       typeDefinition: msg.payload.objecttype,
       nodeId: msg.payload.nodeId,
       browseName: msg.payload.browsename,
-      displayName: new LocalizedText({locale: null, text: msg.payload.displayname})
+      displayName: new LocalizedText({ locale: null, text: msg.payload.displayname })
     }
 
     addressSpace.getOwnNamespace().addObject(newNodeOPCUObject)
@@ -823,7 +823,7 @@ de.biancoroyal.opcua.iiot.core.server.restartServer = function (node) {
     node.emit('shutdown')
   }
 
-  node.send({payload: 'server shutdown'})
+  node.send({ payload: 'server shutdown' })
   this.core.setNodeStatusTo(node, 'shutdown')
 }
 
@@ -864,7 +864,7 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
       // applicationType: ApplicationType.CLIENTANDSERVER,
       applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), coreServer.createServerNameWithPrefix(prefix)),
       productUri: coreServer.createServerNameWithPrefix(prefix),
-      applicationName: {text: 'Node-RED', locale: 'en'},
+      applicationName: { text: 'Node-RED', locale: 'en' },
       gatewayServerUri: null,
       discoveryProfileUri: null,
       discoveryUrls: []

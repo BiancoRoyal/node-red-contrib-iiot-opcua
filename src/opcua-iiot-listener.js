@@ -82,7 +82,7 @@ module.exports = function (RED) {
       subscription.on('internal_error', function (err) {
         coreListener.internalDebugLog('internal_error: ' + err.message)
         if (node.showErrors) {
-          node.error(err, {payload: 'Internal Error'})
+          node.error(err, { payload: 'Internal Error' })
         }
         coreListener.core.setNodeStatusTo(node, 'error')
         node.bianco.iiot.stateMachine.errorsub()
@@ -126,10 +126,10 @@ module.exports = function (RED) {
       let addressSpaceItems = []
 
       node.bianco.iiot.monitoredASO.forEach(function (value, key) {
-        addressSpaceItems.push({name: '', nodeId: key, datatypeName: ''})
+        addressSpaceItems.push({ name: '', nodeId: key, datatypeName: '' })
       })
 
-      node.send({payload: payload, addressSpaceItems: addressSpaceItems})
+      node.send({ payload: payload, addressSpaceItems: addressSpaceItems })
 
       node.bianco.iiot.monitoredItems.clear()
       node.bianco.iiot.monitoredASO.clear()
@@ -375,7 +375,7 @@ module.exports = function (RED) {
       monitoredItem.on('error', function (err) {
         coreListener.internalDebugLog('monitoredItem Error: ' + err.message + ' on ' + monitoredItem.monitoredItemId)
         if (node.showErrors) {
-          node.error(err, {payload: 'Monitored Item Error', monitoredItem: monitoredItem})
+          node.error(err, { payload: 'Monitored Item Error', monitoredItem: monitoredItem })
         }
 
         node.bianco.iiot.updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
@@ -408,7 +408,7 @@ module.exports = function (RED) {
       let msg = {
         payload: {},
         topic: topic,
-        addressSpaceItems: [{name: '', nodeId, datatypeName: ''}],
+        addressSpaceItems: [{ name: '', nodeId, datatypeName: '' }],
         nodetype: 'listen',
         injectType: 'subscribe'
       }
@@ -431,7 +431,7 @@ module.exports = function (RED) {
           msg.error = err.message
         }
       } else {
-        msg.payload = {dataValue, monitoredItem}
+        msg.payload = { dataValue, monitoredItem }
       }
 
       node.send(msg)
@@ -442,7 +442,7 @@ module.exports = function (RED) {
 
       let dataValuesString = {}
       if (node.justValue) {
-        dataValuesString = JSON.stringify({dataValue: dataValue}, null, 2)
+        dataValuesString = JSON.stringify({ dataValue: dataValue }, null, 2)
         try {
           RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
         } catch (err) {
@@ -455,7 +455,7 @@ module.exports = function (RED) {
           msg.error = err.message
         }
       } else {
-        msg.payload = {dataValue, eventResults, monitoredItem}
+        msg.payload = { dataValue, eventResults, monitoredItem }
       }
 
       node.send(msg)
@@ -474,7 +474,7 @@ module.exports = function (RED) {
       let msg = {
         payload: {},
         topic: topic || node.topic, // default if item.topic is empty
-        addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
+        addressSpaceItems: [{ name: '', nodeId: nodeId, datatypeName: '' }],
         nodetype: 'listen',
         injectType: 'event'
       }
@@ -491,7 +491,7 @@ module.exports = function (RED) {
       coreListener.internalDebugLog('Basic Error Handling')
       coreListener.internalDebugLog(err)
       if (node.showErrors) {
-        node.error(err, {payload: 'Error Handling'})
+        node.error(err, { payload: 'Error Handling' })
       }
 
       if (err) {

@@ -79,7 +79,7 @@ module.exports = function (RED) {
         message.methodType = data.msg.methodType
 
         for (result of data.results) {
-          outputArguments.push({statusCode: result.statusCode, outputArguments: result.outputArguments})
+          outputArguments.push({ statusCode: result.statusCode, outputArguments: result.outputArguments })
         }
 
         let dataValuesString = {}

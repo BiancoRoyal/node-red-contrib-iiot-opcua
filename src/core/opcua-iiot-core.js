@@ -16,7 +16,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {}}}}} // eslint-disable-line no-use-before-define
+var de = de || { biancoroyal: { opcua: { iiot: { core: {} } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.nodeOPCUA = de.biancoroyal.opcua.iiot.core.nodeOPCUA || require('node-opcua') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.nodeOPCUAId = de.biancoroyal.opcua.iiot.core.nodeOPCUAId || require('node-opcua-nodeid') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.internalDebugLog = de.biancoroyal.opcua.iiot.core.internalDebugLog || require('debug')('opcuaIIoT:core') // eslint-disable-line no-use-before-define
@@ -177,7 +177,7 @@ de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue, statusLog)
       }
   }
 
-  return {fill: fillValue, shape: shapeValue, status: statusValue}
+  return { fill: fillValue, shape: shapeValue, status: statusValue }
 }
 
 de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
@@ -333,31 +333,31 @@ de.biancoroyal.opcua.iiot.core.getBasicDataTypes = function () {
   let opcua = this.nodeOPCUA
 
   return [
-    {name: 'Null', dataType: opcua.DataType.Null},
-    {name: 'Boolean', dataType: opcua.DataType.Boolean},
-    {name: 'SByte', dataType: opcua.DataType.SByte},
-    {name: 'Byte', dataType: opcua.DataType.Byte},
-    {name: 'Int16', dataType: opcua.DataType.Int16},
-    {name: 'UInt16', dataType: opcua.DataType.UInt16},
-    {name: 'Int32', dataType: opcua.DataType.Int32},
-    {name: 'UInt32', dataType: opcua.DataType.UInt32},
-    {name: 'Int64', dataType: opcua.DataType.Int64},
-    {name: 'UInt64', dataType: opcua.DataType.UInt64},
-    {name: 'Float', dataType: opcua.DataType.Float},
-    {name: 'Double', dataType: opcua.DataType.Double},
-    {name: 'DateTime', dataType: opcua.DataType.DateTime},
-    {name: 'String', dataType: opcua.DataType.String},
-    {name: 'Guid', dataType: opcua.DataType.Guid},
-    {name: 'ByteString', dataType: opcua.DataType.ByteString},
-    {name: 'XmlElement', dataType: opcua.DataType.XmlElement},
-    {name: 'NodeId', dataType: opcua.DataType.NodeId},
-    {name: 'ExpandedNodeId', dataType: opcua.DataType.ExpandedNodeId},
-    {name: 'StatusCode', dataType: opcua.DataType.StatusCode},
-    {name: 'LocalizedText', dataType: opcua.DataType.LocalizedText},
-    {name: 'ExtensionObject', dataType: opcua.DataType.ExtensionObject},
-    {name: 'DataValue', dataType: opcua.DataType.DataValue},
-    {name: 'Variant', dataType: opcua.DataType.Variant},
-    {name: 'DiagnosticInfo', dataType: opcua.DataType.DiagnosticInfo}
+    { name: 'Null', dataType: opcua.DataType.Null },
+    { name: 'Boolean', dataType: opcua.DataType.Boolean },
+    { name: 'SByte', dataType: opcua.DataType.SByte },
+    { name: 'Byte', dataType: opcua.DataType.Byte },
+    { name: 'Int16', dataType: opcua.DataType.Int16 },
+    { name: 'UInt16', dataType: opcua.DataType.UInt16 },
+    { name: 'Int32', dataType: opcua.DataType.Int32 },
+    { name: 'UInt32', dataType: opcua.DataType.UInt32 },
+    { name: 'Int64', dataType: opcua.DataType.Int64 },
+    { name: 'UInt64', dataType: opcua.DataType.UInt64 },
+    { name: 'Float', dataType: opcua.DataType.Float },
+    { name: 'Double', dataType: opcua.DataType.Double },
+    { name: 'DateTime', dataType: opcua.DataType.DateTime },
+    { name: 'String', dataType: opcua.DataType.String },
+    { name: 'Guid', dataType: opcua.DataType.Guid },
+    { name: 'ByteString', dataType: opcua.DataType.ByteString },
+    { name: 'XmlElement', dataType: opcua.DataType.XmlElement },
+    { name: 'NodeId', dataType: opcua.DataType.NodeId },
+    { name: 'ExpandedNodeId', dataType: opcua.DataType.ExpandedNodeId },
+    { name: 'StatusCode', dataType: opcua.DataType.StatusCode },
+    { name: 'LocalizedText', dataType: opcua.DataType.LocalizedText },
+    { name: 'ExtensionObject', dataType: opcua.DataType.ExtensionObject },
+    { name: 'DataValue', dataType: opcua.DataType.DataValue },
+    { name: 'Variant', dataType: opcua.DataType.Variant },
+    { name: 'DiagnosticInfo', dataType: opcua.DataType.DiagnosticInfo }
   ]
 }
 
@@ -603,14 +603,14 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
     let index = 0
     if (msg.valuesToWrite) {
       for (item of msg.addressSpaceItems) {
-        core.pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++])})
+        core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++]) })
       }
     } else {
       for (item of msg.addressSpaceItems) {
         if (item.value) {
-          core.pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, item.value)})
+          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.value) })
         } else {
-          core.pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload)})
+          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload) })
         }
       }
     }
@@ -827,7 +827,7 @@ de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
   }
 
   if (!node.connector) {
-    node.error(new Error('Connector Config Node Not Valid On Registering Client Node ' + node.id), {payload: 'No Connector Configured'})
+    node.error(new Error('Connector Config Node Not Valid On Registering Client Node ' + node.id), { payload: 'No Connector Configured' })
     return
   }
 
@@ -899,7 +899,7 @@ de.biancoroyal.opcua.iiot.core.deregisterToConnector = function (node, done) {
   }
 
   if (!node.connector) {
-    node.error(new Error('Connector Not Valid On Register To Connector'), {payload: 'No Connector Configured'})
+    node.error(new Error('Connector Not Valid On Register To Connector'), { payload: 'No Connector Configured' })
     done()
     return
   }
@@ -929,7 +929,7 @@ de.biancoroyal.opcua.iiot.core.setNodeStatusTo = function (node, statusValue) {
   if (!this.underscore.isEqual(node.oldStatusParameter, statusParameter)) {
     this.detailDebugLog('Node ' + node.id + ' Status To ' + statusValue)
     node.oldStatusParameter = statusParameter
-    node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+    node.status({ fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status })
   }
 }
 
@@ -982,7 +982,7 @@ de.biancoroyal.opcua.iiot.core.getItemFilterValueWithElement = function (item, e
 de.biancoroyal.opcua.iiot.core.handleErrorInsideNode = function (node, err) {
   this.internalDebugLog(typeof node + ' ' + err.message)
   if (node.showErrors) {
-    node.error(err, {payload: err.message})
+    node.error(err, { payload: err.message })
   }
 }
 

@@ -57,7 +57,7 @@ module.exports = function (RED) {
         node.bianco.iiot.createServer(serverOptions)
       } catch (err) {
         node.emit('server_create_error')
-        coreServer.handleServerError(node, err, {payload: 'Server Failure! Please, check the server settings!'})
+        coreServer.handleServerError(node, err, { payload: 'Server Failure! Please, check the server settings!' })
       }
     }
 
@@ -65,7 +65,7 @@ module.exports = function (RED) {
       coreServer.constructAddressSpace(node.bianco.iiot.opcuaServer, node.asoDemo)
         .then(function (err) {
           if (err) {
-            coreServer.handleServerError(node, err, {payload: 'Server Address Space Problem'})
+            coreServer.handleServerError(node, err, { payload: 'Server Address Space Problem' })
           } else {
             coreServer.start(node.bianco.iiot.opcuaServer, node)
               .then(function () {
@@ -77,11 +77,11 @@ module.exports = function (RED) {
                 }
                 node.emit('server_start_error')
                 coreServer.core.setNodeStatusTo(node, 'errors')
-                coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
+                coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
               })
           }
         }).catch(function (err) {
-          coreServer.handleServerError(node, err, {payload: 'Server Address Space Failure'})
+          coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
         })
     }
 

@@ -31,7 +31,7 @@ module.exports = function (RED) {
     node.bianco = coreResponse.core.createBiancoIIoT()
     coreResponse.core.assert(node.bianco.iiot)
 
-    node.status({fill: 'green', shape: 'ring', text: 'active'})
+    node.status({ fill: 'green', shape: 'ring', text: 'active' })
 
     node.bianco.iiot.handleBrowserMsg = function (msg) {
       coreResponse.analyzeBrowserResults(node, msg)

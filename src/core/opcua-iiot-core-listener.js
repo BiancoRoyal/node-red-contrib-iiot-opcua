@@ -16,7 +16,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.client.listener
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {listener: {}}}}}} // eslint-disable-line no-use-before-define
+var de = de || { biancoroyal: { opcua: { iiot: { core: { listener: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.core = de.biancoroyal.opcua.iiot.core.listener.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.client = de.biancoroyal.opcua.iiot.core.listener.client || require('./opcua-iiot-core-client') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.listener.internalDebugLog = de.biancoroyal.opcua.iiot.core.listener.internalDebugLog || require('debug')('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
@@ -248,7 +248,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
             coreListener.internalDebugLog('subscribing monitored item ' + err)
             reject(err)
           } else {
-            resolve({nodeId: nodeId, monitoredItem: monitoredItemResult})
+            resolve({ nodeId: nodeId, monitoredItem: monitoredItemResult })
           }
         }
       )
@@ -291,7 +291,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
       filteredAddressSpaceItems.forEach((item) => {
         subcriptionItems.push({
           nodeId: coreListener.core.nodeOPCUA.resolveNodeId(item.nodeId),
-          attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value})
+          attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value })
       })
 
       subscription.monitorItems(
@@ -307,7 +307,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
             coreListener.internalDebugLog('subscribing monitored item group ' + err)
             reject(err)
           } else {
-            resolve({addressSpaceItems: addressSpaceItems, monitoredItemGroup: monitoredItemGroup})
+            resolve({ addressSpaceItems: addressSpaceItems, monitoredItemGroup: monitoredItemGroup })
           }
         }
       )
@@ -408,7 +408,7 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session, browse
             }
             index++
           } catch (err) {
-            eventInformation = {error: err}
+            eventInformation = { error: err }
             eventResults.push({ eventInformation: eventInformation, eventData: variant.toJSON() })
           }
         })

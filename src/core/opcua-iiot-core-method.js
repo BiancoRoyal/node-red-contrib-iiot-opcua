@@ -15,7 +15,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.method
  */
-var de = de || {biancoroyal: {opcua: {iiot: {core: {method: {}}}}}} // eslint-disable-line no-use-before-define
+var de = de || { biancoroyal: { opcua: { iiot: { core: { method: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.method.core = de.biancoroyal.opcua.iiot.core.method.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.method.internalDebugLog = de.biancoroyal.opcua.iiot.core.method.internalDebugLog || require('debug')('opcuaIIoT:method') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.method.detailDebugLog = de.biancoroyal.opcua.iiot.core.method.detailDebugLog || require('debug')('opcuaIIoT:method:details') // eslint-disable-line no-use-before-define
@@ -61,7 +61,6 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
       } else {
         try {
           msg.inputArguments.forEach(function (element, index, array) {
-            element.dataType = element.dataType
             element.value = core.convertDataValueByDataType({ value: element.value }, element.dataType)
           })
 
@@ -92,7 +91,7 @@ de.biancoroyal.opcua.iiot.core.method.buildMessagesFromMethodCalls = function (m
         reject(new Error('Methods Call Results To Messages Session Not Valid'))
       } else {
         let resultMessages = []
-        resolve({methodCallsResults: methodCallsResults, messages: resultMessages})
+        resolve({ methodCallsResults: methodCallsResults, messages: resultMessages })
       }
     })
 }
