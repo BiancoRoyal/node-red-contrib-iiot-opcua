@@ -834,9 +834,9 @@ de.biancoroyal.opcua.iiot.core.server.handleServerError = function (node, err, m
   }
 }
 
-de.biancoroyal.opcua.iiot.core.server.createServerNameWithPrefix = function (prefix) {
+de.biancoroyal.opcua.iiot.core.server.createServerNameWithPrefix = function (serverPort, prefix) {
   let serverPrefix = (prefix !== '') ? prefix + '-' : prefix
-  return 'NodeRED-IIoT-' + serverPrefix + 'Server'
+  return 'NodeRED-IIoT-' + serverPrefix + 'Server-' + serverPort
 }
 
 de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefix) {
@@ -862,8 +862,8 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
     },
     serverInfo: {
       // applicationType: ApplicationType.CLIENTANDSERVER,
-      applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), coreServer.createServerNameWithPrefix(prefix)),
-      productUri: coreServer.createServerNameWithPrefix(prefix),
+      applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), coreServer.createServerNameWithPrefix(node.port, prefix)),
+      productUri: coreServer.createServerNameWithPrefix(node.port, prefix),
       applicationName: { text: 'Node-RED', locale: 'en' },
       gatewayServerUri: null,
       discoveryProfileUri: null,
