@@ -57,7 +57,7 @@ module.exports = function (RED) {
         msg.addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
 
         try {
-          msg.valuesToWrite.push(core.convertDataValueByDataType({ value: msg.payload || node.value }, node.datatype))
+          msg.valuesToWrite.push(core.convertDataValueByDataType({ value: node.value === '' ? msg.payload : node.value }, node.datatype))
         } catch (err) {
           core.internalDebugLog(err)
           if (node.showErrors) {
