@@ -34,6 +34,7 @@ module.exports = function (RED) {
         node.error(err, msg)
       }
 
+      /* istanbul ignore next */
       if (coreClient.core.isSessionBad(err)) {
         node.emit('opcua_client_not_ready')
       }
@@ -41,6 +42,7 @@ module.exports = function (RED) {
 
     node.bianco.iiot.writeToSession = function (session, originMsg) {
       if (coreClient.core.checkSessionNotValid(session, 'Writer')) {
+        /* istanbul ignore next */
         return
       }
 
@@ -51,9 +53,11 @@ module.exports = function (RED) {
           let message = node.bianco.iiot.buildResultMessage(writeResult)
           node.send(message)
         } catch (err) {
+          /* istanbul ignore next */
           (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err) {
+        /* istanbul ignore next */
         (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
@@ -87,7 +91,7 @@ module.exports = function (RED) {
     node.bianco.iiot.setMessageProperties = function (message, result, stringValue) {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
-      } catch (err) {
+      } /* istanbul ignore next */ catch (err) {
         coreClient.writeDebugLog(err)
         if (node.showErrors) {
           node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
@@ -108,6 +112,7 @@ module.exports = function (RED) {
         node.bianco.iiot.writeToSession(node.bianco.iiot.opcuaSession, msg)
       } else {
         coreClient.writeDebugLog('Wrong Inject Type ' + msg.injectType + '! The Type has to be write.')
+        /* istanbul ignore next */
         if (node.showErrors) {
           node.warn('Wrong Inject Type ' + msg.injectType + '! The msg.injectType has to be write.')
         }

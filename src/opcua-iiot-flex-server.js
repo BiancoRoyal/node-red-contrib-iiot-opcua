@@ -86,6 +86,7 @@ module.exports = function (RED) {
       }
     })
 
+    /* istanbul ignore next */
     node.bianco.iiot.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
       server.internalDebugLog('Init Function Block Flex Server')
     }
@@ -103,6 +104,7 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.createServer = function (serverOptions) {
+      /* istanbul ignore next */
       if (RED.settings.verbose) {
         coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
@@ -120,6 +122,7 @@ module.exports = function (RED) {
       try {
         node.bianco.iiot.createServer(serverOptions)
       } catch (err) {
+        /* istanbul ignore next */
         node.emit('server_create_error')
         coreServer.flex.internalDebugLog(err.message)
         coreServer.handleServerError(node, err, { payload: 'Flex Server Failure! Please, check the server settings!' })
@@ -134,11 +137,13 @@ module.exports = function (RED) {
             coreServer.core.setNodeStatusTo(node, 'active')
             node.emit('server_running')
           }).catch(function (err) {
+            /* istanbul ignore next */
             node.emit('server_start_error')
             coreServer.core.setNodeStatusTo(node, 'errors')
             coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
           })
         }).catch(function (err) {
+          /* istanbul ignore next */
           coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
         })
     }

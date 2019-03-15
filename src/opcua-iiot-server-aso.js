@@ -59,6 +59,7 @@ module.exports = function (RED) {
         core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
         node.send(msg)
       } else {
+        /* istanbul ignore next */
         node.error(new Error('ASO NodeId Is Not Valid'), msg)
       }
     })

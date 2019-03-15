@@ -116,6 +116,7 @@ module.exports = function (RED) {
             break
           default:
             if (node.payloadType === null) {
+              /* istanbul ignore next */
               if (node.payload === '') {
                 msg.payload = Date.now()
               } else {
@@ -128,6 +129,7 @@ module.exports = function (RED) {
 
         node.send(msg)
       } catch (err) {
+        /* istanbul ignore next */
         if (RED.settings.verbose) {
           node.error(err, msg)
         }
@@ -179,10 +181,12 @@ module.exports = function (RED) {
         node.receive()
         res.sendStatus(200)
       } catch (err) {
+        /* istanbul ignore next */
         res.sendStatus(500)
         node.error(RED._('opcuaiiotinject.failed', { error: err.toString() }))
       }
     } else {
+      /* istanbul ignore next */
       res.sendStatus(404)
     }
   })

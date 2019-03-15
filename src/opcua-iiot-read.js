@@ -50,9 +50,11 @@ module.exports = function (RED) {
           try {
             node.send(node.bianco.iiot.buildResultMessage('AllAttributes', readResult))
           } catch (err) {
+            /* istanbul ignore next */
             node.bianco.iiot.handleReadError(err, readResult.msg)
           }
         }).catch(function (err) {
+          /* istanbul ignore next */
           (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
@@ -63,6 +65,7 @@ module.exports = function (RED) {
           let message = node.bianco.iiot.buildResultMessage('VariableValue', readResult)
           node.send(message)
         }).catch(function (err) {
+          /* istanbul ignore next */
           (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
@@ -85,6 +88,7 @@ module.exports = function (RED) {
           message.historyEnd = readResult.endDate || node.bianco.iiot.historyEnd
           node.send(message)
         }).catch(function (err) {
+          /* istanbul ignore next */
           (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
@@ -108,6 +112,7 @@ module.exports = function (RED) {
           message.maxAge = node.maxAge
           node.send(message)
         }).catch(function (err) {
+          /* istanbul ignore next */
           (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
@@ -165,7 +170,7 @@ module.exports = function (RED) {
     node.bianco.iiot.setMessageProperties = function (message, readResult, stringValue) {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
-      } catch (err) {
+      } /* istanbul ignore next */ catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
           node.error(err, readResult.msg)
@@ -182,7 +187,7 @@ module.exports = function (RED) {
         message.resultsConverted = {}
         let dataValuesString = JSON.stringify(readResult.results, null, 2)
         RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
-      } catch (err) {
+      } /* istanbul ignore next */ catch (err) {
         if (node.showErrors) {
           node.warn('JSON not to parse from string for dataValues type ' + readResult.results)
           node.error(err, readResult.msg)
@@ -201,7 +206,7 @@ module.exports = function (RED) {
 
       try {
         node.bianco.iiot.readFromSession(node.bianco.iiot.opcuaSession, coreClient.core.buildNodesToRead(msg), msg)
-      } catch (err) {
+      } /* istanbul ignore next */ catch (err) {
         node.bianco.iiot.handleReadError(err, msg)
       }
     })

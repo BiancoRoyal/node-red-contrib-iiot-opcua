@@ -270,6 +270,7 @@ module.exports = function (RED) {
 
       node.bianco.iiot.opcuaClient.createSession(node.bianco.iiot.userIdentity || {})
         .then(function (session) {
+          session.requestedMaxReferencesPerNode = 100000
           node.bianco.iiot.opcuaSession = session
           node.bianco.iiot.stateMachine.sessionactive()
 
