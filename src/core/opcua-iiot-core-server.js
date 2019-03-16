@@ -846,6 +846,8 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
   let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
   let today = new Date()
 
+  const SecurityPolicy = require("node-opcua").SecurityPolicy;
+
   return {
     port: node.port,
     nodeset_filename: node.bianco.iiot.xmlFiles,
@@ -873,11 +875,17 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
     maxAllowedSessionNumber: node.maxAllowedSessionNumber,
     maxConnectionsPerEndpoint: node.maxConnectionsPerEndpoint,
     allowAnonymous: node.allowAnonymous,
+    /* securityPolicies: [ TODO: configure SecurityPolicies
+      SecurityPolicy.Basic128Rsa15,
+      SecurityPolicy.Basic256,
+      SecurityPolicy.Basic256Sha256
+    ], */
     certificateFile: node.publicCertificateFile,
     privateKeyFile: node.privateCertificateFile,
     alternateHostname: node.alternateHostname || '',
     userManager: null,
     isAuditing: node.isAuditing,
+    registerServerMethod: node.registerServerMethod,
     disableDiscovery: node.disableDiscovery
   }
 }
