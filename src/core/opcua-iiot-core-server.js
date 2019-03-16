@@ -846,7 +846,7 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
   let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
   let today = new Date()
 
-  const SecurityPolicy = require("node-opcua").SecurityPolicy;
+  // const SecurityPolicy = require("node-opcua").SecurityPolicy;
 
   return {
     port: node.port,
