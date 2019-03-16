@@ -353,10 +353,10 @@
 
       // Certificate Management
       try {
-        let certsCheckbox = $("#node-config-input-individualCerts");
+        let certsCheckbox = $("#node-input-individualCerts");
         let configCertFields = $("#node-config-certFiles");
 
-        if (this.individualCerts) {
+        if (node.individualCerts) {
           certsCheckbox.prop('checked', true);
           configCertFields.show();
         } else {
@@ -482,12 +482,8 @@
                 <span data-i18n="opcua-iiot-contrib.label.securityPolicy"></span></label>
                 <ul style="margin-left:80px">
                     <li>None</li>
-                    <li>Basic128</li>
                     <li>Basic128Rsa15</li>
-                    <li>Basic192</li>
-                    <li>Basic192Rsa15</li>
                     <li>Basic256</li>
-                    <li>Basic256Rsa15</li>
                     <li>Basic256Sha256</li>
                 </ul>
             </div>
@@ -511,7 +507,7 @@
                 <label style="min-width:240px">
                     <i class="fa fa-file"></i>
                     <span data-i18n="opcua-iiot-contrib.label.individualCerts"></span>
-                    <input type="checkbox" id="node-config-input-individualCerts" style="max-width:30px">
+                    <input type="checkbox" id="node-input-individualCerts" style="max-width:30px">
                 </label>
             </div>
             <div id="node-config-certFiles">

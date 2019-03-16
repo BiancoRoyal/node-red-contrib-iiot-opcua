@@ -580,6 +580,7 @@ de.biancoroyal.opcua.iiot.core.server.readConfigOfServerNode = function (node, c
   node.showErrors = config.showErrors
 
   // certificates
+  node.individualCerts = config.individualCerts
   node.publicCertificateFile = config.publicCertificateFile
   node.privateCertificateFile = config.privateCertificateFile
 
@@ -642,13 +643,13 @@ de.biancoroyal.opcua.iiot.core.server.loadCertificates = function (node) {
   const nodeOPCUAServerPath = this.core.getNodeOPCUAServerPath()
 
   this.detailDebugLog('config: ' + node.publicCertificateFile)
-  if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
+  if (!node.individualCerts || node.publicCertificateFile === null || node.publicCertificateFile === '') {
     node.publicCertificateFile = this.path.join(nodeOPCUAServerPath, '/certificates/server_selfsigned_cert_2048.pem')
     this.detailDebugLog('default key: ' + node.publicCertificateFile)
   }
 
   this.detailDebugLog('config: ' + node.privateCertificateFile)
-  if (node.privateCertificateFile === null || node.privateCertificateFile === '') {
+  if (!node.individualCerts || node.privateCertificateFile === null || node.privateCertificateFile === '') {
     node.privateCertificateFile = this.path.join(nodeOPCUAServerPath, '/certificates/PKI/own/private/private_key.pem')
     this.detailDebugLog('default key: ' + node.privateCertificateFile)
   }
