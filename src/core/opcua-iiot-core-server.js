@@ -708,6 +708,8 @@ de.biancoroyal.opcua.iiot.core.server.setDiscoveryOptions = function (node, serv
     if (node.capabilitiesForMDNS && node.capabilitiesForMDNS.length) {
       serverOptions.capabilitiesForMDNS = node.capabilitiesForMDNS
     }
+  } else {
+    node.registerServerMethod = this.core.nodeOPCUA.RegisterServerMethod.HIDDEN
   }
   return serverOptions
 }

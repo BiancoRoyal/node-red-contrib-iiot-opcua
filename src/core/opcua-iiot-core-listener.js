@@ -69,7 +69,6 @@ de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = function (timeMilliseconds) {
-
   timeMilliseconds = timeMilliseconds > de.biancoroyal.opcua.iiot.core.listener.MAX_INT32 ? 100 : timeMilliseconds
   return {
     requestedPublishingInterval: timeMilliseconds || 100,
@@ -82,7 +81,6 @@ de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = functio
 }
 
 de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (timeMilliseconds) {
-
   timeMilliseconds = timeMilliseconds > de.biancoroyal.opcua.iiot.core.listener.MAX_INT32 ? 200 : timeMilliseconds
   return {
     requestedPublishingInterval: timeMilliseconds || 200,
