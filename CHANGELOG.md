@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.10.2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.10.0...v3.10.2) (2019-03-17)
+
+
+### Bug Fixes
+
+* comment unused todo ([2c7ad46](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2c7ad46))
+* issue [#89](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/89) by checking time interval to pass Int32 stream of node-opcua ([d9be2ce](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d9be2ce))
+* server individual certificates control ([a41f529](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/a41f529))
+* server LDS options and individual server certs ([dc1ea0d](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/dc1ea0d))
+
+
+
 ## [3.10.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.10.0...v3.10.1) (2019-03-16)
 
 
