@@ -623,12 +623,6 @@ de.biancoroyal.opcua.iiot.core.server.loadNodeSets = function (node, dirname) {
         } else {
           xmlFiles.push(xmlsetFileName.path)
         }
-
-        if (xmlsetFileName.path.includes('ISA95')) {
-          // add server ISA95 extension to node-opcua
-          coreServer.isa95DebugLog('installing ISA95 extend')
-          // require('node-opcua-isa95')(this.core.nodeOPCUA)
-        }
       }
     })
     this.detailDebugLog('appending xmlFiles: ' + xmlFiles.toString())
