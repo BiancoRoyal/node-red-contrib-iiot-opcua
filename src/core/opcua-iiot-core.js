@@ -180,11 +180,228 @@ de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue, statusLog)
   return { fill: fillValue, shape: shapeValue, status: statusValue }
 }
 
-de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
+de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, arraytype, dimensions, value) {
+  let opcua = this.nodeOPCUA
+  let variantValue = null
+  arraytype = arraytype || opcua.VariantArrayType.Scalar
+
+  this.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
+
+  switch (arraytype) {
+    case 'Matrix':
+    case opcua.VariantArrayType.Matrix:
+      variantValue = this.buildNewMatrixVariant(datatype, value, dimensions)
+      break
+    case 'Array':
+    case opcua.VariantArrayType.Array:
+      variantValue = this.buildNewArrayVariant(datatype, value)
+      break
+    default:
+      variantValue = this.buildNewScalarVariant(datatype, value)
+      break
+  }
+
+  this.detailDebugLog('buildNewVariant variantValue: ' + JSON.stringify(variantValue))
+
+  return variantValue
+}
+
+de.biancoroyal.opcua.iiot.core.flattenMatrixValue = function (value, dimensions, depth, flattened) {
+  flattened = flattened || []
+  depth = depth || 0
+
+  if (value.length) {
+    if (dimensions.length === depth) {
+      dimensions.push(value.length)
+    } else if (dimensions[depth] !== value.length) {
+      throw new Error('Matrix subtitems need to be of an equal size')
+    }
+
+    for (let i = 0; i < value.length; i++) {
+      this.flattenMatrixValue(value[i], dimensions, depth + 1, flattened)
+    }
+  } else if (value.length === 0) {
+    throw new Error('Matrix cannot have zero length dimensions')
+  } else {
+    flattened.push(value)
+  }
+
+  return flattened
+}
+
+de.biancoroyal.opcua.iiot.core.buildNewMatrixVariant = function (datatype, value, dimensions) {
+  let opcua = this.nodeOPCUA
+
+  if (!value.length) {
+    throw new Error('Non array value provided to an matrix type node')
+  }
+
+  let inferedDimensions = []
+  let flattenedValue = this.flattenMatrixValue(value, inferedDimensions)
+
+  dimensions = dimensions || inferedDimensions
+  if (!inferedDimensions.every((e, i) => e === dimensions[i])) {
+    // Allow Matrix to be given as flat array
+    if (inferedDimensions[0] !== dimensions.reduce((a, b) => a * b)) {
+      throw new Error('Given matrix dimensions do not match the number of values')
+    }
+  }
+
+  let variantValue = de.biancoroyal.opcua.iiot.core.buildNewArrayVariant(datatype, flattenedValue)
+
+  variantValue.arrayType = opcua.VariantArrayType.Matrix
+  variantValue.dimensions = dimensions
+
+  return variantValue
+}
+
+de.biancoroyal.opcua.iiot.core.buildNewArrayVariant = function (datatype, value) {
   let opcua = this.nodeOPCUA
   let variantValue = null
 
-  this.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
+  if (!value.length) {
+    throw new Error('Non array value provided to an array type node')
+  }
+
+  switch (datatype) {
+    case 'Float':
+    case opcua.DataType.Float:
+      variantValue = {
+        dataType: opcua.DataType.Float,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        variantValue.value.push(parseFloat(value[i]))
+      }
+      break
+    case 'Double':
+    case opcua.DataType.Double:
+      variantValue = {
+        dataType: opcua.DataType.Double,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        variantValue.value.push(parseFloat(value[i]))
+      }
+      break
+    case 'UInt16':
+    case opcua.DataType.UInt16:
+      let uint16 = new Uint16Array(value)
+      variantValue = {
+        dataType: opcua.DataType.UInt16,
+        arrayType: opcua.VariantArrayType.Array,
+        value: uint16
+      }
+      break
+    case 'UInt32':
+    case opcua.DataType.UInt32:
+      let uint32 = new Uint32Array(value)
+      variantValue = {
+        dataType: opcua.DataType.UInt32,
+        arrayType: opcua.VariantArrayType.Array,
+        value: uint32
+      }
+      break
+    case 'Int32':
+    case opcua.DataType.Int32:
+      variantValue = {
+        dataType: opcua.DataType.Int32,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        variantValue.value.push(parseInt(value[i]))
+      }
+      break
+    case 'Int16':
+    case opcua.DataType.Int16:
+      variantValue = {
+        dataType: opcua.DataType.Int16,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        variantValue.value.push(parseInt(value[i]))
+      }
+      break
+    case 'Int64':
+    case opcua.DataType.Int64:
+      variantValue = {
+        dataType: opcua.DataType.Int64,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        variantValue.value.push(parseInt(value[i]))
+      }
+      break
+    case 'Boolean':
+    case opcua.DataType.Boolean:
+      variantValue = {
+        dataType: opcua.DataType.Boolean,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        if (value[i] && value[i] !== 'false') {
+          variantValue.value.push(true)
+        } else {
+          variantValue.value.push(false)
+        }
+      }
+      break
+    case 'LocalizedText':
+    case opcua.DataType.LocalizedText:
+      variantValue = {
+        dataType: opcua.DataType.LocalizedText,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        variantValue.value.push(JSON.parse(value[i])) /* [{text:'Hello', locale:'en'}, {text:'Hallo', locale:'de'} ... ] */
+      }
+      break
+    case 'DateTime':
+    case opcua.DataType.DateTime:
+      variantValue = {
+        dataType: opcua.DataType.DateTime,
+        arrayType: opcua.VariantArrayType.Array,
+        value: []
+      }
+      for (let i = 0; i < value.length; i++) {
+        variantValue.value.push(new Date(value[i]))
+      }
+      break
+    default:
+      if (datatype !== '') {
+        const datatypeList = this.getBasicDataTypes()
+        datatypeList.forEach((item) => {
+          if (item.name === datatype || item.dataType === datatype) {
+            variantValue = {
+              dataType: item.dataType,
+              arrayType: opcua.VariantArrayType.Array,
+              value: value
+            }
+          }
+        })
+      } else {
+        variantValue = {
+          dataType: opcua.DataType.String,
+          arrayType: opcua.VariantArrayType.Array,
+          value: value
+        }
+      }
+      break
+  }
+
+  return variantValue
+}
+
+de.biancoroyal.opcua.iiot.core.buildNewScalarVariant = function (datatype, value) {
+  let opcua = this.nodeOPCUA
+  let variantValue = null
 
   switch (datatype) {
     case 'Float':
@@ -285,8 +502,6 @@ de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value) {
       }
       break
   }
-
-  this.detailDebugLog('buildNewVariant variantValue: ' + JSON.stringify(variantValue))
 
   return variantValue
 }
@@ -603,14 +818,14 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
     let index = 0
     if (msg.valuesToWrite) {
       for (item of msg.addressSpaceItems) {
-        core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++]) })
+        core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.arraytypeName, item.dimensions, msg.valuesToWrite[index++]) })
       }
     } else {
       for (item of msg.addressSpaceItems) {
         if (item.value) {
-          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.value) })
+          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.arraytypeName, item.dimensions, item.value) })
         } else {
-          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload) })
+          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.arraytypeName, item.dimensions, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload) })
         }
       }
     }
