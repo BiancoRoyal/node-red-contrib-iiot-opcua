@@ -180,7 +180,7 @@ de.biancoroyal.opcua.iiot.core.getNodeStatus = function (statusValue, statusLog)
   return { fill: fillValue, shape: shapeValue, status: statusValue }
 }
 
-de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, arraytype, dimensions, value) {
+de.biancoroyal.opcua.iiot.core.buildNewVariant = function (datatype, value, arraytype, dimensions) {
   let opcua = this.nodeOPCUA
   let variantValue = null
   arraytype = arraytype || opcua.VariantArrayType.Scalar
@@ -818,14 +818,14 @@ de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
     let index = 0
     if (msg.valuesToWrite) {
       for (item of msg.addressSpaceItems) {
-        core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.arraytypeName, item.dimensions, msg.valuesToWrite[index++]) })
+        core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++], item.arraytypeName, item.dimensions) })
       }
     } else {
       for (item of msg.addressSpaceItems) {
         if (item.value) {
-          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.arraytypeName, item.dimensions, item.value) })
+          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.value, item.arraytypeName, item.dimensions) })
         } else {
-          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, item.arraytypeName, item.dimensions, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload) })
+          core.pushItemToWriteList(msg, nodesToWrite, item, { value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload, item.arraytypeName, item.dimensions) })
         }
       }
     }
