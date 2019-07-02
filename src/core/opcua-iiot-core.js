@@ -210,7 +210,11 @@ de.biancoroyal.opcua.iiot.core.flattenMatrixValue = function (value, dimensions,
   flattened = flattened || []
   depth = depth || 0
 
-  if (value.length) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      throw new Error('Matrix cannot have zero length dimensions')
+    }
+
     if (dimensions.length === depth) {
       dimensions.push(value.length)
     } else if (dimensions[depth] !== value.length) {
@@ -220,8 +224,6 @@ de.biancoroyal.opcua.iiot.core.flattenMatrixValue = function (value, dimensions,
     for (let i = 0; i < value.length; i++) {
       this.flattenMatrixValue(value[i], dimensions, depth + 1, flattened)
     }
-  } else if (value.length === 0) {
-    throw new Error('Matrix cannot have zero length dimensions')
   } else {
     flattened.push(value)
   }
