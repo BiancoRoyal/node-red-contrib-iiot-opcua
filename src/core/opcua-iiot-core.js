@@ -232,7 +232,7 @@ de.biancoroyal.opcua.iiot.core.flattenMatrixValue = function (value, dimensions,
 de.biancoroyal.opcua.iiot.core.buildNewMatrixVariant = function (datatype, value, dimensions) {
   let opcua = this.nodeOPCUA
 
-  if (!value.length) {
+  if (!Array.isArray(value)) {
     throw new Error('Non array value provided to an matrix type node')
   }
 
@@ -259,7 +259,7 @@ de.biancoroyal.opcua.iiot.core.buildNewArrayVariant = function (datatype, value)
   let opcua = this.nodeOPCUA
   let variantValue = null
 
-  if (!value.length) {
+  if (!Array.isArray(value)) {
     throw new Error('Non array value provided to an array type node')
   }
 
