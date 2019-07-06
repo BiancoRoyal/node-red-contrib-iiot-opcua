@@ -507,6 +507,351 @@ describe('OPC UA Core', function () {
     })
   })
 
+  describe('convertingArray', function () {
+    it('should build new variant array Float', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Float
+      let parsedValue = [parseFloat(22.2), parseFloat(24.5), parseFloat(0.0), parseFloat(-12.1)]
+      let variantFromString = core.buildNewVariant('Float', ['22.2', '24.5', '0.0', '-12.1'], 'Array')
+      let variantFromString2 = core.buildNewVariant('Float', ['22.2', '24.5', '0.0', '-12.1'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [22.2, 24.5, 0.0, -12.1], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array Double', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Double
+      let parsedValue = [parseFloat(22.2), parseFloat(24.5), parseFloat(0.0), parseFloat(-12.1)]
+      let variantFromString = core.buildNewVariant('Double', ['22.2', '24.5', '0.0', '-12.1'], 'Array')
+      let variantFromString2 = core.buildNewVariant('Double', ['22.2', '24.5', '0.0', '-12.1'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [22.2, 24.5, 0.0, -12.1], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array UInt16', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt16
+      let parsedValue = new Uint16Array([220, 255, 0, 10])
+      let variantFromString = core.buildNewVariant('UInt16', ['220', '255', '0', '10'], 'Array')
+      let variantFromString2 = core.buildNewVariant('UInt16', ['220', '255', '0', '10'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [220, 255, 0, 10], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array UInt32', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt32
+      let parsedValue = new Uint32Array([33220, 255, 0, 4294967295])
+      let variantFromString = core.buildNewVariant('UInt32', ['33220', '255', '0', '4294967295'], 'Array')
+      let variantFromString2 = core.buildNewVariant('UInt32', ['33220', '255', '0', '4294967295'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [33220, 255, 0, 4294967295], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array Int32', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int32
+      let parsedValue = [parseInt('33220'), parseInt('-2147483648'), parseInt('0'), parseInt('2147483647')]
+      let variantFromString = core.buildNewVariant('Int32', ['33220', '-2147483648', '0', '2147483647'], 'Array')
+      let variantFromString2 = core.buildNewVariant('Int32', ['33220', '-2147483648', '0', '2147483647'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [33220, -2147483648, 0, 2147483647], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array Int16', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int16
+      let parsedValue = [parseInt('33220'), parseInt('-32768'), parseInt('0'), parseInt('32767')]
+      let variantFromString = core.buildNewVariant('Int16', ['33220', '-32768', '0', '32767'], 'Array')
+      let variantFromString2 = core.buildNewVariant('Int16', ['33220', '-32768', '0', '32767'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [33220, -32768, 0, 32767], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array Int64', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int64
+      let parsedValue = [parseInt('833999220'), parseInt('-9007199254740992'), parseInt('0'), parseInt('9007199254740991')]
+      let variantFromString = core.buildNewVariant('Int64', ['833999220', '-9007199254740992', '0', '9007199254740991'], 'Array')
+      let variantFromString2 = core.buildNewVariant('Int64', ['833999220', '-9007199254740992', '0', '9007199254740991'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [833999220, -9007199254740992, 0, 9007199254740991], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array Boolean', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let parsedValue = [true, false, false, true]
+      let variantFromString = core.buildNewVariant('Boolean', ['true', 'false', 'false', 'true'], 'Array')
+      let variantFromString2 = core.buildNewVariant('Boolean', ['1', '0', '0', '1'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [1, 0, 0, 1], 'Array')
+      let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, [true, false, false, true], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromNumberObject)
+      expect(variantFromObject).to.deep.equal(variantFromNumberObject)
+      done()
+    })
+
+    it('should build new variant array LocalizedText', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.LocalizedText
+      let parsedValue = [JSON.parse('[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]'), JSON.parse('[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]')]
+      let variantFromString = core.buildNewVariant('LocalizedText', ['[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]', '[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]'], 'Array')
+      let variantFromString2 = core.buildNewVariant('LocalizedText', ['[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]', '[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]'], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, ['[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]', '[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]'], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array DateTime', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.DateTime
+      let parsedValue = [new Date(1522274988816), new Date(1522274978816)]
+      let variantFromString = core.buildNewVariant('DateTime', [1522274988816, 1522274978816], 'Array')
+      let variantFromString2 = core.buildNewVariant('DateTime', [1522274988816, 1522274978816], 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [1522274988816, 1522274978816], 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant array String', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.String
+      let parsedValue = ['Hello World!', 'Hello All!']
+      let variantFromString = core.buildNewVariant('String', parsedValue, 'Array')
+      let variantFromString2 = core.buildNewVariant('String', parsedValue, 'Array')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, parsedValue, 'Array')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should fail if nonarray value is provided', function (done) {
+      expect(() => {
+        core.buildNewVariant('UInt16', 10, 'Array')
+      }).to.throw()
+      expect(() => {
+        core.buildNewVariant('String', 'Hello World!', 'Array')
+      }).to.throw()
+      done()
+    })
+  })
+
+  describe('convertingArray', function () {
+    it('should build new variant matrix Float', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Float
+      let parsedValue = [parseFloat(22.2), parseFloat(24.5), parseFloat(0.0), parseFloat(-12.1)]
+      let variantFromString = core.buildNewVariant('Float', [['22.2', '24.5'], ['0.0', '-12.1']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('Float', [['22.2', '24.5'], ['0.0', '-12.1']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[22.2, 24.5], [0.0, -12.1]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix Double', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Double
+      let parsedValue = [parseFloat(22.2), parseFloat(24.5), parseFloat(0.0), parseFloat(-12.1)]
+      let variantFromString = core.buildNewVariant('Double', [['22.2', '24.5'], ['0.0', '-12.1']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('Double', [['22.2', '24.5'], ['0.0', '-12.1']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[22.2, 24.5], [0.0, -12.1]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix UInt16', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt16
+      let parsedValue = new Uint16Array([220, 255, 0, 10])
+      let variantFromString = core.buildNewVariant('UInt16', [['220', '255'], ['0', '10']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('UInt16', [['220', '255'], ['0', '10']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[220, 255], [0, 10]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix UInt32', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt32
+      let parsedValue = new Uint32Array([33220, 255, 0, 4294967295])
+      let variantFromString = core.buildNewVariant('UInt32', [['33220', '255'], ['0', '4294967295']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('UInt32', [['33220', '255'], ['0', '4294967295']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[33220, 255], [0, 4294967295]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix Int32', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int32
+      let parsedValue = [parseInt('33220'), parseInt('-2147483648'), parseInt('0'), parseInt('2147483647')]
+      let variantFromString = core.buildNewVariant('Int32', [['33220', '-2147483648'], ['0', '2147483647']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('Int32', [['33220', '-2147483648'], ['0', '2147483647']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[33220, -2147483648], [0, 2147483647]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix Int16', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int16
+      let parsedValue = [parseInt('33220'), parseInt('-32768'), parseInt('0'), parseInt('32767')]
+      let variantFromString = core.buildNewVariant('Int16', [['33220', '-32768'], ['0', '32767']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('Int16', [['33220', '-32768'], ['0', '32767']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[33220, -32768], [0, 32767]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix Int64', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int64
+      let parsedValue = [parseInt('833999220'), parseInt('-9007199254740992'), parseInt('0'), parseInt('9007199254740991')]
+      let variantFromString = core.buildNewVariant('Int64', [['833999220', '-9007199254740992'], ['0', '9007199254740991']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('Int64', [['833999220', '-9007199254740992'], ['0', '9007199254740991']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[833999220, -9007199254740992], [0, 9007199254740991]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix Boolean', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let parsedValue = [true, false, false, true]
+      let variantFromString = core.buildNewVariant('Boolean', [['true', 'false'], ['false', 'true']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('Boolean', [['1', '0'], ['0', '1']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[1, 0], [0, 1]], 'Matrix')
+      let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, [[true, false], [false, true]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromNumberObject)
+      expect(variantFromObject).to.deep.equal(variantFromNumberObject)
+      done()
+    })
+
+    it('should build new variant matrix LocalizedText', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.LocalizedText
+      let parsedValue = [JSON.parse('[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]'), JSON.parse('[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]')]
+      let variantFromString = core.buildNewVariant('LocalizedText', [['[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]'], ['[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('LocalizedText', [['[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]'], ['[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [['[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]'], ['[{"text":"World", "locale":"en"}, {"text":"Welt", "locale":"de"}]']], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 1]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 1]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix DateTime', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.DateTime
+      let parsedValue = [new Date(1522274988816), new Date(1522274978816)]
+      let variantFromString = core.buildNewVariant('DateTime', [[1522274988816],[ 1522274978816]], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('DateTime', [[1522274988816],[ 1522274978816]], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[1522274988816],[ 1522274978816]], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 1]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 1]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should build new variant matrix String', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.String
+      let parsedValue = ['Hello World!', 'Hello All!']
+      let variantFromString = core.buildNewVariant('String', [['Hello World!'], ['Hello All!']], 'Matrix')
+      let variantFromString2 = core.buildNewVariant('String', [['Hello World!'], ['Hello All!']], 'Matrix')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [['Hello World!'], ['Hello All!']], 'Matrix')
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 1]}).to.deep.equal(variantFromString)
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 1]}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      done()
+    })
+
+    it('should fail if nonarray value is provided', function (done) {
+      expect(() => {
+        core.buildNewVariant('UInt16', 10, 'Matrix')
+      }).to.throw()
+      expect(() => {
+        core.buildNewVariant('String', 'Hello World!', 'Matrix')
+      }).to.throw()
+      done()
+    })
+
+    it('should fail on zero size dimensions', function (done) {
+      expect(() => {
+        core.buildNewVariant('UInt16', [[]], 'Matrix')
+      }).to.throw()
+      done()
+    })
+
+    it('should fail if dimensions are not equal in all rows', function (done) {
+      expect(() => {
+        core.buildNewVariant('UInt16', [[0, 1, 2], [1, 8]], 'Matrix')
+      }).to.throw()
+      done()
+    })
+
+    it('should fail if infered dimensions do not match given dimensions', function (done) {
+      expect(() => {
+        core.buildNewVariant('UInt16', [[0, 1], [1, 8]], 'Matrix', [4])
+      }).to.throw()
+      done()
+    })
+
+    it('should use the given dimension when passing a flat array', function (done) {
+      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt16
+      let parsedValue = new Uint16Array([0, 1, 1, 8])
+      let variant = core.buildNewVariant('UInt16', [0, 1, 1, 8], 'Matrix', [2, 2])
+      expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variant)
+      done()
+    })
+  })
+
   describe('converting DataValue by DataType', function () {
     it('should convert NodeId to string', function (done) {
       let dataTypeOPCUA = core.nodeOPCUA.DataType.NodeId
