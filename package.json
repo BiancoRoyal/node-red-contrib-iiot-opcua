@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-iiot-opcua",
-  "version": "3.11.1-1",
+  "version": "3.11.1-2",
   "description": "The LTS IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",

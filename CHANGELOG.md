@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.11.1-2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-1...v3.11.1-2) (2019-11-23)
+
+
+### Bug Fixes
+
+* inject button problem Node-RED v1.x and 0.20.x ([2905c39](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2905c3976805646d4065d469e4e2d7080858dca6))
+
+
+
 ## [3.11.1-1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-0...v3.11.1-1) (2019-11-23)
 
 
