@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -79,12 +79,19 @@
     <h3>Input</h3>
 
     <ul>
-      <li>payload (value to write one or all)</li>
-      <li>topic</li>
+      <li>payload (value to write one or all)
+      <li>topic
       <li>addressSpaceItems or nodesToWrite (Array of Node-Ids)
+        <ul>
+            <li>nodeId
+            <li>datatypeName
+            <li>arraytypeName (Array, Matrix)
+            <li>dimensions (array with dimensions like [2, 2])
+        </ul>
       <li>nodetype (inject)</li>
       <li>injectType (write)
-      <li>valuesToWrite (Array of values or objects to write individual)</li>
+      <li>valuesToWrite (Array of values or objects to write individual)
+
     </ul>
 
     <h3>Output</h3>

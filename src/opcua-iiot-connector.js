@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -140,7 +140,7 @@ module.exports = function (RED) {
         node.bianco.iiot.autoSelectEndpointFromConnection()
       }
 
-      // coreConnector.setListenerToClient(node)
+      coreConnector.setListenerToClient(node)
       node.bianco.iiot.connectToClient()
     }
 
@@ -399,6 +399,7 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
+      node.bianco.iiot.resetAllTimer()
       if (!coreConnector.core.isInitializedBiancoIIoTNode(node)) {
         done() // if we have a very fast deploy clicking uer
       } else {
@@ -408,7 +409,8 @@ module.exports = function (RED) {
           done()
         } else {
           coreConnector.detailDebugLog('OPC UA Client Is Active On Close Node With State ' + node.bianco.iiot.stateMachine.getMachineState())
-          if (node.bianco.iiot.stateMachine.getMachineState() === 'SESSIONACTIVE') {
+          let state = node.bianco.iiot.stateMachine.getMachineState()
+          if (node.bianco.iiot.opcuaClient && state !== 'CLOSE' && state !== 'SESSIONCLOSED') {
             node.bianco.iiot.closeConnector(() => {
               coreConnector.core.resetBiancoNode(node)
               done()
@@ -460,14 +462,13 @@ module.exports = function (RED) {
       if (node.bianco.iiot.isInactiveOnOPCUA()) {
         coreConnector.detailDebugLog('OPC UA Client Is Not Active On Close Connector')
         done()
-        return
-      }
-
-      if (node.bianco.iiot.opcuaClient) {
-        node.bianco.iiot.opcuaDisconnect(done)
       } else {
-        coreConnector.detailDebugLog('OPC UA Client Is Not Valid On Close Connector')
-        done()
+        if (node.bianco.iiot.opcuaClient) {
+          node.bianco.iiot.opcuaDisconnect(done)
+        } else {
+          coreConnector.detailDebugLog('OPC UA Client Is Not Valid On Close Connector')
+          done()
+        }
       }
     }
 

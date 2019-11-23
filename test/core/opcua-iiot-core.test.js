@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2017,2018 - Klaus Landsdorf (https://bianco-royal.com/)
  All rights reserved.
  node-red-contrib-iiot-opcua
  */
@@ -604,11 +604,13 @@ describe('OPC UA Core', function () {
       let parsedValue = [true, false, false, true]
       let variantFromString = core.buildNewVariant('Boolean', ['true', 'false', 'false', 'true'], 'Array')
       let variantFromString2 = core.buildNewVariant('Boolean', ['1', '0', '0', '1'], 'Array')
+      let variantFromString3 = core.buildNewVariant('Boolean', [true, false, false, true], 'Array')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [1, 0, 0, 1], 'Array')
       let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, [true, false, false, true], 'Array')
       expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromString)
       expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Array, value: parsedValue}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString2).to.deep.equal(variantFromString3)
       expect(variantFromString).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromNumberObject)
       expect(variantFromObject).to.deep.equal(variantFromNumberObject)
@@ -762,11 +764,13 @@ describe('OPC UA Core', function () {
       let parsedValue = [true, false, false, true]
       let variantFromString = core.buildNewVariant('Boolean', [['true', 'false'], ['false', 'true']], 'Matrix')
       let variantFromString2 = core.buildNewVariant('Boolean', [['1', '0'], ['0', '1']], 'Matrix')
+      let variantFromString3 = core.buildNewVariant('Boolean', [[true, false], [false, true]], 'Matrix')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, [[1, 0], [0, 1]], 'Matrix')
       let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, [[true, false], [false, true]], 'Matrix')
       expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromString)
       expect({dataType: dataTypeOPCUA, arrayType: core.nodeOPCUA.VariantArrayType.Matrix, value: parsedValue, dimensions: [2, 2]}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString2).to.deep.equal(variantFromString3)
       expect(variantFromString).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromNumberObject)
       expect(variantFromObject).to.deep.equal(variantFromNumberObject)
