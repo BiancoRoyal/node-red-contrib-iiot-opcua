@@ -77,7 +77,7 @@ module.exports = function (RED) {
     node.bianco.iiot.initCertificatesAndKeys = function () {
       if (node.securedCommunication) {
         if (node.publicCertificateFile === null || node.publicCertificateFile === '') {
-          node.publicCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/client_selfsigned_cert_1024.pem')
+          node.publicCertificateFile = path.join(nodeOPCUAClientPath, '/certificates/client_selfsigned_cert_2048.pem')
           coreConnector.detailDebugLog('default key: ' + node.publicCertificateFile)
         }
 
@@ -140,7 +140,7 @@ module.exports = function (RED) {
         node.bianco.iiot.autoSelectEndpointFromConnection()
       }
 
-      coreConnector.setListenerToClient(node)
+      // coreConnector.setListenerToClient(node) all done by node-opcua since 0.7.x
       node.bianco.iiot.connectToClient()
     }
 
