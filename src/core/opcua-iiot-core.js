@@ -1039,12 +1039,12 @@ de.biancoroyal.opcua.iiot.core.setNodeOPCUARestart = function (node, opcuaClient
 de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
   let core = this
 
-  if (!node) {
+  if (!this.isInitializedBiancoIIoTNode(node)) {
     core.internalDebugLog('Node Not Valid On Register To Connector')
     return
   }
 
-  if (!node.connector) {
+  if (!this.isInitializedBiancoIIoTNode(node.connector)) {
     node.error(new Error('Connector Config Node Not Valid On Registering Client Node ' + node.id), { payload: 'No Connector Configured' })
     return
   }
@@ -1120,7 +1120,7 @@ de.biancoroyal.opcua.iiot.core.deregisterToConnector = function (node, done) {
       done()
     } else {
       node.connector.removeAllListeners()
-      if (this.isInitializedBiancoIIoTNode(node.connector)) {
+      if (core.isInitializedBiancoIIoTNode(node.connector)) {
         node.connector.bianco.iiot.deregisterForOPCUA(node, done)
       } else {
         done()

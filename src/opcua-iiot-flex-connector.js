@@ -53,10 +53,14 @@ module.exports = function (RED) {
     coreConnector.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreConnector.core.deregisterToConnector(node, () => {
-        coreConnector.core.resetBiancoNode(node)
+      if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
+        coreConnector.core.deregisterToConnector(node, () => {
+          coreConnector.core.resetBiancoNode(node)
+          done()
+        })
+      } else {
         done()
-      })
+      }
     })
   }
 

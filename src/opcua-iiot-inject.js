@@ -164,13 +164,14 @@ module.exports = function (RED) {
 
   OPCUAIIoTInject.prototype.close = function () {
     let node = this
-
-    if (node.bianco.iiot.cronjob) {
-      node.bianco.iiot.cronjob.stop()
-      delete node['cronjob']
+    node.removeAllListeners()
+    if (coreInject.core.isInitializedBiancoIIoTNode(node)) {
+      if (node.bianco.iiot.cronjob) {
+        node.bianco.iiot.cronjob.stop()
+        delete node['cronjob']
+      }
+      coreInject.core.resetBiancoNode(node)
     }
-
-    coreInject.core.resetBiancoNode(node)
   }
 
   RED.httpAdmin.post('/opcuaIIoT/inject/:id', RED.auth.needsPermission('opcuaIIoT.inject.write'), function (req, res) {

@@ -231,7 +231,9 @@ module.exports = function (RED) {
       if (!coreListener.checkState(node, msg, 'Monitoring')) {
         return
       }
-
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        return
+      }
       if (msg.addressSpaceItems.length) {
         if (node.useGroupItems) {
           node.bianco.iiot.handleMonitoringOfGroupedItems(msg)
@@ -242,6 +244,10 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.handleEventSubscriptions = function (msg) {
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        return
+      }
+
       for (let addressSpaceItem of msg.addressSpaceItems) {
         if (!addressSpaceItem.nodeId) {
           coreListener.eventDebugLog('Address Space Item Not Valid to Monitor Event Of ' + addressSpaceItem)
@@ -299,8 +305,9 @@ module.exports = function (RED) {
       if (!coreListener.checkState(node, msg, 'Event')) {
         return
       }
-
-      node.bianco.iiot.handleEventSubscriptions(msg)
+      if (coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        node.bianco.iiot.handleEventSubscriptions(msg)
+      }
     }
 
     node.bianco.iiot.monitoredItemTerminated = function (msg, monitoredItem, nodeId, err) {
@@ -314,7 +321,9 @@ module.exports = function (RED) {
           node.error(err, msg)
         }
       }
-      node.bianco.iiot.updateMonitoredItemLists(monitoredItem, nodeId)
+      if (coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        node.bianco.iiot.updateMonitoredItemLists(monitoredItem, nodeId)
+      }
     }
 
     node.bianco.iiot.updateMonitoredItemLists = function (monitoredItem, nodeId) {
@@ -396,6 +405,10 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.sendDataFromMonitoredItem = function (monitoredItem, dataValue) {
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        return
+      }
+
       if (!monitoredItem) {
         coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
         return
@@ -462,6 +475,10 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.sendDataFromEvent = function (monitoredItem, dataValue) {
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        return
+      }
+
       if (!monitoredItem) {
         coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
         return
@@ -494,6 +511,10 @@ module.exports = function (RED) {
         node.error(err, { payload: 'Error Handling' })
       }
 
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        return
+      }
+
       if (err) {
         if (coreListener.core.isSessionBad(err)) {
           node.bianco.iiot.sendAllMonitoredItems('BAD SESSION')
@@ -512,14 +533,23 @@ module.exports = function (RED) {
         if (!err) {
           if (readValue[0].statusCode === StatusCodes.Good) {
             let browseName = readValue[0].value.value.name
-            return callback(null, browseName)
+            if (callback) {
+              callback(null, browseName)
+            }
+          }
+        } else {
+          if (callback) {
+            callback(err, 'Unknown')
           }
         }
-        callback(err, 'Unknown')
       })
     }
 
     node.bianco.iiot.handleListenerInput = function (msg) {
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        return
+      }
+
       switch (node.action) {
         case 'subscribe':
           node.bianco.iiot.subscribeMonitoredItem(msg)
@@ -533,6 +563,10 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg) {
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        return
+      }
+
       if (!coreListener.core.checkConnectorState(node, msg, 'Listener')) {
         return
       }
@@ -567,44 +601,59 @@ module.exports = function (RED) {
 
     if (node.connector) {
       node.connector.on('connector_init', () => {
-        coreListener.internalDebugLog('Reset Subscription On Connector Init')
-        node.bianco.iiot.opcuaSubscription = null
-        node.bianco.iiot.monitoredItems = new Map()
-        node.bianco.iiot.monitoredASO = new Map()
-        node.bianco.iiot.stateMachine = coreListener.createStatelyMachine()
-        node.bianco.iiot.monitoredItemGroup = null
+        if (node.bianco && node.bianco.iiot) {
+          coreListener.internalDebugLog('Reset Subscription On Connector Init')
+          node.bianco.iiot.opcuaSubscription = null
+          node.bianco.iiot.monitoredItems = new Map()
+          node.bianco.iiot.monitoredASO = new Map()
+          node.bianco.iiot.stateMachine = coreListener.createStatelyMachine()
+          node.bianco.iiot.monitoredItemGroup = null
+        }
       })
 
       node.connector.on('connection_stopped', () => {
-        node.bianco.iiot.terminateSubscription(() => {
-          node.bianco.iiot.opcuaSubscription = null
-          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection stopped')
-        })
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.terminateSubscription(() => {
+            node.bianco.iiot.opcuaSubscription = null
+            coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection stopped')
+          })
+        }
       })
 
       node.connector.on('connection_end', () => {
-        node.bianco.iiot.terminateSubscription(() => {
-          node.bianco.iiot.opcuaSubscription = null
-          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection ends')
-        })
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.terminateSubscription(() => {
+            node.bianco.iiot.opcuaSubscription = null
+            coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection ends')
+          })
+        }
       })
 
       node.connector.on('connection_reconfigure', () => {
-        node.bianco.iiot.terminateSubscription(() => {
-          node.bianco.iiot.opcuaSubscription = null
-          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection reconfigure')
-        })
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.terminateSubscription(() => {
+            node.bianco.iiot.opcuaSubscription = null
+            coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection reconfigure')
+          })
+        }
       })
 
       node.connector.on('connection_renew', () => {
-        node.bianco.iiot.terminateSubscription(() => {
-          node.bianco.iiot.opcuaSubscription = null
-          coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection renew')
-        })
+        if (node.bianco && node.bianco.iiot) {
+          node.bianco.iiot.terminateSubscription(() => {
+            node.bianco.iiot.opcuaSubscription = null
+            coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection renew')
+          })
+        }
       })
     }
 
     node.bianco.iiot.terminateSubscription = function (done) {
+      if (!coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        done()
+        return
+      }
+
       if (node.bianco.iiot.opcuaSubscription && node.bianco.iiot.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
         node.bianco.iiot.stateMachine.terminatesub()
         node.bianco.iiot.opcuaSubscription.terminate(() => {
@@ -619,14 +668,20 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.bianco.iiot.terminateSubscription(() => {
-        node.bianco.iiot.opcuaSubscription = null
-        coreListener.core.deregisterToConnector(node, () => {
-          coreListener.core.resetBiancoNode(node)
-          done()
+      node.removeAllListeners()
+      if (coreListener.core.isInitializedBiancoIIoTNode(node)) {
+        node.bianco.iiot.terminateSubscription(() => {
+          node.removeAllListeners()
+          node.bianco.iiot.opcuaSubscription = null
+          coreListener.core.deregisterToConnector(node, () => {
+            coreListener.core.resetBiancoNode(node)
+            done()
+          })
+          coreListener.internalDebugLog('Close Listener Node')
         })
-        coreListener.internalDebugLog('Close Listener Node')
-      })
+      } else {
+        done()
+      }
     })
 
     /* #########   FSM EVENTS  #########     */

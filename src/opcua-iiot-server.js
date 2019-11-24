@@ -143,11 +143,15 @@ module.exports = function (RED) {
     }
 
     node.on('close', (done) => {
-      node.bianco.iiot.closeServer(() => {
-        coreServer.internalDebugLog('Close Server Node')
-        coreServer.core.resetBiancoNode(node)
+      if (coreServer.core.isInitializedBiancoIIoTNode(node)) {
+        node.bianco.iiot.closeServer(() => {
+          coreServer.internalDebugLog('Close Server Node')
+          coreServer.core.resetBiancoNode(node)
+          done()
+        })
+      } else {
         done()
-      })
+      }
     })
 
     node.on('shutdown', () => {
