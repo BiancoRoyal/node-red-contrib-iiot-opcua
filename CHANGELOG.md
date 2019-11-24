@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.11.1-4](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-3...v3.11.1-4) (2019-11-24)
+
+
+### Bug Fixes
+
+* missing supporter hint ([7de1fc7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/7de1fc75b6fa2e64e53d5790e110591472e33aaf))
+
+
+
 ## [3.11.1-3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-2...v3.11.1-3) (2019-11-24)
 
 
