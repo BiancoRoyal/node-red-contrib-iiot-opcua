@@ -58,7 +58,7 @@
     "node": ">=6.10"
   },
   "scripts": {
-    "postinstall": "node ./create_certificates.js demo --dev -s -r ./certificates",
+    "postinstall": "node ./create_certificates.js demo --dev -s -r ./certificates && node ./supporter.js",
     "test:clearCache": "jest --clearCache",
     "test": "standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
     "coverage": "standard --fix && gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
