@@ -23,11 +23,8 @@
     "node-red",
     "node-opcua",
     "automation",
-    "fieldbus",
     "iiot",
-    "opc ua",
-    "biancode",
-    "modbus"
+    "biancoroyal"
   ],
   "author": "Bianco Royal <developers@bianco-royal.de>",
   "license": "BSD-3-Clause",
@@ -79,7 +76,8 @@
     "docs",
     "examples",
     "opcuaIIoT",
-    "create_certificates.js"
+    "create_certificates.js",
+    "supporter.js"
   ],
   "devDependencies": {
     "@babel/cli": "^7.1.2",
