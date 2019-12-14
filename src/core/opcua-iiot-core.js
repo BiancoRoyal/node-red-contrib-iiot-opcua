@@ -512,10 +512,6 @@ de.biancoroyal.opcua.iiot.core.getVariantValue = function (datatype, value) {
   let opcua = this.nodeOPCUA
 
   switch (datatype) {
-    case 'Float':
-    case 'Double':
-    case opcua.DataType.Double:
-      return parseFloat(value)
     case 'UInt16':
     case opcua.DataType.UInt16:
       let uint16 = new Uint16Array([value])
@@ -527,11 +523,13 @@ de.biancoroyal.opcua.iiot.core.getVariantValue = function (datatype, value) {
     case 'Int16':
     case opcua.DataType.Int16:
     case 'Int32':
-    case 'Integer':
     case opcua.DataType.Int32:
+    case 'Integer':
     case 'Int64':
     case opcua.DataType.Int64:
-      return parseInt(value)
+    case 'UInt64':
+    case opcua.DataType.UInt64:
+      return Number(value)
     case 'Boolean':
     case opcua.DataType.Boolean:
       return (value && value !== 'false' && value !== '0')

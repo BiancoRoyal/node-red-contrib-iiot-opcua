@@ -99,12 +99,6 @@ module.exports = function (RED) {
           case 'none':
             msg.payload = ''
             break
-          case 'str':
-            msg.payload = node.payload.toString()
-            break
-          case 'num':
-            msg.payload = Number(node.payload)
-            break
           case 'bool':
             msg.payload = (node.payload === true || node.payload === 'true')
             break
@@ -120,10 +114,10 @@ module.exports = function (RED) {
               if (node.payload === '') {
                 msg.payload = Date.now()
               } else {
-                msg.payload = node.payload
+                msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, node, msg)
               }
             } else {
-              msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, this, msg)
+              msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, node, msg)
             }
         }
 
