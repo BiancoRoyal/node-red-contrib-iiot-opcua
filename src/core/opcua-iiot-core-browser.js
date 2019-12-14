@@ -43,12 +43,21 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrows
           resultMask: 63
         }
       ]
-
+      session.requestedMaxReferencesPerNode = 5000
       session.browse(browseOptions, function (err, browseResult) {
         if (err) {
           reject(err)
         } else {
-          resolve(browseResult)
+          let browseResults = []
+          browseResults.push(browseResult)
+          let continuationPoint = browseResult.continuationPoint
+          while (continuationPoint) {
+            session.browseNext(continuationPoint, false).then(function (browseResult) {
+              browseResults.push(browseResult)
+              continuationPoint = browseResult.continuationPoint
+            })
+          }
+          resolve(browseResults)
         }
       })
     }
@@ -83,7 +92,16 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
         if (err) {
           reject(err)
         } else {
-          resolve(browseResult)
+          let browseResults = []
+          browseResults.push(browseResult)
+          let continuationPoint = browseResult.continuationPoint
+          while (continuationPoint) {
+            session.browseNext(continuationPoint, false).then(function (browseResult) {
+              browseResults.push(browseResult)
+              continuationPoint = browseResult.continuationPoint
+            })
+          }
+          resolve(browseResults)
         }
       })
     }
