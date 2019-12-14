@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.11.2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1...v3.11.2) (2019-12-14)
+
+
+### Bug Fixes
+
+* issue [#102](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/102), but it could be limited by node-opcua ([cc7bb69](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/cc7bb69dad69f41ed38290312661da9800aec026))
+* issue [#113](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/113) set zero as default for numbers ([497f5c7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/497f5c7a8bfc84c38b330e66912740411c3eac0b))
+
+
+
 ## [3.11.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-4...v3.11.1) (2019-12-03)
 
 
