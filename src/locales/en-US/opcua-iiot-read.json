@@ -9,7 +9,8 @@
       "depth": "Depth",
       "justValue": "Send Just Values",
       "parseStrings": "Parse Result",
-      "historyDays": "History Days"
+      "historyDays": "History Days",
+      "serverMaxItemsToRead": "Server Max. To Read"
     }
   }
 }
