@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [3.12.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.2...v3.12.0) (2019-12-15)
+
+
+### Features
+
+* [#117](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/117) iterate with given server max to read ([6431358](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/643135894a74fd55aeac5c3d7d28da44a84c6156))
+* issue [#87](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/87) browse more than 1k via browseNext ([f58d4db](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f58d4dbbd27e8b65fd28b180c3b5d4ae43db02ce))
+
+
+
 ## [3.11.2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1...v3.11.2) (2019-12-14)
 
 
