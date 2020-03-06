@@ -53,7 +53,7 @@ module.exports = function (RED) {
       while (itemsToRead.length > 0) {
         itemsRead = itemsToRead.slice(0, itemSliceValue)
         itemsReadDone.push(itemsToRead.slice(0, itemSliceValue))
-        itemsToRead = itemsToRead.slice(itemSliceValue + 1)
+        itemsToRead = itemsToRead.slice(itemSliceValue)
 
         coreClient.readAllAttributes(session, itemsRead, msg)
           .then(function (readResult) {
