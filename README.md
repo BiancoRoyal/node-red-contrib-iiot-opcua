@@ -1,5 +1,5 @@
 ![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
-![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
+![Contribution IIoT OPC UA](http://b.repl.ca/v1/Contribution-OPC_UA-blue.png)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
 ![ES_Deploy_Version](http://b.repl.ca/v1/JS-ES2015-yellow.png)
 ![NodeJS_Version](http://b.repl.ca/v1/NodeJS-LTS-green.png)
@@ -9,6 +9,8 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/da70f651451445c58d5adaeebd0ad595)](https://www.codacy.com/app/klaus/node-red-contrib-iiot-opcua?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=biancode/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
 
 # node-red-contrib-iiot-opcua
+
+DEPRECATED AND CLOSED since April 2020
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][8] based on [node-opcua][9].
 
