@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.12.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.12.0...v3.12.1) (2020-04-23)
+
+
+### Bug Fixes
+
+* Read - All (AllAttributes) - doesn't reads every 10th item ([e55aa6a](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e55aa6a6e2dc8bb1e20a90950465ada93c47a0ea))
+
+
+
 # [3.12.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.2...v3.12.0) (2019-12-15)
 
 
