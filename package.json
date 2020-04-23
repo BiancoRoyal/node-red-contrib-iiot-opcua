@@ -20,14 +20,11 @@
     "vm2": "3.6.10"
   },
   "keywords": [
-    "node-red",
-    "node-opcua",
+    "opcua",
     "automation",
     "fieldbus",
     "iiot",
-    "opc ua",
-    "biancode",
-    "modbus"
+    "biancoroyal"
   ],
   "author": "Bianco Royal <developers@bianco-royal.de>",
   "license": "BSD-3-Clause",
