@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -28,6 +28,7 @@ module.exports = function (RED) {
     this.showErrors = config.showErrors
     this.parseStrings = config.parseStrings
     this.historyDays = parseInt(config.historyDays) || 1
+    this.serverMaxItemsToRead = parseInt(config.serverMaxItemsToRead) || 1000
     this.connector = RED.nodes.getNode(config.connector)
 
     let node = coreClient.core.initClientNode(this)
@@ -45,29 +46,48 @@ module.exports = function (RED) {
     }
 
     node.bianco.iiot.readAllFromNodeId = function (session, itemsToRead, msg) {
-      coreClient.readAllAttributes(session, itemsToRead, msg)
-        .then(function (readResult) {
-          try {
-            node.send(node.bianco.iiot.buildResultMessage('AllAttributes', readResult))
-          } catch (err) {
+      let itemsRead = []
+      let itemsReadDone = []
+      const itemSliceValue = parseInt(node.serverMaxItemsToRead * 0.01) || 10
+
+      while (itemsToRead.length > 0) {
+        itemsRead = itemsToRead.slice(0, itemSliceValue)
+        itemsReadDone.push(itemsToRead.slice(0, itemSliceValue))
+        itemsToRead = itemsToRead.slice(itemSliceValue)
+
+        coreClient.readAllAttributes(session, itemsRead, msg)
+          .then(function (readResult) {
+            try {
+              node.send(node.bianco.iiot.buildResultMessage('AllAttributes', readResult))
+            } catch (err) {
+              /* istanbul ignore next */
+              node.bianco.iiot.handleReadError(err, readResult.msg)
+            }
+          }).catch(function (err) {
             /* istanbul ignore next */
-            node.bianco.iiot.handleReadError(err, readResult.msg)
-          }
-        }).catch(function (err) {
-          /* istanbul ignore next */
-          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+            (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          })
+      }
     }
 
     node.bianco.iiot.readValueFromNodeId = function (session, itemsToRead, msg) {
-      coreClient.readVariableValue(session, itemsToRead, msg)
-        .then(function (readResult) {
-          let message = node.bianco.iiot.buildResultMessage('VariableValue', readResult)
-          node.send(message)
-        }).catch(function (err) {
-          /* istanbul ignore next */
-          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+      let itemsRead = []
+      let itemsReadDone = []
+
+      while (itemsToRead.length > 0) {
+        itemsRead = itemsToRead.slice(0, node.serverMaxItemsToRead - 1)
+        itemsReadDone.push(itemsToRead.slice(0, node.serverMaxItemsToRead - 1))
+        itemsToRead = itemsToRead.slice(node.serverMaxItemsToRead)
+
+        coreClient.readVariableValue(session, itemsRead, msg)
+          .then(function (readResult) {
+            let message = node.bianco.iiot.buildResultMessage('VariableValue', readResult)
+            node.send(message)
+          }).catch(function (err) {
+            /* istanbul ignore next */
+            (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          })
+      }
     }
 
     node.bianco.iiot.readHistoryDataFromNodeId = function (session, itemsToRead, msg) {
@@ -76,21 +96,30 @@ module.exports = function (RED) {
       node.bianco.iiot.historyStart.setDate(startDate.getDate() - node.historyDays)
       node.bianco.iiot.historyEnd = new Date()
 
-      coreClient.readHistoryValue(
-        session,
-        itemsToRead,
-        msg.payload.historyStart || node.bianco.iiot.historyStart,
-        msg.payload.historyEnd || node.bianco.iiot.historyEnd,
-        msg)
-        .then(function (readResult) {
-          let message = node.bianco.iiot.buildResultMessage('HistoryValue', readResult)
-          message.historyStart = readResult.startDate || node.bianco.iiot.historyStart
-          message.historyEnd = readResult.endDate || node.bianco.iiot.historyEnd
-          node.send(message)
-        }).catch(function (err) {
-          /* istanbul ignore next */
-          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+      let itemsRead = []
+      let itemsReadDone = []
+
+      while (itemsToRead.length > 0) {
+        itemsRead = itemsToRead.slice(0, node.serverMaxItemsToRead - 1)
+        itemsReadDone.push(itemsToRead.slice(0, node.serverMaxItemsToRead - 1))
+        itemsToRead = itemsToRead.slice(node.serverMaxItemsToRead)
+
+        coreClient.readHistoryValue(
+          session,
+          itemsRead,
+          msg.payload.historyStart || node.bianco.iiot.historyStart,
+          msg.payload.historyEnd || node.bianco.iiot.historyEnd,
+          msg)
+          .then(function (readResult) {
+            let message = node.bianco.iiot.buildResultMessage('HistoryValue', readResult)
+            message.historyStart = readResult.startDate || node.bianco.iiot.historyStart
+            message.historyEnd = readResult.endDate || node.bianco.iiot.historyEnd
+            node.send(message)
+          }).catch(function (err) {
+            /* istanbul ignore next */
+            (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          })
+      }
     }
 
     node.bianco.iiot.readFromNodeId = function (session, itemsToRead, msg) {
@@ -105,16 +134,26 @@ module.exports = function (RED) {
         }
         transformedItemsToRead.push(transformedItem)
       }
+      itemsToRead = transformedItemsToRead
 
-      coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg)
-        .then(function (readResult) {
-          let message = node.bianco.iiot.buildResultMessage('Default', readResult)
-          message.maxAge = node.maxAge
-          node.send(message)
-        }).catch(function (err) {
-          /* istanbul ignore next */
-          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+      let itemsRead = []
+      let itemsReadDone = []
+
+      while (itemsToRead.length > 0) {
+        itemsRead = itemsToRead.slice(0, node.serverMaxItemsToRead - 1)
+        itemsReadDone.push(itemsToRead.slice(0, node.serverMaxItemsToRead - 1))
+        itemsToRead = itemsToRead.slice(node.serverMaxItemsToRead)
+
+        coreClient.read(session, itemsRead, msg.payload.maxAge || node.maxAge, msg)
+          .then(function (readResult) {
+            let message = node.bianco.iiot.buildResultMessage('Default', readResult)
+            message.maxAge = node.maxAge
+            node.send(message)
+          }).catch(function (err) {
+            /* istanbul ignore next */
+            (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          })
+      }
     }
 
     node.bianco.iiot.readFromSession = function (session, itemsToRead, originMsg) {
@@ -124,19 +163,27 @@ module.exports = function (RED) {
       }
 
       coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
-      switch (parseInt(node.attributeId)) {
-        case coreClient.READ_TYPE.ALL:
-          node.bianco.iiot.readAllFromNodeId(session, itemsToRead, msg)
-          break
-        case coreClient.READ_TYPE.VALUE:
-          node.bianco.iiot.readValueFromNodeId(session, itemsToRead, msg)
-          break
-        case coreClient.READ_TYPE.HISTORY:
-          node.bianco.iiot.readHistoryDataFromNodeId(session, itemsToRead, msg)
-          break
-        default:
-          node.bianco.iiot.readFromNodeId(session, itemsToRead, msg)
-      }
+
+      new Promise(function (resolve) {
+        switch (parseInt(node.attributeId)) {
+          case coreClient.READ_TYPE.ALL:
+            node.bianco.iiot.readAllFromNodeId(session, itemsToRead, msg)
+            break
+          case coreClient.READ_TYPE.VALUE:
+            node.bianco.iiot.readValueFromNodeId(session, itemsToRead, msg)
+            break
+          case coreClient.READ_TYPE.HISTORY:
+            node.bianco.iiot.readHistoryDataFromNodeId(session, itemsToRead, msg)
+            break
+          default:
+            node.bianco.iiot.readFromNodeId(session, itemsToRead, msg)
+        }
+        resolve()
+      }).then(function () {
+        if (node.showStatusActivities) {
+          coreClient.core.setNodeStatusTo(node, 'active')
+        }
+      })
     }
 
     node.bianco.iiot.buildResultMessage = function (readType, readResult) {
@@ -202,6 +249,10 @@ module.exports = function (RED) {
     node.on('input', function (msg) {
       if (!coreClient.core.checkConnectorState(node, msg, 'Read')) {
         return
+      }
+
+      if (node.showStatusActivities) {
+        coreClient.core.setNodeStatusTo(node, 'reading')
       }
 
       try {

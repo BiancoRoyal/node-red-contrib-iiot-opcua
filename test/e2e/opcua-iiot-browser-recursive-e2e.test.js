@@ -2,7 +2,7 @@
  * Original Work Copyright 2014 IBM Corp.
  * node-red
  *
- * Copyright (c) 2018 Klaus Landsdorf (http://bianco-royal.de/)
+ * Copyright (c) 2018,2019 Klaus Landsdorf (https://bianco-royal.com/)
  * All rights reserved.
  * node-red-contrib-iiot-opcua
  *

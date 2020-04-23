@@ -2,6 +2,107 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.12.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.12.0...v3.12.1) (2020-04-23)
+
+
+### Bug Fixes
+
+* Read - All (AllAttributes) - doesn't reads every 10th item ([e55aa6a](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e55aa6a6e2dc8bb1e20a90950465ada93c47a0ea))
+
+
+
+# [3.12.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.2...v3.12.0) (2019-12-15)
+
+
+### Features
+
+* [#117](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/117) iterate with given server max to read ([6431358](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/643135894a74fd55aeac5c3d7d28da44a84c6156))
+* issue [#87](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/87) browse more than 1k via browseNext ([f58d4db](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f58d4dbbd27e8b65fd28b180c3b5d4ae43db02ce))
+
+
+
+## [3.11.2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1...v3.11.2) (2019-12-14)
+
+
+### Bug Fixes
+
+* issue [#102](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/102), but it could be limited by node-opcua ([cc7bb69](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/cc7bb69dad69f41ed38290312661da9800aec026))
+* issue [#113](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/113) set zero as default for numbers ([497f5c7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/497f5c7a8bfc84c38b330e66912740411c3eac0b))
+
+
+
+## [3.11.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-4...v3.11.1) (2019-12-03)
+
+
+
+## [3.11.1-4](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-3...v3.11.1-4) (2019-11-24)
+
+
+### Bug Fixes
+
+* missing supporter hint ([7de1fc7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/7de1fc75b6fa2e64e53d5790e110591472e33aaf))
+
+
+
+## [3.11.1-3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-2...v3.11.1-3) (2019-11-24)
+
+
+### Bug Fixes
+
+* crash on deploy with listeners ([fd6b7b7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/fd6b7b7bd24cb499228b65453a8326cad3dda220))
+
+
+
+## [3.11.1-2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-1...v3.11.1-2) (2019-11-23)
+
+
+### Bug Fixes
+
+* inject button problem Node-RED v1.x and 0.20.x ([2905c39](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2905c3976805646d4065d469e4e2d7080858dca6))
+
+
+
+## [3.11.1-1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.11.1-0...v3.11.1-1) (2019-11-23)
+
+
+### Bug Fixes
+
+* inject node-red 0.20 ([192c167](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/192c167b10c61f27956f94306a59b77319d7b58d))
+
+
+
+## [3.11.1-0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.10.2...v3.11.1-0) (2019-11-23)
+
+
+
+# 3.11.0-beta.0 (2019-11-23)
+
+
+### Bug Fixes
+
+* certificate problem node-opcua ([e18298d](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e18298dcd12da0749270be2905fef23b3b9537ef))
+
+
+### Features
+
+* write Array, Matrix ([8e01fc7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/8e01fc7de7956393c700e07962174283cd145940))
+
+
+
+# [3.11.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.10.2...v3.11.0) (2019-11-23)
+
+
+### Bug Fixes
+
+* certificate problem node-opcua ([e18298d](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e18298dcd12da0749270be2905fef23b3b9537ef))
+
+
+### Features
+
+* write Array, Matrix ([8e01fc7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/8e01fc7de7956393c700e07962174283cd145940))
+
+
+
 ## [3.10.2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.10.0...v3.10.2) (2019-03-17)
 
 

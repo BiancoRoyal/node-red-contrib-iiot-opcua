@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -21,7 +21,8 @@
       showStatusActivities: {value: false},
       showErrors: {value: false},
       parseStrings: {value: false},
-      historyDays: {value: 1}
+      historyDays: {value: 1},
+      serverMaxItemsToRead: {value: 1000}
     },
     inputs: 1,
     outputs: 1,
@@ -95,6 +96,10 @@
     <div class="form-row">
         <label for="node-input-maxAge"><i class="fa fa-clock-o"></i> <span data-i18n="opcua-iiot-contrib.label.maxAge"></span></label>
         <input type="text" id="node-input-maxAge" placeholder="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-serverMaxItemsToRead"><i class="fa fa-tag"></i> <span data-i18n="opcua-iiot-contrib.label.serverMaxItemsToRead"></span></label>
+        <input type="text" id="node-input-serverMaxItemsToRead" placeholder="1000">
     </div>
     <div class="form-row" id="node-input-depth-row">
         <label for="node-input-depth"><i class="icon-random"></i> <span data-i18n="opcua-iiot-contrib.label.depth"></span></label>
@@ -191,7 +196,10 @@
     <strong>
         <span data-i18n="opcua-iiot-contrib.label.justValue"></span>
     </strong>
-    <p>With that option, the node does not send an object on out two for less CPU load.</p>
+    <p>With that option, the node does not send an object on out two for less CPU load.
+    This doesn't work for you if you have more than 1000 variables to read.
+    With more than 1000 variables you need all information to connect the results with the node-requests.
+    </p>
 
     <p>Set showErrors to get errors from node-opcua on browse.</p>
 </script>

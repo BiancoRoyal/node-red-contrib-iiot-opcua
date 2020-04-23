@@ -1,7 +1,7 @@
 <!--
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2013, 2016 IBM Corp. (node-red)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -44,29 +44,11 @@
 </style>
 
 <script type="text/javascript">
-  RED.nodes.registerType('OPCUA-IIoT-Inject', {
+  var injectNodeType = {
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
       injectType: {value: 'inject'},
-      payload: {
-        value: '', validate: function (v) {
-          let ptype = $('#node-input-payloadType').val() || this.payloadType
-          if (ptype === 'json') {
-            try {
-              JSON.parse(v)
-              return true
-            } catch (err) {
-              return false
-            }
-          } else if (ptype === 'flow' || ptype === 'global') {
-            return /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]+)*/i.test(v)
-          } else if (ptype === 'num') {
-            return /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/.test(v)
-          }
-          return true
-        }
-      },
       payloadType: {value: 'date'},
       topic: {value: ''},
       repeat: {value: ''},
@@ -74,61 +56,65 @@
       once: {value: false},
       startDelay: {value: ''},
       name: {value: ''},
+      payload: {value: '', validate: RED.validators.typedInput("payloadType")},
       addressSpaceItems: {value: []}
     },
     inputs: 0,
     outputs: 1,
     align: 'left',
-    icon: 'icon.png'
-  })
-</script>
-
-<script type="text/javascript">
-  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
-  injectNode.button = {
-    onclick: function () {
-      let label = (this.name || this.payload).replace(/&/g, '&amp').replace(/</g, '&lt').replace(/>/g, '&gt')
-
-      if (this.payloadType === 'date') {
-        label = this._('opcuaiiotinject.timestamp')
-      }
-
-      if (this.payloadType === 'none') {
-        label = this._('opcuaiiotinject.blank')
-      }
-
-      let node = this
-
-      $.ajax({
-        url: 'opcuaIIoT/inject/' + this.id,
-        type: 'POST',
-        success: function (resp) {
-          RED.notify(node._('opcuaiiotinject.success', {label: label}), 'success')
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          if (jqXHR.status === 404) {
-            RED.notify(node._('common.notification.error', {message: node._('common.notification.errors.not-deployed')}), 'error')
-          } else if (jqXHR.status === 500) {
-            RED.notify(node._('common.notification.error', {message: node._('opcuaiiotinject.errors.failed')}), 'error')
-          } else if (jqXHR.status === 0) {
-            RED.notify(node._('common.notification.error', {message: node._('common.notification.errors.no-response')}), 'error')
-          } else {
-            RED.notify(node._('common.notification.error', {
-              message: node._('common.notification.errors.unexpected', {
-                status: jqXHR.status,
-                message: textStatus
-              })
-            }), 'error')
-          }
+    icon: 'icon.png',
+    button: {
+      enabled: function() {
+        return !this.changed
+      },
+      onclick: function() {
+        if (this.changed) {
+          return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
         }
-      })
+        var payload = this.payload;
+        if ((this.payloadType === 'flow') ||
+          (this.payloadType === 'global')) {
+          var key = RED.utils.parseContextKey(payload);
+          payload = this.payloadType+"."+key.key;
+        }
+        var label = this._def.label.call(this);
+        if (label.length > 30) {
+          label = label.substring(0,50)+"...";
+        }
+        label = label.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+        if (this.payloadType === 'date') {
+          label = this._('opcuaiiotinject.timestamp')
+        }
+
+        if (this.payloadType === 'none') {
+          label = this._('opcuaiiotinject.blank')
+        }
+
+        var node = this;
+        $.ajax({
+          url: "opcuaIIoT/inject/"+this.id,
+          type:"POST",
+          success: function(resp) {
+            RED.notify(node._("inject.success",{label:label}),{type:"success",id:"inject"});
+          },
+          error: function(jqXHR,textStatus,errorThrown) {
+            if (jqXHR.status == 404) {
+              RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+            } else if (jqXHR.status == 500) {
+              RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
+            } else if (jqXHR.status == 0) {
+              RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+            } else {
+              RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+            }
+          }
+        });
+      }
     }
   }
-</script>
 
-<script type="text/javascript">
-  //let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
-  injectNode.oneditprepare = function () {
+  injectNodeType.oneditprepare = function () {
     let node = this
     let fieldPayloadType = $('#node-input-payloadType')
 
@@ -347,8 +333,8 @@
         $('#input-label-payload').hide()
 
         if(fieldPayloadType.val() !== 'num' && fieldPayloadType.val() !== 'json') {
-            $('#node-input-payload').typedInput('type', 'num')
-            $('#node-input-payload').val('1000')
+          $('#node-input-payload').typedInput('type', 'num')
+          $('#node-input-payload').val('1000')
         }
       } else {
         $('#input-label-payload').show()
@@ -529,11 +515,8 @@
 
     // console.log('well done editprepare ...')
   }
-</script>
 
-<script type="text/javascript">
-  //let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
-  injectNode.oneditsave = function () {
+  injectNodeType.oneditsave = function () {
     let node = this
     let repeat = ''
     let crontab = ''
@@ -635,21 +618,16 @@
     node.addressSpaceItems = []
 
     cacheItems.each(function () {
-        node.addressSpaceItems.push({
-          name: $(this).find('.addressSpaceItemName').val(),
-          nodeId: $(this).find('.addressSpaceItemNodeId').val(),
-          datatypeName: $(this).find('.addressSpaceItemDatatype').val()
-        })
+      node.addressSpaceItems.push({
+        name: $(this).find('.addressSpaceItemName').val(),
+        nodeId: $(this).find('.addressSpaceItemNodeId').val(),
+        datatypeName: $(this).find('.addressSpaceItemDatatype').val()
+      })
     })
-
     // console.log('well done editsave ...')
   }
 
-</script>
-
-<script type="text/javascript">
-  //let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
-  injectNode.label = function () {
+  injectNodeType.label = function () {
     let suffix = ''
 
     if (this.once) {
@@ -692,9 +670,11 @@
     }
   }
 
-  injectNode.labelStyle = function () {
+  injectNodeType.labelStyle = function () {
     return this.name ? 'node_label_italic' : ''
   }
+
+  RED.nodes.registerType('OPCUA-IIoT-Inject', injectNodeType)
 </script>
 
 <script type="text/x-red" data-template-name="OPCUA-IIoT-Inject">
@@ -842,7 +822,6 @@
             </div>
         </div>
     </div>
-
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Inject">

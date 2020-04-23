@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  All rights reserved.
  node-red-contrib-iiot-opcua
  */
@@ -53,10 +53,14 @@ module.exports = function (RED) {
     coreConnector.core.registerToConnector(node)
 
     node.on('close', (done) => {
-      coreConnector.core.deregisterToConnector(node, () => {
-        coreConnector.core.resetBiancoNode(node)
+      if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
+        coreConnector.core.deregisterToConnector(node, () => {
+          coreConnector.core.resetBiancoNode(node)
+          done()
+        })
+      } else {
         done()
-      })
+      }
     })
   }
 

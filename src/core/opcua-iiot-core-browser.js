@@ -1,7 +1,7 @@
 /**
  The BSD 3-Clause License
 
- Copyright 2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -43,12 +43,21 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrows
           resultMask: 63
         }
       ]
-
+      session.requestedMaxReferencesPerNode = 5000
       session.browse(browseOptions, function (err, browseResult) {
         if (err) {
           reject(err)
         } else {
-          resolve(browseResult)
+          let browseResults = []
+          browseResults.push(browseResult)
+          let continuationPoint = browseResult.continuationPoint
+          while (continuationPoint) {
+            session.browseNext(continuationPoint, false).then(function (browseResult) {
+              browseResults.push(browseResult)
+              continuationPoint = browseResult.continuationPoint
+            })
+          }
+          resolve(browseResults)
         }
       })
     }
@@ -83,7 +92,16 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
         if (err) {
           reject(err)
         } else {
-          resolve(browseResult)
+          let browseResults = []
+          browseResults.push(browseResult)
+          let continuationPoint = browseResult.continuationPoint
+          while (continuationPoint) {
+            session.browseNext(continuationPoint, false).then(function (browseResult) {
+              browseResults.push(browseResult)
+              continuationPoint = browseResult.continuationPoint
+            })
+          }
+          resolve(browseResults)
         }
       })
     }

@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -184,11 +184,15 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      node.bianco.iiot.closeServer(() => {
-        coreServer.flex.internalDebugLog('Close Server Node')
-        coreServer.core.resetBiancoNode(node)
+      if (coreServer.core.isInitializedBiancoIIoTNode(node)) {
+        node.bianco.iiot.closeServer(() => {
+          coreServer.flex.internalDebugLog('Close Server Node')
+          coreServer.core.resetBiancoNode(node)
+          done()
+        })
+      } else {
         done()
-      })
+      }
     })
 
     node.on('shutdown', () => {

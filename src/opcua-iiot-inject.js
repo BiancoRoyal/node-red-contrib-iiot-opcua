@@ -1,7 +1,7 @@
 /**
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2013, 2016 IBM Corp. (node-red)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -99,12 +99,6 @@ module.exports = function (RED) {
           case 'none':
             msg.payload = ''
             break
-          case 'str':
-            msg.payload = node.payload.toString()
-            break
-          case 'num':
-            msg.payload = Number(node.payload)
-            break
           case 'bool':
             msg.payload = (node.payload === true || node.payload === 'true')
             break
@@ -120,10 +114,10 @@ module.exports = function (RED) {
               if (node.payload === '') {
                 msg.payload = Date.now()
               } else {
-                msg.payload = node.payload
+                msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, node, msg)
               }
             } else {
-              msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, this, msg)
+              msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, node, msg)
             }
         }
 
@@ -164,13 +158,14 @@ module.exports = function (RED) {
 
   OPCUAIIoTInject.prototype.close = function () {
     let node = this
-
-    if (node.bianco.iiot.cronjob) {
-      node.bianco.iiot.cronjob.stop()
-      delete node['cronjob']
+    node.removeAllListeners()
+    if (coreInject.core.isInitializedBiancoIIoTNode(node)) {
+      if (node.bianco.iiot.cronjob) {
+        node.bianco.iiot.cronjob.stop()
+        delete node['cronjob']
+      }
+      coreInject.core.resetBiancoNode(node)
     }
-
-    coreInject.core.resetBiancoNode(node)
   }
 
   RED.httpAdmin.post('/opcuaIIoT/inject/:id', RED.auth.needsPermission('opcuaIIoT.inject.write'), function (req, res) {

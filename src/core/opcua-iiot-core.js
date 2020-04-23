@@ -1,7 +1,7 @@
 /**
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -347,7 +347,7 @@ de.biancoroyal.opcua.iiot.core.buildNewArrayVariant = function (datatype, value)
         value: []
       }
       for (let i = 0; i < value.length; i++) {
-        if (value[i] && value[i] !== 'false') {
+        if (value[i] && value[i] !== 'false' && value[i] !== '0') {
           variantValue.value.push(true)
         } else {
           variantValue.value.push(false)
@@ -459,7 +459,7 @@ de.biancoroyal.opcua.iiot.core.buildNewScalarVariant = function (datatype, value
       break
     case 'Boolean':
     case opcua.DataType.Boolean:
-      if (value && value !== 'false') {
+      if (value && value !== 'false' && value !== '0') {
         variantValue = {
           dataType: opcua.DataType.Boolean,
           value: true
@@ -512,10 +512,6 @@ de.biancoroyal.opcua.iiot.core.getVariantValue = function (datatype, value) {
   let opcua = this.nodeOPCUA
 
   switch (datatype) {
-    case 'Float':
-    case 'Double':
-    case opcua.DataType.Double:
-      return parseFloat(value)
     case 'UInt16':
     case opcua.DataType.UInt16:
       let uint16 = new Uint16Array([value])
@@ -527,14 +523,16 @@ de.biancoroyal.opcua.iiot.core.getVariantValue = function (datatype, value) {
     case 'Int16':
     case opcua.DataType.Int16:
     case 'Int32':
-    case 'Integer':
     case opcua.DataType.Int32:
+    case 'Integer':
     case 'Int64':
     case opcua.DataType.Int64:
-      return parseInt(value)
+    case 'UInt64':
+    case opcua.DataType.UInt64:
+      return Number(value)
     case 'Boolean':
     case opcua.DataType.Boolean:
-      return (value && value !== 'false')
+      return (value && value !== 'false' && value !== '0')
     case 'DateTime':
     case opcua.DataType.DateTime:
       return new Date(value)
@@ -801,6 +799,7 @@ de.biancoroyal.opcua.iiot.core.pushItemToWriteList = function (msg, nodesToWrite
     value
   })
 }
+
 de.biancoroyal.opcua.iiot.core.buildNodesToWrite = function (msg) {
   let core = this
   let nodesToWrite = []
@@ -1038,12 +1037,12 @@ de.biancoroyal.opcua.iiot.core.setNodeOPCUARestart = function (node, opcuaClient
 de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
   let core = this
 
-  if (!node) {
+  if (!this.isInitializedBiancoIIoTNode(node)) {
     core.internalDebugLog('Node Not Valid On Register To Connector')
     return
   }
 
-  if (!node.connector) {
+  if (!this.isInitializedBiancoIIoTNode(node.connector)) {
     node.error(new Error('Connector Config Node Not Valid On Registering Client Node ' + node.id), { payload: 'No Connector Configured' })
     return
   }
@@ -1109,21 +1108,22 @@ de.biancoroyal.opcua.iiot.core.registerToConnector = function (node) {
 
 de.biancoroyal.opcua.iiot.core.deregisterToConnector = function (node, done) {
   let core = this
+
   if (!node) {
     core.internalDebugLog('Node Not Valid On Register To Connector')
     done()
-    return
-  }
-
-  if (!node.connector) {
-    node.error(new Error('Connector Not Valid On Register To Connector'), { payload: 'No Connector Configured' })
-    done()
-    return
-  }
-
-  node.connector.removeAllListeners()
-  if (this.isInitializedBiancoIIoTNode(node.connector)) {
-    node.connector.bianco.iiot.deregisterForOPCUA(node, done)
+  } else {
+    if (!node.connector) {
+      node.error(new Error('Connector Not Valid On Register To Connector'), { payload: 'No Connector Configured' })
+      done()
+    } else {
+      node.connector.removeAllListeners()
+      if (core.isInitializedBiancoIIoTNode(node.connector)) {
+        node.connector.bianco.iiot.deregisterForOPCUA(node, done)
+      } else {
+        done()
+      }
+    }
   }
 }
 

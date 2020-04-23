@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
+ Copyright 2016,2017,2018,2019 - Klaus Landsdorf (https://bianco-royal.com/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -39,24 +39,31 @@ module.exports = function (RED) {
     coreBrowser.core.assert(node.bianco.iiot)
     node.bianco.iiot.delayMessageTimer = []
 
-    node.bianco.iiot.extractDataFromBrowserResults = (browserResultToFilter, lists) => {
+    node.bianco.iiot.extractDataFromBrowserResults = (browserResultsToFilter, lists) => {
       lists.addressItemList = []
+      if (!browserResultsToFilter || !browserResultsToFilter.length) {
+        return
+      }
+      browserResultsToFilter.forEach(browserResultToFilter => {
+        if (!browserResultToFilter || !browserResultToFilter.length) {
+          return
+        }
+        browserResultToFilter.forEach(function (result) {
+          result.references.forEach(function (reference) {
+            coreBrowser.detailDebugLog('Add Reference To List :' + reference)
+            lists.browserResults.push(coreBrowser.transformToEntry(reference))
 
-      browserResultToFilter.forEach(function (result) {
-        result.references.forEach(function (reference) {
-          coreBrowser.detailDebugLog('Add Reference To List :' + reference)
-          lists.browserResults.push(coreBrowser.transformToEntry(reference))
-
-          if (reference.nodeId) {
-            lists.nodesToRead.push(reference.nodeId.toString())
-
-            lists.addressItemList.push({
-              nodeId: reference.nodeId.toString(),
-              browseName: reference.browseName.toString(),
-              displayName: reference.displayName.toString(),
-              nodeClass: reference.nodeClass.toString(),
-              datatypeName: reference.typeDefinition.toString() })
-          }
+            if (reference.nodeId) {
+              lists.nodesToRead.push(reference.nodeId.toString())
+              lists.addressItemList.push({
+                nodeId: reference.nodeId.toString(),
+                browseName: reference.browseName.toString(),
+                displayName: reference.displayName.toString(),
+                nodeClass: reference.nodeClass.toString(),
+                datatypeName: reference.typeDefinition.toString()
+              })
+            }
+          })
         })
       })
 
@@ -73,8 +80,8 @@ module.exports = function (RED) {
 
       coreBrowser.browse(node.bianco.iiot.opcuaSession, rootNodeId)
         .then(function (browserResults) {
-          if (browserResults.length) {
-            coreBrowser.detailDebugLog('Browser Result To String: ' + browserResults.toString())
+          if (browserResults && browserResults.length) {
+            coreBrowser.detailDebugLog('Browser Results Count: ' + browserResults.length)
             node.bianco.iiot.extractDataFromBrowserResults(browserResults, lists)
             if (node.recursiveBrowse) {
               if (depth > 0) {
@@ -319,13 +326,15 @@ module.exports = function (RED) {
     coreBrowser.detailDebugLog('request for ' + req.params.nodeId)
 
     if (node.bianco.iiot.opcuaSession) {
-      coreBrowser.browse(node.bianco.iiot.opcuaSession, nodeRootId).then(function (browserResult) {
-        browserResult.forEach(function (result) {
-          if (result.references && result.references.length) {
-            result.references.forEach(function (reference) {
-              entries.push(coreBrowser.transformToEntry(reference))
-            })
-          }
+      coreBrowser.browse(node.bianco.iiot.opcuaSession, nodeRootId).then(function (browserResults) {
+        browserResults.forEach(browserResult => {
+          browserResult.forEach(function (result) {
+            if (result.references && result.references.length) {
+              result.references.forEach(function (reference) {
+                entries.push(coreBrowser.transformToEntry(reference))
+              })
+            }
+          })
         })
         res.json(entries)
       }).catch(function (err) {
