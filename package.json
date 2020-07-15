@@ -106,7 +106,7 @@
     "pump": "^3.0.0",
     "sinon": "^7.0.0",
     "standard": "^12.0.1",
-    "standard-version": "^5.0.1",
+    "standard-version": "^8.0.1",
     "uglify-js": "^3.4.6",
     "uglify-js-harmony": "^2.7.7",
     "weak": "^1.0.1",
