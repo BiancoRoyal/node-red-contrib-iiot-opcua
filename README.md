@@ -10,7 +10,7 @@
 
 # node-red-contrib-iiot-opcua
 
-DEPRECATED AND CLOSED since April 2020
+The License changed since the year 2020!
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][8] based on [node-opcua][9].
 
@@ -18,9 +18,8 @@ DEPRECATED AND CLOSED since April 2020
 [![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
 * v3.x is now LTS version until Oktober 2019 (branch 3.0)
-* tested with Node.js v10 and Node-RED v0.19
-* based on node-opcua v0.4 (OPC UA v1.03)
-* extendable with node-opcua-isa95
+* tested with Node.js v10 and Node-RED v1.0
+* based on node-opcua v0.7 (OPC UA v1.03)
 
 **If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3]!**
 
@@ -114,22 +113,13 @@ see Node-RED menu (right upper corner) -> Import -> Examples -> iiot opcua
 
 ## Package Information
 
-### Known Issues and TODO's
-
-Ideas
-* methods calls
-  * complex
-  * dynamic
-  * structured object parameters
-
-Errors
-* more Bad status situations handling
-* API changes to 0.4.+ bring some breaking changes in connection handling
-  * Please, test and report issues via GitHub!
-
 ### License
 
-The BSD 3-Clause License
+**SLA** with yearly Subscription for commercial use and Closed Source Projects incl. Support<br/>
+Please incl. Support see https://bianco-royal.space/supporter.html
+
+The **BSD 3-Clause** License for none commercial use and Open Source Projects<br/>
+Support is not for free.
 
 [Klaus Landsdorf][1]
 
@@ -145,10 +135,10 @@ This is **not** an official product of the OPC Foundation or Plattform Industrie
 I'd like to give special thanks to [Etienne Rossignon][6]
 for the node-opcua packages and very special for the node-opcua-isa95 package!
 
-[1]:https://bianco-royal.cloud/
-[2]:https://bianco-royal.cloud/supporter/
-[3]:https://github.com/biancode/node-red-contrib-iiot-opcua
-[4]:https://github.com/biancode/node-red-contrib-iiot-opcua/wiki
+[1]:https://bianco-royal.space/
+[2]:https://bianco-royal.space/supporter/
+[3]:https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua
+[4]:https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/wiki
 [6]:https://github.com/erossignon
 [7]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki/DEBUG
 [8]:https://github.com/node-red/node-red

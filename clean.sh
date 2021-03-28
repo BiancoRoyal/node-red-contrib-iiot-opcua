@@ -4,10 +4,14 @@ rm -rf node_modules/
 
 rm package-lock.json
 
+rm yarn-lock.json
+
 rm -rf certificates/
 
-npm cache verify
+yarn cache clean
 
-npm i
+yarn
+
+yarn check
 
 gulp publish

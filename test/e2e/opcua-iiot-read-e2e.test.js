@@ -2,7 +2,7 @@
  * Original Work Copyright 2014 IBM Corp.
  * node-red
  *
- * Copyright (c) 2018,2019 Klaus Landsdorf (https://bianco-royal.com/)
+ * Copyright (c) 2018,2019,2020,2021 Klaus Landsdorf (https://bianco-royal.space/)
  * All rights reserved.
  * node-red-contrib-iiot-opcua
  *
@@ -12,7 +12,7 @@
 
 jest.setTimeout(20000)
 
-var functionNode = require('@node-red/nodes/core/core/80-function')
+var functionNode = require('@node-red/nodes/core/function/10-function')
 
 // iiot opcua
 var injectNode = require('../../src/opcua-iiot-inject')

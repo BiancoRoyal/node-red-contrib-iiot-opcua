@@ -11,7 +11,7 @@
     "type": "comment",
     "z": "ade2bb45.1c9a2",
     "name": "information",
-    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.de/",
+    "info": "Clients to browse\n\nUA-Expert: https://www.unified-automation.com/products/development-tools/uaexpert.html\nOPCUA-Commander: https://github.com/node-opcua/opcua-commander\nNode-RED: use the browse examples to start browsing the server via Node-RED\n\nHappy wiring!\nKlaus Landsdorf\nhttp://bianco-royal.space/",
     "x": 210,
     "y": 60,
     "wires": []

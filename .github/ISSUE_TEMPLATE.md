@@ -16,7 +16,7 @@ IF YOU DON'T FILL OUT THE FOLLOWING INFORMATION, WE MIGHT CLOSE YOUR ISSUE WITHO
 
 <!-- IF IT IS A FEATURE REQUEST DELETE FROM HERE, PLEASE -->
 ## Support
- - support request => **Please do not submit support requests here**, instead see use [the link to our support page](https://bianco-royal.cloud/supporter/#/content/backer)
+ - support request => **Please do not submit support requests here**, instead see use [the link to our support page](https://bianco-royal.space/supporter/#/content/backer)
  - ( ) simple question => please visit the Wiki and Info tab by clicking on the node inside Node-RED before
  - FAQ: Can I send you individual support requests via E-Mail? 
    - Yes, sure! :-D
