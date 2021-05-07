@@ -16,7 +16,7 @@
     "source-map-support": "0.5.11",
     "stately.js": "1.3.0",
     "treeify": "1.1.0",
-    "underscore": "1.9.1",
+    "underscore": "1.12.1",
     "vm2": "3.6.10"
   },
   "keywords": [
