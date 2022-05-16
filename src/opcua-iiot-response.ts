@@ -7,7 +7,7 @@
  */
 'use strict'
 
-import * as nodered from "node-red";
+
 import {Todo} from "./types/placeholders";
 import coreResponse from "./core/opcua-iiot-core-response";
 import {
@@ -16,8 +16,9 @@ import {
   isNodeTypeToFilterResponse
 } from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
+import {Node, NodeAPI, NodeDef} from "node-red";
 
-interface OPCUAIIoTResponse extends nodered.Node {
+interface OPCUAIIoTResponse extends Node {
   name: string
   compressStructure: string
   showStatusActivities: string
@@ -28,7 +29,7 @@ interface OPCUAIIoTResponse extends nodered.Node {
   filters: Todo[]
 }
 
-interface OPCUAIIoTResponseDef extends nodered.NodeDef {
+interface OPCUAIIoTResponseDef extends NodeDef {
   name: string
   compressStructure: string
   showStatusActivities: string
@@ -44,7 +45,7 @@ interface OPCUAIIoTResponseDef extends nodered.NodeDef {
  *
  * @param RED
  */
-module.exports = (RED: nodered.NodeAPI) => {
+module.exports = (RED: NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
   function OPCUAIIoTResponse(this: OPCUAIIoTResponse, config: OPCUAIIoTResponseDef) {

@@ -11,31 +11,61 @@
 
 import {Todo} from "../types/placeholders";
 import debug from 'debug';
+import {Node, NodeStatusFill} from "node-red";
+import {BrowseResult, StatusCode} from "node-opcua";
+import {AddressSpaceItem} from "../types/core";
+import {NodeIdLike} from "node-opcua-nodeid";
+
+type EntryStatus = {
+  good: number,
+  bad: number,
+  other: number,
+}
+
+type Payload = {
+  value?: any
+  browserResults?: BrowseResult[]
+  crawlerResults?: (string | BrowseResult[])[]
+  statusCodes?: StatusCode[]
+  entryStatus: EntryStatus
+  entryStatusText?: string
+  readtype?: string
+  injectType?: string
+  results?: any
+  statusCode?: StatusCode
+  nodesToRead?: AddressSpaceItem[]
+  nodesToWrite?: AddressSpaceItem[]
+  valuesToWrite?: AddressSpaceItem[]
+  addressSpaceItems: AddressSpaceItem[]
+  dataType?: Todo
+  nodeId?: NodeIdLike
+  methodType?: string
+}
 
 const internalDebugLog = debug('opcuaIIoT:response') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:response:details') // eslint-disable-line no-use-before-define
 const EMPTY_LIST = 0
 const NONE = 0
 
-const analyzeBrowserResults = function (node: Todo, payload: Todo) {
+const analyzeBrowserResults = function (node: Node, payload: Payload) {
   handlePayloadStatusCode(node, payload)
 }
 
-const analyzeCrawlerResults = function (node: Todo, payload: Todo) {
+const analyzeCrawlerResults = function (node: Node, payload: Payload) {
   handlePayloadStatusCode(node, payload)
 }
 
-const analyzeReadResults = (node: Todo, payload: Todo) => {
+const analyzeReadResults = (node: Node, payload: Payload) => {
   handlePayloadStatusCode(node, payload)
-  if (payload.readtype === 'HistoryValue' && payload.length) {
-    payload.value.map((item: Todo) => {
+  if (payload.readtype === 'HistoryValue') {
+    payload.value.map((item: any) => {
       delete item['statusCode']
     })
   }
   reconsturctNodeIdOnRead(payload)
 }
 
-const analyzeListenerResults = function (node: Todo, payload: Todo) {
+const analyzeListenerResults = function (node: Node, payload: Payload) {
   switch (payload.injectType) {
     case 'subscribe':
     case 'event':
@@ -46,19 +76,19 @@ const analyzeListenerResults = function (node: Todo, payload: Todo) {
   }
 }
 
-const analyzeMethodResults = function (node: Todo, msg: Todo) {
-  switch (msg.methodType) {
+const analyzeMethodResults = function (node: Node, payload: Payload) {
+  switch (payload.methodType) {
     case 'basic':
     case 'complex':
-      handlePayloadStatusCode(node, msg)
+      handlePayloadStatusCode(node, payload)
       break
     default:
       break
   }
 }
 
-const setNodeStatus = function (node: Todo, entryStatus: Todo, informationText: Todo) {
-  let fillColor = 'green'
+const setNodeStatus = function (node: Node, entryStatus: EntryStatus, informationText: string) {
+  let fillColor: NodeStatusFill = 'green'
 
   if (entryStatus && Object.keys(entryStatus).length === 3) {
     if (entryStatus['other'] > EMPTY_LIST) {
@@ -70,24 +100,22 @@ const setNodeStatus = function (node: Todo, entryStatus: Todo, informationText: 
     }
   }
 
-  if (node.status.text !== informationText) {
-    node.status({fill: fillColor, shape: 'dot', text: informationText})
-  }
+  node.status({fill: fillColor, shape: 'dot', text: informationText})
 }
 
-const analyzeWriteResults = function (node: Todo, msg: Todo) {
+const analyzeWriteResults = function (node: Node, msg: Todo) {
   let entryStatus = handlePayloadArrayOfStatusCodes(msg)
   setNodeStatusInfo(node, msg, entryStatus)
 }
 
-const handlePayloadStatusCode = function (node: Todo, payload: Todo) {
+const handlePayloadStatusCode = function (node: Node, payload: Payload) {
   let entryStatus = {
     bad: 0,
     good: 0,
     other: 0
   }
 
-  if (payload.length && (payload.value || payload.browserResults || payload.crawlerResults || payload.statusCodes)) {
+  if (payload.browserResults || payload.crawlerResults || payload.statusCodes) {
     entryStatus = handlePayloadArrayOfObjects(payload)
   } else {
     entryStatus = handlePayloadObject(payload)
@@ -96,13 +124,13 @@ const handlePayloadStatusCode = function (node: Todo, payload: Todo) {
   payload.entryStatus = entryStatus
 }
 
-const setNodeStatusInfo = function (node: Todo, payload: Todo, entryStatus: Todo) {
+const setNodeStatusInfo = function (node: Node, payload: Payload, entryStatus: Todo) {
   payload.entryStatus = entryStatus
   payload.entryStatusText = 'Good:' + entryStatus['good'] + ' Bad:' + entryStatus['bad'] + ' Other:' + entryStatus['other']
   setNodeStatus(node, payload.entryStatus, payload.entryStatusText)
 }
 
-const handlePayloadArrayOfObjects = function (payload: Todo) {
+const handlePayloadArrayOfObjects = function (payload: Payload) {
   let entry = null
   let entryStatus = {
     bad: 0,
@@ -111,23 +139,18 @@ const handlePayloadArrayOfObjects = function (payload: Todo) {
   }
   let results = []
 
-  if (payload.value) {
-    results = payload.value
+  if (payload.crawlerResults) {
+    results = payload.crawlerResults
   } else if (payload.browserResults) {
     results = payload.browserResults
-  } else if (payload.crawlerResults) {
-    results = payload.crawlerResults
+  } else if (payload.value) {
+    results = payload.value
   } else if (payload.statusCodes) {
     results = payload.statusCodes
-  } else {
-    if (payload.length) {
-      results = payload
-    }
   }
 
-  for (entry of results) {
-    if (entry.statusCode && entry.statusCode.name) {
-      switch (entry.statusCode.name) {
+  results.forEach((entry: any) => {
+      switch (entry.statusCode?.name) {
         case 'Good':
           entryStatus['good'] += 1
           break
@@ -135,23 +158,19 @@ const handlePayloadArrayOfObjects = function (payload: Todo) {
           entryStatus['bad'] += 1
           break
         default:
-          if (entry.statusCode.name.includes('Good')) {
-            entryStatus['good'] += 1
-          } else if (entry.statusCode.name.includes('Bad')) {
+          if (entry.statusCode?.name?.includes('Bad') || entry.includes('Error')) {
             entryStatus['bad'] += 1
           } else {
-            entryStatus['other'] += 1
+            entryStatus['good'] += 1
           }
       }
-    } else {
-      entryStatus['other'] += 1
     }
-  }
+  )
 
   return entryStatus
 }
 
-const handlePayloadObject = function (payload: Todo) {
+const handlePayloadObject = function (payload: Payload) {
   let entryStatus = {
     good: 0,
     bad: 0,
@@ -190,7 +209,7 @@ const handlePayloadObject = function (payload: Todo) {
   return entryStatus
 }
 
-const handlePayloadArrayOfStatusCodes = function (payload: Todo) {
+const handlePayloadArrayOfStatusCodes = function (payload: Payload) {
   let entry = null
   let entryStatus = {
     good: 0,
@@ -228,28 +247,14 @@ const handlePayloadArrayOfStatusCodes = function (payload: Todo) {
   return entryStatus
 }
 
-const defaultCompress = function (payload: Todo) {
+const defaultCompress = function (payload: Payload) {
   if (payload.hasOwnProperty('value') && payload.value.hasOwnProperty('value')) {
     payload.value = payload.value.value
-  } else {
-    if (payload.length) {
-      payload.value = payload.map((item: Todo) => {
-        if (item.value) {
-          if (item.value.value) {
-            return item.value.value
-          } else {
-            return item.value
-          }
-        } else {
-          return item
-        }
-      })
-    }
   }
   trimMessageExtensions(payload)
 }
 
-const trimMessageExtensions = function (payload: Todo) {
+const trimMessageExtensions = function (payload: any) {
   delete payload['nodesToRead']
   delete payload['nodesToReadCount']
   delete payload['addressItemsToRead']
@@ -265,11 +270,11 @@ const trimMessageExtensions = function (payload: Todo) {
   }
 }
 
-const trimMessagePayloadExtensions = (payload: Todo) => {
+const trimMessagePayloadExtensions = (payload: any) => {
   delete payload['listenerParameters']
 }
 
-const compressBrowseMessageStructure = function (payload: Todo) {
+const compressBrowseMessageStructure = function (payload: Payload) {
   if (payload.browserResults?.length) {
     payload.value = payload.browserResults.map((item: Todo) => {
       return {
@@ -285,9 +290,9 @@ const compressBrowseMessageStructure = function (payload: Todo) {
   }
 }
 
-const compressCrawlerMessageStructure = function (payload: Todo) {
-  if (payload.hasOwnProperty('crawlerResults') && payload.crawlerResults.length) {
-    payload.value = payload.crawlerResults.map((item: Todo) => {
+const compressCrawlerMessageStructure = function (payload: Payload) {
+  if (payload.hasOwnProperty('crawlerResults') && payload.crawlerResults?.length) {
+    payload.value = payload.crawlerResults?.map((item: Todo) => {
       return {
         nodeId: item.nodeId.toString(),
         browseName: (item.browseName.namespaceIndex) ? item.browseName.namespaceIndex + ':' + item.browseName.name : item.browseName,
@@ -301,7 +306,7 @@ const compressCrawlerMessageStructure = function (payload: Todo) {
   }
 }
 
-const reconsturctNodeIdOnRead = function (payload: Todo) {
+const reconsturctNodeIdOnRead = function (payload: Payload) {
   let results = payload.value || payload
   let nodesToRead = payload.nodesToRead
 
@@ -330,20 +335,20 @@ const reconsturctNodeIdOnRead = function (payload: Todo) {
 
 }
 
-const compressVariableValueMessage = function (msg: Todo) {
-  delete msg['nodesToRead']
-  delete msg['nodesToReadCount']
-  delete msg['addressSpaceItems']
+const compressVariableValueMessage = function (payload: any) {
+  delete payload['nodesToRead']
+  delete payload['nodesToReadCount']
+  delete payload['addressSpaceItems']
 
-  return msg
+  return payload
 }
 
-const compressFilteredMessage = function (payload: Todo) {
+const compressFilteredMessage = function (payload: any) {
   delete payload['filter']
   delete payload['filtertype']
 }
 
-const compressReadMessageStructure = function (payload: Todo) {
+const compressReadMessageStructure = function (payload: any) {
   switch (payload.readtype) {
     case 'AllAttributes':
       delete payload['nodesToRead']
@@ -365,7 +370,7 @@ const compressReadMessageStructure = function (payload: Todo) {
   trimMessageExtensions(payload)
 }
 
-const compressWriteMessageStructure = function (payload: Todo) {
+const compressWriteMessageStructure = function (payload: any) {
   defaultCompress(payload)
 
   let itemList: Todo[] = []
@@ -380,29 +385,19 @@ const compressWriteMessageStructure = function (payload: Todo) {
   delete payload['valuesToWrite']
 }
 
-const compressListenMessageStructure = function (payload: Todo) {
+const compressListenMessageStructure = function (payload: Payload | any) {
+  // interpreting payload as any makes reassigning it not cause errors
   if (payload.hasOwnProperty('value') && payload.value.hasOwnProperty('value')) {
     payload = {
       value: payload.value.value,
       dataType: payload.value.dataType,
       nodeId: (payload.addressSpaceItems[0].nodeId) ? payload.addressSpaceItems[0].nodeId : payload.addressSpaceItems[0]
     }
-  } else {
-    if (payload.length) {
-      payload.value = payload.map((item: Todo, index: number) => {
-        return {
-          // be safe regardless of how deep the values sit
-          value: item?.value?.value ?? item?.value,
-          dataType: item.value?.dataType ?? item.dataType,
-          nodeId: (payload.addressSpaceItems[index].nodeId) ? payload.addressSpaceItems[index].nodeId : payload.addressSpaceItems[index]
-        }
-      })
-    }
   }
   trimMessageExtensions(payload)
 }
 
-const compressMethodMessageStructure = function (payload: Todo) {
+const compressMethodMessageStructure = function (payload: any) {
   defaultCompress(payload)
   trimMessageExtensions(payload)
 
@@ -414,7 +409,7 @@ const compressMethodMessageStructure = function (payload: Todo) {
   delete payload['definition']
 }
 
-const compressDefaultMessageStructure = function (payload: Todo) {
+const compressDefaultMessageStructure = function (payload: Payload) {
   defaultCompress(payload)
   trimMessageExtensions(payload)
 }

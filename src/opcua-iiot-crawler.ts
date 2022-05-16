@@ -9,22 +9,22 @@
 'use strict'
 
 import {Todo} from "./types/placeholders";
-import {Node, NodeMessageInFlow} from "@node-red/registry";
+import {NodeMessageInFlow} from "@node-red/registry";
 import {
   checkCrawlerItemIsNotToFilter,
-  checkItemForUnsetState, checkSessionNotValid,
-  deregisterToConnector, FAKTOR_SEC_TO_MSEC,
+  checkItemForUnsetState,
+  checkSessionNotValid,
+  deregisterToConnector,
+  FAKTOR_SEC_TO_MSEC,
   registerToConnector,
   resetIiotNode,
   setNodeStatusTo
 } from "./core/opcua-iiot-core";
 import coreBrowser, {BrowserInputPayloadLike} from "./core/opcua-iiot-core-browser";
-import {NodeAPI, NodeDef, NodeMessage, NodeStatus} from "node-red";
+import {Node, NodeAPI, NodeDef, NodeMessage, NodeStatus} from "node-red";
 import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
-import {InjectMessage, InjectPayload} from "./opcua-iiot-inject";
+import {InjectPayload} from "./opcua-iiot-inject";
 import {DataValue} from "node-opcua";
-import {ErrorCallback} from "node-opcua-status-code";
-import {rest} from "underscore";
 
 interface OPCUAIIoTCrawler extends Node {
   name: string
