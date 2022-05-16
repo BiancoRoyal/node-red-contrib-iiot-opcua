@@ -8,7 +8,7 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
+import {OPCUASession, Todo} from "../types/placeholders";
 
 import debug from 'debug';
 import {coerceNodeId} from "node-opcua";
@@ -45,7 +45,7 @@ const getArgumentDefinition = function (session: Todo, msg: Todo) {
     })
 }
 
-const callMethods = function (session: Todo, msg: Todo) {
+const callMethods = function (session: OPCUASession, msg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -53,9 +53,8 @@ const callMethods = function (session: Todo, msg: Todo) {
       } else {
         try {
           msg.payload.inputArguments.forEach(function (element: Todo) {
-            element.value = convertDataValueByDataType({ value: element.value, dataType: element.dataType }, element.dataType)
+            element.value = convertDataValueByDataType(element.value, element.dataType)
           })
-
           let methodCalls = [{
             objectId: coerceNodeId(msg.payload.objectId),
             methodId: coerceNodeId(msg.payload.methodId),

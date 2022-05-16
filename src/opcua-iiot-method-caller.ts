@@ -126,7 +126,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         let outputArguments = []
         let message = Object.assign({}, data.msg)
         message.payload.nodetype = 'method'
-        message.payload.methodType = data.msg.methodType
+        message.payload.methodType = data.msg.payload.methodType
 
         for (result of data.results) {
           outputArguments.push({ statusCode: result.statusCode, outputArguments: result.outputArguments })
