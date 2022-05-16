@@ -671,12 +671,17 @@ module.exports = function (RED: nodered.NodeAPI) {
       renewConnection(done)
     }
 
+    const normalizeCapitalization = (input: string): string => {
+      if (!input.length) return input
+      return input[0].toUpperCase() + input.substring(1).toLowerCase()
+    }
+
     const updateSettings = (config: OPCUAIIoTConnectorConfigurationDef) => {
       this.discoveryUrl = config.discoveryUrl || this.discoveryUrl
       this.endpoint = config.endpoint || this.endpoint
       this.keepSessionAlive = config.keepSessionAlive || this.keepSessionAlive
       this.securityPolicy = coerceSecurityPolicy(config.securityPolicy || this.securityPolicy)
-      this.messageSecurityMode = coerceMessageSecurityMode(config.securityMode || this.messageSecurityMode)
+      this.messageSecurityMode = coerceMessageSecurityMode(normalizeCapitalization((config.securityMode || this.messageSecurityMode) as string))
       this.name = config.name || this.name
       this.showErrors = config.showErrors || this.showErrors
       this.publicCertificateFile = config.publicCertificateFile || this.publicCertificateFile
