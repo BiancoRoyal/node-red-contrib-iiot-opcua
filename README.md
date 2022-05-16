@@ -33,6 +33,14 @@ solution: `npm install -D read-pkg-up@7.0.1`
     1. `cd <...>/Node-RED`
     1. `DEBUG=opcuaIIoT:* npm run start  -- --verbose`
 
+# Docker
+
+### Building an image
+
+```bash
+bash build.sh <image_tag>
+```
+
 # node-red-contrib-iiot-opcua
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][8] based on [node-opcua][9].
