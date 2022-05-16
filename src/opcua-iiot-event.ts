@@ -8,16 +8,42 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo} from "./core/placeholder-types";
+
+interface OPCUAIIoTEvent extends nodered.Node {
+  eventType: string
+  eventTypeLabel: string
+  resultType: string
+  queueSize: string
+  usingListener: string
+  name: string
+  showStatusActivities: boolean
+  showErrors: boolean
+  bianco?: Todo
+}
+
+interface OPCUAIIoTEventDef extends nodered.NodeDef {
+  eventType: string
+  eventTypeLabel: string
+  resultType: string
+  queueSize: string
+  usingListener: string
+  name: string
+  showStatusActivities: boolean
+  showErrors: boolean
+}
+
 /**
  * Event Node-RED node.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
   let coreListener = require('./core/opcua-iiot-core-listener')
 
-  function OPCUAIIoTEvent (config) {
+  function OPCUAIIoTEvent (this: OPCUAIIoTEvent, config: OPCUAIIoTEventDef) {
     RED.nodes.createNode(this, config)
     this.eventType = config.eventType
     this.eventTypeLabel = config.eventTypeLabel
