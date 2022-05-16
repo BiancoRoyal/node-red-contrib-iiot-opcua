@@ -83,7 +83,7 @@ const constructAddressSpaceFromScript = function (server: Todo, constructAddress
 
 const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
   return new Promise(
-    function (resolve, reject) {
+    (resolve, reject) => {
       if (!server) {
         reject(new Error('Server Not Valid To Construct Address Space'))
         return
@@ -100,10 +100,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
 
       let view = namespace.addView({
         organizedBy: addressSpace?.rootFolder.views,
-        browseName: 'BiancoRoyalView',
+        browseName: 'IiotServerView',
         displayName: [
-          new LocalizedText({ text: 'Bianco Royal View', locale: 'en-US' }),
-          new LocalizedText({ text: 'Bianco Royal Sicht', locale: 'de-DE' })
+          new LocalizedText({ text: 'OPCUA-IIoT Server View', locale: 'en-US' }),
+          new LocalizedText({ text: 'OPCUA-IIoT Server Sicht', locale: 'de-DE' })
         ]
       })
       if (!asoDemo) {
@@ -124,12 +124,11 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: addressSpace.rootFolder.objects,
           typeDefinition: 'FolderType',
           nodeId: 'i=1234',
-          browseName: 'BiancoRoyal',
+          browseName: 'IiotServer',
           displayName: [
-            new LocalizedText({ text: 'Bianco Royal', locale: 'en-US' }),
-            new LocalizedText({ text: 'Bianco Royal', locale: 'de-DE' })
+            new LocalizedText({ text: 'OPCUA-IIoT Server', locale: 'en-US' }),
+            new LocalizedText({ text: 'OPCUA-IIoT Server', locale: 'de-DE' })
           ],
-          description: 'Bianco Royal - Software Innovations®'
         })
 
         let variable1 = 1
@@ -847,12 +846,13 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
   // const SecurityPolicy = require("node-opcua").SecurityPolicy;
 
   return {
-    port: node.port,
+    defaultSecureTokenLifetime: 60000000,
+    port: typeof node.port === 'string' ? parseInt(node.port) : node.port,
     nodeset_filename: node.iiot.xmlFiles,
-    resourcePath: node.endpoint || 'UA/NodeRED' + prefix + 'IIoTServer',
+    resourcePath: '/' + node.endpoint || 'UA/NodeRED' + prefix + 'IIoTServer',
     buildInfo: {
       productName: node.name || 'NodeOPCUA IIoT Server',
-      buildNumber: today.getTime(),
+      buildNumber: today.getTime().toString(),
       buildDate: today
     },
     serverCapabilities: {
@@ -863,7 +863,7 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
     },
     serverInfo: {
       // applicationType: ApplicationType.CLIENTANDSERVER,
-      applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), createServerNameWithPrefix(node.port, prefix)),
+      // applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), createServerNameWithPrefix(node.port, prefix)),
       productUri: createServerNameWithPrefix(node.port, prefix),
       applicationName: { text: 'Node-RED', locale: 'en' },
       gatewayServerUri: null,
@@ -879,7 +879,7 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
       SecurityPolicy.Basic256Sha256
     ], */
     certificateFile: node.publicCertificateFile,
-    privateKeyFile: node.privateCertificateFile,
+    // privateKeyFile: node.privateCertificateFile,
     alternateHostname: node.alternateHostname || '',
     userManager: null,
     isAuditing: node.isAuditing,
@@ -888,7 +888,7 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
   }
 }
 
-const createServerObject = function (maxSubscriptions: number, serverOptions: Todo) {
+const createServerObject = async (maxSubscriptions: number, serverOptions: Todo) => {
   OPCUAServer.MAX_SUBSCRIPTION = maxSubscriptions
   return new OPCUAServer(serverOptions)
 }

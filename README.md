@@ -35,6 +35,15 @@ solution: `npm install -D read-pkg-up@7.0.1`
 
 # Docker
 
+### Using the image
+The image has been uploaded to the Conti Artifactory as `ct-it-dtq-edge-docker-l.eu.artifactory.conti.de/datatroniq/node-red`
+Valid tags:
+- `0.0.1`
+- `latest` (currently same image as 0.0.1)
+
+### Current State
+The browse, crawl, result-filter, and server nodes are currently guaranteed to work. All others should work, but may behave slightly differently than expected. 
+
 ### Building an image
 
 ```bash

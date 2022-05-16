@@ -13,14 +13,13 @@ import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {isInitializedIIoTNode, resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {NodeStatus} from "node-red";
-import {OPCUAServer} from "node-opcua";
 
 type OPCUAIIoTServer =  nodered.Node & {
-  asoDemo: string
+  asoDemo: boolean
   on(event: 'shutdown', listener: () => void): void
 }
 interface OPCUAIIoTServerDef extends nodered.NodeDef {
-  asoDemo: string
+  asoDemo: boolean
 }
 
 /**
@@ -39,7 +38,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     let node = coreServer.readConfigOfServerNode(this, config)
     node = coreServer.initServerNode(node)
     node = coreServer.loadNodeSets(node, __dirname)
-    node = coreServer.loadCertificates(node)
+    // node = coreServer.loadCertificates(node)
 
     const buildServerOptions = async () => {
       let serverOptions: Todo = await coreServer.buildServerOptions(node, 'Fix')
@@ -55,7 +54,9 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (RED.settings.verbose) {
         coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
-      node.iiot.opcuaServer = coreServer.createServerObject(node.maxAllowedSubscriptionNumber, serverOptions)
+      const options = await serverOptions
+
+      node.iiot.opcuaServer = await coreServer.createServerObject(node.maxAllowedSubscriptionNumber, options)
       node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
       await node.iiot.opcuaServer.initialize()
       postInitialize()
@@ -110,7 +111,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
       }
-
+      console.log(msg)
       switch (msg.injectType) {
         case 'ASO':
           changeAddressSpace(msg)
