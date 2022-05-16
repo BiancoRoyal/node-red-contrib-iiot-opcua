@@ -19,7 +19,7 @@ import {
   initCoreNode,
   isInitializedIIoTNode,
   isSessionBad, registerToConnector,
-  resetBiancoNode
+  resetIiotNode
 } from "./core/opcua-iiot-core";
 import {ReadValueIdOptions} from "node-opcua-service-read";
 import {NodeIdLike} from "node-opcua-nodeid";
@@ -239,8 +239,20 @@ module.exports = (RED: NodeAPI) => {
       return message
     }
 
+    const errorHandler = (err: Error, msg: NodeMessage) => {
+      this.error(err, msg)
+    }
+
+    const emitHandler = (msg: string) => {
+      this.emit(msg)
+    }
+
+    const statusHandler = (status: string | NodeStatus) => {
+      this.status(status)
+    }
+
     this.on('input', function (msg: NodeMessageInFlow, send: (msg: NodeMessage | Array<NodeMessage | NodeMessage[] | null>) => void, done: () => void) {
-      if (!checkConnectorState(node, msg, 'Read')) {
+      if (!checkConnectorState(node, msg, 'Read', errorHandler, emitHandler, statusHandler)) {
         return
       }
 
@@ -256,11 +268,17 @@ module.exports = (RED: NodeAPI) => {
       this.status(status)
     }
 
-    registerToConnector(node, setStatus)
+    const onAlias = (event: string, callback: () => void) => {
+      // @ts-ignore
+      this.on(event, callback)
+
+    }
+
+    registerToConnector(node, setStatus, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
       deregisterToConnector(node, () => {
-        resetBiancoNode(node)
+        resetIiotNode(node)
         done()
       })
     })

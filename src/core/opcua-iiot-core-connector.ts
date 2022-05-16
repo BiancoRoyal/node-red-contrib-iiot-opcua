@@ -5,11 +5,11 @@
  All rights reserved.
  node-red-contrib-iiot-opcua
  */
+
 'use strict'
 // SOURCE-MAP-REQUIRED
 
 import * as core from './opcua-iiot-core'
-import {OPCUAIIoTConnectorConfiguration} from '../opcua-iiot-connector'
 // @ts-ignore
 import * as Stately from 'stately.js'
 import {Todo} from "../types/placeholders";
@@ -176,7 +176,7 @@ function setListenerToClient(node: Todo) {
         logger.internalDebugLog('!!! Abort backoff !!!')
         logger.internalDebugLog('CONNECTION BROKEN: ' + node.endpoint)
 
-        if (node.iiot.isInactiveOnOPCUA()) {
+        if (node.functions.isInactiveOnOPCUA()) {
             logger.detailDebugLog('Connector Not Active On OPC UA Backoff Abort Event')
         } else {
             node.iiot.resetOPCUAConnection('Connector To Server Backoff Abort')
@@ -223,7 +223,7 @@ function setListenerToClient(node: Todo) {
 }
 
 function logSessionInformation(node: Todo) {
-    if (!node.iiot.opcuaSession) {
+    if (!node.iiot?.opcuaSession) {
         logger.detailDebugLog('Session Not Valid To Log Information')
         return
     }
@@ -257,12 +257,12 @@ function logSessionInformation(node: Todo) {
     }
 }
 
-function checkEndpoint(node: Todo) {
-    if (node.endpoint && node.endpoint.includes('opc.tcp://')) {
+function checkEndpoint(endpoint: string, errorHandler: (err: Error) => void) {
+    if (endpoint && endpoint.includes('opc.tcp://')) {
         return true
     } else {
-        logger.internalDebugLog('Endpoint Not Valid -> ' + node.endpoint)
-        node.error(new Error('endpoint does not include opc.tcp://'), {payload: 'Client Endpoint Error'})
+        logger.internalDebugLog('Endpoint Not Valid -> ' + endpoint)
+        errorHandler(new Error('endpoint does not include opc.tcp://'))
         return false
     }
 }

@@ -8,7 +8,6 @@
  */
 'use strict'
 
-import * as nodered from "node-red";
 import {BrowserNode, Todo} from "./types/placeholders";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {
@@ -17,14 +16,15 @@ import {
   checkItemForUnsetState, checkSessionNotValid,
   deregisterToConnector, FAKTOR_SEC_TO_MSEC,
   registerToConnector,
-  resetBiancoNode,
+  resetIiotNode,
   setNodeStatusTo
 } from "./core/opcua-iiot-core";
-import coreBrowser from "./core/opcua-iiot-core-browser";
-import {NodeStatus} from "node-red";
-import {browseAll} from "node-opcua";
+import coreBrowser, {BrowserInputPayloadLike} from "./core/opcua-iiot-core-browser";
+import {NodeAPI, NodeDef, NodeMessage, NodeStatus} from "node-red";
+import {browseAll, OPCUAClient} from "node-opcua";
+import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
 
-interface OPCUAIIoTCrawler extends nodered.Node {
+interface OPCUAIIoTCrawler extends Node {
   name: string
   justValue: Todo
   singleResult: Todo
@@ -37,7 +37,7 @@ interface OPCUAIIoTCrawler extends nodered.Node {
   delayPerMessage: number
   connector: Node
 }
-interface OPCUAIIoTCrawlerDef extends nodered.NodeDef {
+interface OPCUAIIoTCrawlerDef extends NodeDef {
   name: string
   justValue: Todo
   singleResult: Todo
@@ -55,7 +55,7 @@ interface OPCUAIIoTCrawlerDef extends nodered.NodeDef {
  *
  * @param RED
  */
-module.exports = (RED: nodered.NodeAPI) => {
+module.exports = (RED: NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
   function OPCUAIIoTCrawler (this: OPCUAIIoTCrawler & Todo, config: OPCUAIIoTCrawlerDef) {
@@ -78,11 +78,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       ...this,
       ...coreBrowser.initBrowserNode()
     }
-    //
-    // let node = {
-    //   ...this,
-    //   ...coreBrowser.initBrowserNode()
-    // }
+
     nodeConfig.iiot.delayMessageTimer = []
 
     const filterCrawlerResults = function (crawlerResultToFilter: Todo[]) {
@@ -91,7 +87,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       if (nodeConfig.activateFilters && nodeConfig.filters && nodeConfig.filters.length > 0) {
         crawlerResult.forEach(function (item) {
-          if (nodeConfig.iiot.itemIsNotToFilter(item)) {
+          if (itemIsNotToFilter(item)) {
             filteredEntries.push(item)
           }
         })
@@ -121,7 +117,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return (nodeConfig.negateFilter) ? !result : result
     }
 
-    const crawl = function (session: Todo, msg: Todo) {
+    const crawl = function (session: Todo, msg: BrowserInputPayloadLike, statusHandler: (status: string | NodeStatus) => void) {
       if (checkSessionNotValid(nodeConfig.iiot.opcuaSession, 'Crawler')) {
         return
       }
@@ -129,46 +125,50 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreBrowser.internalDebugLog('Browse Topic To Call Crawler ' + nodeConfig.browseTopic)
 
       if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter) {
-        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'crawling', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities)
+        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'crawling', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
       }
-
       coreBrowser.crawl(session, nodeConfig.browseTopic, msg)
         .then(function (result: Todo) {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
           sendMessage(result.message, filterCrawlerResults(result.crawlerResult))
         }).catch(function (err: Todo) {
-          coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
-
+          coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
         })
     }
 
-    const crawlForSingleResult = function (session: Todo, msg: Todo) {
+    const callError = (err: Error, msg: NodeMessageInFlow) => {
+      this.error(err, msg)
+    }
+    const statusHandler = (status: string | NodeStatus) => {
+      this.status(status)
+    }
+
+    const crawlForSingleResult = function (session: Todo, msg: BrowserInputPayloadLike) {
       coreBrowser.crawlAddressSpaceItems(session, msg)
         .then(function (result: Todo) {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
           sendMessage(result.message, filterCrawlerResults(result.crawlerResult))
         }).catch(function (err: Todo) {
-          coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
+          coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
         })
     }
 
-    const crawlForResults = function (session: Todo, msg: Todo) {
-      msg.addressSpaceItems.map((entry: Todo) => {
+    const crawlForResults = function (session: NodeCrawlerClientSession, msg: BrowserInputPayloadLike) {
+      msg.addressSpaceItems?.map((entry) => {
         coreBrowser.crawl(session, entry.nodeId, msg)
           .then(function (result: Todo) {
             coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
             sendMessage(result.message, filterCrawlerResults(result.crawlerResult))
           }).catch(function (err: Todo) {
-            coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
+            coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
           })
       })
     }
 
-    const crawlNodeList = function (session: Todo, msg: Todo) {
+    const crawlNodeList = function (session: NodeCrawlerClientSession, msg: BrowserInputPayloadLike) {
       if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter) {
-        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'crawling', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities)
+        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'crawling', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
       }
-
       if (nodeConfig.singleResult) {
         crawlForSingleResult(session, msg)
       } else {
@@ -176,7 +176,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const sendMessage = function (originMessage: Todo, crawlerResult: Todo) {
+    const sendMessage = (originMessage: Todo, crawlerResult: Todo) => {
       let msg = Object.assign({}, originMessage)
       msg.nodetype = 'crawl'
 
@@ -189,7 +189,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       } catch (err: any) {
         coreBrowser.internalDebugLog(err)
         if (nodeConfig.showErrors) {
-          nodeConfig.error(err, msg)
+          this.error(err, msg)
         }
         msg.resultsConverted = JSON.stringify(results, null, 2)
         msg.error = err.message
@@ -202,7 +202,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (!nodeConfig.justValue) {
         msg.payload.crawlerResultsCount = crawlerResult.length
         if (nodeConfig.connector) {
-          msg.payload.endpoint = (nodeConfig.connector as Todo).endpoint
+          msg.payload.endpoint = nodeConfig.connector.endpoint
         }
         msg.payload.session = nodeConfig.iiot.opcuaSession.name || 'none'
       }
@@ -210,13 +210,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       nodeConfig.iiot.messageList.push(msg)
 
       if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter) {
-        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'active', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities)
+        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'active', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
       }
 
       // TODO: maybe here RED.util.set ...
 
       nodeConfig.iiot.delayMessageTimer.push(setTimeout(() => {
-        nodeConfig.send(nodeConfig.iiot.messageList.shift())
+        this.send(nodeConfig.iiot.messageList.shift())
       }, nodeConfig.delayPerMessage * FAKTOR_SEC_TO_MSEC))
     }
 
@@ -227,44 +227,51 @@ module.exports = (RED: nodered.NodeAPI) => {
       })
     }
 
-    const startCrawling = function (msg: Todo) {
+    const startCrawling = async (msg: BrowserInputPayloadLike) => {
+      if (!nodeConfig.iiot.opcuaSession) {
+        nodeConfig.connector.iiot.stateMachine.initopcua()
+        const returnCode = await nodeConfig.connector.functions.waitForExist(nodeConfig.connector.iiot, 'opcuaSession').catch((err: Error) => {return -1})
+      }
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
-        crawl(nodeConfig.iiot.opcuaSession, msg)
-      } else {
-        if (msg.addressItemsToBrowse) {
-          msg.addressSpaceItems = msg.addressItemsToBrowse
-        }
+        crawl(nodeConfig.iiot.opcuaSession, msg, statusHandler)
 
+      } else {
         if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
           coreBrowser.internalDebugLog('Start Crawling On AddressSpace Items')
-          crawlNodeList(nodeConfig.iiot.opcuaSession, msg)
+          crawlNodeList(nodeConfig.connector.iiot.opcuaSession, msg)
         } else {
-          nodeConfig.error(new Error('No AddressSpace Items Or Root To Crawl'), msg)
+          this.error(new Error('No AddressSpace Items Or Root To Crawl'), msg)
         }
       }
+    }
+
+    const errorHandler = (err: Error, msg: NodeMessage) => {
+      this.error(err, msg)
     }
 
     const setStatus = (status: string | NodeStatus) => {
       this.status(status)
     }
 
-    this.on('input', function (msg: NodeMessageInFlow) {
-      console.log('HELLO THERE!!!')
-      console.log(msg)
-      if (!checkConnectorState(nodeConfig, msg, 'Crawler')) {
-        return
-      }
+    const emitHandler = (msg: string) => {
+      this.emit(msg)
+    }
 
-      nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, nodeConfig)
-      startCrawling(msg)
-      console.log(nodeConfig.browseTopic)
+    const onAlias = (event: string, callback: () => void) => {
+      this.on(event, callback)
+    }
+
+    this.on('input', function (msg: NodeMessageInFlow) {
+
+      nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic((msg.payload as BrowserInputPayloadLike), nodeConfig)
+      startCrawling((msg.payload as BrowserInputPayloadLike)).finally()
     })
 
-    registerToConnector(this, setStatus)
+    registerToConnector(this, setStatus, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
       deregisterToConnector(this, () => {
-        resetBiancoNode(this)
+        resetIiotNode(this)
         done()
       })
     })

@@ -16,11 +16,28 @@ import {BrowseDirection, NodeCrawler} from "node-opcua";
 import debug from 'debug';
 import {Node, NodeStatus} from "node-red";
 import {NodeMessageInFlow} from "@node-red/registry";
+import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
 const crawlerInternalDebugLog =debug('opcuaIIoT:browser:crawler') // eslint-disable-line no-use-before-define
 const crawlerDetailDebugLog =debug('opcuaIIoT:browser:crawler:details') // eslint-disable-line no-use-before-define
+
+export type BrowserInputPayload = {
+  root: Todo
+  actiontype: string
+  addressSpaceItems: NodeItem[]
+}
+
+type NodeItem = {
+  name: string
+  nodeId: string
+  datatypeName: string
+}
+
+export type BrowserInputPayloadLike = {
+  [k in keyof BrowserInputPayload]?: BrowserInputPayload[k]
+}
 
 
 const browse = function (session: Todo, nodeIdToBrowse: Todo) {
@@ -88,18 +105,17 @@ const browseAddressSpaceItems = function (session: Todo, addressSpaceItems: Todo
   )
 }
 
-const createCrawler = function (session: Todo) {
+const createCrawler = function (session: NodeCrawlerClientSession) {
   return new NodeCrawler(session)
 }
 
-const crawl = function (session: Todo, nodeIdToCrawl: Todo, msg: Todo) {
+const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: string, msg: BrowserInputPayloadLike) => {
   return new Promise(
-    function (resolve, reject) {
+    async (resolve, reject) => {
       if (!nodeIdToCrawl) {
         reject(new Error('NodeId To Crawl Not Valid'))
         return
       }
-
       const message = Object.assign({}, msg)
       const crawler = coreBrowser.createCrawler(session)
       let crawlerResult: Todo[] = []
@@ -110,14 +126,16 @@ const crawl = function (session: Todo, nodeIdToCrawl: Todo, msg: Todo) {
           NodeCrawler.follow(crawler, cacheNode, this)
         }
       }
-
-      crawler.crawl(nodeIdToCrawl, data, function (err) {
-        if (err) {
-          reject(err)
-        } else {
-          resolve({ rootNodeId: nodeIdToCrawl, message, crawlerResult })
-        }
-      })
+      try {
+        await crawler.crawl(nodeIdToCrawl, data, function (err) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve({rootNodeId: nodeIdToCrawl, message, crawlerResult})
+          }
+        })
+      } catch (err) {
+      }
     })
 }
 
@@ -165,13 +183,13 @@ const browseToRoot = function () {
   return OBJECTS_ROOT
 }
 
-const extractNodeIdFromTopic = function (msg: Todo, node: Todo) {
+const extractNodeIdFromTopic = function (payload: BrowserInputPayloadLike, node: Todo) {
   let rootNodeId = null
 
-  if (msg.payload.actiontype === 'browse') { // event driven browsing
-    if (msg.payload.root && msg.payload.root.nodeId) {
-      internalDebugLog('Root Selected External ' + msg.payload.root)
-      rootNodeId = msg.payload.root.nodeId
+  if (payload.actiontype === 'browse') { // event driven browsing
+    if (payload.root && payload.root.nodeId) {
+      internalDebugLog('Root Selected External ' + payload.root)
+      rootNodeId = payload.root.nodeId
     } else {
       rootNodeId = node.nodeId
     }
@@ -220,13 +238,23 @@ const initBrowserNode = function (): BrowserNodeAttributes {
   }
 }
 
-const browseErrorHandling = function (node: BrowserNode, err: Error, msg: Todo, lists: Todo, oldStatusParameter: NodeStatus | undefined = undefined, showErrors: boolean = true, showStatusActivities: boolean = true) {
+const browseErrorHandling = function (
+  node: BrowserNode,
+  err: Error,
+  msg: Todo,
+  lists: Todo,
+  errorHandler: (err: Error, msg: NodeMessageInFlow) => void,
+  statusHandler: (status: string | NodeStatus) => void,
+  oldStatusParameter: NodeStatus | undefined = undefined,
+  showErrors: boolean = true,
+  showStatusActivities: boolean = true,
+) {
   let results = lists?.browserResults || []
 
   if (err) {
     internalDebugLog(typeof node + 'Error ' + err)
     if (showErrors) {
-      node.error(err, msg)
+      errorHandler(err, msg)
     }
 
     if (isSessionBad(err)) {
@@ -240,7 +268,7 @@ const browseErrorHandling = function (node: BrowserNode, err: Error, msg: Todo, 
   }
 
   if (showStatusActivities && oldStatusParameter) {
-    node.oldStatusParameter = setNodeStatusTo(node, 'error', oldStatusParameter, showStatusActivities)
+    node.oldStatusParameter = setNodeStatusTo(node, 'error', oldStatusParameter, showStatusActivities, statusHandler)
   }
 }
 

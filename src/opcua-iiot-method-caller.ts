@@ -8,7 +8,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Node} from "@node-red/registry";
+import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {Todo} from "./types/placeholders";
 import coreMethod from "./core/opcua-iiot-core-method";
 import {
@@ -16,8 +16,9 @@ import {
   deregisterToConnector,
   initCoreNode, isInitializedIIoTNode,
   isSessionBad,
-  registerToConnector, resetBiancoNode
+  registerToConnector, resetIiotNode
 } from "./core/opcua-iiot-core";
+import {NodeMessage, NodeStatus} from "node-red";
 
 interface OPCUAIIoTMethodCaller extends nodered.Node {
   objectId: string
@@ -152,8 +153,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       })
     }
 
+    const errorHandler = (err: Error, msg: NodeMessage) => {
+      this.error(err, msg)
+    }
+
+    const emitHandler = (msg: string) => {
+      this.emit(msg)
+    }
+
+    const statusHandler = (status: string | NodeStatus) => {
+      this.status(status)
+    }
+
     node.on('input', function (msg: Todo) {
-      if (!checkConnectorState(node, msg, 'MethodCaller')) {
+      if (!checkConnectorState(node, msg, 'MethodCaller', errorHandler, emitHandler, statusHandler)) {
         return
       }
 
@@ -164,11 +177,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       node.iiot.callMethodOnSession(node.iiot.opcuaSession, message)
     })
 
-    registerToConnector(node as Todo)
+    const onAlias = (event: string, callback: (...args: any) => void) => {
+      if (event == "input") {
+        this.on(event, callback)
+      } else if (event === "close") {
+        this.on(event, callback)
+      }
+      else this.error('Invalid event to listen on')
+    }
+
+    registerToConnector(node as Todo, statusHandler, onAlias, errorHandler)
 
     node.on('close', (done: () => void) => {
       deregisterToConnector(node as Todo, () => {
-        resetBiancoNode(node)
+        resetIiotNode(node)
         done()
       })
     })

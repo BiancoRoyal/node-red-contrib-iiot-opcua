@@ -17,7 +17,7 @@ describe('OPC UA Core Listener', function () {
 
   describe('Parameter', function () {
     it('should return Event Subscribtion Parameters', function (done) {
-      let sut = coreListener.getEventSubscribtionParameters(TIME_IN_MILLISECONDS)
+      let sut = coreListener.getEventSubscriptionParameters(TIME_IN_MILLISECONDS)
       expect(sut).to.be.an('object').that.has.property('requestedPublishingInterval', TIME_IN_MILLISECONDS)
       expect(sut).to.be.an('object').that.has.property('requestedLifetimeCount', 1000 * 60 * 20)
       expect(sut).to.be.an('object').that.has.property('requestedMaxKeepAliveCount', 120)

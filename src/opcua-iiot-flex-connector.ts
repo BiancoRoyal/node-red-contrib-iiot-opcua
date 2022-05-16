@@ -9,7 +9,8 @@
 import * as nodered from "node-red";
 import {NodeObject, Todo, TodoBianco} from "./types/placeholders";
 import coreConnector from "./core/opcua-iiot-core-connector";
-import {deregisterToConnector, registerToConnector, resetBiancoNode} from "./core/opcua-iiot-core";
+import {deregisterToConnector, registerToConnector, resetIiotNode} from "./core/opcua-iiot-core";
+import {NodeMessage, NodeStatus} from "node-red";
 
 export interface OPCUAIIoTFlexConnector extends nodered.Node {
   showStatusActivities: boolean
@@ -52,7 +53,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         if (msg.payload.endpoint && msg.payload.endpoint.includes('opc.tcp:')) {
           coreConnector.internalDebugLog('connector change possible')
           coreConnector.internalDebugLog(msg.payload)
-          node.connector.bianco.iiot.restartWithNewSettings(msg.payload, () => {
+          node.connector.functions.restartWithNewSettings(msg.payload, () => {
             coreConnector.internalDebugLog('connector change injected')
             node.send(msg)
           })
@@ -66,11 +67,30 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     })
 
-    registerToConnector((node as Todo))
+    const statusHandler = (status: string | NodeStatus) => {
+      this.status(status)
+    }
+
+    const errorHandler = (err: Error, msg: NodeMessage) => {
+      this.error(err, msg)
+    }
+
+    const onAlias = (event: string, callback: (...args: any) => void) => {
+      if (event == "input") {
+        this.on(event, callback)
+      } else if (event === "close") {
+        this.on(event, callback)
+      }
+      else this.error('Invalid event to listen on')
+    }
+
+    registerToConnector((node as Todo), statusHandler, onAlias, errorHandler)
+
+
 
     node.on('close', (done: () => void) => {
       deregisterToConnector((node as Todo), () => {
-        resetBiancoNode(node)
+        resetIiotNode(node)
         done()
       })
     })

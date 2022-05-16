@@ -321,7 +321,7 @@ describe('OPC UA Core', function () {
         }
       }
       core.setNodeStatusTo = function (node, state) {
-        if (state === 'active' && node.bianco.iiot.opcuaSession === node.connector.bianco.iiot.opcuaSession) {
+        if (state === 'active' && node.iiot.opcuaSession === node.connector.bianco.iiot.opcuaSession) {
           done()
         }
       }

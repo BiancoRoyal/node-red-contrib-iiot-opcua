@@ -25,9 +25,10 @@ import {
   checkSessionNotValid, deregisterToConnector,
   initCoreNode,
   isInitializedIIoTNode,
-  isSessionBad, registerToConnector, resetBiancoNode
+  isSessionBad, registerToConnector, resetIiotNode
 } from "./core/opcua-iiot-core";
 import {WriteValueOptions} from "node-opcua-service-write";
+import {NodeMessage, NodeStatus} from "node-red";
 
 
 interface OPCUAIIoTWrite extends nodered.Node {
@@ -141,8 +142,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       return message
     }
 
+    const errorHandler = (err: Error, msg: NodeMessage) => {
+      this.error(err, msg)
+    }
+
+    const emitHandler = (msg: string) => {
+      this.emit(msg)
+    }
+
+    const statusHandler = (status: string | NodeStatus): void => {
+      this.status(status)
+    }
+
     node.on('input', (msg: NodeMessageInFlow) => {
-      if (!checkConnectorState(node, msg, 'Write')) {
+      if (!checkConnectorState(node, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
         return
       }
       // recursivePrintTypes(msg);
@@ -157,11 +170,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     })
 
-    registerToConnector(node)
+    const onAlias = (event: string, callback: (...args: any) => void) => {
+      if (event == "input") {
+        this.on(event, callback)
+      } else if (event === "close") {
+        this.on(event, callback)
+      }
+      else this.error('Invalid event to listen on')
+    }
+
+    registerToConnector(node, statusHandler, onAlias, errorHandler)
 
     node.on('close', (done: TodoVoidFunction) => {
       deregisterToConnector(node, () => {
-        resetBiancoNode(node)
+        resetIiotNode(node)
         done()
       })
     })

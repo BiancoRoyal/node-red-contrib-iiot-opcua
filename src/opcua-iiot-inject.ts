@@ -10,7 +10,7 @@
 import * as nodered from "node-red";
 import {recursivePrintTypes, Todo, TodoBianco} from "./types/placeholders";
 import coreInject from "./core/opcua-iiot-core-inject";
-import {resetBiancoNode} from "./core/opcua-iiot-core";
+import {resetIiotNode} from "./core/opcua-iiot-core";
 import {CronJob} from 'cron';
 import {NodeMessageInFlow} from "node-red";
 
@@ -211,7 +211,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         cronjob.stop()
         delete node['cronjob']
       }
-      resetBiancoNode(node)
+      resetIiotNode(node)
     }
   }
 

@@ -23,7 +23,7 @@ import {
     VariantType, WriteListItem, WriteMessage
 } from "../types/core";
 import {CoreNode, NodeObject, recursivePrintTypes, Todo} from "../types/placeholders";
-import nodeRed, {Node, NodeStatus} from "node-red";
+import nodeRed, {Node, NodeMessage, NodeStatus} from "node-red";
 import {NodeMessageInFlow, NodeStatusFill, NodeStatusShape} from "@node-red/registry";
 import {isArray, isNotDefined} from "../types/assertion";
 import {
@@ -38,6 +38,7 @@ import {
 } from "node-opcua";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
+import {ConnectorIIoT} from "../opcua-iiot-connector";
 
 export {Debug, os, underscore, nodeOPCUAId}
 
@@ -706,7 +707,7 @@ export function isSessionBad(err: Error) {
         err.toString().includes('Connection'))
 }
 
-export function setNodeInitalState(nodeState: string, node: Todo, statusCall?: (status: string | NodeStatus)=>  void) {
+export function setNodeInitalState(nodeState: string, node: Todo, statusCall: (status: string | NodeStatus)=>  void) {
     switch (nodeState) {
         case 'INITOPCUA':
         case 'SESSIONREQUESTED':
@@ -753,143 +754,152 @@ export function isNodeId(nodeId: NodeId) {
     }
 }
 
-export function checkConnectorState(node: Todo, msg: NodeMessageInFlow, callerType: Todo): boolean {
+export function checkConnectorState(
+  node: Todo,
+  msg: NodeMessageInFlow,
+  callerType: string,
+  errorHandler: (err: Error, msg: NodeMessageInFlow) => void,
+  emitHandler: (msg: string) => void,
+  statusHandler: (status: string | NodeStatus) => void
+): boolean {
     const state = node.connector?.iiot.stateMachine?.getMachineState()
     logger.internalDebugLog('Check Connector State ' + state + ' By ' + callerType)
-
     if (node.connector?.iiot?.stateMachine && state !== RUNNING_STATE) {
         logger.internalDebugLog('Wrong Client State ' + state + ' By ' + callerType)
         if (node.showErrors) {
-            node.error(new Error('Client Not ' + RUNNING_STATE + ' On ' + callerType), msg)
+            errorHandler(new Error('Client Not ' + RUNNING_STATE + ' On ' + callerType), msg)
         }
-        node.oldStatusParameter = setNodeStatusTo(node as Node, 'not running', node.oldStatusParameter, node.showStatusActivities)
-        node.emit('opcua_client_not_ready')
+        node.oldStatusParameter = setNodeStatusTo(node as Node, 'not running', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+        emitHandler('opcua_client_not_ready')
         return false
     } else {
         return true
     }
 }
 
-export function setNodeOPCUAConnected(node: NodeObject, opcuaClient: OPCUAClient): void {
+export function setNodeOPCUAConnected(node: Todo, opcuaClient: OPCUAClient, statusHandler: (status: string | NodeStatus) => void): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaClient = opcuaClient
     }
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUAClosed(node: NodeObject): void {
+export function setNodeOPCUAClosed(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
     if (isInitializedIIoTNode(node)) {
         // @ts-ignore
         node.iiot.opcuaClient = null
     }
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'disconnected', node.oldStatusParameter, node.showStatusActivities)
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'disconnected', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUALost(node: NodeObject): void {
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'lost', node.oldStatusParameter, node.showStatusActivities)
+export function setNodeOPCUALost(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'lost', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionStarted(node: NodeObject, opcuaSession: ClientSession): void {
+export function setNodeOPCUASessionStarted(node: Todo, opcuaSession: ClientSession, statusHandler: (status: string | NodeStatus) => void): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaSession = opcuaSession
     }
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'active', node.oldStatusParameter, node.showStatusActivities)
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionClosed(node: NodeObject): void {
+export function setNodeOPCUASessionClosed(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaSession = null
     }
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionRestart(node: NodeObject): void {
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'restart', node.oldStatusParameter, node.showStatusActivities)
+export function setNodeOPCUASessionRestart(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'restart', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionError(node: NodeObject): void {
+export function setNodeOPCUASessionError(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaSession = null
     }
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUARestart(node: NodeObject, opcuaClient: OPCUAClient): void {
+export function setNodeOPCUARestart(node: Todo, opcuaClient: OPCUAClient, statusHandler: (status: string | NodeStatus) => void): void {
     logger.internalDebugLog('Connector Restart')
     if (opcuaClient && isInitializedIIoTNode(node)) {
         node.iiot.opcuaClient = opcuaClient
     }
-    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function registerToConnector(node: NodeObject, statusCall?: (status: string | NodeStatus) =>  void) {
+type NodeWithConnector = {
+    connector: ConnectorIIoT
+}
+
+export function registerToConnector(node: NodeWithConnector, statusCall: (status: string | NodeStatus) =>  void, onAlias: (event: string, callback: () => void) => void, errorHandler: (err: Error, msg: NodeMessage) => void): void {
     if (!node) {
         logger.internalDebugLog('Node Not Valid On Register To Connector')
         return
     }
 
     if (isNotDefined(node.connector)) {
-        node.error(new Error('Connector Config Node Not Valid On Registering Client Node ' + node.id), {payload: 'No Connector Configured'})
+        errorHandler(new Error('Connector Config Node Not Valid On Registering Client Node ' + (node as unknown as Node).id), {payload: 'No Connector Configured'})
         return
     }
+    node.connector.functions?.registerForOPCUA(node, onAlias)
 
-    node.connector?.iiot.registerForOPCUA(node)
-
-    node.connector.on('connector_init', () => {
-        if (node.iiot.opcuaClient) {
+    node.connector.on('connector_init', (node: Todo) => {
+        if (node.iiot?.opcuaClient) {
             // @ts-ignore
             node.iiot.opcuaClient = null
         }
 
-        if (node.iiot.opcuaSession) {
+        if (node.iiot?.opcuaSession) {
             node.iiot.opcuaSession = null
         }
     })
 
-    node.connector.on('connection_started', (opcuaClient) => {
-        setNodeOPCUAConnected(node, opcuaClient)
+    node.connector.on('connection_started', (opcuaClient: OPCUAClient) => {
+        setNodeOPCUAConnected(node.connector, opcuaClient, statusCall)
     })
 
     node.connector.on('server_connection_close', () => {
-        setNodeOPCUAClosed(node)
+        setNodeOPCUAClosed(node.connector, statusCall)
     })
 
     node.connector.on('server_connection_abort', () => {
-        setNodeOPCUAClosed(node)
+        setNodeOPCUAClosed(node.connector, statusCall)
     })
 
     node.connector.on('connection_closed', () => {
-        setNodeOPCUAClosed(node)
+        setNodeOPCUAClosed(node.connector, statusCall)
     })
 
     node.connector.on('server_connection_lost', () => {
-        setNodeOPCUALost(node)
+        setNodeOPCUALost(node.connector, statusCall)
     })
 
     node.connector.on('reset_opcua_connection', () => {
-        setNodeOPCUASessionClosed(node)
+        setNodeOPCUASessionClosed(node.connector, statusCall)
     })
 
     node.connector.on('session_started', (opcuaSession: ClientSession) => {
-        setNodeOPCUASessionStarted(node, opcuaSession)
+        setNodeOPCUASessionStarted(node.connector, opcuaSession, statusCall)
     })
 
     node.connector.on('session_closed', () => {
-        setNodeOPCUASessionClosed(node)
+        setNodeOPCUASessionClosed(node.connector, statusCall)
     })
 
     node.connector.on('session_restart', () => {
-        setNodeOPCUAClosed(node)
+        setNodeOPCUAClosed(node.connector, statusCall)
     })
 
     node.connector.on('session_error', () => {
-        setNodeOPCUASessionError(node)
+        setNodeOPCUASessionError(node.connector, statusCall)
     })
 
     node.connector.on('after_reconnection', () => {
-        setNodeOPCUARestart(node, OPCUAClient.create(node.iiot.opcuaClient)) // TODO: investigate one args v two
+        setNodeOPCUARestart(node.connector, OPCUAClient.create((node.connector as Todo).iiot.opcuaClient), statusCall) // TODO: investigate one args v two
     })
-    setNodeInitalState(node.connector?.iiot.stateMachine?.getMachineState(), node, statusCall)
+    setNodeInitalState(node.connector?.iiot?.stateMachine?.getMachineState(), node, statusCall)
 }
 
 export function deregisterToConnector(node: NodeObject, done: () => void) {
@@ -907,7 +917,7 @@ export function deregisterToConnector(node: NodeObject, done: () => void) {
 
     node.connector.removeAllListeners()
     if (isInitializedIIoTNode(node.connector)) {
-        node.connector?.iiot.deregisterForOPCUA(node, done)
+        node.connector?.functions?.deregisterForOPCUA(node, done)
     }
 }
 
@@ -925,11 +935,14 @@ export function checkSessionNotValid(session: Todo, callerType: Todo) {
     return false
 }
 
-export function setNodeStatusTo(node: Node, statusValue: string, oldStatus: NodeStatus, showStatusActivities: boolean, status: (status: string | NodeStatus) => void = node.status): NodeStatus {
+export function setNodeStatusTo(node: Node, statusValue: string, oldStatus: NodeStatus, showStatusActivities: boolean, status: (status: string | NodeStatus) => void): NodeStatus {
     let statusParameter: NodeStatus = getNodeStatus(statusValue, showStatusActivities)
     if (!underscore.isEqual(oldStatus, statusParameter) && statusParameter) {
         logger.detailDebugLog('Node ' + node.id + ' Status To ' + statusValue)
-        status(statusParameter)
+        if (typeof status === "function")
+            status(statusParameter)
+        else
+            console.log("Status is not a function " + typeof status)
     }
     return statusParameter
 }
@@ -1062,8 +1075,8 @@ export function checkItemForUnsetState(node: Todo, item: Todo) {
     return result
 }
 
-export function resetBiancoNode(node: Todo) {
-    if (isInitializedIIoTNode(node) && node.iiot.resetAllTimer) {
+export function resetIiotNode(node: Todo) {
+    if (isInitializedIIoTNode(node.iiot) && node.iiot.resetAllTimer) {
         node.iiot.resetAllTimer()
     }
     if (isInitializedIIoTNode(node)) {
@@ -1103,8 +1116,8 @@ export function isNodeTypeToFilterResponse(msg: Todo) {
     return msg.nodetype === 'read' || msg.nodetype === 'browse' || msg.nodetype === 'crawl' || msg.nodetype === 'method'
 }
 
-export function isInitializedIIoTNode(node: Todo) {
-    return !!node.iiot
+export function isInitializedIIoTNode<T>(node: T | undefined): node is T {
+    return !!node
 }
 
 

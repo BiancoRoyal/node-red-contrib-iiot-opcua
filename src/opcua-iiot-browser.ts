@@ -9,17 +9,17 @@
 'use strict'
 import * as nodered from "node-red";
 import {Todo, TodoVoidFunction} from "./types/placeholders";
-import {Node} from "@node-red/registry";
+import {Node, NodeMessageInFlow} from "@node-red/registry";
 
 import coreBrowser from "./core/opcua-iiot-core-browser";
 import {
     checkConnectorState,
     checkSessionNotValid, deregisterToConnector,
     FAKTOR_SEC_TO_MSEC,
-    OBJECTS_ROOT, registerToConnector, resetBiancoNode,
+    OBJECTS_ROOT, registerToConnector, resetIiotNode,
     setNodeStatusTo
 } from "./core/opcua-iiot-core";
-import {NodeStatus} from "node-red";
+import {NodeMessage, NodeStatus} from "node-red";
 
 interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
     // todo
@@ -147,8 +147,12 @@ module.exports = function (RED: nodered.NodeAPI) {
                         coreBrowser.internalDebugLog('No Browse Results On ' + rootNodeId)
                     }
                 }).catch(function (err: Error) {
-                coreBrowser.browseErrorHandling(node, err, msg, lists)
+                coreBrowser.browseErrorHandling(node, err, msg, lists, callError, statusHandler)
             })
+        }
+
+        const callError = (err: Error, msg: NodeMessageInFlow): void => {
+            this.error(err, msg)
         }
 
         node.iiot.createListsObject = () => {
@@ -193,7 +197,7 @@ module.exports = function (RED: nodered.NodeAPI) {
                             callback(rootNode, depth, msg, lists)
                         }
                     }).catch(function (err: Error) {
-                    coreBrowser.browseErrorHandling(node, err, msg, lists)
+                    coreBrowser.browseErrorHandling(node, err, msg, lists, callError, statusHandler)
                 })
             }
         }
@@ -227,7 +231,7 @@ module.exports = function (RED: nodered.NodeAPI) {
             node.iiot.messageList.push(msg)
 
             if (node.showStatusActivities && node.oldStatusParameter.text !== 'active') {
-                node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities)
+                node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             }
 
             node.iiot.delayMessageTimer.push(setTimeout(() => {
@@ -338,25 +342,39 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
 
         this.on('input', function (msg: Todo) {
-            if (!checkConnectorState(node, msg, 'Browser')) {
+            if (!checkConnectorState(node, msg, 'Browser', errorHandler, emitHandler, statusHandler)) {
                 return
             }
 
             if (node.showStatusActivities) {
-                node.oldStatusParameter = setNodeStatusTo(node, 'browsing', node.oldStatusParameter, node.showStatusActivities)
+                node.oldStatusParameter = setNodeStatusTo(node, 'browsing', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             }
             node.iiot.startBrowser(msg)
         })
 
-        const setStatus = (status: string | NodeStatus) => {
+        const emitHandler = (msg: string) => {
+            this.emit(msg)
+        }
+
+        const errorHandler = (err: Error, msg: NodeMessage) => {
+            this.error(err, msg)
+        }
+
+        const statusHandler = (status: string | NodeStatus) => {
             this.status(status)
         }
 
-        registerToConnector(node, setStatus)
+        const onAlias = (event: string, callback: () => void) => {
+            // @ts-ignore
+            this.on(event, callback)
+
+        }
+
+        registerToConnector(node, statusHandler, onAlias, errorHandler)
 
         this.on('close', (done: () => void) => {
             deregisterToConnector(node, () => {
-                resetBiancoNode(node)
+                resetIiotNode(node)
                 done()
             })
         })

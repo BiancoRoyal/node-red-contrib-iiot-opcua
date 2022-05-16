@@ -9,7 +9,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Node} from "@node-red/registry";
+import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {Todo, TodoVoidFunction} from "./types/placeholders";
 
 interface OPCUAIIoTCMD extends nodered.Node {
@@ -45,12 +45,13 @@ import {
   checkSessionNotValid, deregisterToConnector,
   isInitializedIIoTNode,
   isNodeId,
-  isSessionBad, registerToConnector, resetBiancoNode,
+  isSessionBad, registerToConnector, resetIiotNode,
   setNodeStatusTo
 } from "./core/opcua-iiot-core";
 import {AttributeIds, ClientSubscription, DataValue, NodeId, StatusCodes} from "node-opcua";
 
 import coreClient from "./core/opcua-iiot-core-client";
+import {NodeMessage, NodeStatus} from "node-red";
 
 /**
  * Listener Node-RED node.
@@ -107,14 +108,14 @@ module.exports = (RED: nodered.NodeAPI) => {
     node.iiot.setSubscriptionEvents = function (subscription: Todo) {
       subscription.on('started', function () {
         coreListener.internalDebugLog('Subscription started')
-        setNodeStatusTo(node, 'started', node.oldStatusParameter, node.showStatusActivities)
+        setNodeStatusTo(node, 'started', node.oldStatusParameter, node.showStatusActivities, statusHandler)
         node.iiot.monitoredItems.clear()
         node.iiot.stateMachine.startsub()
       })
 
       subscription.on('terminated', function () {
         coreListener.internalDebugLog('Subscription terminated')
-        setNodeStatusTo(node, 'terminated', node.oldStatusParameter, node.showStatusActivities)
+        setNodeStatusTo(node, 'terminated', node.oldStatusParameter, node.showStatusActivities, statusHandler)
         node.iiot.stateMachine.terminatesub().idlesub()
         node.iiot.resetSubscription()
       })
@@ -124,7 +125,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         if (node.showErrors) {
           node.error(err, { payload: 'Internal Error' })
         }
-        setNodeStatusTo(node, 'error', node.oldStatusParameter, node.showStatusActivities)
+        setNodeStatusTo(node, 'error', node.oldStatusParameter, node.showStatusActivities, statusHandler)
         node.iiot.stateMachine.errorsub()
         node.iiot.resetSubscription()
       })
@@ -193,7 +194,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     node.iiot.updateSubscriptionStatus = function () {
       coreListener.internalDebugLog('listening' + ' (' + node.iiot.monitoredItems.size + ')')
-      setNodeStatusTo(node, 'listening' + ' (' + node.iiot.monitoredItems.size + ')', node.oldStatusParameter, node.showStatusActivities)
+      setNodeStatusTo(node, 'listening' + ' (' + node.iiot.monitoredItems.size + ')', node.oldStatusParameter, node.showStatusActivities, statusHandler)
     }
 
     node.iiot.handleMonitoringOfGroupedItems = function (msg: Todo) {
@@ -572,8 +573,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
+    const errorHandler = (err: Error, msg: NodeMessage) => {
+      this.error(err, msg)
+    }
+
+    const emitHandler = (msg: string) => {
+      this.emit(msg)
+    }
+
+    const statusHandler = (status: string | NodeStatus): void => {
+      this.status(status)
+    }
+
     node.on('input', function (msg: Todo) {
-      if (!checkConnectorState(node, msg, 'Listener')) {
+      if (!checkConnectorState(node, msg, 'Listener', errorHandler, emitHandler, statusHandler)) {
         return
       }
 
@@ -603,7 +616,16 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     })
 
-    registerToConnector(node)
+    const onAlias = (event: string, callback: (...args: any) => void) => {
+      if (event == "input") {
+        this.on(event, callback)
+      } else if (event === "close") {
+        this.on(event, callback)
+      }
+      else this.error('Invalid event to listen on')
+    }
+
+    registerToConnector(node, statusHandler, onAlias, errorHandler)
 
     if (node.connector) {
       node.connector.on('connector_init', () => {
@@ -662,7 +684,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       node.iiot.terminateSubscription(() => {
         node.iiot.opcuaSubscription = null
         deregisterToConnector(node, () => {
-          resetBiancoNode(node)
+          resetIiotNode(node)
           done()
         })
         coreListener.internalDebugLog('Close Listener Node')

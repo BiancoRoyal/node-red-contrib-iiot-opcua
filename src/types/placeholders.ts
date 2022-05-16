@@ -3,6 +3,7 @@ import {BrowseMessage, ItemNodeId, NodeIdentifier, NodeToWrite, VariantType} fro
 import {ClientSession, DataType, DataValue, NodeId} from "node-opcua";
 import {CoreMachineStates} from "../core/opcua-iiot-core-connector";
 import {Node, NodeStatus} from "node-red";
+import {OPCUAIIoTConnectorNode} from "../opcua-iiot-connector";
 
 export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): void => {
   if (depth == 1)
@@ -40,19 +41,13 @@ export const getEnumKeys = <O extends object, K extends keyof O>(obj: O): K[] =>
 
 export type NodeObject = {
   iiot: IIOT
-  connector?: NodeConnector
+  connector?: OPCUAIIoTConnectorNode
   id: NodeId
   showErrors?: boolean
   showStatusActivities: boolean
   oldStatusParameter: NodeStatus
   emit: (event: string, ...args: any[]) => void
   error: (err: Error, msg: Todo) => void
-}
-
-export type NodeConnector = {
-  iiot: IIOT
-  on: (event: string, callback: TodoVoidFunction) => void
-  removeAllListeners: () => void
 }
 
 export type CoreNode = {

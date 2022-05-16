@@ -29,6 +29,7 @@ import {
 
 import debug from 'debug'
 import path from 'path'
+import {NodeStatus} from "node-red";
 
 const internalDebugLog = debug('opcuaIIoT:server') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:server:details') // eslint-disable-line no-use-before-define
@@ -813,7 +814,7 @@ const deleteNOdeFromAddressSpace = function (node: Todo, msg: Todo) {
   }
 }
 
-const restartServer = function (node: Todo) {
+const restartServer = function (node: Todo, statusHandler: (status: string | NodeStatus) => void) {
   if (node.iiot.opcuaServer) {
     node.iiot.opcuaServer.shutdown(function () {
       node.emit('shutdown')
@@ -824,7 +825,7 @@ const restartServer = function (node: Todo) {
   }
 
   node.send({ payload: 'server shutdown' })
-  node.oldStatusParameter = setNodeStatusTo(node, 'shutdown', node.oldStatusParameter, node.showStatusActivities)
+  node.oldStatusParameter = setNodeStatusTo(node, 'shutdown', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
 const handleServerError = function (node: Todo, err: Error, msg: Todo) {

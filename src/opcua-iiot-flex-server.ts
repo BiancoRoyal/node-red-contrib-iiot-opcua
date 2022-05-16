@@ -11,7 +11,8 @@
 import * as nodered from "node-red";
 import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
-import {resetBiancoNode, setNodeStatusTo} from "./core/opcua-iiot-core";
+import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
+import {NodeStatus} from "node-red";
 
 interface OPCUAIIoTFlexServer extends nodered.Node {
 
@@ -119,7 +120,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreServer.flexDetailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
       node.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
-      setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities)
+      node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
       node.iiot.opcuaServer.initialize(node.iiot.postInitialize)
       coreServer.setOPCUAServerListener(node)
     }
@@ -144,12 +145,12 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreServer.constructAddressSpaceFromScript(node.iiot.opcuaServer, node.iiot.constructAddressSpaceScript, node.iiot.eventObjects)
         .then(function () {
           coreServer.start(node.iiot.opcuaServer, node).then(function () {
-            setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities)
+            node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             node.emit('server_running')
           }).catch(function (err: Error) {
             /* istanbul ignore next */
             node.emit('server_start_error')
-            setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities)
+            node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
           })
         }).catch(function (err: Error) {
@@ -182,9 +183,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
+    const statusHandler = (status: string | NodeStatus): void => {
+      this.status(status)
+    }
+
     node.iiot.restartServer = function () {
       coreServer.flexInternalDebugLog('Restart OPC UA Server')
-      coreServer.restartServer(node)
+      coreServer.restartServer(node, statusHandler)
 
       if (node.iiot.opcuaServer) {
         coreServer.flexInternalDebugLog('OPC UA Server restarted')
@@ -196,7 +201,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     node.on('close', function (done: () => void) {
       node.iiot.closeServer(() => {
         coreServer.flexInternalDebugLog('Close Server Node')
-        resetBiancoNode(node)
+        resetIiotNode(node)
         done()
       })
     })
