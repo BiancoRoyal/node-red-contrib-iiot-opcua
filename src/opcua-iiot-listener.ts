@@ -50,7 +50,7 @@ import {
   isSessionBad, registerToConnector, resetIiotNode,
   setNodeStatusTo
 } from "./core/opcua-iiot-core";
-import {AttributeIds, ClientSubscription, DataValue, StatusCodes} from "node-opcua";
+import {AttributeIds, ClientMonitoredItem, ClientSubscription, DataValue, StatusCodes} from "node-opcua";
 
 import coreClient from "./core/opcua-iiot-core-client";
 import {NodeMessage, NodeStatus} from "node-red";
@@ -109,10 +109,11 @@ module.exports = (RED: nodered.NodeAPI) => {
         ? coreListener.getEventSubscriptionParameters(timeMilliseconds)
         : coreListener.getSubscriptionParameters(timeMilliseconds);
 
+
       makeSubscription(options)
     }
 
-    const setSubscriptionEvents = (subscription: Todo) => {
+    const setSubscriptionEvents = (subscription: ClientSubscription) => {
       subscription.on('started', () => {
         coreListener.internalDebugLog('Subscription started')
         nodeConfig.oldStatusParameter = setNodeStatusTo(this, 'started', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
@@ -137,7 +138,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         resetSubscription()
       })
 
-      subscription.on('item_added', (monitoredItem: Todo) => {
+      subscription.on('item_added', (monitoredItem: ClientMonitoredItem) => {
         setMonitoring(monitoredItem)
         updateSubscriptionStatus()
       })
@@ -322,9 +323,9 @@ module.exports = (RED: nodered.NodeAPI) => {
           coreListener.eventDebugLog('Register Event Item ' + nodeIdToMonitor)
           coreListener.buildNewEventItem(nodeIdToMonitor, msg, nodeConfig.iiot.opcuaSubscription)
             .then(function (result: Todo) {
-              if (result.monitoredItem.monitoredItemId) {
-                coreListener.eventDebugLog('Event Item Registered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-                nodeConfig.iiot.monitoredASO.set(result.nodeId.toString(), {
+              if (result.monitoredItem.itemToMonitor.nodeId) {
+                coreListener.eventDebugLog('Event Item Registered ' + result.monitoredItem.itemToMonitor.nodeId + ' to ' + result.nodeId)
+                nodeConfig.iiot.monitoredASO.set(result?.nodeId?.toString(), {
                   monitoredItem: result.monitoredItem,
                   topic: msg.topic || nodeConfig.topic
                 })
@@ -359,10 +360,10 @@ module.exports = (RED: nodered.NodeAPI) => {
       handleEventSubscriptions(msg)
     }
 
-    const monitoredItemTerminated = (msg: any, monitoredItem: { monitoredItemId: string; }, nodeId: any, err: { message: string; }) => {
+    const monitoredItemTerminated = (msg: any, monitoredItem: Todo, nodeId: any, err: { message: string; }) => {
       if (err) {
-        if (monitoredItem && monitoredItem.monitoredItemId) {
-          coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.monitoredItemId)
+        if (monitoredItem && monitoredItem.itemToMonitor.nodeId) {
+          coreListener.internalDebugLog(err.message + ' on ' + monitoredItem.itemToMonitor.nodeId)
         } else {
           coreListener.internalDebugLog(err.message + ' on monitoredItem')
         }
@@ -377,8 +378,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreListener.internalDebugLog('updateMonitoredItemLists = UMIL')
 
       if (monitoredItem && monitoredItem.itemToMonitor) {
-        if (nodeConfig.iiot.monitoredItems.has(monitoredItem.monitoredItemId)) {
-          nodeConfig.iiot.monitoredItems.delete(monitoredItem.monitoredItemId)
+        if (nodeConfig.iiot.monitoredItems.has(monitoredItem?.itemToMonitor?.nodeId?.toString())) {
+          nodeConfig.iiot.monitoredItems.delete(monitoredItem?.itemToMonitor?.nodeId?.toString())
         }
 
         if (isNodeId(monitoredItem.itemToMonitor.nodeId)) {
@@ -387,10 +388,10 @@ module.exports = (RED: nodered.NodeAPI) => {
             nodeConfig.iiot.monitoredASO.delete(nodeId)
           }
         } else {
-          coreListener.internalDebugLog('UMIL monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
+          coreListener.internalDebugLog('UMIL monitoredItem NodeId is not valid Id:' + monitoredItem.itemToMonitor.nodeId)
           nodeConfig.iiot.monitoredASO.forEach(function (value: Todo, key: Todo, map: Todo) {
-            coreListener.internalDebugLog('UMIL monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItem.monitoredItemId)
-            if (value.monitoredItem.monitoredItemId && value.monitoredItem.monitoredItemId === monitoredItem.monitoredItemId) {
+            coreListener.internalDebugLog('UMIL monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItem.itemToMonitor.nodeId)
+            if (value.monitoredItem.itemToMonitor.nodeId && value.monitoredItem.itemToMonitor.nodeId === monitoredItem.itemToMonitor.nodeId) {
               coreListener.internalDebugLog('UMIL monitoredItem removed from ASO list' + key)
               map.delete(key)
             }
@@ -401,35 +402,34 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const setMonitoring = (monitoredItemToSet: Todo) => {
-      const monitoredItem = monitoredItemToSet
-      if (!monitoredItem || monitoredItem.monitoredItemId === void 0) {
-        coreListener.internalDebugLog('monitoredItem Id from server is not valid Id: ' + monitoredItem.monitoredItemId)
+    const setMonitoring = (monitoredItemToSet: ClientMonitoredItem) => {
+      const monitoredItem: ClientMonitoredItem = monitoredItemToSet
+      if (!monitoredItem) {
+        coreListener.internalDebugLog('monitoredItem Id from server is not valid Id: ' + monitoredItem)
         return
       }
-
       if (!isNodeId(monitoredItem.itemToMonitor.nodeId)) {
-        coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.monitoredItemId)
+        coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.itemToMonitor.nodeId)
       }
-
-      coreListener.internalDebugLog('add monitoredItem to list Id:' + monitoredItem.monitoredItemId + ' nodeId: ' + monitoredItem.itemToMonitor.nodeId)
-      nodeConfig.iiot.monitoredItems.set(monitoredItem.monitoredItemId, monitoredItem)
+      coreListener.internalDebugLog('add monitoredItem to list Id:' + monitoredItem.itemToMonitor.nodeId + ' nodeId: ' + monitoredItem.itemToMonitor.nodeId)
+      nodeConfig.iiot.monitoredItems.set(monitoredItem?.itemToMonitor?.nodeId?.toString(), monitoredItem)
 
       monitoredItem.on('initialized', function () {
-        coreListener.internalDebugLog('monitoredItem ' + monitoredItem.itemToMonitor.nodeId + ' initialized on ' + monitoredItem.monitoredItemId)
+        coreListener.internalDebugLog('monitoredItem ' + monitoredItem.itemToMonitor.nodeId + ' initialized on ' + monitoredItem.itemToMonitor.nodeId)
       })
 
-      monitoredItem.on('changed', function (dataValue: DataValue[]) {
-        coreListener.detailDebugLog('data changed for item: ' + monitoredItem.itemToMonitor.nodeId + ' with Id ' + monitoredItem.monitoredItemId)
+      monitoredItem.on('changed', (dataValue: DataValue) => {
+        coreListener.detailDebugLog('data changed for item: ' + monitoredItem.itemToMonitor.nodeId + ' with Id ' + monitoredItem.itemToMonitor.nodeId)
         if (!monitoredItem.monitoringParameters.filter) {
           sendDataFromMonitoredItem(monitoredItem, dataValue)
         } else {
-          sendDataFromEvent(monitoredItem, dataValue)
+          sendDataFromEvent(monitoredItem, [dataValue])
         }
       })
 
-      monitoredItem.on('error', (err: Error) => {
-        coreListener.internalDebugLog('monitoredItem Error: ' + err.message + ' on ' + monitoredItem.monitoredItemId)
+      // @ts-ignore
+      monitoredItem.on('err', (err: Error) => {
+        coreListener.internalDebugLog('monitoredItem Error: ' + err + ' on ' + monitoredItem.itemToMonitor.nodeId)
         if (nodeConfig.showErrors) {
           this.error(err, ({payload: 'Monitored Item Error', monitoredItem: monitoredItem} as Todo))
         }
@@ -444,9 +444,10 @@ module.exports = (RED: nodered.NodeAPI) => {
         }
       })
 
-      monitoredItem.on('terminated', function () {
+      // @ts-ignore
+      monitoredItem.on('terminated', (err: Todo) => {
         monitoredItem.removeAllListeners()
-        coreListener.internalDebugLog('Terminated For ' + monitoredItem.monitoredItemId)
+        coreListener.internalDebugLog('Terminated For ' + monitoredItem.itemToMonitor.nodeId)
         updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
       })
     }
@@ -457,16 +458,17 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      const nodeId = (isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid'
+      const nodeId = (isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem?.itemToMonitor?.nodeId?.toString() : 'invalid'
       const item = nodeConfig.iiot.monitoredASO.get(nodeId)
       const topic = (item) ? item.topic : nodeConfig.topic
 
       let msg: Todo = {
-        payload: {},
+        payload: {
+          addressSpaceItems: [{name: '', nodeId, datatypeName: ''}],
+          nodetype: 'listen',
+          injectType: 'subscribe'
+        },
         topic: topic,
-        addressSpaceItems: [{name: '', nodeId, datatypeName: ''}],
-        nodetype: 'listen',
-        injectType: 'subscribe'
       }
 
       coreListener.internalDebugLog('sendDataFromMonitoredItem: ' + msg.payload.addressSpaceItems[0].nodeId)
@@ -476,18 +478,18 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (nodeConfig.justValue) {
         dataValuesString = JSON.stringify(dataValue, null, 2)
         try {
-          RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
+          RED.util.setMessageProperty(msg.poyload, 'value', JSON.parse(dataValuesString))
         } catch (err: any) {
           if (nodeConfig.showErrors) {
             this.warn('JSON not to parse from string for monitored item')
             this.error(err, msg)
           }
 
-          msg.payload = dataValuesString
+          msg.payload.value = dataValuesString
           msg.error = err.message
         }
       } else {
-        msg.payload = {dataValue, monitoredItem}
+        msg.payload = {...msg.payload,dataValue, monitoredItem}
       }
 
       this.send(msg)
@@ -500,39 +502,40 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (nodeConfig.justValue) {
         dataValuesString = JSON.stringify({dataValue: dataValue}, null, 2)
         try {
-          RED.util.setMessageProperty(msg, 'payload', JSON.parse(dataValuesString))
+          RED.util.setMessageProperty(msg.payload, 'value', JSON.parse(dataValuesString))
         } catch (err: any) {
           if (nodeConfig.showErrors) {
             this.warn('JSON not to parse from string for monitored item')
             this.error(err, msg)
           }
 
-          msg.payload = dataValuesString
+          msg.payload.value = dataValuesString
           msg.error = err.message
         }
       } else {
-        msg.payload = {dataValue, eventResults, monitoredItem}
+        msg.payload = {...msg.payload, value: dataValue, eventResults, monitoredItem}
       }
 
       this.send(msg)
     }
 
-    const sendDataFromEvent = (monitoredItem: Todo, dataValue: DataValue[]) => {
+    const sendDataFromEvent = (monitoredItem: ClientMonitoredItem, dataValue: DataValue[]) => {
       if (!monitoredItem) {
         coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
         return
       }
 
-      const nodeId = (isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem.itemToMonitor.nodeId.toString() : 'invalid'
+      const nodeId = (isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem?.itemToMonitor?.nodeId?.toString() : 'invalid'
       const item = nodeConfig.iiot.monitoredASO.get(nodeId)
       const topic = (item) ? item.topic : nodeConfig.topic
 
       let msg = {
-        payload: {},
+        payload: {
+          addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
+          nodetype: 'listen',
+          injectType: 'event'
+        },
         topic: topic || nodeConfig.topic, // default if item.topic is empty
-        addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
-        nodetype: 'listen',
-        injectType: 'event'
       }
 
       coreListener.analyzeEvent(nodeConfig.connector.iiot.opcuaSession, getBrowseName, dataValue)
