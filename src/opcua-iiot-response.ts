@@ -15,6 +15,7 @@ import {
   checkResponseItemIsNotToFilter,
   isNodeTypeToFilterResponse
 } from "./core/opcua-iiot-core";
+import {NodeMessageInFlow} from "@node-red/registry";
 
 interface OPCUAIIoTResponse extends nodered.Node {
   name: string
@@ -60,28 +61,28 @@ module.exports = (RED: nodered.NodeAPI) => {
     node.iiot = {}
     this.status({ fill: 'green', shape: 'ring', text: 'active' })
 
-    const handleBrowserMsg = function (msg: Todo) {
-      coreResponse.analyzeBrowserResults(node, msg)
+    const handleBrowserMsg = function (payload: Todo) {
+      coreResponse.analyzeBrowserResults(node, payload)
       if (node.compressStructure) {
-        coreResponse.compressBrowseMessageStructure(msg)
+        coreResponse.compressBrowseMessageStructure(payload)
       }
-      return msg
+      return payload
     }
 
-    const handleCrawlerMsg = function (msg: Todo) {
-      coreResponse.analyzeCrawlerResults(node, msg)
+    const handleCrawlerMsg = function (payload: Todo) {
+      coreResponse.analyzeCrawlerResults(node, payload)
       if (node.compressStructure) {
-        coreResponse.compressCrawlerMessageStructure(msg)
+        coreResponse.compressCrawlerMessageStructure(payload)
       }
-      return msg
+      return payload
     }
 
-    const handleReadMsg = function (msg: Todo) {
-      coreResponse.analyzeReadResults(node, msg)
+    const handleReadMsg = function (payload: Todo) {
+      coreResponse.analyzeReadResults(node, payload)
       if (node.compressStructure) {
-        coreResponse.compressReadMessageStructure(msg)
+        coreResponse.compressReadMessageStructure(payload)
       }
-      return msg
+      return payload
     }
 
     const handleWriteMsg = function (msg: Todo) {
@@ -118,50 +119,40 @@ module.exports = (RED: nodered.NodeAPI) => {
       return msg
     }
 
-    const handleNodeTypeOfMsg = function (msg: Todo) {
-      let message = Object.assign({}, msg)
-
-      switch (msg.nodetype) {
+    const handleNodeTypeOfMsg = function (payload: Todo) {
+      switch (payload.nodetype) {
         case 'browse':
-          message = handleBrowserMsg(message)
-          break
+          return handleBrowserMsg(payload)
         case 'crawl':
-          message = handleCrawlerMsg(message)
-          break
+          return handleCrawlerMsg(payload)
         case 'read':
-          message = handleReadMsg(message)
-          break
+          return handleReadMsg(payload)
         case 'write':
-          message = handleWriteMsg(message)
-          break
+          return handleWriteMsg(payload)
         case 'listen':
-          message = handleListenerMsg(message)
-          break
+          return handleListenerMsg(payload)
         case 'method':
-          message = handleMethodMsg(message)
-          break
+          return handleMethodMsg(payload)
         default:
-          message = handleDefaultMsg(message)
+          return handleDefaultMsg(payload)
       }
-
-      return message
     }
 
-    const extractReadEntriesFromFilter = function (message: Todo) {
+    const extractReadEntriesFromFilter = function (payload: Todo) {
       let filteredEntries: Todo[] = []
       let filteredValues: Todo[] = []
 
-      if (message.payload && message.payload.length) {
-        message.payload.forEach((item: Todo, index: number) => {
-          if (node.iiot.itemIsNotToFilter(item)) {
+      if (payload.value.length) {
+        payload.value.forEach((item: Todo, index: number) => {
+          if (itemIsNotToFilter(item)) {
             filteredEntries.push(item)
             filteredValues.push(index)
           }
         })
       }
 
-      if (message.nodesToRead) {
-        message.nodesToRead = message.nodesToRead.filter((item: Todo, index: number) => {
+      if (payload.nodesToRead) {
+        payload.nodesToRead = payload.nodesToRead.filter((item: Todo, index: number) => {
           return filteredValues.includes(index)
         })
       }
@@ -231,57 +222,78 @@ module.exports = (RED: nodered.NodeAPI) => {
       return filteredEntries
     }
 
-    const extractEntries = function (message: Todo) {
-      switch (message.nodetype) {
+    const extractEntries = function (payload: Todo) {
+      switch (payload.nodetype) {
         case 'read':
-          return extractReadEntriesFromFilter(message)
+          return extractReadEntriesFromFilter(payload)
         case 'browse':
-          return extractBrowserEntriesFromFilter(message)
+          return extractBrowserEntriesFromFilter(payload)
         case 'crawl':
-          return extractCrawlerEntriesFromFilter(message)
+          return extractCrawlerEntriesFromFilter(payload)
         case 'method':
-          return extractMethodEntriesFromFilter(message)
+          return extractMethodEntriesFromFilter(payload)
         default:
-          return extractPayloadEntriesFromFilter(message)
+          return extractPayloadEntriesFromFilter(payload)
       }
     }
 
-    const filterMsg = function (msg: Todo) {
-      if (msg.payload.length || isNodeTypeToFilterResponse(msg)) {
-        let filteredEntries = extractEntries(msg)
+    const filterMsg = function (payload: Todo) {
+      if (payload.value.length || isNodeTypeToFilterResponse(payload)) {
+        let filteredEntries = extractEntries(payload)
         if (filteredEntries.length) {
-          msg.payload = filteredEntries
-          return msg
+          payload.value = filteredEntries
+          return payload
         }
       } else {
-        if (itemIsNotToFilter(msg.payload)) {
-          return msg
+        if (itemIsNotToFilter(payload.payload)) {
+          return payload
         }
       }
       return null
     }
 
-    this.on('input', function (msg: Todo) {
+    /**
+     * Ensure msg has the NodeMessageInFlow format
+     */
+    const normalizeMessage = (msg: Record<string, any>): NodeMessageInFlow => {
+      if (Object.keys(msg).length <= 3 ) {
+        return msg as NodeMessageInFlow;
+      }
+      return {
+        topic: msg.topic,
+        _msgid: msg._msgid,
+        payload: {
+          ...msg,
+          value: msg.payload,
+        }
+      }
+    }
+
+    this.on('input', (msg: NodeMessageInFlow) => {
       try {
         if (node.activateUnsetFilter) {
           if (msg.payload === void 0 || msg.payload === null || msg.payload === {}) { return }
         }
+        msg = normalizeMessage(msg as Todo)
 
-        let message = handleNodeTypeOfMsg(msg)
-        message.compressed = node.compressStructure
+        const inputPayload = msg.payload as Todo;
+        const handledPayload = {
+          ...handleNodeTypeOfMsg(inputPayload),
+          compressed: node.compressStructure
+        }
 
         if (node.activateFilters && node.filters && node.filters.length > 0) {
-          message = filterMsg(message)
-          if (message) {
-            node.send(message)
+          const filteredPayload = filterMsg(handledPayload)
+          if (filteredPayload) {
+            this.send({...msg, payload: filteredPayload})
           }
         } else {
-          node.send(message)
+          this.send({...msg, payload: handledPayload})
         }
       } catch (err) {
         coreResponse.internalDebugLog(err)
         if (node.showErrors) {
-          node.error(err, msg)
+          this.error(err, msg)
         }
       }
     })
@@ -295,6 +307,11 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       return (node.negateFilter) ? !result : result
     }
+
+    if (process.env.TEST === "true")
+      node.functions = {
+        handleNodeTypeOfMsg,
+      }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Response', OPCUAIIoTResponse)

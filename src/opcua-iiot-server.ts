@@ -10,9 +10,13 @@
 
 import * as nodered from "node-red";
 import {Todo} from "./types/placeholders";
+import coreServer from "./core/opcua-iiot-core-server";
+import {isInitializedIIoTNode, resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
+import {NodeStatus} from "node-red";
 
-interface OPCUAIIoTServer extends nodered.Node {
+type OPCUAIIoTServer =  nodered.Node & {
   asoDemo: string
+  on(event: 'shutdown', listener: () => void): void
 }
 interface OPCUAIIoTServerDef extends nodered.NodeDef {
   asoDemo: string
@@ -25,7 +29,6 @@ interface OPCUAIIoTServerDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let coreServer = require('./core/opcua-iiot-core-server')
 
   function OPCUAIIoTServer (this: OPCUAIIoTServer, config: OPCUAIIoTServerDef) {
     RED.nodes.createNode(this, config)
@@ -36,10 +39,9 @@ module.exports = (RED: nodered.NodeAPI) => {
     node = coreServer.initServerNode(node)
     node = coreServer.loadNodeSets(node, __dirname)
     node = coreServer.loadCertificates(node)
-    coreServer.core.assert(node.iiot)
 
-    node.iiot.buildServerOptions = function () {
-      let serverOptions = coreServer.buildServerOptions(node, 'Fix')
+    const buildServerOptions = async () => {
+      let serverOptions: Todo = await coreServer.buildServerOptions(node, 'Fix')
       serverOptions.userManager = {
         isValidUser: function (userName: string, password: string) {
           return coreServer.checkUser(node, userName, password)
@@ -48,45 +50,49 @@ module.exports = (RED: nodered.NodeAPI) => {
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    node.iiot.createServer = function (serverOptions: Todo) {
+    const createServer = (serverOptions: Todo) => {
       if (RED.settings.verbose) {
         coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
       node.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
-      coreServer.core.setNodeStatusTo(node, 'waiting')
-      node.iiot.opcuaServer.initialize(node.iiot.postInitialize)
+      node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+      node.iiot.opcuaServer.initialize(postInitialize)
       coreServer.setOPCUAServerListener(node)
     }
 
-    node.iiot.initNewServer = function () {
+    const initNewServer = () => {
       node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = node.iiot.buildServerOptions()
+      let serverOptions = buildServerOptions()
       serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
 
       try {
-        node.iiot.createServer(serverOptions)
+        createServer(serverOptions)
       } catch (err) {
-        node.emit('server_create_error')
-        coreServer.handleServerError(node, err, { payload: 'Server Failure! Please, check the server settings!' })
+        this.emit('server_create_error')
+        coreServer.handleServerError(node, err as Error, { payload: 'Server Failure! Please, check the server settings!' })
       }
     }
 
-    node.iiot.postInitialize = function () {
+    const statusHandler = (status: string | NodeStatus) => {
+      this.status(status)
+    }
+
+    const postInitialize = () => {
       coreServer.constructAddressSpace(node.iiot.opcuaServer, node.asoDemo)
-        .then(function (err: Error) {
+        .then((err: Todo) => {
           if (err) {
             coreServer.handleServerError(node, err, { payload: 'Server Address Space Problem' })
           } else {
             coreServer.start(node.iiot.opcuaServer, node)
-              .then(function () {
-                coreServer.core.setNodeStatusTo(node, 'active')
-                node.emit('server_running')
+              .then(() => {
+                node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+                this.emit('server_running')
               }).catch(function (err: Error) {
-                if (coreServer.core.isInitializedBiancoIIoTNode(node)) {
+                if (isInitializedIIoTNode(node)) {
                   node.iiot.opcuaServer = null
                 }
                 node.emit('server_start_error')
-                coreServer.core.setNodeStatusTo(node, 'errors')
+              node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
                 coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
               })
           }
@@ -95,9 +101,9 @@ module.exports = (RED: nodered.NodeAPI) => {
         })
     }
 
-    node.iiot.initNewServer()
+    initNewServer()
 
-    node.on('input', function (msg: Todo) {
+    this.on('input', (msg: Todo) => {
       if (!node.iiot.opcuaServer || !node.iiot.initialized) {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
@@ -105,19 +111,19 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       switch (msg.injectType) {
         case 'ASO':
-          node.iiot.changeAddressSpace(msg)
+          changeAddressSpace(msg)
           break
         case 'CMD':
-          node.iiot.executeOpcuaCommand(msg)
+          executeOpcuaCommand(msg)
           break
         default:
           coreServer.handleServerError(node, new Error('Unknown Inject Type ' + msg.injectType), msg)
       }
 
-      node.send(msg)
+      this.send(msg)
     })
 
-    node.iiot.changeAddressSpace = function (msg: Todo) {
+    const changeAddressSpace = (msg: Todo) => {
       // TODO: refactor to work with the new OPC UA type list and option to set add type
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
         coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false)
@@ -128,10 +134,10 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    node.iiot.executeOpcuaCommand = function (msg: Todo) {
+    const executeOpcuaCommand = (msg: Todo) => {
       switch (msg.commandType) {
         case 'restart':
-          node.iiot.restartServer()
+          restartServer()
           break
         case 'deleteNode':
           coreServer.deleteNOdeFromAddressSpace(node, msg)
@@ -141,9 +147,9 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    node.iiot.restartServer = function () {
+    const restartServer = () => {
       coreServer.internalDebugLog('Restart OPC UA Server')
-      coreServer.restartServer(node)
+      coreServer.restartServer(node, statusHandler)
 
       if (node.iiot.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')
@@ -152,20 +158,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    node.on('close', (done: () => void) => {
+    this.on('close', (done: () => void) => {
       node.iiot.closeServer(() => {
         coreServer.internalDebugLog('Close Server Node')
-        coreServer.core.resetBiancoNode(node)
+        resetIiotNode(node)
         done()
       })
     })
 
-    node.on('shutdown', () => {
+    this.on('shutdown', () => {
       node.iiot.opcuaServer = null
-      node.iiot.initNewServer()
+      initNewServer()
     })
 
-    node.iiot.closeServer = function (done: () => void) {
+    const closeServer = (done: () => void) => {
       coreServer.destructAddressSpace(() => {
         node.iiot.opcuaServer.removeAllListeners()
         node.iiot.opcuaServer.shutdown(node.delayToClose, done)

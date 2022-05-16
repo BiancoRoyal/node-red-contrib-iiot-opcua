@@ -69,10 +69,8 @@ module.exports = (RED: NodeAPI) => {
     this.historyDays = parseInt(config.historyDays) || 1
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: Todo = {
-      ...this,
-      iiot: initCoreNode()
-    }
+    let node: Todo = this;
+    node.iiot = initCoreNode()
 
     const handleReadError = (err: Error, msg: NodeMessage) => {
       coreClient.readDebugLog(err)
@@ -84,6 +82,11 @@ module.exports = (RED: NodeAPI) => {
         this.emit('opcua_client_not_ready')
       }
     }
+
+    if (process.env.TEST === "true")
+      node.functions = {
+        handleReadError
+      }
 
     const readAllFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
       coreClient.readAllAttributes(session, itemsToRead, msg)

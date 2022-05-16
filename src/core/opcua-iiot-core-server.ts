@@ -614,7 +614,7 @@ const initServerNode = function (node: Todo) {
     ...node,
     iiot: initCoreServerNode()
   }
-  if (serverNode.setMaxListeners())
+  if (serverNode.setMaxListeners)
     serverNode.setMaxListeners(UNLIMITED_LISTENERS)
   return serverNode
 }
@@ -841,7 +841,7 @@ const createServerNameWithPrefix = function (serverPort: number, prefix: Todo) {
   return 'NodeRED-IIoT-' + serverPrefix + 'Server-' + serverPort
 }
 
-const buildServerOptions = async function (node: Todo, prefix: Todo) {
+const buildServerOptions = async (node: Todo, prefix: Todo) => {
   let today = new Date()
 
   // const SecurityPolicy = require("node-opcua").SecurityPolicy;

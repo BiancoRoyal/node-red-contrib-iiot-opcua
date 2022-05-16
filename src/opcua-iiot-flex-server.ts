@@ -14,6 +14,7 @@ import coreServer from "./core/opcua-iiot-core-server";
 import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {NodeStatus} from "node-red";
 import {VM} from "vm2";
+import {OPCUAServer} from "node-opcua";
 
 type OPCUAIIoTFlexServer = nodered.Node & {
   on(event: 'shutdown', callback: () => void): void
@@ -39,7 +40,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     node = coreServer.loadNodeSets(node, __dirname)
     node = coreServer.loadCertificates(node)
 
-    node.iiot.vm = new VM({
+    const vm = new VM({
       sandbox: {
         node,
         coreServer,
@@ -95,13 +96,17 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     /* istanbul ignore next */
     // @ts-ignore
-    node.iiot.constructAddressSpaceScript = function (server: Todo, constructAddressSpaceScript, eventObjects) {
+    const constructAddressSpaceScript = function (server: Todo, constructAddressSpaceScript, eventObjects) {
       server.internalDebugLog('Init Function Block Flex Server')
     }
 
-    node.iiot.vm.run('node.iiot.constructAddressSpaceScript = ' + config.addressSpaceScript)
+    vm.run('node.iiot.constructAddressSpaceScript = ' + config.addressSpaceScript)
 
-    node.iiot.buildServerOptions = async function () {
+    const statusHandler = (status: string | NodeStatus): void => {
+      this.status(status)
+    }
+
+    const buildServerOptions = async function () {
       let serverOptions: Todo = await coreServer.buildServerOptions(node, 'Flex')
       serverOptions.userManager = {
         isValidUser: function (userName: string, password: string) {
@@ -111,25 +116,33 @@ module.exports = (RED: nodered.NodeAPI) => {
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    node.iiot.createServer = function (serverOptions: Todo) {
+    const createServer = (serverOptions: Todo) => {
       /* istanbul ignore next */
       if (RED.settings.verbose) {
         coreServer.flexDetailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
       node.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
       node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-      node.iiot.opcuaServer.initialize(node.iiot.postInitialize)
+      console.log("Create")
+      try {
+        node.iiot.opcuaServer.initialize()
+      } catch(err: Todo) {
+        console.log(err)
+      }
+      console.log("heyyyy bestie")
+      postInitialize()
       coreServer.setOPCUAServerListener(node)
     }
 
-    node.iiot.initNewServer = () => {
+    const initNewServer = () => {
       node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = node.iiot.buildServerOptions()
+      let serverOptions = buildServerOptions()
       serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
-
       try {
-        node.iiot.createServer(serverOptions)
+        console.log('initNewServer')
+        createServer(serverOptions)
       } catch (err: any) {
+        console.log("catch", err)
         /* istanbul ignore next */
         this.emit('server_create_error')
         coreServer.flexInternalDebugLog(err.message)
@@ -137,10 +150,12 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    node.iiot.postInitialize = () => {
+    const postInitialize = () => {
       node.iiot.eventObjects = {} // event objects should stay in memory
+      console.log("in the finisher")
       coreServer.constructAddressSpaceFromScript(node.iiot.opcuaServer, node.iiot.constructAddressSpaceScript, node.iiot.eventObjects)
         .then(() => {
+          console.log("hi there")
           coreServer.start(node.iiot.opcuaServer, node).then(() => {
             node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             this.emit('server_running')
@@ -151,12 +166,13 @@ module.exports = (RED: nodered.NodeAPI) => {
             coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
           })
         }).catch(function (err: Error) {
+          console.log("in this catch here", err)
           /* istanbul ignore next */
           coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
         })
     }
 
-    node.iiot.initNewServer()
+    initNewServer()
 
     this.on('input', function (msg: Todo) {
       if (!node.iiot.opcuaServer || !node.iiot.initialized) {
@@ -165,26 +181,22 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       if (msg.injectType === 'CMD') {
-        node.iiot.executeOpcuaCommand(msg)
+        executeOpcuaCommand(msg)
       } else {
         coreServer.handleServerError(node, new Error('Unknown Flex Inject Type ' + msg.injectType), msg)
       }
     })
 
-    node.iiot.executeOpcuaCommand = (msg: Todo) => {
+    const executeOpcuaCommand = (msg: Todo) => {
       if (msg.commandType === 'restart') {
-        node.iiot.restartServer()
+        restartServer()
         this.send(msg)
       } else {
         coreServer.handleServerError(node, new Error('Unknown Flex OPC UA Command'), msg)
       }
     }
 
-    const statusHandler = (status: string | NodeStatus): void => {
-      this.status(status)
-    }
-
-    node.iiot.restartServer = function () {
+    const restartServer = function () {
       coreServer.flexInternalDebugLog('Restart OPC UA Server')
       coreServer.restartServer(node, statusHandler)
 
@@ -196,7 +208,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.on('close', function (done: () => void) {
-      node.iiot.closeServer(() => {
+      closeServer(() => {
         coreServer.flexInternalDebugLog('Close Server Node')
         resetIiotNode(node)
         done()
@@ -208,7 +220,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       node.iiot.initNewServer()
     })
 
-    node.iiot.closeServer = function (done: () => void) {
+    const closeServer = function (done: () => void) {
       if (coreServer.simulatorInterval) {
         clearInterval(coreServer.simulatorInterval)
         coreServer.simulatorInterval = null

@@ -10,6 +10,8 @@
 
 'use strict'
 
+process.env.TEST = "true"
+
 jest.setTimeout(5000)
 
 var injectNode = require('@node-red/nodes/core/common/20-inject')
@@ -174,8 +176,8 @@ describe('OPC UA Response node Unit Testing', function () {
       helper.load(responseFlowNodes, testResponseFlow,
         function () {
           let nodeUnderTest = helper.getNode('n1rh')
-          nodeUnderTest.on('input', msg => {
-            expect(msg.payload[0].dataType).toBe('DateTime')
+          nodeUnderTest.on('input', (msg) => {
+            expect(msg.payload.value[0].value.dataType).toBe('DateTime')
             done()
           })
         })
@@ -186,7 +188,7 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('n1rh')
           nodeUnderTest.on('input', msg => {
-            expect(msg.payload[0].dataType).toBe('DateTime')
+            expect(msg.payload.value[0].value.dataType).toBe('DateTime')
             done()
           })
         })
@@ -197,7 +199,7 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('76202549.fd7c1c')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.bianco.iiot.handleNodeTypeOfMsg({payload: {}})
+          nodeUnderTest.functions.handleNodeTypeOfMsg({payload: {}})
           done()
         })
     })

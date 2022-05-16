@@ -17,22 +17,22 @@ const detailDebugLog = debug('opcuaIIoT:response:details') // eslint-disable-lin
 const EMPTY_LIST = 0
 const NONE = 0
 
-const analyzeBrowserResults = function (node: Todo, msg: Todo) {
-  handlePayloadStatusCode(node, msg)
+const analyzeBrowserResults = function (node: Todo, payload: Todo) {
+  handlePayloadStatusCode(node, payload)
 }
 
-const analyzeCrawlerResults = function (node: Todo, msg: Todo) {
-  handlePayloadStatusCode(node, msg)
+const analyzeCrawlerResults = function (node: Todo, payload: Todo) {
+  handlePayloadStatusCode(node, payload)
 }
 
-const analyzeReadResults = function (node: Todo, msg: Todo) {
-  handlePayloadStatusCode(node, msg)
-  if (msg.readtype === 'HistoryValue' && msg.payload && msg.payload.length) {
-    msg.payload.forEach((item: Todo) => {
+const analyzeReadResults = function (node: Todo, payload: Todo) {
+  handlePayloadStatusCode(node, payload)
+  if (payload.readtype === 'HistoryValue' && payload.length) {
+    payload.value.forEach((item: Todo) => {
       delete item['statusCode']
     })
   }
-  reconsturctNodeIdOnRead(msg)
+  reconsturctNodeIdOnRead(payload)
 }
 
 const analyzeListenerResults = function (node: Todo, msg: Todo) {
@@ -92,38 +92,38 @@ const analyzeEventResultStatus = function (node: Todo, msg: Todo) {
   handlePayloadStatusCode(node, msg)
 }
 
-const handlePayloadStatusCode = function (node: Todo, msg: Todo) {
+const handlePayloadStatusCode = function (node: Todo, payload: Todo) {
   let entryStatus = [0, 0, 0]
 
-  if (msg.payload.length || msg.payload.results || msg.payload.browserResults || msg.payload.crawlerResults || msg.payload.statusCodes) {
-    entryStatus = handlePayloadArrayOfObjects(msg)
+  if (payload.length || payload.results || payload.browserResults || payload.crawlerResults || payload.statusCodes) {
+    entryStatus = handlePayloadArrayOfObjects(payload)
   } else {
-    entryStatus = handlePayloadObject(msg)
+    entryStatus = handlePayloadObject(payload)
   }
-  setNodeStatusInfo(node, msg, entryStatus)
+  setNodeStatusInfo(node, payload, entryStatus)
 }
 
-const setNodeStatusInfo = function (node: Todo, msg: Todo, entryStatus: Todo) {
-  msg.entryStatus = entryStatus
-  msg.entryStatusText = 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2]
-  setNodeStatus(node, msg.entryStatus, msg.entryStatusText)
+const setNodeStatusInfo = function (node: Todo, payload: Todo, entryStatus: Todo) {
+  payload.entryStatus = entryStatus
+  payload.entryStatusText = 'Good:' + entryStatus[0] + ' Bad:' + entryStatus[1] + ' Other:' + entryStatus[2]
+  setNodeStatus(node, payload.entryStatus, payload.entryStatusText)
 }
 
-const handlePayloadArrayOfObjects = function (msg: Todo) {
+const handlePayloadArrayOfObjects = function (payload: Todo) {
   let entry = null
   let entryStatus = [0, 0, 0]
   let results = []
 
-  if (msg.payload.results) {
-    results = msg.payload.results
-  } else if (msg.payload.browserResults) {
-    results = msg.payload.browserResults
-  } else if (msg.payload.crawlerResults) {
-    results = msg.payload.crawlerResults
-  } else if (msg.payload.statusCodes) {
-    results = msg.payload.statusCodes
+  if (payload.results) {
+    results = payload.results
+  } else if (payload.browserResults) {
+    results = payload.browserResults
+  } else if (payload.crawlerResults) {
+    results = payload.crawlerResults
+  } else if (payload.statusCodes) {
+    results = payload.statusCodes
   } else {
-    if (msg.payload.length) { results = msg.payload }
+    if (payload.length) { results = payload }
   }
 
   for (entry of results) {
@@ -152,16 +152,16 @@ const handlePayloadArrayOfObjects = function (msg: Todo) {
   return entryStatus
 }
 
-const handlePayloadObject = function (msg: Todo) {
+const handlePayloadObject = function (payload: Todo) {
   let entryStatus = [0, 0, 0]
 
-  if (msg.payload.results || msg.payload.statusCodes) {
-    entryStatus = handlePayloadArrayOfObjects(msg)
+  if (payload.results || payload.statusCodes) {
+    entryStatus = handlePayloadArrayOfObjects(payload)
   }
 
-  if (msg.payload && msg.payload.statusCode) {
-    if (msg.payload.statusCode.name) {
-      switch (msg.payload.statusCode.name) {
+  if (payload && payload.statusCode) {
+    if (payload.statusCode.name) {
+      switch (payload.statusCode.name) {
         case 'Good':
           entryStatus[0] += 1
           break
@@ -169,9 +169,9 @@ const handlePayloadObject = function (msg: Todo) {
           entryStatus[1] += 1
           break
         default:
-          if (msg.payload.statusCode.name.includes('Good')) {
+          if (payload.statusCode.name.includes('Good')) {
             entryStatus[0] += 1
-          } else if (msg.payload.statusCode.name.includes('Bad')) {
+          } else if (payload.statusCode.name.includes('Bad')) {
             entryStatus[1] += 1
           } else {
             entryStatus[2] += 1
@@ -245,7 +245,6 @@ const trimMessageExtensions = function (msg: Todo) {
   delete msg['addressItemsToBrowseCount']
   delete msg['addressSpaceItems']
   delete msg['injectType']
-  delete msg['nodetype']
   delete msg['entryStatus']
   delete msg['entryStatusText']
 
@@ -341,7 +340,7 @@ const compressFilteredMessage = function (msg: Todo) {
 const compressReadMessageStructure = function (msg: Todo) {
   switch (msg.readtype) {
     case 'AllAttributes':
-      delete msg.payload['nodesToRead']
+      delete msg['nodesToRead']
       delete msg['resultsConverted']
       break
     case 'VariableValue':

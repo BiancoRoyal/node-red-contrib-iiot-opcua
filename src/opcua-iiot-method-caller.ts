@@ -65,10 +65,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.inputArguments = config.inputArguments
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = {
-      ...this,
-      iiot: initCoreNode()
-    }
+    let node: Todo = this
+    node.iiot = initCoreNode()
 
     const handleMethodError = (err: Error, msg: Todo) => {
       coreMethod.internalDebugLog(err)
@@ -178,22 +176,25 @@ module.exports = (RED: nodered.NodeAPI) => {
     })
 
     const onAlias = (event: string, callback: (...args: any) => void) => {
-      if (event == "input") {
-        this.on(event, callback)
-      } else if (event === "close") {
-        this.on(event, callback)
-      }
-      else this.error('Invalid event to listen on')
+      // @ts-ignore
+      this.on(event, callback)
     }
 
     registerToConnector(node as Todo, statusHandler, onAlias, errorHandler)
 
-    node.on('close', (done: () => void) => {
+    this.on('close', (done: () => void) => {
       deregisterToConnector(node as Todo, () => {
         resetIiotNode(node)
         done()
       })
     })
+
+    if (process.env.TEST === "true")
+      node.functions = {
+        handleMethodError,
+        handleMethodWarn,
+        callMethodOnSession
+      }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Method-Caller', OPCUAIIoTMethodCaller)

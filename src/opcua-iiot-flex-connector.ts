@@ -17,7 +17,7 @@ export interface OPCUAIIoTFlexConnector extends nodered.Node {
   showStatusActivities: boolean
   showErrors: boolean
   connector: any
-  bianco?: TodoBianco
+  iiot?: Todo
 }
 
 interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
@@ -40,10 +40,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig = {
-      ...this,
-      iiot: {}
-    }
+    let nodeConfig = this;
+    nodeConfig.iiot = {}
 
     this.status({ fill: 'blue', shape: 'ring', text: 'new' })
 

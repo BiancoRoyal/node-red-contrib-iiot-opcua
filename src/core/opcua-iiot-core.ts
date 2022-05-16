@@ -1118,8 +1118,8 @@ export function filterListByNodeId(nodeId: Todo, list: Todo) {
     return result
 }
 
-export function isNodeTypeToFilterResponse(msg: Todo) {
-    return msg.nodetype === 'read' || msg.nodetype === 'browse' || msg.nodetype === 'crawl' || msg.nodetype === 'method'
+export function isNodeTypeToFilterResponse(payload: Todo) {
+    return payload.nodetype === 'read' || payload.nodetype === 'browse' || payload.nodetype === 'crawl' || payload.nodetype === 'method'
 }
 
 export function isInitializedIIoTNode<T>(node: T | undefined): node is T {

@@ -10,6 +10,10 @@
 import * as nodered from "node-red";
 import {Todo, TodoBianco} from "./types/placeholders";
 import {NodeMessageInFlow} from "node-red";
+import {OBJECTS_ROOT, resetIiotNode} from "./core/opcua-iiot-core";
+import {ReferenceTypeIds} from "node-opcua";
+import {logger} from "./core/opcua-iiot-core-connector";
+import internalDebugLog = logger.internalDebugLog;
 interface OPCUAIIoTASO extends nodered.Node {
   nodeId: string
   browsename: string
@@ -40,7 +44,6 @@ interface OPCUAIIoTCMDASO extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTASO (this: OPCUAIIoTASO, config: OPCUAIIoTCMDASO) {
     RED.nodes.createNode(this, config)
@@ -55,9 +58,9 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.name = config.name
 
     let node = this
-    core.internalDebugLog('Open ASO Node')
+    internalDebugLog('Open ASO Node')
 
-    node.on('input', function (msg: NodeMessageInFlow | Todo) {
+    this.on('input', (msg: NodeMessageInFlow | Todo) => {
       if (msg.nodetype === 'inject') {
         node.nodeId = msg.topic || node.nodeId
         node.datatype = msg.datatype || node.datatype
@@ -77,20 +80,20 @@ module.exports = (RED: nodered.NodeAPI) => {
         msg.payload.datatype = node.datatype
         msg.payload.value = node.value
 
-        msg.payload.referenceNodeId = node.referenceNodeId || core.nodeOPCUA.OBJECTS_ROOT
-        msg.payload.referencetype = node.referencetype || core.nodeOPCUA.ReferenceTypeIds.Organizes
+        msg.payload.referenceNodeId = node.referenceNodeId || OBJECTS_ROOT
+        msg.payload.referencetype = node.referencetype || ReferenceTypeIds.Organizes
 
-        core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-        node.send(msg)
+        internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
+        this.send(msg)
       } else {
         /* istanbul ignore next */
-        node.error(new Error('ASO NodeId Is Not Valid'), msg)
+        this.error(new Error('ASO NodeId Is Not Valid'), msg)
       }
     })
 
-    node.on('close', (done: () => void) => {
-      core.internalDebugLog('Close ASO Node')
-      core.resetBiancoNode(node)
+    this.on('close', (done: () => void) => {
+      internalDebugLog('Close ASO Node')
+      resetIiotNode(node)
       done()
     })
   }
