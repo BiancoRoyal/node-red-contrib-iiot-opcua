@@ -133,7 +133,6 @@ const setNodeStatusInfo = function (node: Node, payload: ResponseInputPayload, e
 }
 
 const handlePayloadArrayOfObjects = function (payload: ResponseInputPayload) {
-  let entry = null
   let entryStatus = {
     bad: 0,
     good: 0,
@@ -160,7 +159,7 @@ const handlePayloadArrayOfObjects = function (payload: ResponseInputPayload) {
           entryStatus['bad'] += 1
           break
         default:
-          if (entry.statusCode?.name?.includes('Bad') || entry.includes('Error')) {
+          if (entry.statusCode?.name?.includes('Bad') || entry.toString().includes('Error')) {
             entryStatus['bad'] += 1
           } else {
             entryStatus['good'] += 1
@@ -168,7 +167,6 @@ const handlePayloadArrayOfObjects = function (payload: ResponseInputPayload) {
       }
     }
   )
-
   return entryStatus
 }
 
@@ -314,7 +312,7 @@ const reconsturctNodeIdOnRead = function (payload: ResponseInputPayload) {
 
   if (results && results.length) {
     payload.value = results.map((item: Todo, index: number) => {
-      if (item.hasOwnProperty('value') && item.value.hasOwnProperty('value')) {
+      if (item?.value?.value) {
         let nodeId = null
         if (nodesToRead && index < nodesToRead.length) {
           nodeId = nodesToRead[index]
@@ -323,10 +321,9 @@ const reconsturctNodeIdOnRead = function (payload: ResponseInputPayload) {
             nodeId = payload.addressSpaceItems[index]
           }
         }
-
         return {
-          value: item.value.value,
-          dataType: item.value.dataType,
+          value: item.value?.value,
+          dataType: item.value?.dataType,
           nodeId
         }
       } else {
@@ -334,7 +331,6 @@ const reconsturctNodeIdOnRead = function (payload: ResponseInputPayload) {
       }
     })
   }
-
 }
 
 const compressVariableValueMessage = function (payload: any) {
