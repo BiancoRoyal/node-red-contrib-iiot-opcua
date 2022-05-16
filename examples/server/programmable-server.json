@@ -1,15 +1,15 @@
 [
   {
-    "id": "5305f1a.be84c9",
+    "id": "9e98528a1a8ac073",
     "type": "tab",
     "label": "IIoT OPC UA Flex Server",
     "disabled": false,
     "info": ""
   },
   {
-    "id": "7ceb9438.c6c884",
+    "id": "9964c6a855d14944",
     "type": "OPCUA-IIoT-Server-Command",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "commandtype": "restart",
     "nodeId": "",
     "name": "warm restart with defaults",
@@ -17,14 +17,14 @@
     "y": 140,
     "wires": [
       [
-        "de33daf3.149b98"
+        "46ba6b0a0309a386"
       ]
     ]
   },
   {
-    "id": "cd238ac2.b348c8",
+    "id": "bcc7e7a7012979b1",
     "type": "OPCUA-IIoT-Inject",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "injectType": "inject",
     "payload": "",
     "payloadType": "date",
@@ -39,14 +39,14 @@
     "y": 140,
     "wires": [
       [
-        "7ceb9438.c6c884"
+        "9964c6a855d14944"
       ]
     ]
   },
   {
-    "id": "72b649ec.877a2",
+    "id": "96d5b418c0761ba8",
     "type": "debug",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "active": false,
     "console": "false",
@@ -56,9 +56,9 @@
     "wires": []
   },
   {
-    "id": "de33daf3.149b98",
+    "id": "46ba6b0a0309a386",
     "type": "OPCUA-IIoT-Flex-Server",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "port": "55380",
     "endpoint": "",
     "acceptExternalCommands": true,
@@ -70,6 +70,7 @@
     "showStatusActivities": false,
     "showErrors": true,
     "allowAnonymous": true,
+    "individualCerts": false,
     "isAuditing": false,
     "serverDiscovery": true,
     "users": [],
@@ -82,47 +83,50 @@
     "maxNodesPerRead": "",
     "maxNodesPerBrowse": "",
     "delayToClose": "",
-    "addressSpaceScript": "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    // server = the created node-opcua server\n    // addressSpace = script placeholder\n    // eventObjects = to hold event variables in memory from this script\n    \n    // internal global sandbox objects are \n    // node = node of the flex server, \n    // coreServer = core iiot server object for debug and access to nodeOPCUA,\n    // and scriptObjects to hold variables and functions\n    const LocalizedText = coreServer.core.nodeOPCUA.LocalizedText\n    const namespace = addressSpace.getOwnNamespace()\n\n    coreServer.internalDebugLog('init dynamic address space')\n    node.warn('construct new address space for OPC UA')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    let tanks = namespace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    let oilTankLevel = namespace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    // Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    // ---------------------------------------------------------------------------------\n    let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.iiot.assert(exclusiveLimitAlarmType !== null)\n    \n    let oilTankLevelCondition = namespace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    // --------------------------------------------------------------\n    let gasTankLevel = namespace.addVariable({\n        browseName: 'GasTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // byte variable with value\n    if(scriptObjects.oilTankNumber === undefined || scriptObjects.oilTankNumber === null) {\n            scriptObjects.oilTankNumber = 100\n    }\n    \n    let oilTankNumber = namespace.addVariable({\n        nodeId: \"s=OilTankNumber\",\n        browseName: 'OilTankNumber',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Number', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Nummer', locale: 'de-DE'})\n        ],\n        description: 'Number of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Byte',\n        value: {\n            get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                    dataType: 'Byte',\n                    value: scriptObjects.oilTankNumber\n                })\n            },\n            set: function (variant) {\n                scriptObjects.oilTankNumber = variant.value\n                return coreServer.core.nodeOPCUA.StatusCodes.Good\n            }\n        }\n    })\n    \n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    node.iiot.assert(nonExclusiveLimitAlarmType !== null)\n    \n    let gasTankLevelCondition = namespace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'NonExclusiveLimitAlarmType Condition',\n        conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // variable with value\n    if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = namespace.addObject({\n        browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    if(coreServer.core) {\n        namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            displayName: [\n                new LocalizedText({text: 'Test Read and Write', locale: 'en-US'}),\n                new LocalizedText({text: 'Test Lesen Schreiben', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            value: {\n                get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        dataType: 'Double',\n                        value: scriptObjects.testReadWrite\n                    })\n                },\n                set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        let memoryVariable = namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: [\n                new LocalizedText({text: 'Free Memory', locale: 'en-US'}),\n                new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            \n            value: {\n              get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n       \n    } else {\n        coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}",
+    "addressSpaceScript": "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    // server = the created node-opcua server\n    // addressSpace = script placeholder\n    // eventObjects = to hold event variables in memory from this script\n    \n    // internal global sandbox objects are \n    // node = node of the flex server, \n    // coreServer = core iiot server object for debug and access to nodeOPCUA,\n    // and scriptObjects to hold variables and functions\n    const LocalizedText = opcua.LocalizedText\n    const namespace = addressSpace.getOwnNamespace()\n\n    coreServer.internalDebugLog('init dynamic address space')\n    node.warn('construct new address space for OPC UA')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    let tanks = namespace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    let oilTankLevel = namespace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    // Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    // ---------------------------------------------------------------------------------\n    let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    \n    let oilTankLevelCondition = namespace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    // --------------------------------------------------------------\n    let gasTankLevel = namespace.addVariable({\n        browseName: 'GasTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // byte variable with value\n    if(scriptObjects.oilTankNumber === undefined || scriptObjects.oilTankNumber === null) {\n            scriptObjects.oilTankNumber = 100\n    }\n    \n    let oilTankNumber = namespace.addVariable({\n        nodeId: \"s=OilTankNumber\",\n        browseName: 'OilTankNumber',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Number', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Nummer', locale: 'de-DE'})\n        ],\n        description: 'Number of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Byte',\n        value: {\n            get: function () {\n                return new opcua.Variant({\n                    dataType: 'Byte',\n                    value: scriptObjects.oilTankNumber\n                })\n            },\n            set: function (variant) {\n                scriptObjects.oilTankNumber = variant.value\n                return opcua.StatusCodes.Good\n            }\n        }\n    })\n    \n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    \n    let gasTankLevelCondition = namespace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'NonExclusiveLimitAlarmType Condition',\n        conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // variable with value\n    if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = namespace.addObject({\n        browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    if(coreServer.core) {\n        namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            displayName: [\n                new LocalizedText({text: 'Test Read and Write', locale: 'en-US'}),\n                new LocalizedText({text: 'Test Lesen Schreiben', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            value: {\n                get: function () {\n                    return new opcua.Variant({\n                        dataType: 'Double',\n                        value: scriptObjects.testReadWrite\n                    })\n                },\n                set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    return opcua.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        let memoryVariable = namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: [\n                new LocalizedText({text: 'Free Memory', locale: 'en-US'}),\n                new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            \n            value: {\n              get: function () {\n                return new opcua.Variant({\n                  dataType: 'Double',\n                  value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n       \n    }\n\n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}",
     "x": 530,
     "y": 140,
     "wires": [
       [
-        "72b649ec.877a2"
+        "96d5b418c0761ba8"
       ]
     ]
   },
   {
-    "id": "29147c96.039ad4",
+    "id": "895e562a824a0479",
     "type": "catch",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "scope": null,
     "x": 140,
     "y": 80,
     "wires": [
       [
-        "e2b4b357.5d2de"
+        "63360aecbe74d5b6"
       ]
     ]
   },
   {
-    "id": "e2b4b357.5d2de",
+    "id": "63360aecbe74d5b6",
     "type": "debug",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "active": true,
     "tosidebar": true,
     "console": false,
     "tostatus": false,
-    "complete": "false",
-    "x": 310,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 290,
     "y": 80,
     "wires": []
   },
   {
-    "id": "85493261.f69618",
+    "id": "eacec11f14c4433f",
     "type": "OPCUA-IIoT-Response",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -133,14 +137,14 @@
     "y": 300,
     "wires": [
       [
-        "b294ca52.38deb8"
+        "2399803ef436a77a"
       ]
     ]
   },
   {
-    "id": "10f86f78.2913a1",
+    "id": "d1773b9e76702806",
     "type": "debug",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -152,9 +156,9 @@
     "wires": []
   },
   {
-    "id": "db4ee3c4.cdfeb8",
+    "id": "93ba75eb6c9818bc",
     "type": "OPCUA-IIoT-Write",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "connector": "77fdc29e.3c49ec",
     "name": "",
     "justValue": false,
@@ -164,14 +168,14 @@
     "y": 300,
     "wires": [
       [
-        "85493261.f69618"
+        "eacec11f14c4433f"
       ]
     ]
   },
   {
-    "id": "5f87fa4.d74ee04",
+    "id": "524dd108ec40ea9f",
     "type": "OPCUA-IIoT-Inject",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "injectType": "write",
     "payload": "",
     "payloadType": "date",
@@ -197,14 +201,14 @@
     "y": 300,
     "wires": [
       [
-        "279a8807.4a33d"
+        "b8470569c6b35699"
       ]
     ]
   },
   {
-    "id": "279a8807.4a33d",
+    "id": "b8470569c6b35699",
     "type": "function",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "values to",
     "func": "let uint8 = new Uint8Array([2])\nmsg.valuesToWrite = [uint8[0], 20.33];\nreturn msg;",
     "outputs": 1,
@@ -213,15 +217,15 @@
     "y": 300,
     "wires": [
       [
-        "db4ee3c4.cdfeb8",
-        "10f86f78.2913a1"
+        "93ba75eb6c9818bc",
+        "d1773b9e76702806"
       ]
     ]
   },
   {
-    "id": "f3d09fd4.939238",
+    "id": "48e3bf891e6340b4",
     "type": "OPCUA-IIoT-Inject",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "injectType": "write",
     "payload": "",
     "payloadType": "date",
@@ -247,14 +251,14 @@
     "y": 380,
     "wires": [
       [
-        "ce4bf569.840a18"
+        "1cdb7115d3474b87"
       ]
     ]
   },
   {
-    "id": "ce4bf569.840a18",
+    "id": "1cdb7115d3474b87",
     "type": "OPCUA-IIoT-Read",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "attributeId": "13",
     "maxAge": 1,
     "depth": 1,
@@ -269,14 +273,14 @@
     "y": 380,
     "wires": [
       [
-        "a9cf8169.28348"
+        "735c8353fde5aa91"
       ]
     ]
   },
   {
-    "id": "bd470be4.624cf8",
+    "id": "4dc62287dda5244e",
     "type": "debug",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -288,9 +292,9 @@
     "wires": []
   },
   {
-    "id": "b294ca52.38deb8",
+    "id": "2399803ef436a77a",
     "type": "debug",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "active": false,
     "console": "false",
@@ -300,9 +304,9 @@
     "wires": []
   },
   {
-    "id": "a9cf8169.28348",
+    "id": "735c8353fde5aa91",
     "type": "OPCUA-IIoT-Response",
-    "z": "5305f1a.be84c9",
+    "z": "9e98528a1a8ac073",
     "name": "",
     "compressStructure": true,
     "showStatusActivities": false,
@@ -315,14 +319,13 @@
     "y": 380,
     "wires": [
       [
-        "bd470be4.624cf8"
+        "4dc62287dda5244e"
       ]
     ]
   },
   {
     "id": "77fdc29e.3c49ec",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55380",
     "keepSessionAlive": true,
