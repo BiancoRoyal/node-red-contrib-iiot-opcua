@@ -32,7 +32,7 @@ jobs:
         with: # Download artifacts from build.yml hopefully
           name: build-folders
           path: distrib.tar.gz
-      - run: echo $github.ref
+      - run: printenv
       - run: file distrib.tar.gz
       - run: tar -xvf distrib.tar.gz
       - run: pwd
