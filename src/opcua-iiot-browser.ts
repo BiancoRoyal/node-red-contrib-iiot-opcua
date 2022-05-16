@@ -36,7 +36,7 @@ interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
   sendNodesToRead: boolean
   sendNodesToBrowser: boolean
   sendNodesToListener: boolean
-  singleBrowseResult: boolean
+  multipleOutputs: boolean
   showStatusActivities: boolean
   showErrors: boolean
   recursiveBrowse: boolean
@@ -52,7 +52,7 @@ interface OPCUAIIoTBrowser extends nodered.Node {
   sendNodesToRead: boolean
   sendNodesToBrowser: boolean
   sendNodesToListener: boolean
-  singleBrowseResult: boolean
+  multipleOutputs: boolean
   showStatusActivities: boolean
   showErrors: boolean
   recursiveBrowse: boolean
@@ -109,7 +109,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.sendNodesToRead = config.sendNodesToRead
     this.sendNodesToBrowser = config.sendNodesToBrowser
     this.sendNodesToListener = config.sendNodesToListener
-    this.singleBrowseResult = config.singleBrowseResult
+    this.multipleOutputs = config.multipleOutputs
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
     this.recursiveBrowse = config.recursiveBrowse
@@ -170,7 +170,7 @@ module.exports = function (RED: nodered.NodeAPI) {
                 let newDepth = depth - 1
 
                 let subLists = createListsObject()
-                if (!nodeConfig.singleBrowseResult) {
+                if (nodeConfig.multipleOutputs) {
                   callback(rootNode, depth, msg, lists)
                 } else {
                   subLists = lists
@@ -223,7 +223,7 @@ module.exports = function (RED: nodered.NodeAPI) {
                 let newDepth = depth - 1
 
                 let subLists = createListsObject()
-                if (!nodeConfig.singleBrowseResult) {
+                if (nodeConfig.multipleOutputs) {
                   callback(rootNode, depth, msg, lists)
                 } else {
                   subLists = lists
@@ -324,8 +324,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const browseSendResult = function (rootNodeId: NodeIdLike, depth: number, msg: NodeMessageInFlow, lists: Lists) {
       coreBrowser.internalDebugLog(rootNodeId + ' called by depth ' + depth)
-
-      if (nodeConfig.singleBrowseResult) {
+      if (nodeConfig.multipleOutputs) {
         if (depth <= 0) {
           sendMessage(rootNodeId, depth, msg, lists)
           reset(lists)

@@ -55,18 +55,15 @@ It is based on version `2.2.2-12` of the Node-RED docker image, with the followi
 
 
 Valid tags:
--. `0.0.2`
+- `0.0.6`
+- `0.0.5`
+- `0.0.4`
+- `0.0.3`
+- `0.0.2`
 - `0.0.1`
-- `latest` (currently same image as 0.0.2)
 
 ### Current State
-The following nodes work correctly. All others should work, but may behave slightly differently than expected.
-- Browser
-- Crawler
-- Result-Filter
-- Server
-- Read
-- Response (Response should work, but not all possibilities are tested)
+All nodes should be fully functional. Please report any unexpected behavior.
 
 ### Building an image
 
@@ -81,6 +78,9 @@ Some nodes are configured slightly differently, so here is a guide how to adapt 
 ### Flex-Server
 - The `node-opcua` library is now directly accessible as `opcua`. This means all references to `coreServer.core.nodeOPCUA` should be replaced with `opcua`.
 - `node.iiot.assert` is no longer accessible. The functionality can be replaced by using an `if` statement that throws a new error (`if (errorConfition) throw new Error('Error Message'`). Errors can be displayed by using a `catch` node connected to a `debug` node, which displys the entire message. 
+
+### Browser
+- The option `singleBrowseResult` has been replaced with `multipleOutputs`, and the default value now combines all outputs into one message. To maintain the same output, replace `singleBrowseResult` with `multipleOutputs` and swap the corresponding boolean value (true becomes false, false becomes true).
 
 
 # node-red-contrib-iiot-opcua

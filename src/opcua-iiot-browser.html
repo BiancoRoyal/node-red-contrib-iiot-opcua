@@ -20,7 +20,7 @@
       sendNodesToRead: {value: false},
       sendNodesToListener: {value: false},
       sendNodesToBrowser: {value: false},
-      singleBrowseResult: {value: false},
+      multipleOutputs: {value: false},
       recursiveBrowse: {value: false},
       recursiveDepth: {value: 1},
       delayPerMessage: {value: 0.2},
@@ -129,9 +129,9 @@
                 <input type="checkbox" id="node-input-sendNodesToBrowser" style="max-width:30px">
             </div>
             <div class="form-row">
-                <label style="min-width:160px" for="node-input-singleBrowseResult"><i class="fa fa-object-group"></i>
-                <span data-i18n="opcua-iiot-contrib.label.singleBrowseResult"></span></label>
-                <input type="checkbox" id="node-input-singleBrowseResult" style="max-width:30px">
+                <label style="min-width:160px" for="node-input-multipleOutputs"><i class="fa fa-object-group"></i>
+                <span data-i18n="opcua-iiot-contrib.label.multipleOutputs"></span></label>
+                <input type="checkbox" id="node-input-multipleOutputs" style="max-width:30px">
             </div>
             <hr>
             <div class="form-row">
@@ -198,7 +198,7 @@
  <p>The input could be empty or should hold addressSpaceItems (Array of objects) to browse for.
  A datatype is not required here - it just requires the nodeId in the addressSpaceItems objects here.</p>
 
- <p>With the single result option you get less msg objects from the Browser node.
+ <p>With the multiple outputs option, the output gets spilt into one message per addressSpaceItem sent from the previous node and an extra message if a Node-Id is configured in the Browser tab.
  The delay per msg option helps to get some time between every msg outputs.</p>
 
  <h3>Recursive Browse</h3>
