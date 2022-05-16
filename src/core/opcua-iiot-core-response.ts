@@ -14,7 +14,12 @@ import debug from 'debug';
 import {Node, NodeStatus, NodeStatusFill} from "node-red";
 import {BrowseResult, StatusCode} from "node-opcua";
 import {NodeIdLike} from "node-opcua-nodeid";
-import {AddressSpaceItem} from "../types/helpers";
+import {AddressSpaceItem, StatusInput} from "../types/helpers";
+import {CrawlerPayload} from "../opcua-iiot-crawler";
+import {BrowserPayload} from "../opcua-iiot-browser";
+import {AnyPayload} from "../types/payloads";
+import {isArray} from "../types/assertion";
+import {ReadPayload} from "../opcua-iiot-read";
 
 type EntryStatus = {
   good: number,
@@ -49,16 +54,16 @@ const detailDebugLog = debug('opcuaIIoT:response:details') // eslint-disable-lin
 const EMPTY_LIST = 0
 const NONE = 0
 
-const analyzeBrowserResults = function (node: Node, payload: ResponseInputPayload) {
-  handlePayloadStatusCode(node, payload)
+const analyzeBrowserResults = function (node: Node, payload: BrowserPayload) {
+  handlePayloadStatusCode(node, payload.browserResults, payload as AnyPayload)
 }
 
-const analyzeCrawlerResults = function (node: Node, payload: ResponseInputPayload) {
-  handlePayloadStatusCode(node, payload)
+const analyzeCrawlerResults = function (node: Node, payload: CrawlerPayload) {
+  handlePayloadStatusCode(node, payload.value, payload as AnyPayload)
 }
 
-const analyzeReadResults = (node: Node, payload: ResponseInputPayload) => {
-  handlePayloadStatusCode(node, payload)
+const analyzeReadResults = (node: Node, payload: ReadPayload) => {
+  handlePayloadStatusCode(node, payload.value, payload)
   if (payload.readtype === 'HistoryValue') {
     payload.value.map((item: any) => {
       delete item['statusCode']
@@ -71,7 +76,7 @@ const analyzeListenerResults = function (node: Node, payload: ResponseInputPaylo
   switch (payload.injectType) {
     case 'subscribe':
     case 'event':
-      handlePayloadStatusCode(node, payload)
+      handlePayloadStatusCode(node, payload.value, payload)
       break
     default:
       break
@@ -82,7 +87,7 @@ const analyzeMethodResults = function (node: Node, payload: ResponseInputPayload
   switch (payload.methodType) {
     case 'basic':
     case 'complex':
-      handlePayloadStatusCode(node, payload)
+      handlePayloadStatusCode(node, payload.value, payload)
       break
     default:
       break
@@ -110,17 +115,19 @@ const analyzeWriteResults = function (node: Node, msg: Todo) {
   setNodeStatusInfo(node, msg, entryStatus)
 }
 
-const handlePayloadStatusCode = function (node: Node, payload: ResponseInputPayload) {
+const handlePayloadStatusCode = function (node: Node, payload: AnyPayload, statusInputs: StatusInput | StatusInput[]) {
   let entryStatus = {
     bad: 0,
     good: 0,
     other: 0
   }
 
-  if (payload.browserResults || payload.crawlerResults || payload.statusCodes) {
-    entryStatus = handlePayloadArrayOfObjects(payload)
+  console.log('isArray', isArray(statusInputs))
+
+  if (isArray(statusInputs)) {
+    entryStatus = handlePayloadArrayOfObjects(statusInputs)
   } else {
-    entryStatus = handlePayloadObject(payload)
+    entryStatus = handlePayloadObject(statusInputs)
   }
   setNodeStatusInfo(node, payload, entryStatus)
   payload.entryStatus = entryStatus
@@ -132,25 +139,14 @@ const setNodeStatusInfo = function (node: Node, payload: ResponseInputPayload, e
   setNodeStatus(node, payload.entryStatus, payload.entryStatusText)
 }
 
-const handlePayloadArrayOfObjects = function (payload: ResponseInputPayload) {
+const handlePayloadArrayOfObjects = function (statusInputs: StatusInput[]) {
   let entryStatus = {
     bad: 0,
     good: 0,
     other: 0
   }
-  let results = []
 
-  if (payload.crawlerResults) {
-    results = payload.crawlerResults
-  } else if (payload.browserResults) {
-    results = payload.browserResults
-  } else if (payload.value) {
-    results = payload.value
-  } else if (payload.statusCodes) {
-    results = payload.statusCodes
-  }
-
-  results.forEach((entry: any) => {
+  statusInputs.forEach((entry: any) => {
       switch (entry.statusCode?.name) {
         case 'Good':
           entryStatus['good'] += 1
@@ -170,20 +166,20 @@ const handlePayloadArrayOfObjects = function (payload: ResponseInputPayload) {
   return entryStatus
 }
 
-const handlePayloadObject = function (payload: ResponseInputPayload) {
+const handlePayloadObject = function (statusInput: StatusInput) {
   let entryStatus = {
     good: 0,
     bad: 0,
     other: 0,
   }
 
-  if (payload.results || payload.statusCodes) {
-    entryStatus = handlePayloadArrayOfObjects(payload)
+  if (isArray(statusInput)) {
+    entryStatus = handlePayloadArrayOfObjects(statusInput as StatusInput[])
   }
 
-  if (payload && payload.statusCode) {
-    if (payload.statusCode.name) {
-      switch (payload.statusCode.name) {
+  if (statusInput && statusInput.statusCode) {
+    if (statusInput.statusCode.name) {
+      switch (statusInput.statusCode.name) {
         case 'Good':
           entryStatus['good'] += 1
           break
@@ -191,9 +187,9 @@ const handlePayloadObject = function (payload: ResponseInputPayload) {
           entryStatus['bad'] += 1
           break
         default:
-          if (payload.statusCode.name.includes('Good')) {
+          if (statusInput.statusCode.name.includes('Good')) {
             entryStatus['good'] += 1
-          } else if (payload.statusCode.name.includes('Bad')) {
+          } else if (statusInput.statusCode.name.includes('Bad')) {
             entryStatus['bad'] += 1
           } else {
             entryStatus['other'] += 1
@@ -247,8 +243,8 @@ const handlePayloadArrayOfStatusCodes = function (payload: ResponseInputPayload)
   return entryStatus
 }
 
-const defaultCompress = function (payload: ResponseInputPayload) {
-  if (payload.hasOwnProperty('value') && payload.value.hasOwnProperty('value')) {
+const defaultCompress = function (payload: any) {
+  if (payload.value.value) {
     payload.value = payload.value.value
   }
   trimMessageExtensions(payload)
@@ -274,7 +270,13 @@ const trimMessagePayloadExtensions = (payload: any) => {
   delete payload['listenerParameters']
 }
 
-const compressBrowseMessageStructure = function (payload: ResponseInputPayload) {
+export type CompressedBrowseResult = {
+  nodeId: string
+  browseName: string
+  displayName: string
+}
+
+const compressBrowseMessageStructure = function (payload: BrowserPayload) {
   if (payload.browserResults?.length) {
     payload.value = payload.browserResults.map((item: Todo) => {
       return {
@@ -286,11 +288,11 @@ const compressBrowseMessageStructure = function (payload: ResponseInputPayload) 
     trimMessageExtensions(payload)
     trimMessagePayloadExtensions(payload)
   } else {
-    defaultCompress(payload)
+    defaultCompress(payload as AnyPayload)
   }
 }
 
-const compressCrawlerMessageStructure = function (payload: ResponseInputPayload) {
+const compressCrawlerMessageStructure = function (payload: CrawlerPayload) {
   if (payload.hasOwnProperty('crawlerResults') && payload.crawlerResults?.length) {
     payload.value = payload.crawlerResults?.map((item: Todo) => {
       return {

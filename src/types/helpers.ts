@@ -1,5 +1,6 @@
 import {Todo} from "./placeholders";
-import {AttributeIds, DataType, DataValue, NodeId, NodeIdType} from "node-opcua";
+import {AttributeIds, DataType, DataValue, NodeId, NodeIdType, StatusCode} from "node-opcua";
+import {NodeMessageInFlow} from "node-red";
 
 export type TimeUnits =
   'ms' |
@@ -73,3 +74,18 @@ export type Like<T> = {
 export const getEnumKeys = <O extends object, K extends keyof O>(obj: O): K[] => {
   return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
 }
+
+/**
+ * Give a type to NodeMessageInFlow to voerwrite the unknown type
+ */
+export type TypedNodeMessage<T> = NodeMessageInFlow & {
+  payload: T
+}
+
+/**
+ * A type used to represent anything that might have status codes
+ */
+export type StatusInput = {
+  statusCodes?: StatusCode[]
+  statusCode?: StatusCode
+};

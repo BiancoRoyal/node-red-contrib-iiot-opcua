@@ -25,6 +25,7 @@ import {Node, NodeAPI, NodeDef, NodeMessage, NodeStatus} from "node-red";
 import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
 import {InjectPayload} from "./opcua-iiot-inject";
 import {DataValue} from "node-opcua";
+import {CompressedBrowseResult} from "./core/opcua-iiot-core-response";
 
 interface OPCUAIIoTCrawler extends Node {
   name: string
@@ -60,11 +61,19 @@ type CrawlerMessage = NodeMessageInFlow & {
   payload: CrawlerPayload
 }
 
-type CrawlerPayload = InjectPayload & {
-  crawlerResults: CrawlerResult[]
+export interface CrawlerPayload extends Omit<InjectPayload, 'nodetype'> {
+  crawlerResults: (CrawlerResult | Error)[]
+  browseTopic?: string
+  crawlerResultsCount?: number
+  endpoint?: string
+  session?: string
+  nodetype?: 'crawl'
+  resultsConverted?: string
+  error?: string
+  value: CrawlerResult[] | CompressedBrowseResult[]
 }
 
-type CrawlerResult = {
+export type CrawlerResult = {
   nodeId: string
   nodeClass: number
   typeDefinition: string
@@ -238,7 +247,7 @@ module.exports = (RED: NodeAPI) => {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length);
           const filteredResults = filterCrawlerResults(result.crawlerResult);
           (payload as Todo).value = [filteredResults]
-          sendMessage(payload, filteredResults)
+          sendMessage(payload as FlatMessage<CrawlerPayload>, filteredResults)
         }
       }
     }
@@ -261,7 +270,12 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const sendMessage = (payload: Todo, crawlerResult: Todo) => {
+    interface FlatMessage<T extends object> extends CrawlerPayload {
+      _msgid: string,
+      topic: string,
+    }
+
+    const sendMessage = (payload: FlatMessage<CrawlerPayload>, crawlerResult: Todo) => {
       const {
         _msgid,
         topic,

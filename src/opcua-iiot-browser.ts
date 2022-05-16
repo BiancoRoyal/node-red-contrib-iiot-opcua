@@ -27,6 +27,7 @@ import {AddressSpaceItem} from "./types/helpers";
 import {ListenPayload} from "./opcua-iiot-listener";
 import {ReferenceDescription} from "node-opcua-types/dist/_generated_opcua_types";
 import {NodeIdLike} from "node-opcua-nodeid";
+import {CompressedBrowseResult} from "./core/opcua-iiot-core-response";
 
 interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
   nodeId: NodeIdLike
@@ -70,7 +71,7 @@ type BrowseNodeWithConfig = {
   delayMessageTimer?: NodeJS.Timer
 } & OPCUAIIoTBrowser
 
-export type BrowsePayload = {
+export type BrowserPayload = {
   nodetype: "browse",
   injectType: string,
   addressSpaceItems: AddressSpaceItem[],
@@ -81,6 +82,8 @@ export type BrowsePayload = {
   recursiveDepth: number,
   recursiveDepthMax: number,
   listenerParameters?: ListenPayload
+  browserResults: BrowseResult[]
+  value?: BrowseResult[] | CompressedBrowseResult[]
 }
 
 interface Lists {
@@ -251,11 +254,13 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const listenerParameters = getListenParameters((originMessage.payload as any))
 
-      const payload: BrowsePayload = {
+
+      const payload: BrowserPayload = {
         ...(originMessage.payload as BrowserInputPayload),
         nodetype: 'browse',
         justValue: nodeConfig.justValue,
         rootNodeId,
+        // @ts-ignore because TS is misunderstanding lists.brwoserResults type
         browserResults: lists.browserResults,
         recursiveBrowse: nodeConfig.recursiveBrowse,
         recursiveDepth: depth,

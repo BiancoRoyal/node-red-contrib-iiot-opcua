@@ -26,7 +26,7 @@ import {
 } from "./core/opcua-iiot-core";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
-import {BrowsePayload} from "./opcua-iiot-browser";
+import {BrowserPayload} from "./opcua-iiot-browser";
 import {ClientSession} from "node-opcua";
 
 
@@ -53,12 +53,14 @@ export type WriteResult = {
 }
 
 export type WriteResultMessage = NodeMessageInFlow & {
-  payload: {
-    nodetype: Todo
-    justValue: Todo
-    value: Todo
-    valuesToWrite: Todo
-  }
+  payload: WritePayload
+}
+
+export type WritePayload = {
+  nodetype: 'write'
+  justValue: Todo
+  value: Todo
+  valuesToWrite: Todo
 }
 
 /**
@@ -155,7 +157,7 @@ module.exports = (RED: NodeAPI) => {
       if (!checkConnectorState(node, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
         return
       }
-      const payload = msg.payload as BrowsePayload
+      const payload = msg.payload as BrowserPayload
       // recursivePrintTypes(msg);
       if (payload.injectType === 'write') {
         writeToSession(node.connector.iiot.opcuaSession, msg)

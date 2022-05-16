@@ -12,7 +12,7 @@ import {Todo} from "./types/placeholders";
 import coreFilter from './core/opcua-iiot-core-filter';
 import {convertDataValueByDataType, filterListByNodeId, filterListEntryByNodeId} from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
-import {BrowsePayload} from "./opcua-iiot-browser";
+import {BrowserPayload} from "./opcua-iiot-browser";
 import {BrowseResult} from "node-opcua";
 
 interface OPCUAIIoTResultFilter extends nodered.Node {
@@ -99,7 +99,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      const payload = msg.payload as FilterInputPayload & BrowsePayload
+      const payload = msg.payload as FilterInputPayload & BrowserPayload
       const filtered = filterByType(payload)
       const value =
         node.justValue
@@ -293,7 +293,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const filterByBrowserType = (payload: BrowsePayload & Todo) => {
+    const filterByBrowserType = (payload: BrowserPayload & Todo) => {
       const browserResults = filterListByNodeId(node.nodeId, payload.browserResults)
 
       const addressSpaceItems = (payload.addressSpaceItems && payload.addressSpaceItems.length) ?

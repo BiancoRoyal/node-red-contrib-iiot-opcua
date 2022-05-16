@@ -46,6 +46,10 @@ interface OPCUAIIoTMethodCallerDef extends nodered.NodeDef {
   connector: string
 }
 
+export type MethodPayload = Todo & {
+  nodetype: 'method'
+}
+
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT method call.
  *

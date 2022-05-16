@@ -16,9 +16,13 @@ import {
   isNodeTypeToFilterResponse
 } from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
-import {Node, NodeAPI, NodeDef, NodeStatus} from "node-red";
-import {AddressSpaceItem} from "./types/helpers";
+import {Node, NodeAPI, NodeDef} from "node-red";
+import {AddressSpaceItem, StatusInput} from "./types/helpers";
 import {BrowseResult} from "node-opcua";
+import {CrawlerPayload} from "./opcua-iiot-crawler";
+import {BrowserPayload} from "./opcua-iiot-browser";
+import {AnyPayload} from "./types/payloads";
+import {ReadPayload} from "./opcua-iiot-read";
 
 type Filter = {
   name: string
@@ -78,7 +82,7 @@ module.exports = (RED: NodeAPI) => {
 
     this.status({fill: 'green', shape: 'ring', text: 'active'})
 
-    const handleBrowserMsg = function (payload: ResponseInputPayload) {
+    const handleBrowserMsg = function (payload: BrowserPayload) {
       coreResponse.analyzeBrowserResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressBrowseMessageStructure(payload)
@@ -86,7 +90,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleCrawlerMsg = function (payload: ResponseInputPayload) {
+    const handleCrawlerMsg = function (payload: CrawlerPayload) {
       coreResponse.analyzeCrawlerResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressCrawlerMessageStructure(payload)
@@ -94,7 +98,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleReadMsg = function (payload: ResponseInputPayload) {
+    const handleReadMsg = function (payload: ReadPayload) {
       coreResponse.analyzeReadResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressReadMessageStructure(payload)
@@ -128,7 +132,7 @@ module.exports = (RED: NodeAPI) => {
 
     const handleDefaultMsg = function (payload: ResponseInputPayload) {
       if (payload) {
-        coreResponse.handlePayloadStatusCode(node, payload)
+        coreResponse.handlePayloadStatusCode(node, (payload.value as StatusInput | StatusInput[]), payload)
         if (node.compressStructure) {
           coreResponse.compressDefaultMessageStructure(payload)
         }
@@ -136,12 +140,12 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleNodeTypeOfMsg = function (payload: ResponseInputPayload) {
+    const handleNodeTypeOfMsg = function (payload: AnyPayload) {
       switch (payload.nodetype) {
         case 'browse':
-          return handleBrowserMsg(payload)
+          return handleBrowserMsg(payload as BrowserPayload)
         case 'crawl':
-          return handleCrawlerMsg(payload)
+          return handleCrawlerMsg(payload as CrawlerPayload)
         case 'read':
           return handleReadMsg(payload)
         case 'write':
@@ -287,7 +291,7 @@ module.exports = (RED: NodeAPI) => {
         }
         msg = normalizeMessage(msg as any)
 
-        const inputPayload = msg.payload as ResponseInputPayload;
+        const inputPayload = msg.payload as AnyPayload;
         const handledPayload = {
           ...handleNodeTypeOfMsg(inputPayload),
           compressed: node.compressStructure

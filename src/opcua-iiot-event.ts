@@ -15,7 +15,7 @@ import {constructEventFilter, EventFilter} from "node-opcua";
 import {NodeMessageInFlow} from "@node-red/registry";
 import coreListener from "./core/opcua-iiot-core-listener";
 import {InjectPayload} from "./opcua-iiot-inject";
-import {BrowsePayload} from "./opcua-iiot-browser";
+import {BrowserPayload} from "./opcua-iiot-browser";
 import {Like} from "./types/helpers";
 
 interface OPCUAIIoTEvent extends nodered.Node {
@@ -44,7 +44,7 @@ interface OPCUAIIoTEventDef extends nodered.NodeDef {
 export type EventMessage = NodeMessageInFlow & {
   payload: EventPayload
 }
-export type EventPayload = (InjectPayload | BrowsePayload) & {
+export type EventPayload = (InjectPayload | BrowserPayload) & {
   eventType?: string,
   uaEventFilter?: EventFilter,
   uaEventFields?: string[],
@@ -103,7 +103,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const uaEventFilter: EventFilter = constructEventFilter(uaEventFields)
       const responsePayload: EventPayload = {
-        ...msg.payload as InjectPayload | BrowsePayload,
+        ...msg.payload as InjectPayload | BrowserPayload,
         eventType: nodeConfig.eventType,
         uaEventFilter: uaEventFilter,
         uaEventFields: uaEventFields,

@@ -17,27 +17,27 @@ import {AddressSpaceItem} from "./types/helpers";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string
-  topic: Todo // TODO: string?
+  topic: string
   payload: Todo // TODO: config.payload
-  payloadType: Todo // TODO: config.payloadType
+  payloadType: Todo
   repeat: number
-  crontab: string // TODO: config.crontab
-  once: Todo // TODO: config.once
+  crontab: string
+  once: Todo
   startDelay: number // TODO: parseFloat(config.startDelay) || 10
-  injectType: Todo // TODO: config.injectType || 'inject'
+  injectType: string
   addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
 }
 
 interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
   name: string
-  topic: string // TODO: string?
-  payload: string // TODO: config.payload
-  payloadType: string // TODO: config.payloadType
+  topic: string
+  payload: string
+  payloadType: string
   repeat: string
-  crontab: string // TODO: config.crontab
-  once: boolean // TODO: config.once
+  crontab: string
+  once: boolean
   startDelay: string
-  injectType: Todo // TODO: config.injectType || 'inject'
+  injectType: string
   addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
 }
 

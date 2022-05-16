@@ -50,6 +50,10 @@ interface OPCUAIIoTReadDef extends NodeDef {
   connector: string
 }
 
+export type ReadPayload = Todo & {
+  nodetype: 'read'
+}
+
 /**
  * Read Node-RED node.
  *
