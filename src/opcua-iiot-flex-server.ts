@@ -124,7 +124,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const handleServerError = (node: Todo, err: Error, msg: Todo) => {
-      internalDebugLog(err)
+      coreServer.internalDebugLog(err)
       if (node.showErrors) {
         this.error(err, msg)
       }
