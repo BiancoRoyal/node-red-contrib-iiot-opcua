@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node: [14, 16]
+        node: [14]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -39,5 +39,6 @@ jobs:
             examples
             package.json
             create_certificates.js
+      - run: echo github.ref
+      - run: pwd
       - run: ls opcuaIIoT
-      - run: github.ref
