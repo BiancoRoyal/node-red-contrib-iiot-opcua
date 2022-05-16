@@ -11,32 +11,35 @@
 
 import * as path from 'path'
 import * as nodered from 'node-red'
+import {NodeStatus} from 'node-red'
+import {getNodeOPCUAClientPath, isInitializedIIoTNode, resetIiotNode} from './core/opcua-iiot-core'
 import {
-  getNodeOPCUAClientPath,
-  isInitializedIIoTNode,
-  resetIiotNode,
-  setNodeStatusTo,
-  underscore as _
-} from './core/opcua-iiot-core'
-import {
-  AttributeIds, ClientSession,
+  AttributeIds,
+  ClientSession,
   coerceMessageSecurityMode,
   coerceSecurityPolicy,
   DataTypeIds,
-  EndpointDescription, findServers,
-  MessageSecurityMode, nodesets,
-  ObjectTypeIds, OPCUAClient, ReferenceTypeIds,
-  SecurityPolicy, StatusCodes, UserIdentityInfo, VariableTypeIds
+  EndpointDescription,
+  findServers,
+  MessageSecurityMode,
+  nodesets,
+  ObjectTypeIds,
+  OPCUAClient,
+  ReferenceTypeIds,
+  SecurityPolicy,
+  StatusCodes,
+  UserIdentityInfo,
+  VariableTypeIds
 } from "node-opcua";
 import {CoreNode, getEnumKeys, Todo} from "./types/placeholders";
-import {logger} from "./core/opcua-iiot-core-connector";
-import internalDebugLog = logger.internalDebugLog;
-import coreConnector from "./core/opcua-iiot-core-connector";
-import detailDebugLog = logger.detailDebugLog;
+import coreConnector, {logger} from "./core/opcua-iiot-core-connector";
 import {FindServerResults} from "node-opcua-client/source/tools/findservers";
-import {Node, NodeStatus} from "node-red";
 import {isUndefined} from "underscore";
 import {UserTokenType} from "node-opcua-service-endpoints";
+import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
+import internalDebugLog = logger.internalDebugLog;
+import detailDebugLog = logger.detailDebugLog;
+import _ from 'underscore'
 
 interface OPCUAIIoTConnectorCredentials {
   user: string
@@ -97,7 +100,7 @@ interface OPCUAIIoTConnectorConfigurationDef extends nodered.NodeDef {
   autoSelectRightEndpoint: boolean
   strategyMaxRetry: number
   strategyInitialDelay: number
-  strategyMaxDelay: number
+  strategyMaxDelay: string
   strategyRandomisationFactor: number
   requestedSessionTimeout: number
   connectionStartDelay: number
@@ -151,7 +154,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.autoSelectRightEndpoint = config.autoSelectRightEndpoint
     this.strategyMaxRetry = config.strategyMaxRetry || 10000
     this.strategyInitialDelay = config.strategyInitialDelay || 1000
-    this.strategyMaxDelay = config.strategyMaxDelay || 30000
+    this.strategyMaxDelay = parseInt(config.strategyMaxDelay) || 30000
     this.strategyRandomisationFactor = config.strategyRandomisationFactor || 0.2
     this.requestedSessionTimeout = config.requestedSessionTimeout || 60000
     this.connectionStartDelay = config.connectionStartDelay || CONNECTION_START_DELAY
@@ -209,7 +212,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     /*  #########   CONNECTION  #########     */
 
-    const getUpdatedServerOptions = () => {
+    const getUpdatedServerOptions = (): OPCUAClientOptions => {
       initCertificatesAndKeys()
       // this.iiot.opcuaClientOptions
       return {
@@ -217,8 +220,8 @@ module.exports = function (RED: nodered.NodeAPI) {
         securityMode: this.messageSecurityMode,
         defaultSecureTokenLifetime: this.defaultSecureTokenLifetime,
         keepSessionAlive: this.keepSessionAlive,
-        certificateFile: this.publicCertificateFile,
-        privateKeyFile: this.privateKeyFile,
+        certificateFile: this.publicCertificateFile ?? undefined,
+        privateKeyFile: this.privateKeyFile ?? undefined,
         endpointMustExist: this.endpointMustExist,
         requestedSessionTimeout: this.requestedSessionTimeout,
         connectionStrategy: {
@@ -553,7 +556,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       internalDebugLog('OPC UA Disconnect Connector On State ' + this.iiot.stateMachine.getMachineState())
 
-      if (this.iiot.opcuaClient) {
+      if (this.iiot?.opcuaClient) {
         internalDebugLog('Close Node Disconnect Connector From ' + this.endpoint)
         try {
           this.iiot.opcuaClient.disconnect((err?: Error) => {
@@ -691,7 +694,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.autoSelectRightEndpoint = config.autoSelectRightEndpoint || this.autoSelectRightEndpoint
       this.strategyMaxRetry = config.strategyMaxRetry || this.strategyMaxRetry
       this.strategyInitialDelay = config.strategyInitialDelay || this.strategyInitialDelay
-      this.strategyMaxDelay = config.strategyMaxDelay || this.strategyMaxDelay
+      this.strategyMaxDelay = parseInt(config.strategyMaxDelay) || this.strategyMaxDelay
       this.strategyRandomisationFactor = config.strategyRandomisationFactor || this.strategyRandomisationFactor
       this.requestedSessionTimeout = config.requestedSessionTimeout || this.requestedSessionTimeout
       this.connectionStartDelay = config.connectionStartDelay || this.connectionStartDelay

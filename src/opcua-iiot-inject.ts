@@ -13,6 +13,7 @@ import {Todo} from "./types/placeholders";
 import coreInject from "./core/opcua-iiot-core-inject";
 import {resetIiotNode} from "./core/opcua-iiot-core";
 import {CronJob} from 'cron';
+import {AddressSpaceItem} from "./types/core";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string
@@ -49,7 +50,7 @@ export interface InjectPayload {
   payloadType: string
   nodetype: 'inject'
   injectType: string
-  addressSpaceItems: Todo[]
+  addressSpaceItems: AddressSpaceItem[]
   manualInject: boolean
 }
 
@@ -75,8 +76,6 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.injectType = config.injectType || 'inject'
 
     this.addressSpaceItems = config.addressSpaceItems || []
-    console.log(this.addressSpaceItems)
-    console.log(this.injectType)
 
     let node: Todo = this
 
@@ -138,7 +137,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const generateOutputValue = (payloadType: Todo, inputMessage: NodeMessageInFlow) => {
+    const generateOutputValue = (payloadType: string, inputMessage: NodeMessageInFlow) => {
       switch (payloadType) {
         case 'none':
           return ''
