@@ -11,7 +11,13 @@
 
 import * as path from 'path'
 import * as nodered from 'node-red'
-import {getNodeOPCUAClientPath, isInitializedIIoTNode, resetIiotNode, underscore as _} from './core/opcua-iiot-core'
+import {
+  getNodeOPCUAClientPath,
+  isInitializedIIoTNode,
+  resetIiotNode,
+  setNodeStatusTo,
+  underscore as _
+} from './core/opcua-iiot-core'
 import {
   AttributeIds, ClientSession,
   coerceMessageSecurityMode,
@@ -28,7 +34,7 @@ import internalDebugLog = logger.internalDebugLog;
 import coreConnector from "./core/opcua-iiot-core-connector";
 import detailDebugLog = logger.detailDebugLog;
 import {FindServerResults} from "node-opcua-client/source/tools/findservers";
-import {NodeStatus} from "node-red";
+import {Node, NodeStatus} from "node-red";
 import {isUndefined} from "underscore";
 import {UserTokenType} from "node-opcua-service-endpoints";
 
@@ -712,8 +718,6 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-
-
     const subscribeFSMEvents = (fsm: Todo) => {
       /* #########   FSM EVENTS  #########     */
 
@@ -738,7 +742,6 @@ module.exports = function (RED: nodered.NodeAPI) {
           clearTimeout(clientStartTimeout)
           clientStartTimeout = null
         }
-
         detailDebugLog('connecting OPC UA with delay of msec: ' + this.connectionStartDelay)
         clientStartTimeout = setTimeout(() => {
           if (isInitializedIIoTNode(this.iiot)) {

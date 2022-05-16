@@ -657,7 +657,12 @@ export function buildNodesToRead(payload: Todo) {
 }
 
 export function buildNodesToListen(payload: Todo) {
-    return payload.addressItemsToRead || payload.addressSpaceItems
+    if (payload.addressSpaceItems?.length)
+        return payload.addressSpaceItems
+    else if (payload.addressItemsToRead?.length)
+        return  payload.addressItemsToRead
+    else
+        return payload.addressSpaceItemList
 }
 
 export function buildNodesFromBrowser(payload: Todo) {
@@ -1083,9 +1088,9 @@ export function resetIiotNode(node: Todo) {
     if (isInitializedIIoTNode(node.iiot) && node.iiot.resetAllTimer) {
         node.iiot.resetAllTimer()
     }
-    if (isInitializedIIoTNode(node)) {
-        node.iiot = null
-    }
+    // if (isInitializedIIoTNode(node)) {
+    //     node.iiot = null
+    // }
 }
 
 export function filterListEntryByNodeId(nodeId: Todo, list: Todo) {
