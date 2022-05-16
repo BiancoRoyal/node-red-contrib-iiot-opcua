@@ -232,8 +232,10 @@ module.exports = (RED: NodeAPI) => {
         } else if (result instanceof Error) {
           coreBrowser.browseErrorHandling(nodeConfig, result, payload, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
         } else {
-          coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          sendMessage(payload, filterCrawlerResults(result.crawlerResult))
+          coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length);
+          const filteredResults = filterCrawlerResults(result.crawlerResult);
+          (payload as Todo).value = [filteredResults]
+          sendMessage(payload, filteredResults)
         }
       }
     }
