@@ -10,6 +10,9 @@
 
 import * as nodered from "node-red";
 import {Todo, TodoBianco} from "./types/placeholders";
+import {NodeMessageInFlow} from "@node-red/registry";
+import {convertDataValueByDataType} from "./core/opcua-iiot-core";
+import {logger} from "./core/opcua-iiot-core-connector";
 
 interface OPCUAIIoTNode extends nodered.Node {
   nodeId: string
@@ -37,7 +40,6 @@ interface OPCUAIIoTNodeDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTNode (this: OPCUAIIoTNode, config: OPCUAIIoTNodeDef) {
     RED.nodes.createNode(this, config)
@@ -50,14 +52,15 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.showErrors = config.showErrors
 
     let node: Todo = this
+    node.iiot = {}
     node.iiot.subscribed = false
-
     this.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    this.on('input', (msg: Todo) => {
-      msg.nodetype = 'node'
-      msg.injectType = msg.injectType || node.injectType
+    this.on('input', (msg: NodeMessageInFlow) => {
+
       node.iiot.subscribed = !node.iiot.subscribed
+      const payload = msg.payload as Todo
+      const value: Todo = typeof msg.payload === "string" ? msg.payload : (msg.payload as Todo).value;
 
       if (node.injectType === 'listen') {
         if (node.iiot.subscribed) {
@@ -68,29 +71,39 @@ module.exports = (RED: nodered.NodeAPI) => {
       } else {
         this.status({ fill: 'blue', shape: 'dot', text: 'injected' })
       }
-
-      msg.topic = msg.topic || node.topic
-      msg.addressSpaceItems = msg.addressSpaceItems || [] // eslint-disable-line
-
+      const topic = msg.topic || node.topic
+      const valuesToWrite = payload.valuesToWrite || []
+      const addressSpaceItems = payload.addressSpaceItems || []
       if (node.injectType === 'write') {
-        msg.valuesToWrite = msg.valuesToWrite || [] // eslint-disable-line
-        msg.addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
-
+        addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
         try {
-          msg.valuesToWrite.push(core.convertDataValueByDataType({ value: node.value === '' ? msg.payload : node.value }, node.datatype))
+          valuesToWrite.push(convertDataValueByDataType({ value: node.value === '' ? msg.payload : node.value }, node.datatype))
         } catch (err) {
-          core.internalDebugLog(err)
+          logger.internalDebugLog(err)
           if (node.showErrors) {
             this.error(err, msg)
           }
         }
       } else {
-        msg.addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
+        addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
+      }
+      const outputPayload = {
+        nodetype: "node",
+        injectType: payload.injectType || node.injectType,
+        addressSpaceItems,
+        valuesToWrite,
+        value,
       }
 
-      core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-      this.send(msg)
+      const outputMessage = {
+        payload: outputPayload,
+        topic,
+        _msgid: msg._msgid
+      }
+      logger.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
+      this.send(outputMessage)
     })
+
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Node', OPCUAIIoTNode)

@@ -23,7 +23,7 @@ var testEventNodeFlow = [
     'id': 'n1evf1',
     'type': 'inject',
     'topic': 'TestTopic',
-    'payload': '{"queueSize":10, "interval":1000}',
+    'payload': '{"value":1000}',
     'payloadType': 'json',
     'repeat': '',
     'crontab': '',
@@ -36,7 +36,7 @@ var testEventNodeFlow = [
     'type': 'OPCUA-IIoT-Event',
     'eventType': 'i=2041',
     'eventTypeLabel': 'BaseTypeEvent',
-    'queueSize': 1,
+    'queueSize': 10,
     'usingListener': true,
     'name': 'TestName',
     'showStatusActivities': false,
@@ -70,27 +70,15 @@ describe('OPC UA Event node Unit Testing', function () {
   describe('Event node', function () {
     it('should load with basic settings', function (done) {
       helper.load(
-        [inputNode],
-        [{
-          'id': '67c521a2.07429',
-          'type': 'OPCUA-IIoT-Event',
-          'eventType': 'i=2041',
-          'eventTypeLabel': 'BaseTypeEvent',
-          'queueSize': 1,
-          'usingListener': true,
-          'name': 'TestName',
-          'showStatusActivities': false,
-          'showErrors': false,
-          'wires': [[]]
-        }
-        ],
+        [injectNode, inputNode],
+          testEventNodeFlow,
         function () {
-          let nodeUnderTest = helper.getNode('67c521a2.07429')
+          let nodeUnderTest = helper.getNode('n3evf1')
           expect(nodeUnderTest.name).toBe('TestName')
           expect(nodeUnderTest.eventTypeLabel).toBe('BaseTypeEvent')
           expect(nodeUnderTest.eventType).toBe('i=2041')
           expect(nodeUnderTest.usingListener).toBe(true)
-          expect(nodeUnderTest.queueSize).toBe(1)
+          expect(nodeUnderTest.queueSize).toBe(10)
           done()
         })
     })
@@ -99,7 +87,7 @@ describe('OPC UA Event node Unit Testing', function () {
       helper.load([injectNode, inputNode], testEventNodeFlow, function () {
         let n2 = helper.getNode('n2evf1')
         n2.on('input', function (msg) {
-          expect(msg.payload).toMatchObject({'queueSize': 10, 'interval': 1000})
+          expect(msg.payload).toBeDefined()
           done()
         })
       })
@@ -109,9 +97,10 @@ describe('OPC UA Event node Unit Testing', function () {
       helper.load([injectNode, inputNode], testEventNodeFlow, function () {
         let n4 = helper.getNode('n4evf1')
         n4.on('input', function (msg) {
+          // console.log(msg)
           expect(msg.payload.eventType).toBeDefined()
-          expect(msg.payload.eventFilter).toBeDefined()
-          expect(msg.payload.eventFields).toBeDefined()
+          expect(msg.payload.uaEventFilter).toBeDefined()
+          expect(msg.payload.uaEventFields).toBeDefined()
           expect(msg.payload.queueSize).toBe(10)
           expect(msg.payload.interval).toBe(1000)
           /* payload: { eventType: 'i=2041',
@@ -120,6 +109,7 @@ describe('OPC UA Event node Unit Testing', function () {
             interval: 1000 }) */
           done()
         })
+        n4.receive({payload: {value: 1000}})
       })
     })
   })

@@ -12,7 +12,7 @@ import * as nodered from "node-red";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {
   CoreNode,
-  OPCUASession, recursivePrintTypes,
+  OPCUASession,
   ResultMessage,
   Todo,
   TodoVoidFunction,
@@ -63,23 +63,22 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: CoreNode = {
-      iiot: initCoreNode()
-    }
+    let node: CoreNode = this;
+    node.iiot = initCoreNode()
 
-    node.iiot.handleWriteError = (err: Error, msg: string) => {
+    const handleWriteError = (err: Error, msg: NodeMessage) => {
       coreClient.writeDebugLog(err)
       if (node.showErrors) {
-        node.error(err, msg)
+        this.error(err, msg)
       }
 
       /* istanbul ignore next */
       if (isSessionBad(err)) {
-        node.emit('opcua_client_not_ready')
+        this.emit('opcua_client_not_ready')
       }
     }
 
-    node.iiot.writeToSession = (session: OPCUASession, originMsg: Todo) => {
+    const writeToSession = (session: OPCUASession, originMsg: Todo) => {
       if (checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
@@ -89,30 +88,30 @@ module.exports = (RED: nodered.NodeAPI) => {
       const nodesToWrite: WriteValueOptions[] = buildNodesToWrite(msg)
       coreClient.write(session, nodesToWrite, msg).then((writeResult: Promise<WriteResult>): void => {
         try {
-          let message = node.iiot.buildResultMessage(writeResult)
-          node.send(message)
+          let message = buildResultMessage(writeResult)
+          this.send(message)
         } catch (err: any) {
           /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? node.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+          (isInitializedIIoTNode(node)) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? node.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(node)) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    node.iiot.buildResultMessage = (result: WriteResult): ResultMessage => {
+    const buildResultMessage = (result: WriteResult): ResultMessage => {
       let message = Object.assign({}, result.msg)
       message.nodetype = 'write'
       message.justValue = node.justValue
 
-      let dataValuesString = node.iiot.extractDataValueString(message, result)
-      message = node.iiot.setMessageProperties(message, result, dataValuesString)
+      let dataValuesString = extractDataValueString(message, result)
+      message = setMessageProperties(message, result, dataValuesString)
       return message
     }
 
-    node.iiot.extractDataValueString = (message: WriteResultMessage, result: WriteResult): string => {
-      let dataValuesString = ""
+    const extractDataValueString = (message: WriteResultMessage, result: WriteResult): string => {
+      let dataValuesString: string
       if (node.justValue) {
         dataValuesString = JSON.stringify({
           statusCodes: result.statusCodes
@@ -127,14 +126,14 @@ module.exports = (RED: nodered.NodeAPI) => {
       return dataValuesString
     }
 
-    node.iiot.setMessageProperties =  (message: WriteResultMessage, result: WriteResult, stringValue: string) => {
+    const setMessageProperties =  (message: WriteResultMessage, result: WriteResult, stringValue: string) => {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
       } /* istanbul ignore next */ catch (err: any) {
         coreClient.writeDebugLog(err)
         if (node.showErrors) {
-          node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
-          node.error(err, result.msg)
+          this.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
+          this.error(err, result.msg)
         }
         message.resultsConverted = stringValue
         message.error = err.message
@@ -154,39 +153,40 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.status(status)
     }
 
-    node.on('input', (msg: NodeMessageInFlow) => {
+    this.on('input', (msg: NodeMessageInFlow) => {
       if (!checkConnectorState(node, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
         return
       }
       // recursivePrintTypes(msg);
       if ((msg as Todo).injectType === 'write') {
-        node.iiot.writeToSession(node.iiot.opcuaSession, msg)
+        writeToSession(node.iiot.opcuaSession, msg)
       } else {
         coreClient.writeDebugLog('Wrong Inject Type ' + (msg as Todo).injectType + '! The Type has to be write.')
         /* istanbul ignore next */
         if (node.showErrors) {
-          node.warn('Wrong Inject Type ' + (msg as Todo).injectType + '! The msg.injectType has to be write.')
+          this.warn('Wrong Inject Type ' + (msg as Todo).injectType + '! The msg.injectType has to be write.')
         }
       }
     })
 
-    const onAlias = (event: string, callback: (...args: any) => void) => {
-      if (event == "input") {
-        this.on(event, callback)
-      } else if (event === "close") {
-        this.on(event, callback)
-      }
-      else this.error('Invalid event to listen on')
+    const onAlias = (event: string, callback: () => void) => {
+      // @ts-ignore
+      this.on(event, callback)
     }
 
     registerToConnector(node, statusHandler, onAlias, errorHandler)
 
-    node.on('close', (done: TodoVoidFunction) => {
+    this.on('close', (done: TodoVoidFunction) => {
       deregisterToConnector(node, () => {
         resetIiotNode(node)
         done()
       })
     })
+    if (process.env.TEST === "true"){
+      node.functions = {
+        handleWriteError
+      }
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Write', OPCUAIIoTWrite)

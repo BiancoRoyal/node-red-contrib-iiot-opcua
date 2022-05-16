@@ -83,10 +83,9 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig: Todo = {
-      ...this,
-      iiot: coreListener.initListenerNode()
-    }
+    let nodeConfig: Todo = this;
+
+    nodeConfig.iiot = coreListener.initListenerNode()
 
     nodeConfig.iiot.stateMachine = coreListener.createListenerStateMachine()
     coreListener.internalDebugLog('Start FSM: ' + nodeConfig.iiot.stateMachine.getMachineState())
@@ -693,6 +692,16 @@ module.exports = (RED: nodered.NodeAPI) => {
         done()
       }
     }
+
+    if (process.env.TEST === 'true')
+      nodeConfig.functions = {
+        createSubscription,
+        subscribeActionInput,
+        subscribeMonitoredItem,
+        monitoredItemTerminated,
+        errorHandling,
+        setMonitoring
+      }
 
     this.on('close', (done: () => void) => {
       terminateSubscription(() => {

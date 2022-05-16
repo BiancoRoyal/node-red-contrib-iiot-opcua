@@ -222,14 +222,13 @@ module.exports = function (RED: nodered.NodeAPI) {
   RED.nodes.registerType('OPCUA-IIoT-Inject', OPCUAIIoTInject)
 
   RED.httpAdmin.post('/opcuaIIoT/inject/:id', RED.auth.needsPermission('opcuaIIoT.inject.write'), function (req, res) {
-    let node = RED.nodes.getNode(req.params.id)
+    const node = RED.nodes.getNode(req.params.id)
     if (node) {
       try {
         node.receive()
         res.sendStatus(200)
       } catch (err: any) {
         /* istanbul ignore next */
-        console.log(err)
         res.sendStatus(500)
         node.error(RED._('opcuaiiotinject.failed', { error: err.toString() }))
       }

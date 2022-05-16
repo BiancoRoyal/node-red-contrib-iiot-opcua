@@ -15,7 +15,7 @@ import {constructEventFilter, EventFilter} from "node-opcua";
 import {NodeMessageInFlow} from "@node-red/registry";
 import coreListener from "./core/opcua-iiot-core-listener";
 import {InjectPayload} from "./opcua-iiot-inject";
-import {BrowsePayloadLike, BrowsePayload} from "./opcua-iiot-browser";
+import {BrowsePayload} from "./opcua-iiot-browser";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string
@@ -80,7 +80,6 @@ module.exports = function (RED: nodered.NodeAPI) {
     nodeConfig.iiot.subscribed = false
 
     statusCall({ fill: 'blue', shape: 'ring', text: 'new' })
-
     this.on('input', (msg: NodeMessageInFlow) => {
       nodeConfig.iiot.subscribed = !nodeConfig.iiot.subscribed
 

@@ -624,13 +624,13 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
     return nodesToWrite
 }
 
-export function buildNodesToRead(msg: Todo) {
+export function buildNodesToRead(payload: Todo) {
     let nodesToRead = []
     let item = null
 
-    logger.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(msg))
+    logger.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(payload))
 
-    let nodePayloadList = msg.payload.nodesToRead || msg.payload.nodesToWrite
+    let nodePayloadList = payload.nodesToRead || payload.nodesToWrite
     if (nodePayloadList && nodePayloadList.length) {
         // read to read
         for (item of nodePayloadList) {
@@ -638,7 +638,7 @@ export function buildNodesToRead(msg: Todo) {
             nodesToRead.push(item.toString())
         }
     } else {
-        let nodeList = msg.nodesToRead || msg.nodesToWrite
+        let nodeList = payload.nodesToRead || payload.nodesToWrite
         if (nodeList && nodeList.length) {
             // legacy
             for (item of nodeList) {
@@ -647,13 +647,13 @@ export function buildNodesToRead(msg: Todo) {
             }
         } else {
             // new structure
-            if (msg.payload.addressSpaceItems && msg.payload.addressSpaceItems.length) {
-                for (item of msg.payload.addressSpaceItems) {
+            if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
+                for (item of payload.addressSpaceItems) {
                     nodesToRead.push(item.nodeId)
                 }
             } else {
-                if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-                    for (item of msg.addressSpaceItems) {
+                if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
+                    for (item of payload.addressSpaceItems) {
                         nodesToRead.push(item.nodeId)
                     }
                 }
@@ -666,31 +666,31 @@ export function buildNodesToRead(msg: Todo) {
     return nodesToRead
 }
 
-export function buildNodesToListen(msg: Todo) {
-    return msg.addressItemsToRead || msg.addressSpaceItems
+export function buildNodesToListen(payload: Todo) {
+    return payload.addressItemsToRead || payload.addressSpaceItems
 }
 
-export function buildNodesFromBrowser(msg: Todo) {
-    return msg.payload.browserResults || msg.addressSpaceItems
+export function buildNodesFromBrowser(payload: Todo) {
+    return payload.browserResults || payload.addressSpaceItems
 }
 
-export function buildNodesFromCrawler(msg: Todo) {
-    return msg.payload.crawlerResults || msg.addressSpaceItems
+export function buildNodesFromCrawler(payload: Todo) {
+    return payload.crawlerResults || payload.addressSpaceItems
 }
 
-export function buildNodeListFromClient(msg: {nodetype: Todo}) {
-    switch (msg.nodetype) {
+export function buildNodeListFromClient(payload: {nodetype: Todo}) {
+    switch (payload.nodetype) {
         case 'read':
         case 'write':
-            return buildNodesToRead(msg)
+            return buildNodesToRead(payload)
         case 'listen':
-            return buildNodesToListen(msg)
+            return buildNodesToListen(payload)
         case 'browse':
-            return buildNodesFromBrowser(msg)
+            return buildNodesFromBrowser(payload)
         case 'crawl':
-            return buildNodesFromCrawler(msg)
+            return buildNodesFromCrawler(payload)
         default:
-            logger.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
+            logger.internalDebugLog('unknown node type injected to filter for ' + payload.nodetype)
             return []
     }
 }

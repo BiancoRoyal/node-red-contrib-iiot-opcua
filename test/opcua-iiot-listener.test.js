@@ -10,6 +10,8 @@
 
 'use strict'
 
+process.env.TEST = "true"
+
 jest.setTimeout(5000)
 
 // iiot opc ua nodes
@@ -72,8 +74,9 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
+          console.log(nodeUnderTest)
           nodeUnderTest.iiot.stateMachine.endsub()
-          nodeUnderTest.iiot.createSubscription({ payload: {} })
+          nodeUnderTest.functions.createSubscription({ payload: {} })
           done()
         })
     })
@@ -84,7 +87,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
           nodeUnderTest.iiot.stateMachine.endsub()
-          nodeUnderTest.iiot.subscribeActionInput({ payload: {} })
+          nodeUnderTest.functions.subscribeActionInput({ payload: {} })
           done()
         })
     })
@@ -96,7 +99,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
           expect(nodeUnderTest).toBeDefined()
           nodeUnderTest.iiot.stateMachine.endsub()
           nodeUnderTest.iiot.opcuaSession = null
-          nodeUnderTest.iiot.subscribeMonitoredItem({ payload: {} })
+          nodeUnderTest.functions.subscribeMonitoredItem({ payload: {} })
           done()
         })
     })
@@ -107,7 +110,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
           nodeUnderTest.iiot.stateMachine.endsub()
-          nodeUnderTest.iiot.monitoredItemTerminated({ payload: {} }, null, {}, new Error('Test Error Monitored Item'))
+          nodeUnderTest.functions.monitoredItemTerminated({ payload: {} }, null, {}, new Error('Test Error Monitored Item'))
           done()
         })
     })
@@ -117,7 +120,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.iiot.errorHandling(new Error('Test Error'))
+          nodeUnderTest.functions.errorHandling(new Error('Test Error'))
           done()
         })
     })
@@ -129,7 +132,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
           expect(nodeUnderTest).toBeDefined()
           nodeUnderTest.iiot.stateMachine.endsub()
           let testItem
-          nodeUnderTest.iiot.setMonitoring({ monitoredItemId: testItem })
+          nodeUnderTest.functions.setMonitoring({ monitoredItemId: testItem })
           done()
         })
     })

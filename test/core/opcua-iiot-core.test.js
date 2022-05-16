@@ -12,6 +12,7 @@ jest.setTimeout(5000)
 describe('OPC UA Core', function () {
   let assert = require('chai').assert
   let expect = require('chai').expect
+  let { NodeIdType, DataType } = require('node-opcua')
   let core = require('../../src/core/opcua-iiot-core')
   let isWindows = /^win/.test(core.os.platform())
 
@@ -135,7 +136,7 @@ describe('OPC UA Core', function () {
     it('should return the right identifier zero from numeric msg topic', function (done) {
       let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
       assert(result)
-      let resultExpected = { identifier: 85, type: core.nodeOPCUAId.NodeIdType.NUMERIC }
+      let resultExpected = { identifier: 85, type: NodeIdType.NUMERIC }
       expect(result).to.deep.equal(resultExpected)
       done()
     })
@@ -143,7 +144,7 @@ describe('OPC UA Core', function () {
     it('should return the right identifier five from string msg topic', function (done) {
       let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
       assert(result)
-      let resultExpected = { identifier: 'TestReadWrite', type: core.nodeOPCUAId.NodeIdType.STRING }
+      let resultExpected = { identifier: 'TestReadWrite', type: NodeIdType.STRING }
       expect(result).to.deep.equal(resultExpected)
       done()
     })
@@ -151,7 +152,7 @@ describe('OPC UA Core', function () {
     it('should return the right identifier two from byte string msg topic', function (done) {
       let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;b=M/RbkPCxe45TX=='})
       assert(result)
-      let resultExpected = { identifier: 'M/RbkPCxe45TX==', type: core.nodeOPCUAId.NodeIdType.BYTESTRING }
+      let resultExpected = { identifier: 'M/RbkPCxe45TX==', type: NodeIdType.BYTESTRING }
       expect(result).to.deep.equal(resultExpected)
       done()
     })
@@ -159,7 +160,7 @@ describe('OPC UA Core', function () {
     it('should return the right identifier two from GUID msg topic', function (done) {
       let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;g=034595a-545i-5e456-64f4-ab345e456cb3'})
       assert(result)
-      let resultExpected = { identifier: '034595a-545i-5e456-64f4-ab345e456cb3', type: core.nodeOPCUAId.NodeIdType.GUID }
+      let resultExpected = { identifier: '034595a-545i-5e456-64f4-ab345e456cb3', type: NodeIdType.GUID }
       expect(result).to.deep.equal(resultExpected)
       done()
     })
@@ -259,29 +260,23 @@ describe('OPC UA Core', function () {
     })
 
     it('should set node initial state init', function (done) {
-      let node = {}
-      core.setNodeStatusTo = function (node, state) {
-        if (state === 'connecting') {
-          done()
-        }
-      }
-      core.setNodeInitalState('INITOPCUA', node)
+      // let resursivePrint = require("../../src/types/placeholders").recursivePrintTypes
+      const result = { fill: 'yellow', shape: 'ring', text: 'connecting' }
+      core.setNodeInitalState('INITOPCUA', node, () => null)
+      expect().toBe(result)
+      // console.log(node.oldStatusParameter);
     })
 
     it('should set node initial state open', function (done) {
       let node = {
-        bianco: {
-          iiot: {
-            opcuaClient: null,
-            opcuaSession: null
-          }
+        iiot: {
+          opcuaClient: null,
+          opcuaSession: null
         },
         connector: {
-          bianco: {
-            iiot: {
-              opcuaClient: {},
-              opcuaSession: {}
-            }
+          iiot: {
+            opcuaClient: {},
+            opcuaSession: {}
           }
         }
       }
@@ -361,7 +356,7 @@ describe('OPC UA Core', function () {
 
   describe('converting', function () {
     it('should build new variant Float', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Float
+      let dataTypeOPCUA = DataType.Float
       let parsedValue = parseFloat(22.2)
       let variantFromString = core.buildNewVariant('Float', '22.2')
       let variantFromString2 = core.buildNewVariant('Float', '22.2')
@@ -374,7 +369,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant Double', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Double
+      let dataTypeOPCUA = DataType.Double
       let parsedValue = parseFloat(22.2)
       let variantFromString = core.buildNewVariant('Double', '22.2')
       let variantFromString2 = core.buildNewVariant('Double', '22.2')
@@ -387,7 +382,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant UInt16', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt16
+      let dataTypeOPCUA = DataType.UInt16
       let parsedValue = new Uint16Array([220])[0]
       let variantFromString = core.buildNewVariant('UInt16', '220')
       let variantFromString2 = core.buildNewVariant('UInt16', '220')
@@ -400,7 +395,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant UInt32', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt32
+      let dataTypeOPCUA = DataType.UInt32
       let parsedValue = new Uint32Array([33220])[0]
       let variantFromString = core.buildNewVariant('UInt32', '33220')
       let variantFromString2 = core.buildNewVariant('UInt32', '33220')
@@ -413,7 +408,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant Int32', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int32
+      let dataTypeOPCUA = DataType.Int32
       let parsedValue = parseInt('33220')
       let variantFromString = core.buildNewVariant('Int32', '33220')
       let variantFromString2 = core.buildNewVariant('Int32', '33220')
@@ -426,7 +421,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant Int16', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int16
+      let dataTypeOPCUA = DataType.Int16
       let parsedValue = parseInt('33220')
       let variantFromString = core.buildNewVariant('Int16', '33220')
       let variantFromString2 = core.buildNewVariant('Int16', '33220')
@@ -439,7 +434,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant Int64', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int64
+      let dataTypeOPCUA = DataType.Int64
       let parsedValue = parseInt('833999220')
       let variantFromString = core.buildNewVariant('Int64', '833999220')
       let variantFromString2 = core.buildNewVariant('Int64', '833999220')
@@ -452,7 +447,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant Boolean', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let dataTypeOPCUA = DataType.Boolean
       let parsedValue = true
       let variantFromString = core.buildNewVariant('Boolean', 'true')
       let variantFromString2 = core.buildNewVariant('Boolean', '1')
@@ -468,7 +463,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant LocalizedText', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.LocalizedText
+      let dataTypeOPCUA = DataType.LocalizedText
       let parsedValue = JSON.parse('[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
       let variantFromString = core.buildNewVariant('LocalizedText', '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
       let variantFromString2 = core.buildNewVariant('LocalizedText', '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
@@ -481,7 +476,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant DateTime', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.DateTime
+      let dataTypeOPCUA = DataType.DateTime
       let parsedValue = new Date(1522274988816)
       let variantFromString = core.buildNewVariant('DateTime', 1522274988816)
       let variantFromString2 = core.buildNewVariant('DateTime', 1522274988816)
@@ -494,7 +489,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should build new variant String', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.String
+      let dataTypeOPCUA = DataType.String
       let parsedValue = 'Hello World!'
       let variantFromString = core.buildNewVariant('String', parsedValue)
       let variantFromString2 = core.buildNewVariant('String', parsedValue)
@@ -509,7 +504,7 @@ describe('OPC UA Core', function () {
 
   describe('converting DataValue by DataType', function () {
     it('should convert NodeId to string', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.NodeId
+      let dataTypeOPCUA = DataType.NodeId
       let value = {value: 'test'}
       let variantFromString = core.convertDataValueByDataType(value, 'NodeId')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -519,7 +514,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert NodeIdType to string', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.NodeIdType
+      let dataTypeOPCUA = DataType.NodeIdType
       let value = {value: 'test'}
       let variantFromString = core.convertDataValueByDataType(value, 'NodeIdType')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -529,7 +524,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert ByteString to string', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.ByteString
+      let dataTypeOPCUA = DataType.ByteString
       let value = {value: 'test'}
       let variantFromString = core.convertDataValueByDataType(value, 'ByteString')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -539,7 +534,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Byte Boolean True to number', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Byte
+      let dataTypeOPCUA = DataType.Byte
       let value = {value: true}
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -549,7 +544,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Byte Boolean False to number', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Byte
+      let dataTypeOPCUA = DataType.Byte
       let value = {value: false}
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -559,7 +554,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Byte number 0 to number', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Byte
+      let dataTypeOPCUA = DataType.Byte
       let value = {value: 0}
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -569,7 +564,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Byte number 1 to number', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Byte
+      let dataTypeOPCUA = DataType.Byte
       let value = {value: 1}
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -579,7 +574,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert QualifiedName to string', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.QualifiedName
+      let dataTypeOPCUA = DataType.QualifiedName
       let value = {value: 'test'}
       let variantFromString = core.convertDataValueByDataType(value, 'QualifiedName')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -589,7 +584,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert LocalizedText to string', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.LocalizedText
+      let dataTypeOPCUA = DataType.LocalizedText
       let value = {value: 'test'}
       let variantFromString = core.convertDataValueByDataType(value, 'LocalizedText')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -599,7 +594,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Float NaN', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Float
+      let dataTypeOPCUA = DataType.Float
       let value = {value: 'Hallo'}
       let variantFromString = core.convertDataValueByDataType(value, 'Float')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -609,7 +604,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert to parsed Float', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Float
+      let dataTypeOPCUA = DataType.Float
       let value = {value: 12.34}
       let variantFromString = core.convertDataValueByDataType(value, 'Float')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -619,7 +614,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Double NaN', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Double
+      let dataTypeOPCUA = DataType.Double
       let value = {value: 'Hallo'}
       let variantFromString = core.convertDataValueByDataType(value, 'Double')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -629,7 +624,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Double to parsed Float', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Double
+      let dataTypeOPCUA = DataType.Double
       let value = {value: 92233720368547758.34}
       let variantFromString = core.convertDataValueByDataType(value, 'Double')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -639,7 +634,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert to parsed UInt16', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt16
+      let dataTypeOPCUA = DataType.UInt16
       let value = {value: 65000}
       let variantFromString = core.convertDataValueByDataType(value, 'UInt16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -649,7 +644,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert to parsed UInt32', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt32
+      let dataTypeOPCUA = DataType.UInt32
       let value = {value: 165000}
       let variantFromString = core.convertDataValueByDataType(value, 'UInt32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -659,7 +654,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert to parsed Int16', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int16
+      let dataTypeOPCUA = DataType.Int16
       let value = {value: -65000}
       let variantFromString = core.convertDataValueByDataType(value, 'Int16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -669,7 +664,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert to parsed Int32', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int32
+      let dataTypeOPCUA = DataType.Int32
       let value = {value: -165000}
       let variantFromString = core.convertDataValueByDataType(value, 'Int32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -679,7 +674,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert to parsed Int64', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int64
+      let dataTypeOPCUA = DataType.Int64
       let value = {value: -21474836483}
       let variantFromString = core.convertDataValueByDataType(value, 'Int64')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -689,7 +684,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Boolean True', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let dataTypeOPCUA = DataType.Boolean
       let value = {value: true}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -699,7 +694,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Boolean False', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let dataTypeOPCUA = DataType.Boolean
       let value = {value: false}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -709,7 +704,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert String', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.String
+      let dataTypeOPCUA = DataType.String
       let value = {value: 'false'}
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -719,7 +714,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert String with toString', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.String
+      let dataTypeOPCUA = DataType.String
       let value = {value: false}
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -740,7 +735,7 @@ describe('OPC UA Core', function () {
 
   describe('Variant values', function () {
     it('should get Float', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Float
+      let dataTypeOPCUA = DataType.Float
       let value = {value: 12345.67}
       let variantFromString = core.convertDataValueByDataType(value, 'Float')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -750,7 +745,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Double', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Double
+      let dataTypeOPCUA = DataType.Double
       let value = {value: 1234567.89}
       let variantFromString = core.convertDataValueByDataType(value, 'Double')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -760,7 +755,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get UInt16', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt16
+      let dataTypeOPCUA = DataType.UInt16
       let value = {value: 65000}
       let variantFromString = core.convertDataValueByDataType(value, 'UInt16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -770,7 +765,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get UInt32', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.UInt32
+      let dataTypeOPCUA = DataType.UInt32
       let value = {value: 265000}
       let variantFromString = core.convertDataValueByDataType(value, 'UInt32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -780,7 +775,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Int16', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int16
+      let dataTypeOPCUA = DataType.Int16
       let value = {value: -65000}
       let variantFromString = core.convertDataValueByDataType(value, 'Int16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -790,7 +785,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Int32', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int32
+      let dataTypeOPCUA = DataType.Int32
       let value = {value: -265000}
       let variantFromString = core.convertDataValueByDataType(value, 'Int32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -800,7 +795,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Int64', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Int64
+      let dataTypeOPCUA = DataType.Int64
       let value = {value: -21474836483}
       let variantFromString = core.convertDataValueByDataType(value, 'Int64')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -810,7 +805,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Boolean', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let dataTypeOPCUA = DataType.Boolean
       let value = {value: true}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -820,7 +815,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Boolean', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let dataTypeOPCUA = DataType.Boolean
       let value = {value: false}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -830,7 +825,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Boolean object false', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let dataTypeOPCUA = DataType.Boolean
       let value = {'value': {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false}}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -840,7 +835,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get Boolean object true', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.Boolean
+      let dataTypeOPCUA = DataType.Boolean
       let value = {'value': {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true}}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -850,7 +845,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get DateTime', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.DateTime
+      let dataTypeOPCUA = DataType.DateTime
       let dateValue = new Date()
       let value = {value: dateValue}
       let variantFromString = core.convertDataValueByDataType(value, 'DateTime')
@@ -861,7 +856,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get String', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.String
+      let dataTypeOPCUA = DataType.String
       let value = {value: 'Hallo Welt!'}
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
@@ -871,7 +866,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should get String from number', function (done) {
-      let dataTypeOPCUA = core.nodeOPCUA.DataType.String
+      let dataTypeOPCUA = DataType.String
       let value = {value: 22.33}
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)

@@ -51,6 +51,7 @@ import {
   filterListByNodeId,
   filterListEntryByNodeId
 } from "./core/opcua-iiot-core";
+import {NodeMessageInFlow} from "@node-red/registry";
 
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
@@ -84,24 +85,22 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    const nodeIdToFilter = function (msg: Todo) {
-      let doFilter = true
-      let nodeList = buildNodeListFromClient(msg)
-      let elementNodeId = null
+    const nodeIdToFilter = function (msg: FilterInputPayload): boolean {
+      const nodeList = buildNodeListFromClient(msg)
 
       if (nodeList && nodeList.length) {
-        doFilter = !nodeList.some(function (element: Todo) {
-          elementNodeId = element.nodeId || element
+        return !nodeList.some(function (element: Todo) {
+          const elementNodeId = element.nodeId || element
           return elementNodeId.toString() === node.nodeId.toString()
         })
       }
 
-      return doFilter
+      return true
     }
 
-    const isNodeIdNotToFindInAddressSpaceItems = function (msg: Todo) {
-      if (msg.addressSpaceItems) {
-        let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry: Todo) {
+    const isNodeIdNotToFindInAddressSpaceItems = function (payload: Todo) {
+      if (payload.addressSpaceItems) {
+        let filteredNodeIds = _.filter(payload.addressSpaceItems, function (entry: Todo) {
           return entry.nodeId === node.nodeId
         })
 
@@ -109,45 +108,62 @@ module.exports = (RED: nodered.NodeAPI) => {
           return true
         }
       } else {
-        if (msg.topic !== node.nodeId) { // TODO: that is very old and should be deleted
+        if (payload.topic !== node.nodeId) { // TODO: that is very old and should be deleted
           return true
         }
       }
       return false
     }
 
-    const messageIsToFilter = (msg: Todo) => {
-      return nodeIdToFilter(msg) && isNodeIdNotToFindInAddressSpaceItems(msg)
+    const messageIsToFilter = (payload: FilterInputPayload) => {
+      return nodeIdToFilter(payload) && isNodeIdNotToFindInAddressSpaceItems(payload)
     }
 
-    this.on('input', (msg: Todo) => {
+    type FilterInputPayload = {
+      statusCodes: Todo[]
+      nodesToWrite: Todo[]
+      nodetype: string
+      value: any
+      msg: Todo
+    }
+
+    this.on('input', (msg: NodeMessageInFlow) => {
       if (!msg.hasOwnProperty('payload') || msg.payload === null || msg.payload === void 0) { // values with false has to be true
         coreFilter.internalDebugLog('filtering message without payload')
         return
       }
 
-      if (messageIsToFilter(msg)) {
+      if (!messageIsToFilter(msg.payload as FilterInputPayload)) {
         coreFilter.internalDebugLog('filtering message on filter')
         return
       }
 
-      const message = Object.assign({}, msg)
+      const payload = msg.payload as FilterInputPayload
 
-      message.topic = node.topic || message.topic
-      message.nodeId = node.nodeId
-      message.justValue = node.justValue
-      message.filter = true
-      message.filtertype = 'filter'
-      message.payload = filterByType(message) || message.payload
+      const value = node.justValue ? filterResult(payload) : filterByType(payload) || payload.value
 
-      if (node.justValue) {
-        message.payload = filterResult(message)
+      const { msg: msgKey, ...restPayload } = payload;
+
+      const outputPayload = {
+        ...restPayload,
+        filtertype: "filter",
+        filter: true,
+        justValue: node.justValue,
+        nodeId: node.nodeId,
+        value,
       }
 
-      this.send(message)
+      const outputMessage = {
+        payload: outputPayload,
+        _msgid: msg._msgid,
+        topic: node.topic || msg.topic
+      }
+
+
+      this.send(outputMessage)
     })
 
-    const filterByType = (msg: Todo) => {
+    const filterByType = (msg: FilterInputPayload) => {
       let result = null
       switch (msg.nodetype) {
         case 'read':
@@ -168,17 +184,16 @@ module.exports = (RED: nodered.NodeAPI) => {
         default:
           coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
           if (node.showErrors) {
-            this.error(new Error('unknown node type injected to filter for ' + msg.nodetype), msg)
+            this.error(new Error('unknown node type injected to filter for ' + msg.nodetype), {payload: msg})
           }
       }
 
       return result
     }
 
-    const convertResult = (msg: Todo, result: Todo) => {
+    const convertResult = (msg: FilterInputPayload, result: Todo) => {
       try {
         let convertedResult = null
-
         if (node.fixPoint >= 0 && node.fixedValue) {
           convertedResult = Number.parseFloat(result).toFixed(node.fixPoint)
           convertedResult = parseFloat(convertedResult)
@@ -192,26 +207,23 @@ module.exports = (RED: nodered.NodeAPI) => {
         if (convertedResult === null) {
           convertedResult = result
         }
-
-        if (node.withValueCheck) {
+        if (node.withValueCheck && typeof convertedResult === "number") {
           if (convertedResult < node.minvalue || convertedResult > node.maxvalue) {
             convertedResult = node.defaultvalue
           }
         }
-
         return convertedResult
       } catch (err: any) {
         coreFilter.internalDebugLog('result converting error ' + err.message)
         if (node.showErrors) {
-          this.error(err, msg)
+          this.error(err, {payload: msg})
         }
         return result
       }
     }
 
-    const convertResultValue = function (msg: Todo) {
-      let result = msg.payload
-
+    const convertResultValue = (msg: FilterInputPayload) => {
+      let result = msg.value
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('result null or undefined')
         if (node.showErrors) {
@@ -230,29 +242,27 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       result = convertDataType(result)
-
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('data type result null or undefined')
         if (node.showErrors) {
-          node.error(new Error('converted by data type result null or undefined'), msg)
+          this.error(new Error('converted by data type result null or undefined'), {payload: msg})
         }
       } else {
         result = convertResult(msg, result)
       }
-
       return result
     }
 
-    const filterResult = function (msg: Todo) {
+    const filterResult = function (msg: FilterInputPayload) {
       if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
-        return convertResultValue(msg) || msg.payload
+        return convertResultValue(msg)
       }
-      return msg.payload
+      return msg.value
     }
 
-    const extractValueFromOPCUAArrayStructure = function (msg: Todo, entryIndex: number) {
+    const extractValueFromOPCUAArrayStructure = function (payloadInput: Todo, entryIndex: number) {
       let result = null
-      let payload = msg.payload[entryIndex]
+      let payload = payloadInput[entryIndex]
 
       if (!payload) {
         return result
@@ -271,17 +281,17 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const extractValueFromOPCUAStructure = function (msg: Todo) {
+    const extractValueFromOPCUAStructure = function (payload: Todo) {
       let result
 
-      if (msg.payload.hasOwnProperty('value')) {
-        if (msg.payload.value.hasOwnProperty('value')) {
-          result = msg.payload.value.value
+      if (payload.hasOwnProperty('value')) {
+        if (payload.value.hasOwnProperty('value')) {
+          result = payload.value.value
         } else {
-          result = msg.payload.value
+          result = payload.value
         }
       } else {
-        result = msg.payload
+        result = payload
       }
 
       return result
@@ -290,12 +300,12 @@ module.exports = (RED: nodered.NodeAPI) => {
     const filterByReadType = function (msg: Todo) {
       let result
 
-      if (msg.payload.length >= node.entry) {
+
+      if (msg.length >= node.entry) {
         result = extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
       } else {
         result = extractValueFromOPCUAStructure(msg)
       }
-
       if (result.hasOwnProperty('value')) {
         result = result.value
       }
@@ -361,7 +371,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const convertDataType = function (result: Todo) {
       coreFilter.internalDebugLog('data type convert for ' + node.nodeId)
-      return convertDataValueByDataType({ value: result, dataType: node.datatype }, node.datatype)
+      return convertDataValueByDataType(result, node.datatype)
     }
 
     if (node.withValueCheck) {
@@ -370,6 +380,11 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.status({ fill: 'green', shape: 'dot', text: 'active' })
+
+    if (process.env.TEST === "true")
+      node.functions = {
+        convertResultValue
+      }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Result-Filter', OPCUAIIoTResultFilter)
