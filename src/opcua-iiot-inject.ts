@@ -7,6 +7,33 @@
  node-red-contrib-iiot-opcua
  **/
 'use strict'
+import * as nodered from "node-red";
+
+interface OPCUAIIoTInject extends nodered.Node {
+  name: string
+  topic: any // TODO: string?
+  payload: any // TODO: config.payload
+  payloadType: any // TODO: config.payloadType
+  repeat: any // TODO: config.repeat
+  crontab: any // TODO: config.crontab
+  once: any // TODO: config.once
+  startDelay: number // TODO: parseFloat(config.startDelay) || 10
+  injectType: any // TODO: config.injectType || 'inject'
+  addressSpaceItems: any // TODO: config.addressSpaceItems || []
+}
+
+interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
+  name: string
+  topic: any // TODO: string?
+  payload: any // TODO: config.payload
+  payloadType: any // TODO: config.payloadType
+  repeat: any // TODO: config.repeat
+  crontab: any // TODO: config.crontab
+  once: any // TODO: config.once
+  startDelay: string
+  injectType: any // TODO: config.injectType || 'inject'
+  addressSpaceItems: any // TODO: config.addressSpaceItems || []
+}
 
 /**
  * Inject Node-RED node for OPC UA IIoT nodes.
@@ -14,12 +41,12 @@
  * @param RED
  */
 
-module.exports = function (RED) {
+module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
   let coreInject = require('./core/opcua-iiot-core-inject')
   let cron = require('cron')
 
-  function OPCUAIIoTInject (config) {
+  function OPCUAIIoTInject (this: OPCUAIIoTInject, config: OPCUAIIoTInjectConfigurationDef) {
     RED.nodes.createNode(this, config)
 
     this.topic = config.topic

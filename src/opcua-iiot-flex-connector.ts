@@ -6,17 +6,29 @@
  node-red-contrib-iiot-opcua
  */
 'use strict'
+import * as nodered from "node-red";
 
+export interface OPCUAIIoTFlexConnector extends nodered.Node {
+  showStatusActivities: boolean
+  showErrors: boolean
+  connector: any
+}
+
+interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
+  showStatusActivities: boolean
+  showErrors: boolean
+  connector: any
+}
 /**
  * Event Node-RED node.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
   let coreConnector = require('./core/opcua-iiot-core-connector')
 
-  function OPCUAIIoTFlexConnector (config) {
+  function OPCUAIIoTFlexConnector (this: OPCUAIIoTFlexConnector, config: OPCUAIIoTFlexConnectorConfigurationDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
