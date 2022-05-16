@@ -57,7 +57,7 @@ export type CoreMachineStates =
 
 // export type CoreStateMachine = Record<CoreMachineStates, Record<string, CoreMachineStates>>
 
-function createCoreStatelyMachine() {
+function createConnectorStatelyMachine() {
     const stateMachine = Stately.machine({
         'IDLE': {
             'initopcua': 'INITOPCUA',
@@ -269,7 +269,7 @@ function checkEndpoint(endpoint: string, errorHandler: (err: Error) => void) {
 
 const coreConnector = {
     initConnectorNode,
-    createCoreStatelyMachine,
+    createConnectorStatelyMachine,
     setListenerToClient,
     logSessionInformation,
     checkEndpoint,

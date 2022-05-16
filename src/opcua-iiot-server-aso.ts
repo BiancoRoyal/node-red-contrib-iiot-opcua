@@ -66,7 +66,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         node.datatype = msg.payload.datatype || node.datatype
         node.value = msg.payload.payload || node.value
       }
-
+      const value = node.value || msg.payload.value;
       msg = { payload: {} } // clean message
       msg.topic = 'ServerAddressSpaceObject'
       msg.payload.nodetype = 'inject'
@@ -78,7 +78,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         msg.payload.displayname = node.displayname
         msg.payload.objecttype = node.objecttype
         msg.payload.datatype = node.datatype
-        msg.payload.value = node.value
+        msg.payload.value = value
 
         msg.payload.referenceNodeId = node.referenceNodeId || OBJECTS_ROOT
         msg.payload.referencetype = node.referencetype || ReferenceTypeIds.Organizes

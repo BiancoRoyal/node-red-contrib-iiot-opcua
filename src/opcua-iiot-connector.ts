@@ -257,7 +257,6 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (this.autoSelectRightEndpoint) {
         autoSelectEndpointFromConnection()
       }
-
       // coreConnector.setListenerToClient(node)
       connectToClient()
     }
@@ -872,7 +871,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (isUndefined(this.iiot))
         return
       this.iiot.stateMachine = null
-      this.iiot.stateMachine = coreConnector.createCoreStatelyMachine()
+      this.iiot.stateMachine = coreConnector.createConnectorStatelyMachine()
       subscribeFSMEvents(this.iiot.stateMachine)
     }
 
