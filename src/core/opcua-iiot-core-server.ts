@@ -39,7 +39,7 @@ import {
 
 import debug from 'debug'
 import path from 'path'
-import {NodeStatus} from "node-red";
+import {NodeMessage, NodeStatus} from "node-red";
 import {constructAlarmAddressSpaceDemo} from "../helpers/alarms-and-conditions-demo";
 
 const internalDebugLog = debug('opcuaIIoT:server') // eslint-disable-line no-use-before-define

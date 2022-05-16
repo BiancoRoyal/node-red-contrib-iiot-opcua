@@ -14,6 +14,8 @@ import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {VM} from "vm2";
+import {logger} from "./core/opcua-iiot-core-connector";
+import internalDebugLog = logger.internalDebugLog;
 
 type OPCUAIIoTFlexServer = nodered.Node & {
   on(event: 'shutdown', callback: () => void): void
