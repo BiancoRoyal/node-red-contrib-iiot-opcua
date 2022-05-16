@@ -74,44 +74,44 @@ module.exports = (RED: NodeAPI) => {
       iiot: initCoreNode()
     }
 
-    node.iiot.handleReadError = function (err: Error, msg: NodeMessage) {
+    const handleReadError = (err: Error, msg: NodeMessage) => {
       coreClient.readDebugLog(err)
       if (node.showErrors) {
-        node.error(err, msg)
+        this.error(err, msg)
       }
 
       if (isSessionBad(err)) {
-        node.emit('opcua_client_not_ready')
+        this.emit('opcua_client_not_ready')
       }
     }
 
-    node.iiot.readAllFromNodeId = function (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) {
+    const readAllFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
       coreClient.readAllAttributes(session, itemsToRead, msg)
-        .then(function (readResult: Todo) {
+        .then((readResult: Todo) => {
           try {
-            node.send(node.iiot.buildResultMessage('AllAttributes', readResult))
+            this.send(buildResultMessage('AllAttributes', readResult))
           } catch (err) {
             /* istanbul ignore next */
             node.iiot.handleReadError(err, readResult.msg)
           }
         }).catch(function (err: Error) {
           /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? node.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.iiot.readValueFromNodeId = function (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) {
+    const readValueFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
       coreClient.readVariableValue(session, itemsToRead, msg)
-        .then(function (readResult: Todo) {
-          let message = node.iiot.buildResultMessage('VariableValue', readResult)
-          node.send(message)
+        .then((readResult: Todo) => {
+          let message = buildResultMessage('VariableValue', readResult)
+          this.send(message)
         }).catch(function (err: Error) {
           /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? node.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.iiot.readHistoryDataFromNodeId = function (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) {
+    const readHistoryDataFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
       const startDate = new Date()
       node.iiot.historyStart = new Date()
       node.iiot.historyStart.setDate(startDate.getDate() - node.historyDays)
@@ -123,18 +123,18 @@ module.exports = (RED: NodeAPI) => {
         msg.payload.historyStart || node.iiot.historyStart,
         msg.payload.historyEnd || node.iiot.historyEnd,
         msg)
-        .then(function (readResult: Todo) {
-          let message = node.iiot.buildResultMessage('HistoryValue', readResult)
+        .then((readResult: Todo) => {
+          let message = buildResultMessage('HistoryValue', readResult)
           message.historyStart = readResult.startDate || node.iiot.historyStart
           message.historyEnd = readResult.endDate || node.iiot.historyEnd
-          node.send(message)
-        }).catch(function (err: Error) {
+          this.send(message)
+        }).catch((err: Error) => {
           /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? node.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.iiot.readFromNodeId = function (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) {
+    const readFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
 
       const transformItem = (item: NodeIdLike): ReadValueIdOptions => {
         return {
@@ -147,17 +147,17 @@ module.exports = (RED: NodeAPI) => {
 
 
       coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg)
-        .then(function (readResult: Todo) {
-          let message = node.iiot.buildResultMessage('Default', readResult)
+        .then((readResult: Todo) => {
+          let message = buildResultMessage('Default', readResult)
           message.maxAge = node.maxAge
-          node.send(message)
+          this.send(message)
         }).catch(function (err: Error) {
           /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? node.iiot.handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
         })
     }
 
-    node.iiot.readFromSession = function (session: ClientSession | Todo, itemsToRead: Todo, originMsg: Todo) {
+    const readFromSession = (session: ClientSession | Todo, itemsToRead: Todo, originMsg: Todo) => {
       let msg = Object.assign({}, originMsg)
       if (checkSessionNotValid(session, 'Reader')) {
         return
@@ -166,20 +166,20 @@ module.exports = (RED: NodeAPI) => {
       coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
       switch (parseInt(node.attributeId)) {
         case coreClient.READ_TYPE.ALL:
-          node.iiot.readAllFromNodeId(session, itemsToRead, msg)
+          readAllFromNodeId(session, itemsToRead, msg)
           break
         case coreClient.READ_TYPE.VALUE:
-          node.iiot.readValueFromNodeId(session, itemsToRead, msg)
+          readValueFromNodeId(session, itemsToRead, msg)
           break
         case coreClient.READ_TYPE.HISTORY:
-          node.iiot.readHistoryDataFromNodeId(session, itemsToRead, msg)
+          readHistoryDataFromNodeId(session, itemsToRead, msg)
           break
         default:
-          node.iiot.readFromNodeId(session, itemsToRead, msg)
+          readFromNodeId(session, itemsToRead, msg)
       }
     }
 
-    node.iiot.buildResultMessage = function (readType: Todo, readResult: Todo) {
+    const buildResultMessage = function (readType: Todo, readResult: Todo) {
       let message = Object.assign({}, readResult.msg)
       message.payload = {}
       message.nodetype = 'read'
@@ -187,18 +187,18 @@ module.exports = (RED: NodeAPI) => {
       message.attributeId = node.attributeId
       message.justValue = node.justValue
 
-      let dataValuesString = node.iiot.extractDataValueString(readResult)
-      message = node.iiot.setMessageProperties(message, readResult, dataValuesString)
+      let dataValuesString = extractDataValueString(readResult)
+      message = setMessageProperties(message, readResult, dataValuesString)
 
       if (!node.justValue) {
-        message = node.iiot.enhanceMessage(message, readResult)
+        message = enhanceMessage(message, readResult)
       }
 
       return message
     }
 
-    node.iiot.extractDataValueString = function (readResult: Todo) {
-      let dataValuesString = ""
+    const extractDataValueString = function (readResult: Todo) {
+      let dataValuesString
       if (node.justValue) {
         dataValuesString = JSON.stringify(readResult.results, null, 2)
       } else {
@@ -207,13 +207,13 @@ module.exports = (RED: NodeAPI) => {
       return dataValuesString
     }
 
-    node.iiot.setMessageProperties = function (message: Todo, readResult: Todo, stringValue: Todo) {
+    const setMessageProperties = (message: Todo, readResult: Todo, stringValue: Todo) => {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
       } /* istanbul ignore next */ catch (err: any) {
         if (node.showErrors) {
-          node.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
-          node.error(err, readResult.msg)
+          this.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
+          this.error(err, readResult.msg)
         }
 
         message.payload = stringValue
@@ -222,15 +222,15 @@ module.exports = (RED: NodeAPI) => {
       return message
     }
 
-    node.iiot.enhanceMessage = function (message: Todo, readResult: Todo) {
+    const enhanceMessage = (message: Todo, readResult: Todo) => {
       try {
         message.resultsConverted = {}
         let dataValuesString = JSON.stringify(readResult.results, null, 2)
         RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
       } /* istanbul ignore next */ catch (err: any) {
         if (node.showErrors) {
-          node.warn('JSON not to parse from string for dataValues type ' + readResult.results)
-          node.error(err, readResult.msg)
+          this.warn('JSON not to parse from string for dataValues type ' + readResult.results)
+          this.error(err, readResult.msg)
         }
 
         message.resultsConverted = null
@@ -257,9 +257,9 @@ module.exports = (RED: NodeAPI) => {
       }
 
       try {
-        node.iiot.readFromSession(node.iiot.opcuaSession, buildNodesToRead(msg), msg)
-      } /* istanbul ignore next */ catch (err) {
-        node.iiot.handleReadError(err, msg)
+        readFromSession(node.iiot.opcuaSession, buildNodesToRead(msg), msg)
+      } /* istanbul ignore next */ catch (err: any) {
+        handleReadError(err, msg)
       }
     })
 

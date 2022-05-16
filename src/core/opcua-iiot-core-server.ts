@@ -30,6 +30,7 @@ import {
 import debug from 'debug'
 import path from 'path'
 import {NodeStatus} from "node-red";
+import {constructAlarmAddressSpaceDemo} from "../helpers/alarms-and-conditions-demo";
 
 const internalDebugLog = debug('opcuaIIoT:server') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:server:details') // eslint-disable-line no-use-before-define
@@ -105,7 +106,7 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
       if (!asoDemo) {
         resolve('output')
       } else {
-        let constructAlarmAddressSpaceDemo = require('../helpers/alarms-and-conditions-demo').constructAlarmAddressSpaceDemo
+
         let data = {}
         constructAlarmAddressSpaceDemo(data, addressSpace)
 

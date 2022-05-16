@@ -52,21 +52,21 @@ module.exports = (RED: nodered.NodeAPI) => {
     let node: Todo = this
     node.iiot.subscribed = false
 
-    node.status({ fill: 'blue', shape: 'ring', text: 'new' })
+    this.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    node.on('input', function (msg: Todo) {
+    this.on('input', (msg: Todo) => {
       msg.nodetype = 'node'
       msg.injectType = msg.injectType || node.injectType
       node.iiot.subscribed = !node.iiot.subscribed
 
       if (node.injectType === 'listen') {
         if (node.iiot.subscribed) {
-          node.status({ fill: 'blue', shape: 'dot', text: 'subscribed' })
+          this.status({ fill: 'blue', shape: 'dot', text: 'subscribed' })
         } else {
-          node.status({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
+          this.status({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
         }
       } else {
-        node.status({ fill: 'blue', shape: 'dot', text: 'injected' })
+        this.status({ fill: 'blue', shape: 'dot', text: 'injected' })
       }
 
       msg.topic = msg.topic || node.topic
@@ -81,7 +81,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         } catch (err) {
           core.internalDebugLog(err)
           if (node.showErrors) {
-            node.error(err, msg)
+            this.error(err, msg)
           }
         }
       } else {
@@ -89,7 +89,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       core.internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
-      node.send(msg)
+      this.send(msg)
     })
   }
 

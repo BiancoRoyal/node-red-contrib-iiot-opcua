@@ -70,26 +70,26 @@ module.exports = (RED: nodered.NodeAPI) => {
       iiot: initCoreNode()
     }
 
-    const handleMethodError = function (err: Error, msg: Todo) {
+    const handleMethodError = (err: Error, msg: Todo) => {
       coreMethod.internalDebugLog(err)
       if (node.showErrors) {
-        node.error(err, msg)
+        this.error(err, msg)
       }
 
       if (isSessionBad(err)) {
-        node.emit('opcua_client_not_ready')
+        this.emit('opcua_client_not_ready')
       }
     }
 
-    node.iiot.handleMethodWarn = function (message: Todo) {
+    const handleMethodWarn = (message: Todo) => {
       if (node.showErrors) {
-        node.warn(message)
+        this.warn(message)
       }
 
       coreMethod.internalDebugLog(message)
     }
 
-    node.iiot.callMethodOnSession = function (session: Todo, msg: Todo) {
+    const callMethodOnSession = (session: Todo, msg: Todo) => {
       if (checkSessionNotValid(session, 'MethodCaller')) {
         return
       }
@@ -97,7 +97,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (msg.methodId && msg.inputArguments) {
         coreMethod.getArgumentDefinition(node.iiot.opcuaSession, msg).then(function (results: Todo) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
-          node.iiot.callMethod(msg, results)
+          callMethod(msg, results)
         }).catch((err: Error) => {
           (isInitializedIIoTNode(node)) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
         })
@@ -106,8 +106,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    node.iiot.callMethod = function (msg: Todo, definitionResults: Todo) {
-      coreMethod.callMethods(node.iiot.opcuaSession, msg).then(function (data: Todo) {
+    const callMethod = (msg: Todo, definitionResults: Todo) => {
+      coreMethod.callMethods(node.iiot.opcuaSession, msg).then((data: Todo) => {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
         let result = null
@@ -137,18 +137,18 @@ module.exports = (RED: nodered.NodeAPI) => {
           RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
         } catch (err: any) {
           if (node.showErrors) {
-            node.warn('JSON not to parse from string for dataValues type ' )
-            node.error(err, msg)
+            this.warn('JSON not to parse from string for dataValues type ' )
+            this.error(err, msg)
           }
           message.payload = dataValuesString
           message.error = err.message
         }
 
-        node.send(message)
-      }).catch(function (err: Error) {
+        this.send(message)
+      }).catch((err: Error) => {
         coreMethod.internalDebugLog(err)
         if (node.showErrors) {
-          node.error(err, msg)
+          this.error(err, msg)
         }
       })
     }
@@ -165,7 +165,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.status(status)
     }
 
-    node.on('input', function (msg: Todo) {
+    this.on('input', function (msg: Todo) {
       if (!checkConnectorState(node, msg, 'MethodCaller', errorHandler, emitHandler, statusHandler)) {
         return
       }
@@ -174,7 +174,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (coreMethod.invalidMessage(node, message)) {
         return
       }
-      node.iiot.callMethodOnSession(node.iiot.opcuaSession, message)
+      callMethodOnSession(node.iiot.opcuaSession, message)
     })
 
     const onAlias = (event: string, callback: (...args: any) => void) => {

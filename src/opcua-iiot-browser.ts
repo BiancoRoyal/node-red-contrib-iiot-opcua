@@ -22,7 +22,6 @@ import {
 import {NodeMessage, NodeStatus} from "node-red";
 import {NodeId} from "node-opcua";
 import {AddressSpaceItem} from "./types/core";
-import {isUndefined} from "underscore";
 import {ListenPayload} from "./opcua-iiot-listener";
 
 interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {

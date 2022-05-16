@@ -8,7 +8,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
+import {Todo} from "./types/placeholders";
 interface OPCUAIIoTResultFilter extends nodered.Node {
   nodeId: string
   datatype: string
@@ -82,9 +82,9 @@ module.exports = (RED: nodered.NodeAPI) => {
     let node: Todo = this
     node.iiot = {};
 
-    node.status({ fill: 'blue', shape: 'ring', text: 'new' })
+    this.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    node.iiot.nodeIdToFilter = function (msg: Todo) {
+    const nodeIdToFilter = function (msg: Todo) {
       let doFilter = true
       let nodeList = buildNodeListFromClient(msg)
       let elementNodeId = null
@@ -99,7 +99,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return doFilter
     }
 
-    node.iiot.isNodeIdNotToFindInAddressSpaceItems = function (msg: Todo) {
+    const isNodeIdNotToFindInAddressSpaceItems = function (msg: Todo) {
       if (msg.addressSpaceItems) {
         let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry: Todo) {
           return entry.nodeId === node.nodeId
@@ -116,17 +116,17 @@ module.exports = (RED: nodered.NodeAPI) => {
       return false
     }
 
-    node.iiot.messageIsToFilter = function (msg: Todo) {
-      return node.iiot.nodeIdToFilter(msg) && node.iiot.isNodeIdNotToFindInAddressSpaceItems(msg)
+    const messageIsToFilter = (msg: Todo) => {
+      return nodeIdToFilter(msg) && isNodeIdNotToFindInAddressSpaceItems(msg)
     }
 
-    node.on('input', function (msg: Todo) {
+    this.on('input', (msg: Todo) => {
       if (!msg.hasOwnProperty('payload') || msg.payload === null || msg.payload === void 0) { // values with false has to be true
         coreFilter.internalDebugLog('filtering message without payload')
         return
       }
 
-      if (node.iiot.messageIsToFilter(msg)) {
+      if (messageIsToFilter(msg)) {
         coreFilter.internalDebugLog('filtering message on filter')
         return
       }
@@ -138,44 +138,44 @@ module.exports = (RED: nodered.NodeAPI) => {
       message.justValue = node.justValue
       message.filter = true
       message.filtertype = 'filter'
-      message.payload = node.iiot.filterByType(message) || message.payload
+      message.payload = filterByType(message) || message.payload
 
       if (node.justValue) {
-        message.payload = node.iiot.filterResult(message)
+        message.payload = filterResult(message)
       }
 
-      node.send(message)
+      this.send(message)
     })
 
-    node.iiot.filterByType = function (msg: Todo) {
+    const filterByType = (msg: Todo) => {
       let result = null
       switch (msg.nodetype) {
         case 'read':
-          result = node.iiot.filterByReadType(msg)
+          result = filterByReadType(msg)
           break
         case 'write':
-          result = node.iiot.filterByWriteType(msg)
+          result = filterByWriteType(msg)
           break
         case 'listen':
-          result = node.iiot.filterByListenType(msg)
+          result = filterByListenType(msg)
           break
         case 'browse':
-          result = node.iiot.filterByBrowserType(msg)
+          result = filterByBrowserType(msg)
           break
         case 'crawl':
-          result = node.iiot.filterByCrawlerType(msg)
+          result = filterByCrawlerType(msg)
           break
         default:
           coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
           if (node.showErrors) {
-            node.error(new Error('unknown node type injected to filter for ' + msg.nodetype), msg)
+            this.error(new Error('unknown node type injected to filter for ' + msg.nodetype), msg)
           }
       }
 
       return result
     }
 
-    node.iiot.convertResult = function (msg: Todo, result: Todo) {
+    const convertResult = (msg: Todo, result: Todo) => {
       try {
         let convertedResult = null
 
@@ -203,13 +203,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       } catch (err: any) {
         coreFilter.internalDebugLog('result converting error ' + err.message)
         if (node.showErrors) {
-          node.error(err, msg)
+          this.error(err, msg)
         }
         return result
       }
     }
 
-    node.iiot.convertResultValue = function (msg: Todo) {
+    const convertResultValue = function (msg: Todo) {
       let result = msg.payload
 
       if (result === null || result === void 0) {
@@ -229,7 +229,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         return result
       }
 
-      result = node.iiot.convertDataType(result)
+      result = convertDataType(result)
 
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('data type result null or undefined')
@@ -237,20 +237,20 @@ module.exports = (RED: nodered.NodeAPI) => {
           node.error(new Error('converted by data type result null or undefined'), msg)
         }
       } else {
-        result = node.iiot.convertResult(msg, result)
+        result = convertResult(msg, result)
       }
 
       return result
     }
 
-    node.iiot.filterResult = function (msg: Todo) {
+    const filterResult = function (msg: Todo) {
       if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
-        return node.iiot.convertResultValue(msg) || msg.payload
+        return convertResultValue(msg) || msg.payload
       }
       return msg.payload
     }
 
-    node.iiot.extractValueFromOPCUAArrayStructure = function (msg: Todo, entryIndex: number) {
+    const extractValueFromOPCUAArrayStructure = function (msg: Todo, entryIndex: number) {
       let result = null
       let payload = msg.payload[entryIndex]
 
@@ -271,8 +271,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.iiot.extractValueFromOPCUAStructure = function (msg: Todo) {
-      let result = null
+    const extractValueFromOPCUAStructure = function (msg: Todo) {
+      let result
 
       if (msg.payload.hasOwnProperty('value')) {
         if (msg.payload.value.hasOwnProperty('value')) {
@@ -287,13 +287,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.iiot.filterByReadType = function (msg: Todo) {
-      let result = null
+    const filterByReadType = function (msg: Todo) {
+      let result
 
       if (msg.payload.length >= node.entry) {
-        result = node.iiot.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
+        result = extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
       } else {
-        result = node.iiot.extractValueFromOPCUAStructure(msg)
+        result = extractValueFromOPCUAStructure(msg)
       }
 
       if (result.hasOwnProperty('value')) {
@@ -303,12 +303,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.iiot.filterByWriteType = function (msg: Todo): null {
+    // Todo: This feels wrong
+    const filterByWriteType = function (msg: Todo): null {
       return null // has no value
     }
 
-    node.iiot.filterByListenType = function (msg: Todo) {
-      let result = null
+    const filterByListenType = function (msg: Todo) {
+      let result
 
       if (msg.payload && msg.payload.hasOwnProperty('value')) {
         result = msg.payload.value
@@ -323,7 +324,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.iiot.filterByBrowserType = function (msg: Todo) {
+    const filterByBrowserType = function (msg: Todo) {
       let result = filterListByNodeId(node.nodeId, msg.payload.browserResults)
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
@@ -348,7 +349,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.iiot.filterByCrawlerType = function (msg: Todo) {
+    const filterByCrawlerType = function (msg: Todo) {
       let result = filterListByNodeId(node.nodeId, msg.payload.crawlerResults)
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
@@ -358,17 +359,17 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.iiot.convertDataType = function (result: Todo) {
+    const convertDataType = function (result: Todo) {
       coreFilter.internalDebugLog('data type convert for ' + node.nodeId)
       return convertDataValueByDataType({ value: result, dataType: node.datatype }, node.datatype)
     }
 
     if (node.withValueCheck) {
-      node.minvalue = node.iiot.convertDataType(node.minvalue)
-      node.maxvalue = node.iiot.convertDataType(node.maxvalue)
+      node.minvalue = convertDataType(node.minvalue)
+      node.maxvalue = convertDataType(node.maxvalue)
     }
 
-    node.status({ fill: 'green', shape: 'dot', text: 'active' })
+    this.status({ fill: 'green', shape: 'dot', text: 'active' })
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Result-Filter', OPCUAIIoTResultFilter)
