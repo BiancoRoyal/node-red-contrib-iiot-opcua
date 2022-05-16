@@ -542,8 +542,10 @@ module.exports = function (RED: nodered.NodeAPI) {
         return
       }
 
+      console.log(this.iiot.stateMachine)
+
       coreConnector.logSessionInformation(this)
-      if (this.iiot.stateMachine.getMachineState() !== 'SESSIONRESTART') {
+      if (this.iiot.stateMachine && this.iiot.stateMachine.getMachineState() !== 'SESSIONRESTART') {
         this.iiot.stateMachine.lock().sessionclose()
       }
     }

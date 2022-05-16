@@ -8,10 +8,9 @@
  */
 'use strict'
 
-import {BrowserNode, Todo} from "./types/placeholders";
+import {Todo} from "./types/placeholders";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {
-  checkConnectorState,
   checkCrawlerItemIsNotToFilter,
   checkItemForUnsetState, checkSessionNotValid,
   deregisterToConnector, FAKTOR_SEC_TO_MSEC,
@@ -21,8 +20,9 @@ import {
 } from "./core/opcua-iiot-core";
 import coreBrowser, {BrowserInputPayloadLike} from "./core/opcua-iiot-core-browser";
 import {NodeAPI, NodeDef, NodeMessage, NodeStatus} from "node-red";
-import {browseAll, OPCUAClient} from "node-opcua";
 import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
+import {InjectMessage, InjectPayload} from "./opcua-iiot-inject";
+import {DataValue} from "node-opcua";
 
 interface OPCUAIIoTCrawler extends Node {
   name: string
@@ -50,6 +50,45 @@ interface OPCUAIIoTCrawlerDef extends NodeDef {
   delayPerMessage: number
   connector: string
 }
+
+type CrawlerMessage = NodeMessageInFlow & {
+  payload: CrawlerPayload
+}
+
+type CrawlerPayload = InjectPayload & {
+  crawlerResults: CrawlerResult[]
+}
+
+type CrawlerResult = {
+  nodeId: string
+  nodeClass: number
+  typeDefinition: string
+  browseName: {
+    name: string
+    namespaceIndex: number
+  }
+  displayName: {
+    locale: string
+    text: string
+  }
+  description: {
+    locale?: string
+    text?: string
+  }
+  dataType?: string
+  dataValue?: DataValue
+  valueRank?: number
+  minimumSamplingInterval?: number
+  accessLevel?: number
+  userAccessLevel?: number
+} & CrawlerParent
+
+type CrawlerParent = {
+  parent?: CrawlerResult
+  referenceToParent?: CrawlerResult
+}
+
+
 /**
  * Crawler Node-RED nodeConfig.
  *
@@ -180,18 +219,14 @@ module.exports = (RED: NodeAPI) => {
       let msg = Object.assign({}, originMessage)
       msg.nodetype = 'crawl'
 
-      const results = {
-        crawlerResults: crawlerResult
-      }
-
       try {
-        RED.util.setMessageProperty(msg, 'payload', JSON.parse(JSON.stringify(results, null, 2)))
+        RED.util.setMessageProperty(msg, 'crawlerResults', JSON.parse(JSON.stringify(crawlerResult, null, 2)))
       } catch (err: any) {
         coreBrowser.internalDebugLog(err)
         if (nodeConfig.showErrors) {
           this.error(err, msg)
         }
-        msg.resultsConverted = JSON.stringify(results, null, 2)
+        msg.resultsConverted = JSON.stringify(crawlerResult, null, 2)
         msg.error = err.message
       }
 
