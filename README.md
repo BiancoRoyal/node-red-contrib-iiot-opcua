@@ -1,3 +1,12 @@
+## package.json
+
+Very messing situation on dependency `read-pkg-up`:
+- node-red-node-test-helper wants 7.0.1
+- jest wants 1.0.1 (package-lock.json)
+
+solution: `npm install -D read-pkg-up@7.0.1`
+
+
 ![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
 ![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
