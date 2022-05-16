@@ -17,7 +17,7 @@ import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {
     BrowseMessage, DataTypeInput,
     ItemNodeId,
-    NodeIdentifier,
+    NodeIdentifier, NodeToWrite,
     TimeUnitNames,
     TimeUnits,
     WriteMessage
@@ -597,11 +597,12 @@ export function createItemForWriteList(item: ItemNodeId | string, value: DataVal
 }
 
 export function normalizeMessage(msg: WriteMessage) {
-    const addressSpaceValues = msg.addressSpaceItems || msg.payload?.nodesToWrite;
+    const payload = msg.payload as Todo
+    const addressSpaceValues: NodeToWrite[] = payload.addressSpaceItems || payload.nodesToWrite;
 
     if (!addressSpaceValues) return [];
 
-    const writeValues = msg.valuesToWrite;
+    const writeValues = payload.valuesToWrite;
 
     if (!isNotDefined(writeValues))
         return addressSpaceValues.map((item, index) => {
@@ -623,7 +624,7 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
     const writeInputs = normalizeMessage(msg)
 
 
-    const nodesToWrite = writeInputs.map((item) =>
+    const nodesToWrite = writeInputs.map((item: Todo) =>
       createItemForWriteList(item, buildNewVariant(item.datatypeName, item.value)
     ));
 

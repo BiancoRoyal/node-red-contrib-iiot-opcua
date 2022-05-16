@@ -38,10 +38,10 @@ const READ_TYPE = Object.freeze({
 
 const write = (session: OPCUASession, nodesToWrite: WriteValueOptions[], originMsg: Todo): Promise<WriteResult> =>  {
   return new Promise(
-    function (resolve, reject) {
+    (resolve, reject) => {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.write(nodesToWrite, function (err: Error | null, statusCodes?: StatusCodes[]) {
+        session.write(nodesToWrite, (err: Error | null, statusCodes?: StatusCodes[]) => {
           if (err) {
             reject(err)
           } else {

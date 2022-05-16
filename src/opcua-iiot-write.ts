@@ -29,6 +29,7 @@ import {
 } from "./core/opcua-iiot-core";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {NodeMessage, NodeStatus} from "node-red";
+import {BrowsePayload} from "./opcua-iiot-browser";
 
 
 interface OPCUAIIoTWrite extends nodered.Node {
@@ -92,53 +93,37 @@ module.exports = (RED: nodered.NodeAPI) => {
           this.send(message)
         } catch (err: any) {
           /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+          isInitializedIIoTNode(node) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+        isInitializedIIoTNode(node) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
     const buildResultMessage = (result: WriteResult): ResultMessage => {
       let message = Object.assign({}, result.msg)
-      message.nodetype = 'write'
-      message.justValue = node.justValue
+      message.payload.nodetype = 'write'
+      message.payload.justValue = node.justValue
 
-      let dataValuesString = extractDataValueString(message, result)
-      message = setMessageProperties(message, result, dataValuesString)
+      message.payload.value = extractDataValue(message, result)
       return message
     }
 
-    const extractDataValueString = (message: WriteResultMessage, result: WriteResult): string => {
-      let dataValuesString: string
+    const extractDataValue = (message: WriteResultMessage, result: WriteResult): Todo => {
+      let dataValues: string
       if (node.justValue) {
-        dataValuesString = JSON.stringify({
-          statusCodes: result.statusCodes
-        }, null, 2)
+        if (message.payload.valuesToWrite) {
+          delete message.payload['valuesToWrite']
+        }
 
-        if (message.valuesToWrite) {
-          delete message['valuesToWrite']
+        return {
+          statusCodes: result.statusCodes
         }
       } else {
-        dataValuesString = JSON.stringify(result, null, 2)
+        delete result['msg']
+        return result
       }
-      return dataValuesString
-    }
-
-    const setMessageProperties =  (message: WriteResultMessage, result: WriteResult, stringValue: string) => {
-      try {
-        RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
-      } /* istanbul ignore next */ catch (err: any) {
-        coreClient.writeDebugLog(err)
-        if (node.showErrors) {
-          this.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
-          this.error(err, result.msg)
-        }
-        message.resultsConverted = stringValue
-        message.error = err.message
-      }
-      return message
     }
 
     const errorHandler = (err: Error, msg: NodeMessage) => {
@@ -157,14 +142,15 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (!checkConnectorState(node, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
         return
       }
+      const payload = msg.payload as BrowsePayload
       // recursivePrintTypes(msg);
-      if ((msg as Todo).injectType === 'write') {
-        writeToSession(node.iiot.opcuaSession, msg)
+      if (payload.injectType === 'write') {
+        writeToSession(node.connector.iiot.opcuaSession, msg)
       } else {
-        coreClient.writeDebugLog('Wrong Inject Type ' + (msg as Todo).injectType + '! The Type has to be write.')
+        coreClient.writeDebugLog('Wrong Inject Type ' + payload.injectType + '! The Type has to be write.')
         /* istanbul ignore next */
         if (node.showErrors) {
-          this.warn('Wrong Inject Type ' + (msg as Todo).injectType + '! The msg.injectType has to be write.')
+          this.warn('Wrong Inject Type ' + payload.injectType + '! The msg.payload.injectType has to be write.')
         }
       }
     })
