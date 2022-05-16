@@ -35,6 +35,6 @@ jobs:
       - run: printenv
       - run: file distrib.tar.gz
       - run: ls distrib.tar.gz
-      - run: tar -xvf distrib.tar.gz
+      - run: tar -xvf distrib.tar.gz/distrib.tar.gz
       - run: pwd
       - run: file opcuaIIoT
