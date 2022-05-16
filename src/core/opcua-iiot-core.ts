@@ -12,26 +12,34 @@
 import { debug as Debug } from 'debug'
 import * as os from 'os'
 import * as underscore from 'underscore'
-// @ts-ignore
-import * as nodeOPCUA from 'node-opcua'
+
 import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {
-    BrowseMessage, CleanMessage,
-    DataType,
-    DataValue,
+    BrowseMessage, DataTypeInput,
     ItemNodeId,
     NodeIdentifier, NodeToWrite,
     TimeUnitNames,
     TimeUnits,
     VariantType, WriteListItem, WriteMessage
 } from "../types/core";
-import {CoreNode, NodeObject, Todo} from "../types/placeholders";
-import nodeRed, {NodeStatus} from "node-red";
-import {NodeStatusFill, NodeStatusShape} from "@node-red/registry";
+import {CoreNode, NodeObject, recursivePrintTypes, Todo} from "../types/placeholders";
+import nodeRed, {Node, NodeStatus} from "node-red";
+import {NodeMessageInFlow, NodeStatusFill, NodeStatusShape} from "@node-red/registry";
 import {isArray, isNotDefined} from "../types/assertion";
-import {isNullOrUndefined, NodeId, NodeIdType} from "node-opcua";
+import {
+    AttributeIds,
+    ClientSession,
+    DataType,
+    DataValue, DataValueOptions,
+    isNullOrUndefined,
+    NodeId,
+    NodeIdType,
+    OPCUAClient, Variant
+} from "node-opcua";
+import {WriteValueOptions} from "node-opcua-service-write";
+import {VariantOptions} from "node-opcua-variant";
 
-export {Debug, os, underscore, nodeOPCUA, nodeOPCUAId}
+export {Debug, os, underscore, nodeOPCUAId}
 
 export const OBJECTS_ROOT: string = 'ns=0;i=84'
 export const TEN_SECONDS_TIMEOUT: number = 10
@@ -133,6 +141,7 @@ export function toInt32(uintSixteen: number): number {
 }
 
 export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStatus {
+    console.log('inNodeStatus')
     let fillValue: NodeStatusFill = 'yellow'
     let shapeValue: NodeStatusShape = 'ring'
 
@@ -176,13 +185,13 @@ export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStat
                 statusValue = 'waiting ...'
             }
     }
-
+    console.log('Your error is in another castle')
     return {fill: fillValue, shape: shapeValue, text: statusValue}
 }
 
-export function buildNewVariant(datatype: DataType, value: any): VariantType {
-    let variantValue: VariantType = {
-        dataType: nodeOPCUA.DataType.Null,
+export function buildNewVariant(datatype: DataTypeInput, value: any): DataValueOptions {
+    let variantValue: VariantOptions = {
+        dataType: DataType.Null,
         value: null
     }
 
@@ -190,81 +199,81 @@ export function buildNewVariant(datatype: DataType, value: any): VariantType {
 
     switch (datatype) {
         case 'Float':
-        case nodeOPCUA.DataType.Float:
+        case DataType.Float:
             variantValue = {
-                dataType: nodeOPCUA.DataType.Float,
+                dataType: DataType.Float,
                 value: parseFloat(value)
             }
             break
         case 'Double':
-        case nodeOPCUA.DataType.Double:
+        case DataType.Double:
             variantValue = {
-                dataType: nodeOPCUA.DataType.Double,
+                dataType: DataType.Double,
                 value: parseFloat(value)
             }
             break
         case 'UInt16':
-        case nodeOPCUA.DataType.UInt16:
+        case DataType.UInt16:
             let uint16 = new Uint16Array([value])
             variantValue = {
-                dataType: nodeOPCUA.DataType.UInt16,
+                dataType: DataType.UInt16,
                 value: uint16[0]
             }
             break
         case 'UInt32':
-        case nodeOPCUA.DataType.UInt32:
+        case DataType.UInt32:
             let uint32 = new Uint32Array([value])
             variantValue = {
-                dataType: nodeOPCUA.DataType.UInt32,
+                dataType: DataType.UInt32,
                 value: uint32[0]
             }
             break
         case 'Int32':
-        case nodeOPCUA.DataType.Int32:
+        case DataType.Int32:
             variantValue = {
-                dataType: nodeOPCUA.DataType.Int32,
+                dataType: DataType.Int32,
                 value: parseInt(value)
             }
             break
         case 'Int16':
-        case nodeOPCUA.DataType.Int16:
+        case DataType.Int16:
             variantValue = {
-                dataType: nodeOPCUA.DataType.Int16,
+                dataType: DataType.Int16,
                 value: parseInt(value)
             }
             break
         case 'Int64':
-        case nodeOPCUA.DataType.Int64:
+        case DataType.Int64:
             variantValue = {
-                dataType: nodeOPCUA.DataType.Int64,
+                dataType: DataType.Int64,
                 value: parseInt(value)
             }
             break
         case 'Boolean':
-        case nodeOPCUA.DataType.Boolean:
+        case DataType.Boolean:
             if (value && value !== 'false') {
                 variantValue = {
-                    dataType: nodeOPCUA.DataType.Boolean,
+                    dataType: DataType.Boolean,
                     value: true
                 }
             } else {
                 variantValue = {
-                    dataType: nodeOPCUA.DataType.Boolean,
+                    dataType: DataType.Boolean,
                     value: false
                 }
             }
             break
         case 'LocalizedText':
-        case nodeOPCUA.DataType.LocalizedText:
+        case DataType.LocalizedText:
             variantValue = {
-                dataType: nodeOPCUA.DataType.LocalizedText,
+                dataType: DataType.LocalizedText,
                 value: JSON.parse(value) /* [{text:'Hello', locale:'en'}, {text:'Hallo', locale:'de'} ... ] */
             }
             break
         case 'DateTime':
-        case nodeOPCUA.DataType.DateTime:
+        case DataType.DateTime:
             variantValue = {
-                dataType: nodeOPCUA.DataType.DateTime,
+                dataType: DataType.DateTime,
                 value: new Date(value)
             }
             break
@@ -281,7 +290,7 @@ export function buildNewVariant(datatype: DataType, value: any): VariantType {
                 })
             } else {
                 variantValue = {
-                    dataType: nodeOPCUA.DataType.String,
+                    dataType: DataType.String,
                     value: value
                 }
             }
@@ -290,39 +299,41 @@ export function buildNewVariant(datatype: DataType, value: any): VariantType {
 
     logger.detailDebugLog('buildNewVariant variantValue: ' + JSON.stringify(variantValue))
 
-    return variantValue
+    return {
+        value: variantValue
+    }
 }
 
-export function getVariantValue(datatype: DataType, value: any): number | Date | boolean | string {
+export function getVariantValue(datatype: DataTypeInput, value: any): number | Date | boolean | string {
     switch (datatype) {
         case 'Float':
         case 'Double':
-        case nodeOPCUA.DataType.Double:
+        case DataType.Double:
             return parseFloat(value)
         case 'UInt16':
-        case nodeOPCUA.DataType.UInt16:
+        case DataType.UInt16:
             let uint16 = new Uint16Array([value])
             return uint16[0]
         case 'UInt32':
-        case nodeOPCUA.DataType.UInt32:
+        case DataType.UInt32:
             let uint32 = new Uint32Array([value])
             return uint32[0]
         case 'Int16':
-        case nodeOPCUA.DataType.Int16:
+        case DataType.Int16:
         case 'Int32':
         case 'Integer':
-        case nodeOPCUA.DataType.Int32:
+        case DataType.Int32:
         case 'Int64':
-        case nodeOPCUA.DataType.Int64:
+        case DataType.Int64:
             return parseInt(value)
         case 'Boolean':
-        case nodeOPCUA.DataType.Boolean:
+        case DataType.Boolean:
             return (value && value !== 'false')
         case 'DateTime':
-        case nodeOPCUA.DataType.DateTime:
+        case DataType.DateTime:
             return new Date(value)
         case 'String':
-        case nodeOPCUA.DataType.String:
+        case DataType.String:
             return (typeof value !== 'string') ? value.toString() : value
         default:
             return value
@@ -331,31 +342,31 @@ export function getVariantValue(datatype: DataType, value: any): number | Date |
 
 export function getBasicDataTypes() {
     return [
-        {name: 'Null', dataType: nodeOPCUA.DataType.Null},
-        {name: 'Boolean', dataType: nodeOPCUA.DataType.Boolean},
-        {name: 'SByte', dataType: nodeOPCUA.DataType.SByte},
-        {name: 'Byte', dataType: nodeOPCUA.DataType.Byte},
-        {name: 'Int16', dataType: nodeOPCUA.DataType.Int16},
-        {name: 'UInt16', dataType: nodeOPCUA.DataType.UInt16},
-        {name: 'Int32', dataType: nodeOPCUA.DataType.Int32},
-        {name: 'UInt32', dataType: nodeOPCUA.DataType.UInt32},
-        {name: 'Int64', dataType: nodeOPCUA.DataType.Int64},
-        {name: 'UInt64', dataType: nodeOPCUA.DataType.UInt64},
-        {name: 'Float', dataType: nodeOPCUA.DataType.Float},
-        {name: 'Double', dataType: nodeOPCUA.DataType.Double},
-        {name: 'DateTime', dataType: nodeOPCUA.DataType.DateTime},
-        {name: 'String', dataType: nodeOPCUA.DataType.String},
-        {name: 'Guid', dataType: nodeOPCUA.DataType.Guid},
-        {name: 'ByteString', dataType: nodeOPCUA.DataType.ByteString},
-        {name: 'XmlElement', dataType: nodeOPCUA.DataType.XmlElement},
-        {name: 'NodeId', dataType: nodeOPCUA.DataType.NodeId},
-        {name: 'ExpandedNodeId', dataType: nodeOPCUA.DataType.ExpandedNodeId},
-        {name: 'StatusCode', dataType: nodeOPCUA.DataType.StatusCode},
-        {name: 'LocalizedText', dataType: nodeOPCUA.DataType.LocalizedText},
-        {name: 'ExtensionObject', dataType: nodeOPCUA.DataType.ExtensionObject},
-        {name: 'DataValue', dataType: nodeOPCUA.DataType.DataValue},
-        {name: 'Variant', dataType: nodeOPCUA.DataType.Variant},
-        {name: 'DiagnosticInfo', dataType: nodeOPCUA.DataType.DiagnosticInfo}
+        {name: 'Null', dataType: DataType.Null},
+        {name: 'Boolean', dataType: DataType.Boolean},
+        {name: 'SByte', dataType: DataType.SByte},
+        {name: 'Byte', dataType: DataType.Byte},
+        {name: 'Int16', dataType: DataType.Int16},
+        {name: 'UInt16', dataType: DataType.UInt16},
+        {name: 'Int32', dataType: DataType.Int32},
+        {name: 'UInt32', dataType: DataType.UInt32},
+        {name: 'Int64', dataType: DataType.Int64},
+        {name: 'UInt64', dataType: DataType.UInt64},
+        {name: 'Float', dataType: DataType.Float},
+        {name: 'Double', dataType: DataType.Double},
+        {name: 'DateTime', dataType: DataType.DateTime},
+        {name: 'String', dataType: DataType.String},
+        {name: 'Guid', dataType: DataType.Guid},
+        {name: 'ByteString', dataType: DataType.ByteString},
+        {name: 'XmlElement', dataType: DataType.XmlElement},
+        {name: 'NodeId', dataType: DataType.NodeId},
+        {name: 'ExpandedNodeId', dataType: DataType.ExpandedNodeId},
+        {name: 'StatusCode', dataType: DataType.StatusCode},
+        {name: 'LocalizedText', dataType: DataType.LocalizedText},
+        {name: 'ExtensionObject', dataType: DataType.ExtensionObject},
+        {name: 'DataValue', dataType: DataType.DataValue},
+        {name: 'Variant', dataType: DataType.Variant},
+        {name: 'DiagnosticInfo', dataType: DataType.DiagnosticInfo}
     ]
 }
 
@@ -367,13 +378,13 @@ export function convertDataValue(value: DataValue | string) {
     if (valueIsString(value)) {
         return value;
     } else
-        return convertDataValueByDataType(value, value.dataType)
+        return convertDataValueByDataType(value.value.value, value.value.dataType)
 }
 
-export function convertDataValueByDataType(value: DataValue , dataType: DataType): string {
+export function convertDataValueByDataType(value: any , dataType: DataTypeInput): string {
     let convertedValue = null
 
-    let valueType = typeof value.value
+    const valueType = typeof value
 
     logger.detailDebugLog('convertDataValue: ' + JSON.stringify(value) +
         ' value origin type ' + valueType + ' convert to' + ' ' + dataType)
@@ -381,98 +392,98 @@ export function convertDataValueByDataType(value: DataValue , dataType: DataType
     try {
         switch (dataType) {
             case 'NodeId':
-            case nodeOPCUA.DataType.NodeId:
-                convertedValue = value.value.toString()
+            case DataType.NodeId:
+                convertedValue = value.toString()
                 break
             case 'NodeIdType':
-            case nodeOPCUA.DataType.ExpandedNodeId: // TODO: investigate, original value (NodeIdType) doesn't exist
+            case DataType.ExpandedNodeId: // TODO: investigate, original value (NodeIdType) doesn't exist
                 if (value.value instanceof Buffer) {
-                    convertedValue = value.value.toString()
+                    convertedValue = value.toString()
                 } else {
-                    convertedValue = value.value
+                    convertedValue = value
                 }
                 break
             case 'ByteString':
-            case nodeOPCUA.DataType.ByteString:
-                convertedValue = value.value
+            case DataType.ByteString:
+                convertedValue = value
                 break
             case 'Byte':
-            case nodeOPCUA.DataType.Byte:
+            case DataType.Byte:
                 if (valueType === 'boolean') {
-                    convertedValue = value.value ? 1 : 0
+                    convertedValue = value ? 1 : 0
                 } else {
                     convertedValue = parseInt(value.value)
                 }
                 break
-            case nodeOPCUA.DataType.QualifiedName:
-                convertedValue = value.value.toString()
+            case DataType.QualifiedName:
+                convertedValue = value.toString()
                 break
             case 'LocalizedText':
-            case nodeOPCUA.DataType.LocalizedText:
-                convertedValue = value.value
+            case DataType.LocalizedText:
+                convertedValue = value
                 break
             case 'Float':
-            case nodeOPCUA.DataType.Float:
-                if (isNaN(value.value)) {
-                    convertedValue = value.value
+            case DataType.Float:
+                if (isNaN(value)) {
+                    convertedValue = value
                 } else {
-                    convertedValue = parseFloat(value.value)
+                    convertedValue = parseFloat(value)
                 }
                 break
             case 'Double':
-            case nodeOPCUA.DataType.Double:
-                if (isNaN(value.value)) {
-                    convertedValue = value.value
+            case DataType.Double:
+                if (isNaN(value)) {
+                    convertedValue = value
                 } else {
-                    convertedValue = parseFloat(value.value)
+                    convertedValue = parseFloat(value)
                 }
                 break
             case 'UInt16':
-            case nodeOPCUA.DataType.UInt16:
-                let uint16 = new Uint16Array([value.value])
+            case DataType.UInt16:
+                let uint16 = new Uint16Array([value])
                 convertedValue = uint16[0]
                 break
             case 'UInt32':
-            case nodeOPCUA.DataType.UInt32:
-                let uint32 = new Uint32Array([value.value])
+            case DataType.UInt32:
+                let uint32 = new Uint32Array([value])
                 convertedValue = uint32[0]
                 break
             case 'Int16':
-            case nodeOPCUA.DataType.Int16:
+            case DataType.Int16:
             case 'Int32':
-            case nodeOPCUA.DataType.Int32:
+            case DataType.Int32:
             case 'Int64':
-            case nodeOPCUA.DataType.Int64:
+            case DataType.Int64:
                 if (valueType === 'boolean') {
-                    convertedValue = value.value ? 1 : 0
+                    convertedValue = value ? 1 : 0
                 } else {
-                    if (isNaN(value.value)) {
-                        convertedValue = value.value
+                    if (isNaN(value)) {
+                        convertedValue = value
                     } else {
-                        convertedValue = parseInt(value.value)
+                        convertedValue = parseInt(value)
                     }
                 }
                 break
             case 'Boolean':
-            case nodeOPCUA.DataType.Boolean:
-                convertedValue = value.value
+            case DataType.Boolean:
+                convertedValue = value
                 break
             case 'String':
-            case nodeOPCUA.DataType.String:
+            case DataType.String:
                 if (valueType !== 'string') {
-                    convertedValue = value.value.toString()
+                    convertedValue = value.toString()
                 } else {
-                    convertedValue = value.value
+                    convertedValue = value
                 }
                 break
             case 'Null':
-            case nodeOPCUA.DataType.Null:
+            case DataType.Null:
                 convertedValue = null
                 break
             default:
                 logger.internalDebugLog('convertDataValue unused DataType: ' + dataType)
                 if (value.hasOwnProperty('value')) {
-                    convertedValue = value.value
+                    convertedValue = value
                 } else {
                     convertedValue = null
                 }
@@ -553,7 +564,7 @@ export function parseIdentifierFromItemNodeId(item: ItemNodeId | string): NodeId
     return parseForNodeIdentifier(item.nodeId || item)
 }
 
-export function newOPCUANodeIdFromItemNodeId(item: ItemNodeId | string): nodeOPCUA.NodeId {
+export function newOPCUANodeIdFromItemNodeId(item: ItemNodeId | string): NodeId {
     let namespace = parseNamspaceFromItemNodeId(item)
     let nodeIdentifier = parseIdentifierFromItemNodeId(item)
 
@@ -561,7 +572,7 @@ export function newOPCUANodeIdFromItemNodeId(item: ItemNodeId | string): nodeOPC
     return new NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
-export function newOPCUANodeIdFromMsgTopic(msg: BrowseMessage): nodeOPCUA.NodeId {
+export function newOPCUANodeIdFromMsgTopic(msg: BrowseMessage): NodeId {
     let namespace = parseNamspaceFromMsgTopic(msg)
     let nodeIdentifier = parseIdentifierFromMsgTopic(msg)
 
@@ -569,16 +580,16 @@ export function newOPCUANodeIdFromMsgTopic(msg: BrowseMessage): nodeOPCUA.NodeId
     return new NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
-export function createItemForWriteList(item: ItemNodeId | string, value: DataValue): WriteListItem {
+export function createItemForWriteList(item: ItemNodeId | string, value: DataValueOptions): WriteValueOptions {
     return {
         nodeId: newOPCUANodeIdFromItemNodeId(item),
-        attributeId: nodeOPCUA.AttributeIds.Value,
-        indexRange: null,
+        attributeId: AttributeIds.Value,
+        indexRange: undefined,
         value
     }
 }
 
-export function normalizeMessage(msg: WriteMessage): CleanMessage[] {
+export function normalizeMessage(msg: WriteMessage) {
     const addressSpaceValues = msg.addressSpaceItems || msg.payload?.nodesToWrite;
 
     if (!addressSpaceValues) return [];
@@ -599,7 +610,7 @@ export function normalizeMessage(msg: WriteMessage): CleanMessage[] {
 
 }
 
-export function buildNodesToWrite(msg: WriteMessage): WriteListItem[] {
+export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 
     logger.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
     const writeInputs = normalizeMessage(msg)
@@ -697,35 +708,35 @@ export function isSessionBad(err: Error) {
         err.toString().includes('Connection'))
 }
 
-export function setNodeInitalState(nodeState: string, node: Todo) {
+export function setNodeInitalState(nodeState: string, node: Todo, statusCall?: (status: string | NodeStatus)=>  void) {
     switch (nodeState) {
         case 'INITOPCUA':
         case 'SESSIONREQUESTED':
-            setNodeStatusTo(node, 'connecting')
+            node.oldStatusParameter = setNodeStatusTo(node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusCall)
             break
         case 'OPEN':
         case 'SESSIONCLOSED':
-            node.iiot.opcuaClient = node.connector.bianco.iiot.opcuaClient
-            setNodeStatusTo(node, 'connected')
+            node.iiot.opcuaClient = node.connector.iiot.opcuaClient
+            node.oldStatusParameter = setNodeStatusTo(node, 'connected', node.oldStatusParameter, node.showStatusActivities, statusCall)
             break
         case 'SESSIONACTIVE':
-            node.iiot.opcuaSession = node.connector.bianco.iiot.opcuaSession
-            setNodeStatusTo(node, 'active')
+            node.iiot.opcuaSession = node.connector.iiot.opcuaSession
+            node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusCall)
             break
         case 'LOCKED':
-            setNodeStatusTo(node, 'locked')
+            node.oldStatusParameter = setNodeStatusTo(node, 'locked', node.oldStatusParameter, node.showStatusActivities, statusCall)
             break
         case 'UNLOCKED':
-            setNodeStatusTo(node, 'unlocked')
+            node.oldStatusParameter = setNodeStatusTo(node, 'unlocked', node.oldStatusParameter, node.showStatusActivities, statusCall)
             break
         case 'STOPPED':
-            setNodeStatusTo(node, 'stopped')
+            node.oldStatusParameter = setNodeStatusTo(node, 'stopped', node.oldStatusParameter, node.showStatusActivities, statusCall)
             break
         case 'END':
-            setNodeStatusTo(node, 'end')
+            node.oldStatusParameter = setNodeStatusTo(node, 'end', node.oldStatusParameter, node.showStatusActivities, statusCall)
             break
         default:
-            setNodeStatusTo(node, 'waiting')
+            node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusCall)
     }
 }
 
@@ -735,24 +746,25 @@ export function isNodeId(nodeId: NodeId) {
     }
 
     switch (nodeId.identifierType) {
-        case nodeOPCUA.NodeIdType.NUMERIC:
-        case nodeOPCUA.NodeIdType.STRING:
-        case nodeOPCUA.NodeIdType.GUID:
+        case NodeIdType.NUMERIC:
+        case NodeIdType.STRING:
+        case NodeIdType.GUID:
             return true
         default:
             return false
     }
 }
 
-export function checkConnectorState(node: NodeObject, msg: Todo, callerType: Todo): boolean {
-    logger.internalDebugLog('Check Connector State ' + node.connector?.iiot.stateMachine?.getMachineState() + ' By ' + callerType)
+export function checkConnectorState(node: Todo, msg: NodeMessageInFlow, callerType: Todo): boolean {
+    const state = node.connector?.iiot.stateMachine?.getMachineState()
+    logger.internalDebugLog('Check Connector State ' + state + ' By ' + callerType)
 
-    if (node.connector?.iiot?.stateMachine && node.connector.iiot.stateMachine.getMachineState() !== RUNNING_STATE) {
-        logger.internalDebugLog('Wrong Client State ' + node.connector.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+    if (node.connector?.iiot?.stateMachine && state !== RUNNING_STATE) {
+        logger.internalDebugLog('Wrong Client State ' + state + ' By ' + callerType)
         if (node.showErrors) {
             node.error(new Error('Client Not ' + RUNNING_STATE + ' On ' + callerType), msg)
         }
-        setNodeStatusTo(node, 'not running')
+        node.oldStatusParameter = setNodeStatusTo(node as Node, 'not running', node.oldStatusParameter, node.showStatusActivities)
         node.emit('opcua_client_not_ready')
         return false
     } else {
@@ -760,11 +772,11 @@ export function checkConnectorState(node: NodeObject, msg: Todo, callerType: Tod
     }
 }
 
-export function setNodeOPCUAConnected(node: NodeObject, opcuaClient: nodeOPCUA.OPCUAClient): void {
+export function setNodeOPCUAConnected(node: NodeObject, opcuaClient: OPCUAClient): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaClient = opcuaClient
     }
-    setNodeStatusTo(node, 'connecting')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
 }
 
 export function setNodeOPCUAClosed(node: NodeObject): void {
@@ -772,47 +784,47 @@ export function setNodeOPCUAClosed(node: NodeObject): void {
         // @ts-ignore
         node.iiot.opcuaClient = null
     }
-    setNodeStatusTo(node, 'disconnected')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'disconnected', node.oldStatusParameter, node.showStatusActivities)
 }
 
 export function setNodeOPCUALost(node: NodeObject): void {
-    setNodeStatusTo(node, 'lost')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'lost', node.oldStatusParameter, node.showStatusActivities)
 }
 
-export function setNodeOPCUASessionStarted(node: NodeObject, opcuaSession: nodeOPCUA.ClientSession): void {
+export function setNodeOPCUASessionStarted(node: NodeObject, opcuaSession: ClientSession): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaSession = opcuaSession
     }
-    setNodeStatusTo(node, 'active')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'active', node.oldStatusParameter, node.showStatusActivities)
 }
 
 export function setNodeOPCUASessionClosed(node: NodeObject): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaSession = null
     }
-    setNodeStatusTo(node, 'connecting')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
 }
 
 export function setNodeOPCUASessionRestart(node: NodeObject): void {
-    setNodeStatusTo(node, 'restart')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'restart', node.oldStatusParameter, node.showStatusActivities)
 }
 
 export function setNodeOPCUASessionError(node: NodeObject): void {
     if (isInitializedIIoTNode(node)) {
         node.iiot.opcuaSession = null
     }
-    setNodeStatusTo(node, 'connecting')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
 }
 
-export function setNodeOPCUARestart(node: NodeObject, opcuaClient: nodeOPCUA.OPCUAClient): void {
+export function setNodeOPCUARestart(node: NodeObject, opcuaClient: OPCUAClient): void {
     logger.internalDebugLog('Connector Restart')
     if (opcuaClient && isInitializedIIoTNode(node)) {
         node.iiot.opcuaClient = opcuaClient
     }
-    setNodeStatusTo(node, 'connecting')
+    node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities)
 }
 
-export function registerToConnector(node: NodeObject) {
+export function registerToConnector(node: NodeObject, statusCall?: (status: string | NodeStatus) =>  void) {
     if (!node) {
         logger.internalDebugLog('Node Not Valid On Register To Connector')
         return
@@ -860,7 +872,7 @@ export function registerToConnector(node: NodeObject) {
         setNodeOPCUASessionClosed(node)
     })
 
-    node.connector.on('session_started', (opcuaSession: nodeOPCUA.ClientSession) => {
+    node.connector.on('session_started', (opcuaSession: ClientSession) => {
         setNodeOPCUASessionStarted(node, opcuaSession)
     })
 
@@ -877,10 +889,13 @@ export function registerToConnector(node: NodeObject) {
     })
 
     node.connector.on('after_reconnection', () => {
-        setNodeOPCUARestart(node, node.iiot.opcuaClient) // TODO: investigate one args v two
+        setNodeOPCUARestart(node, OPCUAClient.create(node.iiot.opcuaClient)) // TODO: investigate one args v two
     })
-
-    setNodeInitalState(node.connector?.iiot.stateMachine.getMachineState(), node)
+    if (node.connector?.iiot?.stateMachine)
+        recursivePrintTypes(node.connector?.iiot?.stateMachine)
+    else
+        console.log('Not here either, buddy')
+    setNodeInitalState(node.connector?.iiot.stateMachine?.getMachineState(), node, statusCall)
 }
 
 export function deregisterToConnector(node: NodeObject, done: () => void) {
@@ -916,13 +931,13 @@ export function checkSessionNotValid(session: Todo, callerType: Todo) {
     return false
 }
 
-export function setNodeStatusTo(node: Todo, statusValue: string) {
-    let statusParameter = getNodeStatus(statusValue, node.showStatusActivities)
-    if (!underscore.isEqual(node.oldStatusParameter, statusParameter)) {
+export function setNodeStatusTo(node: Node, statusValue: string, oldStatus: NodeStatus, showStatusActivities: boolean, status: (status: string | NodeStatus) => void = node.status): NodeStatus {
+    let statusParameter: NodeStatus = getNodeStatus(statusValue, showStatusActivities)
+    if (!underscore.isEqual(oldStatus, statusParameter) && statusParameter) {
         logger.detailDebugLog('Node ' + node.id + ' Status To ' + statusValue)
-        node.oldStatusParameter = statusParameter
-        node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: (statusParameter as Todo).status})
+        status(statusParameter)
     }
+    return statusParameter
 }
 
 // sets some values within node.iiot
@@ -1060,7 +1075,6 @@ export function resetBiancoNode(node: Todo) {
     if (isInitializedIIoTNode(node)) {
         node.iiot = null
     }
-    node.bianco = null
 }
 
 export function filterListEntryByNodeId(nodeId: Todo, list: Todo) {

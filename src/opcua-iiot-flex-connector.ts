@@ -7,7 +7,9 @@
  */
 'use strict'
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
+import {NodeObject, Todo, TodoBianco} from "./types/placeholders";
+import coreConnector from "./core/opcua-iiot-core-connector";
+import {deregisterToConnector, registerToConnector, resetBiancoNode} from "./core/opcua-iiot-core";
 
 export interface OPCUAIIoTFlexConnector extends nodered.Node {
   showStatusActivities: boolean
@@ -28,7 +30,6 @@ interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
  */
 module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
-  let coreConnector = require('./core/opcua-iiot-core-connector')
 
   function OPCUAIIoTFlexConnector (this: OPCUAIIoTFlexConnector, config: OPCUAIIoTFlexConnectorConfigurationDef) {
     RED.nodes.createNode(this, config)
@@ -37,9 +38,10 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = this
-    node.bianco = coreConnector.core.createBiancoIIoT()
-    coreConnector.core.assert(node.bianco.iiot)
+    let node = {
+      ...this,
+      iiot: {}
+    }
 
     node.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
@@ -64,11 +66,11 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     })
 
-    coreConnector.core.registerToConnector(node)
+    registerToConnector((node as Todo))
 
     node.on('close', (done: () => void) => {
-      coreConnector.core.deregisterToConnector(node, () => {
-        coreConnector.core.resetBiancoNode(node)
+      deregisterToConnector((node as Todo), () => {
+        resetBiancoNode(node)
         done()
       })
     })

@@ -9,16 +9,25 @@
 'use strict'
 
 import * as nodered from "node-red";
-import { Node } from "@node-red/registry";
+import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {
-  ClientNode,
-  OPCUASession,
+  CoreNode,
+  OPCUASession, recursivePrintTypes,
   ResultMessage,
   Todo,
   TodoVoidFunction,
   WriteResult,
   WriteResultMessage
 } from "./types/placeholders";
+import coreClient from "./core/opcua-iiot-core-client";
+import {
+  buildNodesToWrite, checkConnectorState,
+  checkSessionNotValid, deregisterToConnector,
+  initCoreNode,
+  isInitializedIIoTNode,
+  isSessionBad, registerToConnector, resetBiancoNode
+} from "./core/opcua-iiot-core";
+import {WriteValueOptions} from "node-opcua-service-write";
 
 
 interface OPCUAIIoTWrite extends nodered.Node {
@@ -44,7 +53,6 @@ interface OPCUAIIoTWriteDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let coreClient = require('./core/opcua-iiot-core-client')
 
   function OPCUAIIoTWrite (this: OPCUAIIoTWrite, config: OPCUAIIoTWriteDef) {
     RED.nodes.createNode(this, config)
@@ -54,54 +62,55 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: ClientNode = coreClient.core.initClientNode(this)
-    coreClient.core.assert(node.bianco.iiot)
+    let node: CoreNode = {
+      iiot: initCoreNode()
+    }
 
-    node.bianco.iiot.handleWriteError = (err: Error, msg: string) => {
+    node.iiot.handleWriteError = (err: Error, msg: string) => {
       coreClient.writeDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
       /* istanbul ignore next */
-      if (coreClient.core.isSessionBad(err)) {
+      if (isSessionBad(err)) {
         node.emit('opcua_client_not_ready')
       }
     }
 
-    node.bianco.iiot.writeToSession = (session: OPCUASession, originMsg: Todo) => {
-      if (coreClient.core.checkSessionNotValid(session, 'Writer')) {
+    node.iiot.writeToSession = (session: OPCUASession, originMsg: Todo) => {
+      if (checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
       }
 
       let msg = Object.assign({}, originMsg)
-      let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
+      const nodesToWrite: WriteValueOptions[] = buildNodesToWrite(msg)
       coreClient.write(session, nodesToWrite, msg).then((writeResult: Promise<WriteResult>): void => {
         try {
-          let message = node.bianco.iiot.buildResultMessage(writeResult)
+          let message = node.iiot.buildResultMessage(writeResult)
           node.send(message)
         } catch (err: any) {
           /* istanbul ignore next */
-          (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+          (isInitializedIIoTNode(node)) ? node.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(node)) ? node.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    node.bianco.iiot.buildResultMessage = (result: WriteResult): ResultMessage => {
+    node.iiot.buildResultMessage = (result: WriteResult): ResultMessage => {
       let message = Object.assign({}, result.msg)
       message.nodetype = 'write'
       message.justValue = node.justValue
 
-      let dataValuesString = node.bianco.iiot.extractDataValueString(message, result)
-      message = node.bianco.iiot.setMessageProperties(message, result, dataValuesString)
+      let dataValuesString = node.iiot.extractDataValueString(message, result)
+      message = node.iiot.setMessageProperties(message, result, dataValuesString)
       return message
     }
 
-    node.bianco.iiot.extractDataValueString = (message: WriteResultMessage, result: WriteResult): string => {
+    node.iiot.extractDataValueString = (message: WriteResultMessage, result: WriteResult): string => {
       let dataValuesString = ""
       if (node.justValue) {
         dataValuesString = JSON.stringify({
@@ -117,7 +126,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return dataValuesString
     }
 
-    node.bianco.iiot.setMessageProperties =  (message: WriteResultMessage, result: WriteResult, stringValue: string) => {
+    node.iiot.setMessageProperties =  (message: WriteResultMessage, result: WriteResult, stringValue: string) => {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
       } /* istanbul ignore next */ catch (err: any) {
@@ -132,27 +141,27 @@ module.exports = (RED: nodered.NodeAPI) => {
       return message
     }
 
-    node.on('input', (msg: Todo) => {
-      if (!coreClient.core.checkConnectorState(node, msg, 'Write')) {
+    node.on('input', (msg: NodeMessageInFlow) => {
+      if (!checkConnectorState(node, msg, 'Write')) {
         return
       }
-
-      if (msg.injectType === 'write') {
-        node.bianco.iiot.writeToSession(node.bianco.iiot.opcuaSession, msg)
+      // recursivePrintTypes(msg);
+      if ((msg as Todo).injectType === 'write') {
+        node.iiot.writeToSession(node.iiot.opcuaSession, msg)
       } else {
-        coreClient.writeDebugLog('Wrong Inject Type ' + msg.injectType + '! The Type has to be write.')
+        coreClient.writeDebugLog('Wrong Inject Type ' + (msg as Todo).injectType + '! The Type has to be write.')
         /* istanbul ignore next */
         if (node.showErrors) {
-          node.warn('Wrong Inject Type ' + msg.injectType + '! The msg.injectType has to be write.')
+          node.warn('Wrong Inject Type ' + (msg as Todo).injectType + '! The msg.injectType has to be write.')
         }
       }
     })
 
-    coreClient.core.registerToConnector(node)
+    registerToConnector(node)
 
     node.on('close', (done: TodoVoidFunction) => {
-      coreClient.core.deregisterToConnector(node, () => {
-        coreClient.core.resetBiancoNode(node)
+      deregisterToConnector(node, () => {
+        resetBiancoNode(node)
         done()
       })
     })

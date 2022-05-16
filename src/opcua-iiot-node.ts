@@ -49,20 +49,18 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.injectType = config.injectType
     this.showErrors = config.showErrors
 
-    let node = this
-    node.bianco = core.createBiancoIIoT()
-    core.assert(node.bianco.iiot)
-    node.bianco.iiot.subscribed = false
+    let node: Todo = this
+    node.iiot.subscribed = false
 
     node.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
     node.on('input', function (msg: Todo) {
       msg.nodetype = 'node'
       msg.injectType = msg.injectType || node.injectType
-      node.bianco.iiot.subscribed = !node.bianco.iiot.subscribed
+      node.iiot.subscribed = !node.iiot.subscribed
 
       if (node.injectType === 'listen') {
-        if (node.bianco.iiot.subscribed) {
+        if (node.iiot.subscribed) {
           node.status({ fill: 'blue', shape: 'dot', text: 'subscribed' })
         } else {
           node.status({ fill: 'blue', shape: 'ring', text: 'not subscribed' })

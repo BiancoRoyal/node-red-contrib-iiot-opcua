@@ -1,6 +1,8 @@
 import * as nodeOPCUA from "node-opcua";
-import {BrowseMessage, DataType, DataValue, ItemNodeId, NodeIdentifier, NodeToWrite, VariantType} from "./core";
-import {NodeId} from "node-opcua";
+import {BrowseMessage, ItemNodeId, NodeIdentifier, NodeToWrite, VariantType} from "./core";
+import {ClientSession, DataType, DataValue, NodeId} from "node-opcua";
+import {CoreMachineStates} from "../core/opcua-iiot-core-connector";
+import {Node, NodeStatus} from "node-red";
 
 export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): void => {
   if (depth == 1)
@@ -15,8 +17,12 @@ export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): 
       console.log(indent + key + ": {");
       recursivePrintTypes(o[key], depth + 1);
       console.log(indent + "}, ");
+    // } else if (o[key].length) {
+    //   console.log(indent + key + "[]: {");
+    //   recursivePrintTypes(o[key][0], depth + 1);
+    //   console.log(indent + "}, ");
     } else {
-      console.log(indent + key + ": " + typeof key + " = " + o[key] + ',');
+      console.log(indent + key + ": " + typeof o[key] + " = " + o[key] + ',');
     }
   })
   if (depth == 1)
@@ -28,29 +34,45 @@ export type TodoVoidFunction = (...args: any) => void;
 export type TodoBianco = Todo;
 
 
+export const getEnumKeys = <O extends object, K extends keyof O>(obj: O): K[] =>  {
+  return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
+}
+
 export type NodeObject = {
-  bianco: Bianco
+  iiot: IIOT
   connector?: NodeConnector
   id: NodeId
   showErrors?: boolean
-
+  showStatusActivities: boolean
+  oldStatusParameter: NodeStatus
   emit: (event: string, ...args: any[]) => void
   error: (err: Error, msg: Todo) => void
 }
 
 export type NodeConnector = {
-  bianco: Bianco
+  iiot: IIOT
   on: (event: string, callback: TodoVoidFunction) => void
   removeAllListeners: () => void
 }
 
-export type ClientNode = {
-  bianco: Bianco
-} & Todo;
+export type CoreNode = {
+  reconnectTimeout: number,
+  sessionTimeout: null,
+  opcuaSession: null,
+  opcuaClient: null
+} & Todo
 
-export type Bianco = {
-  iiot: IIOT
-};
+export type BrowserNode = Node & BrowserNodeAttributes
+
+export type BrowserNodeAttributes =  {
+  browseTopic: string
+  oldStatusParameter?: NodeStatus
+  iiot: {
+    items: Todo[]
+    messageList: Todo[]
+    delayMessageTimer: NodeJS.Timeout[]
+  } & CoreNode
+}
 
 export type IIOT = {
   nodeOPCUAId: NodeId
@@ -81,10 +103,10 @@ export type IIOT = {
 }
 
 export type StateMachine = {
-  getMachineState: () => Todo
+  getMachineState: () => CoreMachineStates
 }
 
-export type OPCUASession = Todo;
+export type OPCUASession = ClientSession;
 export type WriteResult = {msg: WriteResultMessage} & Todo;
 export type WriteResultMessage = Todo;
 export type ResultMessage = {

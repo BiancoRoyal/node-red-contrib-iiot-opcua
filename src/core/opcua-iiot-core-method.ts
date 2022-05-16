@@ -125,6 +125,9 @@ const buildCallMessage = function (node: Todo, msg: Todo) {
 }
 
 const coreMethod = {
+  internalDebugLog,
+  detailDebugLog,
+
   getArgumentDefinition,
   callMethods,
   buildMessagesFromMethodCalls,

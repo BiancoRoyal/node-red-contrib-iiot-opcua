@@ -12,6 +12,7 @@ import * as nodered from "node-red";
 import {Todo, TodoBianco} from "./types/placeholders";
 import {NodeMessage} from "node-red";
 import {EventFilter} from "node-opcua";
+import {NodeMessageInFlow} from "@node-red/registry";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string
@@ -56,24 +57,24 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let node: OPCUAIIoTEvent = this
-    node.bianco = coreListener.core.createBiancoIIoT()
-    coreListener.core.assert(node.bianco.iiot)
-    node.bianco.iiot.subscribed = false
+    let node: OPCUAIIoTEvent & Todo = this
 
-    node.status({ fill: 'blue', shape: 'ring', text: 'new' })
+    const statusCall = this.status
+    node.iiot.subscribed = false
 
-    node.on('input', function (msg) {
-      node.bianco.iiot.subscribed = !node.bianco.iiot.subscribed
+    statusCall({ fill: 'blue', shape: 'ring', text: 'new' })
+
+    this.on('input', function (msg: NodeMessageInFlow) {
+      node.iiot.subscribed = !node.iiot.subscribed
 
       if (node.usingListener) {
-        if (node.bianco.iiot.subscribed) {
-          node.status({ fill: 'blue', shape: 'dot', text: 'subscribed' })
+        if (node.iiot.subscribed) {
+          statusCall({ fill: 'blue', shape: 'dot', text: 'subscribed' })
         } else {
-          node.status({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
+          statusCall({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
         }
       } else {
-        node.status({ fill: 'blue', shape: 'dot', text: 'injected' })
+        statusCall({ fill: 'blue', shape: 'dot', text: 'injected' })
       }
 
       let uaEventFields = coreListener.getBasicEventFields()

@@ -10,12 +10,25 @@
 
 import * as nodered from "node-red";
 import {Todo} from "./types/placeholders";
+import coreDiscovery from "./core/opcua-iiot-core-discovery";
+import {OPCUADiscoveryServer, OPCUAServerEndPoint} from "node-opcua";
+import {InjectMessage} from "./opcua-iiot-inject";
+import {NodeMessageInFlow} from "node-red";
 interface OPCUAIIoTDiscovery extends nodered.Node {
   discoveryPort: number
   bianco?: Todo
 }
 interface OPCUAIIoTDiscoveryDef extends nodered.NodeDef {
   discoveryPort: number
+}
+
+export interface DiscoveryMessage extends NodeMessageInFlow {
+  payload: DiscoveryMessagePayload
+}
+
+interface DiscoveryMessagePayload {
+  discoveryUrls: string[]
+  endpoints: OPCUAServerEndPoint[]
 }
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
@@ -24,7 +37,6 @@ interface OPCUAIIoTDiscoveryDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let coreDiscovery = require('./core/opcua-iiot-core-discovery')
 
   function OPCUAIIoTDiscovery (this: OPCUAIIoTDiscovery, config: OPCUAIIoTDiscoveryDef) {
     RED.nodes.createNode(this, config)
@@ -32,10 +44,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.discoveryPort = config.discoveryPort || coreDiscovery.DEFAULT_OPCUA_DISCOVERY_PORT
 
     let node = this
-    node.bianco = coreDiscovery.core.createBiancoIIoT()
-    coreDiscovery.core.assert(node.bianco.iiot)
 
-    const discoveryServer = new coreDiscovery.core.nodeOPCUA.OPCUADiscoveryServer({ port: node.discoveryPort })
+    const discoveryServer = new OPCUADiscoveryServer({ port: node.discoveryPort })
 
     node.status({ fill: 'yellow', shape: 'ring', text: 'starting' })
 
@@ -47,11 +57,14 @@ module.exports = (RED: nodered.NodeAPI) => {
     })
 
     node.on('input', function (msg) {
-      msg.payload = {
-        discoveryUrls: discoveryServer.getDiscoveryUrls() || [],
-        endpoints: discoveryServer.endpoints || []
+      const outputMessage: DiscoveryMessage = {
+        ...msg,
+        payload: {
+          discoveryUrls: discoveryServer.getDiscoveryUrls() || [],
+          endpoints: discoveryServer.endpoints || []
+        }
       }
-      node.send(msg)
+      node.send(outputMessage)
     })
 
     node.on('close', function (done: () => void) {

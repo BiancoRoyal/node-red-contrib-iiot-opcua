@@ -9,8 +9,20 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo} from "./types/placeholders";
-import {Node} from "@node-red/registry";
+import {BrowserNode, Todo} from "./types/placeholders";
+import {Node, NodeMessageInFlow} from "@node-red/registry";
+import {
+  checkConnectorState,
+  checkCrawlerItemIsNotToFilter,
+  checkItemForUnsetState, checkSessionNotValid,
+  deregisterToConnector, FAKTOR_SEC_TO_MSEC,
+  registerToConnector,
+  resetBiancoNode,
+  setNodeStatusTo
+} from "./core/opcua-iiot-core";
+import coreBrowser from "./core/opcua-iiot-core-browser";
+import {NodeStatus} from "node-red";
+import {browseAll} from "node-opcua";
 
 interface OPCUAIIoTCrawler extends nodered.Node {
   name: string
@@ -45,7 +57,6 @@ interface OPCUAIIoTCrawlerDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let coreBrowser = require('./core/opcua-iiot-core-browser')
 
   function OPCUAIIoTCrawler (this: OPCUAIIoTCrawler, config: OPCUAIIoTCrawlerDef) {
     RED.nodes.createNode(this, config)
@@ -63,17 +74,19 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = coreBrowser.initBrowserNode(this)
-    coreBrowser.core.assert(node.bianco.iiot)
-    node.bianco.iiot.delayMessageTimer = []
+    let node = {
+      ...this,
+      ...coreBrowser.initBrowserNode()
+    }
+    node.iiot.delayMessageTimer = []
 
-    node.bianco.iiot.filterCrawlerResults = function (crawlerResultToFilter: Todo[]) {
+    node.iiot.filterCrawlerResults = function (crawlerResultToFilter: Todo[]) {
       let crawlerResult = crawlerResultToFilter || []
       let filteredEntries: Todo[] = []
 
       if (node.activateFilters && node.filters && node.filters.length > 0) {
         crawlerResult.forEach(function (item) {
-          if (node.bianco.iiot.itemIsNotToFilter(item)) {
+          if (node.iiot.itemIsNotToFilter(item)) {
             filteredEntries.push(item)
           }
         })
@@ -91,73 +104,74 @@ module.exports = (RED: nodered.NodeAPI) => {
       return crawlerResult
     }
 
-    node.bianco.iiot.itemIsNotToFilter = function (item: Todo) {
-      let result = coreBrowser.core.checkItemForUnsetState(node, item)
+    node.iiot.itemIsNotToFilter = function (item: Todo) {
+      let result = checkItemForUnsetState(node, item)
 
       if (result) {
         node.filters.forEach(function (element: Todo) {
-          result = coreBrowser.core.checkCrawlerItemIsNotToFilter(node, item, element, result)
+          result = checkCrawlerItemIsNotToFilter(node, item, element, result)
         })
       }
 
       return (node.negateFilter) ? !result : result
     }
 
-    node.bianco.iiot.crawl = function (session: Todo, msg: Todo) {
-      if (coreBrowser.core.checkSessionNotValid(node.bianco.iiot.opcuaSession, 'Crawler')) {
+    node.iiot.crawl = function (session: Todo, msg: Todo) {
+      if (checkSessionNotValid(node.iiot.opcuaSession, 'Crawler')) {
         return
       }
 
       coreBrowser.internalDebugLog('Browse Topic To Call Crawler ' + node.browseTopic)
 
-      if (node.showStatusActivities) {
-        coreBrowser.core.setNodeStatusTo(node, 'crawling')
+      if (node.showStatusActivities && node.oldStatusParameter) {
+        node.oldStatusParameter = setNodeStatusTo(node, 'crawling', node.oldStatusParameter, node.showStatusActivities)
       }
 
       coreBrowser.crawl(session, node.browseTopic, msg)
         .then(function (result: Todo) {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          node.bianco.iiot.sendMessage(result.message, node.bianco.iiot.filterCrawlerResults(result.message, result.crawlerResult))
+          node.iiot.sendMessage(result.message, node.iiot.filterCrawlerResults(result.message, result.crawlerResult))
         }).catch(function (err: Todo) {
-          coreBrowser.browseErrorHandling(node, err, msg)
+          coreBrowser.browseErrorHandling(node, err, msg, undefined, node.oldStatusParameter, node.showErrors, node.showStatusActivities)
+
         })
     }
 
-    node.bianco.iiot.crawlForSingleResult = function (session: Todo, msg: Todo) {
+    node.iiot.crawlForSingleResult = function (session: Todo, msg: Todo) {
       coreBrowser.crawlAddressSpaceItems(session, msg)
         .then(function (result: Todo) {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          node.bianco.iiot.sendMessage(result.message, node.bianco.iiot.filterCrawlerResults(result.crawlerResult))
+          node.iiot.sendMessage(result.message, node.iiot.filterCrawlerResults(result.crawlerResult))
         }).catch(function (err: Todo) {
-          coreBrowser.browseErrorHandling(node, err, msg)
+          coreBrowser.browseErrorHandling(node, err, msg, undefined, node.oldStatusParameter, node.showErrors, node.showStatusActivities)
         })
     }
 
-    node.bianco.iiot.crawlForResults = function (session: Todo, msg: Todo) {
+    node.iiot.crawlForResults = function (session: Todo, msg: Todo) {
       msg.addressSpaceItems.map((entry: Todo) => {
-        coreBrowser.crawl(session, entry.nodeId)
+        coreBrowser.crawl(session, entry.nodeId, msg)
           .then(function (result: Todo) {
             coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-            node.bianco.iiot.sendMessage(result.message, node.bianco.iiot.filterCrawlerResults(result.crawlerResult))
+            node.iiot.sendMessage(result.message, node.iiot.filterCrawlerResults(result.crawlerResult))
           }).catch(function (err: Todo) {
-            coreBrowser.browseErrorHandling(node, err, msg)
+            coreBrowser.browseErrorHandling(node, err, msg, undefined, node.oldStatusParameter, node.showErrors, node.showStatusActivities)
           })
       })
     }
 
-    node.bianco.iiot.crawlNodeList = function (session: Todo, msg: Todo) {
-      if (node.showStatusActivities) {
-        coreBrowser.core.setNodeStatusTo(node, 'crawling')
+    node.iiot.crawlNodeList = function (session: Todo, msg: Todo) {
+      if (node.showStatusActivities && node.oldStatusParameter) {
+        node.oldStatusParameter = setNodeStatusTo(node, 'crawling', node.oldStatusParameter, node.showStatusActivities)
       }
 
       if (node.singleResult) {
-        node.bianco.iiot.crawlForSingleResult(session, msg)
+        node.iiot.crawlForSingleResult(session, msg)
       } else {
-        node.bianco.iiot.crawlForResults(session, msg)
+        node.iiot.crawlForResults(session, msg)
       }
     }
 
-    node.bianco.iiot.sendMessage = function (originMessage: Todo, crawlerResult: Todo) {
+    node.iiot.sendMessage = function (originMessage: Todo, crawlerResult: Todo) {
       let msg = Object.assign({}, originMessage)
       msg.nodetype = 'crawl'
 
@@ -168,7 +182,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       try {
         RED.util.setMessageProperty(msg, 'payload', JSON.parse(JSON.stringify(results, null, 2)))
       } catch (err: any) {
-        coreBrowser.writeDebugLog(err)
+        coreBrowser.internalDebugLog(err)
         if (node.showErrors) {
           node.error(err, msg)
         }
@@ -183,34 +197,34 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (!node.justValue) {
         msg.payload.crawlerResultsCount = crawlerResult.length
         if (node.connector) {
-          msg.payload.endpoint = node.connector.endpoint
+          msg.payload.endpoint = (node.connector as Todo).endpoint
         }
-        msg.payload.session = node.bianco.iiot.opcuaSession.name || 'none'
+        msg.payload.session = node.iiot.opcuaSession.name || 'none'
       }
 
-      node.bianco.iiot.messageList.push(msg)
+      node.iiot.messageList.push(msg)
 
-      if (node.showStatusActivities) {
-        coreBrowser.core.setNodeStatusTo(node, 'active')
+      if (node.showStatusActivities && node.oldStatusParameter) {
+        node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities)
       }
 
       // TODO: maybe here RED.util.set ...
 
-      node.bianco.iiot.delayMessageTimer.push(setTimeout(() => {
-        node.send(node.bianco.iiot.messageList.shift())
-      }, node.delayPerMessage * coreBrowser.core.FAKTOR_SEC_TO_MSEC))
+      node.iiot.delayMessageTimer.push(setTimeout(() => {
+        node.send(node.iiot.messageList.shift())
+      }, node.delayPerMessage * FAKTOR_SEC_TO_MSEC))
     }
 
-    node.bianco.iiot.resetAllTimer = function () {
-      node.bianco.iiot.delayMessageTimer.forEach((timerId: Todo) => {
+    node.iiot.resetAllTimer = function () {
+      node.iiot.delayMessageTimer.forEach((timerId: Todo) => {
         clearTimeout(timerId)
         timerId = null
       })
     }
 
-    node.bianco.iiot.startCrawling = function (msg: Todo) {
+    node.iiot.startCrawling = function (msg: Todo) {
       if (node.browseTopic && node.browseTopic !== '') {
-        node.bianco.iiot.crawl(node.bianco.iiot.opcuaSession, msg)
+        node.iiot.crawl(node.iiot.opcuaSession, msg)
       } else {
         if (msg.addressItemsToBrowse) {
           msg.addressSpaceItems = msg.addressItemsToBrowse
@@ -218,27 +232,28 @@ module.exports = (RED: nodered.NodeAPI) => {
 
         if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
           coreBrowser.internalDebugLog('Start Crawling On AddressSpace Items')
-          node.bianco.iiot.crawlNodeList(node.bianco.iiot.opcuaSession, msg)
+          node.iiot.crawlNodeList(node.iiot.opcuaSession, msg)
         } else {
           node.error(new Error('No AddressSpace Items Or Root To Crawl'), msg)
         }
       }
     }
 
-    node.on('input', function (msg: Todo) {
-      if (!coreBrowser.core.checkConnectorState(node, msg, 'Crawler')) {
+    node.on('input', function (msg: NodeMessageInFlow) {
+      if (!checkConnectorState(node, msg, 'Crawler')) {
         return
       }
 
       node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node)
-      node.bianco.iiot.startCrawling(msg)
+      node.iiot.startCrawling(msg)
+      console.log(node.browseTopic)
     })
 
-    coreBrowser.core.registerToConnector(node)
+    registerToConnector((node as Todo))
 
     node.on('close', (done: () => void) => {
-      coreBrowser.core.deregisterToConnector(node, () => {
-        coreBrowser.core.resetBiancoNode(node)
+      deregisterToConnector((node as Todo), () => {
+        resetBiancoNode(node)
         done()
       })
     })

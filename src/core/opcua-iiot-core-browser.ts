@@ -9,11 +9,13 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {BrowserNode, Todo} from "../types/placeholders";
+import {BrowserNode, BrowserNodeAttributes, Todo} from "../types/placeholders";
 import {initCoreNode, isSessionBad, OBJECTS_ROOT, setNodeStatusTo} from "./opcua-iiot-core";
 import {BrowseDirection, NodeCrawler} from "node-opcua";
 
 import debug from 'debug';
+import {Node, NodeStatus} from "node-red";
+import {NodeMessageInFlow} from "@node-red/registry";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
@@ -206,23 +208,24 @@ const transformToEntry = function (reference: Todo) {
   return reference
 }
 
-const initBrowserNode = function (): BrowserNode {
+const initBrowserNode = function (): BrowserNodeAttributes {
   return {
     browseTopic: OBJECTS_ROOT,
     iiot:{
       ...initCoreNode(),
       items: [],
       messageList: [],
+      delayMessageTimer: []
     }
   }
 }
 
-const browseErrorHandling = function (node: Todo, err: Error, msg: Todo, lists: Todo) {
-  let results = lists.browserResults || []
+const browseErrorHandling = function (node: BrowserNode, err: Error, msg: Todo, lists: Todo, oldStatusParameter: NodeStatus | undefined = undefined, showErrors: boolean = true, showStatusActivities: boolean = true) {
+  let results = lists?.browserResults || []
 
   if (err) {
     internalDebugLog(typeof node + 'Error ' + err)
-    if (node.showErrors) {
+    if (showErrors) {
       node.error(err, msg)
     }
 
@@ -236,13 +239,12 @@ const browseErrorHandling = function (node: Todo, err: Error, msg: Todo, lists: 
     }
   }
 
-  if (node.showStatusActivities) {
-    setNodeStatusTo(node, 'error')
+  if (showStatusActivities && oldStatusParameter) {
+    node.oldStatusParameter = setNodeStatusTo(node, 'error', oldStatusParameter, showStatusActivities)
   }
 }
 
 const coreBrowser = {
-  // passthrough from core
   internalDebugLog,
   detailDebugLog,
   crawlerInternalDebugLog,

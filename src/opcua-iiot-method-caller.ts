@@ -10,6 +10,14 @@
 import * as nodered from "node-red";
 import {Node} from "@node-red/registry";
 import {Todo} from "./types/placeholders";
+import coreMethod from "./core/opcua-iiot-core-method";
+import {
+  checkConnectorState, checkSessionNotValid,
+  deregisterToConnector,
+  initCoreNode, isInitializedIIoTNode,
+  isSessionBad,
+  registerToConnector, resetBiancoNode
+} from "./core/opcua-iiot-core";
 
 interface OPCUAIIoTMethodCaller extends nodered.Node {
   objectId: string
@@ -42,7 +50,6 @@ interface OPCUAIIoTMethodCallerDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let coreMethod = require('./core/opcua-iiot-core-method')
 
   function OPCUAIIoTMethodCaller (this: OPCUAIIoTMethodCaller, config: OPCUAIIoTMethodCallerDef) {
     RED.nodes.createNode(this, config)
@@ -57,21 +64,23 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.inputArguments = config.inputArguments
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = coreMethod.core.initClientNode(this)
-    coreMethod.core.assert(node.bianco.iiot)
+    let node = {
+      ...this,
+      iiot: initCoreNode()
+    }
 
-    node.bianco.iiot.handleMethodError = function (err: Error, msg: Todo) {
+    const handleMethodError = function (err: Error, msg: Todo) {
       coreMethod.internalDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
       }
 
-      if (coreMethod.core.isSessionBad(err)) {
+      if (isSessionBad(err)) {
         node.emit('opcua_client_not_ready')
       }
     }
 
-    node.bianco.iiot.handleMethodWarn = function (message: Todo) {
+    node.iiot.handleMethodWarn = function (message: Todo) {
       if (node.showErrors) {
         node.warn(message)
       }
@@ -79,25 +88,25 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreMethod.internalDebugLog(message)
     }
 
-    node.bianco.iiot.callMethodOnSession = function (session: Todo, msg: Todo) {
-      if (coreMethod.core.checkSessionNotValid(session, 'MethodCaller')) {
+    node.iiot.callMethodOnSession = function (session: Todo, msg: Todo) {
+      if (checkSessionNotValid(session, 'MethodCaller')) {
         return
       }
 
       if (msg.methodId && msg.inputArguments) {
-        coreMethod.getArgumentDefinition(node.bianco.iiot.opcuaSession, msg).then(function (results: Todo) {
+        coreMethod.getArgumentDefinition(node.iiot.opcuaSession, msg).then(function (results: Todo) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
-          node.bianco.iiot.callMethod(msg, results)
+          node.iiot.callMethod(msg, results)
         }).catch((err: Error) => {
-          (coreMethod.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
+          (isInitializedIIoTNode(node)) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
         })
       } else {
         coreMethod.internalDebugLog(new Error('No Method Id And/Or Parameters'))
       }
     }
 
-    node.bianco.iiot.callMethod = function (msg: Todo, definitionResults: Todo) {
-      coreMethod.callMethods(node.bianco.iiot.opcuaSession, msg).then(function (data: Todo) {
+    node.iiot.callMethod = function (msg: Todo, definitionResults: Todo) {
+      coreMethod.callMethods(node.iiot.opcuaSession, msg).then(function (data: Todo) {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
         let result = null
@@ -144,7 +153,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     node.on('input', function (msg: Todo) {
-      if (!coreMethod.core.checkConnectorState(node, msg, 'MethodCaller')) {
+      if (!checkConnectorState(node, msg, 'MethodCaller')) {
         return
       }
 
@@ -152,14 +161,14 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (coreMethod.invalidMessage(node, message)) {
         return
       }
-      node.bianco.iiot.callMethodOnSession(node.bianco.iiot.opcuaSession, message)
+      node.iiot.callMethodOnSession(node.iiot.opcuaSession, message)
     })
 
-    coreMethod.core.registerToConnector(node)
+    registerToConnector(node as Todo)
 
     node.on('close', (done: () => void) => {
-      coreMethod.core.deregisterToConnector(node, () => {
-        coreMethod.core.resetBiancoNode(node)
+      deregisterToConnector(node as Todo, () => {
+        resetBiancoNode(node)
         done()
       })
     })

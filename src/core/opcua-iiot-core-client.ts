@@ -14,6 +14,9 @@
 import {OPCUASession, Todo, WriteResult} from "../types/placeholders";
 
 import debug from "debug";
+import {DataValue, StatusCodes} from "node-opcua";
+import {ReadValueIdOptions} from "node-opcua-service-read";
+import {WriteValueOptions} from "node-opcua-service-write";
 
 const internalDebugLog = debug('opcuaIIoT:client') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:client:details') // eslint-disable-line no-use-before-define
@@ -33,12 +36,12 @@ const READ_TYPE = Object.freeze({
   HISTORY: 130
 }) // eslint-disable-line no-use-before-define
 
-const write = (session: OPCUASession, nodesToWrite: Todo, originMsg: Todo): Promise<WriteResult> =>  {
+const write = (session: OPCUASession, nodesToWrite: WriteValueOptions[], originMsg: Todo): Promise<WriteResult> =>  {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.write(nodesToWrite, function (err: Error, statusCodes: Todo) {
+        session.write(nodesToWrite, function (err: Error | null, statusCodes?: StatusCodes[]) {
           if (err) {
             reject(err)
           } else {
@@ -56,12 +59,11 @@ const write = (session: OPCUASession, nodesToWrite: Todo, originMsg: Todo): Prom
   )
 }
 
-const read = function (session: Todo, nodesToRead: Todo, maxAge: Todo, originMsg: Todo) {
+const read = function (session: OPCUASession, nodesToRead: ReadValueIdOptions[], maxAge: number, msg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
-        let msg = Object.assign({}, originMsg)
-        session.read(nodesToRead, maxAge, function (err: Error, dataValues: Todo) {
+        session.read(nodesToRead, maxAge, function (err: Error | null, dataValues?: DataValue[]) {
           if (err) {
             reject(err)
           } else {

@@ -23,8 +23,7 @@ import {
   availableMemory,
   getNodeOPCUAServerPath,
   getVariantValue,
-  initCoreServerNode,
-  setNodeStatusTo
+  initCoreServerNode, setNodeStatusTo,
 } from "./opcua-iiot-core"
 
 
@@ -825,7 +824,7 @@ const restartServer = function (node: Todo) {
   }
 
   node.send({ payload: 'server shutdown' })
-  setNodeStatusTo(node, 'shutdown')
+  node.oldStatusParameter = setNodeStatusTo(node, 'shutdown', node.oldStatusParameter, node.showStatusActivities)
 }
 
 const handleServerError = function (node: Todo, err: Error, msg: Todo) {
@@ -906,13 +905,15 @@ const setOPCUAServerListener = function (node: Todo) {
   })
 }
 
-const coreServerExport = {
+const coreServer = {
   internalDebugLog,
   detailDebugLog,
   isa95DebugLog,
   isa95DetailDebugLog,
   flexInternalDebugLog,
   flexDetailDebugLog,
+
+  simulatorInterval,
 
   simulateVariation,
   constructAddressSpaceFromScript,
@@ -937,3 +938,5 @@ const coreServerExport = {
   createServerObject,
   setOPCUAServerListener,
 }
+
+export default coreServer

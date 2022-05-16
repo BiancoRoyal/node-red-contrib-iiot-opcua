@@ -7,12 +7,11 @@
     "url": "git@gitlab.sigmalto.com:contitech/node-red-distro.git"
   },
   "dependencies": {
-    "better-assert": "1.0.2",
     "cron": "1.8.2",
     "debug": "4.3.3",
     "easy-table": "1.1.1",
     "es6-map": "0.1.5",
-    "node-opcua": "2.64.1",
+    "node-opcua": "2.65.0",
     "source-map-support": "0.5.21",
     "stately.js": "1.3.0",
     "treeify": "1.1.0",
@@ -89,6 +88,7 @@
     "@babel/cli": "^7.17.6",
     "@babel/core": "^7.17.5",
     "@babel/preset-env": "^7.16.11",
+    "@types/cron": "^1.7.3",
     "@types/debug": "^4.1.7",
     "@types/node-red": "^1.2.0",
     "gulp": "^4.0.2",

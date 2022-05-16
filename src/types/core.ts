@@ -1,6 +1,6 @@
 import {Todo} from "./placeholders";
 import * as nodeOPCUA from "node-opcua";
-import {LocalizedText, NodeIdType} from "node-opcua";
+import {DataType, DataValue, LocalizedText, NodeIdType} from "node-opcua";
 
 export type TimeUnits =
   'ms' |
@@ -29,11 +29,6 @@ export type WriteMessage = {
   valuesToWrite?: Todo[]
 }
 
-export type CleanMessage = {
-  value: Todo
-  datatypeName: DataType
-}
-
 export type AddressSpaceItem = {
   datatypeName: DataType
 } & NodeToWrite
@@ -54,12 +49,8 @@ export type NodeToWrite = {
   value: DataValue
 }
 
-export type DataType = nodeOPCUA.DataType | string;
+export type DataTypeInput = nodeOPCUA.DataType | string;
 
-export type DataValue = {
-  dataType: nodeOPCUA.DataType | string
-  value: Buffer | Todo
-}
 export type WriteListItem = {
   nodeId: nodeOPCUA.NodeId
   attributeId: nodeOPCUA.AttributeIds.Value

@@ -9,7 +9,7 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
+import {recursivePrintTypes, Todo} from "../types/placeholders";
 
 import debug from 'debug'
 
@@ -18,7 +18,7 @@ import * as Stately from 'stately.js'
 
 
 
-import {AttributeIds, DataType, resolveNodeId, TimestampsToReturn} from "node-opcua";
+import {AttributeIds, DataType, DataValue, resolveNodeId, TimestampsToReturn} from "node-opcua";
 import {initCoreNode} from "./opcua-iiot-core";
 
 const internalDebugLog = debug('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
@@ -360,7 +360,7 @@ const buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo)
     })
 }
 
-const analyzeEvent = function (session: Todo, browseForBrowseName: Todo, dataValue: Todo) {
+const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Todo) => Todo, dataValue: DataValue[]) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -380,15 +380,16 @@ const analyzeEvent = function (session: Todo, browseForBrowseName: Todo, dataVal
         let eventInformation: Todo = {}
         let eventResults: Todo[] = []
 
-        dataValue.forEach(function (variant: Todo) {
+        dataValue.forEach(function (dv) {
+          const variant = dv.value
           eventDebugLog('variant entry: ' + variant.toString())
 
           try {
             if (variant.dataType && variant.value) {
-              eventInformation = collectAlarmFields(dataValue.monitoringParameters.filter.selectClauses[index], variant.dataType.key.toString(), variant.value)
+              eventInformation = collectAlarmFields((dataValue as Todo).monitoringParameters.filter.selectClauses[index], variant.dataType.toString(), variant.value)
 
               if (variant.dataType === DataType.NodeId) {
-                browseForBrowseName(session, variant.value, function (err: Todo, browseName: Todo) {
+                browseForBrowseName(session, variant.value, function (err: Error | undefined, browseName: Todo) {
                   if (err) {
                     reject(err)
                   } else {
@@ -427,7 +428,7 @@ const checkState = function (node: Todo, msg: Todo, callerType: Todo) {
   }
 }
 
-const initListenerNode = function (node: Todo) {
+const initListenerNode = function () {
   return {
     ...initCoreNode(),
     opcuaSubscription: null,

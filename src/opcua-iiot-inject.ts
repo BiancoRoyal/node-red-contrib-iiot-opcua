@@ -8,15 +8,19 @@
  **/
 'use strict'
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
+import {recursivePrintTypes, Todo, TodoBianco} from "./types/placeholders";
+import coreInject from "./core/opcua-iiot-core-inject";
+import {resetBiancoNode} from "./core/opcua-iiot-core";
+import {CronJob} from 'cron';
+import {NodeMessageInFlow} from "node-red";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string
   topic: Todo // TODO: string?
   payload: Todo // TODO: config.payload
   payloadType: Todo // TODO: config.payloadType
-  repeat: Todo // TODO: config.repeat
-  crontab: Todo // TODO: config.crontab
+  repeat: number
+  crontab: string // TODO: config.crontab
   once: Todo // TODO: config.once
   startDelay: number // TODO: parseFloat(config.startDelay) || 10
   injectType: Todo // TODO: config.injectType || 'inject'
@@ -26,15 +30,28 @@ interface OPCUAIIoTInject extends nodered.Node {
 
 interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
   name: string
-  topic: Todo // TODO: string?
-  payload: Todo // TODO: config.payload
-  payloadType: Todo // TODO: config.payloadType
-  repeat: Todo // TODO: config.repeat
-  crontab: Todo // TODO: config.crontab
-  once: Todo // TODO: config.once
+  topic: string // TODO: string?
+  payload: string // TODO: config.payload
+  payloadType: string // TODO: config.payloadType
+  repeat: string
+  crontab: string // TODO: config.crontab
+  once: boolean // TODO: config.once
   startDelay: string
   injectType: Todo // TODO: config.injectType || 'inject'
   addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
+}
+
+export interface InjectMessage extends NodeMessageInFlow {
+  payload: InjectPayload
+}
+
+export interface InjectPayload {
+  value: any
+  payloadType: string
+  nodetype: 'inject'
+  injectType: string
+  addressSpaceItems: Todo[]
+  manualInject: boolean
 }
 
 /**
@@ -45,8 +62,6 @@ interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
 
 module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
-  let coreInject = require('./core/opcua-iiot-core-inject')
-  let cron = require('cron')
 
   function OPCUAIIoTInject (this: OPCUAIIoTInject, config: OPCUAIIoTInjectConfigurationDef) {
     RED.nodes.createNode(this, config)
@@ -54,7 +69,6 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.topic = config.topic
     this.payload = config.payload
     this.payloadType = config.payloadType
-    this.repeat = config.repeat
     this.crontab = config.crontab
     this.once = config.once
     this.startDelay = parseFloat(config.startDelay) || 10
@@ -63,39 +77,37 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     this.addressSpaceItems = config.addressSpaceItems || []
 
-    let node = this
-    node.bianco = coreInject.core.createBiancoIIoT()
-    coreInject.core.assert(node.bianco.iiot)
+    let node: Todo = this
 
-    node.bianco.iiot.intervalId = null
-    node.bianco.iiot.onceTimeout = null
-    node.bianco.iiot.cronjob = null
-    node.bianco.iiot.REPEAT_FACTOR = 1000.0
-    node.bianco.iiot.ONE_SECOND = 1000
-    node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS = 1000
+    let intervalId: NodeJS.Timer | null = null
+    let onceTimeout: NodeJS.Timeout | null = null
+    let cronjob: CronJob | null = null
+    const REPEAT_FACTOR = 1000.0
+    const ONE_SECOND = 1000
+    const INPUT_TIMEOUT_MILLISECONDS = 1000
 
-    node.bianco.iiot.repeaterSetup = function () {
+    const repeaterSetup = function () {
       coreInject.internalDebugLog('Repeat Is ' + node.repeat)
       coreInject.internalDebugLog('Crontab Is ' + node.crontab)
 
       if (node.repeat !== '') {
-        node.repeat = parseFloat(config.repeat) * node.bianco.iiot.REPEAT_FACTOR
+        node.repeat = parseFloat(config.repeat) * REPEAT_FACTOR
 
         if (node.repeat === 0) {
-          node.repeat = node.bianco.iiot.ONE_SECOND
+          node.repeat = ONE_SECOND
         }
 
         coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
-        if (node.bianco.iiot.intervalId) {
-          clearInterval(node.bianco.iiot.intervalId)
+        if (intervalId) {
+          clearInterval(intervalId)
         }
 
-        node.bianco.iiot.intervalId = setInterval(function () {
+        intervalId = setInterval(function () {
           node.emit('input', {})
         }, node.repeat)
       } else if (node.crontab !== '') {
-        node.bianco.iiot.cronjob = new cron.CronJob(node.crontab,
+        cronjob = new CronJob(node.crontab,
           function () {
             node.emit('input', {})
           },
@@ -104,59 +116,63 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    node.bianco.iiot.resetAllTimer = function () {
-      if (node.bianco.iiot.onceTimeout) {
-        clearTimeout(node.bianco.iiot.onceTimeout)
-        node.bianco.iiot.onceTimeout = null
+    const resetAllTimer = function () {
+      if (onceTimeout) {
+        clearTimeout(onceTimeout)
+        onceTimeout = null
       }
 
-      if (node.bianco.iiot.intervalId) {
-        clearInterval(node.bianco.iiot.intervalId)
-        node.bianco.iiot.intervalId = null
+      if (intervalId) {
+        clearInterval(intervalId)
+        intervalId = null
       }
     }
 
-    node.on('input', (msg: Todo) => {
-      try {
-        msg.topic = node.topic
-        msg.nodetype = 'inject'
-        msg.injectType = node.injectType
-        msg.addressSpaceItems = []
-        Object.assign(msg.addressSpaceItems, node.addressSpaceItems)
-
-        switch (node.payloadType) {
-          case 'none':
-            msg.payload = ''
-            break
-          case 'str':
-            msg.payload = node.payload.toString()
-            break
-          case 'num':
-            msg.payload = Number(node.payload)
-            break
-          case 'bool':
-            msg.payload = (node.payload === true || node.payload === 'true')
-            break
-          case 'json':
-            msg.payload = JSON.parse(node.payload)
-            break
-          case 'date':
-            msg.payload = Date.now()
-            break
-          default:
-            if (node.payloadType === null) {
-              /* istanbul ignore next */
-              if (node.payload === '') {
-                msg.payload = Date.now()
-              } else {
-                msg.payload = node.payload
-              }
+    const generateOutputValue = (payloadType: Todo, inputMessage: NodeMessageInFlow) => {
+      switch (payloadType) {
+        case 'none':
+          return ''
+        case 'str':
+          return node.payload.toString()
+        case 'num':
+          return Number(node.payload)
+        case 'bool':
+          return (node.payload === true || node.payload === 'true')
+        case 'json':
+          return JSON.parse(node.payload)
+        case 'date':
+          return Date.now()
+        default:
+          if (node.payloadType === null) {
+            if (node.payload === '') {
+              return Date.now()
             } else {
-              msg.payload = RED.util.evaluateNodeProperty(node.payload, node.payloadType, this, msg)
+              return node.payload
             }
-        }
+          } else {
+            return RED.util.evaluateNodeProperty(node.payload, node.payloadType, this, inputMessage)
+          }
+      }
+    }
 
-        node.send(msg)
+    this.on('input', (msg: NodeMessageInFlow) => {
+      if (Object.keys(msg).length === 0) return;
+      try {
+        const topic = node.topic
+        const payload: InjectPayload = {
+          payloadType: node.payloadType,
+          value: generateOutputValue(node.payloadType, msg),
+          nodetype: 'inject',
+          injectType: node.injectType,
+          addressSpaceItems: [...node.addressSpaceItems],
+          manualInject: Object.keys(msg).length !== 0
+        }
+        const outputMessage: NodeMessageInFlow = {
+          ...msg,
+          topic,
+          payload,
+        }
+        node.send(outputMessage)
       } catch (err) {
         /* istanbul ignore next */
         if (RED.settings.verbose) {
@@ -165,42 +181,41 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     })
 
-    if (node.bianco.iiot.onceTimeout) {
-      clearTimeout(node.bianco.iiot.onceTimeout)
-      node.bianco.iiot.onceTimeout = null
+    if (onceTimeout) {
+      clearTimeout(onceTimeout)
+      onceTimeout = null
     }
-    let timeout = node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS * node.startDelay
+    let timeout = INPUT_TIMEOUT_MILLISECONDS * node.startDelay
 
     if (node.once) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
-      node.bianco.iiot.onceTimeout = setTimeout(function () {
+      onceTimeout = setTimeout(function () {
         coreInject.detailDebugLog('injecting once at start')
         node.emit('input', {})
-        node.bianco.iiot.repeaterSetup()
+        repeaterSetup()
       }, timeout)
     } else if (node.repeat || node.crontab) {
       coreInject.detailDebugLog('start with delay timeout ' + timeout + ' msec.')
-      node.bianco.iiot.onceTimeout = setTimeout(function () {
+      onceTimeout = setTimeout(function () {
         coreInject.detailDebugLog('had a start delay of ' + timeout + ' msec. to setup inject interval')
-        node.bianco.iiot.repeaterSetup()
+        repeaterSetup()
       }, timeout)
     } else {
-      node.bianco.iiot.repeaterSetup()
+      repeaterSetup()
+    }
+
+    node.close = function () {
+      let node = this
+
+      if (cronjob) {
+        cronjob.stop()
+        delete node['cronjob']
+      }
+      resetBiancoNode(node)
     }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Inject', OPCUAIIoTInject)
-
-  OPCUAIIoTInject.prototype.close = function () {
-    let node = this
-
-    if (node.bianco.iiot.cronjob) {
-      node.bianco.iiot.cronjob.stop()
-      delete node['cronjob']
-    }
-
-    coreInject.core.resetBiancoNode(node)
-  }
 
   RED.httpAdmin.post('/opcuaIIoT/inject/:id', RED.auth.needsPermission('opcuaIIoT.inject.write'), function (req, res) {
     let node = RED.nodes.getNode(req.params.id)

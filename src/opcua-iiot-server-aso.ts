@@ -55,8 +55,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.name = config.name
 
     let node = this
-    node.bianco = core.createBiancoIIoT()
-    core.assert(node.bianco.iiot)
     core.internalDebugLog('Open ASO Node')
 
     node.on('input', function (msg: NodeMessageInFlow | Todo) {

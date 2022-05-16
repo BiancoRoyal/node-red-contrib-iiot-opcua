@@ -25,7 +25,6 @@ interface OPCUAIIoTResultFilter extends nodered.Node {
   topic: string
   name: string
   showErrors: boolean
-  bianco?: TodoBianco
 }
 interface OPCUAIIoTResultFilterDef extends nodered.NodeDef {
   nodeId: string
@@ -44,6 +43,15 @@ interface OPCUAIIoTResultFilterDef extends nodered.NodeDef {
   name: string
   showErrors: boolean
 }
+
+import coreFilter from './core/opcua-iiot-core-filter';
+import {
+  buildNodeListFromClient,
+  convertDataValueByDataType,
+  filterListByNodeId,
+  filterListEntryByNodeId
+} from "./core/opcua-iiot-core";
+
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
  *
@@ -51,7 +59,6 @@ interface OPCUAIIoTResultFilterDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let coreFilter = require('./core/opcua-iiot-core-filter')
   const _ = require('underscore')
 
   function OPCUAIIoTResultFilter (this: OPCUAIIoTResultFilter, config: OPCUAIIoTResultFilterDef) {
@@ -72,15 +79,14 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.name = config.name
     this.showErrors = config.showErrors
 
-    let node = this
-    node.bianco = coreFilter.core.createBiancoIIoT()
-    coreFilter.core.assert(node.bianco.iiot)
+    let node: Todo = this
+    node.iiot = {};
 
     node.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    node.bianco.iiot.nodeIdToFilter = function (msg: Todo) {
+    node.iiot.nodeIdToFilter = function (msg: Todo) {
       let doFilter = true
-      let nodeList = coreFilter.core.buildNodeListFromClient(msg)
+      let nodeList = buildNodeListFromClient(msg)
       let elementNodeId = null
 
       if (nodeList && nodeList.length) {
@@ -93,7 +99,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return doFilter
     }
 
-    node.bianco.iiot.isNodeIdNotToFindInAddressSpaceItems = function (msg: Todo) {
+    node.iiot.isNodeIdNotToFindInAddressSpaceItems = function (msg: Todo) {
       if (msg.addressSpaceItems) {
         let filteredNodeIds = _.filter(msg.addressSpaceItems, function (entry: Todo) {
           return entry.nodeId === node.nodeId
@@ -110,8 +116,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       return false
     }
 
-    node.bianco.iiot.messageIsToFilter = function (msg: Todo) {
-      return node.bianco.iiot.nodeIdToFilter(msg) && node.bianco.iiot.isNodeIdNotToFindInAddressSpaceItems(msg)
+    node.iiot.messageIsToFilter = function (msg: Todo) {
+      return node.iiot.nodeIdToFilter(msg) && node.iiot.isNodeIdNotToFindInAddressSpaceItems(msg)
     }
 
     node.on('input', function (msg: Todo) {
@@ -120,7 +126,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      if (node.bianco.iiot.messageIsToFilter(msg)) {
+      if (node.iiot.messageIsToFilter(msg)) {
         coreFilter.internalDebugLog('filtering message on filter')
         return
       }
@@ -132,33 +138,32 @@ module.exports = (RED: nodered.NodeAPI) => {
       message.justValue = node.justValue
       message.filter = true
       message.filtertype = 'filter'
-      message.payload = node.bianco.iiot.filterByType(message) || message.payload
+      message.payload = node.iiot.filterByType(message) || message.payload
 
       if (node.justValue) {
-        message.payload = node.bianco.iiot.filterResult(message)
+        message.payload = node.iiot.filterResult(message)
       }
 
-      coreFilter.core.assert(message.payload)
       node.send(message)
     })
 
-    node.bianco.iiot.filterByType = function (msg: Todo) {
+    node.iiot.filterByType = function (msg: Todo) {
       let result = null
       switch (msg.nodetype) {
         case 'read':
-          result = node.bianco.iiot.filterByReadType(msg)
+          result = node.iiot.filterByReadType(msg)
           break
         case 'write':
-          result = node.bianco.iiot.filterByWriteType(msg)
+          result = node.iiot.filterByWriteType(msg)
           break
         case 'listen':
-          result = node.bianco.iiot.filterByListenType(msg)
+          result = node.iiot.filterByListenType(msg)
           break
         case 'browse':
-          result = node.bianco.iiot.filterByBrowserType(msg)
+          result = node.iiot.filterByBrowserType(msg)
           break
         case 'crawl':
-          result = node.bianco.iiot.filterByCrawlerType(msg)
+          result = node.iiot.filterByCrawlerType(msg)
           break
         default:
           coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
@@ -170,7 +175,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.bianco.iiot.convertResult = function (msg: Todo, result: Todo) {
+    node.iiot.convertResult = function (msg: Todo, result: Todo) {
       try {
         let convertedResult = null
 
@@ -204,7 +209,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    node.bianco.iiot.convertResultValue = function (msg: Todo) {
+    node.iiot.convertResultValue = function (msg: Todo) {
       let result = msg.payload
 
       if (result === null || result === void 0) {
@@ -224,7 +229,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         return result
       }
 
-      result = node.bianco.iiot.convertDataType(result)
+      result = node.iiot.convertDataType(result)
 
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('data type result null or undefined')
@@ -232,20 +237,20 @@ module.exports = (RED: nodered.NodeAPI) => {
           node.error(new Error('converted by data type result null or undefined'), msg)
         }
       } else {
-        result = node.bianco.iiot.convertResult(msg, result)
+        result = node.iiot.convertResult(msg, result)
       }
 
       return result
     }
 
-    node.bianco.iiot.filterResult = function (msg: Todo) {
+    node.iiot.filterResult = function (msg: Todo) {
       if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
-        return node.bianco.iiot.convertResultValue(msg) || msg.payload
+        return node.iiot.convertResultValue(msg) || msg.payload
       }
       return msg.payload
     }
 
-    node.bianco.iiot.extractValueFromOPCUAArrayStructure = function (msg: Todo, entryIndex: number) {
+    node.iiot.extractValueFromOPCUAArrayStructure = function (msg: Todo, entryIndex: number) {
       let result = null
       let payload = msg.payload[entryIndex]
 
@@ -266,7 +271,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.bianco.iiot.extractValueFromOPCUAStructure = function (msg: Todo) {
+    node.iiot.extractValueFromOPCUAStructure = function (msg: Todo) {
       let result = null
 
       if (msg.payload.hasOwnProperty('value')) {
@@ -282,13 +287,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.bianco.iiot.filterByReadType = function (msg: Todo) {
+    node.iiot.filterByReadType = function (msg: Todo) {
       let result = null
 
       if (msg.payload.length >= node.entry) {
-        result = node.bianco.iiot.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
+        result = node.iiot.extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
       } else {
-        result = node.bianco.iiot.extractValueFromOPCUAStructure(msg)
+        result = node.iiot.extractValueFromOPCUAStructure(msg)
       }
 
       if (result.hasOwnProperty('value')) {
@@ -298,11 +303,11 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.bianco.iiot.filterByWriteType = function (msg: Todo): null {
+    node.iiot.filterByWriteType = function (msg: Todo): null {
       return null // has no value
     }
 
-    node.bianco.iiot.filterByListenType = function (msg: Todo) {
+    node.iiot.filterByListenType = function (msg: Todo) {
       let result = null
 
       if (msg.payload && msg.payload.hasOwnProperty('value')) {
@@ -318,49 +323,49 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    node.bianco.iiot.filterByBrowserType = function (msg: Todo) {
-      let result = coreFilter.core.filterListByNodeId(node.nodeId, msg.payload.browserResults)
+    node.iiot.filterByBrowserType = function (msg: Todo) {
+      let result = filterListByNodeId(node.nodeId, msg.payload.browserResults)
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-        msg.addressSpaceItems = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressSpaceItems)
+        msg.addressSpaceItems = filterListByNodeId(node.nodeId, msg.addressSpaceItems)
       }
 
       if (msg.nodesToRead && msg.nodesToRead.length) {
-        msg.nodesToRead = coreFilter.core.filterListEntryByNodeId(node.nodeId, msg.nodesToRead)
+        msg.nodesToRead = filterListEntryByNodeId(node.nodeId, msg.nodesToRead)
         msg.nodesToReadCount = msg.nodesToRead.length
       }
 
       if (msg.addressItemsToRead && msg.addressItemsToRead.length) {
-        msg.addressItemsToRead = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressItemsToRead)
+        msg.addressItemsToRead = filterListByNodeId(node.nodeId, msg.addressItemsToRead)
         msg.addressItemsToReadCount = msg.addressItemsToRead.length
       }
 
       if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) {
-        msg.addressItemsToBrowse = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressItemsToBrowse)
+        msg.addressItemsToBrowse = filterListByNodeId(node.nodeId, msg.addressItemsToBrowse)
         msg.addressItemsToBrowseCount = msg.addressItemsToBrowse.length
       }
 
       return result
     }
 
-    node.bianco.iiot.filterByCrawlerType = function (msg: Todo) {
-      let result = coreFilter.core.filterListByNodeId(node.nodeId, msg.payload.crawlerResults)
+    node.iiot.filterByCrawlerType = function (msg: Todo) {
+      let result = filterListByNodeId(node.nodeId, msg.payload.crawlerResults)
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-        msg.addressItems = coreFilter.core.filterListByNodeId(node.nodeId, msg.addressSpaceItems)
+        msg.addressItems = filterListByNodeId(node.nodeId, msg.addressSpaceItems)
       }
 
       return result
     }
 
-    node.bianco.iiot.convertDataType = function (result: Todo) {
+    node.iiot.convertDataType = function (result: Todo) {
       coreFilter.internalDebugLog('data type convert for ' + node.nodeId)
-      return coreFilter.core.convertDataValueByDataType({ value: result }, node.datatype)
+      return convertDataValueByDataType({ value: result, dataType: node.datatype }, node.datatype)
     }
 
     if (node.withValueCheck) {
-      node.minvalue = node.bianco.iiot.convertDataType(node.minvalue)
-      node.maxvalue = node.bianco.iiot.convertDataType(node.maxvalue)
+      node.minvalue = node.iiot.convertDataType(node.minvalue)
+      node.maxvalue = node.iiot.convertDataType(node.maxvalue)
     }
 
     node.status({ fill: 'green', shape: 'dot', text: 'active' })

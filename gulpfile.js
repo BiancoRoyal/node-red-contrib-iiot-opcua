@@ -50,7 +50,7 @@ function wipe () {
 function web () {
   return gulp.src('src/*.htm*')
     .pipe(htmlmin({
-      minifyJS: true,
+      minifyJS: false,
       minifyCSS: true,
       minifyURLs: true,
       maxLineLength: 120,
@@ -67,7 +67,11 @@ function web () {
 function ts () {
     var ts = require("gulp-typescript")
     var tsProject = ts.createProject('tsconfig.json');
-    return tsProject.src().pipe(tsProject()).js.pipe(gulp.dest("opcuaIIoT"))
+    return gulp.src('src/**/*.ts')
+        .pipe(sourcemaps.init())
+        .pipe(tsProject())
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest("opcuaIIoT"))
 }
 
 function nodejs () {
