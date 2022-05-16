@@ -1,87 +1,81 @@
-# Notes for internal development (DATATRONiQ)
 
-## package.json
+# node-red-contrib-iiot-opcua
 
-Very messing situation on dependency `read-pkg-up`:
-- node-red-node-test-helper wants 7.0.1
-- jest wants 1.0.1 (package-lock.json)
+## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
 
-solution: `npm install -D read-pkg-up@7.0.1`
+[![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
+[![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
-## Development/Getting started
+## Installing
 
-1. must install Node v14 (`nvm install 14; nvm use 14`)
-1. install Node-RED in separate directory
-    1. `git clone https://github.com/node-red/node-red.git Node-RED`
-    1. `cd Node-RED`
-    1. `git checkout tags/2.2.2 -b release-2.2.2`
-    1. `npm install`
-    1. `npm run build`
-    1. `npm run start  -- --verbose`
-    1. stop Node-RED again
-1. install node-red-contrib-iiot-opcua
-    1. `git clone git@gitlab.sigmalto.com:contitech/node-red-contrib-iiot-opcua.git`
-    1. `cd node-red-contrib-iiot-opcua`
-    1. `git checkout -t origin/development`
-    1. `npm install`
-    1. `npm run build`
-1. after first run of Node-RED, folder `~/.node-red` will be created
-1. in folder `~/.node-red` install `node-red-contrib-iiot-opcua` (only once)
-    1. `cd ~/.node-red`
-    1. `rm -rf node_modules`
-    1. `npm install <...>/node-red-contrib-iiot-opcua # --> ~/.node-red/node_modules/node-red-contrib-iiot-opcua`
-    1. `cd <...>/Node-RED`
-    1. `DEBUG=opcuaIIoT:* npm run start  -- --verbose`
+1. Navigate to your Node-RED data directly. This defaults to `$HOME/.node-red/`
+2. Install via npm.
+   ```shell
+   npm install node-red-contrib-iiot-opcua
+   ```
 
-# Docker
+## Migrating from previous versions
 
-### Using the image
-The image has been uploaded to the Conti Artifactory as `ct-it-dtq-edge-docker-l.eu.artifactory.conti.de/datatroniq/node-red`.
-It is based on version `2.2.2-12` of the Node-RED docker image, with the following extra packages installed:
-- node-red-dashboard
-- node-red-node-pi-gpiod
-- node-red-contrib-gpio 
-- node-red-contrib-ftp
-- node-red-contrib-postgresql
-- node-red-contrib-influxdb
-- node-red-contrib-re-postgres
-- node-red-contrib-protobuf
-- node-red-contrib-mqtt-sparkplug-plus
-- node-red-node-tail
-- node-red-contrib-mssql-plus
-- node-red-node-sqlite
-- node-red-dashboard
-- node-red-contrib-bwar-soap
+The update from v3.x to v4.x changed the way the nodes are implemented.
+
+### Browser
+- The option `singleBrowseResult` has been replaced with `multipleOutputs`, and the default value now combines all outputs into one message. To maintain the same output, replace `singleBrowseResult` with `multipleOutputs` and swap the corresponding boolean value (true becomes false, false becomes true).
+
+### Flex-Server
+- The `node-opcua` library is now directly accessible as `opcua`. This means all references to `coreServer.core.nodeOPCUA` should be replaced with `opcua`.
+- `node.iiot.assert` is no longer accessible. The functionality can be replaced by using an `if` statement that throws a new error (`if (errorConfition) throw new Error('Error Message'`). Errors can be displayed by using a `catch` node connected to a `debug` node, which displys the entire message.
 
 
-Valid tags:
-- `0.0.6`
-- `0.0.5`
-- `0.0.4`
-- `0.0.3`
-- `0.0.2`
-- `0.0.1`
+## Contributing
 
-### Current State
-All nodes should be fully functional. Please report any unexpected behavior.
+Every bit helps! If you come across any bugs, please [open an issue](TODO link to that), or if you feel inclined to try to fix it yourself, [submit a pull request](TODO link to that).
+
+##### Stuff from original README.md
+
+Let's work together!
+Please, read and in best case accept [CONTRIBUTING](.github/CONTRIBUTING.md) by your sign and send it via E-Mail.
+You could also just send a pull request or issues while testing, please!
+
+
+### Setting up local development
+1. Ensure you are using node 14. This has been developed using node v14.19.1. If using Node Version Manager: `nvm install v14.19.1`
+2. Install Node-RED to a separate directory.
+   ```shell
+   git clone git@github.com:node-red/node-red.git
+   cd node-red
+   git checkout tags/2.2.2
+   npm install
+   npm run build
+   npm run start # This must be run once to initialize the ~/.node-red directory
+   ```
+3. Clone this repository into its own directry
+   ```shell
+   git clone git@github.com:DATATRONiQ/node-red-contrib-iiot-opcua.git
+   cd node-red-contrib-iiot-opcua
+   git checkout development
+   npm install
+   npm run build
+   ```
+4. Add `node-red-contrib-iiot-opcua` to Node-RED
+   ```shell
+   cd ~/.node-red
+   npm install <...>/node-red-contrib-iiot-opcua
+   ```
+5. Start Node-RED
+   ```shell
+   cd <...>/mode-red
+   npm run staart
+   ``` 
+   
+### :TODO_alert_emoji: After making changes, remember to run `npm run build` in the `node-red-contrib-iiot-opcua` directory starting Node-RED! :TODO_alert_emoji:
+
+## Docker
 
 ### Building an image
 
 ```bash
 bash build.sh <image_tag>
 ```
-
-# Migrating nodes
-
-Some nodes are configured slightly differently, so here is a guide how to adapt those nodes.
-
-### Flex-Server
-- The `node-opcua` library is now directly accessible as `opcua`. This means all references to `coreServer.core.nodeOPCUA` should be replaced with `opcua`.
-- `node.iiot.assert` is no longer accessible. The functionality can be replaced by using an `if` statement that throws a new error (`if (errorConfition) throw new Error('Error Message'`). Errors can be displayed by using a `catch` node connected to a `debug` node, which displys the entire message. 
-
-### Browser
-- The option `singleBrowseResult` has been replaced with `multipleOutputs`, and the default value now combines all outputs into one message. To maintain the same output, replace `singleBrowseResult` with `multipleOutputs` and swap the corresponding boolean value (true becomes false, false becomes true).
-
 
 # node-red-contrib-iiot-opcua
 
@@ -176,9 +170,9 @@ see Node-RED menu (right upper corner) -> Import -> Examples -> iiot opcua
 
 **... create your own variables and objects from events ...**
 
-| Node-RED        | UAExpert / Client     |
-|-----------------|-----------------------|
-|![ASO Example](images/wiki/server-aso-flow3.png)|![ASO UAExpert](images/wiki/ASOTestVariablesUAExpert.png)|
+| Node-RED                                         | UAExpert / Client                                         |
+|--------------------------------------------------|-----------------------------------------------------------|
+| ![ASO Example](images/wiki/server-aso-flow3.png) | ![ASO UAExpert](images/wiki/ASOTestVariablesUAExpert.png) |
 
 ### Reconnect via events with the Flex Connector!
 
