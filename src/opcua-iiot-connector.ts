@@ -300,9 +300,9 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const renewConnection = (done: () => void) => {
       if (isInitializedIIoTNode<ConnectorIIoT>(this.iiot)) {
-        this.iiot.opcuaDirectDisconnect(() => {
+        opcuaDirectDisconnect(() => {
           if (isUndefined(this.iiot)) return;
-          this.iiot.renewFiniteStateMachine()
+          renewFiniteStateMachine()
           this.iiot.stateMachine.idle().initopcua();
           done()
         })
@@ -911,6 +911,9 @@ module.exports = function (RED: nodered.NodeAPI) {
         renewFiniteStateMachine()
         this.iiot.stateMachine.idle().initopcua();
       }
+      else {
+        console.log('cant start fsm')
+      }
     }
 
     const deregisterForOPCUA = (opcuaNode: Todo, done: () => void) =>{
@@ -968,6 +971,22 @@ module.exports = function (RED: nodered.NodeAPI) {
       waitForExist,
       restartWithNewSettings,
     }
+
+
+    if (process.env.isTest == 'TRUE') {
+      this.functions = {
+        ...this.functions,
+        connectToClient,
+        connectOPCUAEndpoint,
+        resetBadSession,
+        startSession,
+        renewConnection,
+        handleError,
+        registerForOPCUA,
+        deregisterForOPCUA,
+      }
+    }
+
   }
 
 
@@ -1134,6 +1153,7 @@ module.exports = function (RED: nodered.NodeAPI) {
   })
 
   RED.httpAdmin.get('/opcuaIIoT/list/FilterTypes', RED.auth.needsPermission('opcuaIIoT.list.filterids'), function (req, res) {
+    console.log('request filter types', req)
     const resultTypeList = [
     { name: 'dataType', label: 'Data Type' },
     { name: 'dataValue', label: 'Data Value' },

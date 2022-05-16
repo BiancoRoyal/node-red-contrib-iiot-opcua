@@ -282,6 +282,13 @@ module.exports = (RED: NodeAPI) => {
         done()
       })
     })
+
+    if (process.env.isTest === 'TRUE') {
+      node.iiot = {
+        ...node.iiot,
+        handleReadError,
+      }
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Read', OPCUAIIoTRead)

@@ -9,6 +9,7 @@
  **/
 
 'use strict'
+process.env.isTest = 'TRUE'
 
 jest.setTimeout(5000)
 
@@ -166,7 +167,7 @@ describe('OPC UA Read node Unit Testing', function () {
       helper.load(readNodesToLoad, testReadNodeToBeLoaded, () => {
         let n1 = helper.getNode('41cb29d.1ab50d8')
         if (n1) {
-          n1.bianco.iiot.handleReadError(new Error('Testing Error To Handle'), {payload: {}})
+          n1.iiot.handleReadError(new Error('Testing Error To Handle'), {payload: {}})
           done()
         }
       })

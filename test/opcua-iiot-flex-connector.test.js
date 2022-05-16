@@ -51,8 +51,7 @@ describe('OPC UA Flex Connector node Unit Testing', function () {
       }],
       function () {
         let nodeUnderTest = helper.getNode('14d54403.f94f04')
-        expect(nodeUnderTest.bianco).toBeDefined()
-        expect(nodeUnderTest.bianco.iiot).toBeDefined()
+        expect(nodeUnderTest.iiot).toBeDefined()
         expect(nodeUnderTest.name).toBe('TestFlexConnector')
         done()
       })
