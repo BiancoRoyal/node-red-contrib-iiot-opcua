@@ -47,6 +47,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     const vm = new VM({
       allowAsync: false,
       sandbox: {
+        // allow the node-opcua library to be accessed in user-submitted scripts as 'opcua'
         opcua: require('node-opcua'),
         node,
         coreServer,
@@ -100,6 +101,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     })
 
+    // Use the vm2 library to make the submitted script executable:
+    // vm.run returns construcAddressSpaceScript as a function
     const constructAddressSpaceScript = vm.run('constructAddressSpaceScript = ' + config.addressSpaceScript)
 
     const statusHandler = (status: string | NodeStatus): void => {
