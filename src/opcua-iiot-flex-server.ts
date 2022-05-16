@@ -178,7 +178,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const emitHandler = (eventName: string | symbol, ...args: any[]) => {
-      this.emit(eventName, args)
+      this.emit(eventName, ...args)
     }
 
     const restartServer = function () {
