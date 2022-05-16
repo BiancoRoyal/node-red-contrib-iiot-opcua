@@ -225,6 +225,9 @@ module.exports = (RED: NodeAPI) => {
       sendMessage(payload, crawlerResult)
     }
 
+    /**
+     * Returns a sendWrapper function with the correct payload context
+     */
     const getSendWrapper = (payload: BrowserInputPayloadLike) => {
       return (result: Error | Todo) => {
         if (result.promises) {

@@ -15,5 +15,4 @@ const coreFilter = {
   internalDebugLog: debug('opcuaIIoT:filter:internal'),
 }
 
-// module.exports = de.biancoroyal.opcua.iiot.core.filter
 export default coreFilter

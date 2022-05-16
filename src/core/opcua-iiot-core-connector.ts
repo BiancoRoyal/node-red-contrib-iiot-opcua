@@ -41,7 +41,7 @@ export namespace logger {
   export const libDebugLog = core.Debug('opcuaIIoT:connector:nodeopcua')
 }
 
-// sets values within node.bianco.iiot (refactored to node.iiot)
+// sets values within node.iiot (refactored to node.iiot)
 const initConnectorNode = (): ConnectorIIoT => {
   return {
     ...core.initCoreNode(),

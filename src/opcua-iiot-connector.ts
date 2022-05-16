@@ -285,7 +285,7 @@ module.exports = function (RED: nodered.NodeAPI) {
           done()
         })
       } else {
-        internalDebugLog('bianco.iiot not valid on renew connection')
+        internalDebugLog('iiot not valid on renew connection')
       }
     }
 
@@ -871,7 +871,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       internalDebugLog('Register In Connector NodeId: ' + opcuaNode.id)
 
       if (!this.iiot || isUndefined(this.iiot.registeredNodeList)) {
-        internalDebugLog('Node Not Initialized With Bianco To Register In Connector')
+        internalDebugLog('Node Not Initialized With a registeredNodeList To Register In Connector')
         return
       }
 
@@ -901,7 +901,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       opcuaNode.removeAllListeners('opcua_client_not_ready')
 
       if (!this.iiot || isUndefined(this.iiot.registeredNodeList)) {
-        internalDebugLog('Node Not Initialized With Bianco To Deregister In Connector')
+        internalDebugLog('Node Not Initialized With a registeredNodeList To Deregister In Connector')
         return
       }
 

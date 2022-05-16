@@ -10,7 +10,6 @@
     "cron": "1.8.2",
     "debug": "4.3.3",
     "easy-table": "1.1.1",
-    "es6-map": "0.1.5",
     "node-opcua": "2.64.1",
     "source-map-support": "0.5.21",
     "stately.js": "1.3.0",
@@ -25,7 +24,6 @@
     "fieldbus",
     "iiot",
     "opc ua",
-    "biancode",
     "modbus"
   ],
   "author": "Bianco Royal <developers@bianco-royal.de>",
@@ -91,9 +89,6 @@
     "create_certificates.js"
   ],
   "devDependencies": {
-    "@babel/cli": "^7.17.6",
-    "@babel/core": "^7.17.5",
-    "@babel/preset-env": "^7.16.11",
     "@types/cron": "^1.7.3",
     "@types/debug": "^4.1.7",
     "@types/jest": "^27.4.1",
@@ -142,5 +137,5 @@
     ]
   },
   "main": "index.js",
-  "browserslist": "> 0.25%, not dead"
+  "browserslist": ["> 0.25%", "not dead"]
 }

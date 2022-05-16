@@ -176,7 +176,7 @@ var listenToEventsOnServer = [
     'name': 'listen with 200 ms',
     'addressSpaceItems': [
       {
-        'name': 'BiancoRoyal',
+        'name': 'IIoTAddressItem',
         'nodeId': 'ns=1;i=1234',
         'datatypeName': ''
       },
@@ -290,7 +290,7 @@ var listenToEventsWithResponseOnServer = [
     'name': 'listen with 200 ms',
     'addressSpaceItems': [
       {
-        'name': 'BiancoRoyal',
+        'name': 'IIoTAddressItem',
         'nodeId': 'ns=1;i=1234',
         'datatypeName': ''
       },

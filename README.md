@@ -85,14 +85,13 @@ Some nodes are configured slightly differently, so here is a guide how to adapt 
 
 # node-red-contrib-iiot-opcua
 
-## The IoT/IIoT OPC UA toolbox package for [Node-RED][8] based on [node-opcua][9].
+## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
 
 [![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
 [![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
-* v3.x is now LTS version until Oktober 2019 (branch 3.0)
-* tested with Node.js v10 and Node-RED v0.19
-* based on node-opcua v0.4 (OPC UA v1.03)
+* tested with Node.js v14.19 and Node-RED v2.2.2
+* based on node-opcua v2.64 (OPC UA v1.03)
 * extendable with node-opcua-isa95
 
 **If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3]!**
@@ -101,7 +100,7 @@ Some nodes are configured slightly differently, so here is a guide how to adapt 
 
 ## Install
 
-Run command on [Node-RED][8] installation directory.
+Run command on [Node-RED][3] installation directory.
 
 	npm install node-red-contrib-iiot-opcua
 
@@ -215,14 +214,10 @@ This is **not** an official product of the OPC Foundation or Plattform Industrie
 
 ### Contribution node-opcua
 
-I'd like to give special thanks to [Etienne Rossignon][6]
+I'd like to give special thanks to [Etienne Rossignon][2]
 for the node-opcua packages and very special for the node-opcua-isa95 package!
 
-[1]:https://bianco-royal.cloud/
-[2]:https://bianco-royal.cloud/supporter/
-[3]:https://github.com/biancode/node-red-contrib-iiot-opcua
-[4]:https://github.com/biancode/node-red-contrib-iiot-opcua/wiki
-[6]:https://github.com/erossignon
-[7]:https://github.com/biancode/node-red-iiot-opcua-publicbeta/wiki/DEBUG
-[8]:https://github.com/node-red/node-red
-[9]:https://github.com/node-opcua/node-opcua
+[1]:https://github.com/biancode/
+[2]:https://github.com/erossignon
+[3]:https://github.com/node-red/node-red
+[4]:https://github.com/node-opcua/node-opcua

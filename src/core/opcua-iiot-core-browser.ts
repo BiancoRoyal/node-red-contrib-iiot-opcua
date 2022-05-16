@@ -227,6 +227,7 @@ const crawlAddressSpaceItems = (session: NodeCrawlerClientSession, payload: Todo
        */
       const crawlback: ErrorCallback = (err) => {
         resolvers[index].resolve(crawlerResult)
+        // Ensure only one message is sent
         if (index === payload.addressSpaceItems.length - 1) {
           Promise.allSettled(crawlerPromises).then((promiseList: Todo) => {
             sendWrapper({rootNodeId: item.nodeId, payload, crawlerResult: promiseList, promises: true})
@@ -236,6 +237,7 @@ const crawlAddressSpaceItems = (session: NodeCrawlerClientSession, payload: Todo
         }
       }
 
+      // Crawlback must be called in every branch to ensure a message is sent
       if (err) {
         resolvers[index].reject(err)
         crawlback(err)

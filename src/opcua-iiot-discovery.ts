@@ -25,7 +25,6 @@ import {ApplicationDescription} from "node-opcua-service-endpoints";
 
 interface OPCUAIIoTDiscovery extends nodered.Node {
   discoveryPort: number
-  bianco?: Todo
 }
 
 interface OPCUAIIoTDiscoveryDef extends nodered.NodeDef {
