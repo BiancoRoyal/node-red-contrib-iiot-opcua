@@ -124,7 +124,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         }
       });
 
-      const discoveryUrls = endpoints.flatMap((server) => (server.discoveryUrls || '').toString()).filter((item, index, list) => item !== '' && list.indexOf(item) === index)
+      const discoveryUrls = endpoints.flatMap((server) => (server.discoveryUrls || '') as string).filter((item, index, list) => item !== '' && list.indexOf(item) === index)
 
       return {
         discoveryUrls,
