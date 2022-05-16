@@ -12,9 +12,6 @@ import * as nodered from "node-red";
 import {NodeMessage, NodeStatus} from "node-red";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {Todo, TodoVoidFunction} from "./types/placeholders";
-// @ts-ignore
-import Map from 'es6-map';
-
 import _ from 'underscore';
 import coreListener from "./core/opcua-iiot-core-listener";
 import {
