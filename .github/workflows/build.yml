@@ -27,7 +27,7 @@ jobs:
   publish:
     runs-on: ubuntu-20.04
     needs: build
-    if: GITHUB_REF == refs/heads/main
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/download-artifact@v3
         with: # Download artifacts from build.yml hopefully
