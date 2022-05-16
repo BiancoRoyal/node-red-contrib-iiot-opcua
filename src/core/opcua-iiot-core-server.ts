@@ -720,17 +720,17 @@ const setDiscoveryOptions = function (node: Todo, serverOptions: Todo) {
   return serverOptions
 }
 
-const getAddressSpace = function (node: Todo, msg: Todo): AddressSpace | null {
-  if (!node.iiot.opcuaServer.engine.addressSpace) {
-    node.error(new Error('Server AddressSpace Not Valid'), msg)
+const getAddressSpace = function (node: Todo, msg: Todo, errorHandler: (err: Error, msg: Todo) => void): AddressSpace | null {
+  if (!node.iiot.opcuaServer?.engine?.addressSpace) {
+    errorHandler(new Error('Server AddressSpace Not Valid'), msg)
     return null
   }
 
   return node.iiot.opcuaServer.engine.addressSpace
 }
 
-const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadableType: Todo, isProperty: boolean) {
-  let addressSpace = getAddressSpace(node, msg)
+const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadableType: Todo, isProperty: boolean, errorHandler: (err: Error, msg: Todo) => void) {
+  let addressSpace = getAddressSpace(node, msg, errorHandler)
 
   if (!addressSpace) {
     return
@@ -773,8 +773,8 @@ const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadable
   internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
 }
 
-const addObjectToAddressSpace = function (node: Todo, msg: Todo, humanReadableType: Todo) {
-  let addressSpace = getAddressSpace(node, msg)
+const addObjectToAddressSpace = function (node: Todo, msg: Todo, humanReadableType: Todo, errorHandler: (err: Error, msg: Todo) => void) {
+  let addressSpace = getAddressSpace(node, msg, errorHandler)
 
   if (!addressSpace) {
     return
@@ -794,12 +794,12 @@ const addObjectToAddressSpace = function (node: Todo, msg: Todo, humanReadableTy
     addressSpace.getOwnNamespace().addObject(newNodeOPCUObject)
     internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
   } else {
-    node.error(new Error('Root Reference Not Found'), msg)
+    errorHandler(new Error('Root Reference Not Found'), msg)
   }
 }
 
-const deleteNodeFromAddressSpace = function (node: Todo, msg: Todo) {
-  let addressSpace = getAddressSpace(node, msg)
+const deleteNodeFromAddressSpace = function (node: Todo, msg: Todo, errorHandler: (err: Error, msg: Todo) => void) {
+  let addressSpace = getAddressSpace(node, msg, errorHandler)
   if (!addressSpace) {
     return
   }
@@ -812,7 +812,7 @@ const deleteNodeFromAddressSpace = function (node: Todo, msg: Todo) {
       internalDebugLog('Delete NodeId Not Found ' + msg.payload.nodeId)
     }
   } else {
-    node.error(new Error('OPC UA Command NodeId Not Valid'), msg)
+    errorHandler(new Error('OPC UA Command NodeId Not Valid'), msg)
   }
 }
 

@@ -53,11 +53,11 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
       } catch (err) {
         this.emit('server_create_error')
-        handleServerError(node, err as Error, {payload: 'Server Failure! Please, check the server settings!'})
+        handleServerError(err as Error, {payload: 'Server Failure! Please, check the server settings!'})
       }
     }
 
-    const handleServerError = (node: Todo, err: Error, msg: Todo) => {
+    const handleServerError = (err: Error, msg: Todo) => {
       internalDebugLog(err)
       if (node.showErrors) {
         this.error(err, msg)
@@ -72,7 +72,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreServer.constructAddressSpace(node.iiot.opcuaServer, node.asoDemo)
         .then((err: Todo) => {
           if (err) {
-            handleServerError(node, err, {payload: 'Server Address Space Problem'})
+            handleServerError(err, {payload: 'Server Address Space Problem'})
           } else {
             coreServer.start(node.iiot.opcuaServer, node)
               .then(() => {
@@ -84,11 +84,11 @@ module.exports = (RED: nodered.NodeAPI) => {
               }
               this.emit('server_start_error')
               node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-              handleServerError(node, err, {payload: 'Server Start Failure'})
+              handleServerError(err, {payload: 'Server Start Failure'})
             })
           }
         }).catch(function (err: Error) {
-        handleServerError(node, err, {payload: 'Server Address Space Failure'})
+        handleServerError(err, {payload: 'Server Address Space Failure'})
       })
     }
 
@@ -96,7 +96,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('input', (msg: Todo) => {
       if (!node.iiot.opcuaServer || !node.iiot.initialized) {
-        handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
+        handleServerError(new Error('Server Not Ready For Inputs'), msg)
         return
       }
 
@@ -108,7 +108,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           executeOpcuaCommand(msg)
           break
         default:
-          handleServerError(node, new Error('Unknown Inject Type ' + msg.injectType), msg)
+          handleServerError(new Error('Unknown Inject Type ' + msg.injectType), msg)
       }
 
       this.send(msg)
@@ -117,11 +117,11 @@ module.exports = (RED: nodered.NodeAPI) => {
     const changeAddressSpace = (msg: Todo) => {
       // TODO: refactor to work with the new OPC UA type list and option to set add type
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
-        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false)
+        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false, handleServerError)
       } else if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Property') > -1) {
-        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, true)
+        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, true, handleServerError)
       } else {
-        coreServer.addObjectToAddressSpace(node, msg, msg.payload.objecttype)
+        coreServer.addObjectToAddressSpace(node, msg, msg.payload.objecttype, handleServerError)
       }
     }
 
@@ -131,10 +131,10 @@ module.exports = (RED: nodered.NodeAPI) => {
           restartServer()
           break
         case 'deleteNode':
-          coreServer.deleteNodeFromAddressSpace(node, msg)
+          coreServer.deleteNodeFromAddressSpace(node, msg, handleServerError)
           break
         default:
-          handleServerError(node, new Error('Unknown OPC UA Command'), msg)
+          handleServerError(new Error('Unknown OPC UA Command'), msg)
       }
     }
 
