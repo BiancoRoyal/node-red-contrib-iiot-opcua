@@ -19,6 +19,7 @@ import {
     OBJECTS_ROOT, registerToConnector, resetBiancoNode,
     setNodeStatusTo
 } from "./core/opcua-iiot-core";
+import {NodeStatus} from "node-red";
 
 interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
     // todo
@@ -347,7 +348,11 @@ module.exports = function (RED: nodered.NodeAPI) {
             node.iiot.startBrowser(msg)
         })
 
-        registerToConnector(node, this.status)
+        const setStatus = (status: string | NodeStatus) => {
+            this.status(status)
+        }
+
+        registerToConnector(node, setStatus)
 
         this.on('close', (done: () => void) => {
             deregisterToConnector(node, () => {

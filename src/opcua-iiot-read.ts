@@ -8,7 +8,7 @@
  */
 'use strict'
 
-import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow} from "node-red";
+import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
 import {Todo} from "./types/placeholders";
 import {ClientSession} from "node-opcua";
 import coreClient from "./core/opcua-iiot-core-client";
@@ -251,8 +251,12 @@ module.exports = (RED: NodeAPI) => {
       }
     })
 
-    node.status = this.status
-    registerToConnector(node)
+
+    const setStatus = (status: string | NodeStatus) => {
+      this.status(status)
+    }
+
+    registerToConnector(node, setStatus)
 
     this.on('close', (done: () => void) => {
       deregisterToConnector(node, () => {

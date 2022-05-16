@@ -141,7 +141,6 @@ export function toInt32(uintSixteen: number): number {
 }
 
 export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStatus {
-    console.log('inNodeStatus')
     let fillValue: NodeStatusFill = 'yellow'
     let shapeValue: NodeStatusShape = 'ring'
 
@@ -185,7 +184,6 @@ export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStat
                 statusValue = 'waiting ...'
             }
     }
-    console.log('Your error is in another castle')
     return {fill: fillValue, shape: shapeValue, text: statusValue}
 }
 
@@ -891,10 +889,6 @@ export function registerToConnector(node: NodeObject, statusCall?: (status: stri
     node.connector.on('after_reconnection', () => {
         setNodeOPCUARestart(node, OPCUAClient.create(node.iiot.opcuaClient)) // TODO: investigate one args v two
     })
-    if (node.connector?.iiot?.stateMachine)
-        recursivePrintTypes(node.connector?.iiot?.stateMachine)
-    else
-        console.log('Not here either, buddy')
     setNodeInitalState(node.connector?.iiot.stateMachine?.getMachineState(), node, statusCall)
 }
 
