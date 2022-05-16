@@ -9,13 +9,8 @@
 'use strict'
 
 import {
-  CoreNode,
-  OPCUASession,
-  ResultMessage,
   Todo,
   TodoVoidFunction,
-  WriteResult,
-  WriteResultMessage
 } from "./types/placeholders";
 import coreClient from "./core/opcua-iiot-core-client";
 import {
@@ -32,6 +27,7 @@ import {
 import {WriteValueOptions} from "node-opcua-service-write";
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
 import {BrowsePayload} from "./opcua-iiot-browser";
+import {ClientSession} from "node-opcua";
 
 
 interface OPCUAIIoTWrite extends Node {
@@ -50,6 +46,21 @@ interface OPCUAIIoTWriteDef extends NodeDef {
   connector: string
 }
 
+export type WriteResult = {
+  statusCodes: Todo,
+  nodesToWrite: Todo,
+  msg: NodeMessageInFlow & Todo
+}
+
+export type WriteResultMessage = NodeMessageInFlow & {
+  payload: {
+    nodetype: Todo
+    justValue: Todo
+    value: Todo
+    valuesToWrite: Todo
+  }
+}
+
 /**
  * Write Node-RED node.
  *
@@ -66,7 +77,7 @@ module.exports = (RED: NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: CoreNode = this;
+    let node: Todo = this;
     node.iiot = initCoreNode()
 
     const handleWriteError = (err: Error, msg: NodeMessage) => {
@@ -81,7 +92,7 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const writeToSession = (session: OPCUASession, originMsg: Todo) => {
+    const writeToSession = (session: ClientSession, originMsg: Todo) => {
       if (checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
@@ -89,7 +100,7 @@ module.exports = (RED: NodeAPI) => {
 
       let msg = Object.assign({}, originMsg)
       const nodesToWrite: WriteValueOptions[] = buildNodesToWrite(msg)
-      coreClient.write(session, nodesToWrite, msg).then((writeResult: Promise<WriteResult>): void => {
+      coreClient.write(session, nodesToWrite, msg).then((writeResult: WriteResult): void => {
         try {
           let message = buildResultMessage(writeResult)
           this.send(message)
@@ -103,7 +114,7 @@ module.exports = (RED: NodeAPI) => {
       })
     }
 
-    const buildResultMessage = (result: WriteResult): ResultMessage => {
+    const buildResultMessage = (result: WriteResult): WriteResultMessage => {
       let message = Object.assign({}, result.msg)
       message.payload.nodetype = 'write'
       message.payload.justValue = node.justValue

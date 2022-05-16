@@ -9,13 +9,14 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Like, Todo} from "./types/placeholders";
+import {Todo} from "./types/placeholders";
 import {NodeStatus} from "node-red";
 import {constructEventFilter, EventFilter} from "node-opcua";
 import {NodeMessageInFlow} from "@node-red/registry";
 import coreListener from "./core/opcua-iiot-core-listener";
 import {InjectPayload} from "./opcua-iiot-inject";
 import {BrowsePayload} from "./opcua-iiot-browser";
+import {Like} from "./types/core";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string

@@ -13,6 +13,25 @@ import * as core from './opcua-iiot-core'
 // @ts-ignore
 import * as Stately from 'stately.js'
 import {Todo} from "../types/placeholders";
+import {ClientSession, OPCUAClient, OPCUADiscoveryServer, UserIdentityInfo} from "node-opcua";
+import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
+import {Node} from "node-red";
+
+export type ConnectorIIoT = {
+  endpoints: string[],
+  opcuaClient?: OPCUAClient
+  opcuaSession?: ClientSession
+  discoveryServer?: OPCUADiscoveryServer
+  serverCertificate?: string
+  discoveryServerEndpointUrl?: string
+  hasOpcUaSubscriptions: boolean
+  userIdentity?: UserIdentityInfo
+  stateMachine?: Stately.machine
+  opcuaClientOptions?: OPCUAClientOptions
+  registeredNodeList?: Record<string, Node>
+  functions?: Record<string, (...args: Todo) => Todo>
+  sessionNodeRequests: number
+}
 
 export {Stately}
 
@@ -23,18 +42,17 @@ export namespace logger {
 }
 
 // sets values within node.bianco.iiot (refactored to node.iiot)
-function initConnectorNode() {
+const initConnectorNode = (): ConnectorIIoT => {
   return {
     ...core.initCoreNode(),
     sessionNodeRequests: 0,
     endpoints: [],
-    userIdentity: null,
-    opcuaClient: null,
-    opcuaSession: null,
-    discoveryServer: null,
-    serverCertificate: null,
-    discoveryServerEndpointUrl: null,
-    createConnectionTimeout: null,
+    userIdentity: undefined,
+    opcuaClient: undefined,
+    opcuaSession: undefined,
+    discoveryServer: undefined,
+    serverCertificate: undefined,
+    discoveryServerEndpointUrl: undefined,
     hasOpcUaSubscriptions: false,
   }
 

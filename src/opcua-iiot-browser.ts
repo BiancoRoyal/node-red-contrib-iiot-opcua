@@ -9,7 +9,6 @@
 'use strict'
 import * as nodered from "node-red";
 import {NodeMessage, NodeStatus} from "node-red";
-import {OPCUASession} from "./types/placeholders";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 
 import coreBrowser, {BrowserInputPayload, BrowserInputPayloadLike, Entry} from "./core/opcua-iiot-core-browser";
@@ -23,7 +22,7 @@ import {
   resetIiotNode,
   setNodeStatusTo
 } from "./core/opcua-iiot-core";
-import {BrowseResult, NodeId} from "node-opcua";
+import {BrowseResult, ClientSession, NodeId} from "node-opcua";
 import {AddressSpaceItem} from "./types/core";
 import {ListenPayload} from "./opcua-iiot-listener";
 import {ReferenceDescription} from "node-opcua-types/dist/_generated_opcua_types";
@@ -62,7 +61,7 @@ interface OPCUAIIoTBrowser extends nodered.Node {
 }
 
 type IIoTNode = {
-  opcuaSession?: OPCUASession | null
+  opcuaSession?: ClientSession | null
 }
 
 type BrowseNodeWithConfig = {

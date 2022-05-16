@@ -1,7 +1,5 @@
 import {Todo} from "./placeholders";
-import * as nodeOPCUA from "node-opcua";
-import {DataType, DataValue, LocalizedText, NodeIdType} from "node-opcua";
-import {NodeIdLike} from "node-opcua-nodeid";
+import {AttributeIds, DataType, DataValue, NodeId, NodeIdType} from "node-opcua";
 
 export type TimeUnits =
   'ms' |
@@ -15,12 +13,6 @@ export type TimeUnitNames =
   'min.' |
   'h.' |
   '';
-
-export type FillValues =
-  'yellow' |
-  'green' |
-  'red' |
-  'blue';
 
 export type WriteMessage = {
   addressSpaceItems: AddressSpaceItem[]
@@ -52,28 +44,13 @@ export type BrowseMessage = {
 }
 
 export type NodeToWrite = {
-  nodeId: nodeOPCUA.NodeId
-  attributeId: nodeOPCUA.AttributeIds.Value
+  nodeId: NodeId
+  attributeId: AttributeIds.Value
   indexRange: null
   value: DataValue
 }
 
-export type DataTypeInput = nodeOPCUA.DataType | string;
-
-export type WriteListItem = {
-  nodeId: nodeOPCUA.NodeId
-  attributeId: nodeOPCUA.AttributeIds.Value
-  indexRange: null
-  value: DataValue
-}
-
-export type ReadListItem = {
-
-}
-
-export type ItemNodeId = {
-  nodeId: string
-} & Todo;
+export type DataTypeInput = DataType | string;
 
 export type NodeIdentifier = NodeIdentifierNumeric | NodeIdentifierString;
 
@@ -87,44 +64,10 @@ type NodeIdentifierString = {
   type: Exclude<NodeIdType, NodeIdType.NUMERIC>
 }
 
-export type VariantType = NumericVariant |
-  BooleanVariant |
-  LocalizedTextVariant |
-  DateTimeVariant |
-  StringVariant |
-  GenericVariant;
-
-type NumericVariant = {
-  'dataType': nodeOPCUA.DataType.Float |
-    nodeOPCUA.DataType.Double |
-    nodeOPCUA.DataType.UInt32 |
-    nodeOPCUA.DataType.Int32 |
-    nodeOPCUA.DataType.Int16 |
-    nodeOPCUA.DataType.Int64
-  'value': number
+export type Like<T> = {
+  [key in keyof T]?: T[key]
 }
 
-type BooleanVariant = {
-  dataType: nodeOPCUA.DataType.Boolean
-  value: boolean
+export const getEnumKeys = <O extends object, K extends keyof O>(obj: O): K[] => {
+  return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
 }
-
-type LocalizedTextVariant = {
-  dataType: nodeOPCUA.DataType.LocalizedText
-  value: LocalizedText
-}
-
-type DateTimeVariant = {
-  dataType: nodeOPCUA.DataType.DateTime
-  value: Date
-}
-
-type StringVariant = {
-  dataType: nodeOPCUA.DataType.String
-  value: string
- }
-
-type GenericVariant = {
-  dataType: nodeOPCUA.DataType
-  value: any
- }

@@ -18,14 +18,13 @@ import {NodeIdLike} from 'node-opcua-nodeid'
 import {
   BrowseMessage,
   DataTypeInput,
-  ItemNodeId,
   NodeIdentifier,
   NodeToWrite,
   TimeUnitNames,
   TimeUnits,
   WriteMessage
 } from "../types/core";
-import {CoreNode, NodeObject, Todo, TodoVoidFunction} from "../types/placeholders";
+import {Todo, TodoVoidFunction} from "../types/placeholders";
 import {Node, NodeMessage, NodeStatus} from "node-red";
 import {NodeMessageInFlow, NodeStatusFill, NodeStatusShape} from "@node-red/registry";
 import {isArray, isNotDefined} from "../types/assertion";
@@ -41,7 +40,7 @@ import {
 } from "node-opcua";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
-import {ConnectorIIoT} from "../opcua-iiot-connector";
+import {ConnectorIIoT} from "./opcua-iiot-core-connector";
 
 export {Debug, os, underscore, nodeOPCUAId}
 
@@ -522,9 +521,9 @@ export function parseNamspaceFromMsgTopic(msg: BrowseMessage | null): number | u
   return Number.parseInt(nodeNamespace)
 }
 
-export function parseNamspaceFromItemNodeId(item: ItemNodeId | string): number | undefined {
+export function parseNamspaceFromItemNodeId(item: NodeIdLike): number | undefined {
   let nodeNamespace = ''
-  let nodeItem: string = item.nodeId || item
+  let nodeItem: string = (item as Todo).value || item
 
   if (nodeItem) {
     // TODO: real parsing instead of string operations
@@ -572,11 +571,11 @@ export function parseIdentifierFromMsgTopic(msg: BrowseMessage): NodeIdentifier 
   return parseForNodeIdentifier(msg.topic)
 }
 
-export function parseIdentifierFromItemNodeId(item: ItemNodeId | string): NodeIdentifier {
-  return parseForNodeIdentifier(item.nodeId || item)
+export function parseIdentifierFromItemNodeId(item: NodeIdLike): NodeIdentifier {
+  return parseForNodeIdentifier((item as Todo).nodeId || item)
 }
 
-export function newOPCUANodeIdFromItemNodeId(item: ItemNodeId | string): NodeId {
+export function newOPCUANodeIdFromItemNodeId(item: NodeIdLike): NodeId {
   let namespace = parseNamspaceFromItemNodeId(item)
   let nodeIdentifier = parseIdentifierFromItemNodeId(item)
 
@@ -592,7 +591,7 @@ export function newOPCUANodeIdFromMsgTopic(msg: BrowseMessage): NodeId {
   return new NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
-export function createItemForWriteList(item: ItemNodeId | string, value: DataValueOptions): WriteValueOptions {
+export function createItemForWriteList(item: NodeIdLike, value: DataValueOptions): WriteValueOptions {
   return {
     nodeId: newOPCUANodeIdFromItemNodeId(item),
     attributeId: AttributeIds.Value,
@@ -613,9 +612,7 @@ export function normalizeMessage(msg: WriteMessage) {
     return addressSpaceValues.map((item, index) => {
       return {...item, value: writeValues[index] || ''}
     })
-  }
-
-  else
+  } else
     return addressSpaceValues.map((item, index) => {
       if (item.value) return item;
       else return {
@@ -631,7 +628,6 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 
   logger.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
   const writeInputs = normalizeMessage(msg)
-
 
 
   const nodesToWrite = writeInputs.map((item: Todo) =>
@@ -834,11 +830,11 @@ export function setNodeOPCUARestart(node: Todo, opcuaClient: OPCUAClient, status
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-type NodeWithConnector = {
+type NodeWithConnector = Node & {
   connector: ConnectorIIoT
 }
 
-export function registerToConnector(node: NodeWithConnector, statusCallback: (status: string | NodeStatus) => void, onAlias: (event: string, callback: () => void) => void, errorHandler: (err: Error, msg: NodeMessage) => void): void {
+export function registerToConnector(node: Todo, statusCallback: (status: string | NodeStatus) => void, onAlias: (event: string, callback: () => void) => void, errorHandler: (err: Error, msg: NodeMessage) => void): void {
   if (!node) {
     logger.internalDebugLog('Node Not Valid On Register To Connector')
     return
@@ -915,7 +911,7 @@ export function registerToConnector(node: NodeWithConnector, statusCallback: (st
   setNodeInitalState(node.connector?.iiot?.stateMachine?.getMachineState(), node, statusCall)
 }
 
-export function deregisterToConnector(node: NodeObject, done: () => void) {
+export function deregisterToConnector(node: NodeWithConnector, done: () => void) {
   if (!node) {
     logger.internalDebugLog('Node Not Valid On Register To Connector')
     done()
@@ -928,7 +924,6 @@ export function deregisterToConnector(node: NodeObject, done: () => void) {
     return
   }
 
-  node.connector.removeAllListeners()
   if (isInitializedIIoTNode(node.connector)) {
     node.connector?.functions?.deregisterForOPCUA(node, done)
   }
@@ -967,12 +962,12 @@ export function setNodeStatusTo(
 }
 
 // sets some values within node.iiot
-export function initCoreNode(): CoreNode {
+export function initCoreNode() {
   return {
     reconnectTimeout: DEFAULT_TIMEOUT,
-    sessionTimeout: null,
-    opcuaSession: null,
-    opcuaClient: null
+    sessionTimeout: undefined,
+    opcuaSession: undefined,
+    opcuaClient: undefined
   }
 }
 

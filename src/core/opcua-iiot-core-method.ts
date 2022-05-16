@@ -8,10 +8,10 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {OPCUASession, Todo} from "../types/placeholders";
+import {Todo} from "../types/placeholders";
 
 import debug from 'debug';
-import {coerceNodeId} from "node-opcua";
+import {ClientSession, coerceNodeId} from "node-opcua";
 import {convertDataValueByDataType} from "./opcua-iiot-core";
 
 const internalDebugLog = debug('opcuaIIoT:method') // eslint-disable-line no-use-before-define
@@ -45,7 +45,7 @@ const getArgumentDefinition = function (session: Todo, msg: Todo) {
     })
 }
 
-const callMethods = function (session: OPCUASession, msg: Todo) {
+const callMethods = function (session: ClientSession, msg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {

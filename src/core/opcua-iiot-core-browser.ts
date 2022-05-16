@@ -9,12 +9,12 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {BrowserNode, BrowserNodeAttributes, OPCUASession, Todo} from "../types/placeholders";
+import {Todo} from "../types/placeholders";
 import {initCoreNode, isSessionBad, OBJECTS_ROOT, setNodeStatusTo} from "./opcua-iiot-core";
 import {
   BrowseDirection,
   BrowseResult,
-  CacheNode,
+  CacheNode, ClientSession,
   NodeCrawler,
   NodeCrawlerBase,
   NodeCrawlerClientSession,
@@ -86,7 +86,7 @@ const browse = (session: Todo, nodeIdToBrowse: Todo) => {
   )
 }
 
-const browseAddressSpaceItems = function (session: OPCUASession, addressSpaceItems: AddressSpaceItem[]) {
+const browseAddressSpaceItems = function (session: ClientSession, addressSpaceItems: AddressSpaceItem[]) {
   return new Promise<BrowseResult[]>(
     function (resolve, reject) {
       let browseOptions: BrowseDescriptionLike[] = []
@@ -311,7 +311,7 @@ const transformToEntry = (reference: ReferenceDescription): Entry | ReferenceDes
   return reference
 }
 
-const initBrowserNode = function (): BrowserNodeAttributes {
+const initBrowserNode = function () {
   return {
     browseTopic: OBJECTS_ROOT,
     iiot: {
@@ -324,7 +324,7 @@ const initBrowserNode = function (): BrowserNodeAttributes {
 }
 
 const browseErrorHandling = function (
-  node: BrowserNode,
+  node: Node & Todo,
   err: Error,
   msg: Todo,
   lists: Todo,

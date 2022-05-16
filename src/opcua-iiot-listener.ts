@@ -40,6 +40,7 @@ import {
 
 import coreClient from "./core/opcua-iiot-core-client";
 import {EventPayloadLike} from "./opcua-iiot-event";
+import {isArray} from "./types/assertion";
 
 interface OPCUAIIoTCMD extends nodered.Node {
   action: string
@@ -527,10 +528,6 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       this.send(msg)
-    }
-
-    const isArray = <T>(item: any): item is T[] => {
-      return item?.hasOwnProperty('length')
     }
 
     const sendDataFromEvent = (monitoredItem: ClientMonitoredItem, dataValue: DataValue | DataValue[]) => {

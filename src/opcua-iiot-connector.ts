@@ -25,21 +25,19 @@ import {
   nodesets,
   ObjectTypeIds,
   OPCUAClient,
-  OPCUADiscoveryServer,
   ReferenceTypeIds,
   SecurityPolicy,
   StatusCodes,
-  UserIdentityInfo,
   VariableTypeIds
 } from "node-opcua";
-import {CoreNode, getEnumKeys} from "./types/placeholders";
-import coreConnector, {logger, Stately} from "./core/opcua-iiot-core-connector";
+import coreConnector, {ConnectorIIoT, logger, Stately} from "./core/opcua-iiot-core-connector";
 import {FindServerResults} from "node-opcua-client/source/tools/findservers";
 import _, {isUndefined} from "underscore";
 import {UserTokenType} from "node-opcua-service-endpoints";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import internalDebugLog = logger.internalDebugLog;
 import detailDebugLog = logger.detailDebugLog;
+import {getEnumKeys} from "./types/core";
 
 interface OPCUAIIoTConnectorCredentials {
   user: string
@@ -109,18 +107,6 @@ interface OPCUAIIoTConnectorConfigurationDef extends nodered.NodeDef {
   maxBadSessionRequests: number
 }
 
-export interface ConnectorIIoT extends CoreNode {
-  sessionNodeRequests: 0,
-  endpoints: string[],
-  opcuaClient?: OPCUAClient
-  opcuaSession?: ClientSession
-  discoveryServer: OPCUADiscoveryServer
-  serverCertificate: string
-  discoveryServerEndpointUrl: string
-  createConnectionTimeout: boolean
-  hasOpcUaSubscriptions: boolean
-  userIdentity?: UserIdentityInfo
-}
 
 /**
  * OPC UA connector Node-RED config this.
@@ -350,7 +336,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     const autoSelectEndpointFromConnection = () => {
       internalDebugLog('Auto Searching For Endpoint On ' + this.endpoint)
 
-      if (isUndefined(this.iiot))
+      if (isUndefined(this.iiot) || isUndefined(this.iiot.opcuaClientOptions))
         return
 
       let endpointMustExist = this.iiot.opcuaClientOptions.endpointMustExist
@@ -361,13 +347,13 @@ module.exports = function (RED: nodered.NodeAPI) {
       discoverClient.connect(this.endpoint).then(() => {
         internalDebugLog('Auto Searching Endpoint Connected To ' + this.endpoint)
         selectEndpointFromSettings(discoverClient)
-        if (isUndefined(this.iiot))
+        if (isUndefined(this.iiot) || isUndefined(this.iiot.opcuaClientOptions))
           return
 
         this.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
       }).catch((err: Error) => {
         internalDebugLog('Get Auto Endpoint Request Error ' + err.message)
-        if (isInitializedIIoTNode<ConnectorIIoT>(this.iiot)) {
+        if (isInitializedIIoTNode<ConnectorIIoT>(this.iiot) && !isUndefined(this.iiot.opcuaClientOptions)) {
           this.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
         }
       })
@@ -582,7 +568,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         } else {
           detailDebugLog('OPC UA Client Is Active On Close Node With State ' + this.iiot.stateMachine.getMachineState())
           if (this.iiot.stateMachine.getMachineState() === 'SESSIONACTIVE') {
-            this.iiot.closeConnector(() => {
+            closeConnector(() => {
               resetIiotNode(this)
               done()
             })
@@ -595,12 +581,12 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     })
 
-    this.iiot.opcuaDisconnect = (done: () => void) => {
-      if (isUndefined(this.iiot)) {
+    const opcuaDisconnect = (done: () => void) => {
+      if (isUndefined(this.iiot) || isUndefined(this.iiot.registeredNodeList)) {
         return
       }
 
-      if (this.iiot.registeredNodeList.length > 0) {
+      if (Object.keys(this.iiot.registeredNodeList).length > 0) {
         internalDebugLog('Connector Has Registered Nodes And Can Not Close The Node -> Count: ' + this.iiot.registeredNodeList.length)
         if (disconnectTimeout) {
           clearTimeout(disconnectTimeout)
@@ -608,11 +594,11 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
         disconnectTimeout = setTimeout(() => {
           if (isInitializedIIoTNode(this.iiot)) {
-            this.iiot.closeConnector(done)
+            closeConnector(done)
           }
         }, this.connectionStopDelay)
       } else {
-        this.iiot.opcuaDirectDisconnect(done)
+        opcuaDirectDisconnect(done)
       }
     }
 
@@ -649,7 +635,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
 
       if (this.iiot.opcuaClient) {
-        this.iiot.opcuaDisconnect(done)
+        opcuaDisconnect(done)
       } else {
         detailDebugLog('OPC UA Client Is Not Valid On Close Connector')
         done()
@@ -884,7 +870,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       internalDebugLog('Register In Connector NodeId: ' + opcuaNode.id)
 
-      if (!this.iiot) {
+      if (!this.iiot || isUndefined(this.iiot.registeredNodeList)) {
         internalDebugLog('Node Not Initialized With Bianco To Register In Connector')
         return
       }
@@ -914,7 +900,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       opcuaNode.removeAllListeners('opcua_client_not_ready')
 
-      if (!this.iiot) {
+      if (!this.iiot || isUndefined(this.iiot.registeredNodeList)) {
         internalDebugLog('Node Not Initialized With Bianco To Deregister In Connector')
         return
       }
