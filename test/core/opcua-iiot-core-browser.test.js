@@ -10,27 +10,28 @@
 jest.setTimeout(5000)
 
 describe('OPC UA Core Browser', function () {
-  let coreBrowser = require('../../src/core/opcua-iiot-core-browser')
+  let {default: coreBrowser} = require('../../src/core/opcua-iiot-core-browser')
+  let {OBJECTS_ROOT} = require("../../src/core/opcua-iiot-core")
   const events = require('events')
 
   describe('Core Browser unit test', function () {
     it('should return the objects root nodeId', function (done) {
-      expect(coreBrowser.browseToRoot()).toBe(coreBrowser.core.OBJECTS_ROOT)
+      expect(coreBrowser.browseToRoot()).toBe(OBJECTS_ROOT)
       done()
     })
 
     it('should return the default objects nodeId without root in payload request', function (done) {
-      expect(coreBrowser.extractNodeIdFromTopic({payload: { }}, {})).toBe(null)
+      expect(coreBrowser.extractNodeIdFromTopic({ }, {})).toBe(null)
       done()
     })
 
     it('should return the default objects nodeId with empty root in payload request', function (done) {
-      expect(coreBrowser.extractNodeIdFromTopic({payload: { actiontype: 'browse', root: {} }}, {})).toBe(coreBrowser.core.OBJECTS_ROOT)
+      expect(coreBrowser.extractNodeIdFromTopic({ actiontype: 'browse', root: {} }, {})).toBe(OBJECTS_ROOT)
       done()
     })
 
     it('should return the nodeId from root in payload request', function (done) {
-      expect(coreBrowser.extractNodeIdFromTopic({payload: { actiontype: 'browse', root: { nodeId: 'ns=1;s=MyDemo' } }}, {})).toBe('ns=1;s=MyDemo')
+      expect(coreBrowser.extractNodeIdFromTopic({ actiontype: 'browse', root: { nodeId: 'ns=1;s=MyDemo' } }, {})).toBe('ns=1;s=MyDemo')
       done()
     })
 
@@ -39,12 +40,15 @@ describe('OPC UA Core Browser', function () {
       let node = {
         showErrors: true,
         showStatusActivities: true,
-        statusText: statusText,
+        statusText,
         status: (state) => { statusText = state.text },
         error: (err, msg) => { coreBrowser.internalDebugLog(err.message) }
       }
-      coreBrowser.browseErrorHandling(node, new Error('Error'), { payload: {} }, [])
-      expect(statusText).toBe('error')
+      const statusHandler = (status) => {
+        node.statusText = status.text || status;
+      }
+      coreBrowser.browseErrorHandling(node, new Error('Error'), { payload: {} }, [], (err, msg) => {return}, statusHandler, "idle")
+      expect(node.statusText).toBe('error')
       done()
     })
 

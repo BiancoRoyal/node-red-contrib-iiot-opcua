@@ -9,98 +9,98 @@
 
 jest.setTimeout(5000)
 
-let coreConnector = require('../../src/core/opcua-iiot-core-connector')
+let {default: coreConnector} = require('../../src/core/opcua-iiot-core-connector')
 const events = require('events')
 
 describe('OPC UA Core Connector', function () {
   describe('core functions', function () {
     it('should have IDLE state', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.getMachineState()).toBe('IDLE')
       done()
     })
 
     it('should change to INIT state', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().getMachineState()).toBe('INITOPCUA')
       done()
     })
 
     it('should change to OPEN state', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().getMachineState()).toBe('OPEN')
       done()
     })
 
     it('should change to CLOSED state', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().close().getMachineState()).toBe('CLOSED')
       done()
     })
 
     it('should change to END state from OPEN', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().end().getMachineState()).toBe('END')
       done()
     })
 
     it('should change to END state from CLOSE', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().close().end().getMachineState()).toBe('END')
       done()
     })
 
     it('should change to END state from LOCKED', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().lock().end().getMachineState()).toBe('END')
       done()
     })
 
     it('should change to LOCKED state from INIT', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().lock().getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to LOCKED state from OPEN', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().lock().getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to LOCKED state from CLOSE', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().close().lock().getMachineState()).toBe('LOCKED')
       done()
     })
 
     it('should change to UNLOCKED state from CLOSE', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().close().lock().unlock().getMachineState()).toBe('UNLOCKED')
       done()
     })
 
     it('should change to INIT state from UNLOCKED', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().close().lock().unlock().idle().initopcua().getMachineState()).toBe('INITOPCUA')
       done()
     })
 
     it('should change to IDLE state from UNLOCKED', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().close().lock().unlock().idle().getMachineState()).toBe('IDLE')
       done()
     })
 
     it('should change to OPEN state from UNLOCKED', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       expect(fsm.initopcua().open().close().lock().unlock().open().getMachineState()).toBe('OPEN')
       done()
     })
 
     it('should change to LOCKED state on OPC UA event backoff', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
-      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
+      let fsm = coreConnector.createCoreStatelyMachine()
+      let node = { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } }
       coreConnector.setListenerToClient(node)
       node.iiot.opcuaClient.emit('backoff')
       expect(fsm.getMachineState()).toBe('LOCKED')
@@ -109,8 +109,8 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should change to UNLOCKED state on OPC UA event connection reestablished', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
-      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
+      let fsm = coreConnector.createCoreStatelyMachine()
+      let node = { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } }
       coreConnector.setListenerToClient(node)
       fsm.lock()
       node.iiot.opcuaClient.emit('connection_reestablished')
@@ -120,8 +120,8 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should change to LOCKED state on OPC UA event start reconnection', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
-      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
+      let fsm = coreConnector.createCoreStatelyMachine()
+      let node = { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } }
       coreConnector.setListenerToClient(node)
       fsm.idle().initopcua().open()
       node.iiot.opcuaClient.emit('start_reconnection')
@@ -131,8 +131,8 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should change to OPEN state on OPC UA event timed out request', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
-      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
+      let fsm = coreConnector.createCoreStatelyMachine()
+      let node = { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } }
       coreConnector.setListenerToClient(node)
       fsm.idle().initopcua().open()
       node.iiot.opcuaClient.emit('timed_out_request')
@@ -142,8 +142,8 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should change to SESSIONACTIVE state on OPC UA event security token renewed', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
-      let node = { bianco: { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } } }
+      let fsm = coreConnector.createCoreStatelyMachine()
+      let node = { iiot: { opcuaClient: new events.EventEmitter(), stateMachine: fsm } }
       coreConnector.setListenerToClient(node)
       fsm.idle().initopcua().open().sessionrequest().sessionactive()
       node.iiot.opcuaClient.emit('security_token_renewed')
@@ -153,9 +153,9 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should change to UNLOCKED state on OPC UA event after reconnection', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       let node = new events.EventEmitter()
-      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.iiot = coreConnector.initConnectorNode()
       node.iiot.opcuaClient = new events.EventEmitter()
       node.iiot.stateMachine = fsm
       coreConnector.setListenerToClient(node)
@@ -167,9 +167,9 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should be IDLE state on OPC UA log session parameter', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       let node = new events.EventEmitter()
-      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.iiot = coreConnector.initConnectorNode()
       node.iiot.opcuaClient = new events.EventEmitter()
       node.endpoint = 'opc.tcp://localhost'
       node.iiot.opcuaSession = {
@@ -189,9 +189,9 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should handle OPC UA close event on State Lock', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       let node = new events.EventEmitter()
-      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.iiot = coreConnector.initConnectorNode()
       node.iiot.opcuaClient = new events.EventEmitter()
       node.iiot.stateMachine = fsm
       node.iiot.isInactiveOnOPCUA = () => { return false }
@@ -206,9 +206,9 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should handle OPC UA close event on State Stopped', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       let node = new events.EventEmitter()
-      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.iiot = coreConnector.initConnectorNode()
       node.iiot.opcuaClient = new events.EventEmitter()
       node.iiot.stateMachine = fsm
       node.iiot.isInactiveOnOPCUA = () => { return true }
@@ -225,9 +225,9 @@ describe('OPC UA Core Connector', function () {
     })
 
     it('should handle OPC UA abort event on State Stopped', function (done) {
-      let fsm = coreConnector.createStatelyMachine()
+      let fsm = coreConnector.createCoreStatelyMachine()
       let node = new events.EventEmitter()
-      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.iiot = coreConnector.initConnectorNode()
       node.iiot.opcuaClient = new events.EventEmitter()
       node.iiot.stateMachine = fsm
       node.iiot.isInactiveOnOPCUA = () => { return true }
@@ -245,7 +245,7 @@ describe('OPC UA Core Connector', function () {
 
     it('should handle no session on session information log', function (done) {
       let node = new events.EventEmitter()
-      node.bianco = coreConnector.core.createBiancoIIoT()
+      node.iiot = coreConnector.initConnectorNode()
       node.iiot.opcuaClient = null
       node.iiot.opcuaSession = null
       coreConnector.logSessionInformation(node)

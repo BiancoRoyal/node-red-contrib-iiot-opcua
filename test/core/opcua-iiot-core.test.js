@@ -228,22 +228,24 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead({payload: '', addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to read in payload', function (done) {
-      expect(core.buildNodesToRead({ payload: { nodesToRead: ['ns=4;s=TestReadWrite'] } })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      const result = core.buildNodesToRead({ nodesToRead: ['ns=4;s=TestReadWrite'] })
+      console.log(result)
+      expect(result).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to write in payload', function (done) {
-      expect(core.buildNodesToRead({ payload: { nodesToWrite: ['ns=4;s=TestReadWrite'] } })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead( {nodesToWrite: ['ns=4;s=TestReadWrite'] })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes in payload from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead({ payload: { addressSpaceItems: [{ name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }] } })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead( {addressSpaceItems: [{ name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }] })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
@@ -260,10 +262,13 @@ describe('OPC UA Core', function () {
     })
 
     it('should set node initial state init', function (done) {
-      // let resursivePrint = require("../../src/types/placeholders").recursivePrintTypes
+      const node = {
+        oldStatusParameter: ''
+      }
       const result = { fill: 'yellow', shape: 'ring', text: 'connecting' }
       core.setNodeInitalState('INITOPCUA', node, () => null)
-      expect().toBe(result)
+      expect(node.oldStatusParameter).to.deep.equal(result)
+      done()
       // console.log(node.oldStatusParameter);
     })
 
@@ -280,67 +285,59 @@ describe('OPC UA Core', function () {
           }
         }
       }
-      core.setNodeStatusTo = function (node, state) {
-        if (state === 'connected' && node.opcuaClient === node.connector.opcuaClient) {
-          done()
-        }
-      }
+      const result = { fill: 'green', shape: 'dot', text: 'active' }
+      // core.setNodeStatusTo = function (node, state) {
+      //   if (state === 'connected' && node.opcuaClient === node.connector.opcuaClient) {
+      //     done()
+      //   }
+      // }
       core.setNodeInitalState('OPEN', node)
+      expect(node.oldStatusParameter).to.deep.equal(result)
+      done()
     })
 
     it('should set node initial state locked', function (done) {
-      let node = {}
-      core.setNodeStatusTo = function (node, state) {
-        if (state === 'locked') {
-          done()
-        }
-      }
+      const node = {}
+      const result = { fill: 'yellow', shape: 'ring', text: 'locked' }
       core.setNodeInitalState('LOCKED', node)
+      expect(node.oldStatusParameter).to.deep.equal(result)
+      done()
     })
 
     it('should set node initial state sessionactive', function (done) {
-      let node = {
-        bianco: {
-          iiot: {
-            opcuaClient: null,
-            opcuaSession: null
-          }
+      const result = { fill: 'green', shape: 'dot', text: 'active' }
+      const node = {
+        iiot: {
+          opcuaClient: null,
+          opcuaSession: null
         },
         connector: {
-          bianco: {
-            iiot: {
-              opcuaClient: {},
-              opcuaSession: {}
-            }
+          iiot: {
+            opcuaClient: {},
+            opcuaSession: {}
           }
-        }
-      }
-      core.setNodeStatusTo = function (node, state) {
-        if (state === 'active' && node.iiot.opcuaSession === node.connector.bianco.iiot.opcuaSession) {
-          done()
         }
       }
       core.setNodeInitalState('SESSIONACTIVE', node)
+      expect(node.oldStatusParameter).to.deep.equal(result)
+      done()
     })
 
     it('should set node initial state unlocked', function (done) {
-      let node = {}
-      core.setNodeStatusTo = function (node, state) {
-        if (state === 'unlocked') {
-          done()
-        }
-      }
+      const node = {}
+      const result = { fill: 'yellow', shape: 'ring', text: 'unlocked' }
       core.setNodeInitalState('UNLOCKED', node)
+      console.log(node.oldStatusParameter)
+      expect(node.oldStatusParameter).to.deep.equal(result)
+      done()
     })
 
     it('should set node initial state unknown', function (done) {
-      let node = {}
-      core.setNodeStatusTo = function (node, state) {
-        if (state === 'waiting') {
-          done()
-        }
-      }
+      const node = {}
+      const result = { fill: 'blue', shape: 'dot', text: 'waiting ...' }
       core.setNodeInitalState('', node)
+      expect(node.oldStatusParameter).to.deep.equal(result)
+      done()
     })
 
     it('should return array of nodes to listen from payload of addressItemsToRead instead of addressSpaceItems', function (done) {
@@ -356,78 +353,78 @@ describe('OPC UA Core', function () {
 
   describe('converting', function () {
     it('should build new variant Float', function (done) {
-      let dataTypeOPCUA = DataType.Float
-      let parsedValue = parseFloat(22.2)
-      let variantFromString = core.buildNewVariant('Float', '22.2')
-      let variantFromString2 = core.buildNewVariant('Float', '22.2')
-      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 22.2)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      const dataTypeOPCUA = DataType.Float
+      const parsedValue = parseFloat('22.2')
+      const variantFromString = core.buildNewVariant('Float', '22.2')
+      const variantFromString2 = core.buildNewVariant('Float', '22.2')
+      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 22.2)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
     })
 
     it('should build new variant Double', function (done) {
-      let dataTypeOPCUA = DataType.Double
-      let parsedValue = parseFloat(22.2)
-      let variantFromString = core.buildNewVariant('Double', '22.2')
-      let variantFromString2 = core.buildNewVariant('Double', '22.2')
-      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 22.2)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      const dataTypeOPCUA = DataType.Double
+      const parsedValue = parseFloat('22.2')
+      const variantFromString = core.buildNewVariant('Double', '22.2')
+      const variantFromString2 = core.buildNewVariant('Double', '22.2')
+      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 22.2)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
     })
 
     it('should build new variant UInt16', function (done) {
-      let dataTypeOPCUA = DataType.UInt16
-      let parsedValue = new Uint16Array([220])[0]
-      let variantFromString = core.buildNewVariant('UInt16', '220')
-      let variantFromString2 = core.buildNewVariant('UInt16', '220')
-      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 220)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      const dataTypeOPCUA = DataType.UInt16
+      const parsedValue = new Uint16Array([220])[0]
+      const variantFromString = core.buildNewVariant('UInt16', '220')
+      const variantFromString2 = core.buildNewVariant('UInt16', '220')
+      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 220)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
     })
 
     it('should build new variant UInt32', function (done) {
-      let dataTypeOPCUA = DataType.UInt32
-      let parsedValue = new Uint32Array([33220])[0]
-      let variantFromString = core.buildNewVariant('UInt32', '33220')
-      let variantFromString2 = core.buildNewVariant('UInt32', '33220')
-      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      const dataTypeOPCUA = DataType.UInt32
+      const parsedValue = new Uint32Array([33220])[0]
+      const variantFromString = core.buildNewVariant('UInt32', '33220')
+      const variantFromString2 = core.buildNewVariant('UInt32', '33220')
+      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
     })
 
     it('should build new variant Int32', function (done) {
-      let dataTypeOPCUA = DataType.Int32
-      let parsedValue = parseInt('33220')
-      let variantFromString = core.buildNewVariant('Int32', '33220')
-      let variantFromString2 = core.buildNewVariant('Int32', '33220')
-      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      const dataTypeOPCUA = DataType.Int32
+      const parsedValue = parseInt('33220')
+      const variantFromString = core.buildNewVariant('Int32', '33220')
+      const variantFromString2 = core.buildNewVariant('Int32', '33220')
+      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
     })
 
     it('should build new variant Int16', function (done) {
-      let dataTypeOPCUA = DataType.Int16
-      let parsedValue = parseInt('33220')
-      let variantFromString = core.buildNewVariant('Int16', '33220')
-      let variantFromString2 = core.buildNewVariant('Int16', '33220')
-      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      const dataTypeOPCUA = DataType.Int16
+      const parsedValue = parseInt('33220')
+      const variantFromString = core.buildNewVariant('Int16', '33220')
+      const variantFromString2 = core.buildNewVariant('Int16', '33220')
+      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -439,8 +436,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('Int64', '833999220')
       let variantFromString2 = core.buildNewVariant('Int64', '833999220')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 833999220)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -453,8 +450,8 @@ describe('OPC UA Core', function () {
       let variantFromString2 = core.buildNewVariant('Boolean', '1')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 1)
       let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, true)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromNumberObject)
@@ -468,8 +465,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('LocalizedText', '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
       let variantFromString2 = core.buildNewVariant('LocalizedText', '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -481,8 +478,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('DateTime', 1522274988816)
       let variantFromString2 = core.buildNewVariant('DateTime', 1522274988816)
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 1522274988816)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -494,8 +491,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('String', parsedValue)
       let variantFromString2 = core.buildNewVariant('String', parsedValue)
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, parsedValue)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromString)
-      expect({dataType: dataTypeOPCUA, value: parsedValue}).to.deep.equal(variantFromObject)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -505,7 +502,7 @@ describe('OPC UA Core', function () {
   describe('converting DataValue by DataType', function () {
     it('should convert NodeId to string', function (done) {
       let dataTypeOPCUA = DataType.NodeId
-      let value = {value: 'test'}
+      let value = 'test'
       let variantFromString = core.convertDataValueByDataType(value, 'NodeId')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal('test')
@@ -514,9 +511,10 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert NodeIdType to string', function (done) {
-      let dataTypeOPCUA = DataType.NodeIdType
-      let value = {value: 'test'}
+      let dataTypeOPCUA = DataType.NodeId
+      let value = 'test'
       let variantFromString = core.convertDataValueByDataType(value, 'NodeIdType')
+      console.log(variantFromString)
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal('test')
       expect(variantFromObject).to.deep.equal('test')
@@ -525,7 +523,7 @@ describe('OPC UA Core', function () {
 
     it('should convert ByteString to string', function (done) {
       let dataTypeOPCUA = DataType.ByteString
-      let value = {value: 'test'}
+      let value = 'test'
       let variantFromString = core.convertDataValueByDataType(value, 'ByteString')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal('test')
@@ -535,7 +533,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Byte Boolean True to number', function (done) {
       let dataTypeOPCUA = DataType.Byte
-      let value = {value: true}
+      let value = true
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 1)
@@ -545,7 +543,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Byte Boolean False to number', function (done) {
       let dataTypeOPCUA = DataType.Byte
-      let value = {value: false}
+      let value = false
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 0)
@@ -555,7 +553,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Byte number 0 to number', function (done) {
       let dataTypeOPCUA = DataType.Byte
-      let value = {value: 0}
+      let value = 0
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 0)
@@ -565,7 +563,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Byte number 1 to number', function (done) {
       let dataTypeOPCUA = DataType.Byte
-      let value = {value: 1}
+      let value = 1
       let variantFromString = core.convertDataValueByDataType(value, 'Byte')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 1)
@@ -575,7 +573,7 @@ describe('OPC UA Core', function () {
 
     it('should convert QualifiedName to string', function (done) {
       let dataTypeOPCUA = DataType.QualifiedName
-      let value = {value: 'test'}
+      let value = 'test'
       let variantFromString = core.convertDataValueByDataType(value, 'QualifiedName')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal('test')
@@ -585,7 +583,7 @@ describe('OPC UA Core', function () {
 
     it('should convert LocalizedText to string', function (done) {
       let dataTypeOPCUA = DataType.LocalizedText
-      let value = {value: 'test'}
+      let value = 'test'
       let variantFromString = core.convertDataValueByDataType(value, 'LocalizedText')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal('test')
@@ -595,7 +593,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Float NaN', function (done) {
       let dataTypeOPCUA = DataType.Float
-      let value = {value: 'Hallo'}
+      let value = 'Hallo'
       let variantFromString = core.convertDataValueByDataType(value, 'Float')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 'Hallo')
@@ -605,7 +603,7 @@ describe('OPC UA Core', function () {
 
     it('should convert to parsed Float', function (done) {
       let dataTypeOPCUA = DataType.Float
-      let value = {value: 12.34}
+      let value = 12.34
       let variantFromString = core.convertDataValueByDataType(value, 'Float')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 12.34)
@@ -615,7 +613,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Double NaN', function (done) {
       let dataTypeOPCUA = DataType.Double
-      let value = {value: 'Hallo'}
+      let value = 'Hallo'
       let variantFromString = core.convertDataValueByDataType(value, 'Double')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 'Hallo')
@@ -625,7 +623,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Double to parsed Float', function (done) {
       let dataTypeOPCUA = DataType.Double
-      let value = {value: 92233720368547758.34}
+      let value = 92233720368547758.34
       let variantFromString = core.convertDataValueByDataType(value, 'Double')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 92233720368547758.34)
@@ -635,7 +633,7 @@ describe('OPC UA Core', function () {
 
     it('should convert to parsed UInt16', function (done) {
       let dataTypeOPCUA = DataType.UInt16
-      let value = {value: 65000}
+      let value = 65000
       let variantFromString = core.convertDataValueByDataType(value, 'UInt16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 65000)
@@ -645,7 +643,7 @@ describe('OPC UA Core', function () {
 
     it('should convert to parsed UInt32', function (done) {
       let dataTypeOPCUA = DataType.UInt32
-      let value = {value: 165000}
+      let value = 165000
       let variantFromString = core.convertDataValueByDataType(value, 'UInt32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 165000)
@@ -655,7 +653,7 @@ describe('OPC UA Core', function () {
 
     it('should convert to parsed Int16', function (done) {
       let dataTypeOPCUA = DataType.Int16
-      let value = {value: -65000}
+      let value = -65000
       let variantFromString = core.convertDataValueByDataType(value, 'Int16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, -65000)
@@ -665,7 +663,7 @@ describe('OPC UA Core', function () {
 
     it('should convert to parsed Int32', function (done) {
       let dataTypeOPCUA = DataType.Int32
-      let value = {value: -165000}
+      let value = -165000
       let variantFromString = core.convertDataValueByDataType(value, 'Int32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, -165000)
@@ -675,7 +673,7 @@ describe('OPC UA Core', function () {
 
     it('should convert to parsed Int64', function (done) {
       let dataTypeOPCUA = DataType.Int64
-      let value = {value: -21474836483}
+      let value = -21474836483
       let variantFromString = core.convertDataValueByDataType(value, 'Int64')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, -21474836483)
@@ -685,7 +683,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Boolean True', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {value: true}
+      let value = true
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, true)
@@ -695,7 +693,7 @@ describe('OPC UA Core', function () {
 
     it('should convert Boolean False', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {value: false}
+      let value = false
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, false)
@@ -705,7 +703,7 @@ describe('OPC UA Core', function () {
 
     it('should convert String', function (done) {
       let dataTypeOPCUA = DataType.String
-      let value = {value: 'false'}
+      let value = 'false'
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 'false')
@@ -715,7 +713,7 @@ describe('OPC UA Core', function () {
 
     it('should convert String with toString', function (done) {
       let dataTypeOPCUA = DataType.String
-      let value = {value: false}
+      let value = false
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       assert.equal(variantFromString, 'false')
@@ -724,8 +722,9 @@ describe('OPC UA Core', function () {
     })
 
     it('should convert Unknown', function (done) {
-      let value = {value: false}
+      let value = false
       let variantFromString = core.convertDataValueByDataType(value, 'Unknown')
+      console.log(variantFromString)
       let variantFromObject = core.convertDataValueByDataType(value, null)
       assert.equal(variantFromString, false)
       assert.equal(variantFromObject, false)
@@ -736,7 +735,7 @@ describe('OPC UA Core', function () {
   describe('Variant values', function () {
     it('should get Float', function (done) {
       let dataTypeOPCUA = DataType.Float
-      let value = {value: 12345.67}
+      let value = 12345.67
       let variantFromString = core.convertDataValueByDataType(value, 'Float')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal(12345.67)
@@ -746,7 +745,7 @@ describe('OPC UA Core', function () {
 
     it('should get Double', function (done) {
       let dataTypeOPCUA = DataType.Double
-      let value = {value: 1234567.89}
+      let value = 1234567.89
       let variantFromString = core.convertDataValueByDataType(value, 'Double')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(1234567.89)
@@ -756,7 +755,7 @@ describe('OPC UA Core', function () {
 
     it('should get UInt16', function (done) {
       let dataTypeOPCUA = DataType.UInt16
-      let value = {value: 65000}
+      let value = 65000
       let variantFromString = core.convertDataValueByDataType(value, 'UInt16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(65000)
@@ -766,7 +765,7 @@ describe('OPC UA Core', function () {
 
     it('should get UInt32', function (done) {
       let dataTypeOPCUA = DataType.UInt32
-      let value = {value: 265000}
+      let value = 265000
       let variantFromString = core.convertDataValueByDataType(value, 'UInt32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(265000)
@@ -776,7 +775,7 @@ describe('OPC UA Core', function () {
 
     it('should get Int16', function (done) {
       let dataTypeOPCUA = DataType.Int16
-      let value = {value: -65000}
+      let value = -65000
       let variantFromString = core.convertDataValueByDataType(value, 'Int16')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(-65000)
@@ -786,7 +785,7 @@ describe('OPC UA Core', function () {
 
     it('should get Int32', function (done) {
       let dataTypeOPCUA = DataType.Int32
-      let value = {value: -265000}
+      let value = -265000
       let variantFromString = core.convertDataValueByDataType(value, 'Int32')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(-265000)
@@ -796,7 +795,7 @@ describe('OPC UA Core', function () {
 
     it('should get Int64', function (done) {
       let dataTypeOPCUA = DataType.Int64
-      let value = {value: -21474836483}
+      let value = -21474836483
       let variantFromString = core.convertDataValueByDataType(value, 'Int64')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(-21474836483)
@@ -806,7 +805,7 @@ describe('OPC UA Core', function () {
 
     it('should get Boolean', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {value: true}
+      let value = true
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(true)
@@ -816,7 +815,7 @@ describe('OPC UA Core', function () {
 
     it('should get Boolean', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {value: false}
+      let value = false
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal(false)
@@ -826,7 +825,7 @@ describe('OPC UA Core', function () {
 
     it('should get Boolean object false', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {'value': {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false}}
+      let value = {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false})
@@ -836,7 +835,7 @@ describe('OPC UA Core', function () {
 
     it('should get Boolean object true', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {'value': {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true}}
+      let value = {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true}
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true})
@@ -847,17 +846,17 @@ describe('OPC UA Core', function () {
     it('should get DateTime', function (done) {
       let dataTypeOPCUA = DataType.DateTime
       let dateValue = new Date()
-      let value = {value: dateValue}
+      let value = dateValue
       let variantFromString = core.convertDataValueByDataType(value, 'DateTime')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
-      expect(variantFromString).is.equal(dateValue)
-      expect(variantFromObject).is.equal(dateValue)
+      expect(variantFromString).is.equal(dateValue.toString())
+      expect(variantFromObject).is.equal(dateValue.toString())
       done()
     })
 
     it('should get String', function (done) {
       let dataTypeOPCUA = DataType.String
-      let value = {value: 'Hallo Welt!'}
+      let value = 'Hallo Welt!'
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal('Hallo Welt!')
@@ -867,7 +866,7 @@ describe('OPC UA Core', function () {
 
     it('should get String from number', function (done) {
       let dataTypeOPCUA = DataType.String
-      let value = {value: 22.33}
+      let value = 22.33
       let variantFromString = core.convertDataValueByDataType(value, 'String')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).is.equal('22.33')

@@ -411,9 +411,10 @@ export function convertDataValueByDataType(value: any , dataType: DataTypeInput)
                 if (valueType === 'boolean') {
                     convertedValue = value ? 1 : 0
                 } else {
-                    convertedValue = parseInt(value.value)
+                    convertedValue = parseInt(value)
                 }
                 break
+            case 'QualifiedName':
             case DataType.QualifiedName:
                 convertedValue = value.toString()
                 break
@@ -479,9 +480,18 @@ export function convertDataValueByDataType(value: any , dataType: DataTypeInput)
             case DataType.Null:
                 convertedValue = null
                 break
+            case "DateTime":
+            case DataType.DateTime:
+                if (valueType !== 'string'){
+                    convertedValue = value.toString()
+                } else {
+                    convertedValue = value
+                }
+                break;
             default:
+                console.log("default case")
                 logger.internalDebugLog('convertDataValue unused DataType: ' + dataType)
-                if (value.hasOwnProperty('value')) {
+                if (!isNotDefined(value)) {
                     convertedValue = value
                 } else {
                     convertedValue = null
@@ -625,45 +635,27 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 }
 
 export function buildNodesToRead(payload: Todo) {
-    let nodesToRead = []
-    let item = null
-
     logger.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(payload))
 
     let nodePayloadList = payload.nodesToRead || payload.nodesToWrite
     if (nodePayloadList && nodePayloadList.length) {
         // read to read
-        for (item of nodePayloadList) {
-            item = item.nodeId || item
-            nodesToRead.push(item.toString())
-        }
+        return nodePayloadList.map((item: Todo) => {
+            return (item.nodeId || item).toString()
+        })
     } else {
         let nodeList = payload.nodesToRead || payload.nodesToWrite
         if (nodeList && nodeList.length) {
             // legacy
-            for (item of nodeList) {
-                item = item.nodeId || item
-                nodesToRead.push(item.toString())
-            }
-        } else {
-            // new structure
-            if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
-                for (item of payload.addressSpaceItems) {
-                    nodesToRead.push(item.nodeId)
-                }
-            } else {
-                if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
-                    for (item of payload.addressSpaceItems) {
-                        nodesToRead.push(item.nodeId)
-                    }
-                }
-            }
+            return nodeList.map((item: Todo) => {
+                return (item.nodeId || item).toString()
+            })
+        } else if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
+                return payload.addressSpaceItems.map((item: Todo) => item.nodeId)
         }
     }
 
-    logger.internalDebugLog('buildNodesToRead output: ' + JSON.stringify(nodesToRead))
-
-    return nodesToRead
+    return []
 }
 
 export function buildNodesToListen(payload: Todo) {
@@ -948,7 +940,7 @@ export function setNodeStatusTo(
         if (typeof status === "function")
             status(statusParameter)
         else
-            console.log("Status is not a function " + typeof status)
+            logger.internalDebugLog("Status is not a function " + typeof status)
     }
     return statusParameter
 }

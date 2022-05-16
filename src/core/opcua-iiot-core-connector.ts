@@ -176,7 +176,7 @@ function setListenerToClient(node: Todo) {
         logger.internalDebugLog('!!! Abort backoff !!!')
         logger.internalDebugLog('CONNECTION BROKEN: ' + node.endpoint)
 
-        if (node.functions.isInactiveOnOPCUA()) {
+        if (node.iiot.isInactiveOnOPCUA()) {
             logger.detailDebugLog('Connector Not Active On OPC UA Backoff Abort Event')
         } else {
             node.iiot.resetOPCUAConnection('Connector To Server Backoff Abort')

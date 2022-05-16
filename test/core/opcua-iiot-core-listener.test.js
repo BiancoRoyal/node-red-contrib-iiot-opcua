@@ -12,7 +12,7 @@ jest.setTimeout(5000)
 describe('OPC UA Core Listener', function () {
   let assert = require('chai').assert
   let expect = require('chai').expect
-  let coreListener = require('../../src/core/opcua-iiot-core-listener')
+  let {default: coreListener} = require('../../src/core/opcua-iiot-core-listener')
   const TIME_IN_MILLISECONDS = 10000
 
   describe('Parameter', function () {

@@ -86,8 +86,9 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
         return
       }
 
-      let addressSpace = server.engine.addressSpace
-      const namespace = addressSpace.getOwnNamespace()
+      const {addressSpace} = server.engine
+
+      const namespace = addressSpace?.getOwnNamespace()
 
       if (!addressSpace) {
         reject(new Error('No AddressSpace From OPC UA Server Engine'))
@@ -95,7 +96,7 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
       }
 
       let view = namespace.addView({
-        organizedBy: addressSpace.rootFolder.views,
+        organizedBy: addressSpace?.rootFolder.views,
         browseName: 'BiancoRoyalView',
         displayName: [
           new LocalizedText({ text: 'Bianco Royal View', locale: 'en-US' }),
