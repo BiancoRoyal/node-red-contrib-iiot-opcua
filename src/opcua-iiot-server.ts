@@ -166,6 +166,10 @@ module.exports = (RED: nodered.NodeAPI) => {
     })
 
     this.on('shutdown', () => {
+      this.status({fill: 'yellow', shape: 'dot', text: 'restarting'})
+      closeServer(() => {
+        coreServer.internalDebugLog('Server Node Shutdown')
+      })
       node.iiot.opcuaServer = null
       initNewServer()
     })
