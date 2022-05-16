@@ -196,9 +196,10 @@ export function buildNewVariant(datatype: DataTypeInput, value: any): DataValueO
     dataType: DataType.Null,
     value: null
   }
+  if (value.value)
+    value = value.value
 
   logger.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
-
   switch (datatype) {
     case 'Float':
     case DataType.Float:
@@ -602,16 +603,17 @@ export function createItemForWriteList(item: ItemNodeId | string, value: DataVal
 
 export function normalizeMessage(msg: WriteMessage) {
   const payload = msg.payload as Todo
-  const addressSpaceValues: NodeToWrite[] = payload.addressSpaceItems || payload.nodesToWrite;
+  const addressSpaceValues: NodeToWrite[] = payload.nodesToWrite || payload.addressSpaceItems;
 
   if (!addressSpaceValues) return [];
 
   const writeValues = payload.valuesToWrite;
 
-  if (!isNotDefined(writeValues))
+  if (!isNotDefined(writeValues)) {
     return addressSpaceValues.map((item, index) => {
       return {...item, value: writeValues[index] || ''}
     })
+  }
 
   else
     return addressSpaceValues.map((item, index) => {
@@ -629,6 +631,7 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 
   logger.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
   const writeInputs = normalizeMessage(msg)
+
 
 
   const nodesToWrite = writeInputs.map((item: Todo) =>

@@ -91,7 +91,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
       const outputPayload = {
         nodetype: "node",
-        injectType: payload.injectType || node.injectType,
+        injectType: node.injectType || payload.injectType,
         addressSpaceItems,
         valuesToWrite,
         value,
