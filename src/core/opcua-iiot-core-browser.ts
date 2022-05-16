@@ -13,6 +13,7 @@ import {BrowserNode, BrowserNodeAttributes, OPCUASession, Todo} from "../types/p
 import {initCoreNode, isSessionBad, OBJECTS_ROOT, setNodeStatusTo} from "./opcua-iiot-core";
 import {
   BrowseDirection,
+  BrowseResult,
   CacheNode,
   NodeCrawler,
   NodeCrawlerBase,
@@ -29,6 +30,8 @@ import {ResponseCallback} from "node-opcua-client";
 import {DataValue} from "node-opcua-data-value";
 import {ErrorCallback} from "node-opcua-status-code";
 import {BrowseDescriptionLike} from "node-opcua-client/source/client_session";
+import {isUndefined} from "underscore";
+import {ReferenceDescription} from "node-opcua-types/dist/_generated_opcua_types";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
@@ -48,8 +51,8 @@ export type BrowserInputPayloadLike = {
 }
 
 
-const browse = function (session: Todo, nodeIdToBrowse: Todo) {
-  return new Promise(
+const browse = (session: Todo, nodeIdToBrowse: Todo) => {
+  return new Promise<BrowseResult[]>(
     function (resolve, reject) {
       let browseOptions = [
         {
@@ -68,19 +71,23 @@ const browse = function (session: Todo, nodeIdToBrowse: Todo) {
         }
       ]
 
-      session.browse(browseOptions, function (err: Error, browseResult: Todo) {
+      session.browse(browseOptions, (err: Error | null, browseResult?: BrowseResult[]) => {
         if (err) {
           reject(err)
         } else {
-          resolve(browseResult)
+          if (isUndefined(browseResult)) {
+            reject('Browse Results are Undefined')
+          } else {
+            resolve(browseResult)
+          }
         }
       })
     }
   )
 }
 
-const browseAddressSpaceItems = function (session: OPCUASession, addressSpaceItems: Todo) {
-  return new Promise(
+const browseAddressSpaceItems = function (session: OPCUASession, addressSpaceItems: AddressSpaceItem[]) {
+  return new Promise<BrowseResult[]>(
     function (resolve, reject) {
       let browseOptions: BrowseDescriptionLike[] = []
 
@@ -106,11 +113,15 @@ const browseAddressSpaceItems = function (session: OPCUASession, addressSpaceIte
       if (browseOptions.length === 0) {
         return;
       }
-      session.browse(browseOptions, (err: Error | null, browseResult: Todo) => {
+      session.browse(browseOptions, (err: Error | null, browseResult?: BrowseResult[]) => {
         if (err) {
           reject(err)
         } else {
-          resolve(browseResult)
+          if (isUndefined(browseResult)) {
+            reject('Browse Results are Undefined')
+          } else {
+            resolve(browseResult)
+          }
         }
       })
     }
@@ -264,7 +275,17 @@ const extractNodeIdFromTopic = function (payload: BrowserInputPayloadLike, node:
   return rootNodeId
 }
 
-const transformToEntry = function (reference: Todo) {
+export type Entry = {
+  referenceTypeId?: string,
+  isForward?: boolean,
+  nodeId?: string,
+  browseName?: string,
+  displayName?: string,
+  nodeClass?: string,
+  typeDefinition?: string,
+}
+
+const transformToEntry = (reference: ReferenceDescription): Entry | ReferenceDescription => {
   if (reference) {
     try {
       return reference.toJSON()

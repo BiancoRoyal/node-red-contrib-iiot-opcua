@@ -8,30 +8,35 @@
  */
 'use strict'
 import * as nodered from "node-red";
-import {Like, Todo, TodoVoidFunction} from "./types/placeholders";
+import {NodeMessage, NodeStatus} from "node-red";
+import {OPCUASession} from "./types/placeholders";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 
-import coreBrowser, {BrowserInputPayload, BrowserInputPayloadLike} from "./core/opcua-iiot-core-browser";
+import coreBrowser, {BrowserInputPayload, BrowserInputPayloadLike, Entry} from "./core/opcua-iiot-core-browser";
 import {
   checkConnectorState,
-  checkSessionNotValid, deregisterToConnector,
+  checkSessionNotValid,
+  deregisterToConnector,
   FAKTOR_SEC_TO_MSEC,
-  OBJECTS_ROOT, registerToConnector, resetIiotNode,
+  OBJECTS_ROOT,
+  registerToConnector,
+  resetIiotNode,
   setNodeStatusTo
 } from "./core/opcua-iiot-core";
-import {NodeMessage, NodeStatus} from "node-red";
-import {NodeId} from "node-opcua";
+import {BrowseResult, NodeId} from "node-opcua";
 import {AddressSpaceItem} from "./types/core";
 import {ListenPayload} from "./opcua-iiot-listener";
+import {ReferenceDescription} from "node-opcua-types/dist/_generated_opcua_types";
+import {NodeIdLike} from "node-opcua-nodeid";
 
 interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
-  nodeId: Todo
+  nodeId: NodeIdLike
   name: string
-  justValue: Todo
-  sendNodesToRead: Todo
-  sendNodesToBrowser: Todo
-  sendNodesToListener: Todo
-  singleBrowseResult: Todo
+  justValue: boolean
+  sendNodesToRead: boolean
+  sendNodesToBrowser: boolean
+  sendNodesToListener: boolean
+  singleBrowseResult: boolean
   showStatusActivities: boolean
   showErrors: boolean
   recursiveBrowse: boolean
@@ -41,13 +46,13 @@ interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
 }
 
 interface OPCUAIIoTBrowser extends nodered.Node {
-  nodeId: Todo
+  nodeId: NodeIdLike
   name: string
-  justValue: Todo
-  sendNodesToRead: Todo
-  sendNodesToBrowser: Todo
-  sendNodesToListener: Todo
-  singleBrowseResult: Todo
+  justValue: boolean
+  sendNodesToRead: boolean
+  sendNodesToBrowser: boolean
+  sendNodesToListener: boolean
+  singleBrowseResult: boolean
   showStatusActivities: boolean
   showErrors: boolean
   recursiveBrowse: boolean
@@ -56,35 +61,35 @@ interface OPCUAIIoTBrowser extends nodered.Node {
   connector: Node
 }
 
+type IIoTNode = {
+  opcuaSession?: OPCUASession | null
+}
+
+type BrowseNodeWithConfig = {
+  iiot?: IIoTNode
+  browseTopic?: string
+  delayMessageTimer?: NodeJS.Timer
+} & OPCUAIIoTBrowser
+
 export type BrowsePayload = {
   nodetype: "browse",
   injectType: string,
   addressSpaceItems: AddressSpaceItem[],
   manualInject: boolean,
   justValue: boolean,
-  rootNodeId: string | NodeId,
+  rootNodeId: NodeIdLike,
   recursiveBrowse: boolean,
   recursiveDepth: number,
   recursiveDepthMax: number,
   listenerParameters?: ListenPayload
 }
 
-type BrowserResult = {
-  nodeId: string | NodeId,
-  browseName: string,
-  displayName: string,
-  nodeClass: string
-  datatypeName: string
-}
-
-export type BrowsePayloadLike = Like<BrowsePayload>
-
 interface Lists {
-  browserResults: BrowserResult[]
+  browserResults: BrowseResult[]
   nodesToRead: (NodeId | string)[]
-  addressSpaceItemList: Todo[]
-  addressItemList: Todo[]
-  nodesToBrowse: Todo[],
+  addressSpaceItemList: AddressSpaceItem[]
+  addressItemList: AddressSpaceItem[]
+  nodesToBrowse: AddressSpaceItem[],
 }
 
 /**
@@ -113,20 +118,20 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig: Todo = this;
+    let nodeConfig: BrowseNodeWithConfig | any = this;
     const {iiot, browseTopic} = coreBrowser.initBrowserNode();
     nodeConfig.browseTopic = browseTopic;
     nodeConfig.iiot = iiot;
 
     nodeConfig.iiot.delayMessageTimer = []
 
-    const extractDataFromBrowserResults = (browserResultToFilter: Todo, lists: Todo) => {
+    const extractDataFromBrowserResults = (browserResultToFilter: BrowseResult[], lists: Lists) => {
       lists.addressItemList = []
 
-      browserResultToFilter.forEach(function (result: Todo) {
-        result.references.forEach(function (reference: Todo) {
+      browserResultToFilter.forEach((result: BrowseResult) => {
+        result.references?.forEach((reference: ReferenceDescription) => {
           coreBrowser.detailDebugLog('Add Reference To List :' + reference)
-          lists.browserResults.push(coreBrowser.transformToEntry(reference))
+          lists.browserResults.push(coreBrowser.transformToEntry(reference) as BrowseResult)
 
           if (reference.nodeId) {
             lists.nodesToRead.push(reference.nodeId.toString())
@@ -145,7 +150,9 @@ module.exports = function (RED: nodered.NodeAPI) {
       lists.addressSpaceItemList = lists.addressSpaceItemList.concat(lists.addressItemList)
     }
 
-    const browse = function (rootNodeId: NodeId, msg: NodeMessageInFlow, depth: number, lists: Todo, callback: TodoVoidFunction) {
+    type BrowseCallback = (rootNodeId: NodeIdLike, depth: number, msg: NodeMessageInFlow, lists: Lists) => void
+
+    const browse = function (rootNodeId: NodeId, msg: NodeMessageInFlow, depth: number, lists: Lists, callback: BrowseCallback) {
       if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'Browse')) {
         return
       }
@@ -154,7 +161,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       let rootNode = 'list'
 
       coreBrowser.browse(nodeConfig.connector.iiot.opcuaSession, rootNodeId)
-        .then(function (browserResults: Todo) {
+        .then((browserResults: BrowseResult[]) => {
           if (browserResults.length) {
             coreBrowser.detailDebugLog('Browser Result To String: ' + browserResults.toString())
             extractDataFromBrowserResults(browserResults, lists)
@@ -198,7 +205,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const browseNodeList = function (addressSpaceItems: AddressSpaceItem[], msg: NodeMessageInFlow, depth: number, lists: Lists, callback: TodoVoidFunction) {
+    const browseNodeList = (addressSpaceItems: AddressSpaceItem[], msg: NodeMessageInFlow, depth: number, lists: Lists, callback: BrowseCallback) => {
       if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'BrowseList')) {
         return
       }
@@ -208,7 +215,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       if (nodeConfig.connector.iiot.opcuaSession) {
         coreBrowser.browseAddressSpaceItems(nodeConfig.connector.iiot.opcuaSession, addressSpaceItems)
-          .then((browserResults: Todo) => {
+          .then((browserResults: BrowseResult[]) => {
             coreBrowser.detailDebugLog('List Browser Result To String: ' + browserResults.toString())
             extractDataFromBrowserResults(browserResults, lists)
             if (nodeConfig.recursiveBrowse) {
@@ -235,7 +242,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const sendMessage = (rootNodeId: NodeId, depth: number, originMessage: NodeMessageInFlow, lists: Todo) => {
+    const sendMessage = (rootNodeId: NodeIdLike, depth: number, originMessage: NodeMessageInFlow, lists: Lists) => {
       if (!lists) {
         coreBrowser.internalDebugLog('Lists Not Valid!')
         if (nodeConfig.showErrors) {
@@ -276,8 +283,9 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     const resetAllTimer = function () {
-      nodeConfig.iiot.delayMessageTimer.forEach((timerId: Todo) => {
-        clearTimeout(timerId)
+      nodeConfig.iiot.delayMessageTimer.forEach((timerId: NodeJS.Timeout | null) => {
+        if (timerId)
+          clearTimeout(timerId)
         timerId = null
       })
     }
@@ -315,7 +323,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const browseSendResult = function (rootNodeId: NodeId, depth: number, msg: NodeMessageInFlow, lists: Todo) {
+    const browseSendResult = function (rootNodeId: NodeIdLike, depth: number, msg: NodeMessageInFlow, lists: Lists) {
       coreBrowser.internalDebugLog(rootNodeId + ' called by depth ' + depth)
 
       if (nodeConfig.singleBrowseResult) {
@@ -329,7 +337,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const reset = function (lists: Todo) {
+    const reset = (lists: Lists) => {
       lists = createListsObject()
     }
 
@@ -400,16 +408,16 @@ module.exports = function (RED: nodered.NodeAPI) {
   RED.nodes.registerType('OPCUA-IIoT-Browser', OPCUAIIoTBrowser)
 
   RED.httpAdmin.get('/opcuaIIoT/browse/:id/:nodeId', RED.auth.needsPermission('opcuaIIoT.browse'), function (req, res) {
-    let node = RED.nodes.getNode(req.params.id)
-    let entries: Todo[] = []
+    let node = RED.nodes.getNode(req.params.id) as BrowseNodeWithConfig
+    let entries: (Entry | ReferenceDescription)[] = []
     let nodeRootId = decodeURIComponent(req.params.nodeId) || OBJECTS_ROOT
     coreBrowser.detailDebugLog('request for ' + req.params.nodeId)
 
-    if ((node as Todo).iiot.opcuaSession) {
-      coreBrowser.browse((node as Todo).iiot.opcuaSession, nodeRootId).then(function (browserResult: Todo) {
-        browserResult.forEach(function (result: Todo) {
+    if (node.iiot?.opcuaSession) {
+      coreBrowser.browse(node.iiot.opcuaSession, nodeRootId).then((browserResult: BrowseResult[]) => {
+        browserResult.forEach((result: BrowseResult) => {
           if (result.references && result.references.length) {
-            result.references.forEach(function (reference: Todo) {
+            result.references.forEach((reference: ReferenceDescription) => {
               entries.push(coreBrowser.transformToEntry(reference))
             })
           }
@@ -417,12 +425,12 @@ module.exports = function (RED: nodered.NodeAPI) {
         res.json(entries)
       }).catch(function (err: Error) {
         coreBrowser.internalDebugLog('Browser Error ' + err)
-        if ((node as Todo).showErrors) {
+        if (node.showErrors) {
           node.error(err, {payload: 'Browse Internal Error'})
         }
 
         entries.push({
-          displayName: {text: 'Objects'},
+          displayName: {text: 'Objects'}.toString(),
           nodeId: OBJECTS_ROOT,
           browseName: 'Objects'
         })

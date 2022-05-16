@@ -75,6 +75,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.injectType = config.injectType || 'inject'
 
     this.addressSpaceItems = config.addressSpaceItems || []
+    console.log(this.addressSpaceItems)
+    console.log(this.injectType)
 
     let node: Todo = this
 

@@ -1,6 +1,7 @@
 import {Todo} from "./placeholders";
 import * as nodeOPCUA from "node-opcua";
 import {DataType, DataValue, LocalizedText, NodeIdType} from "node-opcua";
+import {NodeIdLike} from "node-opcua-nodeid";
 
 export type TimeUnits =
   'ms' |
@@ -30,8 +31,16 @@ export type WriteMessage = {
 }
 
 export type AddressSpaceItem = {
-  datatypeName: DataType
-} & NodeToWrite
+  nodeId: string
+  browseName: string
+  displayName: string
+  nodeClass: string
+  datatypeName: string
+}
+
+// export type AddressSpaceItem = {
+//   datatypeName: DataType
+// } & NodeToWrite
 
 export type BrowseMessage = {
   'topic': string
