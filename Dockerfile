@@ -19,6 +19,7 @@ RUN npm install node-red-dashboard \
 
 
 COPY  opcuaIIoT /opt/node-red-contrib-iiot-opcua/opcuaIIoT
+COPY  examples /opt/node-red-contrib-iiot-opcua/examples
 COPY package.json /opt/node-red-contrib-iiot-opcua/
 COPY create_certificates.js /opt/node-red-contrib-iiot-opcua/
 
