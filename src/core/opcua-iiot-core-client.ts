@@ -10,7 +10,6 @@
 // SOURCE-MAP-REQUIRED
 
 
-
 import {OPCUASession, Todo, WriteResult} from "../types/placeholders";
 
 import debug from "debug";
@@ -36,7 +35,7 @@ const READ_TYPE = Object.freeze({
   HISTORY: 130
 }) // eslint-disable-line no-use-before-define
 
-const write = (session: OPCUASession, nodesToWrite: WriteValueOptions[], originMsg: Todo): Promise<WriteResult> =>  {
+const write = (session: OPCUASession, nodesToWrite: WriteValueOptions[], originMsg: Todo): Promise<WriteResult> => {
   return new Promise(
     (resolve, reject) => {
       if (session) {

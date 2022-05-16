@@ -8,11 +8,11 @@
  **/
 'use strict'
 import * as nodered from "node-red";
-import {recursivePrintTypes, Todo, TodoBianco} from "./types/placeholders";
+import {NodeMessageInFlow} from "node-red";
+import {Todo} from "./types/placeholders";
 import coreInject from "./core/opcua-iiot-core-inject";
 import {resetIiotNode} from "./core/opcua-iiot-core";
 import {CronJob} from 'cron';
-import {NodeMessageInFlow} from "node-red";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string
@@ -25,7 +25,6 @@ interface OPCUAIIoTInject extends nodered.Node {
   startDelay: number // TODO: parseFloat(config.startDelay) || 10
   injectType: Todo // TODO: config.injectType || 'inject'
   addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
-  bianco?: TodoBianco
 }
 
 interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
@@ -63,7 +62,7 @@ export interface InjectPayload {
 module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTInject (this: OPCUAIIoTInject, config: OPCUAIIoTInjectConfigurationDef) {
+  function OPCUAIIoTInject(this: OPCUAIIoTInject, config: OPCUAIIoTInjectConfigurationDef) {
     RED.nodes.createNode(this, config)
 
     this.topic = config.topic
@@ -105,16 +104,20 @@ module.exports = function (RED: nodered.NodeAPI) {
         if (typeof node.repeat !== "number" || isNaN(node.repeat)) return;
 
         intervalId = setInterval(() => {
-          this.emit('input', {_msgid: RED.util.generateId(), payload: {
+          this.emit('input', {
+            _msgid: RED.util.generateId(), payload: {
               injectType: "cron"
-            }})
+            }
+          })
         }, node.repeat)
       } else if (node.crontab !== '') {
         cronjob = new CronJob(node.crontab,
           () => {
-            this.emit('input', {_msgid: RED.util.generateId(), payload: {
-              injectType: "cron"
-              }})
+            this.emit('input', {
+              _msgid: RED.util.generateId(), payload: {
+                injectType: "cron"
+              }
+            })
           },
           null,
           true)
@@ -230,7 +233,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       } catch (err: any) {
         /* istanbul ignore next */
         res.sendStatus(500)
-        node.error(RED._('opcuaiiotinject.failed', { error: err.toString() }))
+        node.error(RED._('opcuaiiotinject.failed', {error: err.toString()}))
       }
     } else {
       /* istanbul ignore next */

@@ -8,7 +8,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
+import {Todo} from "./types/placeholders";
 import coreResponse from "./core/opcua-iiot-core-response";
 import {
   checkItemForUnsetState,
@@ -26,8 +26,8 @@ interface OPCUAIIoTResponse extends nodered.Node {
   activateFilters: string
   negateFilter: string
   filters: Todo[]
-  bianco?: TodoBianco
 }
+
 interface OPCUAIIoTResponseDef extends nodered.NodeDef {
   name: string
   compressStructure: string
@@ -38,6 +38,7 @@ interface OPCUAIIoTResponseDef extends nodered.NodeDef {
   negateFilter: string
   filters: Todo[]
 }
+
 /**
  * Response analyser Node-RED node for OPC UA IIoT nodes.
  *
@@ -46,7 +47,7 @@ interface OPCUAIIoTResponseDef extends nodered.NodeDef {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTResponse (this: OPCUAIIoTResponse, config: OPCUAIIoTResponseDef) {
+  function OPCUAIIoTResponse(this: OPCUAIIoTResponse, config: OPCUAIIoTResponseDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.compressStructure = config.compressStructure
@@ -59,7 +60,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     let node: Todo = this
     node.iiot = {}
-    this.status({ fill: 'green', shape: 'ring', text: 'active' })
+    this.status({fill: 'green', shape: 'ring', text: 'active'})
 
     const handleBrowserMsg = function (payload: Todo) {
       coreResponse.analyzeBrowserResults(node, payload)
@@ -85,28 +86,28 @@ module.exports = (RED: nodered.NodeAPI) => {
       return payload
     }
 
-    const handleWriteMsg = function (msg: Todo) {
-      coreResponse.analyzeWriteResults(node, msg)
+    const handleWriteMsg = function (payload: Todo) {
+      coreResponse.analyzeWriteResults(node, payload)
       if (node.compressStructure) {
-        coreResponse.compressWriteMessageStructure(msg)
+        coreResponse.compressWriteMessageStructure(payload)
       }
-      return msg
+      return payload
     }
 
-    const handleListenerMsg = function (msg: Todo) {
-      coreResponse.analyzeListenerResults(node, msg)
+    const handleListenerMsg = function (payload: Todo) {
+      coreResponse.analyzeListenerResults(node, payload)
       if (node.compressStructure) {
-        coreResponse.compressListenMessageStructure(msg)
+        coreResponse.compressListenMessageStructure(payload)
       }
-      return msg
+      return payload
     }
 
-    const handleMethodMsg = function (msg: Todo) {
-      coreResponse.analyzeMethodResults(node, msg)
+    const handleMethodMsg = function (payload: Todo) {
+      coreResponse.analyzeMethodResults(node, payload)
       if (node.compressStructure) {
-        coreResponse.compressMethodMessageStructure(msg)
+        coreResponse.compressMethodMessageStructure(payload)
       }
-      return msg
+      return payload
     }
 
     const handleDefaultMsg = function (payload: Todo) {
@@ -256,7 +257,7 @@ module.exports = (RED: nodered.NodeAPI) => {
      * Ensure msg has the NodeMessageInFlow format
      */
     const normalizeMessage = (msg: Record<string, any>): NodeMessageInFlow => {
-      if (Object.keys(msg).length <= 3 ) {
+      if (Object.keys(msg).length <= 3) {
         return msg as NodeMessageInFlow;
       }
       return {
@@ -272,7 +273,9 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.on('input', (msg: NodeMessageInFlow) => {
       try {
         if (node.activateUnsetFilter) {
-          if (msg.payload === void 0 || msg.payload === null || msg.payload === {}) { return }
+          if (msg.payload === void 0 || msg.payload === null || msg.payload === {}) {
+            return
+          }
         }
         msg = normalizeMessage(msg as Todo)
 

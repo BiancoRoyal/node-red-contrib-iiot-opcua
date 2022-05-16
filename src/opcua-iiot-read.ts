@@ -36,6 +36,7 @@ interface OPCUAIIoTRead extends Node {
   historyDays: number
   connector: Node
 }
+
 interface OPCUAIIoTReadDef extends NodeDef {
   attributeId: string
   maxAge: string
@@ -48,6 +49,7 @@ interface OPCUAIIoTReadDef extends NodeDef {
   historyDays: string
   connector: string
 }
+
 /**
  * Read Node-RED node.
  *
@@ -56,7 +58,7 @@ interface OPCUAIIoTReadDef extends NodeDef {
 module.exports = (RED: NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTRead (this: OPCUAIIoTRead, config: OPCUAIIoTReadDef) {
+  function OPCUAIIoTRead(this: OPCUAIIoTRead, config: OPCUAIIoTReadDef) {
     RED.nodes.createNode(this, config)
     this.attributeId = parseInt(config.attributeId) || 0
     this.maxAge = parseInt(config.maxAge) || 1
@@ -98,9 +100,9 @@ module.exports = (RED: NodeAPI) => {
             node.iiot.handleReadError(err, readResult.msg)
           }
         }).catch(function (err: Error) {
-          /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+        /* istanbul ignore next */
+        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+      })
     }
 
     const readValueFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
@@ -109,9 +111,9 @@ module.exports = (RED: NodeAPI) => {
           let message = buildResultMessage('VariableValue', readResult)
           this.send(message)
         }).catch(function (err: Error) {
-          /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+        /* istanbul ignore next */
+        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+      })
     }
 
     const readHistoryDataFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
@@ -132,9 +134,9 @@ module.exports = (RED: NodeAPI) => {
           message.payload.historyEnd = readResult.endDate || node.iiot.historyEnd
           this.send(message)
         }).catch((err: Error) => {
-          /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+        /* istanbul ignore next */
+        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+      })
     }
 
     const readFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
@@ -155,9 +157,9 @@ module.exports = (RED: NodeAPI) => {
           message.payload.maxAge = node.maxAge
           this.send(message)
         }).catch(function (err: Error) {
-          /* istanbul ignore next */
-          (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
-        })
+        /* istanbul ignore next */
+        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+      })
     }
 
     const readFromSession = (session: ClientSession | Todo, itemsToRead: Todo, originMsg: Todo) => {

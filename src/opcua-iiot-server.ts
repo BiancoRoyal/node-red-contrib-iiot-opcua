@@ -14,10 +14,11 @@ import coreServer from "./core/opcua-iiot-core-server";
 import {isInitializedIIoTNode, resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {NodeStatus} from "node-red";
 
-type OPCUAIIoTServer =  nodered.Node & {
+type OPCUAIIoTServer = nodered.Node & {
   asoDemo: boolean
   on(event: 'shutdown', listener: () => void): void
 }
+
 interface OPCUAIIoTServerDef extends nodered.NodeDef {
   asoDemo: boolean
 }
@@ -30,7 +31,7 @@ interface OPCUAIIoTServerDef extends nodered.NodeDef {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTServer (this: OPCUAIIoTServer, config: OPCUAIIoTServerDef) {
+  function OPCUAIIoTServer(this: OPCUAIIoTServer, config: OPCUAIIoTServerDef) {
     RED.nodes.createNode(this, config)
     coreServer.internalDebugLog('Open Server Node')
 
@@ -72,7 +73,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         createServer(serverOptions)
       } catch (err) {
         this.emit('server_create_error')
-        coreServer.handleServerError(node, err as Error, { payload: 'Server Failure! Please, check the server settings!' })
+        coreServer.handleServerError(node, err as Error, {payload: 'Server Failure! Please, check the server settings!'})
       }
     }
 
@@ -84,24 +85,25 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreServer.constructAddressSpace(node.iiot.opcuaServer, node.asoDemo)
         .then((err: Todo) => {
           if (err) {
-            coreServer.handleServerError(node, err, { payload: 'Server Address Space Problem' })
-          } else {'close'
+            coreServer.handleServerError(node, err, {payload: 'Server Address Space Problem'})
+          } else {
+            'close'
             coreServer.start(node.iiot.opcuaServer, node)
               .then(() => {
                 node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
                 this.emit('server_running')
               }).catch((err: Error) => {
-                if (isInitializedIIoTNode(node)) {
-                  node.iiot.opcuaServer = null
-                }
-                this.emit('server_start_error')
-                node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-                coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
-              })
+              if (isInitializedIIoTNode(node)) {
+                node.iiot.opcuaServer = null
+              }
+              this.emit('server_start_error')
+              node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+              coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
+            })
           }
         }).catch(function (err: Error) {
-          coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
-        })
+        coreServer.handleServerError(node, err, {payload: 'Server Address Space Failure'})
+      })
     }
 
     initNewServer()

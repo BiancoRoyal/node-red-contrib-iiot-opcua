@@ -9,6 +9,7 @@
 
 import * as nodered from "node-red";
 import {Todo} from "./types/placeholders";
+
 interface OPCUAIIoTResultFilter extends nodered.Node {
   nodeId: string
   datatype: string
@@ -26,6 +27,7 @@ interface OPCUAIIoTResultFilter extends nodered.Node {
   name: string
   showErrors: boolean
 }
+
 interface OPCUAIIoTResultFilterDef extends nodered.NodeDef {
   nodeId: string
   datatype: string
@@ -63,7 +65,7 @@ module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   const _ = require('underscore')
 
-  function OPCUAIIoTResultFilter (this: OPCUAIIoTResultFilter, config: OPCUAIIoTResultFilterDef) {
+  function OPCUAIIoTResultFilter(this: OPCUAIIoTResultFilter, config: OPCUAIIoTResultFilterDef) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.datatype = config.datatype
@@ -84,7 +86,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     let node: Todo = this
     node.iiot = {};
 
-    this.status({ fill: 'blue', shape: 'ring', text: 'new' })
+    this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     type FilterInputPayload = {
       statusCodes: Todo[]
@@ -104,15 +106,15 @@ module.exports = (RED: nodered.NodeAPI) => {
       const payload = msg.payload as FilterInputPayload & BrowsePayload
       const filtered = filterByType(payload)
       const value =
-          node.justValue ?
-              // if justValue, return the filtered value of the input message
-              filterResult(payload) :
-              // otherwise return the value field of the payload
-              // The field considered 'value' is different for crawler and browsers
-              (filtered.value || filtered.crawlerResults || filtered.browserResults)
+        node.justValue ?
+          // if justValue, return the filtered value of the input message
+          filterResult(payload) :
+          // otherwise return the value field of the payload
+          // The field considered 'value' is different for crawler and browsers
+          (filtered.value || filtered.crawlerResults || filtered.browserResults)
 
 
-      const { msg: msgKey, ...restPayload } = payload;
+      const {msg: msgKey, ...restPayload} = payload;
 
       const outputPayload = {
         ...restPayload,
@@ -172,7 +174,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       Object.keys(object).forEach((key) => {
-        if (!object[key] || object[key].length === 0 ) {
+        if (!object[key] || object[key].length === 0) {
           delete object[key]
         }
       })
@@ -328,22 +330,22 @@ module.exports = (RED: nodered.NodeAPI) => {
       const browserResults = filterListByNodeId(node.nodeId, msg.browserResults)
 
       const addressSpaceItems = (msg.addressSpaceItems && msg.addressSpaceItems.length) ?
-          filterListByNodeId(node.nodeId, msg.addressSpaceItems) : [];
+        filterListByNodeId(node.nodeId, msg.addressSpaceItems) : [];
 
       const nodesToRead = (msg.nodesToRead && msg.nodesToRead.length) ?
-          filterListEntryByNodeId(node.nodeId, msg.nodesToRead): [];
+        filterListEntryByNodeId(node.nodeId, msg.nodesToRead) : [];
       const nodesToReadCount = (msg.nodesToRead && msg.nodesToRead.length) ?
-          nodesToRead.length: 0;
+        nodesToRead.length : 0;
 
       const addressItemsToRead = (msg.addressItemsToRead && msg.addressItemsToRead.length) ?
-          filterListByNodeId(node.nodeId, msg.addressItemsToRead): []
+        filterListByNodeId(node.nodeId, msg.addressItemsToRead) : []
       const addressItemsToReadCount = (msg.addressItemsToRead && msg.addressItemsToRead.length) ?
-          addressItemsToRead.length: 0
+        addressItemsToRead.length : 0
 
       const addressItemsToBrowse = (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) ?
-          filterListByNodeId(node.nodeId, msg.addressItemsToBrowse) : []
+        filterListByNodeId(node.nodeId, msg.addressItemsToBrowse) : []
       const addressItemsToBrowseCount = (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) ?
-          addressItemsToBrowse.length : 0
+        addressItemsToBrowse.length : 0
 
       return {
         browserResults,
@@ -361,7 +363,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       const crawlerResults = filterListByNodeId(node.nodeId, msg.crawlerResults)
 
       const addressItems = (msg.addressSpaceItems && msg.addressSpaceItems.length) ?
-          filterListByNodeId(node.nodeId, msg.addressSpaceItems): []
+        filterListByNodeId(node.nodeId, msg.addressSpaceItems) : []
 
       return {
         crawlerResults,
@@ -379,7 +381,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       node.maxvalue = convertDataType(node.maxvalue)
     }
 
-    this.status({ fill: 'green', shape: 'dot', text: 'active' })
+    this.status({fill: 'green', shape: 'dot', text: 'active'})
 
     if (process.env.TEST === "true")
       node.functions = {

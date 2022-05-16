@@ -60,7 +60,7 @@ export type  EventPayloadLike = Like<EventPayload>
  */
 module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
-  function OPCUAIIoTEvent (this: OPCUAIIoTEvent, config: OPCUAIIoTEventDef) {
+  function OPCUAIIoTEvent(this: OPCUAIIoTEvent, config: OPCUAIIoTEventDef) {
     RED.nodes.createNode(this, config)
     this.eventType = config.eventType
     this.eventTypeLabel = config.eventTypeLabel
@@ -79,24 +79,24 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
     nodeConfig.iiot.subscribed = false
 
-    statusCall({ fill: 'blue', shape: 'ring', text: 'new' })
+    statusCall({fill: 'blue', shape: 'ring', text: 'new'})
     this.on('input', (msg: NodeMessageInFlow) => {
       nodeConfig.iiot.subscribed = !nodeConfig.iiot.subscribed
 
       if (nodeConfig.usingListener) {
         if (nodeConfig.iiot.subscribed) {
-          statusCall({ fill: 'blue', shape: 'dot', text: 'subscribed' })
+          statusCall({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
-          statusCall({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
+          statusCall({fill: 'blue', shape: 'ring', text: 'not subscribed'})
         }
       } else {
-        statusCall({ fill: 'blue', shape: 'dot', text: 'injected' })
+        statusCall({fill: 'blue', shape: 'dot', text: 'injected'})
       }
 
       const uaEventFields = [
         ...coreListener.getBasicEventFields(),
         ...getAdditionalEventFields()
-        ]
+      ]
 
       const interval = (msg.payload as InjectPayload).value;
 
@@ -124,11 +124,11 @@ module.exports = function (RED: nodered.NodeAPI) {
     const getAdditionalEventFields = () => {
       switch (nodeConfig.resultType) {
         case 'condition':
-          return(coreListener.getConditionFields())
+          return (coreListener.getConditionFields())
         case 'state':
-          return(coreListener.getStateFields())
+          return (coreListener.getStateFields())
         case 'all':
-          return(coreListener.getAllEventFields())
+          return (coreListener.getAllEventFields())
         default:
           return []
       }

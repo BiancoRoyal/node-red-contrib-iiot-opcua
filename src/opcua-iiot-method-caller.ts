@@ -32,6 +32,7 @@ interface OPCUAIIoTMethodCaller extends nodered.Node {
   inputArguments: string
   connector: Node
 }
+
 interface OPCUAIIoTMethodCallerDef extends nodered.NodeDef {
   objectId: string
   methodId: string
@@ -44,6 +45,7 @@ interface OPCUAIIoTMethodCallerDef extends nodered.NodeDef {
   inputArguments: string
   connector: string
 }
+
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT method call.
  *
@@ -52,7 +54,7 @@ interface OPCUAIIoTMethodCallerDef extends nodered.NodeDef {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTMethodCaller (this: OPCUAIIoTMethodCaller, config: OPCUAIIoTMethodCallerDef) {
+  function OPCUAIIoTMethodCaller(this: OPCUAIIoTMethodCaller, config: OPCUAIIoTMethodCallerDef) {
     RED.nodes.createNode(this, config)
     this.objectId = config.objectId
     this.methodId = config.methodId
@@ -109,9 +111,9 @@ module.exports = (RED: nodered.NodeAPI) => {
         if (message.payload.inputArguments) {
           delete message.payload['inputArguments']
         }
-       return null
+        return null
       } else {
-       return {
+        return {
           result,
           definition: definitionResults
         }
@@ -129,7 +131,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         message.payload.methodType = data.msg.payload.methodType
 
         for (result of data.results) {
-          outputArguments.push({ statusCode: result.statusCode, outputArguments: result.outputArguments })
+          outputArguments.push({statusCode: result.statusCode, outputArguments: result.outputArguments})
         }
 
         message.payload.value = getDataValue(message, data.results, definitionResults) || outputArguments

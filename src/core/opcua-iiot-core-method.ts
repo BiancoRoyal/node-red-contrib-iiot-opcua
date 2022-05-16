@@ -65,7 +65,7 @@ const callMethods = function (session: OPCUASession, msg: Todo) {
             if (err) {
               reject(err)
             } else {
-              resolve({ results, msg })
+              resolve({results, msg})
             }
           })
         } catch (err) {
@@ -82,7 +82,7 @@ const buildMessagesFromMethodCalls = function (methodCallsResults: Todo) {
         reject(new Error('Methods Call Results To Messages Session Not Valid'))
       } else {
         let resultMessages: Todo[] = []
-        resolve({ methodCallsResults: methodCallsResults, messages: resultMessages })
+        resolve({methodCallsResults: methodCallsResults, messages: resultMessages})
       }
     })
 }

@@ -8,8 +8,6 @@
  */
 'use strict'
 
-import * as nodered from "node-red";
-import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {
   CoreNode,
   OPCUASession,
@@ -21,18 +19,22 @@ import {
 } from "./types/placeholders";
 import coreClient from "./core/opcua-iiot-core-client";
 import {
-  buildNodesToWrite, checkConnectorState,
-  checkSessionNotValid, deregisterToConnector,
+  buildNodesToWrite,
+  checkConnectorState,
+  checkSessionNotValid,
+  deregisterToConnector,
   initCoreNode,
   isInitializedIIoTNode,
-  isSessionBad, registerToConnector, resetIiotNode
+  isSessionBad,
+  registerToConnector,
+  resetIiotNode
 } from "./core/opcua-iiot-core";
 import {WriteValueOptions} from "node-opcua-service-write";
-import {NodeMessage, NodeStatus} from "node-red";
+import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
 import {BrowsePayload} from "./opcua-iiot-browser";
 
 
-interface OPCUAIIoTWrite extends nodered.Node {
+interface OPCUAIIoTWrite extends Node {
   name: string
   justValue: string
   showStatusActivities: boolean
@@ -40,7 +42,7 @@ interface OPCUAIIoTWrite extends nodered.Node {
   connector: Node
 }
 
-interface OPCUAIIoTWriteDef extends nodered.NodeDef {
+interface OPCUAIIoTWriteDef extends NodeDef {
   name: string
   justValue: string
   showStatusActivities: boolean
@@ -53,10 +55,10 @@ interface OPCUAIIoTWriteDef extends nodered.NodeDef {
  *
  * @param RED
  */
-module.exports = (RED: nodered.NodeAPI) => {
+module.exports = (RED: NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTWrite (this: OPCUAIIoTWrite, config: OPCUAIIoTWriteDef) {
+  function OPCUAIIoTWrite(this: OPCUAIIoTWrite, config: OPCUAIIoTWriteDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.justValue = config.justValue
@@ -168,7 +170,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         done()
       })
     })
-    if (process.env.TEST === "true"){
+    if (process.env.TEST === "true") {
       node.functions = {
         handleWriteError
       }

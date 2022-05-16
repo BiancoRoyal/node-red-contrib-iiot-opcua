@@ -54,11 +54,11 @@ const simulateVariation = function (data: Todo) {
   }
 
   if (data.tankLevel) {
-    data.tankLevel.setValueFromSource({ dataType: 'Double', value })
+    data.tankLevel.setValueFromSource({dataType: 'Double', value})
   }
 
   if (data.tankLevel2) {
-    data.tankLevel2.setValueFromSource({ dataType: 'Double', value })
+    data.tankLevel2.setValueFromSource({dataType: 'Double', value})
   }
 }
 
@@ -102,8 +102,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
         organizedBy: addressSpace?.rootFolder.views,
         browseName: 'IiotServerView',
         displayName: [
-          new LocalizedText({ text: 'OPCUA-IIoT Server View', locale: 'en-US' }),
-          new LocalizedText({ text: 'OPCUA-IIoT Server Sicht', locale: 'de-DE' })
+          new LocalizedText({text: 'OPCUA-IIoT Server View', locale: 'en-US'}),
+          new LocalizedText({text: 'OPCUA-IIoT Server Sicht', locale: 'de-DE'})
         ]
       })
       if (!asoDemo) {
@@ -126,8 +126,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           nodeId: 'i=1234',
           browseName: 'IiotServer',
           displayName: [
-            new LocalizedText({ text: 'OPCUA-IIoT Server', locale: 'en-US' }),
-            new LocalizedText({ text: 'OPCUA-IIoT Server', locale: 'de-DE' })
+            new LocalizedText({text: 'OPCUA-IIoT Server', locale: 'en-US'}),
+            new LocalizedText({text: 'OPCUA-IIoT Server', locale: 'de-DE'})
           ],
         })
 
@@ -203,8 +203,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           nodeId: 's=free_memory',
           browseName: 'FreeMemory',
           displayName: [
-            new LocalizedText({ text: 'Free Memory', locale: 'en-US' }),
-            new LocalizedText({ text: 'ungenutzer RAM', locale: 'de-DE' })
+            new LocalizedText({text: 'Free Memory', locale: 'en-US'}),
+            new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})
           ],
           dataType: 'Double',
 
@@ -272,7 +272,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
         addressSpace.installHistoricalDataNode(fullcounterVariable)
 
         let externalValueWithSourceTimestamp = new DataValue({
-          value: new Variant({ dataType: 'Double', value: 10.0 }),
+          value: new Variant({dataType: 'Double', value: 10.0}),
           sourceTimestamp: null,
           sourcePicoseconds: 0
         })
@@ -336,8 +336,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           nodeId: 's=PumpSpeed',
           browseName: 'PumpSpeed',
           displayName: [
-            new LocalizedText({ text: 'Pump Speed', locale: 'en-US' }),
-            new LocalizedText({ text: 'Geschwindigkeit Pumpe', locale: 'de-DE' })
+            new LocalizedText({text: 'Pump Speed', locale: 'en-US'}),
+            new LocalizedText({text: 'Geschwindigkeit Pumpe', locale: 'de-DE'})
           ],
           dataType: 'Double',
           value: {
@@ -355,8 +355,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           nodeId: 's=SomeDate',
           browseName: 'SomeDate',
           displayName: [
-            new LocalizedText({ text: 'Some Date', locale: 'en-US' }),
-            new LocalizedText({ text: 'Einfaches Datum', locale: 'de-DE' })
+            new LocalizedText({text: 'Some Date', locale: 'en-US'}),
+            new LocalizedText({text: 'Einfaches Datum', locale: 'de-DE'})
           ],
           dataType: 'DateTime',
           value: {
@@ -374,17 +374,17 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           nodeId: 's=MultiLanguageText',
           browseName: 'MultiLanguageText',
           displayName: [
-            new LocalizedText({ text: 'Multi Language Text', locale: 'en-US' }),
-            new LocalizedText({ text: 'Mehrsprachiger Text', locale: 'de-DE' })
+            new LocalizedText({text: 'Multi Language Text', locale: 'en-US'}),
+            new LocalizedText({text: 'Mehrsprachiger Text', locale: 'de-DE'})
           ],
           dataType: 'LocalizedText',
           value: {
             get: function () {
               return new Variant({
                 dataType: DataType.LocalizedText,
-                value: [{ text: 'multilingual text', locale: 'en' },
-                  { text: 'mehrsprachiger Text', locale: 'de' },
-                  { text: 'texte multilingue', locale: 'fr' }]
+                value: [{text: 'multilingual text', locale: 'en'},
+                  {text: 'mehrsprachiger Text', locale: 'de'},
+                  {text: 'texte multilingue', locale: 'fr'}]
               })
             }
           }
@@ -395,7 +395,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           nodeId: 's=FanSpeed',
           browseName: 'FanSpeed',
           dataType: 'Double',
-          value: new Variant({ dataType: 'Double', value: 1000.0 })
+          value: new Variant({dataType: 'Double', value: 1000.0})
         })
 
         intervalList.push(setInterval(function () {
@@ -414,18 +414,18 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
               {
                 name: 'barks',
                 dataType: 'UInt32',
-                description: { text: 'specifies the number of time I should bark' }
+                description: {text: 'specifies the number of time I should bark'}
               }, {
                 name: 'volume',
                 dataType: 'UInt32',
-                description: { text: 'specifies the sound volume [0 = quiet ,100 = loud]' }
+                description: {text: 'specifies the sound volume [0 = quiet ,100 = loud]'}
               }
             ],
 
             outputArguments: [{
               name: 'Barks',
               dataType: 'String',
-              description: { text: 'the generated barks' },
+              description: {text: 'the generated barks'},
               valueRank: 1
             }]
           })
@@ -457,8 +457,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           browseName: 'TemperatureAnalogItem',
           definition: '(tempA -25) + tempB',
           valuePrecision: 0.5,
-          engineeringUnitsRange: { low: 100, high: 200 },
-          instrumentRange: { low: -100, high: +200 },
+          engineeringUnitsRange: {low: 100, high: 200},
+          instrumentRange: {low: -100, high: +200},
           engineeringUnits: standardUnits.degree_celsius,
           dataType: 'Double',
           value: {
@@ -512,9 +512,9 @@ const start = function (server: Todo, node: Todo) {
             server.endpoints.forEach(function (endpoint: Todo) {
               endpoint.endpointDescriptions().forEach(function (endpointDescription: EndpointDescription) {
                 internalDebugLog('Server endpointUrl: ' +
-              endpointDescription.endpointUrl + ' securityMode: ' +
-              endpointDescription.securityMode.toString() +
-              ' securityPolicyUri: ' + endpointDescription.securityPolicyUri ? endpointDescription.securityPolicyUri?.toString() : 'None Security Policy Uri')
+                endpointDescription.endpointUrl + ' securityMode: ' +
+                endpointDescription.securityMode.toString() +
+                ' securityPolicyUri: ' + endpointDescription.securityPolicyUri ? endpointDescription.securityPolicyUri?.toString() : 'None Security Policy Uri')
               })
             })
 
@@ -524,13 +524,13 @@ const start = function (server: Todo, node: Todo) {
 
           server.on('newChannel', function (channel: Todo) {
             internalDebugLog('Client connected with address = ' +
-            channel.remoteAddress + ' port = ' + channel.remotePort
+              channel.remoteAddress + ' port = ' + channel.remotePort
             )
           })
 
           server.on('closeChannel', function (channel: Todo) {
             internalDebugLog('Client disconnected with address = ' +
-            channel.remoteAddress + ' port = ' + channel.remotePort
+              channel.remoteAddress + ' port = ' + channel.remotePort
             )
           })
 
@@ -750,16 +750,16 @@ const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadable
 
   newNodeOPCUAVariable.nodeId = msg.payload.nodeId
   newNodeOPCUAVariable.browseName = msg.payload.browsename
-  newNodeOPCUAVariable.displayName = new LocalizedText({ locale: null, text: msg.payload.displayname })
+  newNodeOPCUAVariable.displayName = new LocalizedText({locale: null, text: msg.payload.displayname})
   newNodeOPCUAVariable.dataType = msg.payload.datatype
   newNodeOPCUAVariable.value = {
-    get () {
+    get() {
       return new Variant({
         dataType: DataType[msg.payload.datatype],
         value: variableData
       })
     },
-    set (variant: Todo) {
+    set(variant: Todo) {
       variableData = variant.value
       return StatusCodes.Good
     }
@@ -784,7 +784,7 @@ const addObjectToAddressSpace = function (node: Todo, msg: Todo, humanReadableTy
       typeDefinition: msg.payload.objecttype,
       nodeId: msg.payload.nodeId,
       browseName: msg.payload.browsename,
-      displayName: new LocalizedText({ locale: null, text: msg.payload.displayname })
+      displayName: new LocalizedText({locale: null, text: msg.payload.displayname})
     }
 
     addressSpace.getOwnNamespace().addObject(newNodeOPCUObject)
@@ -824,7 +824,7 @@ const restartServer = function (node: Todo, statusHandler: (status: string | Nod
     node.emit('shutdown')
   }
 
-  node.send({ payload: 'server shutdown' })
+  node.send({payload: 'server shutdown'})
   node.oldStatusParameter = setNodeStatusTo(node, 'shutdown', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
@@ -865,7 +865,7 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
       // applicationType: ApplicationType.CLIENTANDSERVER,
       // applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), createServerNameWithPrefix(node.port, prefix)),
       productUri: createServerNameWithPrefix(node.port, prefix),
-      applicationName: { text: 'Node-RED', locale: 'en' },
+      applicationName: {text: 'Node-RED', locale: 'en'},
       gatewayServerUri: null,
       discoveryProfileUri: null,
       discoveryUrls: []

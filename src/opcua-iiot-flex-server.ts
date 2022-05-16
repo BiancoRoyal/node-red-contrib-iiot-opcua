@@ -21,9 +21,11 @@ import internalDebugLog = logger.internalDebugLog;
 type OPCUAIIoTFlexServer = nodered.Node & {
   on(event: 'shutdown', callback: () => void): void
 }
+
 interface OPCUAIIoTFlexServerDef extends nodered.NodeDef {
   addressSpaceScript: Todo
 }
+
 /**
  * Server Node-RED node.
  *
@@ -33,7 +35,7 @@ module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let scriptObjects = {}
 
-  function OPCUAIIoTFlexServer (this: OPCUAIIoTFlexServer, config: OPCUAIIoTFlexServerDef) {
+  function OPCUAIIoTFlexServer(this: OPCUAIIoTFlexServer, config: OPCUAIIoTFlexServerDef) {
     RED.nodes.createNode(this, config)
     coreServer.flexInternalDebugLog('Open Server Node')
 
@@ -58,10 +60,10 @@ module.exports = (RED: nodered.NodeAPI) => {
           keys: function () {
             return node.context().keys.apply(node, arguments)
           },
-          get global () {
+          get global() {
             return node.context().global
           },
-          get flow () {
+          get flow() {
             return node.context().flow
           }
         },
@@ -140,7 +142,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         /* istanbul ignore next */
         this.emit('server_create_error')
         coreServer.flexInternalDebugLog(err.message)
-        coreServer.handleServerError(node, err, { payload: 'Flex Server Failure! Please, check the server settings!' })
+        coreServer.handleServerError(node, err, {payload: 'Flex Server Failure! Please, check the server settings!'})
       }
     }
 
@@ -151,16 +153,16 @@ module.exports = (RED: nodered.NodeAPI) => {
           coreServer.start(node.iiot.opcuaServer, node).then(() => {
             node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             this.emit('server_running')
-          }).catch((err: Error) =>{
+          }).catch((err: Error) => {
             /* istanbul ignore next */
             this.emit('server_start_error')
             node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-            coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
+            coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
           })
         }).catch(function (err: Error) {
-          /* istanbul ignore next */
-          coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
-        })
+        /* istanbul ignore next */
+        coreServer.handleServerError(node, err, {payload: 'Server Address Space Failure'})
+      })
     }
 
     initNewServer()

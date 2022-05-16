@@ -7,10 +7,10 @@
  */
 'use strict'
 import * as nodered from "node-red";
-import {NodeObject, Todo, TodoBianco} from "./types/placeholders";
+import {NodeMessage, NodeStatus} from "node-red";
+import {Todo} from "./types/placeholders";
 import coreConnector from "./core/opcua-iiot-core-connector";
 import {deregisterToConnector, registerToConnector, resetIiotNode} from "./core/opcua-iiot-core";
-import {NodeMessage, NodeStatus} from "node-red";
 import {NodeMessageInFlow} from "@node-red/registry";
 
 export interface OPCUAIIoTFlexConnector extends nodered.Node {
@@ -25,6 +25,7 @@ interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
   showErrors: boolean
   connector: any
 }
+
 /**
  * Event Node-RED node.
  *
@@ -33,7 +34,7 @@ interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
 module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTFlexConnector (this: OPCUAIIoTFlexConnector, config: OPCUAIIoTFlexConnectorConfigurationDef) {
+  function OPCUAIIoTFlexConnector(this: OPCUAIIoTFlexConnector, config: OPCUAIIoTFlexConnectorConfigurationDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.showStatusActivities = config.showStatusActivities
@@ -43,7 +44,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     let nodeConfig = this;
     nodeConfig.iiot = {}
 
-    this.status({ fill: 'blue', shape: 'ring', text: 'new' })
+    this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     this.on('input', (msg: NodeMessageInFlow) => {
       coreConnector.internalDebugLog('connector change request input')

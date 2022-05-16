@@ -8,22 +8,25 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
 import {NodeMessageInFlow} from "node-red";
+import {Todo} from "./types/placeholders";
 import {logger} from "./core/opcua-iiot-core-connector";
-import internalDebugLog = logger.internalDebugLog;
 import {resetIiotNode} from "./core/opcua-iiot-core";
+import internalDebugLog = logger.internalDebugLog;
+
 interface OPCUAIIoTCMD extends nodered.Node {
   commandtype: string
   nodeId: string
   name: string
-  bianco?: TodoBianco
+  
 }
+
 interface OPCUAIIoTCMDDef extends nodered.NodeDef {
   commandtype: string
   nodeId: string
   name: string
 }
+
 /**
  * Address space object Node-RED node.
  *
@@ -33,7 +36,7 @@ interface OPCUAIIoTCMDDef extends nodered.NodeDef {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTCMD (this: OPCUAIIoTCMD, config: OPCUAIIoTCMDDef) {
+  function OPCUAIIoTCMD(this: OPCUAIIoTCMD, config: OPCUAIIoTCMDDef) {
     RED.nodes.createNode(this, config)
     this.commandtype = config.commandtype
     this.nodeId = config.nodeId
@@ -42,7 +45,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     let node = this
 
 
-    this.on('input',  (msg: NodeMessageInFlow | Todo) => {
+    this.on('input', (msg: NodeMessageInFlow | Todo) => {
       let returnMessage: Todo = {};
 
       returnMessage.nodetype = 'inject'

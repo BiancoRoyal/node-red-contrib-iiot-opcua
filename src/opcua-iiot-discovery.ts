@@ -14,10 +14,12 @@ import coreDiscovery from "./core/opcua-iiot-core-discovery";
 import {OPCUADiscoveryServer, OPCUAServerEndPoint} from "node-opcua";
 import {InjectMessage} from "./opcua-iiot-inject";
 import {NodeMessageInFlow} from "node-red";
+
 interface OPCUAIIoTDiscovery extends nodered.Node {
   discoveryPort: number
   bianco?: Todo
 }
+
 interface OPCUAIIoTDiscoveryDef extends nodered.NodeDef {
   discoveryPort: number
 }
@@ -30,6 +32,7 @@ interface DiscoveryMessagePayload {
   discoveryUrls: string[]
   endpoints: OPCUAServerEndPoint[]
 }
+
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
  *
@@ -38,22 +41,22 @@ interface DiscoveryMessagePayload {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTDiscovery (this: OPCUAIIoTDiscovery, config: OPCUAIIoTDiscoveryDef) {
+  function OPCUAIIoTDiscovery(this: OPCUAIIoTDiscovery, config: OPCUAIIoTDiscoveryDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.discoveryPort = config.discoveryPort || coreDiscovery.DEFAULT_OPCUA_DISCOVERY_PORT
 
     let node = this
 
-    const discoveryServer = new OPCUADiscoveryServer({ port: node.discoveryPort })
+    const discoveryServer = new OPCUADiscoveryServer({port: node.discoveryPort})
 
-    this.status({ fill: 'yellow', shape: 'ring', text: 'starting' })
+    this.status({fill: 'yellow', shape: 'ring', text: 'starting'})
 
     coreDiscovery.detailDebugLog('discovery endpoints:' + discoveryServer._get_endpoints())
 
     discoveryServer.start(() => {
       coreDiscovery.internalDebugLog('discovery server started')
-      this.status({ fill: 'green', shape: 'dot', text: 'active' })
+      this.status({fill: 'green', shape: 'dot', text: 'active'})
     })
 
     this.on('input', (msg) => {

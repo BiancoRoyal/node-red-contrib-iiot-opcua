@@ -1,6 +1,6 @@
 import * as nodeOPCUA from "node-opcua";
-import {BrowseMessage, ItemNodeId, NodeIdentifier, NodeToWrite, VariantType} from "./core";
 import {ClientSession, DataType, DataValue, NodeId} from "node-opcua";
+import {BrowseMessage, ItemNodeId, NodeIdentifier, NodeToWrite, VariantType} from "./core";
 import {CoreMachineStates} from "../core/opcua-iiot-core-connector";
 import {Node, NodeStatus} from "node-red";
 import {OPCUAIIoTConnectorNode} from "../opcua-iiot-connector";
@@ -14,7 +14,7 @@ export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): 
   if (depth == 1)
     console.log("Types of object: {");
   const indent = "  ".repeat(depth);
-  if (o === undefined || o === null){
+  if (o === undefined || o === null) {
     console.log(indent + "object is null or undefined");
     return;
   }
@@ -23,10 +23,10 @@ export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): 
       console.log(indent + key + ": {");
       recursivePrintTypes(o[key], depth + 1);
       console.log(indent + "}, ");
-    // } else if (o[key].length) {
-    //   console.log(indent + key + "[]: {");
-    //   recursivePrintTypes(o[key][0], depth + 1);
-    //   console.log(indent + "}, ");
+      // } else if (o[key].length) {
+      //   console.log(indent + key + "[]: {");
+      //   recursivePrintTypes(o[key][0], depth + 1);
+      //   console.log(indent + "}, ");
     } else {
       console.log(indent + key + ": " + typeof o[key] + " = " + o[key] + ',');
     }
@@ -37,10 +37,9 @@ export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): 
 
 export type Todo = any;
 export type TodoVoidFunction = (...args: any) => void;
-export type TodoBianco = Todo;
 
 
-export const getEnumKeys = <O extends object, K extends keyof O>(obj: O): K[] =>  {
+export const getEnumKeys = <O extends object, K extends keyof O>(obj: O): K[] => {
   return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
 }
 
@@ -64,7 +63,7 @@ export type CoreNode = {
 
 export type BrowserNode = Node & BrowserNodeAttributes
 
-export type BrowserNodeAttributes =  {
+export type BrowserNodeAttributes = {
   browseTopic: string
   oldStatusParameter?: NodeStatus
   iiot: {
@@ -76,7 +75,7 @@ export type BrowserNodeAttributes =  {
 
 export type IIOT = {
   nodeOPCUAId: NodeId
-  stateMachine: StateMachine
+  stateMachine: Todo
   opcuaClient: nodeOPCUA.OPCUAClient
   opcuaSession: nodeOPCUA.ClientSession | null
 
@@ -84,9 +83,9 @@ export type IIOT = {
   buildResultMessage: (result: WriteResult) => ResultMessage
   convertDataValueByDataType: (value: DataValue, dataType: DataType) => string
   dataValueIsString: (value: DataValue | string) => value is string
-  deregisterForOPCUA: (node: NodeObject, callback: ()=>void) => void
+  deregisterForOPCUA: (node: NodeObject, callback: () => void) => void
   extractDataValueString: (message: WriteResultMessage, result: WriteResult) => string
-  getBasicDataTypes: () => {name: string, dataType: nodeOPCUA.DataType}[]
+  getBasicDataTypes: () => { name: string, dataType: nodeOPCUA.DataType }[]
   getVariantValue: (datatype: DataType, value: any) => number | Date | boolean | string
   handleWriteError: (err: Error, msg: string) => void
   newOPCUANodeIdFromItemNodeId: (item: ItemNodeId | string) => nodeOPCUA.NodeId
@@ -102,12 +101,8 @@ export type IIOT = {
   writeToSession: (session: OPCUASession, originMsg: string) => void
 }
 
-export type StateMachine = {
-  getMachineState: () => CoreMachineStates
-}
-
 export type OPCUASession = ClientSession;
-export type WriteResult = {msg: WriteResultMessage} & Todo;
+export type WriteResult = { msg: WriteResultMessage } & Todo;
 export type WriteResultMessage = Todo;
 export type ResultMessage = {
   resultsConverted: string

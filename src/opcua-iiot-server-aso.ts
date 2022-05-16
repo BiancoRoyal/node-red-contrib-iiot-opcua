@@ -8,12 +8,13 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
+import {Todo} from "./types/placeholders";
 import {NodeMessageInFlow} from "node-red";
 import {OBJECTS_ROOT, resetIiotNode} from "./core/opcua-iiot-core";
 import {ReferenceTypeIds} from "node-opcua";
 import {logger} from "./core/opcua-iiot-core-connector";
 import internalDebugLog = logger.internalDebugLog;
+
 interface OPCUAIIoTASO extends nodered.Node {
   nodeId: string
   browsename: string
@@ -24,8 +25,9 @@ interface OPCUAIIoTASO extends nodered.Node {
   datatype: string
   value: string
   name: string
-  bianco?: TodoBianco
+  
 }
+
 interface OPCUAIIoTCMDASO extends nodered.NodeDef {
   nodeId: string
   browsename: string
@@ -37,6 +39,7 @@ interface OPCUAIIoTCMDASO extends nodered.NodeDef {
   value: string
   name: string
 }
+
 /**
  * Address space object Node-RED node.
  *
@@ -45,7 +48,7 @@ interface OPCUAIIoTCMDASO extends nodered.NodeDef {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTASO (this: OPCUAIIoTASO, config: OPCUAIIoTCMDASO) {
+  function OPCUAIIoTASO(this: OPCUAIIoTASO, config: OPCUAIIoTCMDASO) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.browsename = config.browsename
@@ -67,7 +70,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         node.value = msg.payload.payload || node.value
       }
       const value = node.value || msg.payload.value;
-      msg = { payload: {} } // clean message
+      msg = {payload: {}} // clean message
       msg.topic = 'ServerAddressSpaceObject'
       msg.payload.nodetype = 'inject'
       msg.payload.injectType = 'ASO'

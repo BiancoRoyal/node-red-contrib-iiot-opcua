@@ -32,8 +32,8 @@ import {BrowseDescriptionLike} from "node-opcua-client/source/client_session";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
-const crawlerInternalDebugLog =debug('opcuaIIoT:browser:crawler') // eslint-disable-line no-use-before-define
-const crawlerDetailDebugLog =debug('opcuaIIoT:browser:crawler:details') // eslint-disable-line no-use-before-define
+const crawlerInternalDebugLog = debug('opcuaIIoT:browser:crawler') // eslint-disable-line no-use-before-define
+const crawlerDetailDebugLog = debug('opcuaIIoT:browser:crawler:details') // eslint-disable-line no-use-before-define
 
 export type BrowserInputPayload = {
   root: Todo
@@ -103,11 +103,10 @@ const browseAddressSpaceItems = function (session: OPCUASession, addressSpaceIte
       })
 
 
-
       if (browseOptions.length === 0) {
         return;
       }
-      session.browse(browseOptions, (err: Error | null, browseResult: Todo) =>  {
+      session.browse(browseOptions, (err: Error | null, browseResult: Todo) => {
         if (err) {
           reject(err)
         } else {
@@ -123,47 +122,47 @@ const createCrawler = function (session: NodeCrawlerClientSession) {
 }
 
 const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg: BrowserInputPayloadLike, sendWrapper: (result: Error | Todo) => void) => {
-      if (!nodeIdToCrawl) {
-        return new Error('NodeId To Crawl Not Valid')
+  if (!nodeIdToCrawl) {
+    return new Error('NodeId To Crawl Not Valid')
+  }
+  const message = Object.assign({}, msg)
+  const crawler = coreBrowser.createCrawler(session)
+  let crawlerResult: Todo[] = []
+
+  const data = {
+    onBrowse: function (crawler: Todo, cacheNode: Todo) {
+      crawlerResult.push(cacheNode)
+      NodeCrawler.follow(crawler, cacheNode, this)
+    }
+  }
+  try {
+
+    const crawlback: ErrorCallback = (err) => {
+      if (err) {
+        sendWrapper(err)
+      } else {
+        sendWrapper({
+          crawlerResult,
+          rootNodeId: nodeIdToCrawl
+        })
       }
-      const message = Object.assign({}, msg)
-      const crawler = coreBrowser.createCrawler(session)
-      let crawlerResult: Todo[] = []
+    }
 
-      const data = {
-        onBrowse: function (crawler: Todo, cacheNode: Todo) {
-          crawlerResult.push(cacheNode)
-          NodeCrawler.follow(crawler, cacheNode, this)
-        }
+    const readCallback: ResponseCallback<DataValue[]> = (err, response) => {
+      if (err) {
+        sendWrapper(err)
+      } else if (response && response.some((res) => res.statusCode?.name === 'BadNodeIdUnknown')) {
+        sendWrapper(new Error('NodeId Not Valid: Please enter a valid NodeId, under the "OPC UA Nodes" tab of the Inject Node configuration.'))
+      } else {
+        crawler.crawl(nodeIdToCrawl, data, crawlback)
       }
-      try {
+    }
 
-        const crawlback: ErrorCallback = (err) => {
-          if (err) {
-            sendWrapper(err)
-          } else {
-            sendWrapper({
-              crawlerResult,
-              rootNodeId: nodeIdToCrawl
-            })
-          }
-        }
+    verifyNodeExists(session, nodeIdToCrawl, readCallback)
 
-        const readCallback: ResponseCallback<DataValue[]> = (err, response) => {
-          if (err) {
-            sendWrapper(err)
-          } else if (response && response.some((res) => res.statusCode?.name === 'BadNodeIdUnknown')) {
-            sendWrapper(new Error('NodeId Not Valid: Please enter a valid NodeId, under the "OPC UA Nodes" tab of the Inject Node configuration.'))
-          } else {
-            crawler.crawl(nodeIdToCrawl, data, crawlback)
-          }
-        }
-
-        verifyNodeExists(session, nodeIdToCrawl, readCallback)
-
-      } catch (err) {
-        return err
-      }
+  } catch (err) {
+    return err
+  }
 }
 
 /**
@@ -172,74 +171,74 @@ const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg
  * This seems needlessly overcomplicated, but that is necessary to avoid UnhandledPromiseRejection errors from the crawl function.
  *
  */
-const crawlAddressSpaceItems =  (session: NodeCrawlerClientSession, payload: Todo, sendWrapper: (result: Error | Todo) => void, timeout: number) => {
-      const crawler = coreBrowser.createCrawler(session)
+const crawlAddressSpaceItems = (session: NodeCrawlerClientSession, payload: Todo, sendWrapper: (result: Error | Todo) => void, timeout: number) => {
+  const crawler = coreBrowser.createCrawler(session)
 
-      const crawlerPromises: Todo = []
-      const resolvers: Todo = []
+  const crawlerPromises: Todo = []
+  const resolvers: Todo = []
 
 
-      payload.addressSpaceItems.forEach((item: Todo, index: number) => {
-        if (!item.nodeId) {
+  payload.addressSpaceItems.forEach((item: Todo, index: number) => {
+    if (!item.nodeId) {
+      coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
+      return
+    }
+
+    // Each item should track results itself
+    // results will be combined in the payload.value field, but remain independent in payload.crawlerResult
+    let crawlerResult: Todo[] = []
+    const data: UserData = {
+      onBrowse: (crawler: NodeCrawlerBase, cacheNode: CacheNode, userData: UserData) => {
+        if (!cacheNode) {
           coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
-          return
         }
+        crawlerResult.push(cacheNode)
+        NodeCrawler.follow(crawler, cacheNode, userData)
+      }
+    }
 
-        // Each item should track results itself
-        // results will be combined in the payload.value field, but remain independent in payload.crawlerResult
-        let crawlerResult: Todo[] = []
-        const data: UserData = {
-          onBrowse: (crawler: NodeCrawlerBase, cacheNode: CacheNode, userData: UserData) => {
-            if (!cacheNode) {
-              coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
-            }
-            crawlerResult.push(cacheNode)
-            NodeCrawler.follow(crawler, cacheNode, userData)
-          }
+    /**
+     * Handle the response of the verifyNodeExists function.
+     * If the response doesn't contain any error, then the node exists and it can be crawled..
+     */
+    const readCallback: ResponseCallback<DataValue[]> = (err, response) => {
+      crawlerPromises.push(new Promise((resolve, reject) => {
+        resolvers.push({resolve, reject})
+        setTimeout(reject, timeout * 1000, new Error('Timeout'))
+      }).catch((test) => test))// The catch needs to be here, despite seeming useless
+
+      /**
+       * Resolves the promise of the current item.
+       * If the current item is the last, wait for all promises to resolve, then call the send function.
+       * Intended as a  callback for the crawl function, but also called directly, since this needs to be called every time.
+       */
+      const crawlback: ErrorCallback = (err) => {
+        resolvers[index].resolve(crawlerResult)
+        if (index === payload.addressSpaceItems.length - 1) {
+          Promise.allSettled(crawlerPromises).then((promiseList: Todo) => {
+            sendWrapper({rootNodeId: item.nodeId, payload, crawlerResult: promiseList, promises: true})
+          }).catch((err) => {
+            sendWrapper(err)
+          })
         }
+      }
 
-        /**
-         * Handle the response of the verifyNodeExists function.
-         * If the response doesn't contain any error, then the node exists and it can be crawled..
-         */
-        const readCallback: ResponseCallback<DataValue[]> = (err, response) => {
-          crawlerPromises.push(new Promise((resolve, reject) => {
-            resolvers.push({resolve, reject})
-            setTimeout(reject, timeout * 1000, new Error('Timeout'))
-          }).catch((test) => test))// The catch needs to be here, despite seeming useless
+      if (err) {
+        resolvers[index].reject(err)
+        crawlback(err)
+        return;
+      } else if (response && response.some((res) => res.statusCode?.name === 'BadNodeIdUnknown')) {
+        const error = new Error('NodeId Not Valid: Please enter a valid NodeId, under the "OPC UA Nodes" tab of the Inject Node configuration.')
+        resolvers[index].reject(error)
+        crawlback(error)
+        return;
+      }
+      crawler.crawl(item.nodeId, data, crawlback)
+    }
 
-          /**
-           * Resolves the promise of the current item.
-           * If the current item is the last, wait for all promises to resolve, then call the send function.
-           * Intended as a  callback for the crawl function, but also called directly, since this needs to be called every time.
-           */
-          const crawlback: ErrorCallback = (err) => {
-            resolvers[index].resolve(crawlerResult)
-            if (index === payload.addressSpaceItems.length - 1) {
-              Promise.allSettled(crawlerPromises).then((promiseList: Todo) => {
-                sendWrapper({rootNodeId: item.nodeId, payload, crawlerResult: promiseList, promises: true})
-              }).catch((err) => {
-                sendWrapper(err)
-              })
-            }
-          }
+    verifyNodeExists(session, item.nodeId, readCallback)
 
-          if (err) {
-            resolvers[index].reject(err)
-            crawlback(err)
-            return;
-          } else if (response && response.some((res) => res.statusCode?.name === 'BadNodeIdUnknown')) {
-            const error = new Error('NodeId Not Valid: Please enter a valid NodeId, under the "OPC UA Nodes" tab of the Inject Node configuration.')
-            resolvers[index].reject(error)
-            crawlback(error)
-            return;
-          }
-          crawler.crawl(item.nodeId, data, crawlback)
-        }
-
-        verifyNodeExists(session, item.nodeId, readCallback)
-
-      })
+  })
 }
 
 const browseToRoot = function () {
@@ -293,7 +292,7 @@ const transformToEntry = function (reference: Todo) {
 const initBrowserNode = function (): BrowserNodeAttributes {
   return {
     browseTopic: OBJECTS_ROOT,
-    iiot:{
+    iiot: {
       ...initCoreNode(),
       items: [],
       messageList: [],

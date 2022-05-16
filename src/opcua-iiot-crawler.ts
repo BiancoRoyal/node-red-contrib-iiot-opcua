@@ -40,6 +40,7 @@ interface OPCUAIIoTCrawler extends Node {
   timeout: number
   connector: Node
 }
+
 interface OPCUAIIoTCrawlerDef extends NodeDef {
   name: string
   justValue: Todo
@@ -101,7 +102,7 @@ type CrawlerParent = {
 module.exports = (RED: NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTCrawler (this: OPCUAIIoTCrawler & Todo, config: OPCUAIIoTCrawlerDef) {
+  function OPCUAIIoTCrawler(this: OPCUAIIoTCrawler & Todo, config: OPCUAIIoTCrawlerDef) {
     RED.nodes.createNode(this, config)
 
     this.name = config.name
@@ -210,7 +211,7 @@ module.exports = (RED: NodeAPI) => {
       })
 
       // list errors in payload.error
-      const error = results.filter( (result) => {
+      const error = results.filter((result) => {
         return (result.value instanceof Error)
       }).map((result) => {
         return result.value
@@ -228,8 +229,7 @@ module.exports = (RED: NodeAPI) => {
       return (result: Error | Todo) => {
         if (result.promises) {
           handleResultArray(result.crawlerResult, payload)
-        }
-        else if (result instanceof Error) {
+        } else if (result instanceof Error) {
           coreBrowser.browseErrorHandling(nodeConfig, result, payload, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
         } else {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
@@ -317,7 +317,9 @@ module.exports = (RED: NodeAPI) => {
     const startCrawling = async (payload: BrowserInputPayloadLike) => {
       if (!nodeConfig.connector.iiot.opcuaSession) {
         nodeConfig.connector.iiot.stateMachine.initopcua()
-        const returnCode = await nodeConfig.connector.functions.waitForExist(nodeConfig.connector.iiot, 'opcuaSession').catch((err: Error) => {return -1})
+        const returnCode = await nodeConfig.connector.functions.waitForExist(nodeConfig.connector.iiot, 'opcuaSession').catch((err: Error) => {
+          return -1
+        })
       }
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
         crawl(nodeConfig.connector.iiot.opcuaSession, payload, statusHandler)

@@ -17,7 +17,6 @@ import debug from 'debug'
 import * as Stately from 'stately.js'
 
 
-
 import {AttributeIds, DataType, DataValue, resolveNodeId, TimestampsToReturn} from "node-opcua";
 import {initCoreNode} from "./opcua-iiot-core";
 
@@ -196,14 +195,17 @@ const monitorItems = function (node: Todo, msg: Todo, uaSubscription: Todo) {
         .then(function (result: Todo) {
           if (result.monitoredItem.monitoredItemId) {
             subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-            node.iiot.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
+            node.iiot.monitoredASO.set(result.nodeId.toString(), {
+              monitoredItem: result.monitoredItem,
+              topic: msg.topic || node.topic
+            })
           }
         }).catch(function (err: Error) {
-          subscribeDebugLog(err)
-          if (node.showErrors) {
-            node.error(err, msg)
-          }
-        })
+        subscribeDebugLog(err)
+        if (node.showErrors) {
+          node.error(err, msg)
+        }
+      })
     }
   }
 }
@@ -249,7 +251,7 @@ const buildNewMonitoredItem = function (nodeId: Todo, msg: Todo, subscription: T
             internalDebugLog('subscribing monitored item ' + err)
             reject(err)
           } else {
-            resolve({ nodeId: nodeId, monitoredItem: monitoredItemResult })
+            resolve({nodeId: nodeId, monitoredItem: monitoredItemResult})
           }
         }
       )
@@ -290,7 +292,8 @@ const buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpace
       filteredAddressSpaceItems.forEach((item: Todo) => {
         subcriptionItems.push({
           nodeId: resolveNodeId(item.nodeId),
-          attributeId: AttributeIds.Value })
+          attributeId: AttributeIds.Value
+        })
       })
 
       subscription.monitorItems(
@@ -306,7 +309,7 @@ const buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpace
             internalDebugLog('subscribing monitored item group ' + err)
             reject(err)
           } else {
-            resolve({ addressSpaceItems: addressSpaceItems, monitoredItemGroup: monitoredItemGroup })
+            resolve({addressSpaceItems: addressSpaceItems, monitoredItemGroup: monitoredItemGroup})
           }
         }
       )
@@ -353,7 +356,7 @@ const buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo)
             internalDebugLog('subscribing event item ' + err)
             reject(err)
           } else {
-            resolve({ nodeId: nodeId, monitoredItem: monitoredItemResult })
+            resolve({nodeId: nodeId, monitoredItem: monitoredItemResult})
           }
         }
       )
@@ -394,17 +397,17 @@ const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Tod
                     reject(err)
                   } else {
                     eventInformation.browseName = browseName
-                    eventResults.push({ eventInformation: eventInformation, eventData: variant.toJSON() })
+                    eventResults.push({eventInformation: eventInformation, eventData: variant.toJSON()})
                   }
                 })
               } else {
-                eventResults.push({ eventInformation: eventInformation, eventData: variant.toJSON() })
+                eventResults.push({eventInformation: eventInformation, eventData: variant.toJSON()})
               }
             }
             index++
           } catch (err) {
-            eventInformation = { error: err }
-            eventResults.push({ eventInformation: eventInformation, eventData: variant.toJSON() })
+            eventInformation = {error: err}
+            eventResults.push({eventInformation: eventInformation, eventData: variant.toJSON()})
           }
         })
 

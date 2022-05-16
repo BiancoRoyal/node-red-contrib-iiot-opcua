@@ -71,7 +71,7 @@ const setNodeStatus = function (node: Todo, entryStatus: Todo, informationText: 
   }
 
   if (node.status.text !== informationText) {
-    node.status({ fill: fillColor, shape: 'dot', text: informationText })
+    node.status({fill: fillColor, shape: 'dot', text: informationText})
   }
 }
 
@@ -120,7 +120,9 @@ const handlePayloadArrayOfObjects = function (payload: Todo) {
   } else if (payload.statusCodes) {
     results = payload.statusCodes
   } else {
-    if (payload.length) { results = payload }
+    if (payload.length) {
+      results = payload
+    }
   }
 
   for (entry of results) {
@@ -300,7 +302,6 @@ const compressCrawlerMessageStructure = function (payload: Todo) {
 }
 
 const reconsturctNodeIdOnRead = function (payload: Todo) {
-  let itemList: Todo[] = []
   let results = payload.value || payload
   let nodesToRead = payload.nodesToRead
 

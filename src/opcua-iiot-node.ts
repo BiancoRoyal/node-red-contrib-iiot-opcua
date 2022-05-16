@@ -9,7 +9,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
+import {Todo} from "./types/placeholders";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {convertDataValueByDataType} from "./core/opcua-iiot-core";
 import {logger} from "./core/opcua-iiot-core-connector";
@@ -22,8 +22,9 @@ interface OPCUAIIoTNode extends nodered.Node {
   name: string
   injectType: string
   showErrors: string
-  bianco?: TodoBianco
+  
 }
+
 interface OPCUAIIoTNodeDef extends nodered.NodeDef {
   nodeId: string
   datatype: string
@@ -33,6 +34,7 @@ interface OPCUAIIoTNodeDef extends nodered.NodeDef {
   injectType: string
   showErrors: string
 }
+
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
  *
@@ -41,7 +43,7 @@ interface OPCUAIIoTNodeDef extends nodered.NodeDef {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTNode (this: OPCUAIIoTNode, config: OPCUAIIoTNodeDef) {
+  function OPCUAIIoTNode(this: OPCUAIIoTNode, config: OPCUAIIoTNodeDef) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.datatype = config.datatype
@@ -54,7 +56,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     let node: Todo = this
     node.iiot = {}
     node.iiot.subscribed = false
-    this.status({ fill: 'blue', shape: 'ring', text: 'new' })
+    this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     this.on('input', (msg: NodeMessageInFlow) => {
 
@@ -64,20 +66,20 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       if (node.injectType === 'listen') {
         if (node.iiot.subscribed) {
-          this.status({ fill: 'blue', shape: 'dot', text: 'subscribed' })
+          this.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
-          this.status({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
+          this.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})
         }
       } else {
-        this.status({ fill: 'blue', shape: 'dot', text: 'injected' })
+        this.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
       const topic = msg.topic || node.topic
       const valuesToWrite = payload.valuesToWrite || []
       const addressSpaceItems = payload.addressSpaceItems || []
       if (node.injectType === 'write') {
-        addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
+        addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
         try {
-          valuesToWrite.push(convertDataValueByDataType({ value: node.value === '' ? msg.payload : node.value }, node.datatype))
+          valuesToWrite.push(convertDataValueByDataType({value: node.value === '' ? msg.payload : node.value}, node.datatype))
         } catch (err) {
           logger.internalDebugLog(err)
           if (node.showErrors) {
@@ -85,7 +87,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           }
         }
       } else {
-        addressSpaceItems.push({ name: node.name, nodeId: node.nodeId, datatypeName: node.datatype })
+        addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
       }
       const outputPayload = {
         nodetype: "node",
