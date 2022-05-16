@@ -18,7 +18,7 @@ import {
   makeApplicationUrn,
   OPCUACertificateManager,
   OPCUADiscoveryServer,
-  OPCUAServerEndPoint
+  OPCUAServerEndPoint, UAString
 } from "node-opcua";
 import path from "path";
 import {ApplicationDescription} from "node-opcua-service-endpoints";
@@ -124,7 +124,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         }
       });
 
-      const discoveryUrls = endpoints.flatMap((server) => (server.discoveryUrls || []) as string[]).filter((item, index, list) => item !== '' && list.indexOf(item) === index)
+      const discoveryUrls = endpoints.flatMap((server) => (server.discoveryUrls || [])).filter((item, index, list): item is string => !!item && list.indexOf(item) === index)
 
       return {
         discoveryUrls,
