@@ -838,7 +838,7 @@ de.biancoroyal.opcua.iiot.core.server.createServerNameWithPrefix = function (ser
 
 de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefix) {
   let coreServer = this
-  let geFullyQualifiedDomainName = coreServer.core.nodeOPCUA.get_fully_qualified_domain_name
+  let extractFullyQualifiedDomainName = coreServer.core.nodeOPCUA.extractFullyQualifiedDomainName
   let makeApplicationUrn = coreServer.core.nodeOPCUA.makeApplicationUrn
   let today = new Date()
 
@@ -861,7 +861,7 @@ de.biancoroyal.opcua.iiot.core.server.buildServerOptions = function (node, prefi
     },
     serverInfo: {
       // applicationType: ApplicationType.CLIENTANDSERVER,
-      applicationUri: makeApplicationUrn(geFullyQualifiedDomainName(), coreServer.createServerNameWithPrefix(node.port, prefix)),
+      applicationUri: makeApplicationUrn(extractFullyQualifiedDomainName(), coreServer.createServerNameWithPrefix(node.port, prefix)),
       productUri: coreServer.createServerNameWithPrefix(node.port, prefix),
       applicationName: { text: 'Node-RED', locale: 'en' },
       gatewayServerUri: null,
