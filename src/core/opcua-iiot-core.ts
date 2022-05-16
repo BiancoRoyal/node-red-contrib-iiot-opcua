@@ -13,7 +13,6 @@ import { debug as Debug } from 'debug'
 import * as os from 'os'
 import * as underscore from 'underscore'
 // @ts-ignore
-import * as assert from 'better-assert'
 import * as nodeOPCUA from 'node-opcua'
 import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {
@@ -26,15 +25,13 @@ import {
     TimeUnits,
     VariantType, WriteListItem, WriteMessage
 } from "../types/core";
-import {NodeObject, Todo} from "../types/placeholders";
+import {CoreNode, NodeObject, Todo} from "../types/placeholders";
 import nodeRed, {NodeStatus} from "node-red";
 import {NodeStatusFill, NodeStatusShape} from "@node-red/registry";
 import {isArray, isNotDefined} from "../types/assertion";
 import {isNullOrUndefined, NodeId, NodeIdType} from "node-opcua";
 
-export {Debug, os, underscore, assert, nodeOPCUA, nodeOPCUAId}
-
-export * as connector from "./opcua-iiot-core-connector";
+export {Debug, os, underscore, nodeOPCUA, nodeOPCUAId}
 
 export const OBJECTS_ROOT: string = 'ns=0;i=84'
 export const TEN_SECONDS_TIMEOUT: number = 10
@@ -708,11 +705,11 @@ export function setNodeInitalState(nodeState: string, node: Todo) {
             break
         case 'OPEN':
         case 'SESSIONCLOSED':
-            node.bianco.iiot.opcuaClient = node.connector.bianco.iiot.opcuaClient
+            node.iiot.opcuaClient = node.connector.bianco.iiot.opcuaClient
             setNodeStatusTo(node, 'connected')
             break
         case 'SESSIONACTIVE':
-            node.bianco.iiot.opcuaSession = node.connector.bianco.iiot.opcuaSession
+            node.iiot.opcuaSession = node.connector.bianco.iiot.opcuaSession
             setNodeStatusTo(node, 'active')
             break
         case 'LOCKED':
@@ -748,10 +745,10 @@ export function isNodeId(nodeId: NodeId) {
 }
 
 export function checkConnectorState(node: NodeObject, msg: Todo, callerType: Todo): boolean {
-    logger.internalDebugLog('Check Connector State ' + node.connector?.bianco?.iiot.stateMachine?.getMachineState() + ' By ' + callerType)
+    logger.internalDebugLog('Check Connector State ' + node.connector?.iiot.stateMachine?.getMachineState() + ' By ' + callerType)
 
-    if (node.connector?.bianco?.iiot?.stateMachine && node.connector.bianco.iiot.stateMachine.getMachineState() !== RUNNING_STATE) {
-        logger.internalDebugLog('Wrong Client State ' + node.connector.bianco.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+    if (node.connector?.iiot?.stateMachine && node.connector.iiot.stateMachine.getMachineState() !== RUNNING_STATE) {
+        logger.internalDebugLog('Wrong Client State ' + node.connector.iiot.stateMachine.getMachineState() + ' By ' + callerType)
         if (node.showErrors) {
             node.error(new Error('Client Not ' + RUNNING_STATE + ' On ' + callerType), msg)
         }
@@ -764,16 +761,16 @@ export function checkConnectorState(node: NodeObject, msg: Todo, callerType: Tod
 }
 
 export function setNodeOPCUAConnected(node: NodeObject, opcuaClient: nodeOPCUA.OPCUAClient): void {
-    if (isInitializedBiancoIIoTNode(node)) {
-        node.bianco.iiot.opcuaClient = opcuaClient
+    if (isInitializedIIoTNode(node)) {
+        node.iiot.opcuaClient = opcuaClient
     }
     setNodeStatusTo(node, 'connecting')
 }
 
 export function setNodeOPCUAClosed(node: NodeObject): void {
-    if (isInitializedBiancoIIoTNode(node)) {
+    if (isInitializedIIoTNode(node)) {
         // @ts-ignore
-        node.bianco.iiot.opcuaClient = null
+        node.iiot.opcuaClient = null
     }
     setNodeStatusTo(node, 'disconnected')
 }
@@ -783,15 +780,15 @@ export function setNodeOPCUALost(node: NodeObject): void {
 }
 
 export function setNodeOPCUASessionStarted(node: NodeObject, opcuaSession: nodeOPCUA.ClientSession): void {
-    if (isInitializedBiancoIIoTNode(node)) {
-        node.bianco.iiot.opcuaSession = opcuaSession
+    if (isInitializedIIoTNode(node)) {
+        node.iiot.opcuaSession = opcuaSession
     }
     setNodeStatusTo(node, 'active')
 }
 
 export function setNodeOPCUASessionClosed(node: NodeObject): void {
-    if (isInitializedBiancoIIoTNode(node)) {
-        node.bianco.iiot.opcuaSession = null
+    if (isInitializedIIoTNode(node)) {
+        node.iiot.opcuaSession = null
     }
     setNodeStatusTo(node, 'connecting')
 }
@@ -801,16 +798,16 @@ export function setNodeOPCUASessionRestart(node: NodeObject): void {
 }
 
 export function setNodeOPCUASessionError(node: NodeObject): void {
-    if (isInitializedBiancoIIoTNode(node)) {
-        node.bianco.iiot.opcuaSession = null
+    if (isInitializedIIoTNode(node)) {
+        node.iiot.opcuaSession = null
     }
     setNodeStatusTo(node, 'connecting')
 }
 
 export function setNodeOPCUARestart(node: NodeObject, opcuaClient: nodeOPCUA.OPCUAClient): void {
     logger.internalDebugLog('Connector Restart')
-    if (opcuaClient && isInitializedBiancoIIoTNode(node)) {
-        node.bianco.iiot.opcuaClient = opcuaClient
+    if (opcuaClient && isInitializedIIoTNode(node)) {
+        node.iiot.opcuaClient = opcuaClient
     }
     setNodeStatusTo(node, 'connecting')
 }
@@ -826,16 +823,16 @@ export function registerToConnector(node: NodeObject) {
         return
     }
 
-    node.connector.bianco?.iiot.registerForOPCUA(node)
+    node.connector?.iiot.registerForOPCUA(node)
 
     node.connector.on('connector_init', () => {
-        if (node.bianco.iiot.opcuaClient) {
+        if (node.iiot.opcuaClient) {
             // @ts-ignore
-            node.bianco.iiot.opcuaClient = null
+            node.iiot.opcuaClient = null
         }
 
-        if (node.bianco.iiot.opcuaSession) {
-            node.bianco.iiot.opcuaSession = null
+        if (node.iiot.opcuaSession) {
+            node.iiot.opcuaSession = null
         }
     })
 
@@ -880,10 +877,10 @@ export function registerToConnector(node: NodeObject) {
     })
 
     node.connector.on('after_reconnection', () => {
-        setNodeOPCUARestart(node, node.bianco.iiot.opcuaClient) // TODO: investigate one args v two
+        setNodeOPCUARestart(node, node.iiot.opcuaClient) // TODO: investigate one args v two
     })
 
-    setNodeInitalState(node.connector?.bianco?.iiot.stateMachine.getMachineState(), node)
+    setNodeInitalState(node.connector?.iiot.stateMachine.getMachineState(), node)
 }
 
 export function deregisterToConnector(node: NodeObject, done: () => void) {
@@ -900,8 +897,8 @@ export function deregisterToConnector(node: NodeObject, done: () => void) {
     }
 
     node.connector.removeAllListeners()
-    if (isInitializedBiancoIIoTNode(node.connector)) {
-        node.connector.bianco?.iiot.deregisterForOPCUA(node, done)
+    if (isInitializedIIoTNode(node.connector)) {
+        node.connector?.iiot.deregisterForOPCUA(node, done)
     }
 }
 
@@ -928,24 +925,21 @@ export function setNodeStatusTo(node: Todo, statusValue: string) {
     }
 }
 
-export function createBiancoIIoT() {
-    return {iiot: {}}
+// sets some values within node.iiot
+export function initCoreNode(): CoreNode {
+    return {
+        reconnectTimeout: DEFAULT_TIMEOUT,
+        sessionTimeout: null,
+        opcuaSession: null,
+        opcuaClient: null
+    }
 }
 
-export function initClientNode(node: Todo) {
-    node.bianco = createBiancoIIoT()
-    node.bianco.iiot.reconnectTimeout = DEFAULT_TIMEOUT
-    node.bianco.iiot.sessionTimeout = null
-    node.bianco.iiot.opcuaSession = null
-    node.bianco.iiot.opcuaClient = null
-    return node
-}
-
-export function initCoreServerNode(node: Todo) {
-    node.bianco = createBiancoIIoT()
-    node.bianco.iiot.initialized = false
-    node.bianco.iiot.opcuaServer = null
-    return node
+export function initCoreServerNode() {
+    return {
+        initialized: false,
+        opcuaServer: null
+    }
 }
 
 export function getItemFilterValueWithElement(item: Todo, element: Todo) {
@@ -1060,11 +1054,11 @@ export function checkItemForUnsetState(node: Todo, item: Todo) {
 }
 
 export function resetBiancoNode(node: Todo) {
-    if (isInitializedBiancoIIoTNode(node) && node.bianco.iiot.resetAllTimer) {
-        node.bianco.iiot.resetAllTimer()
+    if (isInitializedIIoTNode(node) && node.iiot.resetAllTimer) {
+        node.iiot.resetAllTimer()
     }
-    if (isInitializedBiancoIIoTNode(node)) {
-        node.bianco.iiot = null
+    if (isInitializedIIoTNode(node)) {
+        node.iiot = null
     }
     node.bianco = null
 }
@@ -1101,8 +1095,8 @@ export function isNodeTypeToFilterResponse(msg: Todo) {
     return msg.nodetype === 'read' || msg.nodetype === 'browse' || msg.nodetype === 'crawl' || msg.nodetype === 'method'
 }
 
-export function isInitializedBiancoIIoTNode(node: Todo) {
-    return node && node.bianco && node.bianco.iiot
+export function isInitializedIIoTNode(node: Todo) {
+    return !!node.iiot
 }
 
 

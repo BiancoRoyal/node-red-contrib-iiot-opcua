@@ -8,18 +8,12 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
 
-/**
- * Nested namespace settings.
- *
- * @type {{biancoroyal: {opcua: {iiot: {core: {filter: {}}}}}}}
- *
- * @Namesapce de.biancoroyal.opcua.iiot.core.filter
- */
-var de: Todo = de || { biancoroyal: { opcua: { iiot: { core: { filter: {} } } } } } // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.filter.core = de.biancoroyal.opcua.iiot.core.filter.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.filter.internalDebugLog = de.biancoroyal.opcua.iiot.core.filter.internalDebugLog || require('debug')('opcuaIIoT:filter') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.filter.detailDebugLog = de.biancoroyal.opcua.iiot.core.filter.detailDebugLog || require('debug')('opcuaIIoT:filter:details') // eslint-disable-line no-use-before-define
+import debug from 'debug';
 
-module.exports = de.biancoroyal.opcua.iiot.core.filter
+const coreFilter = {
+  internalDebugLog: debug('opcuaIIoT:filter:internal'),
+}
+
+// module.exports = de.biancoroyal.opcua.iiot.core.filter
+export default coreFilter

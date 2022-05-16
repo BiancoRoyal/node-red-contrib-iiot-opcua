@@ -10,21 +10,14 @@
 
 import {Todo} from "../types/placeholders";
 
-/**
- * Nested namespace settings.
- *
- * @type {{biancoroyal: {opcua: {iiot: {core: {method: {}}}}}}}
- *
- * @Namesapce de.biancoroyal.opcua.iiot.core.method
- */
-var de: Todo = de || { biancoroyal: { opcua: { iiot: { core: { method: {} } } } } } // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.method.core = de.biancoroyal.opcua.iiot.core.method.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.method.internalDebugLog = de.biancoroyal.opcua.iiot.core.method.internalDebugLog || require('debug')('opcuaIIoT:method') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.method.detailDebugLog = de.biancoroyal.opcua.iiot.core.method.detailDebugLog || require('debug')('opcuaIIoT:method:details') // eslint-disable-line no-use-before-define
+import debug from 'debug';
+import {coerceNodeId} from "node-opcua";
+import {convertDataValueByDataType} from "./opcua-iiot-core";
 
-de.biancoroyal.opcua.iiot.core.method.getArgumentDefinition = function (session: Todo, msg: Todo) {
-  let coerceNodeId = this.core.nodeOPCUA.coerceNodeId
+const internalDebugLog = debug('opcuaIIoT:method') // eslint-disable-line no-use-before-define
+const detailDebugLog = debug('opcuaIIoT:method:details') // eslint-disable-line no-use-before-define
 
+const getArgumentDefinition = function (session: Todo, msg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -52,10 +45,7 @@ de.biancoroyal.opcua.iiot.core.method.getArgumentDefinition = function (session:
     })
 }
 
-de.biancoroyal.opcua.iiot.core.method.callMethods = function (session: Todo, msg: Todo) {
-  let core = this.core
-  let coerceNodeId = this.core.nodeOPCUA.coerceNodeId
-
+const callMethods = function (session: Todo, msg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -63,7 +53,7 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session: Todo, msg
       } else {
         try {
           msg.inputArguments.forEach(function (element: Todo) {
-            element.value = core.convertDataValueByDataType({ value: element.value }, element.dataType)
+            element.value = convertDataValueByDataType({ value: element.value, dataType: element.dataType }, element.dataType)
           })
 
           let methodCalls = [{
@@ -86,7 +76,7 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session: Todo, msg
     })
 }
 
-de.biancoroyal.opcua.iiot.core.method.buildMessagesFromMethodCalls = function (methodCallsResults: Todo) {
+const buildMessagesFromMethodCalls = function (methodCallsResults: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!methodCallsResults) {
@@ -98,33 +88,33 @@ de.biancoroyal.opcua.iiot.core.method.buildMessagesFromMethodCalls = function (m
     })
 }
 
-de.biancoroyal.opcua.iiot.core.method.invalidMessage = function (node: Todo, message: Todo) {
+const invalidMessage = function (node: Todo, message: Todo) {
   let response = false
 
   if (!message.objectId) {
-    node.bianco.iiot.handleMethodWarn('No Object-Id Found For Method Call')
+    node.iiot.handleMethodWarn('No Object-Id Found For Method Call')
     response = true
   }
 
   if (!message.methodId) {
-    node.bianco.iiot.handleMethodWarn('No Method-Id Found For Method Call')
+    node.iiot.handleMethodWarn('No Method-Id Found For Method Call')
     response = true
   }
 
   if (!message.inputArguments) {
-    node.bianco.iiot.handleMethodWarn('No Input Arguments Found For Method Call')
+    node.iiot.handleMethodWarn('No Input Arguments Found For Method Call')
     response = true
   }
 
   if (!message.methodType) {
-    node.bianco.iiot.handleMethodWarn('No Method Type Found For Method Call')
+    node.iiot.handleMethodWarn('No Method Type Found For Method Call')
     response = true
   }
 
   return response
 }
 
-de.biancoroyal.opcua.iiot.core.method.buildCallMessage = function (node: Todo, msg: Todo) {
+const buildCallMessage = function (node: Todo, msg: Todo) {
   let message = msg
   message.objectId = msg.payload.objectId || node.objectId
   message.methodId = msg.payload.methodId || node.methodId
@@ -134,4 +124,12 @@ de.biancoroyal.opcua.iiot.core.method.buildCallMessage = function (node: Todo, m
   return message
 }
 
-module.exports = de.biancoroyal.opcua.iiot.core.method
+const coreMethod = {
+  getArgumentDefinition,
+  callMethods,
+  buildMessagesFromMethodCalls,
+  invalidMessage,
+  buildCallMessage,
+}
+
+export default coreMethod

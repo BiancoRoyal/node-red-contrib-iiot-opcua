@@ -11,35 +11,34 @@
 
 import {Todo} from "../types/placeholders";
 
-/**
- * Nested namespace settings.
- *
- * @type {{biancoroyal: {opcua: {iiot: {core: {client: {listener: {}}}}}}}}
- *
- * @Namesapce de.biancoroyal.opcua.iiot.core.client.listener
- */
-var de: Todo = de || { biancoroyal: { opcua: { iiot: { core: { listener: {} } } } } } // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.core = de.biancoroyal.opcua.iiot.core.listener.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.client = de.biancoroyal.opcua.iiot.core.listener.client || require('./opcua-iiot-core-client') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.internalDebugLog = de.biancoroyal.opcua.iiot.core.listener.internalDebugLog || require('debug')('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.detailDebugLog = de.biancoroyal.opcua.iiot.core.listener.detailDebugLog || require('debug')('opcuaIIoT:listener:details') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog = de.biancoroyal.opcua.iiot.core.listener.subscribeDebugLog || require('debug')('opcuaIIoT:listener:subscribe') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.subscribeDetailDebugLog = de.biancoroyal.opcua.iiot.core.listener.subscribeDetailDebugLog || require('debug')('opcuaIIoT:listener:subscribe:details') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.eventDebugLog = de.biancoroyal.opcua.iiot.core.listener.eventDebugLog || require('debug')('opcuaIIoT:listener:event') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.eventDetailDebugLog = de.biancoroyal.opcua.iiot.core.listener.eventDetailDebugLog || require('debug')('opcuaIIoT:listener:event:details') // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_INTERVAL = 1000 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.MIN_LISTENER_INTERVAL = 100 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.MAX_LISTENER_INTERVAL = 3600000 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.MAX_INT32 = 2147483647 // eslint-disable-line no-use-before-define
-de.biancoroyal.opcua.iiot.core.listener.Stately = de.biancoroyal.opcua.iiot.core.listener.Stately || require('stately.js') // eslint-disable-line no-use-before-define
+import debug from 'debug'
 
-de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
-  return de.biancoroyal.opcua.iiot.core.listener.Stately.machine({
+// @ts-ignore
+import * as Stately from 'stately.js'
+
+
+
+import {AttributeIds, DataType, resolveNodeId, TimestampsToReturn} from "node-opcua";
+import {initCoreNode} from "./opcua-iiot-core";
+
+const internalDebugLog = debug('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
+const detailDebugLog = debug('opcuaIIoT:listener:details') // eslint-disable-line no-use-before-define
+const subscribeDebugLog = debug('opcuaIIoT:listener:subscribe') // eslint-disable-line no-use-before-define
+const subscribeDetailDebugLog = debug('opcuaIIoT:listener:subscribe:details') // eslint-disable-line no-use-before-define
+const eventDebugLog = debug('opcuaIIoT:listener:event') // eslint-disable-line no-use-before-define
+const eventDetailDebugLog = debug('opcuaIIoT:listener:event:details') // eslint-disable-line no-use-before-define
+const SUBSCRIBE_DEFAULT_INTERVAL = 1000 // eslint-disable-line no-use-before-define
+const MIN_LISTENER_INTERVAL = 100 // eslint-disable-line no-use-before-define
+const MAX_LISTENER_INTERVAL = 3600000 // eslint-disable-line no-use-before-define
+const SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-define
+const EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
+const EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
+const METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
+const RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
+const MAX_INT32 = 2147483647 // eslint-disable-line no-use-before-define
+
+const createStatelyMachine = function () {
+  return Stately.machine({
     'IDLE': {
       'requestinitsub': 'REQUESTED',
       'endsub': 'END'
@@ -70,8 +69,8 @@ de.biancoroyal.opcua.iiot.core.listener.createStatelyMachine = function () {
   }, 'IDLE')
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = function (timeMilliseconds: number) {
-  timeMilliseconds = timeMilliseconds > de.biancoroyal.opcua.iiot.core.listener.MAX_INT32 ? 100 : timeMilliseconds
+const getEventSubscriptionParameters = function (timeMilliseconds: number) {
+  timeMilliseconds = timeMilliseconds > MAX_INT32 ? 100 : timeMilliseconds
   return {
     requestedPublishingInterval: timeMilliseconds || 100,
     requestedLifetimeCount: 1000 * 60 * 20,
@@ -82,8 +81,8 @@ de.biancoroyal.opcua.iiot.core.listener.getEventSubscribtionParameters = functio
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (timeMilliseconds: number) {
-  timeMilliseconds = timeMilliseconds > de.biancoroyal.opcua.iiot.core.listener.MAX_INT32 ? 200 : timeMilliseconds
+const getSubscriptionParameters = function (timeMilliseconds: number) {
+  timeMilliseconds = timeMilliseconds > MAX_INT32 ? 200 : timeMilliseconds
   return {
     requestedPublishingInterval: timeMilliseconds || 200,
     requestedLifetimeCount: 1000 * 60 * 10,
@@ -94,7 +93,7 @@ de.biancoroyal.opcua.iiot.core.listener.getSubscriptionParameters = function (ti
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field: Todo, dataType: Todo, value: Todo) {
+const collectAlarmFields = function (field: Todo, dataType: Todo, value: Todo) {
   return {
     field,
     dataType,
@@ -102,11 +101,11 @@ de.biancoroyal.opcua.iiot.core.listener.collectAlarmFields = function (field: To
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getBasicEventFields = function () {
+const getBasicEventFields = function () {
   return ['EventId', 'SourceName', 'Message', 'ReceiveTime']
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getAllEventFields = function () {
+const getAllEventFields = function () {
   return [
     'ConditionName',
     'ConditionType',
@@ -141,7 +140,7 @@ de.biancoroyal.opcua.iiot.core.listener.getAllEventFields = function () {
   ]
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getStateFields = function () {
+const getStateFields = function () {
   return [
     'ConditionName',
     'SourceNode',
@@ -162,7 +161,7 @@ de.biancoroyal.opcua.iiot.core.listener.getStateFields = function () {
   ]
 }
 
-de.biancoroyal.opcua.iiot.core.listener.getConditionFields = function () {
+const getConditionFields = function () {
   return [
     'Time',
     'Quality',
@@ -176,32 +175,31 @@ de.biancoroyal.opcua.iiot.core.listener.getConditionFields = function () {
   ]
 }
 
-de.biancoroyal.opcua.iiot.core.listener.monitorItems = function (node: Todo, msg: Todo, uaSubscription: Todo) {
-  let coreListener = de.biancoroyal.opcua.iiot.core.listener
+const monitorItems = function (node: Todo, msg: Todo, uaSubscription: Todo) {
 
   for (let addressSpaceItem of msg.addressSpaceItems) {
     if (!addressSpaceItem.nodeId) {
-      coreListener.subscribeDebugLog('Address Space Item Not Valid to Monitor ' + addressSpaceItem)
+      subscribeDebugLog('Address Space Item Not Valid to Monitor ' + addressSpaceItem)
       return
     }
 
-    if (addressSpaceItem.datatypeName === de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE) {
-      coreListener.subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
+    if (addressSpaceItem.datatypeName === METHOD_TYPE) {
+      subscribeDebugLog('Address Space Item Not Allowed to Monitor ' + addressSpaceItem)
       return
     }
 
     const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
 
     if (nodeIdToMonitor) {
-      coreListener.subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
-      this.buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
+      subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
+      buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
         .then(function (result: Todo) {
           if (result.monitoredItem.monitoredItemId) {
-            coreListener.subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
-            node.bianco.iiot.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
+            subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+            node.iiot.monitoredASO.set(result.nodeId.toString(), { monitoredItem: result.monitoredItem, topic: msg.topic || node.topic })
           }
         }).catch(function (err: Error) {
-          coreListener.subscribeDebugLog(err)
+          subscribeDebugLog(err)
           if (node.showErrors) {
             node.error(err, msg)
           }
@@ -210,9 +208,7 @@ de.biancoroyal.opcua.iiot.core.listener.monitorItems = function (node: Todo, msg
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId: Todo, msg: Todo, subscription: Todo) {
-  let coreListener = de.biancoroyal.opcua.iiot.core.listener
-
+const buildNewMonitoredItem = function (nodeId: Todo, msg: Todo, subscription: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!nodeId) {
@@ -224,33 +220,33 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
       let queueSize
       let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters : msg.payload
       if (typeof options.interval === 'number' &&
-        options.interval <= coreListener.MAX_LISTENER_INTERVAL &&
-        options.interval >= coreListener.MIN_LISTENER_INTERVAL) {
+        options.interval <= MAX_LISTENER_INTERVAL &&
+        options.interval >= MIN_LISTENER_INTERVAL) {
         interval = parseInt(options.interval)
       } else {
-        interval = coreListener.SUBSCRIBE_DEFAULT_INTERVAL
+        interval = SUBSCRIBE_DEFAULT_INTERVAL
       }
 
       if (options.queueSize && typeof options.queueSize === 'number') {
         queueSize = parseInt(options.queueSize)
       } else {
-        queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
+        queueSize = SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
 
       subscription.monitor(
         {
-          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(nodeId),
-          attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value
+          nodeId: resolveNodeId(nodeId),
+          attributeId: AttributeIds.Value
         },
         {
           samplingInterval: interval,
           discardOldest: true,
           queueSize: queueSize
         },
-        coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+        TimestampsToReturn.Both,
         function (err: Error, monitoredItemResult: Todo) {
           if (err) {
-            coreListener.internalDebugLog('subscribing monitored item ' + err)
+            internalDebugLog('subscribing monitored item ' + err)
             reject(err)
           } else {
             resolve({ nodeId: nodeId, monitoredItem: monitoredItemResult })
@@ -260,9 +256,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItem = function (nodeId
     })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpaceItems: Todo, subscription: Todo) {
-  let coreListener = de.biancoroyal.opcua.iiot.core.listener
-
+const buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpaceItems: Todo, subscription: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!addressSpaceItems) {
@@ -275,28 +269,28 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
 
       let options = (msg.payload.listenerParameters) ? msg.payload.listenerParameters : msg.payload
       if (typeof options.interval === 'number' &&
-        options.interval <= coreListener.MAX_LISTENER_INTERVAL &&
-        options.interval >= coreListener.MIN_LISTENER_INTERVAL) {
+        options.interval <= MAX_LISTENER_INTERVAL &&
+        options.interval >= MIN_LISTENER_INTERVAL) {
         interval = parseInt(options.interval)
       } else {
-        interval = coreListener.SUBSCRIBE_DEFAULT_INTERVAL
+        interval = SUBSCRIBE_DEFAULT_INTERVAL
       }
 
       if (options.queueSize && typeof options.queueSize === 'number') {
         queueSize = parseInt(options.queueSize)
       } else {
-        queueSize = coreListener.SUBSCRIBE_DEFAULT_QUEUE_SIZE
+        queueSize = SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
 
       let filteredAddressSpaceItems = addressSpaceItems.filter((addressSpaceItem: Todo) => {
-        return addressSpaceItem.datatypeName !== de.biancoroyal.opcua.iiot.core.listener.METHOD_TYPE
+        return addressSpaceItem.datatypeName !== METHOD_TYPE
       })
 
       let subcriptionItems: Todo[] = []
       filteredAddressSpaceItems.forEach((item: Todo) => {
         subcriptionItems.push({
-          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(item.nodeId),
-          attributeId: coreListener.core.nodeOPCUA.AttributeIds.Value })
+          nodeId: resolveNodeId(item.nodeId),
+          attributeId: AttributeIds.Value })
       })
 
       subscription.monitorItems(
@@ -306,10 +300,10 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
           discardOldest: true,
           queueSize: queueSize
         },
-        coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+        TimestampsToReturn.Both,
         function (err: Error, monitoredItemGroup: Todo) {
           if (err) {
-            coreListener.internalDebugLog('subscribing monitored item group ' + err)
+            internalDebugLog('subscribing monitored item group ' + err)
             reject(err)
           } else {
             resolve({ addressSpaceItems: addressSpaceItems, monitoredItemGroup: monitoredItemGroup })
@@ -319,9 +313,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewMonitoredItemGroup = function (n
     })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo) {
-  let coreListener = de.biancoroyal.opcua.iiot.core.listener
-
+const buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!nodeId) {
@@ -332,22 +324,22 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId: To
       let interval
       let queueSize
 
-      if (typeof msg.payload.interval === 'number' && msg.payload.interval < coreListener.MAX_LISTENER_INTERVAL) {
+      if (typeof msg.payload.interval === 'number' && msg.payload.interval < MAX_LISTENER_INTERVAL) {
         interval = parseInt(msg.payload.interval)
       } else {
-        interval = coreListener.EVENT_DEFAULT_INTERVAL
+        interval = EVENT_DEFAULT_INTERVAL
       }
 
       if (typeof msg.payload.queueSize === 'number') {
         queueSize = parseInt(msg.payload.queueSize)
       } else {
-        queueSize = coreListener.EVENT_DEFAULT_QUEUE_SIZE
+        queueSize = EVENT_DEFAULT_QUEUE_SIZE
       }
 
       subscription.monitor(
         {
-          nodeId: coreListener.core.nodeOPCUA.resolveNodeId(nodeId),
-          attributeId: coreListener.core.nodeOPCUA.AttributeIds.EventNotifier
+          nodeId: resolveNodeId(nodeId),
+          attributeId: AttributeIds.EventNotifier
         },
         {
           samplingInterval: interval,
@@ -355,10 +347,10 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId: To
           queueSize: queueSize,
           filter: msg.payload.eventFilter
         },
-        coreListener.core.nodeOPCUA.read_service.TimestampsToReturn.Both,
+        TimestampsToReturn.Both,
         function (err: Error, monitoredItemResult: Todo) {
           if (err) {
-            coreListener.internalDebugLog('subscribing event item ' + err)
+            internalDebugLog('subscribing event item ' + err)
             reject(err)
           } else {
             resolve({ nodeId: nodeId, monitoredItem: monitoredItemResult })
@@ -368,10 +360,7 @@ de.biancoroyal.opcua.iiot.core.listener.buildNewEventItem = function (nodeId: To
     })
 }
 
-de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session: Todo, browseForBrowseName: Todo, dataValue: Todo) {
-  let core = de.biancoroyal.opcua.iiot.core.listener.core
-  let coreListener = de.biancoroyal.opcua.iiot.core.listener
-
+const analyzeEvent = function (session: Todo, browseForBrowseName: Todo, dataValue: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -392,13 +381,13 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session: Todo, 
         let eventResults: Todo[] = []
 
         dataValue.forEach(function (variant: Todo) {
-          coreListener.eventDebugLog('variant entry: ' + variant.toString())
+          eventDebugLog('variant entry: ' + variant.toString())
 
           try {
             if (variant.dataType && variant.value) {
-              eventInformation = coreListener.collectAlarmFields(dataValue.monitoringParameters.filter.selectClauses[index], variant.dataType.key.toString(), variant.value)
+              eventInformation = collectAlarmFields(dataValue.monitoringParameters.filter.selectClauses[index], variant.dataType.key.toString(), variant.value)
 
-              if (variant.dataType === core.nodeOPCUA.DataType.NodeId) {
+              if (variant.dataType === DataType.NodeId) {
                 browseForBrowseName(session, variant.value, function (err: Todo, browseName: Todo) {
                   if (err) {
                     reject(err)
@@ -424,13 +413,13 @@ de.biancoroyal.opcua.iiot.core.listener.analyzeEvent = function (session: Todo, 
   )
 }
 
-de.biancoroyal.opcua.iiot.core.listener.checkState = function (node: Todo, msg: Todo, callerType: Todo) {
-  this.internalDebugLog('Check Listener State ' + node.bianco.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+const checkState = function (node: Todo, msg: Todo, callerType: Todo) {
+  internalDebugLog('Check Listener State ' + node.iiot.stateMachine.getMachineState() + ' By ' + callerType)
 
-  if (node.connector && node.bianco.iiot.stateMachine && node.bianco.iiot.stateMachine.getMachineState() !== this.RUNNING_STATE) {
-    this.internalDebugLog('Wrong Listener State ' + node.bianco.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+  if (node.connector && node.iiot.stateMachine && node.iiot.stateMachine.getMachineState() !== RUNNING_STATE) {
+    internalDebugLog('Wrong Listener State ' + node.iiot.stateMachine.getMachineState() + ' By ' + callerType)
     if (node.showErrors) {
-      node.error(new Error('Listener Not ' + this.RUNNING_STATE + ' On ' + callerType), msg)
+      node.error(new Error('Listener Not ' + RUNNING_STATE + ' On ' + callerType), msg)
     }
     return false
   } else {
@@ -438,13 +427,49 @@ de.biancoroyal.opcua.iiot.core.listener.checkState = function (node: Todo, msg: 
   }
 }
 
-de.biancoroyal.opcua.iiot.core.listener.initListenerNode = function (node: Todo) {
-  let listenerNode = this.core.initClientNode(node)
-  listenerNode.bianco.iiot.opcuaSubscription = null
-  listenerNode.bianco.iiot.monitoredItems = new Map()
-  listenerNode.bianco.iiot.monitoredASO = new Map()
-  listenerNode.bianco.iiot.messageQueue = []
-  return listenerNode
+const initListenerNode = function (node: Todo) {
+  return {
+    ...initCoreNode(),
+    opcuaSubscription: null,
+    monitoredItems: new Map(),
+    monitoredASO: new Map(),
+    messageQueue: []
+  }
 }
 
-module.exports = de.biancoroyal.opcua.iiot.core.listener
+const coreListener = {
+  internalDebugLog,
+  detailDebugLog,
+  subscribeDebugLog,
+  subscribeDetailDebugLog,
+  eventDebugLog,
+  eventDetailDebugLog,
+
+  SUBSCRIBE_DEFAULT_INTERVAL,
+  MIN_LISTENER_INTERVAL,
+  MAX_LISTENER_INTERVAL,
+  SUBSCRIBE_DEFAULT_QUEUE_SIZE,
+  EVENT_DEFAULT_INTERVAL,
+  EVENT_DEFAULT_QUEUE_SIZE,
+  METHOD_TYPE,
+  RUNNING_STATE,
+  MAX_INT32,
+
+  createStatelyMachine,
+  getEventSubscriptionParameters,
+  getSubscriptionParameters,
+  collectAlarmFields,
+  getBasicEventFields,
+  getAllEventFields,
+  getStateFields,
+  getConditionFields,
+  monitorItems,
+  buildNewMonitoredItem,
+  buildNewMonitoredItemGroup,
+  buildNewEventItem,
+  analyzeEvent,
+  checkState,
+  initListenerNode,
+}
+
+export default coreListener;

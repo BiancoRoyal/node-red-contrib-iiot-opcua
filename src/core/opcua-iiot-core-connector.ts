@@ -9,7 +9,6 @@
 // SOURCE-MAP-REQUIRED
 
 import * as core from './opcua-iiot-core'
-import { assert } from './opcua-iiot-core';
 import {OPCUAIIoTConnectorConfiguration} from '../opcua-iiot-connector'
 // @ts-ignore
 import * as Stately from 'stately.js'
@@ -22,23 +21,44 @@ export namespace logger {
     export const libDebugLog = core.Debug('opcuaIIoT:connector:nodeopcua')
 }
 
-export function initConnectorNode(node: OPCUAIIoTConnectorConfiguration) {
-    core.initClientNode(node)
-    node.bianco.iiot.sessionNodeRequests = 0
-    node.bianco.iiot.endpoints = []
-    node.bianco.iiot.userIdentity = null
-    node.bianco.iiot.opcuaClient = null
-    node.bianco.iiot.opcuaSession = null
-    node.bianco.iiot.discoveryServer = null
-    node.bianco.iiot.serverCertificate = null
-    node.bianco.iiot.discoveryServerEndpointUrl = null
-    node.bianco.iiot.createConnectionTimeout = null
-    node.bianco.iiot.hasOpcUaSubscriptions = false
-    return node
+// sets values within node.bianco.iiot (refactored to node.iiot)
+function initConnectorNode() {
+    return {
+        ...core.initCoreNode(),
+        sessionNodeRequests: 0,
+        endpoints: [],
+        userIdentity: null,
+        opcuaClient: null,
+        opcuaSession: null,
+        discoveryServer: null,
+        serverCertificate: null,
+        discoveryServerEndpointUrl: null,
+        createConnectionTimeout: null,
+        hasOpcUaSubscriptions: false,
+    }
+
 }
 
-export function createStatelyMachine() {
-    return Stately.machine({
+export type CoreMachineStates =
+    'IDLE' |
+    'INITOPCUA' |
+    'OPEN' |
+    'SESSIONREQUESTED' |
+    'SESSIONACTIVE' |
+    'SESSIONRESTART' |
+    'SESSIONCLOSED' |
+    'CLOSED' |
+    'LOCKED' |
+    'UNLOCKED' |
+    'RECONFIGURED' |
+    'RENEW' |
+    'STOPPED' |
+    'END';
+
+// export type CoreStateMachine = Record<CoreMachineStates, Record<string, CoreMachineStates>>
+
+function createCoreStatelyMachine() {
+    const stateMachine = Stately.machine({
         'IDLE': {
             'initopcua': 'INITOPCUA',
             'lock': 'LOCKED',
@@ -115,12 +135,14 @@ export function createStatelyMachine() {
         'STOPPED': {},
         'END': {}
     }, 'IDLE')
+    logger.internalDebugLog('Start FSM: ' + stateMachine.getMachineState())
+    logger.detailDebugLog('FSM events:' + stateMachine.getMachineEvents())
+    return stateMachine
 }
 
-export function setListenerToClient(node: Todo) {
-    assert(node.bianco.iiot)
+function setListenerToClient(node: Todo) {
 
-    if (!node.bianco.iiot.opcuaClient) {
+    if (!node.iiot.opcuaClient) {
         logger.internalDebugLog('Client Not Valid On Setting Events To Client')
         if (node.showErrors) {
             node.error(new Error('Client Not Valid To Set Event Listeners'), {payload: 'No Client To Set Event Listeners'})
@@ -128,15 +150,15 @@ export function setListenerToClient(node: Todo) {
         return
     }
 
-    node.bianco.iiot.opcuaClient.on('close', function (err: Error) {
+    node.iiot.opcuaClient.on('close', function (err: Error) {
         if (err) {
             logger.internalDebugLog('Connection Error On Close ' + err)
         }
 
-        if (node.bianco.iiot.isInactiveOnOPCUA()) {
+        if (node.iiot.isInactiveOnOPCUA()) {
             logger.detailDebugLog('Connector Not Active On OPC UA Close Event')
         } else {
-            node.bianco.iiot.resetOPCUAConnection('Connector To Server Close')
+            node.iiot.resetOPCUAConnection('Connector To Server Close')
         }
 
         logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!')
@@ -144,98 +166,98 @@ export function setListenerToClient(node: Todo) {
         node.emit('server_connection_close')
     })
 
-    node.bianco.iiot.opcuaClient.on('backoff', function (number: number, delay: number) {
+    node.iiot.opcuaClient.on('backoff', function (number: number, delay: number) {
         logger.internalDebugLog('!!! CONNECTION FAILED (backoff) FOR #', number, ' retrying ', delay / 1000.0, ' sec. !!!')
         logger.internalDebugLog('CONNECTION FAILED: ' + node.endpoint)
-        node.bianco.iiot.stateMachine.lock()
+        node.iiot.stateMachine.lock()
     })
 
-    node.bianco.iiot.opcuaClient.on('abort', function () {
+    node.iiot.opcuaClient.on('abort', function () {
         logger.internalDebugLog('!!! Abort backoff !!!')
         logger.internalDebugLog('CONNECTION BROKEN: ' + node.endpoint)
 
-        if (node.bianco.iiot.isInactiveOnOPCUA()) {
+        if (node.iiot.isInactiveOnOPCUA()) {
             logger.detailDebugLog('Connector Not Active On OPC UA Backoff Abort Event')
         } else {
-            node.bianco.iiot.resetOPCUAConnection('Connector To Server Backoff Abort')
+            node.iiot.resetOPCUAConnection('Connector To Server Backoff Abort')
         }
 
         node.emit('server_connection_abort')
     })
 
-    node.bianco.iiot.opcuaClient.on('connection_lost', function () {
+    node.iiot.opcuaClient.on('connection_lost', function () {
         logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION LOST !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION LOST: ' + node.endpoint)
-        node.bianco.iiot.stateMachine.lock()
+        node.iiot.stateMachine.lock()
         node.emit('server_connection_lost')
     })
 
-    node.bianco.iiot.opcuaClient.on('connection_reestablished', function () {
+    node.iiot.opcuaClient.on('connection_reestablished', function () {
         logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION RE-ESTABLISHED: ' + node.endpoint)
-        node.bianco.iiot.stateMachine.unlock()
+        node.iiot.stateMachine.unlock()
     })
 
-    node.bianco.iiot.opcuaClient.on('start_reconnection', function () {
+    node.iiot.opcuaClient.on('start_reconnection', function () {
         logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT STARTING RECONNECTION !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION STARTING RECONNECTION: ' + node.endpoint)
-        node.bianco.iiot.stateMachine.lock()
+        node.iiot.stateMachine.lock()
     })
 
-    node.bianco.iiot.opcuaClient.on('timed_out_request', function () {
+    node.iiot.opcuaClient.on('timed_out_request', function () {
         logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT TIMED OUT REQUEST !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION TIMED OUT REQUEST: ' + node.endpoint)
     })
 
-    node.bianco.iiot.opcuaClient.on('security_token_renewed', function () {
+    node.iiot.opcuaClient.on('security_token_renewed', function () {
         logger.detailDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT SECURITY TOKEN RENEWED !!!!!!!!!!!!!!!!!!!')
         logger.detailDebugLog('CONNECTION SECURITY TOKEN RENEWE: ' + node.endpoint)
     })
 
-    node.bianco.iiot.opcuaClient.on('after_reconnection', function () {
+    node.iiot.opcuaClient.on('after_reconnection', function () {
         logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!      CLIENT RECONNECTED     !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION RECONNECTED: ' + node.endpoint)
-        node.emit('after_reconnection', node.bianco.iiot.opcuaClient)
-        node.bianco.iiot.stateMachine.unlock()
+        node.emit('after_reconnection', node.iiot.opcuaClient)
+        node.iiot.stateMachine.unlock()
     })
 }
 
-export function logSessionInformation(node: Todo) {
-    if (!node.bianco.iiot.opcuaSession) {
+function logSessionInformation(node: Todo) {
+    if (!node.iiot.opcuaSession) {
         logger.detailDebugLog('Session Not Valid To Log Information')
         return
     }
 
-    logger.internalDebugLog('Session ' + node.bianco.iiot.opcuaSession.name + ' Id: ' + node.bianco.iiot.opcuaSession.sessionId + ' Started On ' + node.endpoint)
-    logger.detailDebugLog('name :' + node.bianco.iiot.opcuaSession.name)
-    logger.detailDebugLog('sessionId :' + node.bianco.iiot.opcuaSession.sessionId)
-    logger.detailDebugLog('authenticationToken :' + node.bianco.iiot.opcuaSession.authenticationToken)
-    logger.internalDebugLog('timeout :' + node.bianco.iiot.opcuaSession.timeout)
+    logger.internalDebugLog('Session ' + node.iiot.opcuaSession.name + ' Id: ' + node.iiot.opcuaSession.sessionId + ' Started On ' + node.endpoint)
+    logger.detailDebugLog('name :' + node.iiot.opcuaSession.name)
+    logger.detailDebugLog('sessionId :' + node.iiot.opcuaSession.sessionId)
+    logger.detailDebugLog('authenticationToken :' + node.iiot.opcuaSession.authenticationToken)
+    logger.internalDebugLog('timeout :' + node.iiot.opcuaSession.timeout)
 
-    if (node.bianco.iiot.opcuaSession.serverNonce) {
-        logger.detailDebugLog('serverNonce :' + node.bianco.iiot.opcuaSession.serverNonce ? node.bianco.iiot.opcuaSession.serverNonce.toString('hex') : 'none')
+    if (node.iiot.opcuaSession.serverNonce) {
+        logger.detailDebugLog('serverNonce :' + node.iiot.opcuaSession.serverNonce ? node.iiot.opcuaSession.serverNonce.toString('hex') : 'none')
     }
 
-    if (node.bianco.iiot.opcuaSession.serverCertificate) {
-        logger.detailDebugLog('serverCertificate :' + node.bianco.iiot.opcuaSession.serverCertificate ? node.bianco.iiot.opcuaSession.serverCertificate.toString('base64') : 'none')
+    if (node.iiot.opcuaSession.serverCertificate) {
+        logger.detailDebugLog('serverCertificate :' + node.iiot.opcuaSession.serverCertificate ? node.iiot.opcuaSession.serverCertificate.toString('base64') : 'none')
     } else {
         logger.detailDebugLog('serverCertificate : None')
     }
 
-    logger.detailDebugLog('serverSignature :' + node.bianco.iiot.opcuaSession.serverSignature ? node.bianco.iiot.opcuaSession.serverSignature : 'none')
+    logger.detailDebugLog('serverSignature :' + node.iiot.opcuaSession.serverSignature ? node.iiot.opcuaSession.serverSignature : 'none')
 
-    if (node.bianco.iiot.opcuaSession.lastRequestSentTime) {
-        logger.detailDebugLog('lastRequestSentTime : ' + node.bianco.iiot.opcuaSession.lastRequestSentTime)
-        logger.internalDebugLog('lastRequestSentTime converted :' + node.bianco.iiot.opcuaSession.lastRequestSentTime ? new Date(node.bianco.iiot.opcuaSession.lastRequestSentTime).toISOString() : 'none')
+    if (node.iiot.opcuaSession.lastRequestSentTime) {
+        logger.detailDebugLog('lastRequestSentTime : ' + node.iiot.opcuaSession.lastRequestSentTime)
+        logger.internalDebugLog('lastRequestSentTime converted :' + node.iiot.opcuaSession.lastRequestSentTime ? new Date(node.iiot.opcuaSession.lastRequestSentTime).toISOString() : 'none')
     }
 
-    if (node.bianco.iiot.opcuaSession.lastResponseReceivedTime) {
-        logger.detailDebugLog('lastResponseReceivedTime : ' + node.bianco.iiot.opcuaSession.lastResponseReceivedTime)
-        logger.internalDebugLog('lastResponseReceivedTime converted :' + node.bianco.iiot.opcuaSession.lastResponseReceivedTime ? new Date(node.bianco.iiot.opcuaSession.lastResponseReceivedTime).toISOString() : 'none')
+    if (node.iiot.opcuaSession.lastResponseReceivedTime) {
+        logger.detailDebugLog('lastResponseReceivedTime : ' + node.iiot.opcuaSession.lastResponseReceivedTime)
+        logger.internalDebugLog('lastResponseReceivedTime converted :' + node.iiot.opcuaSession.lastResponseReceivedTime ? new Date(node.iiot.opcuaSession.lastResponseReceivedTime).toISOString() : 'none')
     }
 }
 
-export function checkEndpoint(node: Todo) {
+function checkEndpoint(node: Todo) {
     if (node.endpoint && node.endpoint.includes('opc.tcp://')) {
         return true
     } else {
@@ -244,3 +266,14 @@ export function checkEndpoint(node: Todo) {
         return false
     }
 }
+
+const coreConnector = {
+    initConnectorNode,
+    createCoreStatelyMachine,
+    setListenerToClient,
+    logSessionInformation,
+    checkEndpoint,
+    internalDebugLog: logger.internalDebugLog
+}
+
+export default coreConnector
