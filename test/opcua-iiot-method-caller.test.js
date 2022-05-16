@@ -13,8 +13,8 @@
 jest.setTimeout(5000)
 
 // opcua iiot
-var injectNode = require('node-red/nodes/core/core/20-inject')
-var functionNode = require('node-red/nodes/core/core/80-function')
+var injectNode = require('@node-red/nodes/core/common/20-inject')
+var functionNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../src/opcua-iiot-method-caller')
 
 var helper = require('node-red-node-test-helper')

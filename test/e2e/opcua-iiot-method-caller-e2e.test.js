@@ -12,8 +12,8 @@
 
 jest.setTimeout(20000)
 
-var injectNodeRed = require('node-red/nodes/core/core/20-inject')
-var functionNode = require('node-red/nodes/core/core/80-function')
+var injectNodeRed = require('@node-red/nodes/core/common/20-inject')
+var functionNode = require('@node-red/nodes/core/function/10-function')
 
 // opcua iiot
 var injectNode = require('../../src/opcua-iiot-inject')
