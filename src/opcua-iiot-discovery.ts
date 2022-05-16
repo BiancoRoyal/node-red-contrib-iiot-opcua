@@ -8,16 +8,25 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo} from "./types/placeholders";
+interface OPCUAIIoTDiscovery extends nodered.Node {
+  discoveryPort: number
+  bianco?: Todo
+}
+interface OPCUAIIoTDiscoveryDef extends nodered.NodeDef {
+  discoveryPort: number
+}
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let coreDiscovery = require('./core/opcua-iiot-core-discovery')
 
-  function OPCUAIIoTDiscovery (config) {
+  function OPCUAIIoTDiscovery (this: OPCUAIIoTDiscovery, config: OPCUAIIoTDiscoveryDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.discoveryPort = config.discoveryPort || coreDiscovery.DEFAULT_OPCUA_DISCOVERY_PORT
@@ -45,7 +54,7 @@ module.exports = function (RED) {
       node.send(msg)
     })
 
-    node.on('close', function (done) {
+    node.on('close', function (done: () => void) {
       if (discoveryServer) {
         discoveryServer.shutdown(function () {
           coreDiscovery.internalDebugLog('shutdown')

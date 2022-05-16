@@ -7,16 +7,30 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo, TodoBianco} from "./types/placeholders";
+import {NodeMessageInFlow} from "node-red";
+interface OPCUAIIoTCMD extends nodered.Node {
+  commandtype: string
+  nodeId: string
+  name: string
+  bianco?: TodoBianco
+}
+interface OPCUAIIoTCMDDef extends nodered.NodeDef {
+  commandtype: string
+  nodeId: string
+  name: string
+}
 /**
  * Address space object Node-RED node.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let core = require('./core/opcua-iiot-core')
 
-  function OPCUAIIoTCMD (config) {
+  function OPCUAIIoTCMD (this: OPCUAIIoTCMD, config: OPCUAIIoTCMDDef) {
     RED.nodes.createNode(this, config)
     this.commandtype = config.commandtype
     this.nodeId = config.nodeId
@@ -27,10 +41,12 @@ module.exports = function (RED) {
     core.assert(node.bianco.iiot)
     core.internalDebugLog('Open CMD Node')
 
-    node.on('input', function (msg) {
-      msg.nodetype = 'inject'
-      msg.injectType = 'CMD'
-      msg.commandType = node.commandtype
+    node.on('input', function (msg: NodeMessageInFlow | Todo) {
+      let returnMessage: Todo = {};
+
+      returnMessage.nodetype = 'inject'
+      returnMessage.injectType = 'CMD'
+      returnMessage.commandType = node.commandtype
 
       if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
         let addressSpaceItem
@@ -44,7 +60,7 @@ module.exports = function (RED) {
         }
       } else {
         if (node.nodeId) {
-          msg.payload = {
+          returnMessage.payload = {
             nodeId: node.nodeId
           }
         }
@@ -52,7 +68,7 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', (done) => {
+    node.on('close', (done: () => void) => {
       core.internalDebugLog('Close CMD Node')
       core.resetBiancoNode(node)
       done()

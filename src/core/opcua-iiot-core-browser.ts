@@ -9,6 +9,8 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
+import {Todo} from "../types/placeholders";
+
 /**
  * Nested namespace settings.
  *
@@ -16,14 +18,14 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.browser
  */
-var de = de || { biancoroyal: { opcua: { iiot: { core: { browser: { crawler: {} } } } } } } // eslint-disable-line no-use-before-define
+var de: Todo = de || { biancoroyal: { opcua: { iiot: { core: { browser: { crawler: {} } } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.core = de.biancoroyal.opcua.iiot.core.browser.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.internalDebugLog = de.biancoroyal.opcua.iiot.core.browser.internalDebugLog || require('debug')('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.detailDebugLog = de.biancoroyal.opcua.iiot.core.browser.detailDebugLog || require('debug')('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.crawler.internalDebugLog = de.biancoroyal.opcua.iiot.core.browser.crawler.internalDebugLog || require('debug')('opcuaIIoT:browser:crawler') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.browser.crawler.detailDebugLog = de.biancoroyal.opcua.iiot.core.browser.crawler.detailDebugLog || require('debug')('opcuaIIoT:browser:crawler:details') // eslint-disable-line no-use-before-define
 
-de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrowse) {
+de.biancoroyal.opcua.iiot.core.browser.browse = function (session: Todo, nodeIdToBrowse: Todo) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
@@ -44,7 +46,7 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrows
         }
       ]
 
-      session.browse(browseOptions, function (err, browseResult) {
+      session.browse(browseOptions, function (err: Error, browseResult: Todo) {
         if (err) {
           reject(err)
         } else {
@@ -55,13 +57,13 @@ de.biancoroyal.opcua.iiot.core.browser.browse = function (session, nodeIdToBrows
   )
 }
 
-de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (session, addressSpaceItems) {
+de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (session: Todo, addressSpaceItems: Todo) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
-      let browseOptions = []
+      let browseOptions: Todo[] = []
 
-      addressSpaceItems.forEach(function (item) {
+      addressSpaceItems.forEach(function (item: Todo) {
         browseOptions.push({
           nodeId: item.nodeId,
           referenceTypeId: 'Organizes',
@@ -79,7 +81,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
         })
       })
 
-      session.browse(browseOptions, function (err, browseResult) {
+      session.browse(browseOptions, function (err: Error, browseResult: Todo) {
         if (err) {
           reject(err)
         } else {
@@ -90,12 +92,12 @@ de.biancoroyal.opcua.iiot.core.browser.browseAddressSpaceItems = function (sessi
   )
 }
 
-de.biancoroyal.opcua.iiot.core.browser.createCrawler = function (session) {
+de.biancoroyal.opcua.iiot.core.browser.createCrawler = function (session: Todo) {
   this.core.assert(session !== null)
   return new this.core.nodeOPCUA.NodeCrawler(session)
 }
 
-de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl, msg) {
+de.biancoroyal.opcua.iiot.core.browser.crawl = function (session: Todo, nodeIdToCrawl: Todo, msg: Todo) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
@@ -106,16 +108,16 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl,
 
       const message = Object.assign({}, msg)
       const crawler = coreBrowser.createCrawler(session)
-      let crawlerResult = []
+      let crawlerResult: Todo[] = []
 
       const data = {
-        onBrowse: function (crawler, cacheNode) {
+        onBrowse: function (crawler: Todo, cacheNode: Todo) {
           crawlerResult.push(cacheNode)
           coreBrowser.core.nodeOPCUA.NodeCrawler.follow(crawler, cacheNode, this)
         }
       }
 
-      crawler.crawl(nodeIdToCrawl, data, function (err) {
+      crawler.crawl(nodeIdToCrawl, data, function (err: Error) {
         if (err) {
           reject(err)
         } else {
@@ -125,7 +127,7 @@ de.biancoroyal.opcua.iiot.core.browser.crawl = function (session, nodeIdToCrawl,
     })
 }
 
-de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (session, msg) {
+de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (session: Todo, msg: Todo) {
   let coreBrowser = this
   return new Promise(
     function (resolve, reject) {
@@ -136,10 +138,10 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
 
       const message = Object.assign({}, msg)
       const crawler = coreBrowser.createCrawler(session)
-      let crawlerResult = []
+      let crawlerResult: Todo[] = []
 
       const data = {
-        onBrowse (crawler, cacheNode) {
+        onBrowse (crawler: Todo, cacheNode: Todo) {
           if (!cacheNode) {
             coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
           }
@@ -148,13 +150,13 @@ de.biancoroyal.opcua.iiot.core.browser.crawlAddressSpaceItems = function (sessio
         }
       }
 
-      message.addressSpaceItems.forEach((item) => {
+      message.addressSpaceItems.forEach((item: Todo) => {
         if (!item.nodeId) {
           coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
           return
         }
 
-        crawler.crawl(item.nodeId, data, function (err) {
+        crawler.crawl(item.nodeId, data, function (err: Error) {
           if (err) {
             reject(err)
           } else {
@@ -170,7 +172,7 @@ de.biancoroyal.opcua.iiot.core.browser.browseToRoot = function () {
   return this.core.OBJECTS_ROOT
 }
 
-de.biancoroyal.opcua.iiot.core.browser.extractNodeIdFromTopic = function (msg, node) {
+de.biancoroyal.opcua.iiot.core.browser.extractNodeIdFromTopic = function (msg: Todo, node: Todo) {
   let rootNodeId = null
 
   if (msg.payload.actiontype === 'browse') { // event driven browsing
@@ -188,7 +190,7 @@ de.biancoroyal.opcua.iiot.core.browser.extractNodeIdFromTopic = function (msg, n
   return rootNodeId
 }
 
-de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference) {
+de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference: Todo) {
   if (reference) {
     try {
       return reference.toJSON()
@@ -213,7 +215,7 @@ de.biancoroyal.opcua.iiot.core.browser.transformToEntry = function (reference) {
   return reference
 }
 
-de.biancoroyal.opcua.iiot.core.browser.initBrowserNode = function (node) {
+de.biancoroyal.opcua.iiot.core.browser.initBrowserNode = function (node: Todo) {
   this.core.initClientNode(node)
   node.browseTopic = this.core.OBJECTS_ROOT
   node.bianco.iiot.items = []
@@ -221,7 +223,7 @@ de.biancoroyal.opcua.iiot.core.browser.initBrowserNode = function (node) {
   return node
 }
 
-de.biancoroyal.opcua.iiot.core.browser.browseErrorHandling = function (node, err, msg, lists) {
+de.biancoroyal.opcua.iiot.core.browser.browseErrorHandling = function (node: Todo, err: Error, msg: Todo, lists: Todo) {
   let results = lists.browserResults || []
 
   if (err) {

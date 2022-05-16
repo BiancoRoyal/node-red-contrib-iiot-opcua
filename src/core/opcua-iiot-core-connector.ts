@@ -13,6 +13,7 @@ import { assert } from './opcua-iiot-core';
 import {OPCUAIIoTConnectorConfiguration} from '../opcua-iiot-connector'
 // @ts-ignore
 import * as Stately from 'stately.js'
+import {Todo} from "../types/placeholders";
 export { Stately }
 
 export namespace logger {
@@ -37,7 +38,7 @@ export function initConnectorNode(node: OPCUAIIoTConnectorConfiguration) {
 }
 
 export function createStatelyMachine() {
-    return de.biancoroyal.opcua.iiot.core.connector.Stately.machine({
+    return Stately.machine({
         'IDLE': {
             'initopcua': 'INITOPCUA',
             'lock': 'LOCKED',
@@ -116,7 +117,7 @@ export function createStatelyMachine() {
     }, 'IDLE')
 }
 
-export function setListenerToClient(node) {
+export function setListenerToClient(node: Todo) {
     assert(node.bianco.iiot)
 
     if (!node.bianco.iiot.opcuaClient) {
@@ -127,7 +128,7 @@ export function setListenerToClient(node) {
         return
     }
 
-    node.bianco.iiot.opcuaClient.on('close', function (err) {
+    node.bianco.iiot.opcuaClient.on('close', function (err: Error) {
         if (err) {
             logger.internalDebugLog('Connection Error On Close ' + err)
         }
@@ -138,13 +139,13 @@ export function setListenerToClient(node) {
             node.bianco.iiot.resetOPCUAConnection('Connector To Server Close')
         }
 
-        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!'.bgWhite.red)
+        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION CLOSED !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION CLOSED: ' + node.endpoint)
         node.emit('server_connection_close')
     })
 
-    node.bianco.iiot.opcuaClient.on('backoff', function (number, delay) {
-        logger.internalDebugLog('!!! CONNECTION FAILED (backoff) FOR #'.bgWhite.yellow, number, ' retrying ', delay / 1000.0, ' sec. !!!')
+    node.bianco.iiot.opcuaClient.on('backoff', function (number: number, delay: number) {
+        logger.internalDebugLog('!!! CONNECTION FAILED (backoff) FOR #', number, ' retrying ', delay / 1000.0, ' sec. !!!')
         logger.internalDebugLog('CONNECTION FAILED: ' + node.endpoint)
         node.bianco.iiot.stateMachine.lock()
     })
@@ -163,43 +164,43 @@ export function setListenerToClient(node) {
     })
 
     node.bianco.iiot.opcuaClient.on('connection_lost', function () {
-        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION LOST !!!!!!!!!!!!!!!!!!!'.bgWhite.orange)
+        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION LOST !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION LOST: ' + node.endpoint)
         node.bianco.iiot.stateMachine.lock()
         node.emit('server_connection_lost')
     })
 
     node.bianco.iiot.opcuaClient.on('connection_reestablished', function () {
-        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!'.bgWhite.orange)
+        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION RE-ESTABLISHED: ' + node.endpoint)
         node.bianco.iiot.stateMachine.unlock()
     })
 
     node.bianco.iiot.opcuaClient.on('start_reconnection', function () {
-        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT STARTING RECONNECTION !!!!!!!!!!!!!!!!!!!'.bgWhite.yellow)
+        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT STARTING RECONNECTION !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION STARTING RECONNECTION: ' + node.endpoint)
         node.bianco.iiot.stateMachine.lock()
     })
 
     node.bianco.iiot.opcuaClient.on('timed_out_request', function () {
-        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT TIMED OUT REQUEST !!!!!!!!!!!!!!!!!!!'.bgWhite.blue)
+        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT TIMED OUT REQUEST !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION TIMED OUT REQUEST: ' + node.endpoint)
     })
 
     node.bianco.iiot.opcuaClient.on('security_token_renewed', function () {
-        logger.detailDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT SECURITY TOKEN RENEWED !!!!!!!!!!!!!!!!!!!'.bgWhite.violet)
+        logger.detailDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT SECURITY TOKEN RENEWED !!!!!!!!!!!!!!!!!!!')
         logger.detailDebugLog('CONNECTION SECURITY TOKEN RENEWE: ' + node.endpoint)
     })
 
     node.bianco.iiot.opcuaClient.on('after_reconnection', function () {
-        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!      CLIENT RECONNECTED     !!!!!!!!!!!!!!!!!!!'.bgWhite.green)
+        logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!      CLIENT RECONNECTED     !!!!!!!!!!!!!!!!!!!')
         logger.internalDebugLog('CONNECTION RECONNECTED: ' + node.endpoint)
         node.emit('after_reconnection', node.bianco.iiot.opcuaClient)
         node.bianco.iiot.stateMachine.unlock()
     })
 }
 
-export function logSessionInformation(node) {
+export function logSessionInformation(node: Todo) {
     if (!node.bianco.iiot.opcuaSession) {
         logger.detailDebugLog('Session Not Valid To Log Information')
         return
@@ -218,7 +219,7 @@ export function logSessionInformation(node) {
     if (node.bianco.iiot.opcuaSession.serverCertificate) {
         logger.detailDebugLog('serverCertificate :' + node.bianco.iiot.opcuaSession.serverCertificate ? node.bianco.iiot.opcuaSession.serverCertificate.toString('base64') : 'none')
     } else {
-        logger.detailDebugLog('serverCertificate : None'.red)
+        logger.detailDebugLog('serverCertificate : None')
     }
 
     logger.detailDebugLog('serverSignature :' + node.bianco.iiot.opcuaSession.serverSignature ? node.bianco.iiot.opcuaSession.serverSignature : 'none')
@@ -234,7 +235,7 @@ export function logSessionInformation(node) {
     }
 }
 
-export function checkEndpoint(node) {
+export function checkEndpoint(node: Todo) {
     if (node.endpoint && node.endpoint.includes('opc.tcp://')) {
         return true
     } else {

@@ -7,16 +7,44 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Node} from "@node-red/registry";
+import {Todo} from "./types/placeholders";
+
+interface OPCUAIIoTMethodCaller extends nodered.Node {
+  objectId: string
+  methodId: string
+  methodType: string
+  value: string
+  justValue: string
+  name: string
+  showStatusActivities: string
+  showErrors: string
+  inputArguments: string
+  connector: Node
+}
+interface OPCUAIIoTMethodCallerDef extends nodered.NodeDef {
+  objectId: string
+  methodId: string
+  methodType: string
+  value: string
+  justValue: string
+  name: string
+  showStatusActivities: string
+  showErrors: string
+  inputArguments: string
+  connector: string
+}
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT method call.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let coreMethod = require('./core/opcua-iiot-core-method')
 
-  function OPCUAIIoTMethodCaller (config) {
+  function OPCUAIIoTMethodCaller (this: OPCUAIIoTMethodCaller, config: OPCUAIIoTMethodCallerDef) {
     RED.nodes.createNode(this, config)
     this.objectId = config.objectId
     this.methodId = config.methodId
@@ -32,7 +60,7 @@ module.exports = function (RED) {
     let node = coreMethod.core.initClientNode(this)
     coreMethod.core.assert(node.bianco.iiot)
 
-    node.bianco.iiot.handleMethodError = function (err, msg) {
+    node.bianco.iiot.handleMethodError = function (err: Error, msg: Todo) {
       coreMethod.internalDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
@@ -43,7 +71,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.bianco.iiot.handleMethodWarn = function (message) {
+    node.bianco.iiot.handleMethodWarn = function (message: Todo) {
       if (node.showErrors) {
         node.warn(message)
       }
@@ -51,16 +79,16 @@ module.exports = function (RED) {
       coreMethod.internalDebugLog(message)
     }
 
-    node.bianco.iiot.callMethodOnSession = function (session, msg) {
+    node.bianco.iiot.callMethodOnSession = function (session: Todo, msg: Todo) {
       if (coreMethod.core.checkSessionNotValid(session, 'MethodCaller')) {
         return
       }
 
       if (msg.methodId && msg.inputArguments) {
-        coreMethod.getArgumentDefinition(node.bianco.iiot.opcuaSession, msg).then(function (results) {
+        coreMethod.getArgumentDefinition(node.bianco.iiot.opcuaSession, msg).then(function (results: Todo) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
           node.bianco.iiot.callMethod(msg, results)
-        }).catch((err) => {
+        }).catch((err: Error) => {
           (coreMethod.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
         })
       } else {
@@ -68,8 +96,8 @@ module.exports = function (RED) {
       }
     }
 
-    node.bianco.iiot.callMethod = function (msg, definitionResults) {
-      coreMethod.callMethods(node.bianco.iiot.opcuaSession, msg).then(function (data) {
+    node.bianco.iiot.callMethod = function (msg: Todo, definitionResults: Todo) {
+      coreMethod.callMethods(node.bianco.iiot.opcuaSession, msg).then(function (data: Todo) {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
         let result = null
@@ -82,7 +110,7 @@ module.exports = function (RED) {
           outputArguments.push({ statusCode: result.statusCode, outputArguments: result.outputArguments })
         }
 
-        let dataValuesString = {}
+        let dataValuesString: string
         if (node.justValue) {
           if (message.inputArguments) {
             delete message['inputArguments']
@@ -97,9 +125,9 @@ module.exports = function (RED) {
 
         try {
           RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
-        } catch (err) {
+        } catch (err: any) {
           if (node.showErrors) {
-            node.warn('JSON not to parse from string for dataValues type ' + typeof readResult)
+            node.warn('JSON not to parse from string for dataValues type ' )
             node.error(err, msg)
           }
           message.payload = dataValuesString
@@ -107,7 +135,7 @@ module.exports = function (RED) {
         }
 
         node.send(message)
-      }).catch(function (err) {
+      }).catch(function (err: Error) {
         coreMethod.internalDebugLog(err)
         if (node.showErrors) {
           node.error(err, msg)
@@ -115,7 +143,7 @@ module.exports = function (RED) {
       })
     }
 
-    node.on('input', function (msg) {
+    node.on('input', function (msg: Todo) {
       if (!coreMethod.core.checkConnectorState(node, msg, 'MethodCaller')) {
         return
       }
@@ -129,7 +157,7 @@ module.exports = function (RED) {
 
     coreMethod.core.registerToConnector(node)
 
-    node.on('close', (done) => {
+    node.on('close', (done: () => void) => {
       coreMethod.core.deregisterToConnector(node, () => {
         coreMethod.core.resetBiancoNode(node)
         done()

@@ -8,18 +8,27 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo} from "./types/placeholders";
+
+interface OPCUAIIoTFlexServer extends nodered.Node {
+
+}
+interface OPCUAIIoTFlexServerDef extends nodered.NodeDef {
+  addressSpaceScript: Todo
+}
 /**
  * Server Node-RED node.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
   const { VM } = require('vm2')
   let scriptObjects = {}
 
-  function OPCUAIIoTFlexServer (config) {
+  function OPCUAIIoTFlexServer (this: OPCUAIIoTFlexServer, config: OPCUAIIoTFlexServerDef) {
     RED.nodes.createNode(this, config)
     coreServer.flex.internalDebugLog('Open Server Node')
 
@@ -78,7 +87,7 @@ module.exports = function (RED) {
           }
         },
         sandboxEnv: {
-          get: function (envVar) {
+          get: function (envVar: Todo) {
             let flow = node._flow
             return flow.getSetting(envVar)
           }
@@ -87,7 +96,8 @@ module.exports = function (RED) {
     })
 
     /* istanbul ignore next */
-    node.bianco.iiot.constructAddressSpaceScript = function (server, constructAddressSpaceScript, eventObjects) {
+    // @ts-ignore
+    node.bianco.iiot.constructAddressSpaceScript = function (server: Todo, constructAddressSpaceScript, eventObjects) {
       server.internalDebugLog('Init Function Block Flex Server')
     }
 
@@ -96,14 +106,14 @@ module.exports = function (RED) {
     node.bianco.iiot.buildServerOptions = function () {
       let serverOptions = coreServer.buildServerOptions(node, 'Flex')
       serverOptions.userManager = {
-        isValidUser: function (userName, password) {
+        isValidUser: function (userName: string, password: string) {
           return coreServer.checkUser(node, userName, password)
         }
       }
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    node.bianco.iiot.createServer = function (serverOptions) {
+    node.bianco.iiot.createServer = function (serverOptions: Todo) {
       /* istanbul ignore next */
       if (RED.settings.verbose) {
         coreServer.flex.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
@@ -121,7 +131,7 @@ module.exports = function (RED) {
 
       try {
         node.bianco.iiot.createServer(serverOptions)
-      } catch (err) {
+      } catch (err: any) {
         /* istanbul ignore next */
         node.emit('server_create_error')
         coreServer.flex.internalDebugLog(err.message)
@@ -136,13 +146,13 @@ module.exports = function (RED) {
           coreServer.start(node.bianco.iiot.opcuaServer, node).then(function () {
             coreServer.core.setNodeStatusTo(node, 'active')
             node.emit('server_running')
-          }).catch(function (err) {
+          }).catch(function (err: Error) {
             /* istanbul ignore next */
             node.emit('server_start_error')
             coreServer.core.setNodeStatusTo(node, 'errors')
             coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
           })
-        }).catch(function (err) {
+        }).catch(function (err: Error) {
           /* istanbul ignore next */
           coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
         })
@@ -150,7 +160,7 @@ module.exports = function (RED) {
 
     node.bianco.iiot.initNewServer()
 
-    node.on('input', function (msg) {
+    node.on('input', function (msg: Todo) {
       if (!node.bianco.iiot.opcuaServer || !node.bianco.iiot.initialized) {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
@@ -163,7 +173,7 @@ module.exports = function (RED) {
       }
     })
 
-    node.bianco.iiot.executeOpcuaCommand = function (msg) {
+    node.bianco.iiot.executeOpcuaCommand = function (msg: Todo) {
       if (msg.commandType === 'restart') {
         node.bianco.iiot.restartServer()
         node.send(msg)
@@ -183,7 +193,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.on('close', function (done) {
+    node.on('close', function (done: () => void) {
       node.bianco.iiot.closeServer(() => {
         coreServer.flex.internalDebugLog('Close Server Node')
         coreServer.core.resetBiancoNode(node)
@@ -196,7 +206,7 @@ module.exports = function (RED) {
       node.bianco.iiot.initNewServer()
     })
 
-    node.bianco.iiot.closeServer = function (done) {
+    node.bianco.iiot.closeServer = function (done: () => void) {
       if (coreServer.simulatorInterval) {
         clearInterval(coreServer.simulatorInterval)
         coreServer.simulatorInterval = null

@@ -8,16 +8,26 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo} from "./types/placeholders";
+
+interface OPCUAIIoTServer extends nodered.Node {
+  asoDemo: string
+}
+interface OPCUAIIoTServerDef extends nodered.NodeDef {
+  asoDemo: string
+}
+
 /**
  * Server Node-RED node.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let coreServer = require('./core/opcua-iiot-core-server')
 
-  function OPCUAIIoTServer (config) {
+  function OPCUAIIoTServer (this: OPCUAIIoTServer, config: OPCUAIIoTServerDef) {
     RED.nodes.createNode(this, config)
     coreServer.internalDebugLog('Open Server Node')
 
@@ -31,14 +41,14 @@ module.exports = function (RED) {
     node.bianco.iiot.buildServerOptions = function () {
       let serverOptions = coreServer.buildServerOptions(node, 'Fix')
       serverOptions.userManager = {
-        isValidUser: function (userName, password) {
+        isValidUser: function (userName: string, password: string) {
           return coreServer.checkUser(node, userName, password)
         }
       }
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    node.bianco.iiot.createServer = function (serverOptions) {
+    node.bianco.iiot.createServer = function (serverOptions: Todo) {
       if (RED.settings.verbose) {
         coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
@@ -63,7 +73,7 @@ module.exports = function (RED) {
 
     node.bianco.iiot.postInitialize = function () {
       coreServer.constructAddressSpace(node.bianco.iiot.opcuaServer, node.asoDemo)
-        .then(function (err) {
+        .then(function (err: Error) {
           if (err) {
             coreServer.handleServerError(node, err, { payload: 'Server Address Space Problem' })
           } else {
@@ -71,7 +81,7 @@ module.exports = function (RED) {
               .then(function () {
                 coreServer.core.setNodeStatusTo(node, 'active')
                 node.emit('server_running')
-              }).catch(function (err) {
+              }).catch(function (err: Error) {
                 if (coreServer.core.isInitializedBiancoIIoTNode(node)) {
                   node.bianco.iiot.opcuaServer = null
                 }
@@ -80,14 +90,14 @@ module.exports = function (RED) {
                 coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
               })
           }
-        }).catch(function (err) {
+        }).catch(function (err: Error) {
           coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
         })
     }
 
     node.bianco.iiot.initNewServer()
 
-    node.on('input', function (msg) {
+    node.on('input', function (msg: Todo) {
       if (!node.bianco.iiot.opcuaServer || !node.bianco.iiot.initialized) {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
@@ -107,7 +117,7 @@ module.exports = function (RED) {
       node.send(msg)
     })
 
-    node.bianco.iiot.changeAddressSpace = function (msg) {
+    node.bianco.iiot.changeAddressSpace = function (msg: Todo) {
       // TODO: refactor to work with the new OPC UA type list and option to set add type
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
         coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false)
@@ -118,7 +128,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.bianco.iiot.executeOpcuaCommand = function (msg) {
+    node.bianco.iiot.executeOpcuaCommand = function (msg: Todo) {
       switch (msg.commandType) {
         case 'restart':
           node.bianco.iiot.restartServer()
@@ -142,7 +152,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.on('close', (done) => {
+    node.on('close', (done: () => void) => {
       node.bianco.iiot.closeServer(() => {
         coreServer.internalDebugLog('Close Server Node')
         coreServer.core.resetBiancoNode(node)
@@ -155,7 +165,7 @@ module.exports = function (RED) {
       node.bianco.iiot.initNewServer()
     })
 
-    node.bianco.iiot.closeServer = function (done) {
+    node.bianco.iiot.closeServer = function (done: () => void) {
       coreServer.destructAddressSpace(() => {
         node.bianco.iiot.opcuaServer.removeAllListeners()
         node.bianco.iiot.opcuaServer.shutdown(node.delayToClose, done)

@@ -8,16 +8,45 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import { Node } from "@node-red/registry";
+import {
+  ClientNode,
+  OPCUASession,
+  ResultMessage,
+  Todo,
+  TodoVoidFunction,
+  WriteResult,
+  WriteResultMessage
+} from "./types/placeholders";
+
+
+interface OPCUAIIoTWrite extends nodered.Node {
+  name: string
+  justValue: string
+  showStatusActivities: boolean
+  showErrors: boolean
+  connector: Node
+}
+
+interface OPCUAIIoTWriteDef extends nodered.NodeDef {
+  name: string
+  justValue: string
+  showStatusActivities: boolean
+  showErrors: boolean
+  connector: string
+}
+
 /**
  * Write Node-RED node.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let coreClient = require('./core/opcua-iiot-core-client')
 
-  function OPCUAIIoTWrite (config) {
+  function OPCUAIIoTWrite (this: OPCUAIIoTWrite, config: OPCUAIIoTWriteDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.justValue = config.justValue
@@ -25,10 +54,10 @@ module.exports = function (RED) {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = coreClient.core.initClientNode(this)
+    let node: ClientNode = coreClient.core.initClientNode(this)
     coreClient.core.assert(node.bianco.iiot)
 
-    node.bianco.iiot.handleWriteError = function (err, msg) {
+    node.bianco.iiot.handleWriteError = (err: Error, msg: string) => {
       coreClient.writeDebugLog(err)
       if (node.showErrors) {
         node.error(err, msg)
@@ -40,7 +69,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.bianco.iiot.writeToSession = function (session, originMsg) {
+    node.bianco.iiot.writeToSession = (session: OPCUASession, originMsg: Todo) => {
       if (coreClient.core.checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
@@ -48,21 +77,21 @@ module.exports = function (RED) {
 
       let msg = Object.assign({}, originMsg)
       let nodesToWrite = coreClient.core.buildNodesToWrite(msg)
-      coreClient.write(session, nodesToWrite, msg).then(function (writeResult) {
+      coreClient.write(session, nodesToWrite, msg).then((writeResult: Promise<WriteResult>): void => {
         try {
           let message = node.bianco.iiot.buildResultMessage(writeResult)
           node.send(message)
-        } catch (err) {
+        } catch (err: any) {
           /* istanbul ignore next */
           (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
-      }).catch(function (err) {
+      }).catch(function (err: Error) {
         /* istanbul ignore next */
         (coreClient.core.isInitializedBiancoIIoTNode(node)) ? node.bianco.iiot.handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    node.bianco.iiot.buildResultMessage = function (result) {
+    node.bianco.iiot.buildResultMessage = (result: WriteResult): ResultMessage => {
       let message = Object.assign({}, result.msg)
       message.nodetype = 'write'
       message.justValue = node.justValue
@@ -72,8 +101,8 @@ module.exports = function (RED) {
       return message
     }
 
-    node.bianco.iiot.extractDataValueString = function (message, result) {
-      let dataValuesString = {}
+    node.bianco.iiot.extractDataValueString = (message: WriteResultMessage, result: WriteResult): string => {
+      let dataValuesString = ""
       if (node.justValue) {
         dataValuesString = JSON.stringify({
           statusCodes: result.statusCodes
@@ -88,10 +117,10 @@ module.exports = function (RED) {
       return dataValuesString
     }
 
-    node.bianco.iiot.setMessageProperties = function (message, result, stringValue) {
+    node.bianco.iiot.setMessageProperties =  (message: WriteResultMessage, result: WriteResult, stringValue: string) => {
       try {
         RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
-      } /* istanbul ignore next */ catch (err) {
+      } /* istanbul ignore next */ catch (err: any) {
         coreClient.writeDebugLog(err)
         if (node.showErrors) {
           node.warn('JSON not to parse from string for write statusCodes type ' + typeof result.statusCodes)
@@ -103,7 +132,7 @@ module.exports = function (RED) {
       return message
     }
 
-    node.on('input', function (msg) {
+    node.on('input', (msg: Todo) => {
       if (!coreClient.core.checkConnectorState(node, msg, 'Write')) {
         return
       }
@@ -121,7 +150,7 @@ module.exports = function (RED) {
 
     coreClient.core.registerToConnector(node)
 
-    node.on('close', (done) => {
+    node.on('close', (done: TodoVoidFunction) => {
       coreClient.core.deregisterToConnector(node, () => {
         coreClient.core.resetBiancoNode(node)
         done()

@@ -8,31 +8,33 @@
  **/
 'use strict'
 import * as nodered from "node-red";
+import {Todo, TodoBianco} from "./types/placeholders";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string
-  topic: any // TODO: string?
-  payload: any // TODO: config.payload
-  payloadType: any // TODO: config.payloadType
-  repeat: any // TODO: config.repeat
-  crontab: any // TODO: config.crontab
-  once: any // TODO: config.once
+  topic: Todo // TODO: string?
+  payload: Todo // TODO: config.payload
+  payloadType: Todo // TODO: config.payloadType
+  repeat: Todo // TODO: config.repeat
+  crontab: Todo // TODO: config.crontab
+  once: Todo // TODO: config.once
   startDelay: number // TODO: parseFloat(config.startDelay) || 10
-  injectType: any // TODO: config.injectType || 'inject'
-  addressSpaceItems: any // TODO: config.addressSpaceItems || []
+  injectType: Todo // TODO: config.injectType || 'inject'
+  addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
+  bianco?: TodoBianco
 }
 
 interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
   name: string
-  topic: any // TODO: string?
-  payload: any // TODO: config.payload
-  payloadType: any // TODO: config.payloadType
-  repeat: any // TODO: config.repeat
-  crontab: any // TODO: config.crontab
-  once: any // TODO: config.once
+  topic: Todo // TODO: string?
+  payload: Todo // TODO: config.payload
+  payloadType: Todo // TODO: config.payloadType
+  repeat: Todo // TODO: config.repeat
+  crontab: Todo // TODO: config.crontab
+  once: Todo // TODO: config.once
   startDelay: string
-  injectType: any // TODO: config.injectType || 'inject'
-  addressSpaceItems: any // TODO: config.addressSpaceItems || []
+  injectType: Todo // TODO: config.injectType || 'inject'
+  addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
 }
 
 /**
@@ -114,7 +116,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    node.on('input', function (msg) {
+    node.on('input', (msg: Todo) => {
       try {
         msg.topic = node.topic
         msg.nodetype = 'inject'
@@ -167,7 +169,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       clearTimeout(node.bianco.iiot.onceTimeout)
       node.bianco.iiot.onceTimeout = null
     }
-    let timeout = parseInt(node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS * node.startDelay)
+    let timeout = node.bianco.iiot.INPUT_TIMEOUT_MILLISECONDS * node.startDelay
 
     if (node.once) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
@@ -207,7 +209,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       try {
         node.receive()
         res.sendStatus(200)
-      } catch (err) {
+      } catch (err: any) {
         /* istanbul ignore next */
         res.sendStatus(500)
         node.error(RED._('opcuaiiotinject.failed', { error: err.toString() }))

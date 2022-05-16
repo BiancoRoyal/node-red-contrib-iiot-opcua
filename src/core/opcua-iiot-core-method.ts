@@ -8,6 +8,8 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
+import {Todo} from "../types/placeholders";
+
 /**
  * Nested namespace settings.
  *
@@ -15,12 +17,12 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.method
  */
-var de = de || { biancoroyal: { opcua: { iiot: { core: { method: {} } } } } } // eslint-disable-line no-use-before-define
+var de: Todo = de || { biancoroyal: { opcua: { iiot: { core: { method: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.method.core = de.biancoroyal.opcua.iiot.core.method.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.method.internalDebugLog = de.biancoroyal.opcua.iiot.core.method.internalDebugLog || require('debug')('opcuaIIoT:method') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.method.detailDebugLog = de.biancoroyal.opcua.iiot.core.method.detailDebugLog || require('debug')('opcuaIIoT:method:details') // eslint-disable-line no-use-before-define
 
-de.biancoroyal.opcua.iiot.core.method.getArgumentDefinition = function (session, msg) {
+de.biancoroyal.opcua.iiot.core.method.getArgumentDefinition = function (session: Todo, msg: Todo) {
   let coerceNodeId = this.core.nodeOPCUA.coerceNodeId
 
   return new Promise(
@@ -31,11 +33,11 @@ de.biancoroyal.opcua.iiot.core.method.getArgumentDefinition = function (session,
         try {
           let methodId = coerceNodeId(msg.methodId)
 
-          session.getArgumentDefinition(methodId, function (err, inputArguments, outputArguments) {
+          session.getArgumentDefinition(methodId, function (err: Error, inputArguments: Todo, outputArguments: Todo) {
             if (err) {
               reject(err)
             } else {
-              let results = {}
+              let results: Todo = {}
               results.methodId = methodId
               results.methodDefinition = {}
               results.methodDefinition.inputArguments = inputArguments
@@ -50,7 +52,7 @@ de.biancoroyal.opcua.iiot.core.method.getArgumentDefinition = function (session,
     })
 }
 
-de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
+de.biancoroyal.opcua.iiot.core.method.callMethods = function (session: Todo, msg: Todo) {
   let core = this.core
   let coerceNodeId = this.core.nodeOPCUA.coerceNodeId
 
@@ -60,7 +62,7 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
         reject(new Error('Methods Call Session Not Valid'))
       } else {
         try {
-          msg.inputArguments.forEach(function (element, index, array) {
+          msg.inputArguments.forEach(function (element: Todo) {
             element.value = core.convertDataValueByDataType({ value: element.value }, element.dataType)
           })
 
@@ -70,7 +72,7 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
             inputArguments: msg.inputArguments
           }]
 
-          session.call(methodCalls, function (err, results) {
+          session.call(methodCalls, function (err: Todo, results: Todo) {
             if (err) {
               reject(err)
             } else {
@@ -84,19 +86,19 @@ de.biancoroyal.opcua.iiot.core.method.callMethods = function (session, msg) {
     })
 }
 
-de.biancoroyal.opcua.iiot.core.method.buildMessagesFromMethodCalls = function (methodCallsResults) {
+de.biancoroyal.opcua.iiot.core.method.buildMessagesFromMethodCalls = function (methodCallsResults: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!methodCallsResults) {
         reject(new Error('Methods Call Results To Messages Session Not Valid'))
       } else {
-        let resultMessages = []
+        let resultMessages: Todo[] = []
         resolve({ methodCallsResults: methodCallsResults, messages: resultMessages })
       }
     })
 }
 
-de.biancoroyal.opcua.iiot.core.method.invalidMessage = function (node, message) {
+de.biancoroyal.opcua.iiot.core.method.invalidMessage = function (node: Todo, message: Todo) {
   let response = false
 
   if (!message.objectId) {
@@ -122,7 +124,7 @@ de.biancoroyal.opcua.iiot.core.method.invalidMessage = function (node, message) 
   return response
 }
 
-de.biancoroyal.opcua.iiot.core.method.buildCallMessage = function (node, msg) {
+de.biancoroyal.opcua.iiot.core.method.buildCallMessage = function (node: Todo, msg: Todo) {
   let message = msg
   message.objectId = msg.payload.objectId || node.objectId
   message.methodId = msg.payload.methodId || node.methodId

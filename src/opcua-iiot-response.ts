@@ -7,16 +7,40 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo, TodoBianco} from "./types/placeholders";
+
+interface OPCUAIIoTResponse extends nodered.Node {
+  name: string
+  compressStructure: string
+  showStatusActivities: string
+  showErrors: string
+  activateUnsetFilter: string
+  activateFilters: string
+  negateFilter: string
+  filters: Todo[]
+  bianco?: TodoBianco
+}
+interface OPCUAIIoTResponseDef extends nodered.NodeDef {
+  name: string
+  compressStructure: string
+  showStatusActivities: string
+  showErrors: string
+  activateUnsetFilter: string
+  activateFilters: string
+  negateFilter: string
+  filters: Todo[]
+}
 /**
  * Response analyser Node-RED node for OPC UA IIoT nodes.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let coreResponse = require('./core/opcua-iiot-core-response')
 
-  function OPCUAIIoTResponse (config) {
+  function OPCUAIIoTResponse (this: OPCUAIIoTResponse, config: OPCUAIIoTResponseDef) {
     RED.nodes.createNode(this, config)
     this.name = config.name
     this.compressStructure = config.compressStructure
@@ -33,7 +57,7 @@ module.exports = function (RED) {
 
     node.status({ fill: 'green', shape: 'ring', text: 'active' })
 
-    node.bianco.iiot.handleBrowserMsg = function (msg) {
+    node.bianco.iiot.handleBrowserMsg = function (msg: Todo) {
       coreResponse.analyzeBrowserResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressBrowseMessageStructure(msg)
@@ -41,7 +65,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.bianco.iiot.handleCrawlerMsg = function (msg) {
+    node.bianco.iiot.handleCrawlerMsg = function (msg: Todo) {
       coreResponse.analyzeCrawlerResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressCrawlerMessageStructure(msg)
@@ -49,7 +73,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.bianco.iiot.handleReadMsg = function (msg) {
+    node.bianco.iiot.handleReadMsg = function (msg: Todo) {
       coreResponse.analyzeReadResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressReadMessageStructure(msg)
@@ -57,7 +81,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.bianco.iiot.handleWriteMsg = function (msg) {
+    node.bianco.iiot.handleWriteMsg = function (msg: Todo) {
       coreResponse.analyzeWriteResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressWriteMessageStructure(msg)
@@ -65,7 +89,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.bianco.iiot.handleListenerMsg = function (msg) {
+    node.bianco.iiot.handleListenerMsg = function (msg: Todo) {
       coreResponse.analyzeListenerResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressListenMessageStructure(msg)
@@ -73,7 +97,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.bianco.iiot.handleMethodMsg = function (msg) {
+    node.bianco.iiot.handleMethodMsg = function (msg: Todo) {
       coreResponse.analyzeMethodResults(node, msg)
       if (node.compressStructure) {
         coreResponse.compressMethodMessageStructure(msg)
@@ -81,7 +105,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.bianco.iiot.handleDefaultMsg = function (msg) {
+    node.bianco.iiot.handleDefaultMsg = function (msg: Todo) {
       if (msg && msg.payload) {
         coreResponse.handlePayloadStatusCode(node, msg)
         if (node.compressStructure) {
@@ -91,7 +115,7 @@ module.exports = function (RED) {
       return msg
     }
 
-    node.bianco.iiot.handleNodeTypeOfMsg = function (msg) {
+    node.bianco.iiot.handleNodeTypeOfMsg = function (msg: Todo) {
       let message = Object.assign({}, msg)
 
       switch (msg.nodetype) {
@@ -120,12 +144,12 @@ module.exports = function (RED) {
       return message
     }
 
-    node.bianco.iiot.extractReadEntriesFromFilter = function (message) {
-      let filteredEntries = []
-      let filteredValues = []
+    node.bianco.iiot.extractReadEntriesFromFilter = function (message: Todo) {
+      let filteredEntries: Todo[] = []
+      let filteredValues: Todo[] = []
 
       if (message.payload && message.payload.length) {
-        message.payload.forEach((item, index) => {
+        message.payload.forEach((item: Todo, index: number) => {
           if (node.bianco.iiot.itemIsNotToFilter(item)) {
             filteredEntries.push(item)
             filteredValues.push(index)
@@ -134,7 +158,7 @@ module.exports = function (RED) {
       }
 
       if (message.nodesToRead) {
-        message.nodesToRead = message.nodesToRead.filter((item, index) => {
+        message.nodesToRead = message.nodesToRead.filter((item: Todo, index: number) => {
           return filteredValues.includes(index)
         })
       }
@@ -142,9 +166,9 @@ module.exports = function (RED) {
       return filteredEntries
     }
 
-    node.bianco.iiot.extractBrowserEntriesFromFilter = function (message) {
-      let filteredEntries = []
-      message.payload.browserResults.forEach((item) => {
+    node.bianco.iiot.extractBrowserEntriesFromFilter = function (message: Todo) {
+      let filteredEntries: Todo[] = []
+      message.payload.browserResults.forEach((item: Todo) => {
         if (node.bianco.iiot.itemIsNotToFilter(item)) {
           filteredEntries.push(item)
         }
@@ -152,9 +176,9 @@ module.exports = function (RED) {
       return filteredEntries
     }
 
-    node.bianco.iiot.extractCrawlerEntriesFromFilter = function (message) {
-      let filteredEntries = []
-      message.payload.crawlerResults.forEach((item) => {
+    node.bianco.iiot.extractCrawlerEntriesFromFilter = function (message: Todo) {
+      let filteredEntries: Todo[] = []
+      message.payload.crawlerResults.forEach((item: Todo) => {
         if (node.bianco.iiot.itemIsNotToFilter(item)) {
           filteredEntries.push(item)
         }
@@ -162,9 +186,9 @@ module.exports = function (RED) {
       return filteredEntries
     }
 
-    node.bianco.iiot.extractPayloadEntriesFromFilter = function (message) {
-      let filteredEntries = []
-      message.payload.forEach((item) => {
+    node.bianco.iiot.extractPayloadEntriesFromFilter = function (message: Todo) {
+      let filteredEntries: Todo[] = []
+      message.payload.forEach((item: Todo) => {
         if (node.bianco.iiot.itemIsNotToFilter(item)) {
           filteredEntries.push(item)
         }
@@ -172,17 +196,17 @@ module.exports = function (RED) {
       return filteredEntries
     }
 
-    node.bianco.iiot.extractMethodEntriesFromFilter = function (message) {
-      let filteredEntries = []
-      let filteredValues = []
-      message.addressSpaceItems.forEach((item, index) => {
+    node.bianco.iiot.extractMethodEntriesFromFilter = function (message: Todo) {
+      let filteredEntries: Todo[] = []
+      let filteredValues: Todo[] = []
+      message.addressSpaceItems.forEach((item: Todo, index: number) => {
         if (node.bianco.iiot.itemIsNotToFilter(item)) {
           filteredEntries.push(item)
           filteredValues.push(index)
         }
       })
 
-      let outputArguments = null
+      let outputArguments: Todo
       if (message.payload.results) {
         outputArguments = message.payload.results.outputArguments
       } else {
@@ -190,7 +214,7 @@ module.exports = function (RED) {
       }
 
       if (outputArguments) {
-        outputArguments.forEach((item, index) => {
+        outputArguments.forEach((item: Todo, index: number) => {
           if (node.bianco.iiot.itemIsNotToFilter(item)) {
             if (filteredValues.includes(index)) {
               filteredEntries[index].dataType = item.dataType
@@ -204,7 +228,7 @@ module.exports = function (RED) {
       return filteredEntries
     }
 
-    node.bianco.iiot.extractEntries = function (message) {
+    node.bianco.iiot.extractEntries = function (message: Todo) {
       switch (message.nodetype) {
         case 'read':
           return node.bianco.iiot.extractReadEntriesFromFilter(message)
@@ -219,7 +243,7 @@ module.exports = function (RED) {
       }
     }
 
-    node.bianco.iiot.filterMsg = function (msg) {
+    node.bianco.iiot.filterMsg = function (msg: Todo) {
       if (msg.payload.length || coreResponse.core.isNodeTypeToFilterResponse(msg)) {
         let filteredEntries = node.bianco.iiot.extractEntries(msg)
         if (filteredEntries.length) {
@@ -234,7 +258,7 @@ module.exports = function (RED) {
       return null
     }
 
-    node.on('input', function (msg) {
+    node.on('input', function (msg: Todo) {
       try {
         if (node.activateUnsetFilter) {
           if (msg.payload === void 0 || msg.payload === null || msg.payload === {}) { return }
@@ -259,10 +283,10 @@ module.exports = function (RED) {
       }
     })
 
-    node.bianco.iiot.itemIsNotToFilter = function (item) {
+    node.bianco.iiot.itemIsNotToFilter = function (item: Todo) {
       let result = coreResponse.core.checkItemForUnsetState(node, item)
 
-      node.filters.forEach((element) => {
+      node.filters.forEach((element: Todo) => {
         result = coreResponse.core.checkResponseItemIsNotToFilter(node, item, element, result)
       })
 

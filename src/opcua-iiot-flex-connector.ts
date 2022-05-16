@@ -7,11 +7,13 @@
  */
 'use strict'
 import * as nodered from "node-red";
+import {Todo, TodoBianco} from "./types/placeholders";
 
 export interface OPCUAIIoTFlexConnector extends nodered.Node {
   showStatusActivities: boolean
   showErrors: boolean
   connector: any
+  bianco?: TodoBianco
 }
 
 interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
@@ -41,7 +43,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     node.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    node.on('input', function (msg) {
+    node.on('input', function (msg: Todo) {
       coreConnector.internalDebugLog('connector change request input')
 
       if (node.connector) {
@@ -64,7 +66,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     coreConnector.core.registerToConnector(node)
 
-    node.on('close', (done) => {
+    node.on('close', (done: () => void) => {
       coreConnector.core.deregisterToConnector(node, () => {
         coreConnector.core.resetBiancoNode(node)
         done()

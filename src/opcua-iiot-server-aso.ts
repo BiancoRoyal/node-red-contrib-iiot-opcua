@@ -7,16 +7,42 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo, TodoBianco} from "./types/placeholders";
+import {NodeMessageInFlow} from "node-red";
+interface OPCUAIIoTASO extends nodered.Node {
+  nodeId: string
+  browsename: string
+  displayname: string
+  objecttype: string
+  referencetype: string
+  referenceNodeId: string
+  datatype: string
+  value: string
+  name: string
+  bianco?: TodoBianco
+}
+interface OPCUAIIoTCMDASO extends nodered.NodeDef {
+  nodeId: string
+  browsename: string
+  displayname: string
+  objecttype: string
+  referencetype: string
+  referenceNodeId: string
+  datatype: string
+  value: string
+  name: string
+}
 /**
  * Address space object Node-RED node.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let core = require('./core/opcua-iiot-core')
 
-  function OPCUAIIoTASO (config) {
+  function OPCUAIIoTASO (this: OPCUAIIoTASO, config: OPCUAIIoTCMDASO) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.browsename = config.browsename
@@ -33,7 +59,7 @@ module.exports = function (RED) {
     core.assert(node.bianco.iiot)
     core.internalDebugLog('Open ASO Node')
 
-    node.on('input', function (msg) {
+    node.on('input', function (msg: NodeMessageInFlow | Todo) {
       if (msg.nodetype === 'inject') {
         node.nodeId = msg.topic || node.nodeId
         node.datatype = msg.datatype || node.datatype
@@ -64,7 +90,7 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', (done) => {
+    node.on('close', (done: () => void) => {
       core.internalDebugLog('Close ASO Node')
       core.resetBiancoNode(node)
       done()

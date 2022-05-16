@@ -16,22 +16,37 @@ import * as underscore from 'underscore'
 import * as assert from 'better-assert'
 import * as nodeOPCUA from 'node-opcua'
 import * as nodeOPCUAId from 'node-opcua-nodeid'
+import {
+    BrowseMessage, CleanMessage,
+    DataType,
+    DataValue,
+    ItemNodeId,
+    NodeIdentifier, NodeToWrite,
+    TimeUnitNames,
+    TimeUnits,
+    VariantType, WriteListItem, WriteMessage
+} from "../types/core";
+import {NodeObject, Todo} from "../types/placeholders";
+import nodeRed, {NodeStatus} from "node-red";
+import {NodeStatusFill, NodeStatusShape} from "@node-red/registry";
+import {isArray, isNotDefined} from "../types/assertion";
+import {isNullOrUndefined, NodeId, NodeIdType} from "node-opcua";
 
 export {Debug, os, underscore, assert, nodeOPCUA, nodeOPCUAId}
 
 export * as connector from "./opcua-iiot-core-connector";
 
-export const OBJECTS_ROOT = 'ns=0;i=84'
-export const TEN_SECONDS_TIMEOUT = 10
-export const RUNNING_STATE = 'SESSIONACTIVE'
-export const isWindows = /^win/.test(os.platform())
-export const FAKTOR_SEC_TO_MSEC = 1000
-export const DEFAULT_TIMEOUT = 1000
+export const OBJECTS_ROOT: string = 'ns=0;i=84'
+export const TEN_SECONDS_TIMEOUT: number = 10
+export const RUNNING_STATE: string = 'SESSIONACTIVE'
+export const isWindows: boolean = /^win/.test(os.platform())
+export const FAKTOR_SEC_TO_MSEC: number = 1000
+export const DEFAULT_TIMEOUT: number = 1000
 
-export const regex_ns_i = /ns=([0-9]+);i=([0-9]+)/
-export const regex_ns_s = /ns=([0-9]+);s=(.*)/
-export const regex_ns_b = /ns=([0-9]+);b=(.*)/
-export const regex_ns_g = /ns=([0-9]+);g=(.*)/
+export const regex_ns_i: RegExp = /ns=([0-9]+);i=([0-9]+)/
+export const regex_ns_s: RegExp = /ns=([0-9]+);s=(.*)/
+export const regex_ns_b: RegExp = /ns=([0-9]+);b=(.*)/
+export const regex_ns_g: RegExp = /ns=([0-9]+);g=(.*)/
 
 namespace logger {
     export const internalDebugLog = Debug('opcuaIIoT:core')
@@ -45,7 +60,7 @@ logger.internalDebugLog(os.platform())
 logger.internalDebugLog(os.type())
 logger.internalDebugLog(os.arch())
 
-export function getPathFromRequireResolve(requireResolve) {
+export const getPathFromRequireResolve= (requireResolve: string): string => {
     let pathToNodeOPCUA = ''
 
     if (isWindows) {
@@ -59,66 +74,49 @@ export function getPathFromRequireResolve(requireResolve) {
     return pathToNodeOPCUA
 }
 
-export function getNodeOPCUAPath() {
+export function getNodeOPCUAPath(): string {
     return getPathFromRequireResolve(require.resolve('node-opcua'))
 }
 
-export function getNodeOPCUAClientPath() {
+export function getNodeOPCUAClientPath(): string {
     return getPathFromRequireResolve(require.resolve('node-opcua-client'))
 }
 
-export function getNodeOPCUAServerPath() {
+export function getNodeOPCUAServerPath(): string {
     return getPathFromRequireResolve(require.resolve('node-opcua-server'))
 }
 
-export function getTimeUnitName(unit) {
-    let unitAbbreviation = ''
-
+export function getTimeUnitName(unit: TimeUnits): TimeUnitNames {
     switch (unit) {
         case 'ms':
-            unitAbbreviation = 'msec.'
-            break
+            return 'msec.'
         case 's':
-            unitAbbreviation = 'sec.'
-            break
+            return 'sec.'
         case 'm':
-            unitAbbreviation = 'min.'
-            break
+            return 'min.'
         case 'h':
-            unitAbbreviation = 'h.'
-            break
+            return 'h.'
         default:
-            break
+            return ''
     }
-
-    return unitAbbreviation
 }
 
-export function calcMillisecondsByTimeAndUnit(time, unit) {
-    let convertedTime
-
+export function calcMillisecondsByTimeAndUnit(time: number, unit: TimeUnits): number {
     switch (unit) {
         case 'ms':
-            convertedTime = time
-            break
+            return time
         case 's':
-            convertedTime = time * 1000 // seconds
-            break
+            return time * 1000 // seconds
         case 'm':
-            convertedTime = time * 60000 // minutes
-            break
+            return time * 60000 // minutes
         case 'h':
-            convertedTime = time * 3600000 // hours
-            break
+            return time * 3600000 // hours
         default:
-            convertedTime = 10000 // 10 sec.
-            break
+            return 10000 // 10 sec.
     }
-
-    return convertedTime
 }
 
-export function buildBrowseMessage(topic) {
+export function buildBrowseMessage(topic: Todo): BrowseMessage {
     return {
         'topic': topic,
         'nodeId': '',
@@ -129,20 +127,17 @@ export function buildBrowseMessage(topic) {
     }
 }
 
-export function toInt32(x) {
-    let uintSixteen = x
+export function toInt32(uintSixteen: number): number {
 
     if (uintSixteen >= Math.pow(2, 15)) {
-        uintSixteen = x - Math.pow(2, 16)
-        return uintSixteen
-    } else {
-        return uintSixteen
+        return uintSixteen - Math.pow(2, 16)
     }
+    return uintSixteen
 }
 
-export function getNodeStatus(statusValue, statusLog) {
-    let fillValue = 'yellow'
-    let shapeValue = 'ring'
+export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStatus {
+    let fillValue: NodeStatusFill = 'yellow'
+    let shapeValue: NodeStatusShape = 'ring'
 
     switch (statusValue) {
         case 'initialize':
@@ -185,11 +180,14 @@ export function getNodeStatus(statusValue, statusLog) {
             }
     }
 
-    return {fill: fillValue, shape: shapeValue, status: statusValue}
+    return {fill: fillValue, shape: shapeValue, text: statusValue}
 }
 
-export function buildNewVariant(datatype, value) {
-    let variantValue = null
+export function buildNewVariant(datatype: DataType, value: any): VariantType {
+    let variantValue: VariantType = {
+        dataType: nodeOPCUA.DataType.Null,
+        value: null
+    }
 
     logger.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
 
@@ -298,7 +296,7 @@ export function buildNewVariant(datatype, value) {
     return variantValue
 }
 
-export function getVariantValue(datatype, value) {
+export function getVariantValue(datatype: DataType, value: any): number | Date | boolean | string {
     switch (datatype) {
         case 'Float':
         case 'Double':
@@ -364,17 +362,19 @@ export function getBasicDataTypes() {
     ]
 }
 
-export function convertDataValue(value) {
-    return de.biancoroyal.opcua.iiot.convertDataValueByDataType(value, value.dataType)
+export function valueIsString(value: DataValue | string): value is string {
+    return typeof value === 'string'
 }
 
-export function convertDataValueByDataType(value, dataType) {
-    let convertedValue = null
+export function convertDataValue(value: DataValue | string) {
+    if (valueIsString(value)) {
+        return value;
+    } else
+        return convertDataValueByDataType(value, value.dataType)
+}
 
-    if (!value.hasOwnProperty('value')) {
-        logger.specialDebugLog('value has no value and that is not allowed ' + JSON.stringify(value))
-        return value
-    }
+export function convertDataValueByDataType(value: DataValue , dataType: DataType): string {
+    let convertedValue = null
 
     let valueType = typeof value.value
 
@@ -388,7 +388,7 @@ export function convertDataValueByDataType(value, dataType) {
                 convertedValue = value.value.toString()
                 break
             case 'NodeIdType':
-            case nodeOPCUA.DataType.NodeIdType: // TODO: investigate
+            case nodeOPCUA.DataType.ExpandedNodeId: // TODO: investigate, original value (NodeIdType) doesn't exist
                 if (value.value instanceof Buffer) {
                     convertedValue = value.value.toString()
                 } else {
@@ -490,21 +490,21 @@ export function convertDataValueByDataType(value, dataType) {
     return convertedValue
 }
 
-export function parseNamspaceFromMsgTopic(msg) {
-    let nodeNamespace = null
+export function parseNamspaceFromMsgTopic(msg: BrowseMessage | null): number | undefined {
+    let nodeNamespace = ''
 
-    if (msg && msg.topic) {
+    if (msg?.topic) {
         // TODO: real parsing instead of string operations
         // TODO: which type are relevant here? (String, Integer ...)
         nodeNamespace = msg.topic.substring(3, msg.topic.indexOf(';'))
     }
 
-    return nodeNamespace
+    return Number.parseInt(nodeNamespace)
 }
 
-export function parseNamspaceFromItemNodeId(item) {
-    let nodeNamespace = null
-    let nodeItem = item.nodeId || item
+export function parseNamspaceFromItemNodeId(item: ItemNodeId | string): number | undefined {
+    let nodeNamespace = ''
+    let nodeItem: string = item.nodeId || item
 
     if (nodeItem) {
         // TODO: real parsing instead of string operations
@@ -512,111 +512,112 @@ export function parseNamspaceFromItemNodeId(item) {
         nodeNamespace = nodeItem.substring(3, nodeItem.indexOf(';'))
     }
 
-    return nodeNamespace
+    return Number.parseInt(nodeNamespace)
 }
 
-export function parseForNodeIdentifier(nodeItem) {
-    let nodeIdentifier = null
-
+export function parseForNodeIdentifier(nodeItem: string): NodeIdentifier {
     if (nodeItem) {
         // TODO: real parsing instead of string operations
         if (nodeItem.includes(';i=')) {
-            nodeIdentifier = {
+            return {
                 identifier: parseInt(nodeItem.substring(nodeItem.indexOf(';i=') + 3)),
-                type: de.biancoroyal.opcua.iiot.nodeOPCUAId.NodeIdType.NUMERIC
+                type: NodeIdType.NUMERIC
             }
         } else if (nodeItem.includes(';g=')) {
-            nodeIdentifier = {
+            return {
                 identifier: nodeItem.substring(nodeItem.indexOf(';g=') + 3),
-                type: de.biancoroyal.opcua.iiot.nodeOPCUAId.NodeIdType.GUID
+                type: NodeIdType.GUID
             }
         } else {
             if (nodeItem.includes(';b=')) {
-                nodeIdentifier = {
+                return {
                     identifier: nodeItem.substring(nodeItem.indexOf(';b=') + 3),
-                    type: de.biancoroyal.opcua.iiot.nodeOPCUAId.NodeIdType.BYTESTRING
+                    type: NodeIdType.BYTESTRING
                 }
             } else {
-                nodeIdentifier = {
+                return {
                     identifier: nodeItem.substring(nodeItem.indexOf(';s=') + 3),
-                    type: de.biancoroyal.opcua.iiot.nodeOPCUAId.NodeIdType.STRING
+                    type: NodeIdType.STRING
                 }
             }
         }
     }
-    return nodeIdentifier
+    return {
+        identifier: 'null',
+        type: 0x00
+    }
 }
 
-export function parseIdentifierFromMsgTopic(msg) {
+export function parseIdentifierFromMsgTopic(msg: BrowseMessage): NodeIdentifier {
     return parseForNodeIdentifier(msg.topic)
 }
 
-export function parseIdentifierFromItemNodeId(item) {
+export function parseIdentifierFromItemNodeId(item: ItemNodeId | string): NodeIdentifier {
     return parseForNodeIdentifier(item.nodeId || item)
 }
 
-export function newOPCUANodeIdFromItemNodeId(item) {
+export function newOPCUANodeIdFromItemNodeId(item: ItemNodeId | string): nodeOPCUA.NodeId {
     let namespace = parseNamspaceFromItemNodeId(item)
     let nodeIdentifier = parseIdentifierFromItemNodeId(item)
 
     logger.internalDebugLog('newOPCUANodeIdFromItemNodeId: ' + JSON.stringify(item) + ' -> ' + JSON.stringify(nodeIdentifier) + ' namespace:' + namespace)
-    return new de.biancoroyal.opcua.iiot.nodeOPCUAId.NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
+    return new NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
-export function newOPCUANodeIdFromMsgTopic(msg) {
+export function newOPCUANodeIdFromMsgTopic(msg: BrowseMessage): nodeOPCUA.NodeId {
     let namespace = parseNamspaceFromMsgTopic(msg)
     let nodeIdentifier = parseIdentifierFromMsgTopic(msg)
 
     logger.internalDebugLog('newOPCUANodeIdFromMsgTopic: ' + JSON.stringify(nodeIdentifier))
-    return new de.biancoroyal.opcua.iiot.nodeOPCUAId.NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
+    return new NodeId(nodeIdentifier.type, nodeIdentifier.identifier, namespace)
 }
 
-export function pushItemToWriteList(msg, nodesToWrite, item, value) {
-    nodesToWrite.push({
+export function createItemForWriteList(item: ItemNodeId | string, value: DataValue): WriteListItem {
+    return {
         nodeId: newOPCUANodeIdFromItemNodeId(item),
         attributeId: nodeOPCUA.AttributeIds.Value,
         indexRange: null,
         value
-    })
+    }
 }
 
-export function buildNodesToWrite(msg) {
-    let nodesToWrite = []
+export function normalizeMessage(msg: WriteMessage): CleanMessage[] {
+    const addressSpaceValues = msg.addressSpaceItems || msg.payload?.nodesToWrite;
+
+    if (!addressSpaceValues) return [];
+
+    const writeValues = msg.valuesToWrite;
+
+    if (!isNotDefined(writeValues))
+        return addressSpaceValues.map((item, index) => {
+            return {...item, value: writeValues[index] || ''}
+        })
+
+    else
+        return addressSpaceValues.map((item, index) => {
+            if (item.value) return item;
+            else return {...item, value: (isArray(msg.payload) && msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index] : msg.payload}
+
+        })
+
+}
+
+export function buildNodesToWrite(msg: WriteMessage): WriteListItem[] {
 
     logger.detailDebugLog('buildNodesToWrite input: ' + JSON.stringify(msg))
-    let item = null
+    const writeInputs = normalizeMessage(msg)
 
-    // compatible mode to nodesToWrite of node-opcua
-    if (!msg.addressSpaceItems || !msg.addressSpaceItems.length) {
-        let itemList = msg.payload.nodesToWrite || msg.nodesToWrite
-        if (itemList && itemList.length) {
-            msg.addressSpaceItems = itemList
-        }
-    }
 
-    if (msg.addressSpaceItems) {
-        let index = 0
-        if (msg.valuesToWrite) {
-            for (item of msg.addressSpaceItems) {
-                pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, msg.valuesToWrite[index++])})
-            }
-        } else {
-            for (item of msg.addressSpaceItems) {
-                if (item.value) {
-                    pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, item.value)})
-                } else {
-                    pushItemToWriteList(msg, nodesToWrite, item, {value: this.buildNewVariant(item.datatypeName, (msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index++] : msg.payload)})
-                }
-            }
-        }
-    }
+    const nodesToWrite = writeInputs.map((item) =>
+      createItemForWriteList(item, buildNewVariant(item.datatypeName, item.value)
+    ));
 
     logger.internalDebugLog('buildNodesToWrite output: ' + JSON.stringify(nodesToWrite))
 
     return nodesToWrite
 }
 
-export function buildNodesToRead(msg) {
+export function buildNodesToRead(msg: Todo) {
     let nodesToRead = []
     let item = null
 
@@ -658,19 +659,19 @@ export function buildNodesToRead(msg) {
     return nodesToRead
 }
 
-export function buildNodesToListen(msg) {
+export function buildNodesToListen(msg: Todo) {
     return msg.addressItemsToRead || msg.addressSpaceItems
 }
 
-export function buildNodesFromBrowser(msg) {
+export function buildNodesFromBrowser(msg: Todo) {
     return msg.payload.browserResults || msg.addressSpaceItems
 }
 
-export function buildNodesFromCrawler(msg) {
+export function buildNodesFromCrawler(msg: Todo) {
     return msg.payload.crawlerResults || msg.addressSpaceItems
 }
 
-export function buildNodeListFromClient(msg) {
+export function buildNodeListFromClient(msg: {nodetype: Todo}) {
     switch (msg.nodetype) {
         case 'read':
         case 'write':
@@ -691,7 +692,7 @@ export function availableMemory() {
     return os.freemem() / os.totalmem() * 100.0
 }
 
-export function isSessionBad(err) {
+export function isSessionBad(err: Error) {
     return (err.toString().includes('Session') ||
         err.toString().includes('Channel') ||
         err.toString().includes('Transaction') ||
@@ -699,7 +700,7 @@ export function isSessionBad(err) {
         err.toString().includes('Connection'))
 }
 
-export function setNodeInitalState(nodeState, node) {
+export function setNodeInitalState(nodeState: string, node: Todo) {
     switch (nodeState) {
         case 'INITOPCUA':
         case 'SESSIONREQUESTED':
@@ -731,7 +732,7 @@ export function setNodeInitalState(nodeState, node) {
     }
 }
 
-export function isNodeId(nodeId) {
+export function isNodeId(nodeId: NodeId) {
     if (!nodeId || !nodeId.identifierType) {
         return false
     }
@@ -746,10 +747,10 @@ export function isNodeId(nodeId) {
     }
 }
 
-export function checkConnectorState(node, msg, callerType) {
-    logger.internalDebugLog('Check Connector State ' + node.connector.bianco.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+export function checkConnectorState(node: NodeObject, msg: Todo, callerType: Todo): boolean {
+    logger.internalDebugLog('Check Connector State ' + node.connector?.bianco?.iiot.stateMachine?.getMachineState() + ' By ' + callerType)
 
-    if (node.connector && node.connector.bianco.iiot.stateMachine && node.connector.bianco.iiot.stateMachine.getMachineState() !== this.RUNNING_STATE) {
+    if (node.connector?.bianco?.iiot?.stateMachine && node.connector.bianco.iiot.stateMachine.getMachineState() !== RUNNING_STATE) {
         logger.internalDebugLog('Wrong Client State ' + node.connector.bianco.iiot.stateMachine.getMachineState() + ' By ' + callerType)
         if (node.showErrors) {
             node.error(new Error('Client Not ' + RUNNING_STATE + ' On ' + callerType), msg)
@@ -762,50 +763,51 @@ export function checkConnectorState(node, msg, callerType) {
     }
 }
 
-export function setNodeOPCUAConnected(node, opcuaClient) {
+export function setNodeOPCUAConnected(node: NodeObject, opcuaClient: nodeOPCUA.OPCUAClient): void {
     if (isInitializedBiancoIIoTNode(node)) {
         node.bianco.iiot.opcuaClient = opcuaClient
     }
     setNodeStatusTo(node, 'connecting')
 }
 
-export function setNodeOPCUAClosed(node) {
+export function setNodeOPCUAClosed(node: NodeObject): void {
     if (isInitializedBiancoIIoTNode(node)) {
+        // @ts-ignore
         node.bianco.iiot.opcuaClient = null
     }
     setNodeStatusTo(node, 'disconnected')
 }
 
-export function setNodeOPCUALost(node) {
+export function setNodeOPCUALost(node: NodeObject): void {
     setNodeStatusTo(node, 'lost')
 }
 
-export function setNodeOPCUASessionStarted(node, opcuaSession) {
+export function setNodeOPCUASessionStarted(node: NodeObject, opcuaSession: nodeOPCUA.ClientSession): void {
     if (isInitializedBiancoIIoTNode(node)) {
         node.bianco.iiot.opcuaSession = opcuaSession
     }
     setNodeStatusTo(node, 'active')
 }
 
-export function setNodeOPCUASessionClosed(node) {
+export function setNodeOPCUASessionClosed(node: NodeObject): void {
     if (isInitializedBiancoIIoTNode(node)) {
         node.bianco.iiot.opcuaSession = null
     }
     setNodeStatusTo(node, 'connecting')
 }
 
-export function setNodeOPCUASessionRestart(node) {
+export function setNodeOPCUASessionRestart(node: NodeObject): void {
     setNodeStatusTo(node, 'restart')
 }
 
-export function setNodeOPCUASessionError(node) {
+export function setNodeOPCUASessionError(node: NodeObject): void {
     if (isInitializedBiancoIIoTNode(node)) {
         node.bianco.iiot.opcuaSession = null
     }
     setNodeStatusTo(node, 'connecting')
 }
 
-export function setNodeOPCUARestart(node, opcuaClient) {
+export function setNodeOPCUARestart(node: NodeObject, opcuaClient: nodeOPCUA.OPCUAClient): void {
     logger.internalDebugLog('Connector Restart')
     if (opcuaClient && isInitializedBiancoIIoTNode(node)) {
         node.bianco.iiot.opcuaClient = opcuaClient
@@ -813,21 +815,22 @@ export function setNodeOPCUARestart(node, opcuaClient) {
     setNodeStatusTo(node, 'connecting')
 }
 
-export function registerToConnector(node) {
+export function registerToConnector(node: NodeObject) {
     if (!node) {
         logger.internalDebugLog('Node Not Valid On Register To Connector')
         return
     }
 
-    if (!node.connector) {
+    if (isNotDefined(node.connector)) {
         node.error(new Error('Connector Config Node Not Valid On Registering Client Node ' + node.id), {payload: 'No Connector Configured'})
         return
     }
 
-    node.connector.bianco.iiot.registerForOPCUA(node)
+    node.connector.bianco?.iiot.registerForOPCUA(node)
 
     node.connector.on('connector_init', () => {
         if (node.bianco.iiot.opcuaClient) {
+            // @ts-ignore
             node.bianco.iiot.opcuaClient = null
         }
 
@@ -860,7 +863,7 @@ export function registerToConnector(node) {
         setNodeOPCUASessionClosed(node)
     })
 
-    node.connector.on('session_started', (opcuaSession) => {
+    node.connector.on('session_started', (opcuaSession: nodeOPCUA.ClientSession) => {
         setNodeOPCUASessionStarted(node, opcuaSession)
     })
 
@@ -877,13 +880,13 @@ export function registerToConnector(node) {
     })
 
     node.connector.on('after_reconnection', () => {
-        setNodeOPCUARestart(node) // TODO: investigate one args v two
+        setNodeOPCUARestart(node, node.bianco.iiot.opcuaClient) // TODO: investigate one args v two
     })
 
-    setNodeInitalState(node.connector.bianco.iiot.stateMachine.getMachineState(), node)
+    setNodeInitalState(node.connector?.bianco?.iiot.stateMachine.getMachineState(), node)
 }
 
-export function deregisterToConnector(node, done) {
+export function deregisterToConnector(node: NodeObject, done: () => void) {
     if (!node) {
         logger.internalDebugLog('Node Not Valid On Register To Connector')
         done()
@@ -898,11 +901,11 @@ export function deregisterToConnector(node, done) {
 
     node.connector.removeAllListeners()
     if (isInitializedBiancoIIoTNode(node.connector)) {
-        node.connector.bianco.iiot.deregisterForOPCUA(node, done)
+        node.connector.bianco?.iiot.deregisterForOPCUA(node, done)
     }
 }
 
-export function checkSessionNotValid(session, callerType) {
+export function checkSessionNotValid(session: Todo, callerType: Todo) {
     if (!session) {
         logger.internalDebugLog('Session Not Valid On Check For ' + callerType)
         return true
@@ -916,12 +919,12 @@ export function checkSessionNotValid(session, callerType) {
     return false
 }
 
-export function setNodeStatusTo(node, statusValue) {
+export function setNodeStatusTo(node: Todo, statusValue: string) {
     let statusParameter = getNodeStatus(statusValue, node.showStatusActivities)
     if (!underscore.isEqual(node.oldStatusParameter, statusParameter)) {
         logger.detailDebugLog('Node ' + node.id + ' Status To ' + statusValue)
         node.oldStatusParameter = statusParameter
-        node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: statusParameter.status})
+        node.status({fill: statusParameter.fill, shape: statusParameter.shape, text: (statusParameter as Todo).status})
     }
 }
 
@@ -929,7 +932,7 @@ export function createBiancoIIoT() {
     return {iiot: {}}
 }
 
-export function initClientNode(node) {
+export function initClientNode(node: Todo) {
     node.bianco = createBiancoIIoT()
     node.bianco.iiot.reconnectTimeout = DEFAULT_TIMEOUT
     node.bianco.iiot.sessionTimeout = null
@@ -938,14 +941,14 @@ export function initClientNode(node) {
     return node
 }
 
-export function initCoreServerNode(node) {
+export function initCoreServerNode(node: Todo) {
     node.bianco = createBiancoIIoT()
     node.bianco.iiot.initialized = false
     node.bianco.iiot.opcuaServer = null
     return node
 }
 
-export function getItemFilterValueWithElement(item, element) {
+export function getItemFilterValueWithElement(item: Todo, element: Todo) {
     let filterValue = null
 
     switch (element.name) {
@@ -971,84 +974,84 @@ export function getItemFilterValueWithElement(item, element) {
     return filterValue
 }
 
-export function handleErrorInsideNode(node, err) {
+export function handleErrorInsideNode(node: Todo, err: Error) {
     logger.internalDebugLog(typeof node + ' ' + err.message)
     if (node.showErrors) {
         node.error(err, {payload: err.message})
     }
 }
 
-export function checkCrawlerItemIsNotToFilter(node, item, element, result) {
+export function checkCrawlerItemIsNotToFilter(node: Todo, item: Todo, element: Todo, result: Todo) {
     try {
         let filterValue = getItemFilterValueWithElement(item, element)
 
         if (filterValue && filterValue.key && filterValue.key.match) {
             if (filterValue.key.match(element.value)) {
-                result &= false
+                result &= 0
             }
         } else {
             if (filterValue && filterValue.match) {
                 if (filterValue.match(element.value)) {
-                    result &= false
+                    result &= 0
                 }
             } else {
                 if (filterValue && filterValue.toString) {
                     filterValue = filterValue.toString()
                     if (filterValue && filterValue.match) {
                         if (filterValue.match(element.value)) {
-                            result &= false
+                            result &= 0
                         }
                     }
                 }
             }
         }
-    } catch (err) {
+    } catch (err: any) {
         handleErrorInsideNode(node, err)
     }
 
     return result
 }
 
-export function checkResponseItemIsNotToFilter(node, item, element, result) {
+export function checkResponseItemIsNotToFilter(node: Todo, item: Todo, element: Todo, result: Todo) {
     try {
         let filterValue = getItemFilterValueWithElement(item, element)
 
         if (filterValue) {
             if (filterValue.key && filterValue.key.match) {
-                result &= filterValue.key.match(element.value) !== null
+                result &= filterValue.key.match(element.value) !== null ? 1: 0
             } else {
                 if (filterValue.match) {
-                    result &= filterValue.match(element.value) !== null
+                    result &= filterValue.match(element.value) !== null ? 1: 0
                 } else {
                     if (filterValue.toString) {
                         filterValue = filterValue.toString()
                         if (filterValue.match) {
-                            result &= filterValue.match(element.value) !== null
+                            result &= filterValue.match(element.value) !== null ? 1: 0
                         }
                     }
                 }
             }
         } else {
-            result &= false // undefined items
+            result &= 0 // undefined items
         }
-    } catch (err) {
+    } catch (err: any) {
         handleErrorInsideNode(node, err)
     }
 
     return result
 }
 
-export function checkItemForUnsetState(node, item) {
-    let result = true
+export function checkItemForUnsetState(node: Todo, item: Todo) {
+    let result = 1
 
     if (node.activateUnsetFilter) {
-        result &= item !== null
+        result &= item !== null ? 1: 0
 
         if (item && item.hasOwnProperty('value')) {
             if (item.value && item.value.hasOwnProperty('value')) {
-                result &= item.value.value !== null
+                result &= item.value.value !== null ? 1: 0
             } else {
-                result &= item.value !== null
+                result &= item.value !== null ? 1: 0
             }
         }
     }
@@ -1056,7 +1059,7 @@ export function checkItemForUnsetState(node, item) {
     return result
 }
 
-export function resetBiancoNode(node) {
+export function resetBiancoNode(node: Todo) {
     if (isInitializedBiancoIIoTNode(node) && node.bianco.iiot.resetAllTimer) {
         node.bianco.iiot.resetAllTimer()
     }
@@ -1066,11 +1069,11 @@ export function resetBiancoNode(node) {
     node.bianco = null
 }
 
-export function filterListEntryByNodeId(nodeId, list) {
-    let result = []
+export function filterListEntryByNodeId(nodeId: Todo, list: Todo) {
+    let result: Todo[] = []
 
     if (list && list.length) {
-        list.forEach((item) => {
+        list.forEach((item: Todo) => {
             if (item === nodeId) {
                 result.push(item)
             }
@@ -1080,11 +1083,11 @@ export function filterListEntryByNodeId(nodeId, list) {
     return result
 }
 
-export function filterListByNodeId(nodeId, list) {
-    let result = []
+export function filterListByNodeId(nodeId: Todo, list: Todo) {
+    let result: Todo[] = []
 
     if (list && list.length) {
-        list.forEach((item) => {
+        list.forEach((item: Todo) => {
             if (item.nodeId === nodeId) {
                 result.push(item)
             }
@@ -1094,11 +1097,11 @@ export function filterListByNodeId(nodeId, list) {
     return result
 }
 
-export function isNodeTypeToFilterResponse(msg) {
+export function isNodeTypeToFilterResponse(msg: Todo) {
     return msg.nodetype === 'read' || msg.nodetype === 'browse' || msg.nodetype === 'crawl' || msg.nodetype === 'method'
 }
 
-export function isInitializedBiancoIIoTNode(node) {
+export function isInitializedBiancoIIoTNode(node: Todo) {
     return node && node.bianco && node.bianco.iiot
 }
 

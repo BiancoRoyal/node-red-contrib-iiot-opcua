@@ -9,6 +9,10 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
+
+
+import {OPCUASession, Todo, WriteResult} from "../types/placeholders";
+
 /**
  * Nested namespace settings.
  *
@@ -16,7 +20,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.client
  */
-var de = de || { biancoroyal: { opcua: { iiot: { core: { client: {} } } } } } // eslint-disable-line no-use-before-define
+var de: Todo = de || { biancoroyal: { opcua: { iiot: { core: { client: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.client.core = de.biancoroyal.opcua.iiot.core.client.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.client.internalDebugLog = de.biancoroyal.opcua.iiot.core.client.internalDebugLog || require('debug')('opcuaIIoT:client') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.client.detailDebugLog = de.biancoroyal.opcua.iiot.core.client.detailDebugLog || require('debug')('opcuaIIoT:client:details') // eslint-disable-line no-use-before-define
@@ -35,12 +39,12 @@ de.biancoroyal.opcua.iiot.core.client.READ_TYPE = de.biancoroyal.opcua.iiot.core
   HISTORY: 130
 }) // eslint-disable-line no-use-before-define
 
-de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite, originMsg) {
+de.biancoroyal.opcua.iiot.core.client.write = (session: OPCUASession, nodesToWrite: Todo, originMsg: Todo): Promise<WriteResult> =>  {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.write(nodesToWrite, function (err, statusCodes) {
+        session.write(nodesToWrite, function (err: Error, statusCodes: Todo) {
           if (err) {
             reject(err)
           } else {
@@ -58,12 +62,12 @@ de.biancoroyal.opcua.iiot.core.client.write = function (session, nodesToWrite, o
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.read = function (session, nodesToRead, maxAge, originMsg) {
+de.biancoroyal.opcua.iiot.core.client.read = function (session: Todo, nodesToRead: Todo, maxAge: Todo, originMsg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.read(nodesToRead, maxAge, function (err, dataValues) {
+        session.read(nodesToRead, maxAge, function (err: Error, dataValues: Todo) {
           if (err) {
             reject(err)
           } else {
@@ -81,12 +85,12 @@ de.biancoroyal.opcua.iiot.core.client.read = function (session, nodesToRead, max
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nodesToRead, originMsg) {
+de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session: Todo, nodesToRead: Todo, originMsg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readVariableValue(nodesToRead, function (err, dataValues) {
+        session.readVariableValue(nodesToRead, function (err: Error, dataValues: Todo) {
           if (err) {
             reject(err)
           } else {
@@ -104,12 +108,12 @@ de.biancoroyal.opcua.iiot.core.client.readVariableValue = function (session, nod
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, nodesToRead, startDate, endDate, originMsg) {
+de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session: Todo, nodesToRead: Todo, startDate: Todo, endDate: Todo, originMsg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readHistoryValue(nodesToRead, startDate, endDate, function (err, dataValues) {
+        session.readHistoryValue(nodesToRead, startDate, endDate, function (err: Error, dataValues: Todo) {
           if (err) {
             reject(err)
           } else {
@@ -129,12 +133,12 @@ de.biancoroyal.opcua.iiot.core.client.readHistoryValue = function (session, node
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nodesToRead, originMsg) {
+de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session: Todo, nodesToRead: Todo, originMsg: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readAllAttributes(nodesToRead, function (err, dataValues) {
+        session.readAllAttributes(nodesToRead, function (err: Error, dataValues: Todo) {
           if (err) {
             reject(err)
           } else {
@@ -152,7 +156,7 @@ de.biancoroyal.opcua.iiot.core.client.readAllAttributes = function (session, nod
   )
 }
 
-de.biancoroyal.opcua.iiot.core.client.stringifyFormatted = function (dataValues) {
+de.biancoroyal.opcua.iiot.core.client.stringifyFormatted = function (dataValues: Todo) {
   return JSON.stringify(dataValues, null, 2)
 }
 

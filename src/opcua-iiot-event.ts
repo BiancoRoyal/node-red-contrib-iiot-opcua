@@ -9,7 +9,9 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo} from "./core/placeholder-types";
+import {Todo, TodoBianco} from "./types/placeholders";
+import {NodeMessage} from "node-red";
+import {EventFilter} from "node-opcua";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string
@@ -20,7 +22,7 @@ interface OPCUAIIoTEvent extends nodered.Node {
   name: string
   showStatusActivities: boolean
   showErrors: boolean
-  bianco?: Todo
+  bianco?: TodoBianco
 }
 
 interface OPCUAIIoTEventDef extends nodered.NodeDef {
@@ -54,7 +56,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let node = this
+    let node: OPCUAIIoTEvent = this
     node.bianco = coreListener.core.createBiancoIIoT()
     coreListener.core.assert(node.bianco.iiot)
     node.bianco.iiot.subscribed = false
@@ -90,27 +92,50 @@ module.exports = function (RED: nodered.NodeAPI) {
           break
       }
 
-      let uaEventFilter = coreListener.core.nodeOPCUA.constructEventFilter(uaEventFields)
+      let uaEventFilter: EventFilter = coreListener.core.nodeOPCUA.constructEventFilter(uaEventFields)
       let interval = 1000
 
       if (typeof msg.payload === 'number') {
         interval = msg.payload // msec.
       }
+      else {
 
-      msg.nodetype = 'events'
-
-      let eventSubscriptionPayload = {
-        eventType: msg.payload.eventType || node.eventType,
-        eventFilter: msg.payload.uaEventFilter || uaEventFilter,
-        eventFields: msg.payload.uaEventFields || uaEventFields,
-        queueSize: msg.payload.queueSize || node.queueSize,
-        interval: msg.payload.interval || interval
       }
 
-      // TODO: send works but it has a problem with debug node and ByteString
-      msg.payload = eventSubscriptionPayload
+      type msgPayload = {
+        eventType?: string,
+        uaEventFilter?: EventFilter,
+        uaEventFields?: Todo,
+        queueSize?: Todo,
+        interval?: number,
+      }
 
-      node.send(msg)
+      const payload = msg.payload as msgPayload
+
+      const responseMessage: NodeMessage = {
+        _msgid: msg._msgid,
+        payload: {
+          eventType: payload.eventType || node.eventType,
+          eventFilter: payload.uaEventFilter || uaEventFilter,
+          eventFields: payload.uaEventFields || uaEventFields,
+          queueSize: payload.queueSize || node.queueSize,
+          interval: payload.interval || interval,
+        },
+        topic: msg.topic,
+      }
+      // msg.nodetype = 'events'
+
+
+      // TODO: send works but it has a problem with debug node and ByteString
+      // msg.payload = {
+      //   eventType: msg.payload.eventType || node.eventType,
+      //   eventFilter: msg.payload.uaEventFilter || uaEventFilter,
+      //   eventFields: msg.payload.uaEventFields || uaEventFields,
+      //   queueSize: msg.payload.queueSize || node.queueSize,
+      //   interval: msg.payload.interval || interval
+      // }
+
+      node.send(responseMessage)
     })
   }
 

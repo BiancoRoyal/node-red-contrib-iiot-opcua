@@ -8,16 +8,38 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
+import {Todo, TodoBianco} from "./types/placeholders";
+
+interface OPCUAIIoTNode extends nodered.Node {
+  nodeId: string
+  datatype: string
+  value: string
+  topic: string
+  name: string
+  injectType: string
+  showErrors: string
+  bianco?: TodoBianco
+}
+interface OPCUAIIoTNodeDef extends nodered.NodeDef {
+  nodeId: string
+  datatype: string
+  value: string
+  topic: string
+  name: string
+  injectType: string
+  showErrors: string
+}
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
  *
  * @param RED
  */
-module.exports = function (RED) {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
   let core = require('./core/opcua-iiot-core')
 
-  function OPCUAIIoTNode (config) {
+  function OPCUAIIoTNode (this: OPCUAIIoTNode, config: OPCUAIIoTNodeDef) {
     RED.nodes.createNode(this, config)
     this.nodeId = config.nodeId
     this.datatype = config.datatype
@@ -34,7 +56,7 @@ module.exports = function (RED) {
 
     node.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    node.on('input', function (msg) {
+    node.on('input', function (msg: Todo) {
       msg.nodetype = 'node'
       msg.injectType = msg.injectType || node.injectType
       node.bianco.iiot.subscribed = !node.bianco.iiot.subscribed

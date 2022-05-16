@@ -8,6 +8,8 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
+import {Todo} from "../types/placeholders";
+
 /**
  * Nested namespace settings.
  *
@@ -15,7 +17,7 @@
  *
  * @Namesapce de.biancoroyal.opcua.iiot.core.inject
  */
-var de = de || { biancoroyal: { opcua: { iiot: { core: { inject: {} } } } } } // eslint-disable-line no-use-before-define
+var de: Todo = de || { biancoroyal: { opcua: { iiot: { core: { inject: {} } } } } } // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.inject.core = de.biancoroyal.opcua.iiot.core.inject.core || require('./opcua-iiot-core') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.inject.internalDebugLog = de.biancoroyal.opcua.iiot.core.inject.internalDebugLog || require('debug')('opcuaIIoT:inject') // eslint-disable-line no-use-before-define
 de.biancoroyal.opcua.iiot.core.inject.detailDebugLog = de.biancoroyal.opcua.iiot.core.inject.detailDebugLog || require('debug')('opcuaIIoT:inject:details') // eslint-disable-line no-use-before-define
