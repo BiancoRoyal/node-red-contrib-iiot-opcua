@@ -56,8 +56,9 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     let node: Todo = this
 
+    //Create and Start the Discovery Server
     const startDiscoveryServer = async () => {
-
+      // Access the certificates created by installation
       const certificateFolder = '../certificates'
 
       const serverCertificateManager = new OPCUACertificateManager({
@@ -79,8 +80,6 @@ module.exports = (RED: nodered.NodeAPI) => {
           applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), node.name || 'discovery'),
         },
         port: node.discoveryPort,
-        // certificateFile: '../certificates/discoveryServer_cert_2048.pem',
-        // automaticallyAcceptUnknownCertificates: true,
       })
 
       try {
@@ -95,8 +94,6 @@ module.exports = (RED: nodered.NodeAPI) => {
       return discoveryServer
     }
 
-
-
     this.status({fill: 'yellow', shape: 'ring', text: 'starting'})
 
     node.discoveryServer = startDiscoveryServer().then((server) => {
@@ -108,12 +105,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       return undefined
     })
 
+    // Convert the numeric Enum value to the string label, for user readability
     const applicationTypeToString = (applicationType: ApplicationType): string => {
       return ApplicationType[applicationType]
-
     }
 
-    const parseServerList = (serverList: ApplicationDescription[]): {discoveryUrls: string[], endpoints: Todo[]} => {
+    // Create the payload objects
+    const parseServerList = (serverList: ApplicationDescription[]): { discoveryUrls: string[], endpoints: Todo[] } => {
       const endpoints = serverList.map((server) => {
         return {
           applicationUri: server.applicationUri,
@@ -135,6 +133,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.on('input', async (msg) => {
+      // Ensure that the discovery server has been started
       const discoveryServer: OPCUADiscoveryServer = await node.discoveryServer
 
       if (!discoveryServer) {
@@ -147,8 +146,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      // ts-ignore required
-      // @ts-ignore required to access discoveryServer.getServers() without arguments
+      // @ts-ignore: Ignore required to access discoveryServer.getServers() without arguments, and the argument isn't even used by the function
       const {discoveryUrls, endpoints} = parseServerList(discoveryServer.getServers())
 
       const outputMessage: DiscoveryMessage = {
