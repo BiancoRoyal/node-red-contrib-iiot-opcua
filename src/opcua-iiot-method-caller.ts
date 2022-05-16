@@ -149,6 +149,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           }
           return item
         })
+        message.payload.outputArguments = outputArguments;
 
         this.send(message)
       }).catch((err: Error) => {
