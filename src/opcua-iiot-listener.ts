@@ -9,8 +9,38 @@
 'use strict'
 
 import * as nodered from "node-red";
+import {NodeMessage, NodeStatus} from "node-red";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 import {Todo, TodoVoidFunction} from "./types/placeholders";
+// @ts-ignore
+import Map from 'es6-map';
+
+import _ from 'underscore';
+import coreListener from "./core/opcua-iiot-core-listener";
+import {
+  buildNodesToListen,
+  checkConnectorState,
+  checkSessionNotValid,
+  deregisterToConnector,
+  isInitializedIIoTNode,
+  isNodeId,
+  isSessionBad,
+  registerToConnector,
+  resetIiotNode,
+  setNodeStatusTo
+} from "./core/opcua-iiot-core";
+import {
+  AttributeIds,
+  ClientMonitoredItem,
+  ClientSubscription,
+  ClientSubscriptionOptions,
+  DataValue,
+  StatusCodes
+} from "node-opcua";
+
+import coreClient from "./core/opcua-iiot-core-client";
+import {EventPayloadLike} from "./opcua-iiot-event";
+import {Variant} from "node-opcua-variant";
 
 interface OPCUAIIoTCMD extends nodered.Node {
   action: string
@@ -35,26 +65,6 @@ interface OPCUAIIoTCMDDef extends nodered.NodeDef {
   showErrors: string
   connector: string
 }
-
-// @ts-ignore
-import Map from 'es6-map';
-
-import _ from 'underscore';
-import coreListener from "./core/opcua-iiot-core-listener";
-import {
-  buildNodesToListen,
-  checkConnectorState,
-  checkSessionNotValid, deregisterToConnector,
-  isInitializedIIoTNode,
-  isNodeId,
-  isSessionBad, registerToConnector, resetIiotNode,
-  setNodeStatusTo
-} from "./core/opcua-iiot-core";
-import {AttributeIds, ClientMonitoredItem, ClientSubscription, DataValue, StatusCodes} from "node-opcua";
-
-import coreClient from "./core/opcua-iiot-core-client";
-import {NodeMessage, NodeStatus} from "node-red";
-import {EventPayloadLike} from "./opcua-iiot-event";
 
 
 export type ListenPayload = {
@@ -101,7 +111,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         nodeConfig.iiot.opcuaSubscription = null
       nodeConfig.iiot.stateMachine.requestinitsub()
 
-      const timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
+      const timeMilliseconds = (typeof msg.payload.value === 'number') ? msg.payload.value : null
       const dynamicOptions = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
       coreListener.internalDebugLog('create subscription, type: ' + nodeConfig.action)
       const options = dynamicOptions ||
@@ -144,7 +154,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       })
     }
 
-    const makeSubscription = function (parameters: Todo) {
+    const makeSubscription = function (parameters: ClientSubscriptionOptions) {
       if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'ListenerSubscription')) {
         return
       }
@@ -429,14 +439,15 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       // @ts-ignore
       monitoredItem.on('err', (err: Error) => {
-        coreListener.internalDebugLog('monitoredItem Error: ' + err + ' on ' + monitoredItem.itemToMonitor.nodeId)
+        const error = new Error(monitoredItem.itemToMonitor.nodeId.toString() + ': ' + (err?.message || err))
+        coreListener.internalDebugLog('monitoredItem Error: ' + error + ' on ' + monitoredItem.itemToMonitor.nodeId)
         if (nodeConfig.showErrors) {
-          this.error(err, ({payload: 'Monitored Item Error', monitoredItem: monitoredItem} as Todo))
+          this.error(error, ({payload: 'Monitored Item Error', monitoredItem: monitoredItem} as Todo))
         }
 
         updateMonitoredItemLists(monitoredItem, monitoredItem.itemToMonitor.nodeId)
 
-        if (isSessionBad(err)) {
+        if (isSessionBad(error)) {
           sendAllMonitoredItems('BAD SESSION')
           terminateSubscription(() => {
             this.emit('opcua_client_not_ready')
@@ -489,7 +500,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           msg.error = err.message
         }
       } else {
-        msg.payload = {...msg.payload,dataValue, monitoredItem}
+        msg.payload = {...msg.payload, value: dataValue, monitoredItem}
       }
 
       this.send(msg)
@@ -519,7 +530,15 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.send(msg)
     }
 
-    const sendDataFromEvent = (monitoredItem: ClientMonitoredItem, dataValue: DataValue) => {
+    const isArray = <T>(item: any): item is T[] => {
+      return item?.hasOwnProperty('length')
+    }
+
+    const sendDataFromEvent = (monitoredItem: ClientMonitoredItem, dataValue: DataValue | DataValue[]) => {
+      // @ts-ignore
+      if (!isArray(dataValue)) {
+        dataValue = [dataValue]
+      }
       if (!monitoredItem) {
         coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
         return

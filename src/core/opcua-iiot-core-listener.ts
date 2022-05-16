@@ -363,7 +363,7 @@ const buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo)
     })
 }
 
-const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Todo) => Todo, dataValue: DataValue) {
+const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Todo) => Todo, dataValue: DataValue[]) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -381,34 +381,34 @@ const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Tod
         let index = 0
         let eventInformation: Todo = {}
         let eventResults: Todo[] = []
+        dataValue.forEach((dv) => {
+          const variant = dv.value
+          eventDebugLog('variant entry: ' + variant?.toString())
 
-        const variant = dataValue.value
-        eventDebugLog('variant entry: ' + variant?.toString())
+          try {
+            if (variant.dataType && variant.value) {
+              eventInformation = collectAlarmFields((dataValue as Todo).monitoringParameters.filter.selectClauses[index], variant?.dataType?.toString(), variant.value)
 
-        try {
-          if (variant.dataType && variant.value) {
-            eventInformation = collectAlarmFields((dataValue as Todo).monitoringParameters.filter.selectClauses[index], variant?.dataType?.toString(), variant.value)
-
-            if (variant.dataType === DataType.NodeId) {
-              browseForBrowseName(session, variant.value, function (err: Error | undefined, browseName: Todo) {
-                if (err) {
-                  reject(err)
-                } else {
-                  eventInformation.browseName = browseName
-                  eventResults.push({eventInformation: eventInformation, eventData: variant?.toJSON()})
-                }
-              })
-            } else {
-              eventResults.push({eventInformation: eventInformation, eventData: variant?.toJSON()})
+              if (variant.dataType === DataType.NodeId) {
+                browseForBrowseName(session, variant.value, function (err: Error | undefined, browseName: Todo) {
+                  if (err) {
+                    reject(err)
+                  } else {
+                    eventInformation.browseName = browseName
+                    eventResults.push({eventInformation: eventInformation, eventData: variant?.toJSON()})
+                  }
+                })
+              } else {
+                eventResults.push({eventInformation: eventInformation, eventData: variant?.toJSON()})
+              }
             }
+            index++
+          } catch (err) {
+            eventInformation = {error: err}
+            eventResults.push({eventInformation: eventInformation, eventData: variant?.toJSON()})
           }
-          index++
-        } catch (err) {
-          eventInformation = {error: err}
-          eventResults.push({eventInformation: eventInformation, eventData: variant?.toJSON()})
-        }
-
-        resolve(eventResults)
+        })
+        resolve(eventResults.flat())
       }
     }
   )
