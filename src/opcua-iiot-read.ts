@@ -274,18 +274,13 @@ module.exports = (RED: NodeAPI) => {
       }
     })
 
-
-    const setStatus = (status: string | NodeStatus) => {
-      this.status(status)
-    }
-
     const onAlias = (event: string, callback: () => void) => {
       // @ts-ignore
       this.on(event, callback)
 
     }
 
-    registerToConnector(node, setStatus, onAlias, errorHandler)
+    registerToConnector(node, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
       deregisterToConnector(node, () => {

@@ -17,13 +17,13 @@ import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {
     BrowseMessage, DataTypeInput,
     ItemNodeId,
-    NodeIdentifier, NodeToWrite,
+    NodeIdentifier,
     TimeUnitNames,
     TimeUnits,
-    VariantType, WriteListItem, WriteMessage
+    WriteMessage
 } from "../types/core";
-import {CoreNode, NodeObject, recursivePrintTypes, Todo} from "../types/placeholders";
-import nodeRed, {Node, NodeMessage, NodeStatus} from "node-red";
+import {CoreNode, NodeObject, Todo, TodoVoidFunction} from "../types/placeholders";
+import {Node, NodeMessage, NodeStatus} from "node-red";
 import {NodeMessageInFlow, NodeStatusFill, NodeStatusShape} from "@node-red/registry";
 import {isArray, isNotDefined} from "../types/assertion";
 import {
@@ -31,10 +31,9 @@ import {
     ClientSession,
     DataType,
     DataValue, DataValueOptions,
-    isNullOrUndefined,
     NodeId,
     NodeIdType,
-    OPCUAClient, Variant
+    OPCUAClient,
 } from "node-opcua";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
@@ -823,7 +822,7 @@ type NodeWithConnector = {
     connector: ConnectorIIoT
 }
 
-export function registerToConnector(node: NodeWithConnector, statusCall: (status: string | NodeStatus) =>  void, onAlias: (event: string, callback: () => void) => void, errorHandler: (err: Error, msg: NodeMessage) => void): void {
+export function registerToConnector(node: NodeWithConnector, statusCallback: (status: string | NodeStatus) =>  void, onAlias: (event: string, callback: () => void) => void, errorHandler: (err: Error, msg: NodeMessage) => void): void {
     if (!node) {
         logger.internalDebugLog('Node Not Valid On Register To Connector')
         return
@@ -833,7 +832,15 @@ export function registerToConnector(node: NodeWithConnector, statusCall: (status
         errorHandler(new Error('Connector Config Node Not Valid On Registering Client Node ' + (node as unknown as Node).id), {payload: 'No Connector Configured'})
         return
     }
+    if (!node.connector.statusCallbacks) {
+        node.connector.statusCallbacks = []
+    }
+    node.connector.statusCallbacks.push(statusCallback)
     node.connector.functions?.registerForOPCUA(node, onAlias)
+
+    const statusCall = (status: string | NodeStatus): void => {
+        node.connector.statusCallbacks.forEach((callback: TodoVoidFunction) => callback(status))
+    }
 
     node.connector.on('connector_init', (node: Todo) => {
         if (node.iiot?.opcuaClient) {

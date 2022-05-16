@@ -274,11 +274,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         return
       }
 
-      //
-      // this.iiot.initialized = true;
-
-      // console.trace(this.endpoint);
-
       this.iiot.opcuaClient.connect(this.endpoint, async (err: Error | undefined): Promise<void> => {
         if (isInitializedIIoTNode(this) && !isUndefined(this.iiot)) {
           if (err) {
@@ -377,7 +372,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       })
     }
 
-    const waitForExist = async <T extends object>(item: T, key: string): Promise<number> => {
+    const waitForExist = async <T extends object>(item: T, key: string, iterationCount = 100, checkInterval = 100): Promise<number> => {
       return new Promise<number>(
         (resolve, reject) => {
 
@@ -388,10 +383,10 @@ module.exports = function (RED: nodered.NodeAPI) {
             if (iter < 0){
               reject(new Error(key + ' not initialized'))
             }
-            setTimeout(getClient, 100, iter - 1, item)
+            setTimeout(getClient, checkInterval, iter - 1, item)
           }
 
-          getClient(100, item)
+          getClient(iterationCount, item)
         }
       )
     }
@@ -400,8 +395,9 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const startSession = async (callerInfo: string) => {
       internalDebugLog('Request For New Session From ' + callerInfo)
-      if (isUndefined(this.iiot))
+      if (isUndefined(this.iiot)) {
         return
+      }
 
       if (isInactiveOnOPCUA()) {
         internalDebugLog('State Is Not Active While Start Session-> ' + this.iiot.stateMachine.getMachineState())
