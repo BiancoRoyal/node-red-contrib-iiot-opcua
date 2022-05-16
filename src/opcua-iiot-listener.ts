@@ -40,7 +40,6 @@ import {
 
 import coreClient from "./core/opcua-iiot-core-client";
 import {EventPayloadLike} from "./opcua-iiot-event";
-import {Variant} from "node-opcua-variant";
 
 interface OPCUAIIoTCMD extends nodered.Node {
   action: string
