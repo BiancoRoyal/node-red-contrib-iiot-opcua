@@ -423,7 +423,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         if (!monitoredItem.monitoringParameters.filter) {
           sendDataFromMonitoredItem(monitoredItem, dataValue)
         } else {
-          sendDataFromEvent(monitoredItem, [dataValue])
+          sendDataFromEvent(monitoredItem, dataValue)
         }
       })
 
@@ -500,7 +500,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       let dataValuesString: string
       if (nodeConfig.justValue) {
-        dataValuesString = JSON.stringify({dataValue: dataValue}, null, 2)
+        dataValuesString = JSON.stringify(dataValue, null, 2)
         try {
           RED.util.setMessageProperty(msg.payload, 'value', JSON.parse(dataValuesString))
         } catch (err: any) {
@@ -519,7 +519,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.send(msg)
     }
 
-    const sendDataFromEvent = (monitoredItem: ClientMonitoredItem, dataValue: DataValue[]) => {
+    const sendDataFromEvent = (monitoredItem: ClientMonitoredItem, dataValue: DataValue) => {
       if (!monitoredItem) {
         coreListener.internalDebugLog('Monitored Item Is Not Valid On Change Event While Monitoring')
         return

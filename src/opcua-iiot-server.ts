@@ -14,6 +14,7 @@ import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {isInitializedIIoTNode, resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 
+
 type OPCUAIIoTServer = nodered.Node & {
   asoDemo: boolean
   on(event: 'shutdown', listener: () => void): void
@@ -55,7 +56,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const handleServerError = (err: Error, msg: Todo) => {
-      internalDebugLog(err)
+      coreServer.internalDebugLog(err)
       if (node.showErrors) {
         this.error(err, msg)
       }
