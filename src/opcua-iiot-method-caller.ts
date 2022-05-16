@@ -8,7 +8,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Node, NodeMessageInFlow} from "@node-red/registry";
+import {Node} from "@node-red/registry";
 import {Todo} from "./types/placeholders";
 import coreMethod from "./core/opcua-iiot-core-method";
 import {
@@ -92,55 +92,61 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      if (msg.methodId && msg.inputArguments) {
-        coreMethod.getArgumentDefinition(node.iiot.opcuaSession, msg).then(function (results: Todo) {
+      if (msg.payload.methodId && msg.payload.inputArguments) {
+        coreMethod.getArgumentDefinition(node.connector.iiot.opcuaSession, msg).then(function (results: Todo) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
           callMethod(msg, results)
         }).catch((err: Error) => {
-          (isInitializedIIoTNode(node)) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
+          isInitializedIIoTNode(node) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
         })
       } else {
         coreMethod.internalDebugLog(new Error('No Method Id And/Or Parameters'))
       }
     }
 
+    const getDataValue = (message: Todo, result: Todo, definitionResults: Todo) => {
+      if (node.justValue) {
+        if (message.payload.inputArguments) {
+          delete message.payload['inputArguments']
+        }
+       return null
+      } else {
+       return {
+          result,
+          definition: definitionResults
+        }
+      }
+    }
+
     const callMethod = (msg: Todo, definitionResults: Todo) => {
-      coreMethod.callMethods(node.iiot.opcuaSession, msg).then((data: Todo) => {
+      coreMethod.callMethods(node.connector.iiot.opcuaSession, msg).then((data: Todo) => {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
         let result = null
         let outputArguments = []
         let message = Object.assign({}, data.msg)
-        message.nodetype = 'method'
-        message.methodType = data.msg.methodType
+        message.payload.nodetype = 'method'
+        message.payload.methodType = data.msg.methodType
 
         for (result of data.results) {
           outputArguments.push({ statusCode: result.statusCode, outputArguments: result.outputArguments })
         }
 
-        let dataValuesString: string
-        if (node.justValue) {
-          if (message.inputArguments) {
-            delete message['inputArguments']
+        message.payload.value = getDataValue(message, data.results, definitionResults) || outputArguments
+        message.payload.definition = definitionResults
+        message.payload.value = message.payload.value.result.map((item: Todo) => {
+          if (item.statusCode) {
+            return {
+              ...item,
+              statusCode: {
+                value: item.statusCode._value,
+                description: item.statusCode._description,
+                name: item.statusCode._name,
+              }
+            }
           }
-          dataValuesString = JSON.stringify(outputArguments, null, 2)
-        } else {
-          dataValuesString = JSON.stringify({
-            results: data.results,
-            definition: definitionResults
-          }, null, 2)
-        }
-
-        try {
-          RED.util.setMessageProperty(message, 'payload', JSON.parse(dataValuesString))
-        } catch (err: any) {
-          if (node.showErrors) {
-            this.warn('JSON not to parse from string for dataValues type ' )
-            this.error(err, msg)
-          }
-          message.payload = dataValuesString
-          message.error = err.message
-        }
+          return item
+        })
 
         this.send(message)
       }).catch((err: Error) => {
@@ -169,10 +175,10 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       const message = coreMethod.buildCallMessage(node, msg)
-      if (coreMethod.invalidMessage(node, message)) {
+      if (coreMethod.invalidMessage(node, message, handleMethodWarn)) {
         return
       }
-      callMethodOnSession(node.iiot.opcuaSession, message)
+      callMethodOnSession(node.connector.iiot.opcuaSession, message)
     })
 
     const onAlias = (event: string, callback: (...args: any) => void) => {

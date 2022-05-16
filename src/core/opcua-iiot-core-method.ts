@@ -24,7 +24,7 @@ const getArgumentDefinition = function (session: Todo, msg: Todo) {
         reject(new Error('Method Argument Definition Session Not Valid'))
       } else {
         try {
-          let methodId = coerceNodeId(msg.methodId)
+          let methodId = coerceNodeId(msg.payload.methodId)
 
           session.getArgumentDefinition(methodId, function (err: Error, inputArguments: Todo, outputArguments: Todo) {
             if (err) {
@@ -52,14 +52,14 @@ const callMethods = function (session: Todo, msg: Todo) {
         reject(new Error('Methods Call Session Not Valid'))
       } else {
         try {
-          msg.inputArguments.forEach(function (element: Todo) {
+          msg.payload.inputArguments.forEach(function (element: Todo) {
             element.value = convertDataValueByDataType({ value: element.value, dataType: element.dataType }, element.dataType)
           })
 
           let methodCalls = [{
-            objectId: coerceNodeId(msg.objectId),
-            methodId: coerceNodeId(msg.methodId),
-            inputArguments: msg.inputArguments
+            objectId: coerceNodeId(msg.payload.objectId),
+            methodId: coerceNodeId(msg.payload.methodId),
+            inputArguments: msg.payload.inputArguments
           }]
 
           session.call(methodCalls, function (err: Todo, results: Todo) {
@@ -88,26 +88,26 @@ const buildMessagesFromMethodCalls = function (methodCallsResults: Todo) {
     })
 }
 
-const invalidMessage = function (node: Todo, message: Todo) {
+const invalidMessage = function (node: Todo, message: Todo, handleMethodWarn: (message: Todo) => void) {
   let response = false
 
-  if (!message.objectId) {
-    node.iiot.handleMethodWarn('No Object-Id Found For Method Call')
+  if (!message.payload.objectId) {
+    handleMethodWarn('No Object-Id Found For Method Call')
     response = true
   }
 
-  if (!message.methodId) {
-    node.iiot.handleMethodWarn('No Method-Id Found For Method Call')
+  if (!message.payload.methodId) {
+    handleMethodWarn('No Method-Id Found For Method Call')
     response = true
   }
 
-  if (!message.inputArguments) {
-    node.iiot.handleMethodWarn('No Input Arguments Found For Method Call')
+  if (!message.payload.inputArguments) {
+    handleMethodWarn('No Input Arguments Found For Method Call')
     response = true
   }
 
-  if (!message.methodType) {
-    node.iiot.handleMethodWarn('No Method Type Found For Method Call')
+  if (!message.payload.methodType) {
+    handleMethodWarn('No Method Type Found For Method Call')
     response = true
   }
 
@@ -116,11 +116,11 @@ const invalidMessage = function (node: Todo, message: Todo) {
 
 const buildCallMessage = function (node: Todo, msg: Todo) {
   let message = msg
-  message.objectId = msg.payload.objectId || node.objectId
-  message.methodId = msg.payload.methodId || node.methodId
-  message.methodType = msg.payload.methodType || node.methodType
-  message.inputArguments = msg.payload.inputArguments || node.inputArguments
-  message.nodetype = 'method'
+  message.payload.objectId = msg.payload.objectId || node.objectId
+  message.payload.methodId = msg.payload.methodId || node.methodId
+  message.payload.methodType = msg.payload.methodType || node.methodType
+  message.payload.inputArguments = msg.payload.inputArguments || node.inputArguments
+  message.payload.nodetype = 'method'
   return message
 }
 
