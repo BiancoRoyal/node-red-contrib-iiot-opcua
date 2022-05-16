@@ -68,9 +68,9 @@ function ts () {
     var ts = require("gulp-typescript")
     var tsProject = ts.createProject('tsconfig.json');
     return gulp.src('src/**/*.ts')
-        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(tsProject())
-        .pipe(sourcemaps.write())
+        .pipe(sourcemaps.write(''))
         .pipe(gulp.dest("opcuaIIoT"))
 }
 
