@@ -109,7 +109,7 @@
     "standard-version": "^8.0.1",
     "uglify-js": "^3.4.6",
     "uglify-js-harmony": "^2.7.7",
-    "weak": "^1.0.1",
+    "weak": "file:deps/TooTallNate/node-weak",
     "when": "^3.7.8"
   },
   "directories": {
