@@ -13,7 +13,7 @@ import {Todo} from "./types/placeholders";
 import coreInject from "./core/opcua-iiot-core-inject";
 import {resetIiotNode} from "./core/opcua-iiot-core";
 import {CronJob} from 'cron';
-import {AddressSpaceItem} from "./types/core";
+import {AddressSpaceItem} from "./types/helpers";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string

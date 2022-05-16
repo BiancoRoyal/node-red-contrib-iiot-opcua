@@ -23,7 +23,7 @@ import {
   setNodeStatusTo
 } from "./core/opcua-iiot-core";
 import {BrowseResult, ClientSession, NodeId} from "node-opcua";
-import {AddressSpaceItem} from "./types/core";
+import {AddressSpaceItem} from "./types/helpers";
 import {ListenPayload} from "./opcua-iiot-listener";
 import {ReferenceDescription} from "node-opcua-types/dist/_generated_opcua_types";
 import {NodeIdLike} from "node-opcua-nodeid";

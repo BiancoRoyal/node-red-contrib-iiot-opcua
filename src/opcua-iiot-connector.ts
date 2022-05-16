@@ -37,7 +37,7 @@ import {UserTokenType} from "node-opcua-service-endpoints";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import internalDebugLog = logger.internalDebugLog;
 import detailDebugLog = logger.detailDebugLog;
-import {getEnumKeys} from "./types/core";
+import {getEnumKeys} from "./types/helpers";
 
 interface OPCUAIIoTConnectorCredentials {
   user: string

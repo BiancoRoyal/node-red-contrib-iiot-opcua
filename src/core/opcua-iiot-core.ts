@@ -23,7 +23,7 @@ import {
   TimeUnitNames,
   TimeUnits,
   WriteMessage
-} from "../types/core";
+} from "../types/helpers";
 import {Todo, TodoVoidFunction} from "../types/placeholders";
 import {Node, NodeMessage, NodeStatus} from "node-red";
 import {NodeMessageInFlow, NodeStatusFill, NodeStatusShape} from "@node-red/registry";

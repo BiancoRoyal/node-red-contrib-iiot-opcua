@@ -17,7 +17,7 @@ import {
 } from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {Node, NodeAPI, NodeDef} from "node-red";
-import {AddressSpaceItem} from "./types/core";
+import {AddressSpaceItem} from "./types/helpers";
 import {BrowseResult} from "node-opcua";
 
 type Filter = {

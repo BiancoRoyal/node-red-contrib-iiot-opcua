@@ -14,7 +14,8 @@ import {initCoreNode, isSessionBad, OBJECTS_ROOT, setNodeStatusTo} from "./opcua
 import {
   BrowseDirection,
   BrowseResult,
-  CacheNode, ClientSession,
+  CacheNode,
+  ClientSession,
   NodeCrawler,
   NodeCrawlerBase,
   NodeCrawlerClientSession,
@@ -24,7 +25,6 @@ import {
 import debug from 'debug';
 import {NodeStatus} from "node-red";
 import {NodeMessageInFlow} from "@node-red/registry";
-import {AddressSpaceItem} from "../types/core";
 import {NodeIdLike} from "node-opcua-nodeid";
 import {ResponseCallback} from "node-opcua-client";
 import {DataValue} from "node-opcua-data-value";
@@ -32,6 +32,7 @@ import {ErrorCallback} from "node-opcua-status-code";
 import {BrowseDescriptionLike} from "node-opcua-client/source/client_session";
 import {isUndefined} from "underscore";
 import {ReferenceDescription} from "node-opcua-types/dist/_generated_opcua_types";
+import {AddressSpaceItem} from "../types/helpers";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define

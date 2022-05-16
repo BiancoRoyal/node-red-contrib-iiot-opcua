@@ -13,8 +13,8 @@ import {Todo} from "../types/placeholders";
 import debug from 'debug';
 import {Node, NodeStatusFill} from "node-red";
 import {BrowseResult, StatusCode} from "node-opcua";
-import {AddressSpaceItem} from "../types/core";
 import {NodeIdLike} from "node-opcua-nodeid";
+import {AddressSpaceItem} from "../types/helpers";
 
 type EntryStatus = {
   good: number,
