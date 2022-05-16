@@ -1,3 +1,5 @@
+# Notes for internal development (DATATRONiQ)
+
 ## package.json
 
 Very messing situation on dependency `read-pkg-up`:
@@ -6,16 +8,30 @@ Very messing situation on dependency `read-pkg-up`:
 
 solution: `npm install -D read-pkg-up@7.0.1`
 
+## Development/Getting started
 
-![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
-![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
-[![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
-![ES_Deploy_Version](http://b.repl.ca/v1/JS-ES2015-yellow.png)
-![NodeJS_Version](http://b.repl.ca/v1/NodeJS-LTS-green.png)
-[![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
-[![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](http://www.npm-stats.com/~packages/node-red-contrib-iiot-opcua)
-[![Build Status](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/da70f651451445c58d5adaeebd0ad595)](https://www.codacy.com/app/klaus/node-red-contrib-iiot-opcua?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=biancode/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
+1. must install Node v14 (`nvm install 14; nvm use 14`)
+1. install Node-RED in separate directory
+    1. `git clone https://github.com/node-red/node-red.git Node-RED`
+    1. `cd Node-RED`
+    1. `git checkout tags/2.2.2 -b release-2.2.2`
+    1. `npm install`
+    1. `npm run build`
+    1. `npm run start  -- --verbose`
+    1. stop Node-RED again
+1. install node-red-contrib-iiot-opcua
+    1. `git clone git@gitlab.sigmalto.com:contitech/node-red-contrib-iiot-opcua.git`
+    1. `cd node-red-contrib-iiot-opcua`
+    1. `git checkout -t origin/development`
+    1. `npm install`
+    1. `npm run build`
+1. after first run of Node-RED, folder `~/.node-red` will be created
+1. in folder `~/.node-red` install `node-red-contrib-iiot-opcua` (only once)
+    1. `cd ~/.node-red`
+    1. `rm -rf node_modules`
+    1. `npm install <...>/node-red-contrib-iiot-opcua # --> ~/.node-red/node_modules/node-red-contrib-iiot-opcua`
+    1. `cd <...>/Node-RED`
+    1. `DEBUG=opcuaIIoT:* npm run start  -- --verbose`
 
 # node-red-contrib-iiot-opcua
 
