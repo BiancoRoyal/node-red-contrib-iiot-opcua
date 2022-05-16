@@ -17,7 +17,8 @@
       "topic": "Topic",
       "nodeId": "Node-Id",
       "lookupUseHint": "You can crawl with the lookup by select and lookup agian.",
-      "delayPerMessage": "Delay msg"
+      "delayPerMessage": "Delay Between Messages",
+      "timeout": "Crawler Timeout"
     }
   }
 }
