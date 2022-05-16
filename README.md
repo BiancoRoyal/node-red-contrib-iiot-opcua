@@ -74,6 +74,15 @@ The following nodes work correctly. All others should work, but may behave sligh
 bash build.sh <image_tag>
 ```
 
+# Migrating nodes
+
+Some nodes are configured slightly differently, so here is a guide how to adapt those nodes.
+
+### Flex-Server
+- The `node-opcua` library is now directly accessible as `opcua`. This means all references to `coreServer.core.nodeOPCUA` should be replaced with `opcua`.
+- `node.iiot.assert` is no longer accessible. The functionality can be replaced by using an `if` statement that throws a new error (`if (errorConfition) throw new Error('Error Message'`). Errors can be displayed by using a `catch` node connected to a `debug` node, which displys the entire message. 
+
+
 # node-red-contrib-iiot-opcua
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][8] based on [node-opcua][9].

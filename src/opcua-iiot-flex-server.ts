@@ -9,14 +9,11 @@
 'use strict'
 
 import * as nodered from "node-red";
+import {NodeStatus} from "node-red";
 import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
-import {NodeStatus} from "node-red";
 import {VM} from "vm2";
-import {OPCUAServer} from "node-opcua";
-import {logger} from "./core/opcua-iiot-core-connector";
-import internalDebugLog = logger.internalDebugLog;
 
 type OPCUAIIoTFlexServer = nodered.Node & {
   on(event: 'shutdown', callback: () => void): void
@@ -39,13 +36,19 @@ module.exports = (RED: nodered.NodeAPI) => {
     RED.nodes.createNode(this, config)
     coreServer.flexInternalDebugLog('Open Server Node')
 
-    let node = coreServer.readConfigOfServerNode(this, config)
-    node = coreServer.initServerNode(node)
-    node = coreServer.loadNodeSets(node, __dirname)
-    node = coreServer.loadCertificates(node)
+    let node: Todo = this;
+
+    coreServer.readConfigOfServerNode(node, config)
+    coreServer.initServerNode(node)
+    coreServer.loadNodeSets(node, __dirname)
+    // node = coreServer.loadCertificates(node)
+    node.context = this.context
 
     const vm = new VM({
+      allowAsync: false,
       sandbox: {
+        // allow the node-opcua library to be accessed in user-submitted scripts as 'opcua'
+        opcua: require('node-opcua'),
         node,
         coreServer,
         scriptObjects,
@@ -98,46 +101,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     })
 
-    /* istanbul ignore next */
-    // @ts-ignore
-    const constructAddressSpaceScript = function (server: Todo, constructAddressSpaceScript, eventObjects) {
-      internalDebugLog('Init Function Block Flex Server')
-    }
-
-    vm.run('node.iiot.constructAddressSpaceScript = ' + config.addressSpaceScript)
+    // Use the vm2 library to make the submitted script executable:
+    // vm.run returns construcAddressSpaceScript as a function
+    const constructAddressSpaceScript = vm.run('constructAddressSpaceScript = ' + config.addressSpaceScript)
 
     const statusHandler = (status: string | NodeStatus): void => {
       this.status(status)
     }
 
-    const buildServerOptions = async function () {
-      let serverOptions: Todo = await coreServer.buildServerOptions(node, 'Flex')
-      serverOptions.userManager = {
-        isValidUser: function (userName: string, password: string) {
-          return coreServer.checkUser(node, userName, password)
-        }
-      }
-      return coreServer.setDiscoveryOptions(node, serverOptions)
-    }
-
-    const createServer = async (serverOptions: Todo) => {
-      /* istanbul ignore next */
-      if (RED.settings.verbose) {
-        coreServer.flexDetailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
-      }
-      node.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
-      node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-      await node.iiot.opcuaServer.initialize()
-      postInitialize()
-      coreServer.setOPCUAServerListener(node)
-    }
-
     const initNewServer = () => {
       node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = buildServerOptions()
-      serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
+      let serverOptions = coreServer.buildGeneralServerOptions(node, 'Flex')
+      // serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
       try {
-        createServer(serverOptions)
+        coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
       } catch (err: any) {
         /* istanbul ignore next */
         this.emit('server_create_error')

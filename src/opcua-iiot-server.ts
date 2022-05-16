@@ -36,41 +36,19 @@ module.exports = (RED: nodered.NodeAPI) => {
     coreServer.internalDebugLog('Open Server Node')
 
     this.asoDemo = config.asoDemo // ASO (address space objects) Demo
-    let node = coreServer.readConfigOfServerNode(this, config)
-    node = coreServer.initServerNode(node)
-    node = coreServer.loadNodeSets(node, __dirname)
+    let node: Todo = this;
+    coreServer.readConfigOfServerNode(this, config)
+    coreServer.initServerNode(node)
+    coreServer.loadNodeSets(node, __dirname)
     // node = coreServer.loadCertificates(node)
-
-    const buildServerOptions = async () => {
-      let serverOptions: Todo = await coreServer.buildServerOptions(node, 'Fix')
-      serverOptions.userManager = {
-        isValidUser: function (userName: string, password: string) {
-          return coreServer.checkUser(node, userName, password)
-        }
-      }
-      return coreServer.setDiscoveryOptions(node, serverOptions)
-    }
-
-    const createServer = async (serverOptions: Todo) => {
-      if (RED.settings.verbose) {
-        coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
-      }
-      const options = await serverOptions
-
-      node.iiot.opcuaServer = await coreServer.createServerObject(node.maxAllowedSubscriptionNumber, options)
-      node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-      await node.iiot.opcuaServer.initialize()
-      postInitialize()
-      coreServer.setOPCUAServerListener(node)
-    }
 
     const initNewServer = () => {
       node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = buildServerOptions()
+      let serverOptions = coreServer.buildGeneralServerOptions(node, 'Fix')
       serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
 
       try {
-        createServer(serverOptions)
+        coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
       } catch (err) {
         this.emit('server_create_error')
         coreServer.handleServerError(node, err as Error, {payload: 'Server Failure! Please, check the server settings!'})
@@ -87,7 +65,6 @@ module.exports = (RED: nodered.NodeAPI) => {
           if (err) {
             coreServer.handleServerError(node, err, {payload: 'Server Address Space Problem'})
           } else {
-            'close'
             coreServer.start(node.iiot.opcuaServer, node)
               .then(() => {
                 node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)

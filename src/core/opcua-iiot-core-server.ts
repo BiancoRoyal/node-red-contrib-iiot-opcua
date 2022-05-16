@@ -11,19 +11,28 @@
 
 import {Todo} from "../types/placeholders";
 import {
-  CallbackT, DataType, DataValue,
-  EndpointDescription, extractFullyQualifiedDomainName,
-  ISessionContext, LocalizedText,
-  makeApplicationUrn, nodesets,
-  OPCUAServer, RegisterServerMethod, standardUnits, StatusCodes,
-  Variant, VariantArrayType
+  CallbackT,
+  DataType,
+  DataValue,
+  EndpointDescription,
+  ISessionContext,
+  LocalizedText,
+  nodesets,
+  OPCUAServer,
+  OPCUAServerEndPoint,
+  RegisterServerMethod,
+  standardUnits,
+  StatusCodes,
+  Variant,
+  VariantArrayType
 } from "node-opcua";
 
 import {
   availableMemory,
   getNodeOPCUAServerPath,
   getVariantValue,
-  initCoreServerNode, setNodeStatusTo,
+  initCoreServerNode,
+  setNodeStatusTo,
 } from "./opcua-iiot-core"
 
 
@@ -63,22 +72,18 @@ const simulateVariation = function (data: Todo) {
 }
 
 const constructAddressSpaceFromScript = function (server: Todo, constructAddressSpaceScript: Todo, eventObjects: Todo) {
-  internalDebugLog('Construct Address Space From Script')
-  // TODO: constructAddressSpaceScript is not yet implemented
-  return constructAddressSpace(server, true)
-  //
-  // return new Promise(
-  //   function (resolve, reject) {
-  //     if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
-  //       try {
-  //         constructAddressSpaceScript(server, server.engine.addressSpace, eventObjects, resolve)
-  //       } catch (err) {
-  //         reject(err)
-  //       }
-  //     } else {
-  //       reject(new Error('Wrong Parameters Construct AddressSpace From Script'))
-  //     }
-  //   })
+  return new Promise(
+    (resolve, reject) => {
+      if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
+        try {
+          constructAddressSpaceScript(server, server.engine.addressSpace, eventObjects, resolve)
+        } catch (err) {
+          reject(err)
+        }
+      } else {
+        reject(new Error('Wrong Parameters Construct AddressSpace From Script'))
+      }
+    })
 }
 
 const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
@@ -481,6 +486,16 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
     })
 }
 
+const buildGeneralServerOptions = async (node: Todo, prefix: string) => {
+  let serverOptions: Todo = await buildServerOptions(node, prefix)
+  serverOptions.userManager = {
+    isValidUser: function (userName: string, password: string) {
+      return checkUser(node, userName, password)
+    }
+  }
+  return setDiscoveryOptions(node, serverOptions)
+}
+
 const destructAddressSpace = function (done: () => void) {
   intervalList.forEach(function (value: Todo, index: number, list: Todo[]) {
     clearInterval(value)
@@ -490,7 +505,7 @@ const destructAddressSpace = function (done: () => void) {
   done()
 }
 
-const start = function (server: Todo, node: Todo) {
+const start = function (server: OPCUAServer, node: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!server) {
@@ -502,66 +517,61 @@ const start = function (server: Todo, node: Todo) {
         reject(new Error('Node Not Valid To Start'))
         return
       }
-      server.start(function (err: Error) {
-        if (err) {
-          reject(err)
-        } else {
-          node.iiot.initialized = true
+      server.start(() => {
+        node.iiot.initialized = true
 
-          if (server.endpoints && server.endpoints.length) {
-            server.endpoints.forEach(function (endpoint: Todo) {
-              endpoint.endpointDescriptions().forEach(function (endpointDescription: EndpointDescription) {
-                internalDebugLog('Server endpointUrl: ' +
-                endpointDescription.endpointUrl + ' securityMode: ' +
-                endpointDescription.securityMode.toString() +
-                ' securityPolicyUri: ' + endpointDescription.securityPolicyUri ? endpointDescription.securityPolicyUri?.toString() : 'None Security Policy Uri')
-              })
+        if (server.endpoints?.length) {
+          server.endpoints.forEach((endpoint: OPCUAServerEndPoint) => {
+            endpoint.endpointDescriptions().forEach((endpointDescription: EndpointDescription) => {
+              internalDebugLog('Server endpointUrl:', endpointDescription.endpointUrl,
+                'securityMode:', endpointDescription.securityMode.toString(),
+                'securityPolicyUri:', endpointDescription.securityPolicyUri ? endpointDescription.securityPolicyUri?.toString() : 'None Security Policy Uri'
+              );
             })
-
-            let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
-            internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
-          }
-
-          server.on('newChannel', function (channel: Todo) {
-            internalDebugLog('Client connected with address = ' +
-              channel.remoteAddress + ' port = ' + channel.remotePort
-            )
           })
-
-          server.on('closeChannel', function (channel: Todo) {
-            internalDebugLog('Client disconnected with address = ' +
-              channel.remoteAddress + ' port = ' + channel.remotePort
-            )
-          })
-
-          server.on('create_session', function (session: Todo) {
-            internalDebugLog('############## SESSION CREATED ##############')
-            if (session.clientDescription) {
-              detailDebugLog('Client application URI:' + session.clientDescription.applicationUri)
-              detailDebugLog('Client product URI:' + session.clientDescription.productUri)
-              detailDebugLog('Client application name:' + session.clientDescription.applicationName ? session.clientDescription.applicationName.toString() : 'none application name')
-              detailDebugLog('Client application type:' + session.clientDescription.applicationType ? session.clientDescription.applicationType.toString() : 'none application type')
-            }
-
-            internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : 'none session name')
-            internalDebugLog('Session timeout:' + session.sessionTimeout)
-            internalDebugLog('Session id:' + session.sessionId)
-          })
-
-          server.on('session_closed', function (session: Todo, reason: Todo) {
-            internalDebugLog('############## SESSION CLOSED ##############')
-            internalDebugLog('reason:' + reason)
-            internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : 'none session name')
-          })
-
-          internalDebugLog('Server Initialized')
-
-          if (server.serverInfo) {
-            detailDebugLog('Server Info:' + JSON.stringify(server.serverInfo))
-          }
-
-          resolve('')
+          let endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl
+          internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
         }
+
+        server.on('newChannel', function (channel: Todo) {
+          internalDebugLog('Client connected with address = ' +
+            channel.remoteAddress + ' port = ' + channel.remotePort
+          )
+        })
+
+        server.on('closeChannel', function (channel: Todo) {
+          internalDebugLog('Client disconnected with address = ' +
+            channel.remoteAddress + ' port = ' + channel.remotePort
+          )
+        })
+
+        server.on('create_session', function (session: Todo) {
+          internalDebugLog('############## SESSION CREATED ##############')
+          if (session.clientDescription) {
+            detailDebugLog('Client application URI:' + session.clientDescription.applicationUri)
+            detailDebugLog('Client product URI:' + session.clientDescription.productUri)
+            detailDebugLog('Client application name:' + session.clientDescription.applicationName ? session.clientDescription.applicationName.toString() : 'none application name')
+            detailDebugLog('Client application type:' + session.clientDescription.applicationType ? session.clientDescription.applicationType.toString() : 'none application type')
+          }
+
+          internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : 'none session name')
+          internalDebugLog('Session timeout:' + session.sessionTimeout)
+          internalDebugLog('Session id:' + session.sessionId)
+        })
+
+        server.on('session_closed', function (session: Todo, reason: Todo) {
+          internalDebugLog('############## SESSION CLOSED ##############')
+          internalDebugLog('reason:' + reason)
+          internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : 'none session name')
+        })
+
+        internalDebugLog('Server Initialized')
+
+        if (server.serverInfo) {
+          detailDebugLog('Server Info:' + JSON.stringify(server.serverInfo))
+        }
+
+        resolve('')
       })
     })
 }
@@ -604,18 +614,12 @@ const readConfigOfServerNode = function (node: Todo, config: Todo) {
   node.registerServerMethod = config.registerServerMethod || 1
   node.discoveryServerEndpointUrl = config.discoveryServerEndpointUrl
   node.capabilitiesForMDNS = (config.capabilitiesForMDNS) ? config.capabilitiesForMDNS.split(',') : [config.capabilitiesForMDNS]
-
-  return node
 }
 
 const initServerNode = function (node: Todo) {
-  let serverNode = {
-    ...node,
-    iiot: initCoreServerNode()
-  }
-  if (serverNode.setMaxListeners)
-    serverNode.setMaxListeners(UNLIMITED_LISTENERS)
-  return serverNode
+  node.iiot = initCoreServerNode()
+  if (node.setMaxListeners)
+    node.setMaxListeners(UNLIMITED_LISTENERS)
 }
 
 const loadNodeSets = function (node: Todo, dirname: string) {
@@ -638,7 +642,6 @@ const loadNodeSets = function (node: Todo, dirname: string) {
 
   detailDebugLog('node set:' + xmlFiles.toString())
   node.iiot.xmlFiles = xmlFiles
-  return node
 }
 
 const loadCertificates = function (node: Todo) {
@@ -844,7 +847,6 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
   let today = new Date()
 
   // const SecurityPolicy = require("node-opcua").SecurityPolicy;
-
   return {
     defaultSecureTokenLifetime: 60000000,
     port: typeof node.port === 'string' ? parseInt(node.port) : node.port,
@@ -886,6 +888,19 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
     registerServerMethod: node.registerServerMethod,
     disableDiscovery: node.disableDiscovery
   }
+}
+const createServer = async (node: Todo, serverOptions: Todo, postInitialize: () => void, statusHandler: (status: string | NodeStatus) => void, verbose: boolean = false) => {
+  /* istanbul ignore next */
+  if (verbose) {
+    coreServer.flexDetailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
+  }
+  const options = await serverOptions
+
+  node.iiot.opcuaServer = await coreServer.createServerObject(node.maxAllowedSubscriptionNumber, options)
+  node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+  await node.iiot.opcuaServer.initialize()
+  postInitialize()
+  coreServer.setOPCUAServerListener(node)
 }
 
 const createServerObject = async (maxSubscriptions: number, serverOptions: Todo) => {
@@ -938,9 +953,10 @@ const coreServer = {
   restartServer,
   handleServerError,
   createServerNameWithPrefix,
-  buildServerOptions,
   createServerObject,
   setOPCUAServerListener,
+  buildGeneralServerOptions,
+  createServer,
 }
 
 export default coreServer
