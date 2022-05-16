@@ -117,8 +117,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
 
       // TODO: send works but it has a problem with debug node and ByteString
-      // I'm not sure where this comes from, but I'm leaving it just in case.
-
+      // I'm not sure what this comment refers to, but I'm leaving it just in case.
       this.send(responseMessage)
     })
 

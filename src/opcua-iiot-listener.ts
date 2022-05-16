@@ -102,7 +102,6 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       const timeMilliseconds = (typeof msg.payload === 'number') ? msg.payload : null
       const dynamicOptions = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
-
       if (nodeConfig.action !== 'events') {
         coreListener.internalDebugLog('create monitoring subscription')
         const monitoringOptions = dynamicOptions || coreListener.getSubscriptionParameters(timeMilliseconds)
@@ -146,24 +145,21 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const makeSubscription = function (parameters: Todo) {
-      if (checkSessionNotValid(nodeConfig.iiot.opcuaSession, 'ListenerSubscription')) {
+      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'ListenerSubscription')) {
         return
       }
-
       if (!parameters) {
         coreListener.internalDebugLog('Subscription Parameters Not Valid')
         return
       } else {
         coreListener.internalDebugLog('Subscription Parameters: ' + JSON.stringify(parameters))
       }
-
-      nodeConfig.iiot.opcuaSubscription = ClientSubscription.create(nodeConfig.iiot.opcuaSession, parameters)
+      nodeConfig.iiot.opcuaSubscription = ClientSubscription.create(nodeConfig.connector.iiot.opcuaSession, parameters)
       coreListener.internalDebugLog('New Subscription Created')
 
       if (nodeConfig.connector) {
         nodeConfig.iiot.hasOpcUaSubscriptions = true
       }
-
       setSubscriptionEvents(nodeConfig.iiot.opcuaSubscription)
       nodeConfig.iiot.stateMachine.initsub()
     }
@@ -219,7 +215,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           updateSubscriptionStatus()
         })
       } else {
-        coreListener.buildNewMonitoredItemGroup(this, msg, msg.addressSpaceItems, nodeConfig.iiot.opcuaSubscription)
+        coreListener.buildNewMonitoredItemGroup(this, msg, msg.payload.addressSpaceItems, nodeConfig.iiot.opcuaSubscription)
           .then((result: Todo) => {
             if (!result.monitoredItemGroup) {
               this.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
@@ -238,12 +234,12 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const handleMonitoringOfItems = (msg: Todo) => {
-      const itemsToMonitor = msg.addressSpaceItems.filter((addressSpaceItem: Todo) => {
+      const itemsToMonitor = msg.payload.addressSpaceItems.filter((addressSpaceItem: Todo) => {
         const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
         return typeof nodeConfig.iiot.monitoredASO.get(nodeIdToMonitor) === 'undefined'
       })
 
-      const itemsToTerminate = msg.addressSpaceItems.filter((addressSpaceItem: Todo) => {
+      const itemsToTerminate = msg.payload.addressSpaceItems.filter((addressSpaceItem: Todo) => {
         const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
         return typeof nodeConfig.iiot.monitoredASO.get(nodeIdToMonitor) !== 'undefined'
       })
@@ -274,25 +270,36 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const subscribeMonitoredItem =  (msg: Todo) => {
-      if (checkSessionNotValid(nodeConfig.iiot.opcuaSession, 'MonitorListener')) {
+      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'MonitorListener')) {
         return
       }
 
       if (!coreListener.checkState(this, msg, 'Monitoring')) {
         return
       }
-
-      if (msg.addressSpaceItems.length) {
+      if (!msg.payload.addressSpaceItems?.length) {
+        msg.payload.addressSpaceItems = msg.payload.browseResults
+      }
+      if (msg.payload.addressSpaceItems?.length) {
         if (nodeConfig.useGroupItems) {
           handleMonitoringOfGroupedItems(msg)
         } else {
           handleMonitoringOfItems(msg)
         }
+      } else {
+        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'error', nodeConfig.oldStatusParameter, true, statusHandler)
+        this.send({
+          ...msg,
+          payload: {
+            status: 'error',
+            message: 'No address space items to monitor'
+          }
+        })
       }
     }
 
     const handleEventSubscriptions = (msg: Todo) => {
-      for (let addressSpaceItem of msg.addressSpaceItems) {
+      msg.payload.addressSpaceItems.forEach((addressSpaceItem: Todo) => {
         if (!addressSpaceItem.nodeId) {
           coreListener.eventDebugLog('Address Space Item Not Valid to Monitor Event Of ' + addressSpaceItem)
           return
@@ -313,11 +320,11 @@ module.exports = (RED: nodered.NodeAPI) => {
         const item = nodeConfig.iiot.monitoredASO.get(nodeIdToMonitor)
 
         if (!item) {
-          coreListener.eventDebugLog('Regsiter Event Item ' + nodeIdToMonitor)
+          coreListener.eventDebugLog('Register Event Item ' + nodeIdToMonitor)
           coreListener.buildNewEventItem(nodeIdToMonitor, msg, nodeConfig.iiot.opcuaSubscription)
             .then(function (result: Todo) {
               if (result.monitoredItem.monitoredItemId) {
-                coreListener.eventDebugLog('Event Item Regsitered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
+                coreListener.eventDebugLog('Event Item Registered ' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
                 nodeConfig.iiot.monitoredASO.set(result.nodeId.toString(), {
                   monitoredItem: result.monitoredItem,
                   topic: msg.topic || nodeConfig.topic
@@ -335,14 +342,14 @@ module.exports = (RED: nodered.NodeAPI) => {
           const eventMessage = Object.assign({}, msg)
           item.monitoredItem.terminate(function (err: Error) {
             coreListener.eventDebugLog('Terminated Monitored Item ' + item.monitoredItem.itemToMonitor.nodeId)
-            nodeConfig.iiot.monitoredItemTerminated(eventMessage, item.monitoredItem, nodeIdToMonitor, err)
+            monitoredItemTerminated(eventMessage, item.monitoredItem, nodeIdToMonitor, err)
           })
         }
-      }
+      })
     }
 
     const subscribeMonitoredEvent = (msg: Todo) => {
-      if (checkSessionNotValid(nodeConfig.iiot.opcuaSession, 'EventListener')) {
+      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'EventListener')) {
         return
       }
 
@@ -463,7 +470,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         injectType: 'subscribe'
       }
 
-      coreListener.internalDebugLog('sendDataFromMonitoredItem: ' + msg.addressSpaceItems[0].nodeId)
+      coreListener.internalDebugLog('sendDataFromMonitoredItem: ' + msg.payload.addressSpaceItems[0].nodeId)
 
       let dataValuesString: string
       msg.justValue = nodeConfig.justValue
@@ -529,7 +536,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         injectType: 'event'
       }
 
-      coreListener.analyzeEvent(nodeConfig.iiot.opcuaSession, getBrowseName, dataValue)
+      coreListener.analyzeEvent(nodeConfig.connector.iiot.opcuaSession, getBrowseName, dataValue)
         .then((eventResults: Todo) => {
           handleEventResults(msg, dataValue, eventResults, monitoredItem)
         }).catch((err: Error) => {
