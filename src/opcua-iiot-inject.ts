@@ -89,7 +89,6 @@ module.exports = function (RED: nodered.NodeAPI) {
     const repeaterSetup = () => {
       coreInject.internalDebugLog('Repeat Is ' + node.repeat)
       coreInject.internalDebugLog('Crontab Is ' + node.crontab)
-      console.log(config.repeat)
       if (node.repeat !== '') {
         node.repeat = parseFloat(config.repeat) * REPEAT_FACTOR
 
