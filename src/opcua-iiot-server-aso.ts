@@ -61,16 +61,16 @@ module.exports = (RED: nodered.NodeAPI) => {
     internalDebugLog('Open ASO Node')
 
     this.on('input', (msg: NodeMessageInFlow | Todo) => {
-      if (msg.nodetype === 'inject') {
-        node.nodeId = msg.topic || node.nodeId
-        node.datatype = msg.datatype || node.datatype
-        node.value = msg.payload || node.value
+      if (msg.payload.nodetype === 'inject') {
+        node.nodeId = msg.payload.topic || node.nodeId
+        node.datatype = msg.payload.datatype || node.datatype
+        node.value = msg.payload.payload || node.value
       }
 
       msg = { payload: {} } // clean message
       msg.topic = 'ServerAddressSpaceObject'
-      msg.nodetype = 'inject'
-      msg.injectType = 'ASO'
+      msg.payload.nodetype = 'inject'
+      msg.payload.injectType = 'ASO'
 
       if (node.nodeId.includes('i=') || node.nodeId.includes('s=') || node.nodeId.includes('b=')) {
         msg.payload.nodeId = node.nodeId

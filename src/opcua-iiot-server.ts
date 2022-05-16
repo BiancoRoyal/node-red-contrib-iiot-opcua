@@ -85,7 +85,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         .then((err: Todo) => {
           if (err) {
             coreServer.handleServerError(node, err, { payload: 'Server Address Space Problem' })
-          } else {
+          } else {'close'
             coreServer.start(node.iiot.opcuaServer, node)
               .then(() => {
                 node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
@@ -111,8 +111,8 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
       }
-      console.log(msg)
-      switch (msg.injectType) {
+
+      switch (msg.payload.injectType) {
         case 'ASO':
           changeAddressSpace(msg)
           break
