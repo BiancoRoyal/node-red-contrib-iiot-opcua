@@ -11,6 +11,7 @@
 
 import {Todo} from "../types/placeholders";
 import {
+  AddressSpace,
   CallbackT,
   DataType,
   DataValue,
@@ -719,7 +720,7 @@ const setDiscoveryOptions = function (node: Todo, serverOptions: Todo) {
   return serverOptions
 }
 
-const getAddressSpace = function (node: Todo, msg: Todo) {
+const getAddressSpace = function (node: Todo, msg: Todo): AddressSpace | null {
   if (!node.iiot.opcuaServer.engine.addressSpace) {
     node.error(new Error('Server AddressSpace Not Valid'), msg)
     return null
@@ -797,13 +798,11 @@ const addObjectToAddressSpace = function (node: Todo, msg: Todo, humanReadableTy
   }
 }
 
-const deleteNOdeFromAddressSpace = function (node: Todo, msg: Todo) {
+const deleteNodeFromAddressSpace = function (node: Todo, msg: Todo) {
   let addressSpace = getAddressSpace(node, msg)
-
   if (!addressSpace) {
     return
   }
-
   if (msg.payload.nodeId) {
     let searchedNode = addressSpace.findNode(msg.payload.nodeId)
     if (searchedNode) {
@@ -817,25 +816,18 @@ const deleteNOdeFromAddressSpace = function (node: Todo, msg: Todo) {
   }
 }
 
-const restartServer = function (node: Todo, statusHandler: (status: string | NodeStatus) => void) {
+const restartServer = function (node: Todo, statusHandler: (status: string | NodeStatus) => void, emitHandler: (eventName: string | symbol, ...args: any[]) => void, sendHandler: (msg: Todo) => void) {
   if (node.iiot.opcuaServer) {
     node.iiot.opcuaServer.shutdown(function () {
-      node.emit('shutdown')
+      emitHandler('shutdown')
     })
   } else {
     node.iiot.opcuaServer = null
-    node.emit('shutdown')
+    emitHandler('shutdown')
   }
 
-  node.send({payload: 'server shutdown'})
+  sendHandler({payload: 'server shutdown'})
   node.oldStatusParameter = setNodeStatusTo(node, 'shutdown', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-}
-
-const handleServerError = function (node: Todo, err: Error, msg: Todo) {
-  internalDebugLog(err)
-  if (node.showErrors) {
-    node.error(err, msg)
-  }
 }
 
 const createServerNameWithPrefix = function (serverPort: number, prefix: Todo) {
@@ -949,9 +941,8 @@ const coreServer = {
   getAddressSpace,
   addVariableToAddressSpace,
   addObjectToAddressSpace,
-  deleteNOdeFromAddressSpace,
+  deleteNodeFromAddressSpace,
   restartServer,
-  handleServerError,
   createServerNameWithPrefix,
   createServerObject,
   setOPCUAServerListener,

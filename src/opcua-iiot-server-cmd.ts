@@ -18,7 +18,7 @@ interface OPCUAIIoTCMD extends nodered.Node {
   commandtype: string
   nodeId: string
   name: string
-  
+
 }
 
 interface OPCUAIIoTCMDDef extends nodered.NodeDef {
@@ -46,29 +46,28 @@ module.exports = (RED: nodered.NodeAPI) => {
 
 
     this.on('input', (msg: NodeMessageInFlow | Todo) => {
-      let returnMessage: Todo = {};
+      let returnPayload: Todo = {};
 
-      returnMessage.nodetype = 'inject'
-      returnMessage.injectType = 'CMD'
-      returnMessage.commandType = node.commandtype
+      returnPayload.nodetype = 'inject'
+      returnPayload.injectType = 'CMD'
+      returnPayload.commandType = node.commandtype
 
-      if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
+      if (msg.payload.addressSpaceItems && msg.payload.addressSpaceItems.length > 0) {
         let addressSpaceItem
-        for (addressSpaceItem of msg.addressSpaceItems) {
-          returnMessage.payload = {
-            nodeId: addressSpaceItem.nodeId
-          }
-          if (msg.payload.nodeId) {
-            this.send(msg)
-          }
+        for (addressSpaceItem of msg.payload.addressSpaceItems) {
+          returnPayload.nodeId = addressSpaceItem.nodeId
+        }
+        if (returnPayload.nodeId) {
+          this.send({
+            ...msg,
+            payload: returnPayload
+          })
         }
       } else {
         if (node.nodeId) {
-          returnMessage.payload = {
-            nodeId: node.nodeId
-          }
+          returnPayload.nodeId = node.nodeId
         }
-        this.send(returnMessage)
+        this.send({...msg, payload: returnPayload})
       }
     })
 
