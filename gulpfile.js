@@ -64,6 +64,12 @@ function web () {
     .pipe(gulp.dest('opcuaIIoT'))
 }
 
+function ts () {
+    var ts = require("gulp-typescript")
+    var tsProject = ts.createProject('tsconfig.json');
+    return tsProject.src().pipe(tsProject()).js.pipe(gulp.dest("dist"))
+}
+
 function nodejs () {
   const anchor = '// SOURCE-MAP-REQUIRED'
 
@@ -75,18 +81,18 @@ function nodejs () {
 }
 
 function doc (cb) {
-  return gulp.src(['README.md', 'src/**/*.js'], { read: false })
+  return gulp.src(['README.md', 'src/**/*.ts'], { read: false })
     .pipe(jsdoc(cb))
 }
 
 function code () {
-  return gulp.src('src/**/*.js')
+  return gulp.src('src/**/*.ts')
     .pipe(babel({ presets: ['@babel/env'] }))
     .pipe(gulp.dest('code'))
 }
 
 const docs = series(doc, docIcons, docImages)
-const build = series(wipe, web, nodejs, locale, code, publics, icons)
+const build = series(wipe, web, ts, locale, code, publics, icons)
 
 exports.docs = docs
 exports.clean = wipe
