@@ -52,6 +52,7 @@ import {
   filterListEntryByNodeId
 } from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
+import {BrowsePayload} from "./opcua-iiot-browser";
 
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
@@ -85,45 +86,12 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    const nodeIdToFilter = function (msg: FilterInputPayload): boolean {
-      const nodeList = buildNodeListFromClient(msg)
-
-      if (nodeList && nodeList.length) {
-        return !nodeList.some(function (element: Todo) {
-          const elementNodeId = element.nodeId || element
-          return elementNodeId.toString() === node.nodeId.toString()
-        })
-      }
-
-      return true
-    }
-
-    const isNodeIdNotToFindInAddressSpaceItems = function (payload: Todo) {
-      if (payload.addressSpaceItems) {
-        let filteredNodeIds = _.filter(payload.addressSpaceItems, function (entry: Todo) {
-          return entry.nodeId === node.nodeId
-        })
-
-        if (filteredNodeIds.length < 1) {
-          return true
-        }
-      } else {
-        if (payload.topic !== node.nodeId) { // TODO: that is very old and should be deleted
-          return true
-        }
-      }
-      return false
-    }
-
-    const messageIsToFilter = (payload: FilterInputPayload) => {
-      return nodeIdToFilter(payload) && isNodeIdNotToFindInAddressSpaceItems(payload)
-    }
-
     type FilterInputPayload = {
       statusCodes: Todo[]
       nodesToWrite: Todo[]
       nodetype: string
       value: any
+      browserResults?: Todo[]
       msg: Todo
     }
 
@@ -133,24 +101,27 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      if (!messageIsToFilter(msg.payload as FilterInputPayload)) {
-        coreFilter.internalDebugLog('filtering message on filter')
-        return
-      }
+      const payload = msg.payload as FilterInputPayload & BrowsePayload
+      const filtered = filterByType(payload)
+      const value =
+          node.justValue ?
+              // if justValue, return the filtered value of the input message
+              filterResult(payload) :
+              // otherwise return the value field of the payload
+              // The field considered 'value' is different for crawler and browsers
+              (filtered.value || filtered.crawlerResults || filtered.browserResults)
 
-      const payload = msg.payload as FilterInputPayload
-
-      const value = node.justValue ? filterResult(payload) : filterByType(payload) || payload.value
 
       const { msg: msgKey, ...restPayload } = payload;
 
       const outputPayload = {
         ...restPayload,
         filtertype: "filter",
-        filter: true,
         justValue: node.justValue,
         nodeId: node.nodeId,
         value,
+        ...filtered,
+        filter: true,
       }
 
       const outputMessage = {
@@ -188,7 +159,24 @@ module.exports = (RED: nodered.NodeAPI) => {
           }
       }
 
-      return result
+      return omitFalseyAndEmpty(result)
+    }
+
+    /**
+     * Removes empty arrays and falsey values from the object
+     */
+    const omitFalseyAndEmpty = <T>(object: Record<string, T[]>) => {
+      // return if null
+      if (!object) {
+        return object
+      }
+
+      Object.keys(object).forEach((key) => {
+        if (!object[key] || object[key].length === 0 ) {
+          delete object[key]
+        }
+      })
+      return object
     }
 
     const convertResult = (msg: FilterInputPayload, result: Todo) => {
@@ -310,7 +298,9 @@ module.exports = (RED: nodered.NodeAPI) => {
         result = result.value
       }
 
-      return result
+      return {
+        value: result
+      }
     }
 
     // Todo: This feels wrong
@@ -334,39 +324,49 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const filterByBrowserType = function (msg: Todo) {
-      let result = filterListByNodeId(node.nodeId, msg.payload.browserResults)
+    const filterByBrowserType = function (msg: BrowsePayload & Todo) {
+      const browserResults = filterListByNodeId(node.nodeId, msg.browserResults)
 
-      if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-        msg.addressSpaceItems = filterListByNodeId(node.nodeId, msg.addressSpaceItems)
+      const addressSpaceItems = (msg.addressSpaceItems && msg.addressSpaceItems.length) ?
+          filterListByNodeId(node.nodeId, msg.addressSpaceItems) : [];
+
+      const nodesToRead = (msg.nodesToRead && msg.nodesToRead.length) ?
+          filterListEntryByNodeId(node.nodeId, msg.nodesToRead): [];
+      const nodesToReadCount = (msg.nodesToRead && msg.nodesToRead.length) ?
+          nodesToRead.length: 0;
+
+      const addressItemsToRead = (msg.addressItemsToRead && msg.addressItemsToRead.length) ?
+          filterListByNodeId(node.nodeId, msg.addressItemsToRead): []
+      const addressItemsToReadCount = (msg.addressItemsToRead && msg.addressItemsToRead.length) ?
+          addressItemsToRead.length: 0
+
+      const addressItemsToBrowse = (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) ?
+          filterListByNodeId(node.nodeId, msg.addressItemsToBrowse) : []
+      const addressItemsToBrowseCount = (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) ?
+          addressItemsToBrowse.length : 0
+
+      return {
+        browserResults,
+        addressSpaceItems,
+        nodesToRead,
+        nodesToReadCount,
+        addressItemsToRead,
+        addressItemsToReadCount,
+        addressItemsToBrowse,
+        addressItemsToBrowseCount,
       }
-
-      if (msg.nodesToRead && msg.nodesToRead.length) {
-        msg.nodesToRead = filterListEntryByNodeId(node.nodeId, msg.nodesToRead)
-        msg.nodesToReadCount = msg.nodesToRead.length
-      }
-
-      if (msg.addressItemsToRead && msg.addressItemsToRead.length) {
-        msg.addressItemsToRead = filterListByNodeId(node.nodeId, msg.addressItemsToRead)
-        msg.addressItemsToReadCount = msg.addressItemsToRead.length
-      }
-
-      if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) {
-        msg.addressItemsToBrowse = filterListByNodeId(node.nodeId, msg.addressItemsToBrowse)
-        msg.addressItemsToBrowseCount = msg.addressItemsToBrowse.length
-      }
-
-      return result
     }
 
     const filterByCrawlerType = function (msg: Todo) {
-      let result = filterListByNodeId(node.nodeId, msg.payload.crawlerResults)
+      const crawlerResults = filterListByNodeId(node.nodeId, msg.crawlerResults)
 
-      if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
-        msg.addressItems = filterListByNodeId(node.nodeId, msg.addressSpaceItems)
+      const addressItems = (msg.addressSpaceItems && msg.addressSpaceItems.length) ?
+          filterListByNodeId(node.nodeId, msg.addressSpaceItems): []
+
+      return {
+        crawlerResults,
+        addressItems,
       }
-
-      return result
     }
 
     const convertDataType = function (result: Todo) {

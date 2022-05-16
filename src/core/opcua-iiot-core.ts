@@ -1096,17 +1096,10 @@ export function filterListEntryByNodeId(nodeId: Todo, list: Todo) {
 }
 
 export function filterListByNodeId(nodeId: Todo, list: Todo) {
-    let result: Todo[] = []
-
-    if (list && list.length) {
-        list.forEach((item: Todo) => {
-            if (item.nodeId === nodeId) {
-                result.push(item)
-            }
-        })
-    }
-
-    return result
+    return list.filter((item: Todo) => {
+        // if item.nodeId is null, item may itself be a nodeId
+        return (item.nodeId || item) === nodeId
+    })
 }
 
 export function isNodeTypeToFilterResponse(payload: Todo) {

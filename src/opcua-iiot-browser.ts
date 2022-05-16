@@ -146,14 +146,14 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
 
         const browse = function (rootNodeId: NodeId, msg: NodeMessageInFlow, depth: number, lists: Todo, callback: TodoVoidFunction) {
-            if (checkSessionNotValid(nodeConfig.iiot.opcuaSession, 'Browse')) {
+            if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'Browse')) {
                 return
             }
 
             coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + rootNodeId)
             let rootNode = 'list'
 
-            coreBrowser.browse(nodeConfig.iiot.opcuaSession, rootNodeId)
+            coreBrowser.browse(nodeConfig.connector.iiot.opcuaSession, rootNodeId)
                 .then(function (browserResults: Todo) {
                     if (browserResults.length) {
                         coreBrowser.detailDebugLog('Browser Result To String: ' + browserResults.toString())
@@ -237,7 +237,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
 
         const sendMessage = (rootNodeId: NodeId, depth: number, originMessage: NodeMessageInFlow, lists: Todo) => {
-
             if (!lists) {
                 coreBrowser.internalDebugLog('Lists Not Valid!')
                 if (nodeConfig.showErrors) {
@@ -302,7 +301,7 @@ module.exports = function (RED: nodered.NodeAPI) {
                 browseTopic: nodeConfig.browseTopic,
                 browserResultsCount: lists.browserResults.length,
                 endpoint: nodeConfig.connector?.endpoint,
-                session: (nodeConfig.iiot.opcuaSession) ? nodeConfig.iiot.opcuaSession.name : 'none'
+                session: (nodeConfig.connector.iiot.opcuaSession) ? nodeConfig.connector.iiot.opcuaSession.name : 'none'
             }
         }
 

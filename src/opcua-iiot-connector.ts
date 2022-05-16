@@ -282,7 +282,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.iiot.opcuaClient.connect(this.endpoint, async (err: Error | undefined): Promise<void> => {
         if (isInitializedIIoTNode(this) && !isUndefined(this.iiot)) {
           if (err) {
-            this.iiot.stateMachine.lock().stopopcua()
+            this.iiot?.stateMachine.lock().stopopcua()
             handleError(err)
           } else {
             internalDebugLog('Client Is Connected To ' + this.endpoint)
@@ -540,7 +540,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
 
       coreConnector.logSessionInformation(this)
-      if (this.iiot.stateMachine && this.iiot.stateMachine.getMachineState() !== 'SESSIONRESTART') {
+      if (this.iiot?.stateMachine && this.iiot.stateMachine.getMachineState() !== 'SESSIONRESTART') {
         this.iiot.stateMachine.lock().sessionclose()
       }
     }
@@ -897,7 +897,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       onAlias('opcua_client_not_ready', () => {
         if (isInitializedIIoTNode(this.iiot) && this.iiot.stateMachine.getMachineState() !== 'END') {
-          this.iiot.resetBadSession()
+          resetBadSession()
         }
       })
 
