@@ -157,8 +157,8 @@ module.exports = (RED: NodeAPI) => {
       return (nodeConfig.negateFilter) ? !result : result
     }
 
-    const crawl = function (session: Todo, msg: BrowserInputPayloadLike, statusHandler: (status: string | NodeStatus) => void) {
-      if (checkSessionNotValid(nodeConfig.iiot.opcuaSession, 'Crawler')) {
+    const crawl = async (session: Todo, msg: BrowserInputPayloadLike, statusHandler: (status: string | NodeStatus) => void) => {
+      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'Crawler')) {
         return
       }
 
@@ -167,13 +167,9 @@ module.exports = (RED: NodeAPI) => {
       if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter) {
         nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'crawling', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
       }
-      coreBrowser.crawl(session, nodeConfig.browseTopic, msg)
-        .then(function (result: Todo) {
-          coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          sendMessage(result.message, filterCrawlerResults(result.crawlerResult))
-        }).catch(function (err: Todo) {
-          coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
-        })
+
+      coreBrowser.crawl(session, nodeConfig.browseTopic, msg, getSendWrapper(msg))
+
     }
 
     const callError = (err: Error, msg: NodeMessageInFlow) => {
@@ -193,15 +189,21 @@ module.exports = (RED: NodeAPI) => {
         })
     }
 
+    const getSendWrapper = (msg: BrowserInputPayloadLike) => {
+      return (result: Error | Todo) => {
+        if (result instanceof Error) {
+          coreBrowser.browseErrorHandling(nodeConfig, result, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
+        } else {
+          coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
+          sendMessage(msg, filterCrawlerResults(result.crawlerResult))
+        }
+      }
+    }
+
     const crawlForResults = function (session: NodeCrawlerClientSession, msg: BrowserInputPayloadLike) {
-      msg.addressSpaceItems?.map((entry) => {
-        coreBrowser.crawl(session, entry.nodeId, msg)
-          .then(function (result: Todo) {
-            coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-            sendMessage(result.message, filterCrawlerResults(result.crawlerResult))
-          }).catch(function (err: Todo) {
-            coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
-          })
+      msg.addressSpaceItems?.forEach((entry) => {
+        coreBrowser.crawl(session, entry.nodeId, msg, getSendWrapper(msg))
+
       })
     }
 
@@ -240,7 +242,7 @@ module.exports = (RED: NodeAPI) => {
         if (nodeConfig.connector) {
           msg.payload.endpoint = nodeConfig.connector.endpoint
         }
-        msg.payload.session = nodeConfig.iiot.opcuaSession.name || 'none'
+        msg.payload.session = nodeConfig.connector.iiot.opcuaSession.name || 'none'
       }
 
       nodeConfig.iiot.messageList.push(msg)
@@ -264,12 +266,12 @@ module.exports = (RED: NodeAPI) => {
     }
 
     const startCrawling = async (msg: BrowserInputPayloadLike) => {
-      if (!nodeConfig.iiot.opcuaSession) {
+      if (!nodeConfig.connector.iiot.opcuaSession) {
         nodeConfig.connector.iiot.stateMachine.initopcua()
         const returnCode = await nodeConfig.connector.functions.waitForExist(nodeConfig.connector.iiot, 'opcuaSession').catch((err: Error) => {return -1})
       }
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
-        crawl(nodeConfig.iiot.opcuaSession, msg, statusHandler)
+        crawl(nodeConfig.connector.iiot.opcuaSession, msg, statusHandler)
 
       } else {
         if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
@@ -298,7 +300,6 @@ module.exports = (RED: NodeAPI) => {
     }
 
     this.on('input', function (msg: NodeMessageInFlow) {
-      console.log('msg received in crawler')
       nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic((msg.payload as BrowserInputPayloadLike), nodeConfig)
       startCrawling((msg.payload as BrowserInputPayloadLike)).finally()
     })

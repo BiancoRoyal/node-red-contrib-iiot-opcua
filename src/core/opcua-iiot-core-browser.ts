@@ -19,6 +19,9 @@ import {NodeMessageInFlow} from "@node-red/registry";
 import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
 import {AddressSpaceItem} from "../types/core";
 import {NodeIdLike} from "node-opcua-nodeid";
+import {ResponseCallback} from "node-opcua-client";
+import {DataValue} from "node-opcua-data-value";
+import {ErrorCallback} from "node-opcua-status-code";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
@@ -107,12 +110,9 @@ const createCrawler = function (session: NodeCrawlerClientSession) {
   return new NodeCrawler(session)
 }
 
-const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg: BrowserInputPayloadLike) => {
-  return new Promise(
-    async (resolve, reject) => {
+const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg: BrowserInputPayloadLike, sendWrapper: (result: Error | Todo) => void) => {
       if (!nodeIdToCrawl) {
-        reject(new Error('NodeId To Crawl Not Valid'))
-        return
+        return new Error('NodeId To Crawl Not Valid')
       }
       const message = Object.assign({}, msg)
       const crawler = coreBrowser.createCrawler(session)
@@ -125,16 +125,33 @@ const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg
         }
       }
       try {
-        await crawler.crawl(nodeIdToCrawl, data, function (err) {
+
+        const crawlback: ErrorCallback = (err) => {
           if (err) {
-            reject(err)
+            sendWrapper(err)
           } else {
-            resolve({rootNodeId: nodeIdToCrawl, message, crawlerResult})
+            sendWrapper({
+              crawlerResult,
+              rootNodeId: nodeIdToCrawl
+            })
           }
-        })
+        }
+
+        const readCallback: ResponseCallback<DataValue[]> = (err, response) => {
+          if (err) {
+            sendWrapper(err)
+          } else if (response && response.some((res) => res.statusCode?.name === 'BadNodeIdUnknown')) {
+            sendWrapper(new Error('NodeId Not Valid: Please enter a valid NodeId, under the "OPC UA Nodes" tab of the Inject Node configuration.'))
+          } else {
+            crawler.crawl(nodeIdToCrawl, data, crawlback)
+          }
+        }
+
+        verifyNodeExists(session, nodeIdToCrawl, readCallback)
+
       } catch (err) {
+        return err
       }
-    })
 }
 
 const crawlAddressSpaceItems = function (session: Todo, msg: Todo) {
@@ -268,6 +285,10 @@ const browseErrorHandling = function (
   if (showStatusActivities && oldStatusParameter) {
     node.oldStatusParameter = setNodeStatusTo(node, 'error', oldStatusParameter, showStatusActivities, statusHandler)
   }
+}
+
+const verifyNodeExists = (session: NodeCrawlerClientSession, nodeId: Todo, endCallback: ResponseCallback<DataValue[]>) => {
+  session.read([{nodeId: nodeId}], endCallback)
 }
 
 const coreBrowser = {
