@@ -111,6 +111,7 @@ const browseAddressSpaceItems = function (session: OPCUASession, addressSpaceIte
 
 
       if (browseOptions.length === 0) {
+        resolve([]);
         return;
       }
       session.browse(browseOptions, (err: Error | null, browseResult?: BrowseResult[]) => {
