@@ -113,10 +113,11 @@ module.exports = (RED: NodeAPI) => {
 
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig: Todo = {
-      ...this,
-      ...coreBrowser.initBrowserNode()
-    }
+    let nodeConfig: Todo = this;
+    const {iiot, browseTopic} = coreBrowser.initBrowserNode();
+    nodeConfig.browseTopic = browseTopic;
+    nodeConfig.iiot = iiot;
+
 
     nodeConfig.iiot.delayMessageTimer = []
 
@@ -297,7 +298,7 @@ module.exports = (RED: NodeAPI) => {
     }
 
     this.on('input', function (msg: NodeMessageInFlow) {
-
+      console.log('msg received in crawler')
       nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic((msg.payload as BrowserInputPayloadLike), nodeConfig)
       startCrawling((msg.payload as BrowserInputPayloadLike)).finally()
     })

@@ -15,6 +15,8 @@ import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {NodeStatus} from "node-red";
 import {VM} from "vm2";
 import {OPCUAServer} from "node-opcua";
+import {logger} from "./core/opcua-iiot-core-connector";
+import internalDebugLog = logger.internalDebugLog;
 
 type OPCUAIIoTFlexServer = nodered.Node & {
   on(event: 'shutdown', callback: () => void): void
@@ -97,7 +99,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     /* istanbul ignore next */
     // @ts-ignore
     const constructAddressSpaceScript = function (server: Todo, constructAddressSpaceScript, eventObjects) {
-      server.internalDebugLog('Init Function Block Flex Server')
+      internalDebugLog('Init Function Block Flex Server')
     }
 
     vm.run('node.iiot.constructAddressSpaceScript = ' + config.addressSpaceScript)
@@ -116,20 +118,14 @@ module.exports = (RED: nodered.NodeAPI) => {
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    const createServer = (serverOptions: Todo) => {
+    const createServer = async (serverOptions: Todo) => {
       /* istanbul ignore next */
       if (RED.settings.verbose) {
         coreServer.flexDetailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
       node.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
       node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-      console.log("Create")
-      try {
-        node.iiot.opcuaServer.initialize()
-      } catch(err: Todo) {
-        console.log(err)
-      }
-      console.log("heyyyy bestie")
+      await node.iiot.opcuaServer.initialize()
       postInitialize()
       coreServer.setOPCUAServerListener(node)
     }
@@ -139,10 +135,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       let serverOptions = buildServerOptions()
       serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
       try {
-        console.log('initNewServer')
         createServer(serverOptions)
       } catch (err: any) {
-        console.log("catch", err)
         /* istanbul ignore next */
         this.emit('server_create_error')
         coreServer.flexInternalDebugLog(err.message)
@@ -152,10 +146,8 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const postInitialize = () => {
       node.iiot.eventObjects = {} // event objects should stay in memory
-      console.log("in the finisher")
-      coreServer.constructAddressSpaceFromScript(node.iiot.opcuaServer, node.iiot.constructAddressSpaceScript, node.iiot.eventObjects)
+      coreServer.constructAddressSpaceFromScript(node.iiot.opcuaServer, constructAddressSpaceScript, node.iiot.eventObjects)
         .then(() => {
-          console.log("hi there")
           coreServer.start(node.iiot.opcuaServer, node).then(() => {
             node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             this.emit('server_running')
@@ -166,7 +158,6 @@ module.exports = (RED: nodered.NodeAPI) => {
             coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
           })
         }).catch(function (err: Error) {
-          console.log("in this catch here", err)
           /* istanbul ignore next */
           coreServer.handleServerError(node, err, { payload: 'Server Address Space Failure' })
         })

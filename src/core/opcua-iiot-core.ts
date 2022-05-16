@@ -489,7 +489,6 @@ export function convertDataValueByDataType(value: any , dataType: DataTypeInput)
                 }
                 break;
             default:
-                console.log("default case")
                 logger.internalDebugLog('convertDataValue unused DataType: ' + dataType)
                 if (!isNotDefined(value)) {
                     convertedValue = value

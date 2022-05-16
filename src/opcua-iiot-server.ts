@@ -13,6 +13,7 @@ import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {isInitializedIIoTNode, resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {NodeStatus} from "node-red";
+import {OPCUAServer} from "node-opcua";
 
 type OPCUAIIoTServer =  nodered.Node & {
   asoDemo: string
@@ -50,13 +51,14 @@ module.exports = (RED: nodered.NodeAPI) => {
       return coreServer.setDiscoveryOptions(node, serverOptions)
     }
 
-    const createServer = (serverOptions: Todo) => {
+    const createServer = async (serverOptions: Todo) => {
       if (RED.settings.verbose) {
         coreServer.detailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
       }
-      node.iiot.opcuaServer = coreServer.createServerObject(node, serverOptions)
+      node.iiot.opcuaServer = coreServer.createServerObject(node.maxAllowedSubscriptionNumber, serverOptions)
       node.oldStatusParameter = setNodeStatusTo(node, 'waiting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-      node.iiot.opcuaServer.initialize(postInitialize)
+      await node.iiot.opcuaServer.initialize()
+      postInitialize()
       coreServer.setOPCUAServerListener(node)
     }
 
@@ -87,12 +89,12 @@ module.exports = (RED: nodered.NodeAPI) => {
               .then(() => {
                 node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
                 this.emit('server_running')
-              }).catch(function (err: Error) {
+              }).catch((err: Error) => {
                 if (isInitializedIIoTNode(node)) {
                   node.iiot.opcuaServer = null
                 }
-                node.emit('server_start_error')
-              node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+                this.emit('server_start_error')
+                node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
                 coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
               })
           }
@@ -159,7 +161,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.on('close', (done: () => void) => {
-      node.iiot.closeServer(() => {
+      closeServer(() => {
         coreServer.internalDebugLog('Close Server Node')
         resetIiotNode(node)
         done()

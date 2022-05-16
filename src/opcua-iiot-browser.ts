@@ -113,10 +113,11 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         this.connector = RED.nodes.getNode(config.connector)
 
-        let nodeConfig: Todo = {
-            ...this,
-            ...coreBrowser.initBrowserNode()
-        }
+        let nodeConfig: Todo = this;
+        const {iiot, browseTopic} = coreBrowser.initBrowserNode();
+        nodeConfig.browseTopic = browseTopic;
+        nodeConfig.iiot = iiot;
+
         nodeConfig.iiot.delayMessageTimer = []
 
         const extractDataFromBrowserResults = (browserResultToFilter: Todo, lists: Todo) => {
@@ -367,7 +368,6 @@ module.exports = function (RED: nodered.NodeAPI) {
             if (!checkConnectorState(nodeConfig, msg, 'Browser', errorHandler, emitHandler, statusHandler)) {
                 return
             }
-
             if (nodeConfig.showStatusActivities) {
                 nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'browsing', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
             }

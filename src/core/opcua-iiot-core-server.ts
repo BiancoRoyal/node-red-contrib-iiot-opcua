@@ -64,21 +64,25 @@ const simulateVariation = function (data: Todo) {
 
 const constructAddressSpaceFromScript = function (server: Todo, constructAddressSpaceScript: Todo, eventObjects: Todo) {
   internalDebugLog('Construct Address Space From Script')
-  return new Promise(
-    function (resolve, reject) {
-      if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
-        try {
-          constructAddressSpaceScript(server, server.engine.addressSpace, eventObjects, resolve)
-        } catch (err) {
-          reject(err)
-        }
-      } else {
-        reject(new Error('Wrong Parameters Construct AddressSpace From Script'))
-      }
-    })
+  // TODO: constructAddressSpaceScript is not yet implemented
+  return constructAddressSpace(server, true)
+  //
+  // return new Promise(
+  //   function (resolve, reject) {
+  //     if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
+  //       try {
+  //         constructAddressSpaceScript(server, server.engine.addressSpace, eventObjects, resolve)
+  //       } catch (err) {
+  //         console.log("catchy catchy")
+  //         reject(err)
+  //       }
+  //     } else {
+  //       reject(new Error('Wrong Parameters Construct AddressSpace From Script'))
+  //     }
+  //   })
 }
 
-const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
+const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
   return new Promise(
     function (resolve, reject) {
       if (!server) {
@@ -86,14 +90,16 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
         return
       }
 
-      const {addressSpace} = server.engine
+      console.log(server.engine._internalState)
 
-      const namespace = addressSpace?.getOwnNamespace()
+      const addressSpace = server.engine?.addressSpace
 
       if (!addressSpace) {
         reject(new Error('No AddressSpace From OPC UA Server Engine'))
         return
       }
+
+      const namespace = addressSpace.getOwnNamespace()
 
       let view = namespace.addView({
         organizedBy: addressSpace?.rootFolder.views,
@@ -103,11 +109,12 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
           new LocalizedText({ text: 'Bianco Royal Sicht', locale: 'de-DE' })
         ]
       })
-
+      console.log("AAAAAAAAAAAA")
       if (!asoDemo) {
-        resolve('output')
+        console.log("if")
+        resolve(null)
       } else {
-
+        console.log("else")
         let data = {}
         constructAlarmAddressSpaceDemo(data, addressSpace)
 
@@ -117,6 +124,9 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
         }, 500)
 
         intervalList.push(simulatorInterval)
+
+        console.log(addressSpace.rootFolder?.objects)
+
         let vendorName = namespace.addObject({
           organizedBy: addressSpace.rootFolder.objects,
           typeDefinition: 'FolderType',
@@ -412,12 +422,10 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
               {
                 name: 'barks',
                 dataType: 'UInt32',
-                arrayType: VariantArrayType.Scalar,
                 description: { text: 'specifies the number of time I should bark' }
               }, {
                 name: 'volume',
                 dataType: 'UInt32',
-                arrayType: VariantArrayType.Scalar,
                 description: { text: 'specifies the sound volume [0 = quiet ,100 = loud]' }
               }
             ],
@@ -425,7 +433,6 @@ const constructAddressSpace = function (server: Todo, asoDemo: Todo) {
             outputArguments: [{
               name: 'Barks',
               dataType: 'String',
-              arrayType: VariantArrayType.Array,
               description: { text: 'the generated barks' },
               valueRank: 1
             }]
@@ -503,7 +510,7 @@ const start = function (server: Todo, node: Todo) {
         reject(new Error('Node Not Valid To Start'))
         return
       }
-
+      console.log("starting server")
       server.start(function (err: Error) {
         if (err) {
           reject(err)
@@ -889,8 +896,8 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
   }
 }
 
-const createServerObject = function (node: Todo, serverOptions: Todo) {
-  OPCUAServer.MAX_SUBSCRIPTION = node.maxAllowedSubscriptionNumber
+const createServerObject = function (maxSubscriptions: number, serverOptions: Todo) {
+  OPCUAServer.MAX_SUBSCRIPTION = maxSubscriptions
   return new OPCUAServer(serverOptions)
 }
 
@@ -916,6 +923,8 @@ const coreServer = {
   flexInternalDebugLog,
   flexDetailDebugLog,
 
+  maxTimeInterval,
+  timeInterval,
   simulatorInterval,
 
   simulateVariation,
