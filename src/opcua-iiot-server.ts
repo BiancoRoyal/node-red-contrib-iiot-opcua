@@ -9,10 +9,12 @@
 'use strict'
 
 import * as nodered from "node-red";
+import {NodeStatus} from "node-red";
 import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {isInitializedIIoTNode, resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
-import {NodeStatus} from "node-red";
+import {logger} from "./core/opcua-iiot-core-connector";
+import internalDebugLog = logger.internalDebugLog;
 
 type OPCUAIIoTServer = nodered.Node & {
   asoDemo: boolean
@@ -51,7 +53,14 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
       } catch (err) {
         this.emit('server_create_error')
-        coreServer.handleServerError(node, err as Error, {payload: 'Server Failure! Please, check the server settings!'})
+        handleServerError(err as Error, {payload: 'Server Failure! Please, check the server settings!'})
+      }
+    }
+
+    const handleServerError = (err: Error, msg: Todo) => {
+      internalDebugLog(err)
+      if (node.showErrors) {
+        this.error(err, msg)
       }
     }
 
@@ -63,7 +72,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreServer.constructAddressSpace(node.iiot.opcuaServer, node.asoDemo)
         .then((err: Todo) => {
           if (err) {
-            coreServer.handleServerError(node, err, {payload: 'Server Address Space Problem'})
+            handleServerError(err, {payload: 'Server Address Space Problem'})
           } else {
             coreServer.start(node.iiot.opcuaServer, node)
               .then(() => {
@@ -75,11 +84,11 @@ module.exports = (RED: nodered.NodeAPI) => {
               }
               this.emit('server_start_error')
               node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-              coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
+              handleServerError(err, {payload: 'Server Start Failure'})
             })
           }
         }).catch(function (err: Error) {
-        coreServer.handleServerError(node, err, {payload: 'Server Address Space Failure'})
+        handleServerError(err, {payload: 'Server Address Space Failure'})
       })
     }
 
@@ -87,7 +96,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('input', (msg: Todo) => {
       if (!node.iiot.opcuaServer || !node.iiot.initialized) {
-        coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
+        handleServerError(new Error('Server Not Ready For Inputs'), msg)
         return
       }
 
@@ -99,7 +108,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           executeOpcuaCommand(msg)
           break
         default:
-          coreServer.handleServerError(node, new Error('Unknown Inject Type ' + msg.injectType), msg)
+          handleServerError(new Error('Unknown Inject Type ' + msg.injectType), msg)
       }
 
       this.send(msg)
@@ -108,30 +117,38 @@ module.exports = (RED: nodered.NodeAPI) => {
     const changeAddressSpace = (msg: Todo) => {
       // TODO: refactor to work with the new OPC UA type list and option to set add type
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
-        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false)
+        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false, handleServerError)
       } else if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Property') > -1) {
-        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, true)
+        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, true, handleServerError)
       } else {
-        coreServer.addObjectToAddressSpace(node, msg, msg.payload.objecttype)
+        coreServer.addObjectToAddressSpace(node, msg, msg.payload.objecttype, handleServerError)
       }
     }
 
     const executeOpcuaCommand = (msg: Todo) => {
-      switch (msg.commandType) {
+      switch (msg.payload.commandType) {
         case 'restart':
           restartServer()
           break
         case 'deleteNode':
-          coreServer.deleteNOdeFromAddressSpace(node, msg)
+          coreServer.deleteNodeFromAddressSpace(node, msg, handleServerError)
           break
         default:
-          coreServer.handleServerError(node, new Error('Unknown OPC UA Command'), msg)
+          handleServerError(new Error('Unknown OPC UA Command'), msg)
       }
+    }
+
+    const sendHandler = (msg: Todo) => {
+      this.send(msg)
+    }
+
+    const emitHandler = (eventName: string | symbol, ...args: any[]) => {
+      this.emit(eventName, ...args)
     }
 
     const restartServer = () => {
       coreServer.internalDebugLog('Restart OPC UA Server')
-      coreServer.restartServer(node, statusHandler)
+      coreServer.restartServer(node, statusHandler, emitHandler, sendHandler)
 
       if (node.iiot.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')

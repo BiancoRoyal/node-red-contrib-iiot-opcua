@@ -119,7 +119,14 @@ module.exports = (RED: nodered.NodeAPI) => {
         /* istanbul ignore next */
         this.emit('server_create_error')
         coreServer.flexInternalDebugLog(err.message)
-        coreServer.handleServerError(node, err, {payload: 'Flex Server Failure! Please, check the server settings!'})
+        handleServerError(err, {payload: 'Flex Server Failure! Please, check the server settings!'})
+      }
+    }
+
+    const handleServerError = (err: Error, msg: Todo) => {
+      coreServer.internalDebugLog(err)
+      if (node.showErrors) {
+        this.error(err, msg)
       }
     }
 
@@ -134,11 +141,11 @@ module.exports = (RED: nodered.NodeAPI) => {
             /* istanbul ignore next */
             this.emit('server_start_error')
             node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-            coreServer.handleServerError(node, err, {payload: 'Server Start Failure'})
+            handleServerError(err, {payload: 'Server Start Failure'})
           })
         }).catch(function (err: Error) {
         /* istanbul ignore next */
-        coreServer.handleServerError(node, err, {payload: 'Server Address Space Failure'})
+        handleServerError(err, {payload: 'Server Address Space Failure'})
       })
     }
 
@@ -146,14 +153,14 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('input', function (msg: Todo) {
       if (!node.iiot.opcuaServer || !node.iiot.initialized) {
-        coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
+        handleServerError(new Error('Server Not Ready For Inputs'), msg)
         return
       }
 
       if (msg.injectType === 'CMD') {
         executeOpcuaCommand(msg)
       } else {
-        coreServer.handleServerError(node, new Error('Unknown Flex Inject Type ' + msg.injectType), msg)
+        handleServerError(new Error('Unknown Flex Inject Type ' + msg.injectType), msg)
       }
     })
 
@@ -162,13 +169,21 @@ module.exports = (RED: nodered.NodeAPI) => {
         restartServer()
         this.send(msg)
       } else {
-        coreServer.handleServerError(node, new Error('Unknown Flex OPC UA Command'), msg)
+        handleServerError(new Error('Unknown Flex OPC UA Command'), msg)
       }
+    }
+
+    const sendHandler = (msg: Todo) => {
+      this.send(msg)
+    }
+
+    const emitHandler = (eventName: string | symbol, ...args: any[]) => {
+      this.emit(eventName, ...args)
     }
 
     const restartServer = function () {
       coreServer.flexInternalDebugLog('Restart OPC UA Server')
-      coreServer.restartServer(node, statusHandler)
+      coreServer.restartServer(node, statusHandler, emitHandler, sendHandler)
 
       if (node.iiot.opcuaServer) {
         coreServer.flexInternalDebugLog('OPC UA Server restarted')
