@@ -45,7 +45,6 @@ describe('OPC UA Core Server', function () {
       const run = async () => {
         await opcuaserver.initialize()
         coreServer.constructAddressSpace(opcuaserver, true).then(() => {
-          console.log('then')
           done()
         })
       }
@@ -58,7 +57,6 @@ describe('OPC UA Core Server', function () {
           coreServer.constructAddressSpace(opcuaserver, true).then(function () {
             coreServer.timeInterval = coreServer.maxTimeInterval
             coreServer.simulateVariation({})
-            console.log(coreServer.timeInterval)
             expect(coreServer.timeInterval).toBe(500000)
             done()
           })

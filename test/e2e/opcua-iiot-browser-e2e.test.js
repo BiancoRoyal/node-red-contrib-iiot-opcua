@@ -664,6 +664,7 @@ describe('OPC UA Browser node e2e Testing', function () {
     it('should verify browser items as result', function (done) {
       helper.load(browseNodesToLoad, testBrowseFlow, function () {
         let n5 = helper.getNode('n5f1')
+        let n1 = helper.getNode('n1f1')
         n5.on('input', function (msg) {
           console.log(msg)
           expect(msg.payload.browserResults).toBeDefined()
@@ -671,6 +672,7 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.browserResults.length).toBe(15)
           done()
         })
+        n1.receive({payload: {value: 69}})
       })
     })
 

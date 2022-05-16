@@ -818,7 +818,6 @@ describe('OPC UA Crawler node Testing', function () {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFlow, function () {
         let n4 = helper.getNode('n4f3')
         n4.on('input', function (msg) {
-          console.log(msg.payload)
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBe(undefined)
 

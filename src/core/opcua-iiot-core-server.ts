@@ -73,7 +73,6 @@ const constructAddressSpaceFromScript = function (server: Todo, constructAddress
   //       try {
   //         constructAddressSpaceScript(server, server.engine.addressSpace, eventObjects, resolve)
   //       } catch (err) {
-  //         console.log("catchy catchy")
   //         reject(err)
   //       }
   //     } else {
@@ -89,8 +88,6 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
         reject(new Error('Server Not Valid To Construct Address Space'))
         return
       }
-
-      console.log(server.engine._internalState)
 
       const addressSpace = server.engine?.addressSpace
 
@@ -109,12 +106,9 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           new LocalizedText({ text: 'Bianco Royal Sicht', locale: 'de-DE' })
         ]
       })
-      console.log("AAAAAAAAAAAA")
       if (!asoDemo) {
-        console.log("if")
         resolve(null)
       } else {
-        console.log("else")
         let data = {}
         constructAlarmAddressSpaceDemo(data, addressSpace)
 
@@ -125,7 +119,6 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
 
         intervalList.push(simulatorInterval)
 
-        console.log(addressSpace.rootFolder?.objects)
 
         let vendorName = namespace.addObject({
           organizedBy: addressSpace.rootFolder.objects,
@@ -510,7 +503,6 @@ const start = function (server: Todo, node: Todo) {
         reject(new Error('Node Not Valid To Start'))
         return
       }
-      console.log("starting server")
       server.start(function (err: Error) {
         if (err) {
           reject(err)

@@ -274,14 +274,10 @@ module.exports = function (RED: nodered.NodeAPI) {
         return
       }
 
-      // console.log(Object.keys(this.iiot))
       //
-      // if (this.iiot.initialzed) console.log('already initialized')
       // this.iiot.initialized = true;
 
-      // console.log(this.iiot.stateMachine.getMachineState());
       // console.trace(this.endpoint);
-      // console.log(this.iiot.opcuaClientOptions)
 
       this.iiot.opcuaClient.connect(this.endpoint, async (err: Error | undefined): Promise<void> => {
         if (isInitializedIIoTNode(this) && !isUndefined(this.iiot)) {
@@ -542,7 +538,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         return
       }
 
-      console.log(this.iiot.stateMachine)
 
       coreConnector.logSessionInformation(this)
       if (this.iiot.stateMachine && this.iiot.stateMachine.getMachineState() !== 'SESSIONRESTART') {
@@ -912,7 +907,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         this.iiot.stateMachine.idle().initopcua();
       }
       else {
-        console.log('cant start fsm')
       }
     }
 
@@ -1153,7 +1147,6 @@ module.exports = function (RED: nodered.NodeAPI) {
   })
 
   RED.httpAdmin.get('/opcuaIIoT/list/FilterTypes', RED.auth.needsPermission('opcuaIIoT.list.filterids'), function (req, res) {
-    console.log('request filter types', req)
     const resultTypeList = [
     { name: 'dataType', label: 'Data Type' },
     { name: 'dataValue', label: 'Data Value' },

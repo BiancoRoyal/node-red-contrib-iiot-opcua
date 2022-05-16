@@ -234,7 +234,6 @@ describe('OPC UA Core', function () {
 
     it('should return array of nodes to read in payload', function (done) {
       const result = core.buildNodesToRead({ nodesToRead: ['ns=4;s=TestReadWrite'] })
-      console.log(result)
       expect(result).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
@@ -269,7 +268,6 @@ describe('OPC UA Core', function () {
       core.setNodeInitalState('INITOPCUA', node, () => null)
       expect(node.oldStatusParameter).to.deep.equal(result)
       done()
-      // console.log(node.oldStatusParameter);
     })
 
     it('should set node initial state open', function (done) {
@@ -327,7 +325,6 @@ describe('OPC UA Core', function () {
       const node = {}
       const result = { fill: 'yellow', shape: 'ring', text: 'unlocked' }
       core.setNodeInitalState('UNLOCKED', node)
-      console.log(node.oldStatusParameter)
       expect(node.oldStatusParameter).to.deep.equal(result)
       done()
     })
@@ -514,7 +511,6 @@ describe('OPC UA Core', function () {
       let dataTypeOPCUA = DataType.NodeId
       let value = 'test'
       let variantFromString = core.convertDataValueByDataType(value, 'NodeIdType')
-      console.log(variantFromString)
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
       expect(variantFromString).to.deep.equal('test')
       expect(variantFromObject).to.deep.equal('test')
@@ -724,7 +720,6 @@ describe('OPC UA Core', function () {
     it('should convert Unknown', function (done) {
       let value = false
       let variantFromString = core.convertDataValueByDataType(value, 'Unknown')
-      console.log(variantFromString)
       let variantFromObject = core.convertDataValueByDataType(value, null)
       assert.equal(variantFromString, false)
       assert.equal(variantFromObject, false)

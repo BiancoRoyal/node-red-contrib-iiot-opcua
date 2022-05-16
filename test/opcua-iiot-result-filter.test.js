@@ -391,7 +391,6 @@ describe('OPC UA Result Filter node Testing', function () {
         let n6 = helper.getNode('n6rff2')
         let n5 = helper.getNode('n5rff2')
         n6.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload.nodeId).toBe('ns=1;s=Pressure')
           expect(msg.payload.value).toBe(16.04)
           expect(msg.topic).toBe('TestTopic')
@@ -412,7 +411,6 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowWithPrecisionPayload, function () {
         let n6 = helper.getNode('n6rff3')
         n6.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload.nodeId).toBe('ns=1;s=Pressure')
           let expectedResult = Number.parseFloat('16.041979').toPrecision(2)
           expectedResult = parseFloat(expectedResult)
@@ -510,7 +508,6 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
         let n6 = helper.getNode('n6rff5')
         n6.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload.nodeId).toBe('ns=1;s=Pressure')
           expect(msg.payload.value).toBe(0.37883857546881394)
           expect(msg.topic).toBe('TestTopic')
@@ -546,7 +543,6 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], writeTestValueCheckFlowPayload, function () {
         let n6 = helper.getNode('n6rff5')
         n6.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload.nodeId).toBe('ns=1;s=Pressure')
           expect(msg.payload.value).toBe(0.38)
           expect(msg.topic).toBe('TestTopic')

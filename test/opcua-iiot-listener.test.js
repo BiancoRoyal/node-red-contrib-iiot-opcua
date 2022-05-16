@@ -74,7 +74,6 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          console.log(nodeUnderTest)
           nodeUnderTest.iiot.stateMachine.endsub()
           nodeUnderTest.functions.createSubscription({ payload: {} })
           done()

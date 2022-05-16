@@ -97,7 +97,6 @@ describe('OPC UA Event node Unit Testing', function () {
       helper.load([injectNode, inputNode], testEventNodeFlow, function () {
         let n4 = helper.getNode('n4evf1')
         n4.on('input', function (msg) {
-          // console.log(msg)
           expect(msg.payload.eventType).toBeDefined()
           expect(msg.payload.uaEventFilter).toBeDefined()
           expect(msg.payload.uaEventFields).toBeDefined()

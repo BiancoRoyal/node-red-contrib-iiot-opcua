@@ -10,6 +10,9 @@
 import * as nodered from "node-red";
 import {Todo, TodoBianco} from "./types/placeholders";
 import {NodeMessageInFlow} from "node-red";
+import {logger} from "./core/opcua-iiot-core-connector";
+import internalDebugLog = logger.internalDebugLog;
+import {resetIiotNode} from "./core/opcua-iiot-core";
 interface OPCUAIIoTCMD extends nodered.Node {
   commandtype: string
   nodeId: string
@@ -26,9 +29,9 @@ interface OPCUAIIoTCMDDef extends nodered.NodeDef {
  *
  * @param RED
  */
+
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  let core = require('./core/opcua-iiot-core')
 
   function OPCUAIIoTCMD (this: OPCUAIIoTCMD, config: OPCUAIIoTCMDDef) {
     RED.nodes.createNode(this, config)
@@ -39,7 +42,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     let node = this
 
 
-    node.on('input', function (msg: NodeMessageInFlow | Todo) {
+    this.on('input',  (msg: NodeMessageInFlow | Todo) => {
       let returnMessage: Todo = {};
 
       returnMessage.nodetype = 'inject'
@@ -53,7 +56,7 @@ module.exports = (RED: nodered.NodeAPI) => {
             nodeId: addressSpaceItem.nodeId
           }
           if (msg.payload.nodeId) {
-            node.send(msg)
+            this.send(msg)
           }
         }
       } else {
@@ -62,13 +65,13 @@ module.exports = (RED: nodered.NodeAPI) => {
             nodeId: node.nodeId
           }
         }
-        node.send(msg)
+        this.send(msg)
       }
     })
 
-    node.on('close', (done: () => void) => {
-      core.internalDebugLog('Close CMD Node')
-      core.resetBiancoNode(node)
+    this.on('close', (done: () => void) => {
+      internalDebugLog('Close CMD Node')
+      resetIiotNode(node)
       done()
     })
   }
