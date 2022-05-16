@@ -59,7 +59,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     //Create and Start the Discovery Server
     const startDiscoveryServer = async () => {
       // Access the certificates created by installation
-      const certificateFolder = '../certificates'
+      const certificateFolder = process.env.CERTIFICATES || '../certificates';
 
       const serverCertificateManager = new OPCUACertificateManager({
         automaticallyAcceptUnknownCertificate: true,
