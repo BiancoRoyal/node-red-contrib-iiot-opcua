@@ -14,10 +14,13 @@ import * as os from 'os'
 import * as underscore from 'underscore'
 
 import * as nodeOPCUAId from 'node-opcua-nodeid'
+import {NodeIdLike} from 'node-opcua-nodeid'
 import {
-  BrowseMessage, DataTypeInput,
+  BrowseMessage,
+  DataTypeInput,
   ItemNodeId,
-  NodeIdentifier, NodeToWrite,
+  NodeIdentifier,
+  NodeToWrite,
   TimeUnitNames,
   TimeUnits,
   WriteMessage
@@ -30,7 +33,8 @@ import {
   AttributeIds,
   ClientSession,
   DataType,
-  DataValue, DataValueOptions,
+  DataValue,
+  DataValueOptions,
   NodeId,
   NodeIdType,
   OPCUAClient,
@@ -639,7 +643,7 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 export function buildNodesToRead(payload: Todo) {
   logger.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(payload))
 
-  let nodePayloadList = payload.nodesToRead || payload.nodesToWrite
+  let nodePayloadList = payload.nodesToRead || payload.nodesToWrite || (payload.value.length ? payload.value : (payload.crawlerResults || payload.browserResults));
   if (nodePayloadList && nodePayloadList.length) {
     // read to read
     return nodePayloadList.map((item: Todo) => {
@@ -1096,24 +1100,19 @@ export function resetIiotNode(node: Todo) {
   // }
 }
 
-export function filterListEntryByNodeId(nodeId: Todo, list: Todo) {
-  let result: Todo[] = []
-
-  if (list && list.length) {
-    list.forEach((item: Todo) => {
-      if (item === nodeId) {
-        result.push(item)
-      }
-    })
-  }
-
-  return result
+export function filterListEntryByNodeId(nodeId: string, list: string[]) {
+  return list.filter((item) => {
+    return item.toString().includes(nodeId)
+  })
 }
 
-export function filterListByNodeId(nodeId: Todo, list: Todo) {
+export function filterListByNodeId(nodeId: NodeIdLike, list: Todo) {
+  if (nodeId === '') {
+    return list
+  }
   return list.filter((item: Todo) => {
     // if item.nodeId is null, item may itself be a nodeId
-    return (item.nodeId || item) === nodeId
+    return (item.nodeId || item).toString().includes(nodeId)
   })
 }
 

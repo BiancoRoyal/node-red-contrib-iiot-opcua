@@ -265,7 +265,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         ...enhanceMessage(lists),
         ...setMessageLists(lists)
       }
-
       const newMessaage = {
         ...originMessage,
         payload
@@ -314,8 +313,8 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const setMessageLists = (lists: Lists) => {
       return {
-        nodesToRead: lists.nodesToRead,
-        nodesToReadCount: lists.nodesToRead.length,
+        nodesToRead: lists.nodesToRead.length ? lists.nodesToRead : lists.browserResults,
+        nodesToReadCount: lists.nodesToRead.length || lists.browserResults.length,
         addressSpaceItemList: lists.addressSpaceItemList,
         addressSpaceItemListCount: lists.addressSpaceItemList.length,
         addressItemsToBrowse: lists.addressSpaceItemList,

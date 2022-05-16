@@ -9,6 +9,11 @@
 
 import * as nodered from "node-red";
 import {Todo} from "./types/placeholders";
+import coreFilter from './core/opcua-iiot-core-filter';
+import {convertDataValueByDataType, filterListByNodeId, filterListEntryByNodeId} from "./core/opcua-iiot-core";
+import {NodeMessageInFlow} from "@node-red/registry";
+import {BrowsePayload} from "./opcua-iiot-browser";
+import {BrowseResult} from "node-opcua";
 
 interface OPCUAIIoTResultFilter extends nodered.Node {
   nodeId: string
@@ -45,16 +50,6 @@ interface OPCUAIIoTResultFilterDef extends nodered.NodeDef {
   name: string
   showErrors: boolean
 }
-
-import coreFilter from './core/opcua-iiot-core-filter';
-import {
-  buildNodeListFromClient,
-  convertDataValueByDataType,
-  filterListByNodeId,
-  filterListEntryByNodeId
-} from "./core/opcua-iiot-core";
-import {NodeMessageInFlow} from "@node-red/registry";
-import {BrowsePayload} from "./opcua-iiot-browser";
 
 /**
  * OPC UA node representation for Node-RED OPC UA IIoT nodes.
@@ -93,7 +88,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       nodesToWrite: Todo[]
       nodetype: string
       value: any
-      browserResults?: Todo[]
+      browserResults?: BrowseResult[]
+      crawlerResults?: BrowseResult[]
       msg: Todo
     }
 
@@ -106,16 +102,15 @@ module.exports = (RED: nodered.NodeAPI) => {
       const payload = msg.payload as FilterInputPayload & BrowsePayload
       const filtered = filterByType(payload)
       const value =
-        node.justValue ?
+        node.justValue
           // if justValue, return the filtered value of the input message
-          filterResult(payload) :
+          ? filterResult({...filtered, nodetype: payload.nodetype})
           // otherwise return the value field of the payload
           // The field considered 'value' is different for crawler and browsers
-          (filtered.value || filtered.crawlerResults || filtered.browserResults)
+          : (filtered.value || filtered.crawlerResults || filtered.browserResults)
 
 
       const {msg: msgKey, ...restPayload} = payload;
-
       const outputPayload = {
         ...restPayload,
         filtertype: "filter",
@@ -136,49 +131,31 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.send(outputMessage)
     })
 
-    const filterByType = (msg: FilterInputPayload) => {
+    const filterByType = (payload: FilterInputPayload) => {
       let result = null
-      switch (msg.nodetype) {
+      switch (payload.nodetype) {
         case 'read':
-          result = filterByReadType(msg)
+          result = filterByReadType(payload)
           break
         case 'write':
-          result = filterByWriteType(msg)
+          result = filterByWriteType(payload)
           break
         case 'listen':
-          result = filterByListenType(msg)
+          result = filterByListenType(payload)
           break
         case 'browse':
-          result = filterByBrowserType(msg)
+          result = filterByBrowserType(payload)
           break
         case 'crawl':
-          result = filterByCrawlerType(msg)
+          result = filterByCrawlerType(payload)
           break
         default:
-          coreFilter.internalDebugLog('unknown node type injected to filter for ' + msg.nodetype)
+          coreFilter.internalDebugLog('unknown node type injected to filter for ' + payload.nodetype)
           if (node.showErrors) {
-            this.error(new Error('unknown node type injected to filter for ' + msg.nodetype), {payload: msg})
+            this.error(new Error('unknown node type injected to filter for ' + payload.nodetype), {payload: payload})
           }
       }
-
-      return omitFalseyAndEmpty(result)
-    }
-
-    /**
-     * Removes empty arrays and falsey values from the object
-     */
-    const omitFalseyAndEmpty = <T>(object: Record<string, T[]>) => {
-      // return if null
-      if (!object) {
-        return object
-      }
-
-      Object.keys(object).forEach((key) => {
-        if (!object[key] || object[key].length === 0) {
-          delete object[key]
-        }
-      })
-      return object
+      return result
     }
 
     const convertResult = (msg: FilterInputPayload, result: Todo) => {
@@ -212,12 +189,12 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const convertResultValue = (msg: FilterInputPayload) => {
-      let result = msg.value
+    const convertResultValue = (payload: FilterInputPayload) => {
+      let result = payload.value
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('result null or undefined')
         if (node.showErrors) {
-          node.error(new Error('converted result null or undefined'), msg)
+          this.error(new Error('converted result null or undefined'), {payload})
         }
         return result
       }
@@ -235,19 +212,21 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('data type result null or undefined')
         if (node.showErrors) {
-          this.error(new Error('converted by data type result null or undefined'), {payload: msg})
+          this.error(new Error('converted by data type result null or undefined'), {payload})
         }
       } else {
-        result = convertResult(msg, result)
+        result = convertResult(payload, result)
       }
       return result
     }
 
-    const filterResult = function (msg: FilterInputPayload) {
-      if (msg.nodetype === 'read' || msg.nodetype === 'listen') {
-        return convertResultValue(msg)
+    const filterResult = function (payload: FilterInputPayload) {
+      if (payload.nodetype === 'read' || payload.nodetype === 'listen') {
+        return convertResultValue(payload)
+      } else if (payload.nodetype === 'browse' || payload.nodetype === 'crawl') {
+        return (payload as Todo).crawlerResults || payload.browserResults
       }
-      return msg.value
+      return payload.value
     }
 
     const extractValueFromOPCUAArrayStructure = function (payloadInput: Todo, entryIndex: number) {
@@ -280,28 +259,16 @@ module.exports = (RED: nodered.NodeAPI) => {
         } else {
           result = payload.value
         }
-      } else {
-        result = payload
       }
 
       return result
     }
 
-    const filterByReadType = function (msg: Todo) {
-      let result
-
-
-      if (msg.length >= node.entry) {
-        result = extractValueFromOPCUAArrayStructure(msg, node.entry - 1)
-      } else {
-        result = extractValueFromOPCUAStructure(msg)
-      }
-      if (result.hasOwnProperty('value')) {
-        result = result.value
-      }
-
+    const filterByReadType = (payload: Todo) => {
       return {
-        value: result
+        value: payload.value.filter((item: Todo) => {
+          return item.nodeId.toString().includes(this.nodeId)
+        })
       }
     }
 
@@ -326,25 +293,25 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const filterByBrowserType = function (msg: BrowsePayload & Todo) {
-      const browserResults = filterListByNodeId(node.nodeId, msg.browserResults)
+    const filterByBrowserType = (payload: BrowsePayload & Todo) => {
+      const browserResults = filterListByNodeId(node.nodeId, payload.browserResults)
 
-      const addressSpaceItems = (msg.addressSpaceItems && msg.addressSpaceItems.length) ?
-        filterListByNodeId(node.nodeId, msg.addressSpaceItems) : [];
+      const addressSpaceItems = (payload.addressSpaceItems && payload.addressSpaceItems.length) ?
+        filterListByNodeId(node.nodeId, payload.addressSpaceItems) : [];
 
-      const nodesToRead = (msg.nodesToRead && msg.nodesToRead.length) ?
-        filterListEntryByNodeId(node.nodeId, msg.nodesToRead) : [];
-      const nodesToReadCount = (msg.nodesToRead && msg.nodesToRead.length) ?
+      const nodesToRead = (payload.nodesToRead && payload.nodesToRead.length) ?
+        filterListEntryByNodeId(node.nodeId, payload.nodesToRead) : [];
+      const nodesToReadCount = (payload.nodesToRead && payload.nodesToRead.length) ?
         nodesToRead.length : 0;
 
-      const addressItemsToRead = (msg.addressItemsToRead && msg.addressItemsToRead.length) ?
-        filterListByNodeId(node.nodeId, msg.addressItemsToRead) : []
-      const addressItemsToReadCount = (msg.addressItemsToRead && msg.addressItemsToRead.length) ?
+      const addressItemsToRead = (payload.addressItemsToRead && payload.addressItemsToRead.length) ?
+        filterListByNodeId(node.nodeId, payload.addressItemsToRead) : []
+      const addressItemsToReadCount = (payload.addressItemsToRead && payload.addressItemsToRead.length) ?
         addressItemsToRead.length : 0
 
-      const addressItemsToBrowse = (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) ?
-        filterListByNodeId(node.nodeId, msg.addressItemsToBrowse) : []
-      const addressItemsToBrowseCount = (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length) ?
+      const addressItemsToBrowse = (payload.addressItemsToBrowse && payload.addressItemsToBrowse.length) ?
+        filterListByNodeId(node.nodeId, payload.addressItemsToBrowse) : []
+      const addressItemsToBrowseCount = (payload.addressItemsToBrowse && payload.addressItemsToBrowse.length) ?
         addressItemsToBrowse.length : 0
 
       return {
