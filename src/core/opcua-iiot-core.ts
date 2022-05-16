@@ -1040,7 +1040,7 @@ export function checkCrawlerItemIsNotToFilter(node: Todo, item: Todo, element: T
   return result
 }
 
-export function checkResponseItemIsNotToFilter(node: Todo, item: Todo, element: Todo, result: Todo) {
+export function checkResponseItemIsNotToFilter(node: Node, item: Todo, element: Todo, result: Todo) {
   try {
     let filterValue = getItemFilterValueWithElement(item, element)
 

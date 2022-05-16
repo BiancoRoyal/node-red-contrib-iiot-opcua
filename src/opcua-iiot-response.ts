@@ -9,7 +9,7 @@
 
 
 import {Todo} from "./types/placeholders";
-import coreResponse from "./core/opcua-iiot-core-response";
+import coreResponse, {ResponseInputPayload} from "./core/opcua-iiot-core-response";
 import {
   checkItemForUnsetState,
   checkResponseItemIsNotToFilter,
@@ -17,6 +17,13 @@ import {
 } from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {Node, NodeAPI, NodeDef} from "node-red";
+import {AddressSpaceItem} from "./types/core";
+import {BrowseResult} from "node-opcua";
+
+type Filter = {
+  name: string
+  value: string
+}
 
 interface OPCUAIIoTResponse extends Node {
   name: string
@@ -26,7 +33,9 @@ interface OPCUAIIoTResponse extends Node {
   activateUnsetFilter: string
   activateFilters: string
   negateFilter: string
-  filters: Todo[]
+  filters: Filter[]
+  iiot: Todo
+  functions?: Record<string, (...args: any) => any>
 }
 
 interface OPCUAIIoTResponseDef extends NodeDef {
@@ -37,7 +46,7 @@ interface OPCUAIIoTResponseDef extends NodeDef {
   activateUnsetFilter: string
   activateFilters: string
   negateFilter: string
-  filters: Todo[]
+  filters: Filter[]
 }
 
 /**
@@ -59,11 +68,11 @@ module.exports = (RED: NodeAPI) => {
     this.negateFilter = config.negateFilter
     this.filters = config.filters
 
-    let node: Todo = this
+    let node: OPCUAIIoTResponse = this
     node.iiot = {}
     this.status({fill: 'green', shape: 'ring', text: 'active'})
 
-    const handleBrowserMsg = function (payload: Todo) {
+    const handleBrowserMsg = function (payload: ResponseInputPayload) {
       coreResponse.analyzeBrowserResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressBrowseMessageStructure(payload)
@@ -71,7 +80,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleCrawlerMsg = function (payload: Todo) {
+    const handleCrawlerMsg = function (payload: ResponseInputPayload) {
       coreResponse.analyzeCrawlerResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressCrawlerMessageStructure(payload)
@@ -79,7 +88,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleReadMsg = function (payload: Todo) {
+    const handleReadMsg = function (payload: ResponseInputPayload) {
       coreResponse.analyzeReadResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressReadMessageStructure(payload)
@@ -87,7 +96,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleWriteMsg = function (payload: Todo) {
+    const handleWriteMsg = function (payload: ResponseInputPayload) {
       coreResponse.analyzeWriteResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressWriteMessageStructure(payload)
@@ -95,7 +104,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleListenerMsg = function (payload: Todo) {
+    const handleListenerMsg = function (payload: ResponseInputPayload) {
       coreResponse.analyzeListenerResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressListenMessageStructure(payload)
@@ -103,7 +112,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleMethodMsg = function (payload: Todo) {
+    const handleMethodMsg = function (payload: ResponseInputPayload) {
       coreResponse.analyzeMethodResults(node, payload)
       if (node.compressStructure) {
         coreResponse.compressMethodMessageStructure(payload)
@@ -111,7 +120,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleDefaultMsg = function (payload: Todo) {
+    const handleDefaultMsg = function (payload: ResponseInputPayload) {
       if (payload) {
         coreResponse.handlePayloadStatusCode(node, payload)
         if (node.compressStructure) {
@@ -121,7 +130,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const handleNodeTypeOfMsg = function (payload: Todo) {
+    const handleNodeTypeOfMsg = function (payload: ResponseInputPayload) {
       switch (payload.nodetype) {
         case 'browse':
           return handleBrowserMsg(payload)
@@ -140,12 +149,12 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const extractReadEntriesFromFilter = function (payload: Todo) {
-      let filteredEntries: Todo[] = []
-      let filteredValues: Todo[] = []
+    const extractReadEntriesFromFilter = function (payload: ResponseInputPayload) {
+      let filteredEntries: AddressSpaceItem[] = []
+      let filteredValues: number[] = []
 
       if (payload.value.length) {
-        payload.value.forEach((item: Todo, index: number) => {
+        payload.value.forEach((item: AddressSpaceItem, index: number) => {
           if (itemIsNotToFilter(item)) {
             filteredEntries.push(item)
             filteredValues.push(index)
@@ -154,7 +163,7 @@ module.exports = (RED: NodeAPI) => {
       }
 
       if (payload.nodesToRead) {
-        payload.nodesToRead = payload.nodesToRead.filter((item: Todo, index: number) => {
+        payload.nodesToRead = payload.nodesToRead.filter((item: AddressSpaceItem, index: number) => {
           return filteredValues.includes(index)
         })
       }
@@ -162,40 +171,32 @@ module.exports = (RED: NodeAPI) => {
       return filteredEntries
     }
 
-    const extractBrowserEntriesFromFilter = function (message: Todo) {
-      let filteredEntries: Todo[] = []
-      message.payload.browserResults.forEach((item: Todo) => {
-        if (itemIsNotToFilter(item)) {
-          filteredEntries.push(item)
-        }
+    const extractBrowserEntriesFromFilter = function (payload: ResponseInputPayload) {
+      return payload.browserResults?.filter((item: BrowseResult) => {
+        return itemIsNotToFilter(item)
       })
-      return filteredEntries
     }
 
-    const extractCrawlerEntriesFromFilter = function (message: Todo) {
-      let filteredEntries: Todo[] = []
-      message.payload.crawlerResults.forEach((item: Todo) => {
-        if (itemIsNotToFilter(item)) {
-          filteredEntries.push(item)
-        }
+    const extractCrawlerEntriesFromFilter = function (payload: ResponseInputPayload) {
+      const filter = payload.crawlerResults?.length === payload.addressSpaceItems?.length
+        ? payload.value
+        : payload.crawlerResults;
+
+      return filter.filter((item: BrowseResult) => {
+        return itemIsNotToFilter(item)
       })
-      return filteredEntries
     }
 
-    const extractPayloadEntriesFromFilter = function (message: Todo) {
-      let filteredEntries: Todo[] = []
-      message.payload.forEach((item: Todo) => {
-        if (node.iiot.itemIsNotToFilter(item)) {
-          filteredEntries.push(item)
-        }
+    const extractPayloadEntriesFromFilter = function (payload: ResponseInputPayload) {
+      return payload.value.filter((item: Todo) => {
+        return itemIsNotToFilter(item)
       })
-      return filteredEntries
     }
 
-    const extractMethodEntriesFromFilter = function (message: Todo) {
+    const extractMethodEntriesFromFilter = function (payload: ResponseInputPayload) {
       let filteredEntries: Todo[] = []
       let filteredValues: Todo[] = []
-      message.addressSpaceItems.forEach((item: Todo, index: number) => {
+      payload.addressSpaceItems.forEach((item: Todo, index: number) => {
         if (itemIsNotToFilter(item)) {
           filteredEntries.push(item)
           filteredValues.push(index)
@@ -203,10 +204,10 @@ module.exports = (RED: NodeAPI) => {
       })
 
       let outputArguments: Todo
-      if (message.payload.results) {
-        outputArguments = message.payload.results.outputArguments
+      if (payload.results) {
+        outputArguments = payload.results.outputArguments
       } else {
-        outputArguments = message.payload.outputArguments
+        outputArguments = payload.outputArguments
       }
 
       if (outputArguments) {
@@ -224,7 +225,7 @@ module.exports = (RED: NodeAPI) => {
       return filteredEntries
     }
 
-    const extractEntries = function (payload: Todo) {
+    const extractEntries = function (payload: ResponseInputPayload) {
       switch (payload.nodetype) {
         case 'read':
           return extractReadEntriesFromFilter(payload)
@@ -239,15 +240,15 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const filterMsg = function (payload: Todo) {
+    const filterMsg = function (payload: ResponseInputPayload) {
       if (payload.value.length || isNodeTypeToFilterResponse(payload)) {
         let filteredEntries = extractEntries(payload)
-        if (filteredEntries.length) {
+        if (filteredEntries?.length) {
           payload.value = filteredEntries
           return payload
         }
       } else {
-        if (itemIsNotToFilter(payload.payload)) {
+        if (itemIsNotToFilter(payload)) {
           return payload
         }
       }
@@ -278,9 +279,9 @@ module.exports = (RED: NodeAPI) => {
             return
           }
         }
-        msg = normalizeMessage(msg as Todo)
+        msg = normalizeMessage(msg as any)
 
-        const inputPayload = msg.payload as Todo;
+        const inputPayload = msg.payload as ResponseInputPayload;
         const handledPayload = {
           ...handleNodeTypeOfMsg(inputPayload),
           compressed: node.compressStructure
@@ -301,10 +302,10 @@ module.exports = (RED: NodeAPI) => {
       }
     })
 
-    const itemIsNotToFilter = function (item: Todo) {
+    const itemIsNotToFilter = function (item: any) {
       let result = checkItemForUnsetState(node, item)
 
-      node.filters.forEach((element: Todo) => {
+      node.filters.forEach((element: any) => {
         result = checkResponseItemIsNotToFilter(node, item, element, result)
       })
 

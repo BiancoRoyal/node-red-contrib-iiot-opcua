@@ -22,7 +22,8 @@ type EntryStatus = {
   other: number,
 }
 
-type Payload = {
+export type ResponseInputPayload = {
+  outputArguments: Todo;
   value?: any
   browserResults?: BrowseResult[]
   crawlerResults?: (string | BrowseResult[])[]
@@ -40,6 +41,7 @@ type Payload = {
   dataType?: Todo
   nodeId?: NodeIdLike
   methodType?: string
+  nodetype?: string
 }
 
 const internalDebugLog = debug('opcuaIIoT:response') // eslint-disable-line no-use-before-define
@@ -47,15 +49,15 @@ const detailDebugLog = debug('opcuaIIoT:response:details') // eslint-disable-lin
 const EMPTY_LIST = 0
 const NONE = 0
 
-const analyzeBrowserResults = function (node: Node, payload: Payload) {
+const analyzeBrowserResults = function (node: Node, payload: ResponseInputPayload) {
   handlePayloadStatusCode(node, payload)
 }
 
-const analyzeCrawlerResults = function (node: Node, payload: Payload) {
+const analyzeCrawlerResults = function (node: Node, payload: ResponseInputPayload) {
   handlePayloadStatusCode(node, payload)
 }
 
-const analyzeReadResults = (node: Node, payload: Payload) => {
+const analyzeReadResults = (node: Node, payload: ResponseInputPayload) => {
   handlePayloadStatusCode(node, payload)
   if (payload.readtype === 'HistoryValue') {
     payload.value.map((item: any) => {
@@ -65,7 +67,7 @@ const analyzeReadResults = (node: Node, payload: Payload) => {
   reconsturctNodeIdOnRead(payload)
 }
 
-const analyzeListenerResults = function (node: Node, payload: Payload) {
+const analyzeListenerResults = function (node: Node, payload: ResponseInputPayload) {
   switch (payload.injectType) {
     case 'subscribe':
     case 'event':
@@ -76,7 +78,7 @@ const analyzeListenerResults = function (node: Node, payload: Payload) {
   }
 }
 
-const analyzeMethodResults = function (node: Node, payload: Payload) {
+const analyzeMethodResults = function (node: Node, payload: ResponseInputPayload) {
   switch (payload.methodType) {
     case 'basic':
     case 'complex':
@@ -108,7 +110,7 @@ const analyzeWriteResults = function (node: Node, msg: Todo) {
   setNodeStatusInfo(node, msg, entryStatus)
 }
 
-const handlePayloadStatusCode = function (node: Node, payload: Payload) {
+const handlePayloadStatusCode = function (node: Node, payload: ResponseInputPayload) {
   let entryStatus = {
     bad: 0,
     good: 0,
@@ -124,13 +126,13 @@ const handlePayloadStatusCode = function (node: Node, payload: Payload) {
   payload.entryStatus = entryStatus
 }
 
-const setNodeStatusInfo = function (node: Node, payload: Payload, entryStatus: Todo) {
+const setNodeStatusInfo = function (node: Node, payload: ResponseInputPayload, entryStatus: Todo) {
   payload.entryStatus = entryStatus
   payload.entryStatusText = 'Good:' + entryStatus['good'] + ' Bad:' + entryStatus['bad'] + ' Other:' + entryStatus['other']
   setNodeStatus(node, payload.entryStatus, payload.entryStatusText)
 }
 
-const handlePayloadArrayOfObjects = function (payload: Payload) {
+const handlePayloadArrayOfObjects = function (payload: ResponseInputPayload) {
   let entry = null
   let entryStatus = {
     bad: 0,
@@ -170,7 +172,7 @@ const handlePayloadArrayOfObjects = function (payload: Payload) {
   return entryStatus
 }
 
-const handlePayloadObject = function (payload: Payload) {
+const handlePayloadObject = function (payload: ResponseInputPayload) {
   let entryStatus = {
     good: 0,
     bad: 0,
@@ -209,7 +211,7 @@ const handlePayloadObject = function (payload: Payload) {
   return entryStatus
 }
 
-const handlePayloadArrayOfStatusCodes = function (payload: Payload) {
+const handlePayloadArrayOfStatusCodes = function (payload: ResponseInputPayload) {
   let entry = null
   let entryStatus = {
     good: 0,
@@ -247,7 +249,7 @@ const handlePayloadArrayOfStatusCodes = function (payload: Payload) {
   return entryStatus
 }
 
-const defaultCompress = function (payload: Payload) {
+const defaultCompress = function (payload: ResponseInputPayload) {
   if (payload.hasOwnProperty('value') && payload.value.hasOwnProperty('value')) {
     payload.value = payload.value.value
   }
@@ -274,7 +276,7 @@ const trimMessagePayloadExtensions = (payload: any) => {
   delete payload['listenerParameters']
 }
 
-const compressBrowseMessageStructure = function (payload: Payload) {
+const compressBrowseMessageStructure = function (payload: ResponseInputPayload) {
   if (payload.browserResults?.length) {
     payload.value = payload.browserResults.map((item: Todo) => {
       return {
@@ -290,7 +292,7 @@ const compressBrowseMessageStructure = function (payload: Payload) {
   }
 }
 
-const compressCrawlerMessageStructure = function (payload: Payload) {
+const compressCrawlerMessageStructure = function (payload: ResponseInputPayload) {
   if (payload.hasOwnProperty('crawlerResults') && payload.crawlerResults?.length) {
     payload.value = payload.crawlerResults?.map((item: Todo) => {
       return {
@@ -306,7 +308,7 @@ const compressCrawlerMessageStructure = function (payload: Payload) {
   }
 }
 
-const reconsturctNodeIdOnRead = function (payload: Payload) {
+const reconsturctNodeIdOnRead = function (payload: ResponseInputPayload) {
   let results = payload.value || payload
   let nodesToRead = payload.nodesToRead
 
@@ -385,7 +387,7 @@ const compressWriteMessageStructure = function (payload: any) {
   delete payload['valuesToWrite']
 }
 
-const compressListenMessageStructure = function (payload: Payload | any) {
+const compressListenMessageStructure = function (payload: ResponseInputPayload | any) {
   // interpreting payload as any makes reassigning it not cause errors
   if (payload.hasOwnProperty('value') && payload.value.hasOwnProperty('value')) {
     payload = {
@@ -409,7 +411,7 @@ const compressMethodMessageStructure = function (payload: any) {
   delete payload['definition']
 }
 
-const compressDefaultMessageStructure = function (payload: Payload) {
+const compressDefaultMessageStructure = function (payload: ResponseInputPayload) {
   defaultCompress(payload)
   trimMessageExtensions(payload)
 }
