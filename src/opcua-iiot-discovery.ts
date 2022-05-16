@@ -47,16 +47,16 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const discoveryServer = new OPCUADiscoveryServer({ port: node.discoveryPort })
 
-    node.status({ fill: 'yellow', shape: 'ring', text: 'starting' })
+    this.status({ fill: 'yellow', shape: 'ring', text: 'starting' })
 
     coreDiscovery.detailDebugLog('discovery endpoints:' + discoveryServer._get_endpoints())
 
-    discoveryServer.start(function () {
+    discoveryServer.start(() => {
       coreDiscovery.internalDebugLog('discovery server started')
-      node.status({ fill: 'green', shape: 'dot', text: 'active' })
+      this.status({ fill: 'green', shape: 'dot', text: 'active' })
     })
 
-    node.on('input', function (msg) {
+    this.on('input', (msg) => {
       const outputMessage: DiscoveryMessage = {
         ...msg,
         payload: {
@@ -64,10 +64,10 @@ module.exports = (RED: nodered.NodeAPI) => {
           endpoints: discoveryServer.endpoints || []
         }
       }
-      node.send(outputMessage)
+      this.send(outputMessage)
     })
 
-    node.on('close', function (done: () => void) {
+    this.on('close', function (done: () => void) {
       if (discoveryServer) {
         discoveryServer.shutdown(function () {
           coreDiscovery.internalDebugLog('shutdown')

@@ -11,6 +11,7 @@ import {NodeObject, Todo, TodoBianco} from "./types/placeholders";
 import coreConnector from "./core/opcua-iiot-core-connector";
 import {deregisterToConnector, registerToConnector, resetIiotNode} from "./core/opcua-iiot-core";
 import {NodeMessage, NodeStatus} from "node-red";
+import {NodeMessageInFlow} from "@node-red/registry";
 
 export interface OPCUAIIoTFlexConnector extends nodered.Node {
   showStatusActivities: boolean
@@ -39,31 +40,33 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node = {
+    let nodeConfig = {
       ...this,
       iiot: {}
     }
 
-    node.status({ fill: 'blue', shape: 'ring', text: 'new' })
+    this.status({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    node.on('input', function (msg: Todo) {
+    this.on('input', (msg: NodeMessageInFlow) => {
       coreConnector.internalDebugLog('connector change request input')
 
-      if (node.connector) {
-        if (msg.payload.endpoint && msg.payload.endpoint.includes('opc.tcp:')) {
+      const payload: Todo = msg.payload
+
+      if (nodeConfig.connector) {
+        if (payload.endpoint && payload.endpoint.includes('opc.tcp:')) {
           coreConnector.internalDebugLog('connector change possible')
-          coreConnector.internalDebugLog(msg.payload)
-          node.connector.functions.restartWithNewSettings(msg.payload, () => {
+          coreConnector.internalDebugLog(payload)
+          nodeConfig.connector.functions.restartWithNewSettings(payload, () => {
             coreConnector.internalDebugLog('connector change injected')
-            node.send(msg)
+            this.send(msg)
           })
         } else {
           coreConnector.internalDebugLog('Connector Change Not Possible - Wrong Endpoint')
-          node.error(new Error('Connector Change Not Possible - Wrong Endpoint'), msg)
+          this.error(new Error('Connector Change Not Possible - Wrong Endpoint'), msg)
         }
       } else {
         coreConnector.internalDebugLog('Connector Change Not Possible - No Connector')
-        node.error(new Error('Connector Change Not Possible - No Connector'), msg)
+        this.error(new Error('Connector Change Not Possible - No Connector'), msg)
       }
     })
 
@@ -75,22 +78,16 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.error(err, msg)
     }
 
-    const onAlias = (event: string, callback: (...args: any) => void) => {
-      if (event == "input") {
-        this.on(event, callback)
-      } else if (event === "close") {
-        this.on(event, callback)
-      }
-      else this.error('Invalid event to listen on')
+    const onAlias = (event: string, callback: () => void) => {
+      // @ts-ignore
+      this.on(event, callback)
     }
 
-    registerToConnector((node as Todo), statusHandler, onAlias, errorHandler)
+    registerToConnector(this, statusHandler, onAlias, errorHandler)
 
-
-
-    node.on('close', (done: () => void) => {
-      deregisterToConnector((node as Todo), () => {
-        resetIiotNode(node)
+    this.on('close', (done: () => void) => {
+      deregisterToConnector(this as Todo, () => {
+        resetIiotNode(this)
         done()
       })
     })

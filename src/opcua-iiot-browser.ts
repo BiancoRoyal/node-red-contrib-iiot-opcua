@@ -8,10 +8,10 @@
  */
 'use strict'
 import * as nodered from "node-red";
-import {Todo, TodoVoidFunction} from "./types/placeholders";
+import {Like, Todo, TodoVoidFunction} from "./types/placeholders";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 
-import coreBrowser, {BrowserInputPayloadLike} from "./core/opcua-iiot-core-browser";
+import coreBrowser, {BrowserInputPayload, BrowserInputPayloadLike} from "./core/opcua-iiot-core-browser";
 import {
     checkConnectorState,
     checkSessionNotValid, deregisterToConnector,
@@ -23,6 +23,7 @@ import {NodeMessage, NodeStatus} from "node-red";
 import {NodeId} from "node-opcua";
 import {AddressSpaceItem} from "./types/core";
 import {isUndefined} from "underscore";
+import {ListenPayload} from "./opcua-iiot-listener";
 
 interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
     nodeId: Todo
@@ -54,6 +55,37 @@ interface OPCUAIIoTBrowser extends nodered.Node {
     recursiveDepth: number
     delayPerMessage: number
     connector: Node
+}
+
+export type BrowsePayload = {
+    nodetype: "browse",
+    injectType: string,
+    addressSpaceItems: AddressSpaceItem[],
+    manualInject: boolean,
+    justValue: boolean,
+    rootNodeId: string | NodeId,
+    recursiveBrowse: boolean,
+    recursiveDepth: number,
+    recursiveDepthMax: number,
+    listenerParameters?: ListenPayload
+}
+
+type BrowserResult = {
+    nodeId: string | NodeId,
+    browseName: string,
+    displayName: string,
+    nodeClass: string
+    datatypeName: string
+}
+
+export type BrowsePayloadLike = Like<BrowsePayload>
+
+interface Lists {
+    browserResults: BrowserResult[]
+    nodesToRead: (NodeId | string)[]
+    addressSpaceItemList: Todo[]
+    addressItemList: Todo[]
+    nodesToBrowse: Todo[],
 }
 
 /**
@@ -157,14 +189,6 @@ module.exports = function (RED: nodered.NodeAPI) {
             this.error(err, msg)
         }
 
-        interface Lists {
-            browserResults: Todo[]
-            nodesToRead: Todo[]
-            addressSpaceItemList: Todo[]
-            addressItemList: Todo[]
-            nodesToBrowse: Todo[],
-        }
-
         const createListsObject = (): Lists => {
             return {
                 nodesToBrowse: [],
@@ -221,10 +245,10 @@ module.exports = function (RED: nodered.NodeAPI) {
                 }
             }
 
-            let listenerParameters = getListenParameters(originMessage)
+            const listenerParameters = getListenParameters((originMessage.payload as any))
 
-            const payload = {
-                ...(originMessage.payload as BrowserInputPayloadLike),
+            const payload: BrowsePayload = {
+                ...(originMessage.payload as BrowserInputPayload),
                 nodetype: 'browse',
                 justValue: nodeConfig.justValue,
                 rootNodeId,
@@ -260,11 +284,11 @@ module.exports = function (RED: nodered.NodeAPI) {
             })
         }
 
-        const getListenParameters = function (msg: Todo) {
-            if (msg.injectType === 'listen') {
-                return msg.payload
+        const getListenParameters = (msg: ListenPayload | undefined): ListenPayload | undefined => {
+            if (msg?.injectType === 'listen') {
+                return msg
             } else {
-                return null
+                return undefined
             }
         }
 
@@ -282,12 +306,12 @@ module.exports = function (RED: nodered.NodeAPI) {
             }
         }
 
-        const setMessageLists = function (lists: Lists) {
+        const setMessageLists = (lists: Lists) => {
             return {
                 nodesToRead: lists.nodesToRead,
                 nodesToReadCount: lists.nodesToRead.length,
-                addressItemsToRead: lists.addressSpaceItemList,
-                addressItemsToReadCount: lists.addressSpaceItemList.length,
+                addressSpaceItemList: lists.addressSpaceItemList,
+                addressSpaceItemListCount: lists.addressSpaceItemList.length,
                 addressItemsToBrowse: lists.addressSpaceItemList,
                 addressItemsToBrowseCount: lists.addressSpaceItemList.length,
             }
@@ -366,7 +390,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         const onAlias = (event: string, callback: () => void) => {
             // @ts-ignore
             this.on(event, callback)
-
         }
 
         registerToConnector(nodeConfig, statusHandler, onAlias, errorHandler)
@@ -389,7 +412,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         coreBrowser.detailDebugLog('request for ' + req.params.nodeId)
 
         if ((node as Todo).iiot.opcuaSession) {
-            coreBrowser.browse((node as Todo).bianco.iiot.opcuaSession, nodeRootId).then(function (browserResult: Todo) {
+            coreBrowser.browse((node as Todo).iiot.opcuaSession, nodeRootId).then(function (browserResult: Todo) {
                 browserResult.forEach(function (result: Todo) {
                     if (result.references && result.references.length) {
                         result.references.forEach(function (reference: Todo) {

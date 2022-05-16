@@ -86,10 +86,10 @@ module.exports = function (RED: nodered.NodeAPI) {
     const ONE_SECOND = 1000
     const INPUT_TIMEOUT_MILLISECONDS = 1000
 
-    const repeaterSetup = function () {
+    const repeaterSetup = () => {
       coreInject.internalDebugLog('Repeat Is ' + node.repeat)
       coreInject.internalDebugLog('Crontab Is ' + node.crontab)
-
+      console.log(config.repeat)
       if (node.repeat !== '') {
         node.repeat = parseFloat(config.repeat) * REPEAT_FACTOR
 
@@ -103,13 +103,19 @@ module.exports = function (RED: nodered.NodeAPI) {
           clearInterval(intervalId)
         }
 
-        intervalId = setInterval(function () {
-          node.emit('input', {})
+        if (typeof node.repeat !== "number" || isNaN(node.repeat)) return;
+
+        intervalId = setInterval(() => {
+          this.emit('input', {_msgid: RED.util.generateId(), payload: {
+              injectType: "cron"
+            }})
         }, node.repeat)
       } else if (node.crontab !== '') {
         cronjob = new CronJob(node.crontab,
-          function () {
-            node.emit('input', {})
+          () => {
+            this.emit('input', {_msgid: RED.util.generateId(), payload: {
+              injectType: "cron"
+              }})
           },
           null,
           true)
@@ -163,7 +169,7 @@ module.exports = function (RED: nodered.NodeAPI) {
           payloadType: node.payloadType,
           value: generateOutputValue(node.payloadType, msg),
           nodetype: 'inject',
-          injectType: node.injectType,
+          injectType: (msg.payload as Todo).injectType || node.injectType,
           addressSpaceItems: [...node.addressSpaceItems],
           manualInject: Object.keys(msg).length !== 0
         }
@@ -172,11 +178,11 @@ module.exports = function (RED: nodered.NodeAPI) {
           topic,
           payload,
         }
-        node.send(outputMessage)
+        this.send(outputMessage)
       } catch (err) {
         /* istanbul ignore next */
         if (RED.settings.verbose) {
-          node.error(err, msg)
+          this.error(err, msg)
         }
       }
     })
@@ -189,9 +195,9 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     if (node.once) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
-      onceTimeout = setTimeout(function () {
+      onceTimeout = setTimeout(() => {
         coreInject.detailDebugLog('injecting once at start')
-        node.emit('input', {})
+        this.emit('input', {})
         repeaterSetup()
       }, timeout)
     } else if (node.repeat || node.crontab) {

@@ -935,7 +935,13 @@ export function checkSessionNotValid(session: Todo, callerType: Todo) {
     return false
 }
 
-export function setNodeStatusTo(node: Node, statusValue: string, oldStatus: NodeStatus, showStatusActivities: boolean, status: (status: string | NodeStatus) => void): NodeStatus {
+export function setNodeStatusTo(
+  node: Node,
+  statusValue: string,
+  oldStatus: NodeStatus,
+  showStatusActivities: boolean,
+  status: (status: string | NodeStatus) => void
+): NodeStatus {
     let statusParameter: NodeStatus = getNodeStatus(statusValue, showStatusActivities)
     if (!underscore.isEqual(oldStatus, statusParameter) && statusParameter) {
         logger.detailDebugLog('Node ' + node.id + ' Status To ' + statusValue)

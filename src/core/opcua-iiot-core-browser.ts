@@ -29,6 +29,8 @@ export type BrowserInputPayload = {
   root: Todo
   actiontype: string
   addressSpaceItems: AddressSpaceItem[]
+  injectType: string,
+  manualInject: boolean
 }
 
 export type BrowserInputPayloadLike = {

@@ -6,6 +6,10 @@ import {Node, NodeStatus} from "node-red";
 import {OPCUAIIoTConnectorNode} from "../opcua-iiot-connector";
 import {NodeMessageInFlow} from "@node-red/registry";
 
+export type Like<T> = {
+  [key in keyof T]?: T[key]
+}
+
 export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): void => {
   if (depth == 1)
     console.log("Types of object: {");

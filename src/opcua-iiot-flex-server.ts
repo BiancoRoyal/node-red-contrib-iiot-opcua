@@ -13,9 +13,10 @@ import {Todo} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {NodeStatus} from "node-red";
+import {VM} from "vm2";
 
-interface OPCUAIIoTFlexServer extends nodered.Node {
-
+type OPCUAIIoTFlexServer = nodered.Node & {
+  on(event: 'shutdown', callback: () => void): void
 }
 interface OPCUAIIoTFlexServerDef extends nodered.NodeDef {
   addressSpaceScript: Todo
@@ -27,7 +28,6 @@ interface OPCUAIIoTFlexServerDef extends nodered.NodeDef {
  */
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
-  const { VM } = require('vm2')
   let scriptObjects = {}
 
   function OPCUAIIoTFlexServer (this: OPCUAIIoTFlexServer, config: OPCUAIIoTFlexServerDef) {
@@ -40,9 +40,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     node = coreServer.loadCertificates(node)
 
     node.iiot.vm = new VM({
-      require: {
-        builtin: ['fs', 'Math', 'Date', 'console']
-      },
       sandbox: {
         node,
         coreServer,
@@ -125,7 +122,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreServer.setOPCUAServerListener(node)
     }
 
-    node.iiot.initNewServer = function () {
+    node.iiot.initNewServer = () => {
       node = coreServer.initRegisterServerMethod(node)
       let serverOptions = node.iiot.buildServerOptions()
       serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
@@ -134,22 +131,22 @@ module.exports = (RED: nodered.NodeAPI) => {
         node.iiot.createServer(serverOptions)
       } catch (err: any) {
         /* istanbul ignore next */
-        node.emit('server_create_error')
+        this.emit('server_create_error')
         coreServer.flexInternalDebugLog(err.message)
         coreServer.handleServerError(node, err, { payload: 'Flex Server Failure! Please, check the server settings!' })
       }
     }
 
-    node.iiot.postInitialize = function () {
+    node.iiot.postInitialize = () => {
       node.iiot.eventObjects = {} // event objects should stay in memory
       coreServer.constructAddressSpaceFromScript(node.iiot.opcuaServer, node.iiot.constructAddressSpaceScript, node.iiot.eventObjects)
-        .then(function () {
-          coreServer.start(node.iiot.opcuaServer, node).then(function () {
+        .then(() => {
+          coreServer.start(node.iiot.opcuaServer, node).then(() => {
             node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
-            node.emit('server_running')
-          }).catch(function (err: Error) {
+            this.emit('server_running')
+          }).catch((err: Error) =>{
             /* istanbul ignore next */
-            node.emit('server_start_error')
+            this.emit('server_start_error')
             node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
             coreServer.handleServerError(node, err, { payload: 'Server Start Failure' })
           })
@@ -161,7 +158,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     node.iiot.initNewServer()
 
-    node.on('input', function (msg: Todo) {
+    this.on('input', function (msg: Todo) {
       if (!node.iiot.opcuaServer || !node.iiot.initialized) {
         coreServer.handleServerError(node, new Error('Server Not Ready For Inputs'), msg)
         return
@@ -174,10 +171,10 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     })
 
-    node.iiot.executeOpcuaCommand = function (msg: Todo) {
+    node.iiot.executeOpcuaCommand = (msg: Todo) => {
       if (msg.commandType === 'restart') {
         node.iiot.restartServer()
-        node.send(msg)
+        this.send(msg)
       } else {
         coreServer.handleServerError(node, new Error('Unknown Flex OPC UA Command'), msg)
       }
@@ -198,7 +195,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    node.on('close', function (done: () => void) {
+    this.on('close', function (done: () => void) {
       node.iiot.closeServer(() => {
         coreServer.flexInternalDebugLog('Close Server Node')
         resetIiotNode(node)
@@ -206,7 +203,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       })
     })
 
-    node.on('shutdown', () => {
+    this.on('shutdown', () => {
       node.iiot.opcuaServer = null
       node.iiot.initNewServer()
     })

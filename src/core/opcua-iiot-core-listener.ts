@@ -37,7 +37,7 @@ const METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
 const RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
 const MAX_INT32 = 2147483647 // eslint-disable-line no-use-before-define
 
-const createStatelyMachine = function () {
+const createListenerStateMachine = function () {
   return Stately.machine({
     'IDLE': {
       'requestinitsub': 'REQUESTED',
@@ -456,7 +456,7 @@ const coreListener = {
   RUNNING_STATE,
   MAX_INT32,
 
-  createStatelyMachine,
+  createListenerStateMachine,
   getEventSubscriptionParameters,
   getSubscriptionParameters,
   collectAlarmFields,

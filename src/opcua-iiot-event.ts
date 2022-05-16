@@ -9,10 +9,13 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo, TodoBianco} from "./types/placeholders";
-import {NodeMessage} from "node-red";
-import {EventFilter} from "node-opcua";
+import {Like, Todo} from "./types/placeholders";
+import {NodeStatus} from "node-red";
+import {constructEventFilter, EventFilter} from "node-opcua";
 import {NodeMessageInFlow} from "@node-red/registry";
+import coreListener from "./core/opcua-iiot-core-listener";
+import {InjectPayload} from "./opcua-iiot-inject";
+import {BrowsePayloadLike, BrowsePayload} from "./opcua-iiot-browser";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string
@@ -23,7 +26,6 @@ interface OPCUAIIoTEvent extends nodered.Node {
   name: string
   showStatusActivities: boolean
   showErrors: boolean
-  bianco?: TodoBianco
 }
 
 interface OPCUAIIoTEventDef extends nodered.NodeDef {
@@ -37,6 +39,20 @@ interface OPCUAIIoTEventDef extends nodered.NodeDef {
   showErrors: boolean
 }
 
+
+export type EventMessage = NodeMessageInFlow & {
+  payload: EventPayload
+}
+export type EventPayload = (InjectPayload | BrowsePayload) & {
+  eventType?: string,
+  uaEventFilter?: EventFilter,
+  uaEventFields?: string[],
+  queueSize?: number,
+  interval?: number,
+}
+
+export type  EventPayloadLike = Like<EventPayload>
+
 /**
  * Event Node-RED node.
  *
@@ -44,8 +60,6 @@ interface OPCUAIIoTEventDef extends nodered.NodeDef {
  */
 module.exports = function (RED: nodered.NodeAPI) {
   // SOURCE-MAP-REQUIRED
-  let coreListener = require('./core/opcua-iiot-core-listener')
-
   function OPCUAIIoTEvent (this: OPCUAIIoTEvent, config: OPCUAIIoTEventDef) {
     RED.nodes.createNode(this, config)
     this.eventType = config.eventType
@@ -57,18 +71,21 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let node: OPCUAIIoTEvent & Todo = this
+    let nodeConfig: OPCUAIIoTEvent & Todo = this
+    nodeConfig.iiot = {}
 
-    const statusCall = this.status
-    node.iiot.subscribed = false
+    const statusCall = (status: NodeStatus | string) => {
+      this.status(status)
+    }
+    nodeConfig.iiot.subscribed = false
 
     statusCall({ fill: 'blue', shape: 'ring', text: 'new' })
 
-    this.on('input', function (msg: NodeMessageInFlow) {
-      node.iiot.subscribed = !node.iiot.subscribed
+    this.on('input', (msg: NodeMessageInFlow) => {
+      nodeConfig.iiot.subscribed = !nodeConfig.iiot.subscribed
 
-      if (node.usingListener) {
-        if (node.iiot.subscribed) {
+      if (nodeConfig.usingListener) {
+        if (nodeConfig.iiot.subscribed) {
           statusCall({ fill: 'blue', shape: 'dot', text: 'subscribed' })
         } else {
           statusCall({ fill: 'blue', shape: 'ring', text: 'not subscribed' })
@@ -77,67 +94,47 @@ module.exports = function (RED: nodered.NodeAPI) {
         statusCall({ fill: 'blue', shape: 'dot', text: 'injected' })
       }
 
-      let uaEventFields = coreListener.getBasicEventFields()
+      const uaEventFields = [
+        ...coreListener.getBasicEventFields(),
+        ...getAdditionalEventFields()
+        ]
 
-      switch (node.resultType) {
-        case 'condition':
-          uaEventFields.push(coreListener.getConditionFields())
-          break
-        case 'state':
-          uaEventFields.push(coreListener.getStateFields())
-          break
-        case 'all':
-          uaEventFields.push(coreListener.getAllEventFields())
-          break
-        default:
-          break
+      const interval = (msg.payload as InjectPayload).value;
+
+      const uaEventFilter: EventFilter = constructEventFilter(uaEventFields)
+      const responsePayload: EventPayload = {
+        ...msg.payload as InjectPayload | BrowsePayload,
+        eventType: nodeConfig.eventType,
+        uaEventFilter: uaEventFilter,
+        uaEventFields: uaEventFields,
+        queueSize: nodeConfig.queueSize,
+        interval: typeof interval === 'number' ? interval : 1000
       }
 
-      let uaEventFilter: EventFilter = coreListener.core.nodeOPCUA.constructEventFilter(uaEventFields)
-      let interval = 1000
-
-      if (typeof msg.payload === 'number') {
-        interval = msg.payload // msec.
-      }
-      else {
-
-      }
-
-      type msgPayload = {
-        eventType?: string,
-        uaEventFilter?: EventFilter,
-        uaEventFields?: Todo,
-        queueSize?: Todo,
-        interval?: number,
-      }
-
-      const payload = msg.payload as msgPayload
-
-      const responseMessage: NodeMessage = {
+      const responseMessage: EventMessage = {
         _msgid: msg._msgid,
-        payload: {
-          eventType: payload.eventType || node.eventType,
-          eventFilter: payload.uaEventFilter || uaEventFilter,
-          eventFields: payload.uaEventFields || uaEventFields,
-          queueSize: payload.queueSize || node.queueSize,
-          interval: payload.interval || interval,
-        },
+        payload: responsePayload,
         topic: msg.topic,
       }
-      // msg.nodetype = 'events'
-
 
       // TODO: send works but it has a problem with debug node and ByteString
-      // msg.payload = {
-      //   eventType: msg.payload.eventType || node.eventType,
-      //   eventFilter: msg.payload.uaEventFilter || uaEventFilter,
-      //   eventFields: msg.payload.uaEventFields || uaEventFields,
-      //   queueSize: msg.payload.queueSize || node.queueSize,
-      //   interval: msg.payload.interval || interval
-      // }
+      // I'm not sure where this comes from, but I'm leaving it just in case.
 
-      node.send(responseMessage)
+      this.send(responseMessage)
     })
+
+    const getAdditionalEventFields = () => {
+      switch (nodeConfig.resultType) {
+        case 'condition':
+          return(coreListener.getConditionFields())
+        case 'state':
+          return(coreListener.getStateFields())
+        case 'all':
+          return(coreListener.getAllEventFields())
+        default:
+          return []
+      }
+    }
   }
 
   RED.nodes.registerType('OPCUA-IIoT-Event', OPCUAIIoTEvent)
