@@ -957,6 +957,9 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.functions = {
       waitForExist,
       restartWithNewSettings,
+      registerForOPCUA,
+      deregisterForOPCUA,
+      getUpdatedServerOptions
     }
 
 
