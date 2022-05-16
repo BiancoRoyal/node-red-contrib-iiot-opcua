@@ -59,7 +59,7 @@ export type CoreMachineStates =
 // export type CoreStateMachine = Record<CoreMachineStates, Record<string, CoreMachineStates>>
 
 function createConnectorStatelyMachine() {
-  const stateMachine = Stately.machine({
+  const stateMachine: Stately.stateMachine = Stately.machine({
     'IDLE': {
       'initopcua': 'INITOPCUA',
       'lock': 'LOCKED',

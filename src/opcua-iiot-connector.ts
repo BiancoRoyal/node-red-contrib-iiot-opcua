@@ -25,21 +25,21 @@ import {
   nodesets,
   ObjectTypeIds,
   OPCUAClient,
+  OPCUADiscoveryServer,
   ReferenceTypeIds,
   SecurityPolicy,
   StatusCodes,
   UserIdentityInfo,
   VariableTypeIds
 } from "node-opcua";
-import {CoreNode, getEnumKeys, Todo} from "./types/placeholders";
-import coreConnector, {logger} from "./core/opcua-iiot-core-connector";
+import {CoreNode, getEnumKeys} from "./types/placeholders";
+import coreConnector, {logger, Stately} from "./core/opcua-iiot-core-connector";
 import {FindServerResults} from "node-opcua-client/source/tools/findservers";
-import {isUndefined} from "underscore";
+import _, {isUndefined} from "underscore";
 import {UserTokenType} from "node-opcua-service-endpoints";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import internalDebugLog = logger.internalDebugLog;
 import detailDebugLog = logger.detailDebugLog;
-import _ from 'underscore'
 
 interface OPCUAIIoTConnectorCredentials {
   user: string
@@ -77,7 +77,7 @@ export type OPCUAIIoTConnectorNode = nodered.Node<OPCUAIIoTConnectorCredentials>
   }
   on(event: 'connection_started', listener: (opcuaClient: OPCUAClient) => void): OPCUAIIoTConnectorNode,
   on(event: 'session_started', listener: (opcuaSession: ClientSession) => void): void
-  on(event: 'connector_init', listener: (node: Todo) => void): void
+  on(event: 'connector_init', listener: (node: Node) => void): void
 
   on(event: 'server_connection_close' | 'server_connection_abort' | 'connection_closed' | 'server_connection_lost' | 'reset_opcua_connection' | 'session_closed' | 'session_restart' | 'session_error' | 'after_reconnection',
      listener: () => void): void
@@ -114,10 +114,10 @@ export interface ConnectorIIoT extends CoreNode {
   endpoints: string[],
   opcuaClient?: OPCUAClient
   opcuaSession?: ClientSession
-  discoveryServer: Todo
+  discoveryServer: OPCUADiscoveryServer
   serverCertificate: string
   discoveryServerEndpointUrl: string
-  createConnectionTimeout: Todo
+  createConnectionTimeout: boolean
   hasOpcUaSubscriptions: boolean
   userIdentity?: UserIdentityInfo
 }
@@ -214,7 +214,6 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const getUpdatedServerOptions = (): OPCUAClientOptions => {
       initCertificatesAndKeys()
-      // this.iiot.opcuaClientOptions
       return {
         securityPolicy: this.securityPolicy,
         securityMode: this.messageSecurityMode,
@@ -251,14 +250,9 @@ module.exports = function (RED: nodered.NodeAPI) {
       internalDebugLog('Connecting To Endpoint ' + this.endpoint)
 
       this.iiot.opcuaClientOptions = getUpdatedServerOptions()
-      // TODO: causes "TypeError: Converting circular structure to JSON" at line 578 in this file
-      //    this.iiot.opcuaClient = OPCUAClient.create(this.iiot.opcuaClientOptions)
-      //    detailDebugLog('Options ' + this.iiot.opcuaClientOptions)
-      // workaround: JSON.parse(JSON.stringify(obj))
-      const optsJson = JSON.stringify(this.iiot.opcuaClientOptions)
-      detailDebugLog('Options ' + optsJson)
+
       if (!this.iiot.opcuaClient)
-        this.iiot.opcuaClient = OPCUAClient.create(JSON.parse(optsJson))
+        this.iiot.opcuaClient = OPCUAClient.create({...this.iiot.opcuaClientOptions}) // Need to use the spread operator, because otherwise there is phantom circular references
       if (Object.keys(this.iiot.opcuaClient).length === 0) {
         detailDebugLog('Failed to create OPCUA Client ', {opcuaClient: this.iiot.opcuaClient})
       }
@@ -310,10 +304,10 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const endpointMatchForConnecting = (endpoint: EndpointDescription | Todo) => {
+    const endpointMatchForConnecting = (endpoint: EndpointDescription) => {
       internalDebugLog('Auto Endpoint ' + endpoint.endpointUrl?.toString() + ' ' + endpoint.securityPolicyUri?.toString())
-      let securityMode = endpoint.securityMode.key || endpoint.securityMode
-      let securityPolicy = (endpoint.securityPolicyUri.includes('SecurityPolicy#')) ? endpoint.securityPolicyUri.split('#')[1] : endpoint.securityPolicyUri
+      let securityMode = endpoint.securityMode
+      let securityPolicy = (endpoint.securityPolicyUri?.includes('SecurityPolicy#')) ? endpoint.securityPolicyUri.split('#')[1] : endpoint.securityPolicyUri
 
       internalDebugLog('node-mode:' + this.messageSecurityMode + ' securityMode: ' + securityMode)
       internalDebugLog('node-policy:' + this.securityPolicy + ' securityPolicy: ' + securityPolicy)
@@ -409,14 +403,14 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       if (isInactiveOnOPCUA()) {
         internalDebugLog('State Is Not Active While Start Session-> ' + this.iiot.stateMachine.getMachineState())
-        if ((this as Todo).showErrors) {
+        if (this.showErrors) {
           this.error(new Error('OPC UA Connector Is Not Active'), {payload: 'Create Session Error'})
         }
         return
       }
       if (this.iiot.stateMachine.getMachineState() !== 'OPEN') {
         internalDebugLog('Session Request Not Allowed On State ' + this.iiot.stateMachine.getMachineState())
-        if ((this as Todo).showErrors) {
+        if (this.showErrors) {
           this.error(new Error('OPC UA Connector Is Not Open'), {payload: 'Create Session Error'})
         }
         return
@@ -424,7 +418,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       await waitForExist(this.iiot, 'opcuaClient')
       if (!this.iiot.opcuaClient) {
         internalDebugLog('OPC UA Client Connection Is Not Valid On State ' + this.iiot.stateMachine.getMachineState())
-        if ((this as Todo).showErrors) {
+        if (this.showErrors) {
           this.error(new Error('OPC UA Client Connection Is Not Valid'), {payload: 'Create Session Error'})
         }
         return
@@ -715,7 +709,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         this.iiot.opcuaSession = undefined
       }
       if (Object.keys(this.iiot.opcuaClient || {}).length > 1) {
-        // TODO: should this be .disconnect() since removeAllListeners() is not implemented anymore?
         this.iiot.opcuaClient?.removeAllListeners()
         this.iiot.opcuaClient?.disconnect((err?: Error) => {
           if (err && !isUndefined(this.iiot)) {
@@ -726,7 +719,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const subscribeFSMEvents = (fsm: Todo) => {
+    const subscribeFSMEvents = (fsm: Stately.stateMachine) => {
       /* #########   FSM EVENTS  #########     */
 
       fsm.onIDLE = () => {
@@ -804,8 +797,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         this.emit('connection_closed')
         if (isInitializedIIoTNode(this.iiot)) {
           if (Object.keys(this.iiot.opcuaClient || {}).length > 1) {
-            // TODO: should this be .disconnect() since removeAllListeners() is not implemented anymore?
-            this.iiot.opcuaClient?.removeAllListeners()
             this.iiot.opcuaClient?.disconnect((err?: Error) => {
               if (err) {
                 handleError(err)
@@ -886,7 +877,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       subscribeFSMEvents(this.iiot.stateMachine)
     }
 
-    const registerForOPCUA = (opcuaNode: Todo, onAlias: (...args: Todo) => void) => {
+    const registerForOPCUA = (opcuaNode: nodered.Node, onAlias: (event: string, ...args: any) => void) => {
       if (!opcuaNode) {
         internalDebugLog('Node Not Valid To Register In Connector')
         return
@@ -915,7 +906,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const deregisterForOPCUA = (opcuaNode: Todo, done: () => void) => {
+    const deregisterForOPCUA = (opcuaNode: nodered.Node, done: () => void) => {
       if (!opcuaNode) {
         internalDebugLog('Node Not Valid To Deregister In Connector')
         done()
@@ -964,9 +955,6 @@ module.exports = function (RED: nodered.NodeAPI) {
     renewFiniteStateMachine()
 
     this.functions = {
-      deregisterForOPCUA,
-      getUpdatedServerOptions,
-      registerForOPCUA,
       waitForExist,
       restartWithNewSettings,
     }
@@ -975,13 +963,13 @@ module.exports = function (RED: nodered.NodeAPI) {
     if (process.env.isTest == 'TRUE') {
       this.functions = {
         ...this.functions,
+        registerForOPCUA,
         connectToClient,
         connectOPCUAEndpoint,
         resetBadSession,
         startSession,
         renewConnection,
         handleError,
-        registerForOPCUA,
         deregisterForOPCUA,
       }
     }
@@ -1003,7 +991,7 @@ module.exports = function (RED: nodered.NodeAPI) {
   /*  ---------------------  HTTP Requests --------------------- */
 
   RED.httpAdmin.get('/opcuaIIoT/client/discover/:id/:discoveryUrl', RED.auth.needsPermission('opcua.discovery'), function (req, res) {
-    let node: Todo = RED.nodes.getNode(req.params.id)
+    let node = RED.nodes.getNode(req.params.id) as OPCUAIIoTConnectorNode
     let discoverUrlRequest = decodeURIComponent(req.params.discoveryUrl)
     internalDebugLog('Get Discovery Request ' + JSON.stringify(req.params) + ' for ' + discoverUrlRequest)
     if (node) {
@@ -1030,15 +1018,19 @@ module.exports = function (RED: nodered.NodeAPI) {
   })
 
   RED.httpAdmin.get('/opcuaIIoT/client/endpoints/:id/:endpointUrl', RED.auth.needsPermission('opcua.endpoints'), function (req, res) {
-    let node: Todo = RED.nodes.getNode(req.params.id)
+    let node = RED.nodes.getNode(req.params.id) as OPCUAIIoTConnectorNode
     let endpointUrlRequest = decodeURIComponent(req.params.endpointUrl)
     internalDebugLog('Get Endpoints Request ' + JSON.stringify(req.params) + ' for ' + endpointUrlRequest)
+    if (isUndefined(node.iiot)) {
+      node.error('IIoT invalid')
+      return;
+    }
     if (node) {
       if (endpointUrlRequest && !endpointUrlRequest.includes('opc.tcp://')) {
         res.json([])
       } else {
-        if (!node.iiot.opcuaClientOptions) {
-          node.iiot.opcuaClientOptions = node.functions.getUpdatedServerOptions()
+        if (!node.iiot?.opcuaClientOptions) {
+          node.iiot.opcuaClientOptions = node.functions?.getUpdatedServerOptions()
         }
         let discoveryClient = OPCUAClient.create({
           ...node.iiot.opcuaClientOptions,
