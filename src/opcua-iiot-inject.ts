@@ -163,7 +163,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.on('input', (msg: NodeMessageInFlow) => {
       if (Object.keys(msg).length === 0) return;
       try {
-        const topic = node.topic
+        const topic = node.topic || msg.topic
         const payload: InjectPayload = {
           payloadType: node.payloadType,
           value: generateOutputValue(node.payloadType, msg),
@@ -192,7 +192,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
     let timeout = INPUT_TIMEOUT_MILLISECONDS * node.startDelay
 
-    if (node.once) {
+    if (this.once) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
       onceTimeout = setTimeout(() => {
         coreInject.detailDebugLog('injecting once at start')
@@ -209,8 +209,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       repeaterSetup()
     }
 
-    node.close = function () {
-      let node = this
+    this.close = async (removed: boolean) => {
 
       if (cronjob) {
         cronjob.stop()
@@ -224,13 +223,13 @@ module.exports = function (RED: nodered.NodeAPI) {
 
   RED.httpAdmin.post('/opcuaIIoT/inject/:id', RED.auth.needsPermission('opcuaIIoT.inject.write'), function (req, res) {
     let node = RED.nodes.getNode(req.params.id)
-
     if (node) {
       try {
         node.receive()
         res.sendStatus(200)
       } catch (err: any) {
         /* istanbul ignore next */
+        console.log(err)
         res.sendStatus(500)
         node.error(RED._('opcuaiiotinject.failed', { error: err.toString() }))
       }

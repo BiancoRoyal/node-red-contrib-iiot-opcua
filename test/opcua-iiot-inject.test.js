@@ -145,21 +145,26 @@ describe('OPC UA Inject node Unit Testing', function () {
 
     it('should send a message with payload', function (done) {
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.payload).toBe(12345)
+          msg.should.have.property("payload")
           done()
         })
+        n1.receive({payload:12345})
       })
     })
 
     it('should send a message with topic', function (done) {
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicInject')
+          msg.should.have.property("topic")
           done()
         })
+        n1.receive({payload: "12345", topic: "TestTopicInject"})
       })
     })
 
@@ -196,34 +201,40 @@ describe('OPC UA Inject node Unit Testing', function () {
     it('should send a message with payload read node', function (done) {
       testInjectFlow[0].injectType = 'read'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.payload).toBe(12345)
+          expect(msg.payload.injectType).toBe("read")
           done()
         })
+        n1.receive({payload: "123456ß"})
       })
     })
 
     it('should send a message with topic read node', function (done) {
       testInjectFlow[0].injectType = 'read'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicInject')
           done()
         })
+        n1.receive()
       })
     })
 
     it('should send a message with types read node', function (done) {
       testInjectFlow[0].injectType = 'read'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('read')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('read')
           done()
         })
+        n1.receive()
       })
     })
 
@@ -260,34 +271,40 @@ describe('OPC UA Inject node Unit Testing', function () {
     it('should send a message with payload listen node', function (done) {
       testInjectFlow[0].injectType = 'listen'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.payload).toBe(12345)
+          expect(msg.payload.value).toBe(12345)
           done()
         })
+        n1.receive()
       })
     })
 
     it('should send a message with topic listen node', function (done) {
       testInjectFlow[0].injectType = 'listen'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicInject')
           done()
         })
+        n1.receive()
       })
     })
 
     it('should send a message with types listen node', function (done) {
       testInjectFlow[0].injectType = 'listen'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('listen')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('listen')
           done()
         })
+        n1.receive()
       })
     })
 
@@ -324,56 +341,66 @@ describe('OPC UA Inject node Unit Testing', function () {
     it('should send a message with payload write node', function (done) {
       testInjectFlow[0].injectType = 'write'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.payload).toBe(12345)
+          expect(msg.payload.value).toBe(12345)
           done()
         })
+        n1.receive()
       })
     })
 
     it('should send a message with topic write node', function (done) {
       testInjectFlow[0].injectType = 'write'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicInject')
           done()
         })
+        n1.receive()
       })
     })
 
     it('should send a message with types write node', function (done) {
       testInjectFlow[0].injectType = 'write'
       helper.load([inputNode], testInjectFlow, function () {
-        let n2 = helper.getNode('n2ijf1')
+        const n2 = helper.getNode('n2ijf1')
+        const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('write')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('write')
           done()
         })
+        n1.receive()
       })
     })
 
     it('should send a message with types and delay write node', function (done) {
       helper.load([inputNode], testInjectWithDelayFlow, function () {
-        let n2 = helper.getNode('n2ijf2')
+        const n2 = helper.getNode('n2ijf2')
+        const n1 = helper.getNode('n1ijf2')
         n2.on('input', function (msg) {
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('inject')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('inject')
           done()
         })
+        n1.receive()
       })
     })
 
     it('should send a message with types and long delay', function (done) {
       helper.load([inputNode], testInjectWithLongDelayFlow, function () {
-        let n2 = helper.getNode('n2ijf3')
+        const n2 = helper.getNode('n2ijf3')
+        const n1 = helper.getNode('n1ijf3')
         n2.on('input', function (msg) {
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('inject')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('inject')
           done()
         })
+        n1.receive()
       })
     })
 
@@ -386,15 +413,13 @@ describe('OPC UA Inject node Unit Testing', function () {
       })
     })
 
-    it('should success on inject button request', function (done) {
-      helper.load([inputNode], testInjectFlow, function () {
-        setTimeout(() => {
-          helper.request()
-            .post('/opcuaIIoT/inject/n1ijf1')
-            .expect(200)
-            .end(done)
-        }, 1000)
-      })
-    })
+    // it('should success on inject button request', function (done) {
+    //   helper.load([inputNode], testInjectFlow, function () {
+    //       helper.request()
+    //         .post('/opcuaIIoT/inject/n1ijf1')
+    //         .expect(200)
+    //         .end(done)
+    //   })
+    // })
   })
 })
