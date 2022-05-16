@@ -2,6 +2,27 @@ import * as nodeOPCUA from "node-opcua";
 import {BrowseMessage, DataType, DataValue, ItemNodeId, NodeIdentifier, NodeToWrite, VariantType} from "./core";
 import {NodeId} from "node-opcua";
 
+export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): void => {
+  if (depth == 1)
+    console.log("Types of object: {");
+  const indent = "  ".repeat(depth);
+  if (o === undefined || o === null){
+    console.log(indent + "object is null or undefined");
+    return;
+  }
+  Object.keys(o).forEach((key: string) => {
+    if (typeof o[key] === "object") {
+      console.log(indent + key + ": {");
+      recursivePrintTypes(o[key], depth + 1);
+      console.log(indent + "}, ");
+    } else {
+      console.log(indent + key + ": " + typeof key + " = " + o[key] + ',');
+    }
+  })
+  if (depth == 1)
+    console.log("} \nTypes Complete");
+}
+
 export type Todo = any;
 export type TodoVoidFunction = (...args: any) => void;
 export type TodoBianco = Todo;

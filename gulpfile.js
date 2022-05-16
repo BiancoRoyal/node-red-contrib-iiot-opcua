@@ -67,7 +67,7 @@ function web () {
 function ts () {
     var ts = require("gulp-typescript")
     var tsProject = ts.createProject('tsconfig.json');
-    return tsProject.src().pipe(tsProject()).js.pipe(gulp.dest("dist"))
+    return tsProject.src().pipe(tsProject()).js.pipe(gulp.dest("opcuaIIoT"))
 }
 
 function nodejs () {
@@ -85,14 +85,14 @@ function doc (cb) {
     .pipe(jsdoc(cb))
 }
 
-function code () {
-  return gulp.src('src/**/*.ts')
-    .pipe(babel({ presets: ['@babel/env'] }))
-    .pipe(gulp.dest('code'))
-}
+// function code () {
+//   return gulp.src('src/**/*.ts')
+//     .pipe(babel({ presets: ['@babel/env'] }))
+//     .pipe(gulp.dest('code'))
+// }
 
 const docs = series(doc, docIcons, docImages)
-const build = series(wipe, web, ts, locale, code, publics, icons)
+const build = series(wipe, web, ts, locale, publics, icons)
 
 exports.docs = docs
 exports.clean = wipe
