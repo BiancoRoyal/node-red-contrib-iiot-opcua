@@ -47,7 +47,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     const initNewServer = () => {
       node = coreServer.initRegisterServerMethod(node)
       let serverOptions = coreServer.buildGeneralServerOptions(node, 'Fix')
-      serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
 
       try {
         coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
