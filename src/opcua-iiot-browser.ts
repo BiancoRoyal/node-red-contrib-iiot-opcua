@@ -167,9 +167,8 @@ module.exports = function (RED: nodered.NodeAPI) {
                                     callback(rootNode, depth, msg, lists)
                                 } else {
                                     subLists = lists
+                                    browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
                                 }
-
-                                browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
                             } else {
                                 coreBrowser.internalDebugLog('Minimum Depth Reached On Browse At ' + rootNodeId)
                                 callback(rootNodeId, depth, msg, lists)
@@ -336,7 +335,6 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         const browseWithAddressSpaceItems = function (msg: NodeMessageInFlow, depth: number, lists: Lists) {
             const payload = msg.payload as BrowserInputPayloadLike
-
             if (payload.addressSpaceItems && payload.addressSpaceItems.length > 0) {
                 browseNodeList(payload.addressSpaceItems, msg, depth, lists, browseSendResult)
             } else {
@@ -351,11 +349,9 @@ module.exports = function (RED: nodered.NodeAPI) {
                 this.status({ fill: 'red', shape: 'ring', text: 'invalid connector session' })
                 return
             }
-
             let lists = createListsObject()
             let depth = (nodeConfig.recursiveBrowse) ? nodeConfig.recursiveDepth : 0
             nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic(msg.payload as BrowserInputPayloadLike, nodeConfig) // set topic to the node object for HTTP requests at node
-
             if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
                 browse(nodeConfig.browseTopic, msg, depth, lists, browseSendResult)
             } else {
