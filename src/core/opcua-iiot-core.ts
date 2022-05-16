@@ -124,25 +124,6 @@ export function calcMillisecondsByTimeAndUnit(time: number, unit: TimeUnits): nu
   }
 }
 
-export function buildBrowseMessage(topic: Todo): BrowseMessage {
-  return {
-    'topic': topic,
-    'nodeId': '',
-    'browseName': '',
-    'nodeClassType': '',
-    'typeDefinition': '',
-    'payload': ''
-  }
-}
-
-export function toInt32(uintSixteen: number): number {
-
-  if (uintSixteen >= Math.pow(2, 15)) {
-    return uintSixteen - Math.pow(2, 16)
-  }
-  return uintSixteen
-}
-
 export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStatus {
   let fillValue: NodeStatusFill = 'yellow'
   let shapeValue: NodeStatusShape = 'ring'

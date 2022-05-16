@@ -30,10 +30,6 @@ export type AddressSpaceItem = {
   datatypeName: string
 }
 
-// export type AddressSpaceItem = {
-//   datatypeName: DataType
-// } & NodeToWrite
-
 export type BrowseMessage = {
   'topic': string
   'nodeId': string
@@ -64,10 +60,16 @@ type NodeIdentifierString = {
   type: Exclude<NodeIdType, NodeIdType.NUMERIC>
 }
 
+/**
+ * Creates a copy of type <T>, except that all keys are optional.
+ */
 export type Like<T> = {
   [key in keyof T]?: T[key]
 }
 
+/**
+ * Get a list of enum keys from an enum
+ */
 export const getEnumKeys = <O extends object, K extends keyof O>(obj: O): K[] => {
   return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
 }

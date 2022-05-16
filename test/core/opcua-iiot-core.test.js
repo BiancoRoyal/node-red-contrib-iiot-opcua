@@ -103,17 +103,6 @@ describe('OPC UA Core', function () {
   })
 
   describe('core build functions', function () {
-    it('should return the right string for the topic in message build', function (done) {
-      let msg = core.buildBrowseMessage('TestTopic')
-      assert.equal('TestTopic', msg.topic)
-      done()
-    })
-
-    it('should return the right string for converting to Int32', function (done) {
-      let result = core.toInt32(16)
-      assert.equal(16, result)
-      done()
-    })
 
     it('should return the right namesapce zero from msg topic', function (done) {
       let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
