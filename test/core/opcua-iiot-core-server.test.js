@@ -9,15 +9,16 @@
 
 jest.setTimeout(5000)
 
-let coreServer = require('../../src/core/opcua-iiot-core-server')
+let {default: coreServer} = require('../../src/core/opcua-iiot-core-server')
+const {OPCUAServer} = require("node-opcua");
 let opcuaserver = null
 
 describe('OPC UA Core Server', function () {
   beforeEach(function (done) {
     opcuaserver = null
-    opcuaserver = new coreServer.core.nodeOPCUA.OPCUAServer({
+    opcuaserver = new OPCUAServer({
       port: 53531,
-      resourcePath: 'UA/MyLittleTestServer',
+      resourcePath: '/UA/MyLittleTestServer',
       buildInfo: {
         productName: 'MyTestServer1',
         buildNumber: '7658',
@@ -41,21 +42,26 @@ describe('OPC UA Core Server', function () {
 
   describe('core server functions', function () {
     it('should work on server initialize callback', function (done) {
-      opcuaserver.initialize(function () {
-        coreServer.constructAddressSpace(opcuaserver, true).then(function () {
+      const run = async () => {
+        await opcuaserver.initialize()
+        coreServer.constructAddressSpace(opcuaserver, true).then(() => {
           done()
         })
-      })
+      }
+      run()
     })
 
     it('should reset count server timeInterval on maxTimeInterval', function (done) {
       opcuaserver.initialize(function () {
-        coreServer.constructAddressSpace(opcuaserver, true).then(function () {
-          coreServer.timeInterval = coreServer.maxTimeInterval
-          coreServer.simulateVariation({})
-          expect(coreServer.timeInterval).toBe(1)
-          done()
-        })
+        const run = async () => {
+          coreServer.constructAddressSpace(opcuaserver, true).then(function () {
+            coreServer.timeInterval = coreServer.maxTimeInterval
+            coreServer.simulateVariation({})
+            expect(coreServer.timeInterval).toBe(500000)
+            done()
+          })
+        }
+        run()
       })
     })
 
@@ -84,9 +90,9 @@ describe('OPC UA Core Server', function () {
     it('should work on server start callback', function (done) {
       opcuaserver.initialize(function () {
         coreServer.constructAddressSpace(opcuaserver, true).then(function () {
-          let node = { bianco: { iiot: {initialized: false} } }
+          let node = { iiot: {initialized: false} }
           coreServer.start(opcuaserver, node).then(function () {
-            expect(node.bianco.iiot.initialized).toBe(true)
+            expect(node.iiot.initialized).toBe(true)
             done()
           })
         })

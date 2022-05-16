@@ -10,6 +10,8 @@
 
 'use strict'
 
+process.env.TEST = "true"
+
 jest.setTimeout(5000)
 
 // opcua iiot
@@ -119,7 +121,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
       helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
-        n1.bianco.iiot.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
+        n1.functions.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
         done()
       })
     })
@@ -164,7 +166,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
       helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
-        n1.bianco.iiot.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
+        n1.iiot.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
         done()
       })
     })
@@ -209,7 +211,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
       helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
-        n1.bianco.iiot.handleMethodWarn('Test')
+        n1.functions.handleMethodWarn('Test')
         done()
       })
     })
@@ -218,7 +220,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
       helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
-        n1.bianco.iiot.callMethodOnSession(null)
+        n1.functions.callMethodOnSession(null)
         done()
       })
     })

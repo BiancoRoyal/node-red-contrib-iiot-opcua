@@ -17,3 +17,5 @@ jcoverage/
 \.jsinspect-results\.json
 
 certificates/
+
+dist/

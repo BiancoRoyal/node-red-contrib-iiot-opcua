@@ -12,7 +12,7 @@ jest.setTimeout(5000)
 describe('OPC UA Core Client', function () {
   let assert = require('chai').assert
   let expect = require('chai').expect
-  let coreClient = require('../../src/core/opcua-iiot-core-client')
+  let {default: coreClient} = require('../../src/core/opcua-iiot-core-client')
 
   describe('write', function () {
     it('should return Error object, if none value is present', function (done) {

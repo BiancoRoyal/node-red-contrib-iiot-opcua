@@ -81,9 +81,7 @@
     align: 'left',
     icon: 'icon.png'
   })
-</script>
 
-<script type="text/javascript">
   let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
   injectNode.button = {
     onclick: function () {
@@ -124,10 +122,6 @@
       })
     }
   }
-</script>
-
-<script type="text/javascript">
-  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
   injectNode.oneditprepare = function () {
     let node = this
     let fieldPayloadType = $('#node-input-payloadType')
@@ -529,10 +523,6 @@
 
     // console.log('well done editprepare ...')
   }
-</script>
-
-<script type="text/javascript">
-  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
   injectNode.oneditsave = function () {
     let node = this
     let repeat = ''
@@ -644,11 +634,6 @@
 
     // console.log('well done editsave ...')
   }
-
-</script>
-
-<script type="text/javascript">
-  let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
   injectNode.label = function () {
     let suffix = ''
 

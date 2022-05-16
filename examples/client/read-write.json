@@ -110,7 +110,7 @@
     "type": "function",
     "z": "f49a0646.6b54a8",
     "name": "toWriteMsg",
-    "func": "msg.nodetype = 'inject';\nmsg.injectType = 'write'\nmsg.valuesToWrite = [16.04]\nreturn msg;",
+    "func": "msg.payload.nodetype = 'inject';\nmsg.payload.injectType = 'write'\nmsg.payload.valuesToWrite = [16.04]\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
     "x": 410,

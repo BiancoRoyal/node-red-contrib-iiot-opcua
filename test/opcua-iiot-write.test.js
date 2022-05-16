@@ -10,6 +10,8 @@
 
 'use strict'
 
+process.env.TEST = "true"
+
 jest.setTimeout(5000)
 
 var injectNodeRedNode = require('@node-red/nodes/core/common/20-inject')
@@ -71,7 +73,7 @@ describe('OPC UA Write node Unit Testing', function () {
       helper.load(writeNodesToLoad, writeUnitFlow, () => {
         let n1 = helper.getNode('34d2c6bc.43275b')
         if (n1) {
-          n1.bianco.iiot.handleWriteError(new Error('Testing Error To Handle'), {payload: {}})
+          n1.functions.handleWriteError(new Error('Testing Error To Handle'), {payload: {}})
           done()
         }
       })

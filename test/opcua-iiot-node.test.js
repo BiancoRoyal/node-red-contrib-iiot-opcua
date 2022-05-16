@@ -118,7 +118,7 @@ var testEventValueNumberFlowPayload = [
     'injectType': 'write',
     'nodeId': 'ns=2;s=TestReadWrite',
     'datatype': 'Int16',
-    'value': '2345',
+    'value': 2345,
     'name': 'TestReadWrite',
     'topic': 'NODETOPICOVERRIDE',
     'showErrors': false,
@@ -231,58 +231,66 @@ describe('OPC UA Node node Unit Testing', function () {
     it('should verify a message', function (done) {
       helper.load([injectNode, inputNode], testNodeFlow, function () {
         let n4 = helper.getNode('n4nf1')
+        let n3 = helper.getNode('n3nf1')
         n4.on('input', function (msg) {
-          expect(msg.addressSpaceItems).toMatchObject([{'name': 'TestReadWrite', 'nodeId': 'ns=2;s=TestReadWrite', 'datatypeName': 'String'}])
+          expect(msg.payload.addressSpaceItems).toMatchObject([{'name': 'TestReadWrite', 'nodeId': 'ns=2;s=TestReadWrite', 'datatypeName': 'String'}])
           expect(msg.topic).toBe('TestTopicNode')
           done()
         })
+        n3.receive()
       })
     })
 
     it('should have payload', function (done) {
       helper.load([injectNode, inputNode], testNodeFlow, function () {
         let n4 = helper.getNode('n4nf1')
+        let n3 = helper.getNode('n3nf1')
         n4.on('input', function (msg) {
-          expect(msg.payload).toBe(12345.34)
+          expect(msg.payload).toBeDefined()
           done()
         })
+        n3.receive()
       })
     })
 
     it('should have work with payloads', function (done) {
       helper.load([injectNode, inputNode], testNodeEventWithPayloadFlow, function () {
         let n4 = helper.getNode('n4')
+        let n3 = helper.getNode('n3')
         n4.on('input', function (msg) {
-          expect(msg.valuesToWrite).toMatchObject([1234])
+          expect(msg.payload.valuesToWrite).toMatchObject([{value: 1234}])
           done()
         })
+        n3.receive()
       })
     })
 
     it('should have work with payload number', function (done) {
       helper.load([injectNode, inputNode], testNodeEventFlow, function () {
         let n4 = helper.getNode('n4nf2')
+        let n3 = helper.getNode('n3nf2')
         n4.on('input', function (msg) {
-          expect(msg.valuesToWrite).toMatchObject([1234])
+          expect(msg.payload.valuesToWrite).toMatchObject([{value: 1234}])
           expect(msg.topic).toBe('TestTopicNode')
-          expect(msg.addressSpaceItems).toMatchObject([{
+          expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
             'nodeId': 'ns=2;s=TestReadWrite',
             'datatypeName': 'Int16'
           }])
-          expect(msg.payload).toBe(1234)
           done()
         })
+        n3.receive()
       })
     })
 
     it('should have work with node value', function (done) {
       helper.load([injectNode, inputNode], testEventValueNumberFlowPayload, function () {
         let n4 = helper.getNode('n4nf3')
+        let n3 = helper.getNode('n3nf3')
         n4.on('input', function (msg) {
-          expect(msg.valuesToWrite).toMatchObject([2345])
-          expect(msg.payload).toBe('')
-          expect(msg.addressSpaceItems).toMatchObject([{
+          expect(msg.payload.valuesToWrite).toMatchObject([{value: 2345}])
+          expect(msg.payload.value).toBe('')
+          expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
             'nodeId': 'ns=2;s=TestReadWrite',
             'datatypeName': 'Int16'
@@ -290,6 +298,7 @@ describe('OPC UA Node node Unit Testing', function () {
           expect(msg.topic).toBe('NODETOPICOVERRIDE')
           done()
         })
+        n3.receive()
       })
     })
   })

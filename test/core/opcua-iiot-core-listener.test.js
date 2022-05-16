@@ -12,12 +12,12 @@ jest.setTimeout(5000)
 describe('OPC UA Core Listener', function () {
   let assert = require('chai').assert
   let expect = require('chai').expect
-  let coreListener = require('../../src/core/opcua-iiot-core-listener')
+  let {default: coreListener} = require('../../src/core/opcua-iiot-core-listener')
   const TIME_IN_MILLISECONDS = 10000
 
   describe('Parameter', function () {
     it('should return Event Subscribtion Parameters', function (done) {
-      let sut = coreListener.getEventSubscribtionParameters(TIME_IN_MILLISECONDS)
+      let sut = coreListener.getEventSubscriptionParameters(TIME_IN_MILLISECONDS)
       expect(sut).to.be.an('object').that.has.property('requestedPublishingInterval', TIME_IN_MILLISECONDS)
       expect(sut).to.be.an('object').that.has.property('requestedLifetimeCount', 1000 * 60 * 20)
       expect(sut).to.be.an('object').that.has.property('requestedMaxKeepAliveCount', 120)

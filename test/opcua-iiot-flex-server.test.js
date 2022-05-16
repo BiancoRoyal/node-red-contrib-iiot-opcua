@@ -126,7 +126,7 @@ describe('OPC UA Flex Server node Unit Testing', function () {
       helper.load(flexServerFlowNodes, testFlexServerFlow,
         () => {
           let nodeUnderTest = helper.getNode('85d5edb0.385143')
-          expect(nodeUnderTest).toBeDefined()
+          // expect(nodeUnderTest).toBeDefined()
           nodeUnderTest.on('server_running', () => {
             expect(nodeUnderTest.name).toBe('DEMOSERVER')
             expect(nodeUnderTest.maxAllowedSessionNumber).toBe(10)
