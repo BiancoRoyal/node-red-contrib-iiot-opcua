@@ -47,7 +47,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     const initNewServer = () => {
       node = coreServer.initRegisterServerMethod(node)
       let serverOptions = coreServer.buildGeneralServerOptions(node, 'Fix')
-      serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
 
       try {
         coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
@@ -166,6 +165,10 @@ module.exports = (RED: nodered.NodeAPI) => {
     })
 
     this.on('shutdown', () => {
+      this.status({fill: 'yellow', shape: 'dot', text: 'restarting'})
+      closeServer(() => {
+        coreServer.internalDebugLog('Server Node Shutdown')
+      })
       node.iiot.opcuaServer = null
       initNewServer()
     })
