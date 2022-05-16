@@ -68,7 +68,7 @@ module.exports = function (RED) {
     let disconnectTimeout = null
     let nodeOPCUAClientPath = coreConnector.core.getNodeOPCUAClientPath()
 
-    node.securedCommunication = (node.securityPolicy && node.securityPolicy !== 'None' && node.messageSecurityMode && node.messageSecurityMode !== 'NONE')
+    node.securedCommunication = (node.securityPolicy && node.securityPolicy !== 'None' && node.messageSecurityMode && node.messageSecurityMode !== 'None')
 
     coreConnector.detailDebugLog('config: ' + node.publicCertificateFile)
     coreConnector.detailDebugLog('config: ' + node.privateKeyFile)
@@ -108,13 +108,13 @@ module.exports = function (RED) {
     node.bianco.iiot.updateServerOptions = function () {
       node.bianco.iiot.initCertificatesAndKeys()
       node.bianco.iiot.opcuaClientOptions = {
-        securityPolicy: node.securityPolicy || 'None',
-        securityMode: node.messageSecurityMode || 'NONE',
+        securityPolicy: coreConnector.core.nodeOPCUA.coerceSecurityPolicy(node.securityPolicy || 'None'),
+        securityMode: coreConnector.core.nodeOPCUA.coerceMessageSecurityMode(node.messageSecurityMode || 'None'),
         defaultSecureTokenLifetime: node.defaultSecureTokenLifetime || 120000,
         keepSessionAlive: node.keepSessionAlive,
         certificateFile: node.publicCertificateFile,
         privateKeyFile: node.privateKeyFile,
-        endpoint_must_exist: node.endpointMustExist,
+        endpointMustExist: node.endpointMustExist,
         requestedSessionTimeout: node.requestedSessionTimeout || 60000,
         connectionStrategy: {
           maxRetry: node.strategyMaxRetry || 2000,
@@ -133,8 +133,16 @@ module.exports = function (RED) {
       coreConnector.internalDebugLog('Connecting To Endpoint ' + node.endpoint)
 
       node.bianco.iiot.updateServerOptions()
-      coreConnector.detailDebugLog('Options ' + JSON.stringify(node.bianco.iiot.opcuaClientOptions))
-      node.bianco.iiot.opcuaClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.bianco.iiot.opcuaClientOptions)
+      // TODO: causes "TypeError: Converting circular structure to JSON" at line 578 in this file
+      //    node.bianco.iiot.opcuaClient = coreConnector.core.nodeOPCUA.OPCUAClient.create(node.bianco.iiot.opcuaClientOptions)
+      //    coreConnector.detailDebugLog('Options ' + node.bianco.iiot.opcuaClientOptions)
+      // workaround: JSON.parse(JSON.stringify(obj))
+      const optsJson = JSON.stringify(node.bianco.iiot.opcuaClientOptions)
+      coreConnector.detailDebugLog('Options ' + optsJson)
+      node.bianco.iiot.opcuaClient = coreConnector.core.nodeOPCUA.OPCUAClient.create(JSON.parse(optsJson))
+      if (Object.keys(node.bianco.iiot.opcuaClient).length === 0) {
+        coreConnector.detailDebugLog('Failed to create OPCUA Client ', {opcuaClient: node.bianco.iiot.opcuaClient})
+      }
 
       if (node.autoSelectRightEndpoint) {
         node.bianco.iiot.autoSelectEndpointFromConnection()
@@ -220,19 +228,19 @@ module.exports = function (RED) {
     node.bianco.iiot.autoSelectEndpointFromConnection = function () {
       coreConnector.internalDebugLog('Auto Searching For Endpoint On ' + node.endpoint)
 
-      let endpointMustExist = node.bianco.iiot.opcuaClientOptions.endpoint_must_exist
-      node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = false
+      let endpointMustExist = node.bianco.iiot.opcuaClientOptions.endpointMustExist
+      node.bianco.iiot.opcuaClientOptions.endpointMustExist = false
 
-      let discoverClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.bianco.iiot.opcuaClientOptions)
+      let discoverClient = coreConnector.core.nodeOPCUA.OPCUAClient.create(node.bianco.iiot.opcuaClientOptions)
 
       discoverClient.connect(node.endpoint).then(function () {
         coreConnector.internalDebugLog('Auto Searching Endpoint Connected To ' + node.endpoint)
         node.bianco.iiot.selectEndpointFromSettings(discoverClient)
-        node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
+        node.bianco.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
       }).catch(function (err) {
         coreConnector.internalDebugLog('Get Auto Endpoint Request Error ' + err.message)
         if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
-          node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
+          node.bianco.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
         }
       })
     }
@@ -504,15 +512,23 @@ module.exports = function (RED) {
     node.bianco.iiot.resetOPCUAObjects = function () {
       coreConnector.detailDebugLog('Reset All OPC UA Objects')
       node.bianco.iiot.sessionNodeRequests = 0
-      if (node.bianco.iiot.opcuaClient) {
-        node.bianco.iiot.opcuaClient.removeAllListeners()
-      }
-      node.bianco.iiot.opcuaClient = null
-
       if (node.bianco.iiot.opcuaSession) {
+        if (node.bianco.iiot.opcuaClient) {
+          node.bianco.iiot.opcuaClient.closeSession(node.bianco.iiot.opcuaSession, true)
+        }
         node.bianco.iiot.opcuaSession.removeAllListeners()
+        node.bianco.iiot.opcuaSession = null
       }
-      node.bianco.iiot.opcuaSession = null
+      if (Object.keys(node.bianco.iiot.opcuaClient || {}).length > 1) {
+        // TODO: should this be .disconnect() since removeAllListeners() is not implemented anymore?
+        node.bianco.iiot.opcuaClient.removeAllListeners()
+        node.bianco.iiot.opcuaClient.disconnect(function (err) {
+          if (err) {
+            node.bianco.iiot.handleError(err)
+          }          
+        })
+        node.bianco.iiot.opcuaClient = null
+      }
     }
 
     node.bianco.iiot.subscribeFSMEvents = function (fsm) {
@@ -591,10 +607,16 @@ module.exports = function (RED) {
         coreConnector.detailDebugLog('Connector Client Close Event FSM')
         node.emit('connection_closed')
         if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
-          if (node.bianco.iiot.opcuaClient) {
+          if (Object.keys(node.bianco.iiot.opcuaClient || {}).length > 1) {
+            // TODO: should this be .disconnect() since removeAllListeners() is not implemented anymore?
             node.bianco.iiot.opcuaClient.removeAllListeners()
+            node.bianco.iiot.opcuaClient.disconnect(function (err) {
+              if (err) {
+                node.bianco.iiot.handleError(err)
+              }          
+            })
+            node.bianco.iiot.opcuaClient = null
           }
-          node.bianco.iiot.opcuaClient = null
         }
       }
 
@@ -719,7 +741,7 @@ module.exports = function (RED) {
 
       if (Object.keys(node.bianco.iiot.registeredNodeList).length === 0) {
         node.bianco.iiot.stateMachine.lock().stopopcua()
-        if (node.bianco.iiot.opcuaClient) {
+        if (Object.keys(node.bianco.iiot.opcuaClient || {}).length > 1) {
           coreConnector.detailDebugLog('OPC UA Direct Disconnect On Unregister Of All Nodes')
           try {
             node.bianco.iiot.opcuaClient.disconnect(function (err) {
@@ -799,8 +821,8 @@ module.exports = function (RED) {
       if (endpointUrlRequest && !endpointUrlRequest.includes('opc.tcp://')) {
         res.json([])
       } else {
-        const endpointMustExist = node.bianco.iiot.opcuaClientOptions.endpoint_must_exist // to reset later
-        node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = false
+        const endpointMustExist = node.bianco.iiot.opcuaClientOptions.endpointMustExist // to reset later
+        node.bianco.iiot.opcuaClientOptions.endpointMustExist = false
         let discoveryClient = new coreConnector.core.nodeOPCUA.OPCUAClient(node.bianco.iiot.opcuaClientOptions)
         discoveryClient.connect(endpointUrlRequest).then(function () {
           coreConnector.internalDebugLog('Get Endpoints Connected For Request')
@@ -818,11 +840,11 @@ module.exports = function (RED) {
             discoveryClient.disconnect(function () {
               coreConnector.internalDebugLog('Get Endpoints Request Disconnect')
             })
-            node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
+            node.bianco.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
           })
         }).catch(function (err) {
           if (coreConnector.core.isInitializedBiancoIIoTNode(node)) {
-            node.bianco.iiot.opcuaClientOptions.endpoint_must_exist = endpointMustExist
+            node.bianco.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
           }
           coreConnector.internalDebugLog('Get Endpoints Request Error ' + err.message)
           res.json([])

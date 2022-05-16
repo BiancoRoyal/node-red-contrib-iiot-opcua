@@ -16,7 +16,7 @@
       keepSessionAlive: {value: true},
       loginEnabled: {value: false},
       securityPolicy: {value: 'None', required: true},
-      securityMode: {value: 'NONE', required: true},
+      securityMode: {value: 'None', required: true},
       name: {value: "LOCAL SERVER"},
       showErrors: {value: false},
       individualCerts: {value: false},
@@ -255,23 +255,23 @@
                 <span data-i18n="opcua-iiot-contrib.label.securityPolicy"></span></label>
                 <select type="text" id="node-config-input-securityPolicy">
                     <option value="None">None</option>
-                    <option value="Basic128">Basic128</option>
-                    <option value="Basic128Rsa15">Basic128Rsa15</option>
-                    <option value="Basic192">Basic192</option>
-                    <option value="Basic192Rsa15">Basic192Rsa15</option>
-                    <option value="Basic256">Basic256</option>
-                    <option value="Basic256Rsa15">Basic256Rsa15</option>
                     <option value="Basic256Sha256">Basic256Sha256</option>
-                </select>
+                    <option value="Basic256Rsa15">Basic256Rsa15</option>
+                    <option value="Basic256">Basic256</option>
+                    <option value="Basic192Rsa15">Basic192Rsa15</option>
+                    <option value="Basic128Rsa15">Basic128Rsa15</option>
+                    <option value="Aes256_Sha256_RsaPss">Aes256_Sha256_RsaPss</option>
+                    <option value="Aes128_Sha256_RsaOaep">Aes128_Sha256_RsaOaep</option>                                        
+                  </select>
             </div>
             <div class="form-row">
                 <!-- MessageSecurityMode enum via REST -->
                 <label for="node-config-input-securityMode" style="min-width:140px"><i class="fa fa-key"></i>
                 <span data-i18n="opcua-iiot-contrib.label.securityMode"></span></label>
                 <select type="text" id="node-config-input-securityMode">
-                    <option value="NONE">None</option>
-                    <option value="SIGN">Sign</option>
-                    <option value="SIGNANDENCRYPT">Sign&Encrypt</option>
+                    <option value="None">None</option>
+                    <option value="Sign">Sign</option>
+                    <option value="SignAndEncrypt">Sign&Encrypt</option>
                 </select>
             </div>
             <div class="form-row">
@@ -413,13 +413,13 @@
     <div>
         <ul style="margin-left:80px">
             <li>None
-            <li>Basic128
-            <li>Basic128Rsa15
-            <li>Basic192
-            <li>Basic192Rsa15
-            <li>Basic256
-            <li>Basic256Rsa15
             <li>Basic256Sha256
+            <li>Basic256Rsa15
+            <li>Basic256
+            <li>Basic192Rsa15
+            <li>Basic128Rsa15
+            <li>Aes256_Sha256_RsaPss
+            <li>Aes128_Sha256_RsaOaep
         </ul>
     </div>
 
