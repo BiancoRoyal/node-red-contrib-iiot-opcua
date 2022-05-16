@@ -168,7 +168,7 @@ module.exports = function (RED: nodered.NodeAPI) {
           payloadType: node.payloadType,
           value: generateOutputValue(node.payloadType, msg),
           nodetype: 'inject',
-          injectType: (msg.payload as Todo).injectType || node.injectType,
+          injectType: (msg.payload as Todo)?.injectType || node.injectType,
           addressSpaceItems: [...node.addressSpaceItems],
           manualInject: Object.keys(msg).length !== 0
         }
