@@ -26,3 +26,17 @@ jobs:
             examples
             package.json
             create_certificates.js
+
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/download-artifact@v3
+        with: # Download artifacts from build.yml hopefully
+          name: build-folders
+          path: |
+            opcuaIIoT
+            examples
+            package.json
+            create_certificates.js
+      - run: ls opcuaIIoT
+      - run: github.ref
