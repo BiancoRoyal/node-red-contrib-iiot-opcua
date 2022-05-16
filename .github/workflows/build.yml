@@ -18,14 +18,11 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm install
       - run: npm run build
+      - run: tar -czf distrib.tar.gz opcuaIIoT examples package.json create_certificates.js
       - uses: actions/upload-artifact@v3
         with:
           name: build-folders
-          path: |
-            opcuaIIoT
-            examples
-            package.json
-            create_certificates.js
+          path: distrib.tar.gz
 
   publish:
     runs-on: ubuntu-20.04
@@ -34,12 +31,9 @@ jobs:
       - uses: actions/download-artifact@v3
         with: # Download artifacts from build.yml hopefully
           name: build-folders
-          path: |
-            opcuaIIoT
-            examples
-            package.json
-            create_certificates.js
+          path: distrib.tar.gz
       - run: echo $github.ref
+      - run: tar -xzf distrib.tar.gz
       - run: pwd
       - run: ls
       - run: file opcuaIIoT
