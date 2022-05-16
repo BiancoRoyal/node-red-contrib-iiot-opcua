@@ -128,8 +128,8 @@ module.exports = (RED: NodeAPI) => {
         msg)
         .then((readResult: Todo) => {
           let message = buildResultMessage('HistoryValue', readResult)
-          message.historyStart = readResult.startDate || node.iiot.historyStart
-          message.historyEnd = readResult.endDate || node.iiot.historyEnd
+          message.payload.historyStart = readResult.startDate || node.iiot.historyStart
+          message.payload.historyEnd = readResult.endDate || node.iiot.historyEnd
           this.send(message)
         }).catch((err: Error) => {
           /* istanbul ignore next */
@@ -152,7 +152,7 @@ module.exports = (RED: NodeAPI) => {
       coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg)
         .then((readResult: Todo) => {
           let message = buildResultMessage('Default', readResult)
-          message.maxAge = node.maxAge
+          message.payload.maxAge = node.maxAge
           this.send(message)
         }).catch(function (err: Error) {
           /* istanbul ignore next */
@@ -183,21 +183,29 @@ module.exports = (RED: NodeAPI) => {
     }
 
     const buildResultMessage = function (readType: Todo, readResult: Todo) {
-      let message = Object.assign({}, readResult.msg)
-      message.payload = {}
-      message.nodetype = 'read'
-      message.readtype = readType
-      message.attributeId = node.attributeId
-      message.justValue = node.justValue
-
-      let dataValuesString = extractDataValueString(readResult)
-      message = setMessageProperties(message, readResult, dataValuesString)
-
-      if (!node.justValue) {
-        message = enhanceMessage(message, readResult)
+      let payload = {
+        ...readResult.msg.payload,
+        nodetype: 'read',
+        readtype: readType,
+        attributeId: node.attributeId,
+        justValue: node.justValue,
+        payloadType: 'read'
       }
 
-      return message
+      let dataValuesString = extractDataValueString(readResult)
+
+      payload = setMessageProperties(payload, readResult, dataValuesString)
+
+      if (!node.justValue) {
+        payload = enhanceMessage(payload, readResult)
+      }
+
+      let message: NodeMessage = {
+        ...readResult.msg,
+        payload
+      }
+
+      return message as Todo
     }
 
     const extractDataValueString = function (readResult: Todo) {
@@ -210,36 +218,36 @@ module.exports = (RED: NodeAPI) => {
       return dataValuesString
     }
 
-    const setMessageProperties = (message: Todo, readResult: Todo, stringValue: Todo) => {
+    const setMessageProperties = (payload: Todo, readResult: Todo, stringValue: Todo) => {
       try {
-        RED.util.setMessageProperty(message, 'payload', JSON.parse(stringValue))
+        RED.util.setMessageProperty(payload, 'value', JSON.parse(stringValue))
       } /* istanbul ignore next */ catch (err: any) {
         if (node.showErrors) {
           this.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
           this.error(err, readResult.msg)
         }
 
-        message.payload = stringValue
-        message.error = err.message
+        payload.value = stringValue
+        payload.error = err.message
       }
-      return message
+      return payload
     }
 
-    const enhanceMessage = (message: Todo, readResult: Todo) => {
+    const enhanceMessage = (payload: Todo, readResult: Todo) => {
       try {
-        message.resultsConverted = {}
+        payload.resultsConverted = {}
         let dataValuesString = JSON.stringify(readResult.results, null, 2)
-        RED.util.setMessageProperty(message, 'resultsConverted', JSON.parse(dataValuesString))
+        RED.util.setMessageProperty(payload, 'resultsConverted', JSON.parse(dataValuesString))
       } /* istanbul ignore next */ catch (err: any) {
         if (node.showErrors) {
           this.warn('JSON not to parse from string for dataValues type ' + readResult.results)
           this.error(err, readResult.msg)
         }
 
-        message.resultsConverted = null
-        message.error = err.message
+        payload.resultsConverted = null
+        payload.error = err.message
       }
-      return message
+      return payload
     }
 
     const errorHandler = (err: Error, msg: NodeMessage) => {
@@ -260,7 +268,7 @@ module.exports = (RED: NodeAPI) => {
       }
 
       try {
-        readFromSession(node.iiot.opcuaSession, buildNodesToRead(msg), msg)
+        readFromSession(node.connector.iiot.opcuaSession, buildNodesToRead(msg.payload), msg)
       } /* istanbul ignore next */ catch (err: any) {
         handleReadError(err, msg)
       }

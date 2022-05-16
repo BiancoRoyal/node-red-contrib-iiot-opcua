@@ -36,13 +36,36 @@ solution: `npm install -D read-pkg-up@7.0.1`
 # Docker
 
 ### Using the image
-The image has been uploaded to the Conti Artifactory as `ct-it-dtq-edge-docker-l.eu.artifactory.conti.de/datatroniq/node-red`
+The image has been uploaded to the Conti Artifactory as `ct-it-dtq-edge-docker-l.eu.artifactory.conti.de/datatroniq/node-red`.
+It is based on version `2.2.2-12` of the Node-RED docker image, with the following extra packages installed:
+- node-red-dashboard
+- node-red-node-pi-gpiod
+- node-red-contrib-gpio 
+- node-red-contrib-ftp
+- node-red-contrib-postgresql
+- node-red-contrib-influxdb
+- node-red-contrib-re-postgres
+- node-red-contrib-protobuf
+- node-red-contrib-mqtt-sparkplug-plus
+- node-red-node-tail
+- node-red-contrib-mssql-plus
+- node-red-node-sqlite
+- node-red-dashboard
+- node-red-contrib-bwar-soap
+
+
 Valid tags:
 - `0.0.1`
 - `latest` (currently same image as 0.0.1)
 
 ### Current State
-The browse, crawl, result-filter, and server nodes are currently guaranteed to work. All others should work, but may behave slightly differently than expected. 
+The following nodes work correctly. All others should work, but may behave slightly differently than expected.
+- Browser
+- Crawler
+- Result-Filter
+- Server
+- Read
+- Response
 
 ### Building an image
 

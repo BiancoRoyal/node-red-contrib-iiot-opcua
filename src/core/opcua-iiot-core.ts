@@ -653,7 +653,6 @@ export function buildNodesToRead(payload: Todo) {
                 return payload.addressSpaceItems.map((item: Todo) => item.nodeId)
         }
     }
-
     return []
 }
 

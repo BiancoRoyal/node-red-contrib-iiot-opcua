@@ -281,7 +281,6 @@ module.exports = (RED: nodered.NodeAPI) => {
           ...handleNodeTypeOfMsg(inputPayload),
           compressed: node.compressStructure
         }
-
         if (node.activateFilters && node.filters && node.filters.length > 0) {
           const filteredPayload = filterMsg(handledPayload)
           if (filteredPayload) {
