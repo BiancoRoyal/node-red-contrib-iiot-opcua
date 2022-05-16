@@ -39,6 +39,7 @@ jobs:
             examples
             package.json
             create_certificates.js
-      - run: echo github.ref
+      - run: echo $github.ref
       - run: pwd
+      - run: ls
       - run: ls opcuaIIoT
