@@ -1,4 +1,4 @@
-name: Ren a build
+name: Build and publish (only on main)
 on:
   push:
     branches:
@@ -34,7 +34,7 @@ jobs:
           path: distrib.tar.gz
       - run: printenv
       - run: file distrib.tar.gz
+      - run: ls distrib.tar.gz
       - run: tar -xvf distrib.tar.gz
       - run: pwd
-      - run: ls
       - run: file opcuaIIoT
