@@ -27,14 +27,12 @@ jobs:
   publish:
     runs-on: ubuntu-20.04
     needs: build
+    if: GITHUB_REF == refs/heads/main
     steps:
       - uses: actions/download-artifact@v3
         with: # Download artifacts from build.yml hopefully
           name: build-folders
           path: distrib.tar.gz
       - run: printenv
-      - run: file distrib.tar.gz
-      - run: ls distrib.tar.gz
       - run: tar -xvf distrib.tar.gz/distrib.tar.gz
-      - run: pwd
-      - run: file opcuaIIoT
+      # TODO: Add the steps to publish to NPM
