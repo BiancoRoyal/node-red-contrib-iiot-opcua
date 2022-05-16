@@ -109,14 +109,14 @@ module.exports = (RED: nodered.NodeAPI) => {
       return msg
     }
 
-    const handleDefaultMsg = function (msg: Todo) {
-      if (msg && msg.payload) {
-        coreResponse.handlePayloadStatusCode(node, msg)
+    const handleDefaultMsg = function (payload: Todo) {
+      if (payload) {
+        coreResponse.handlePayloadStatusCode(node, payload)
         if (node.compressStructure) {
-          coreResponse.compressDefaultMessageStructure(msg)
+          coreResponse.compressDefaultMessageStructure(payload)
         }
       }
-      return msg
+      return payload
     }
 
     const handleNodeTypeOfMsg = function (payload: Todo) {

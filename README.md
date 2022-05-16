@@ -55,8 +55,9 @@ It is based on version `2.2.2-12` of the Node-RED docker image, with the followi
 
 
 Valid tags:
+-. `0.0.2`
 - `0.0.1`
-- `latest` (currently same image as 0.0.1)
+- `latest` (currently same image as 0.0.2)
 
 ### Current State
 The following nodes work correctly. All others should work, but may behave slightly differently than expected.
@@ -65,7 +66,7 @@ The following nodes work correctly. All others should work, but may behave sligh
 - Result-Filter
 - Server
 - Read
-- Response
+- Response (Response should work, but not all possibilities are tested)
 
 ### Building an image
 

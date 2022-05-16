@@ -35,13 +35,11 @@ const analyzeReadResults = (node: Todo, payload: Todo) => {
   reconsturctNodeIdOnRead(payload)
 }
 
-const analyzeListenerResults = function (node: Todo, msg: Todo) {
-  switch (msg.injectType) {
+const analyzeListenerResults = function (node: Todo, payload: Todo) {
+  switch (payload.injectType) {
     case 'subscribe':
-      analyzeSubscribeResultStatus(node, msg)
-      break
     case 'event':
-      analyzeEventResultStatus(node, msg)
+      handlePayloadStatusCode(node, payload)
       break
     default:
       break
@@ -51,8 +49,6 @@ const analyzeListenerResults = function (node: Todo, msg: Todo) {
 const analyzeMethodResults = function (node: Todo, msg: Todo) {
   switch (msg.methodType) {
     case 'basic':
-      handlePayloadStatusCode(node, msg)
-      break
     case 'complex':
       handlePayloadStatusCode(node, msg)
       break
@@ -84,14 +80,6 @@ const analyzeWriteResults = function (node: Todo, msg: Todo) {
   setNodeStatusInfo(node, msg, entryStatus)
 }
 
-const analyzeSubscribeResultStatus = function (node: Todo, msg: Todo) {
-  handlePayloadStatusCode(node, msg)
-}
-
-const analyzeEventResultStatus = function (node: Todo, msg: Todo) {
-  handlePayloadStatusCode(node, msg)
-}
-
 const handlePayloadStatusCode = function (node: Todo, payload: Todo) {
   let entryStatus = {
     bad: 0,
@@ -99,7 +87,7 @@ const handlePayloadStatusCode = function (node: Todo, payload: Todo) {
     other: 0
   }
 
-  if (payload.length || payload.value || payload.browserResults || payload.crawlerResults || payload.statusCodes) {
+  if (payload.length && (payload.value || payload.browserResults || payload.crawlerResults || payload.statusCodes)) {
     entryStatus = handlePayloadArrayOfObjects(payload)
   } else {
     entryStatus = handlePayloadObject(payload)
@@ -200,7 +188,7 @@ const handlePayloadObject = function (payload: Todo) {
   return entryStatus
 }
 
-const handlePayloadArrayOfStatusCodes = function (msg: Todo) {
+const handlePayloadArrayOfStatusCodes = function (payload: Todo) {
   let entry = null
   let entryStatus = {
     good: 0,
@@ -208,8 +196,8 @@ const handlePayloadArrayOfStatusCodes = function (msg: Todo) {
     other: 0,
   }
 
-  if (msg.payload.statusCodes) {
-    for (entry of msg.payload.statusCodes) {
+  if (payload.statusCodes) {
+    for (entry of payload.statusCodes) {
       if (entry && entry.name) {
         switch (entry.name) {
           case 'Good':
@@ -238,19 +226,25 @@ const handlePayloadArrayOfStatusCodes = function (msg: Todo) {
   return entryStatus
 }
 
-const defaultCompress = function (msg: Todo) {
-  if (msg.payload.hasOwnProperty('value') && msg.payload.value.hasOwnProperty('value')) {
-    msg.payload = msg.payload.value.value
+const defaultCompress = function (payload: Todo) {
+  if (payload.hasOwnProperty('value') && payload.value.hasOwnProperty('value')) {
+    payload.value = payload.value.value
   } else {
-    if (msg.payload.length) {
-      msg.payload.forEach((item: Todo) => {
-        if (item.hasOwnProperty('value') && item.value.hasOwnProperty('value')) {
-          item = item.value.value
+    if (payload.length) {
+      payload.value = payload.map((item: Todo) => {
+        if (item.value) {
+          if (item.value.value) {
+            return item.value.value
+          } else {
+            return item.value
+          }
+        } else {
+          return item
         }
       })
     }
   }
-  trimMessageExtensions(msg)
+  trimMessageExtensions(payload)
 }
 
 const trimMessageExtensions = function (payload: Todo) {
@@ -269,43 +263,39 @@ const trimMessageExtensions = function (payload: Todo) {
   }
 }
 
-const trimMessagePayloadExtensions = function (msg: Todo) {
-  delete msg.payload['listenerParameters']
+const trimMessagePayloadExtensions = (payload: Todo) => {
+  delete payload['listenerParameters']
 }
 
-const compressBrowseMessageStructure = function (msg: Todo) {
-  if (msg.payload.hasOwnProperty('browserResults') && msg.payload.browserResults.length) {
-    let itemList: Todo[] = []
-    msg.payload.browserResults.forEach((item: Todo) => {
-      itemList.push({
+const compressBrowseMessageStructure = function (payload: Todo) {
+  if (payload.browserResults?.length) {
+    payload.value = payload.browserResults.map((item: Todo) => {
+      return {
         nodeId: item.nodeId.toString(),
-        browseName: (item.browseName.namespaceIndex) ? item.browseName.namespaceIndex + ':' + item.browseName.name : item.browseName,
-        displayName: item.displayName.text
-      })
+        browseName: (item.browseName?.namespaceIndex) ? item.browseName?.namespaceIndex + ':' + item.browseName?.name : item.browseName,
+        displayName: item.displayName?.text
+      }
     })
-    msg.payload = itemList
-    trimMessageExtensions(msg)
-    trimMessagePayloadExtensions(msg)
+    trimMessageExtensions(payload)
+    trimMessagePayloadExtensions(payload)
   } else {
-    defaultCompress(msg)
+    defaultCompress(payload)
   }
 }
 
-const compressCrawlerMessageStructure = function (msg: Todo) {
-  if (msg.payload.hasOwnProperty('crawlerResults') && msg.payload.crawlerResults.length) {
-    let itemList: Todo[] = []
-    msg.payload.crawlerResults.forEach((item: Todo) => {
-      itemList.push({
+const compressCrawlerMessageStructure = function (payload: Todo) {
+  if (payload.hasOwnProperty('crawlerResults') && payload.crawlerResults.length) {
+    payload.value = payload.crawlerResults.map((item: Todo) => {
+      return {
         nodeId: item.nodeId.toString(),
         browseName: (item.browseName.namespaceIndex) ? item.browseName.namespaceIndex + ':' + item.browseName.name : item.browseName,
         displayName: item.displayName.text
-      })
+      }
     })
-    msg.payload = itemList
-    trimMessageExtensions(msg)
-    trimMessagePayloadExtensions(msg)
+    trimMessageExtensions(payload)
+    trimMessagePayloadExtensions(payload)
   } else {
-    defaultCompress(msg)
+    defaultCompress(payload)
   }
 }
 
@@ -374,62 +364,58 @@ const compressReadMessageStructure = function (payload: Todo) {
   trimMessageExtensions(payload)
 }
 
-const compressWriteMessageStructure = function (msg: Todo) {
-  defaultCompress(msg)
+const compressWriteMessageStructure = function (payload: Todo) {
+  defaultCompress(payload)
 
   let itemList: Todo[] = []
-  msg.payload.statusCodes.forEach((item: Todo, index: number) => {
-    itemList.push({
-      nodeId: (msg.payload.nodesToWrite) ? msg.payload.nodesToWrite[index] : msg.addressSpaceItems[index],
+  payload.value = payload.statusCodes.map((item: Todo, index: number) => {
+    return {
+      nodeId: (payload.nodesToWrite) ? payload.nodesToWrite[index] : payload.addressSpaceItems[index],
       statusCode: item,
-      value: (msg.valuesToWrite) ? msg.valuesToWrite[index] : null
-    })
+      value: (payload.valuesToWrite) ? payload.valuesToWrite[index] : null
+    }
   })
-  msg.payload = itemList
 
-  delete msg['valuesToWrite']
+  delete payload['valuesToWrite']
 }
 
-const compressListenMessageStructure = function (msg: Todo) {
-  if (msg.payload.hasOwnProperty('value') && msg.payload.value.hasOwnProperty('value')) {
-    msg.payload = {
-      value: msg.payload.value.value,
-      dataType: msg.payload.value.dataType,
-      nodeId: (msg.addressSpaceItems[0].nodeId) ? msg.addressSpaceItems[0].nodeId : msg.addressSpaceItems[0]
+const compressListenMessageStructure = function (payload: Todo) {
+  if (payload.hasOwnProperty('value') && payload.value.hasOwnProperty('value')) {
+    payload = {
+      value: payload.value.value,
+      dataType: payload.value.dataType,
+      nodeId: (payload.addressSpaceItems[0].nodeId) ? payload.addressSpaceItems[0].nodeId : payload.addressSpaceItems[0]
     }
   } else {
-    if (msg.payload.length) {
-      let itemList: Todo[] = []
-      msg.payload.forEach((item: Todo, index: number) => {
-        if (item.hasOwnProperty('value') && item.value.hasOwnProperty('value')) {
-          itemList.push({
-            value: item.value.value,
-            dataType: item.value.dataType,
-            nodeId: (msg.addressSpaceItems[index].nodeId) ? msg.addressSpaceItems[index].nodeId : msg.addressSpaceItems[index]
-          })
+    if (payload.length) {
+      payload.value = payload.map((item: Todo, index: number) => {
+        return {
+          // be safe regardless of how deep the values sit
+          value: item?.value?.value ?? item?.value,
+          dataType: item.value?.dataType ?? item.dataType,
+          nodeId: (payload.addressSpaceItems[index].nodeId) ? payload.addressSpaceItems[index].nodeId : payload.addressSpaceItems[index]
         }
       })
-      msg.payload = itemList
     }
   }
-  trimMessageExtensions(msg)
+  trimMessageExtensions(payload)
 }
 
-const compressMethodMessageStructure = function (msg: Todo) {
-  defaultCompress(msg)
-  trimMessageExtensions(msg)
+const compressMethodMessageStructure = function (payload: Todo) {
+  defaultCompress(payload)
+  trimMessageExtensions(payload)
 
-  delete msg['inputArguments']
-  delete msg['objectId']
-  delete msg['methodId']
-  delete msg['methodType']
+  delete payload['inputArguments']
+  delete payload['objectId']
+  delete payload['methodId']
+  delete payload['methodType']
 
-  delete msg.payload['definition']
+  delete payload['definition']
 }
 
-const compressDefaultMessageStructure = function (msg: Todo) {
-  defaultCompress(msg)
-  trimMessageExtensions(msg)
+const compressDefaultMessageStructure = function (payload: Todo) {
+  defaultCompress(payload)
+  trimMessageExtensions(payload)
 }
 
 
@@ -446,8 +432,6 @@ const coreResponse = {
   analyzeMethodResults,
   setNodeStatus,
   analyzeWriteResults,
-  analyzeSubscribeResultStatus,
-  analyzeEventResultStatus,
   handlePayloadStatusCode,
   setNodeStatusInfo,
   handlePayloadArrayOfObjects,

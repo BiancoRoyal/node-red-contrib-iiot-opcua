@@ -52,7 +52,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
         let addressSpaceItem
         for (addressSpaceItem of msg.addressSpaceItems) {
-          msg.payload = {
+          returnMessage.payload = {
             nodeId: addressSpaceItem.nodeId
           }
           if (msg.payload.nodeId) {
@@ -65,7 +65,7 @@ module.exports = (RED: nodered.NodeAPI) => {
             nodeId: node.nodeId
           }
         }
-        this.send(msg)
+        this.send(returnMessage)
       }
     })
 
