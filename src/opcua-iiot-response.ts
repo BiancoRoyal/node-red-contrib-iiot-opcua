@@ -16,7 +16,7 @@ import {
   isNodeTypeToFilterResponse
 } from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
-import {Node, NodeAPI, NodeDef} from "node-red";
+import {Node, NodeAPI, NodeDef, NodeStatus} from "node-red";
 import {AddressSpaceItem} from "./types/helpers";
 import {BrowseResult} from "node-opcua";
 
@@ -70,6 +70,12 @@ module.exports = (RED: NodeAPI) => {
 
     let node: OPCUAIIoTResponse = this
     node.iiot = {}
+
+    // prototype functions don't seem to be copied in the above line
+    // explicitly define node.status here, so it can be used by functions in core-response.ts
+    node.status = this.status
+
+
     this.status({fill: 'green', shape: 'ring', text: 'active'})
 
     const handleBrowserMsg = function (payload: ResponseInputPayload) {

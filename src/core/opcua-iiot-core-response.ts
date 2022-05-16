@@ -11,7 +11,7 @@
 
 import {Todo} from "../types/placeholders";
 import debug from 'debug';
-import {Node, NodeStatusFill} from "node-red";
+import {Node, NodeStatus, NodeStatusFill} from "node-red";
 import {BrowseResult, StatusCode} from "node-opcua";
 import {NodeIdLike} from "node-opcua-nodeid";
 import {AddressSpaceItem} from "../types/helpers";
@@ -89,7 +89,7 @@ const analyzeMethodResults = function (node: Node, payload: ResponseInputPayload
   }
 }
 
-const setNodeStatus = function (node: Node, entryStatus: EntryStatus, informationText: string) {
+const setNodeStatus = (node: Node, entryStatus: EntryStatus, informationText: string ) => {
   let fillColor: NodeStatusFill = 'green'
 
   if (entryStatus && Object.keys(entryStatus).length === 3) {
@@ -362,7 +362,7 @@ const compressReadMessageStructure = function (payload: any) {
   delete payload['readtype']
   delete payload['attributeId']
 
-  delete payload['addressItemsToRead']
+  delete payload['addressItemsToReadn']
   delete payload['addressItemsToReadCount']
 
   trimMessageExtensions(payload)
