@@ -275,8 +275,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (!coreConnector.checkEndpoint(this.endpoint, errorHandler)) {
         return
       }
-
-      this.iiot.opcuaClient.connect(this.endpoint, async (err: Error | undefined): Promise<void> => {
+      this.iiot.opcuaClient.connect(this.endpoint, (err: Error | undefined): void => {
         if (isInitializedIIoTNode(this) && !isUndefined(this.iiot)) {
           if (err) {
             this.iiot?.stateMachine.lock().stopopcua()
