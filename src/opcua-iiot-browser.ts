@@ -11,7 +11,7 @@ import * as nodered from "node-red";
 import {Todo, TodoVoidFunction} from "./types/placeholders";
 import {Node, NodeMessageInFlow} from "@node-red/registry";
 
-import coreBrowser from "./core/opcua-iiot-core-browser";
+import coreBrowser, {BrowserInputPayloadLike} from "./core/opcua-iiot-core-browser";
 import {
     checkConnectorState,
     checkSessionNotValid, deregisterToConnector,
@@ -20,9 +20,11 @@ import {
     setNodeStatusTo
 } from "./core/opcua-iiot-core";
 import {NodeMessage, NodeStatus} from "node-red";
+import {NodeId} from "node-opcua";
+import {AddressSpaceItem} from "./types/core";
+import {isUndefined} from "underscore";
 
 interface OPCUAIIoTBrowserNodeDef extends nodered.NodeDef {
-    // todo
     nodeId: Todo
     name: string
     justValue: Todo
@@ -80,13 +82,13 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         this.connector = RED.nodes.getNode(config.connector)
 
-        let node: Todo = {
+        let nodeConfig: Todo = {
             ...this,
             ...coreBrowser.initBrowserNode()
         }
-        node.iiot.delayMessageTimer = []
+        nodeConfig.iiot.delayMessageTimer = []
 
-        node.iiot.extractDataFromBrowserResults = (browserResultToFilter: Todo, lists: Todo) => {
+        const extractDataFromBrowserResults = (browserResultToFilter: Todo, lists: Todo) => {
             lists.addressItemList = []
 
             browserResultToFilter.forEach(function (result: Todo) {
@@ -111,31 +113,31 @@ module.exports = function (RED: nodered.NodeAPI) {
             lists.addressSpaceItemList = lists.addressSpaceItemList.concat(lists.addressItemList)
         }
 
-        node.iiot.browse = function (rootNodeId: Todo, msg: Todo, depth: Todo, lists: Todo, callback: TodoVoidFunction) {
-            if (checkSessionNotValid(node.iiot.opcuaSession, 'Browse')) {
+        const browse = function (rootNodeId: NodeId, msg: NodeMessageInFlow, depth: number, lists: Todo, callback: TodoVoidFunction) {
+            if (checkSessionNotValid(nodeConfig.iiot.opcuaSession, 'Browse')) {
                 return
             }
 
             coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + rootNodeId)
             let rootNode = 'list'
 
-            coreBrowser.browse(node.iiot.opcuaSession, rootNodeId)
+            coreBrowser.browse(nodeConfig.iiot.opcuaSession, rootNodeId)
                 .then(function (browserResults: Todo) {
                     if (browserResults.length) {
                         coreBrowser.detailDebugLog('Browser Result To String: ' + browserResults.toString())
-                        node.iiot.extractDataFromBrowserResults(browserResults, lists)
-                        if (node.recursiveBrowse) {
+                        extractDataFromBrowserResults(browserResults, lists)
+                        if (nodeConfig.recursiveBrowse) {
                             if (depth > 0) {
                                 let newDepth = depth - 1
 
-                                let subLists = node.iiot.createListsObject()
-                                if (!node.singleBrowseResult) {
+                                let subLists = createListsObject()
+                                if (!nodeConfig.singleBrowseResult) {
                                     callback(rootNode, depth, msg, lists)
                                 } else {
                                     subLists = lists
                                 }
 
-                                node.iiot.browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
+                                browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
                             } else {
                                 coreBrowser.internalDebugLog('Minimum Depth Reached On Browse At ' + rootNodeId)
                                 callback(rootNodeId, depth, msg, lists)
@@ -147,7 +149,7 @@ module.exports = function (RED: nodered.NodeAPI) {
                         coreBrowser.internalDebugLog('No Browse Results On ' + rootNodeId)
                     }
                 }).catch(function (err: Error) {
-                coreBrowser.browseErrorHandling(node, err, msg, lists, callError, statusHandler)
+                coreBrowser.browseErrorHandling(nodeConfig, err, msg, lists, callError, statusHandler)
             })
         }
 
@@ -155,7 +157,15 @@ module.exports = function (RED: nodered.NodeAPI) {
             this.error(err, msg)
         }
 
-        node.iiot.createListsObject = () => {
+        interface Lists {
+            browserResults: Todo[]
+            nodesToRead: Todo[]
+            addressSpaceItemList: Todo[]
+            addressItemList: Todo[]
+            nodesToBrowse: Todo[],
+        }
+
+        const createListsObject = (): Lists => {
             return {
                 nodesToBrowse: [],
                 nodesToRead: [],
@@ -165,30 +175,30 @@ module.exports = function (RED: nodered.NodeAPI) {
             }
         }
 
-        node.iiot.browseNodeList = function (addressSpaceItems: Todo, msg: Todo, depth: Todo, lists: Todo, callback: TodoVoidFunction) {
-            if (checkSessionNotValid(node.iiot.opcuaSession, 'BrowseList')) {
+        const browseNodeList = function (addressSpaceItems: AddressSpaceItem[], msg: NodeMessageInFlow, depth: number, lists: Lists, callback: TodoVoidFunction) {
+            if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'BrowseList')) {
                 return
             }
 
             coreBrowser.internalDebugLog('Browse For NodeId List')
             let rootNode = 'list'
 
-            if (node.iiot.opcuaSession) {
-                coreBrowser.browseAddressSpaceItems(node.iiot.opcuaSession, addressSpaceItems)
-                    .then(function (browserResults: Todo) {
+            if (nodeConfig.connector.iiot.opcuaSession) {
+                coreBrowser.browseAddressSpaceItems(nodeConfig.connector.iiot.opcuaSession, addressSpaceItems)
+                    .then((browserResults: Todo) => {
                         coreBrowser.detailDebugLog('List Browser Result To String: ' + browserResults.toString())
-                        node.iiot.extractDataFromBrowserResults(browserResults, lists)
-                        if (node.recursiveBrowse) {
+                        extractDataFromBrowserResults(browserResults, lists)
+                        if (nodeConfig.recursiveBrowse) {
                             if (depth > 0) {
                                 let newDepth = depth - 1
 
-                                let subLists = node.iiot.createListsObject()
-                                if (!node.singleBrowseResult) {
+                                let subLists = createListsObject()
+                                if (!nodeConfig.singleBrowseResult) {
                                     callback(rootNode, depth, msg, lists)
                                 } else {
                                     subLists = lists
                                 }
-                                node.iiot.browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
+                                browseNodeList(lists.addressItemList, msg, newDepth, subLists, callback)
                             } else {
                                 coreBrowser.internalDebugLog('Minimum Depth Reached On Browse List')
                                 callback(rootNode, depth, msg, lists)
@@ -197,56 +207,60 @@ module.exports = function (RED: nodered.NodeAPI) {
                             callback(rootNode, depth, msg, lists)
                         }
                     }).catch(function (err: Error) {
-                    coreBrowser.browseErrorHandling(node, err, msg, lists, callError, statusHandler)
+                    coreBrowser.browseErrorHandling(nodeConfig, err, msg, lists, callError, statusHandler)
                 })
             }
         }
 
-        node.iiot.sendMessage = function (rootNodeId: Todo, depth: Todo, originMessage: Todo, lists: Todo) {
-            let msg = Object.assign({}, originMessage)
-            msg.nodetype = 'browse'
-            msg.justValue = node.justValue
+        const sendMessage = (rootNodeId: NodeId, depth: number, originMessage: NodeMessageInFlow, lists: Todo) => {
 
             if (!lists) {
                 coreBrowser.internalDebugLog('Lists Not Valid!')
-                if (node.showErrors) {
-                    node.error(new Error('Lists Not Valid On Browse Send Message'), msg)
+                if (nodeConfig.showErrors) {
+                    this.error(new Error('Lists Not Valid On Browse Send Message'), originMessage)
                 }
             }
 
-            let listenerParameters = node.iiot.getListenParameters(msg)
+            let listenerParameters = getListenParameters(originMessage)
 
-            msg.payload = {
+            const payload = {
+                ...(originMessage.payload as BrowserInputPayloadLike),
+                nodetype: 'browse',
+                justValue: nodeConfig.justValue,
                 rootNodeId,
                 browserResults: lists.browserResults,
-                recursiveBrowse: node.recursiveBrowse,
+                recursiveBrowse: nodeConfig.recursiveBrowse,
                 recursiveDepth: depth,
-                recursiveDepthMax: node.recursiveDepth,
-                listenerParameters
+                recursiveDepthMax: nodeConfig.recursiveDepth,
+                listenerParameters,
+                ...enhanceMessage(lists),
+                ...setMessageLists(lists)
             }
 
-            msg = node.iiot.enhanceMessage(msg, lists)
-            msg = node.iiot.setMessageLists(msg, lists)
-
-            node.iiot.messageList.push(msg)
-
-            if (node.showStatusActivities && node.oldStatusParameter.text !== 'active') {
-                node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+            const newMessaage = {
+                ...originMessage,
+                payload
             }
 
-            node.iiot.delayMessageTimer.push(setTimeout(() => {
-                node.send(node.iiot.messageList.shift())
-            }, node.delayPerMessage * FAKTOR_SEC_TO_MSEC))
+            nodeConfig.iiot.messageList.push(newMessaage)
+
+            if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter.text !== 'active') {
+                nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'active', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
+            }
+
+            nodeConfig.iiot.delayMessageTimer.push(setTimeout(() => {
+                this.send(nodeConfig.iiot.messageList.shift())
+            }, nodeConfig.delayPerMessage * FAKTOR_SEC_TO_MSEC))
         }
 
-        node.iiot.resetAllTimer = function () {
-            node.iiot.delayMessageTimer.forEach((timerId: Todo) => {
+        const resetAllTimer = function () {
+            nodeConfig.iiot.delayMessageTimer.forEach((timerId: Todo) => {
                 clearTimeout(timerId)
                 timerId = null
             })
         }
 
-        node.iiot.getListenParameters = function (msg: Todo) {
+        const getListenParameters = function (msg: Todo) {
             if (msg.injectType === 'listen') {
                 return msg.payload
             } else {
@@ -254,102 +268,87 @@ module.exports = function (RED: nodered.NodeAPI) {
             }
         }
 
-        node.iiot.enhanceMessage = function (msg: Todo, lists: Todo) {
-            if (!node.justValue) {
-                msg.payload.browseTopic = node.browseTopic
-                msg.payload.addressSpaceItems = msg.addressSpaceItems
-                msg.payload.browserResultsCount = lists.browserResults.length
-                if (node.connector) {
-                    msg.payload.endpoint = node.connector.endpoint
+        const enhanceMessage = (lists: Lists) => {
+            if (nodeConfig.justValue)
+                return {
+                    browserResults: lists.addressSpaceItemList
                 }
-                msg.payload.session = (node.iiot.opcuaSession) ? node.iiot.opcuaSession.name : 'none'
-            } else {
-                msg.payload.browserResults = lists.addressSpaceItemList
+
+            return {
+                browseTopic: nodeConfig.browseTopic,
+                browserResultsCount: lists.browserResults.length,
+                endpoint: nodeConfig.connector?.endpoint,
+                session: (nodeConfig.iiot.opcuaSession) ? nodeConfig.iiot.opcuaSession.name : 'none'
             }
-            return msg
         }
 
-        node.iiot.setMessageLists = function (msg: Todo, lists: Todo) {
-            if (node.sendNodesToRead && lists.nodesToRead) {
-                msg.nodesToRead = lists.nodesToRead
-                msg.nodesToReadCount = lists.nodesToRead.length
+        const setMessageLists = function (lists: Lists) {
+            return {
+                nodesToRead: lists.nodesToRead,
+                nodesToReadCount: lists.nodesToRead.length,
+                addressItemsToRead: lists.addressSpaceItemList,
+                addressItemsToReadCount: lists.addressSpaceItemList.length,
+                addressItemsToBrowse: lists.addressSpaceItemList,
+                addressItemsToBrowseCount: lists.addressSpaceItemList.length,
             }
-
-            if (node.sendNodesToListener && lists.addressSpaceItemList) {
-                msg.addressItemsToRead = lists.addressSpaceItemList
-                msg.addressItemsToReadCount = lists.addressSpaceItemList.length
-            }
-
-            if (node.sendNodesToBrowser && lists.addressSpaceItemList) {
-                msg.addressItemsToBrowse = lists.addressSpaceItemList
-                msg.addressItemsToBrowseCount = lists.addressSpaceItemList.length
-            }
-            return msg
         }
 
-        node.iiot.browseSendResult = function (rootNodeId: Todo, depth: Todo, msg: Todo, lists: Todo) {
+        const browseSendResult = function (rootNodeId: NodeId, depth: number, msg: NodeMessageInFlow, lists: Todo) {
             coreBrowser.internalDebugLog(rootNodeId + ' called by depth ' + depth)
 
-            if (node.singleBrowseResult) {
+            if (nodeConfig.singleBrowseResult) {
                 if (depth <= 0) {
-                    node.iiot.sendMessage(rootNodeId, depth, msg, lists)
-                    node.iiot.reset(lists)
+                    sendMessage(rootNodeId, depth, msg, lists)
+                    reset(lists)
                 }
             } else {
-                node.iiot.sendMessage(rootNodeId, depth, msg, lists)
-                node.iiot.reset(lists)
+                sendMessage(rootNodeId, depth, msg, lists)
+                reset(lists)
             }
         }
 
-        node.iiot.reset = function (lists: Todo) {
-            lists = node.iiot.createListsObject()
+        const reset = function (lists: Todo) {
+            lists = createListsObject()
         }
 
-        node.iiot.browseWithAddressSpaceItems = function (msg: Todo, depth: Todo, lists: Todo) {
-            if (msg.addressItemsToBrowse && msg.addressItemsToBrowse.length > 0) {
-                msg.addressSpaceItems = msg.addressItemsToBrowse
-            }
+        const browseWithAddressSpaceItems = function (msg: NodeMessageInFlow, depth: number, lists: Lists) {
+            const payload = msg.payload as BrowserInputPayloadLike
 
-            if (msg.addressSpaceItems && msg.addressSpaceItems.length > 0) {
-                node.iiot.browseNodeList(msg.addressSpaceItems, msg, depth, lists, (rootNodeId: Todo, depth: Todo, msg: Todo, subLists: Todo) => {
-                    node.iiot.browseSendResult(rootNodeId, depth, msg, subLists)
-                })
+            if (payload.addressSpaceItems && payload.addressSpaceItems.length > 0) {
+                browseNodeList(payload.addressSpaceItems, msg, depth, lists, browseSendResult)
             } else {
                 coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
-                node.browseTopic = node.nodeId || coreBrowser.browseToRoot()
-                node.iiot.browse(node.browseTopic, msg, depth, lists, (rootNodeId: Todo, depth: Todo, msg: Todo, subLists: Todo) => {
-                    node.iiot.browseSendResult(rootNodeId, depth, msg, subLists)
-                })
+                nodeConfig.browseTopic = nodeConfig.nodeId || coreBrowser.browseToRoot()
+                browse(nodeConfig.browseTopic, msg, depth, lists, browseSendResult)
             }
         }
 
-        node.iiot.startBrowser = function (msg: Todo) {
-            if (checkSessionNotValid(node.iiot.opcuaSession, 'Browser')) {
+        const startBrowser = (msg: NodeMessageInFlow) => {
+            if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'Browser')) {
+                this.status({ fill: 'red', shape: 'ring', text: 'invalid connector session' })
                 return
             }
 
-            let lists = node.iiot.createListsObject()
-            let depth = (node.recursiveBrowse) ? node.recursiveDepth : 0
-            node.browseTopic = coreBrowser.extractNodeIdFromTopic(msg, node) // set topic to the node object for HTTP requests at node
+            let lists = createListsObject()
+            let depth = (nodeConfig.recursiveBrowse) ? nodeConfig.recursiveDepth : 0
+            nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic(msg.payload as BrowserInputPayloadLike, nodeConfig) // set topic to the node object for HTTP requests at node
 
-            if (node.browseTopic && node.browseTopic !== '') {
-                node.iiot.browse(node.browseTopic, msg, depth, lists, (rootNodeId: Todo, depth: Todo, msg: Todo, subLists: Todo) => {
-                    node.iiot.browseSendResult(rootNodeId, depth, msg, subLists)
-                })
+            if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
+                browse(nodeConfig.browseTopic, msg, depth, lists, browseSendResult)
             } else {
-                node.iiot.browseWithAddressSpaceItems(msg, depth, lists)
+                browseWithAddressSpaceItems(msg, depth, lists)
             }
         }
 
-        this.on('input', function (msg: Todo) {
-            if (!checkConnectorState(node, msg, 'Browser', errorHandler, emitHandler, statusHandler)) {
+        this.on('input', (msg: NodeMessageInFlow) => {
+            if (!checkConnectorState(nodeConfig, msg, 'Browser', errorHandler, emitHandler, statusHandler)) {
                 return
             }
 
-            if (node.showStatusActivities) {
-                node.oldStatusParameter = setNodeStatusTo(node, 'browsing', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+            if (nodeConfig.showStatusActivities) {
+                nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'browsing', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
             }
-            node.iiot.startBrowser(msg)
+            startBrowser(msg)
         })
 
         const emitHandler = (msg: string) => {
@@ -370,11 +369,11 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         }
 
-        registerToConnector(node, statusHandler, onAlias, errorHandler)
+        registerToConnector(nodeConfig, statusHandler, onAlias, errorHandler)
 
         this.on('close', (done: () => void) => {
-            deregisterToConnector(node, () => {
-                resetIiotNode(node)
+            deregisterToConnector(nodeConfig, () => {
+                resetIiotNode(nodeConfig)
                 done()
             })
         })

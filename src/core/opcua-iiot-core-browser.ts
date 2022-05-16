@@ -17,6 +17,8 @@ import debug from 'debug';
 import {Node, NodeStatus} from "node-red";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
+import {AddressSpaceItem} from "../types/core";
+import {NodeIdLike} from "node-opcua-nodeid";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
@@ -26,13 +28,7 @@ const crawlerDetailDebugLog =debug('opcuaIIoT:browser:crawler:details') // eslin
 export type BrowserInputPayload = {
   root: Todo
   actiontype: string
-  addressSpaceItems: NodeItem[]
-}
-
-type NodeItem = {
-  name: string
-  nodeId: string
-  datatypeName: string
+  addressSpaceItems: AddressSpaceItem[]
 }
 
 export type BrowserInputPayloadLike = {
@@ -109,7 +105,7 @@ const createCrawler = function (session: NodeCrawlerClientSession) {
   return new NodeCrawler(session)
 }
 
-const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: string, msg: BrowserInputPayloadLike) => {
+const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg: BrowserInputPayloadLike) => {
   return new Promise(
     async (resolve, reject) => {
       if (!nodeIdToCrawl) {

@@ -4,6 +4,7 @@ import {ClientSession, DataType, DataValue, NodeId} from "node-opcua";
 import {CoreMachineStates} from "../core/opcua-iiot-core-connector";
 import {Node, NodeStatus} from "node-red";
 import {OPCUAIIoTConnectorNode} from "../opcua-iiot-connector";
+import {NodeMessageInFlow} from "@node-red/registry";
 
 export const recursivePrintTypes = (o: Record<string, any>, depth: number = 1): void => {
   if (depth == 1)
@@ -64,7 +65,7 @@ export type BrowserNodeAttributes =  {
   oldStatusParameter?: NodeStatus
   iiot: {
     items: Todo[]
-    messageList: Todo[]
+    messageList: NodeMessageInFlow[]
     delayMessageTimer: NodeJS.Timeout[]
   } & CoreNode
 }
