@@ -9,54 +9,45 @@
 'use strict'
 
 const gulp = require('gulp')
+const { series, parallel } = require('gulp')
 const htmlmin = require('gulp-htmlmin')
 const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
 const uglify = require('gulp-uglify')
 const babel = require('gulp-babel')
-const sequence = require('gulp-sequence')
 const sourcemaps = require('gulp-sourcemaps')
-const pump = require('pump')
 const replace = require('gulp-replace')
 
-gulp.task('default', function () {
-  // place code for your default task here
-})
-
-gulp.task('docs', sequence('doc', 'docIcons', 'docImages'))
-gulp.task('build', sequence('clean', 'web', 'nodejs', 'locale', 'code', 'public', 'icons'))
-gulp.task('publish', sequence('build', 'maps', 'docs'))
-
-gulp.task('icons', function () {
+function icons () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
-})
+}
 
-gulp.task('docIcons', function () {
+function docIcons () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('docs/gen/icons'))
-})
+}
 
-gulp.task('docImages', function () {
+function docImages () {
   return gulp.src('images/**/*').pipe(gulp.dest('docs/gen/images'))
-})
+}
 
-gulp.task('locale', function () {
+function locale () {
   return gulp.src('src/locales/**/*').pipe(gulp.dest('opcuaIIoT/locales'))
-})
+}
 
-gulp.task('public', function () {
+function publics () {
   return gulp.src('src/public/**/*').pipe(gulp.dest('opcuaIIoT/public'))
-})
+}
 
-gulp.task('maps', function () {
+function maps () {
   return gulp.src('maps/**/*').pipe(gulp.dest('opcuaIIoT/maps'))
-})
+}
 
-gulp.task('clean', function () {
-  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps', 'code', 'coverage', 'jcoverage', 'suite/jcoverage', 'pki', 'suite/pki', 'test/pki'])
+function wipe () {
+  return gulp.src(['opcuaIIoT', 'docs/gen', 'maps', 'code', 'coverage', 'jcoverage', 'suite/jcoverage', 'pki', 'suite/pki', 'test/pki'], { allowEmpty: true })
     .pipe(clean({ force: true }))
-})
+}
 
-gulp.task('web', function () {
+function web () {
   return gulp.src('src/*.htm*')
     .pipe(htmlmin({
       minifyJS: true,
@@ -71,35 +62,33 @@ gulp.task('web', function () {
       quoteCharacter: "'"
     }))
     .pipe(gulp.dest('opcuaIIoT'))
-})
+}
 
-gulp.task('nodejs', function (cb) {
-  let anchor = '// SOURCE-MAP-REQUIRED'
+function nodejs () {
+  const anchor = '// SOURCE-MAP-REQUIRED'
 
-  pump([
-    gulp.src('src/**/*.js')
-      .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(replace(anchor, 'require(\'source-map-support\').install()'))
-      .pipe(babel({ presets: ['@babel/env'] }))
-      .pipe(uglify())
-      .pipe(sourcemaps.write('maps')), gulp.dest('opcuaIIoT')],
-  cb
-  )
-})
-
-gulp.task('nodejsclearly', function (cb) {
-  gulp.src('src/**/*.js')
+  return gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(replace(anchor, 'require(\'source-map-support\').install()'))
     .pipe(babel({ presets: ['@babel/env'] }))
-    .pipe(gulp.dest('code'))
-})
+    .pipe(sourcemaps.write('maps')).pipe(gulp.dest('opcuaIIoT'))
+}
 
-gulp.task('doc', function (cb) {
-  gulp.src(['README.md', 'src/**/*.js'], { read: false })
+function doc (cb) {
+  return gulp.src(['README.md', 'src/**/*.js'], { read: false })
     .pipe(jsdoc(cb))
-})
+}
 
-gulp.task('code', function () {
-  gulp.src('src/**/*.js')
+function code () {
+  return gulp.src('src/**/*.js')
     .pipe(babel({ presets: ['@babel/env'] }))
     .pipe(gulp.dest('code'))
-})
+}
+
+const docs = series(doc, docIcons, docImages)
+const build = series(wipe, web, nodejs, locale, code, publics, icons)
+
+exports.docs = docs
+exports.clean = wipe
+exports.build = build
+exports.publish = parallel(build, maps, docs)
