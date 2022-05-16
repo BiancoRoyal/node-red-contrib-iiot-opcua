@@ -289,9 +289,9 @@ module.exports = function (RED: nodered.NodeAPI) {
       })
     }
 
-    const getListenParameters = (msg: ListenPayload | undefined): ListenPayload | undefined => {
-      if (msg?.injectType === 'listen') {
-        return msg
+    const getListenParameters = (payload: ListenPayload | undefined): ListenPayload | undefined => {
+      if (payload?.injectType === 'listen') {
+        return payload
       } else {
         return undefined
       }

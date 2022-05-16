@@ -13,10 +13,7 @@ const { series, parallel } = require('gulp')
 const htmlmin = require('gulp-htmlmin')
 const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
-const uglify = require('gulp-uglify')
-const babel = require('gulp-babel')
 const sourcemaps = require('gulp-sourcemaps')
-const replace = require('gulp-replace')
 
 function icons () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
@@ -72,16 +69,6 @@ function ts () {
         .pipe(tsProject())
         .pipe(sourcemaps.write(''))
         .pipe(gulp.dest("opcuaIIoT"))
-}
-
-function nodejs () {
-  const anchor = '// SOURCE-MAP-REQUIRED'
-
-  return gulp.src('src/**/*.js')
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(replace(anchor, 'require(\'source-map-support\').install()'))
-    .pipe(babel({ presets: ['@babel/env'] }))
-    .pipe(sourcemaps.write('maps')).pipe(gulp.dest('opcuaIIoT'))
 }
 
 function doc (cb) {
