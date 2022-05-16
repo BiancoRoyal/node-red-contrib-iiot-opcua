@@ -23,6 +23,8 @@ import {NodeAPI, NodeDef, NodeMessage, NodeStatus} from "node-red";
 import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
 import {InjectMessage, InjectPayload} from "./opcua-iiot-inject";
 import {DataValue} from "node-opcua";
+import {ErrorCallback} from "node-opcua-status-code";
+import {rest} from "underscore";
 
 interface OPCUAIIoTCrawler extends Node {
   name: string
@@ -35,6 +37,7 @@ interface OPCUAIIoTCrawler extends Node {
   negateFilter: Todo
   filters: Todo
   delayPerMessage: number
+  timeout: number
   connector: Node
 }
 interface OPCUAIIoTCrawlerDef extends NodeDef {
@@ -48,6 +51,7 @@ interface OPCUAIIoTCrawlerDef extends NodeDef {
   negateFilter: Todo
   filters: Todo
   delayPerMessage: number
+  timeout: number
   connector: string
 }
 
@@ -110,6 +114,7 @@ module.exports = (RED: NodeAPI) => {
     this.negateFilter = config.negateFilter
     this.filters = config.filters
     this.delayPerMessage = config.delayPerMessage || 0.2
+    this.timeout = config.timeout || 30
 
     this.connector = RED.nodes.getNode(config.connector)
 
@@ -157,7 +162,7 @@ module.exports = (RED: NodeAPI) => {
       return (nodeConfig.negateFilter) ? !result : result
     }
 
-    const crawl = async (session: Todo, msg: BrowserInputPayloadLike, statusHandler: (status: string | NodeStatus) => void) => {
+    const crawl = async (session: Todo, payload: BrowserInputPayloadLike, statusHandler: (status: string | NodeStatus) => void) => {
       if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'Crawler')) {
         return
       }
@@ -167,8 +172,7 @@ module.exports = (RED: NodeAPI) => {
       if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter) {
         nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'crawling', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
       }
-
-      coreBrowser.crawl(session, nodeConfig.browseTopic, msg, getSendWrapper(msg))
+      coreBrowser.crawl(session, nodeConfig.browseTopic, payload, getSendWrapper(payload))
 
     }
 
@@ -179,70 +183,115 @@ module.exports = (RED: NodeAPI) => {
       this.status(status)
     }
 
-    const crawlForSingleResult = function (session: Todo, msg: BrowserInputPayloadLike) {
-      coreBrowser.crawlAddressSpaceItems(session, msg)
-        .then(function (result: Todo) {
-          coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          sendMessage(result.message, filterCrawlerResults(result.crawlerResult))
-        }).catch(function (err: Todo) {
-          coreBrowser.browseErrorHandling(nodeConfig, err, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
-        })
+    const crawlForSingleResult = function (session: NodeCrawlerClientSession, payload: BrowserInputPayloadLike) {
+      coreBrowser.crawlAddressSpaceItems(session, payload, getSendWrapper(payload), nodeConfig.timeout)
     }
 
-    const getSendWrapper = (msg: BrowserInputPayloadLike) => {
+    type PromiseResult = {
+      status: string,
+      value: Error | Todo
+    }
+
+    const handleResultArray = (results: PromiseResult[], payload: Todo) => {
+      // map each result 1-to-1 input to output
+      const crawlerResult = results.map(function (result) {
+        if (result.value instanceof Error) {
+          return result.value.toString()
+        } else {
+          return result.value
+        }
+      })
+
+      // combine the valid results into payload.value
+      const value = results.filter((result) => {
+        return !(result.value instanceof Error)
+      }).flatMap((result) => {
+        return result.value
+      })
+
+      // list errors in payload.error
+      const error = results.filter( (result) => {
+        return (result.value instanceof Error)
+      }).map((result) => {
+        return result.value
+      })
+
+      if (error.length > 0) {
+        payload.error = error
+      }
+      payload.value = value
+
+      sendMessage(payload, crawlerResult)
+    }
+
+    const getSendWrapper = (payload: BrowserInputPayloadLike) => {
       return (result: Error | Todo) => {
-        if (result instanceof Error) {
-          coreBrowser.browseErrorHandling(nodeConfig, result, msg, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
+        if (result.promises) {
+          handleResultArray(result.crawlerResult, payload)
+        }
+        else if (result instanceof Error) {
+          coreBrowser.browseErrorHandling(nodeConfig, result, payload, undefined, callError, statusHandler, nodeConfig.oldStatusParameter, nodeConfig.showErrors, nodeConfig.showStatusActivities)
         } else {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length)
-          sendMessage(msg, filterCrawlerResults(result.crawlerResult))
+          sendMessage(payload, filterCrawlerResults(result.crawlerResult))
         }
       }
     }
 
-    const crawlForResults = function (session: NodeCrawlerClientSession, msg: BrowserInputPayloadLike) {
-      msg.addressSpaceItems?.forEach((entry) => {
-        coreBrowser.crawl(session, entry.nodeId, msg, getSendWrapper(msg))
+    const crawlForResults = function (session: NodeCrawlerClientSession, payload: BrowserInputPayloadLike) {
+      payload.addressSpaceItems?.forEach((entry) => {
+        coreBrowser.crawl(session, entry.nodeId, payload, getSendWrapper(payload))
 
       })
     }
 
-    const crawlNodeList = function (session: NodeCrawlerClientSession, msg: BrowserInputPayloadLike) {
+    const crawlNodeList = function (session: NodeCrawlerClientSession, payload: BrowserInputPayloadLike) {
       if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter) {
         nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'crawling', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
       }
       if (nodeConfig.singleResult) {
-        crawlForSingleResult(session, msg)
+        crawlForSingleResult(session, payload)
       } else {
-        crawlForResults(session, msg)
+        crawlForResults(session, payload)
       }
     }
 
-    const sendMessage = (originMessage: Todo, crawlerResult: Todo) => {
-      let msg = Object.assign({}, originMessage)
-      msg.nodetype = 'crawl'
+    const sendMessage = (payload: Todo, crawlerResult: Todo) => {
+      const {
+        _msgid,
+        topic,
+        ...restMessage
+      } = payload;
+
+      restMessage.nodetype = 'crawl'
 
       try {
-        RED.util.setMessageProperty(msg, 'crawlerResults', JSON.parse(JSON.stringify(crawlerResult, null, 2)))
+        RED.util.setMessageProperty(restMessage, 'crawlerResults', JSON.parse(JSON.stringify(crawlerResult, null, 2)))
       } catch (err: any) {
         coreBrowser.internalDebugLog(err)
         if (nodeConfig.showErrors) {
-          this.error(err, msg)
+          this.error(err, restMessage)
         }
-        msg.resultsConverted = JSON.stringify(crawlerResult, null, 2)
-        msg.error = err.message
+        restMessage.resultsConverted = JSON.stringify(crawlerResult, null, 2)
+        restMessage.error = err.message
       }
 
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
-        msg.payload.browseTopic = nodeConfig.browseTopic
+        restMessage.browseTopic = nodeConfig.browseTopic
       }
 
       if (!nodeConfig.justValue) {
-        msg.payload.crawlerResultsCount = crawlerResult.length
+        restMessage.crawlerResultsCount = crawlerResult.length
         if (nodeConfig.connector) {
-          msg.payload.endpoint = nodeConfig.connector.endpoint
+          restMessage.endpoint = nodeConfig.connector.endpoint
         }
-        msg.payload.session = nodeConfig.connector.iiot.opcuaSession.name || 'none'
+        restMessage.session = nodeConfig.connector.iiot.opcuaSession.name || 'none'
+      }
+
+      const msg = {
+        _msgid,
+        topic,
+        payload: restMessage
       }
 
       nodeConfig.iiot.messageList.push(msg)
@@ -265,20 +314,20 @@ module.exports = (RED: NodeAPI) => {
       })
     }
 
-    const startCrawling = async (msg: BrowserInputPayloadLike) => {
+    const startCrawling = async (payload: BrowserInputPayloadLike) => {
       if (!nodeConfig.connector.iiot.opcuaSession) {
         nodeConfig.connector.iiot.stateMachine.initopcua()
         const returnCode = await nodeConfig.connector.functions.waitForExist(nodeConfig.connector.iiot, 'opcuaSession').catch((err: Error) => {return -1})
       }
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
-        crawl(nodeConfig.connector.iiot.opcuaSession, msg, statusHandler)
+        crawl(nodeConfig.connector.iiot.opcuaSession, payload, statusHandler)
 
       } else {
-        if (msg.addressSpaceItems && msg.addressSpaceItems.length) {
+        if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
           coreBrowser.internalDebugLog('Start Crawling On AddressSpace Items')
-          crawlNodeList(nodeConfig.connector.iiot.opcuaSession, msg)
+          crawlNodeList(nodeConfig.connector.iiot.opcuaSession, payload)
         } else {
-          this.error(new Error('No AddressSpace Items Or Root To Crawl'), msg)
+          this.error(new Error('No AddressSpace Items Or Root To Crawl'), payload)
         }
       }
     }
@@ -299,9 +348,18 @@ module.exports = (RED: NodeAPI) => {
       this.on(event, callback)
     }
 
+    type enhancedPayload = BrowserInputPayloadLike & {
+      _msgid: string
+      topic: string | undefined
+    }
+
     this.on('input', function (msg: NodeMessageInFlow) {
-      nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic((msg.payload as BrowserInputPayloadLike), nodeConfig)
-      startCrawling((msg.payload as BrowserInputPayloadLike)).finally()
+      const payload = msg.payload as enhancedPayload
+      nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic(payload, nodeConfig);
+      payload._msgid = msg._msgid;
+      payload.topic = msg.topic;
+
+      startCrawling(msg.payload as BrowserInputPayloadLike).finally()
     })
 
     registerToConnector(this, setStatus, onAlias, errorHandler)

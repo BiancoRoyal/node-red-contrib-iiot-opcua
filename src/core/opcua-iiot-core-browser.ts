@@ -9,19 +9,26 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {BrowserNode, BrowserNodeAttributes, Todo} from "../types/placeholders";
+import {BrowserNode, BrowserNodeAttributes, OPCUASession, Todo} from "../types/placeholders";
 import {initCoreNode, isSessionBad, OBJECTS_ROOT, setNodeStatusTo} from "./opcua-iiot-core";
-import {BrowseDirection, NodeCrawler} from "node-opcua";
+import {
+  BrowseDirection,
+  CacheNode,
+  NodeCrawler,
+  NodeCrawlerBase,
+  NodeCrawlerClientSession,
+  UserData
+} from "node-opcua";
 
 import debug from 'debug';
-import {Node, NodeStatus} from "node-red";
+import {NodeStatus} from "node-red";
 import {NodeMessageInFlow} from "@node-red/registry";
-import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_crawler_base";
 import {AddressSpaceItem} from "../types/core";
 import {NodeIdLike} from "node-opcua-nodeid";
 import {ResponseCallback} from "node-opcua-client";
 import {DataValue} from "node-opcua-data-value";
 import {ErrorCallback} from "node-opcua-status-code";
+import {BrowseDescriptionLike} from "node-opcua-client/source/client_session";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
@@ -72,12 +79,12 @@ const browse = function (session: Todo, nodeIdToBrowse: Todo) {
   )
 }
 
-const browseAddressSpaceItems = function (session: Todo, addressSpaceItems: Todo) {
+const browseAddressSpaceItems = function (session: OPCUASession, addressSpaceItems: Todo) {
   return new Promise(
     function (resolve, reject) {
-      let browseOptions: Todo[] = []
+      let browseOptions: BrowseDescriptionLike[] = []
 
-      addressSpaceItems.forEach(function (item: Todo) {
+      addressSpaceItems.flatMap(function (item: Todo) {
         browseOptions.push({
           nodeId: item.nodeId,
           referenceTypeId: 'Organizes',
@@ -95,7 +102,12 @@ const browseAddressSpaceItems = function (session: Todo, addressSpaceItems: Todo
         })
       })
 
-      session.browse(browseOptions, function (err: Error, browseResult: Todo) {
+
+
+      if (browseOptions.length === 0) {
+        return;
+      }
+      session.browse(browseOptions, (err: Error | null, browseResult: Todo) =>  {
         if (err) {
           reject(err)
         } else {
@@ -154,43 +166,80 @@ const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg
       }
 }
 
-const crawlAddressSpaceItems = function (session: Todo, msg: Todo) {
-  return new Promise(
-    function (resolve, reject) {
-      if (!msg.addressSpaceItems) {
-        reject(new Error('AddressSpace Items Not Valid To Crawl'))
-        return
-      }
-
-      const message = Object.assign({}, msg)
+/**
+ * Crawl based on addressSpaceItems from an inject node.
+ *
+ * This seems needlessly overcomplicated, but that is necessary to avoid UnhandledPromiseRejection errors from the crawl function.
+ *
+ */
+const crawlAddressSpaceItems =  (session: NodeCrawlerClientSession, payload: Todo, sendWrapper: (result: Error | Todo) => void, timeout: number) => {
       const crawler = coreBrowser.createCrawler(session)
-      let crawlerResult: Todo[] = []
 
-      const data = {
-        onBrowse (crawler: Todo, cacheNode: Todo) {
-          if (!cacheNode) {
-            coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
-          }
-          crawlerResult.push(cacheNode)
-          NodeCrawler.follow(crawler, cacheNode, this)
-        }
-      }
+      const crawlerPromises: Todo = []
+      const resolvers: Todo = []
 
-      message.addressSpaceItems.forEach((item: Todo) => {
+
+      payload.addressSpaceItems.forEach((item: Todo, index: number) => {
         if (!item.nodeId) {
           coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
           return
         }
 
-        crawler.crawl(item.nodeId, data, function (err) {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({ rootNodeId: item.nodeId, message, crawlerResult })
+        // Each item should track results itself
+        // results will be combined in the payload.value field, but remain independent in payload.crawlerResult
+        let crawlerResult: Todo[] = []
+        const data: UserData = {
+          onBrowse: (crawler: NodeCrawlerBase, cacheNode: CacheNode, userData: UserData) => {
+            if (!cacheNode) {
+              coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
+            }
+            crawlerResult.push(cacheNode)
+            NodeCrawler.follow(crawler, cacheNode, userData)
           }
-        })
+        }
+
+        /**
+         * Handle the response of the verifyNodeExists function.
+         * If the response doesn't contain any error, then the node exists and it can be crawled..
+         */
+        const readCallback: ResponseCallback<DataValue[]> = (err, response) => {
+          crawlerPromises.push(new Promise((resolve, reject) => {
+            resolvers.push({resolve, reject})
+            setTimeout(reject, timeout * 1000, new Error('Timeout'))
+          }).catch((test) => test))// The catch needs to be here, despite seeming useless
+
+          /**
+           * Resolves the promise of the current item.
+           * If the current item is the last, wait for all promises to resolve, then call the send function.
+           * Intended as a  callback for the crawl function, but also called directly, since this needs to be called every time.
+           */
+          const crawlback: ErrorCallback = (err) => {
+            resolvers[index].resolve(crawlerResult)
+            if (index === payload.addressSpaceItems.length - 1) {
+              Promise.allSettled(crawlerPromises).then((promiseList: Todo) => {
+                sendWrapper({rootNodeId: item.nodeId, payload, crawlerResult: promiseList, promises: true})
+              }).catch((err) => {
+                sendWrapper(err)
+              })
+            }
+          }
+
+          if (err) {
+            resolvers[index].reject(err)
+            crawlback(err)
+            return;
+          } else if (response && response.some((res) => res.statusCode?.name === 'BadNodeIdUnknown')) {
+            const error = new Error('NodeId Not Valid: Please enter a valid NodeId, under the "OPC UA Nodes" tab of the Inject Node configuration.')
+            resolvers[index].reject(error)
+            crawlback(error)
+            return;
+          }
+          crawler.crawl(item.nodeId, data, crawlback)
+        }
+
+        verifyNodeExists(session, item.nodeId, readCallback)
+
       })
-    })
 }
 
 const browseToRoot = function () {
@@ -287,6 +336,11 @@ const browseErrorHandling = function (
   }
 }
 
+/**
+ * Verifies that a node exists and catches the error, sending a nonexistent node to the crawler causes an error
+ *
+ * The endCallback function should do error checking and then call the crawl function
+ */
 const verifyNodeExists = (session: NodeCrawlerClientSession, nodeId: Todo, endCallback: ResponseCallback<DataValue[]>) => {
   session.read([{nodeId: nodeId}], endCallback)
 }
