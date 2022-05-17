@@ -21,6 +21,10 @@ This project upgrades the original work by migrating to TypeScript, and updating
 [![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
 [![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
 
+* tested with Node.js v14.19 and Node-RED v2.2.2
+* based on node-opcua v2.64 (OPC UA v1.03)
+* extendable with node-opcua-isa95
+
 *The latest version published to NPM was 3.12.1, while our version is based on 3.10.2.
 
 ## Installing
@@ -50,14 +54,7 @@ itself may only contain an ID, a topic, and a payload. This means that any refer
 
 ## Contributing
 
-Every bit helps! If you come across any bugs, please [open an issue](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/issues/new/choose), or if you feel inclined to try to fix it yourself, [submit a pull request](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/compare).
-
-##### Stuff from original README.md
-
-Let's work together!
-Please, read and in best case accept [CONTRIBUTING](.github/CONTRIBUTING.md) by your sign and send it via E-Mail.
-You could also just send a pull request or issues while testing, please!
-
+Every bit helps! If you come across any bugs, please [send a buge report](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/issues/new?type=bug), or if you feel inclined to fix it yourself, [submit a pull request](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/compare).
 
 ### Setting up local development
 1. Ensure you are using node 14. This has been developed using node v14.19.1. If using Node Version Manager: `nvm install v14.19.1`
@@ -85,64 +82,11 @@ You could also just send a pull request or issues while testing, please!
    ```
 5. Start Node-RED
    ```shell
-   cd <...>/mode-red
+   cd <...>/node-red
    npm run staart
    ``` 
    
-### :TODO_alert_emoji: After making changes, remember to run `npm run build` in the `node-red-contrib-iiot-opcua` directory starting Node-RED! :TODO_alert_emoji:
-
-## Docker
-
-### Building an image
-
-```bash
-bash build.sh <image_tag>
-```
-
-# node-red-contrib-iiot-opcua
-
-## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
-
-[![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
-[![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
-
-* tested with Node.js v14.19 and Node-RED v2.2.2
-* based on node-opcua v2.64 (OPC UA v1.03)
-* extendable with node-opcua-isa95
-
-**If you like that contributor's package for OPC UA, then please give us your star at [GitHub][3]!**
-
-[You could also help as a backer of the project.][2]
-
-## Install
-
-Run command on [Node-RED][3] installation directory.
-
-	npm install node-red-contrib-iiot-opcua
-
-or run command for global installation.
-
-	npm install -g node-red-contrib-iiot-opcua
-
-try these options on npm install to build, if you have problems to install
-
-    --unsafe-perm --build-from-source
-
-![Flow Example](images/wiki/browser-listener-flow3-active.png)
-
-To get a special version please set the version with @M.M.F:
-
-    npm install node-red-contrib-iiot-opcua@2.7.1
-
-or global with the -g option of npm. You get more help in the npm docs.
-    
-## Contributing
-
-Let's work together!
-Please, read and in best case accept [CONTRIBUTING](.github/CONTRIBUTING.md) by your sign and send it via E-Mail.
-You could also just send a pull request or issues while testing, please!
-
-[Click here if you want to back the project!][2]
+### :warning: After making changes, remember to run `npm run build` in the `node-red-contrib-iiot-opcua` directory starting Node-RED! :warning:
 
 ### Debug
 
@@ -151,19 +95,23 @@ provides interesting points in different abstractions if IDE or console debuggin
 
 Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 
-    DEBUG=opcuaIIoT* node-red -v 1>nodeREDIIoTOPCUA.log 2>&1
+    DEBUG=opcuaIIoT* npm run start -v 1>nodeREDIIoTOPCUA.log 2>&1
 
-or on local Node-RED
 
-    DEBUG=opcuaIIoT* node red.js -v 1>nodeREDIIoTOPCUAServer.log 2>&1
-    
-#### Debug Options
 
-Please, read the [Wiki article][7]
+## Docker
 
-### Wiki
+### Building an image
 
-Follow the [white rabbit][4]!
+```bash
+npm run container # This populates the image tag from the package.json version
+# or
+bash build.sh <image_tag>
+```
+
+## Examples
+### Basic Flow
+![Flow Example](images/wiki/browser-listener-flow3-active.png)
 
 ### Your own address space model!
 
@@ -201,19 +149,6 @@ see Node-RED menu (right upper corner) -> Import -> Examples -> iiot opcua
 ![Flow Flex Connector](images/wiki/flex-connector-flow31.png)
 
 ## Package Information
-
-### Known Issues and TODO's
-
-Ideas
-* methods calls
-  * complex
-  * dynamic
-  * structured object parameters
-
-Errors
-* more Bad status situations handling
-* API changes to 0.4.+ bring some breaking changes in connection handling
-  * Please, test and report issues via GitHub!
 
 ### License
 
