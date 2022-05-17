@@ -71,16 +71,10 @@
     "test:ci": "jest --verbose --detectOpenHandles --forceExit --logHeapUsage --ci --debug",
     "build1": "standard --fix && gulp publish",
     "build": "gulp publish",
-    "container": "npm run container:build && npm run container:save",
-    "container:build": "bash build.sh datatroniq/node-red:$npm_package_version",
-    "container:save": "podman save datatroniq/node-red:$npm_package_version | pigz > node-red.docker",
     "prepublishOnly": "npm test && npm run coverage && npm run build",
     "release": "standard-version -a",
     "inspect": "jsinspect ./src > .jsinspect-results.json",
     "rewrite-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "container:load": "docker load -i node-red.docker",
-    "container:tag": "docker tag datatroniq/node-red:$npm_package_version ct-it-dtq-edge-docker-l.eu.artifactory.conti.de/datatroniq/node-red:$npm_package_version",
-    "container:push": "docker push ct-it-dtq-edge-docker-l.eu.artifactory.conti.de/datatroniq/node-red:$npm_package_version"
   },
   "files": [
     "docs",

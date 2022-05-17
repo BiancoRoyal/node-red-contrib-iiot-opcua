@@ -96,18 +96,6 @@ Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 
     DEBUG=opcuaIIoT* npm run start -v 1>nodeREDIIoTOPCUA.log 2>&1
 
-
-
-## Docker
-
-### Building an image
-
-```bash
-npm run container # This populates the image tag from the package.json version
-# or
-bash build.sh <image_tag>
-```
-
 ## Examples
 ### Basic Flow
 ![Flow Example](images/wiki/browser-listener-flow3-active.png)
