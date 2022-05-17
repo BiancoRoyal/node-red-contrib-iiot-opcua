@@ -1,16 +1,16 @@
 name: "Bug Report"
 description: Report a bug or unexpected behavior encountered.
-labels: bug
+labels:
+  - bug
 body:
-  - type: input
-    id: version
-    attribute:
-      label: Which node-red-contrib-iiot-opcua versoin are you using?
+  - type: "input"
+    id: "version"
+    attributes:
+      label: Which node-red-contrib-iiot-opcua version are you using?
       description: |
-        Please check the `package.json` file in your Node-RED data directory (default: `¼HOME/.node-red/`).
+        Please check the `package.json` file in your Node-RED data directory (default: `$HOME/.node-red/`).
     validations:
       required: true
-
   - type: textarea
     id: descriptions
     attributes:
@@ -19,8 +19,6 @@ body:
         Please provide a clear and thorough description of what happened.
     validations:
       required: true
-
-
   - type: dropdown
     id: server
     attributes:
@@ -35,7 +33,6 @@ body:
         - None/This is related to a node that doesn't connect to a server
     validations:
       required: true
-
   - type: textarea
     id: reproduction
     attributes:
@@ -45,7 +42,6 @@ body:
         Please attach relevant flows as a `.json` file. (In the top-right menu, click `Export`)
     validations:
       required: true
-
   - type: textarea
     id: expected
     attributes:
@@ -55,11 +51,11 @@ body:
     validations:
       required: false
 
-- type: textarea
-  id: other
-  attributes:
-    label: Other Information
-    description: |
-      Please provide any other information you feel is relevant, such as Node-RED or NodeJS versions. 
-  validations:
-    required: false
+  - type: textarea
+    id: other
+    attributes:
+      label: Other Information
+      description: |
+        Please provide any other information you feel is relevant, such as Node-RED or NodeJS versions.
+    validations:
+      required: false
