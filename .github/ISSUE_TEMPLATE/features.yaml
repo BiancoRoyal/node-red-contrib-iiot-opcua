@@ -1,4 +1,4 @@
-name: feature
+name: "Feature Request"
 description: Request a new feature
 labels:
   - feature
