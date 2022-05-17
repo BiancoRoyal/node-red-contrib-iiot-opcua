@@ -9,8 +9,8 @@
 ![NodeJS_Version](https://img.shields.io/badge/NodeJS-14.19.1-green.png)
 [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
-[![Build Status](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua)
-[![Maintainability badge](url)](a url to a maintainability badge such as CodeClimate)
+[![Build Status](badge url)](link to build status)
+[![Maintainability badge](url)](a url to a maintainability or code quality badge such as CodeClimate)
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
 
