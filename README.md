@@ -1,10 +1,27 @@
 
-# node-red-contrib-iiot-opcua
+# node-red-contrib-iiot-opcua 
+
+![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
+![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
+![License](http://b.repl.ca/v1/License-LicenseType-orange.png)
+[![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
+![ES_Deploy_Version](http://b.repl.ca/v1/TypeScript-4.6.4-yellow.png)
+![NodeJS_Version](http://b.repl.ca/v1/NodeJS-14.19.1-green.png)
+[![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+[![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
+[![Build Status](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua)
+[![Maintainability badge](codeclimate)](a url to CodeCliemate)
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
 
+This is an updated version of the project of the same name, which was deprecated by the [original developer][1] in April 2020. 
+The original repository has been deleted from Github, so this is based on [this fork of a slightly outdated version of the project](https://github.com/cacamille3/node-red-contrib-iiot-opcua).* 
+This project upgrades the original work by migrating to TypeScript, and updating dependencies, including updates to new major release versions of Node-RED (v0.19 to v2.2.2) and node-opcua (v0.4 to v2.64.1).
+
 [![ISA95](images/logoISA95blue2.png)](https://opcfoundation.org/developer-tools/specifications-unified-architecture/isa-95-common-object-model/)
 [![ISA95](images/logoRAMI40blue.png)](http://www.plattform-i40.de/)
+
+*The latest version published to NPM was 3.12.1, while our version is based on 3.10.2.
 
 ## Installing
 
@@ -16,7 +33,12 @@
 
 ## Migrating from previous versions
 
-The update from v3.x to v4.x changed the way the nodes are implemented.
+The update from v3.x to v4.x changed the way some nodes are implemented.
+
+### General Changes
+- The message format was standardized. While in older versions, a lot of additional properties were placed directly into the message,
+they have been moved into the message's payload (`msg.payload`). This is to ensure the standard Node-RED message format is used, where the message
+itself may only contain an ID, a topic, and a payload. This means that any references like `msg.nodetype` should be changed to `msg.payload.nodetype`.
 
 ### Browser
 - The option `singleBrowseResult` has been replaced with `multipleOutputs`, and the default value now combines all outputs into one message. To maintain the same output, replace `singleBrowseResult` with `multipleOutputs` and swap the corresponding boolean value (true becomes false, false becomes true).
@@ -28,7 +50,7 @@ The update from v3.x to v4.x changed the way the nodes are implemented.
 
 ## Contributing
 
-Every bit helps! If you come across any bugs, please [open an issue](TODO link to that), or if you feel inclined to try to fix it yourself, [submit a pull request](TODO link to that).
+Every bit helps! If you come across any bugs, please [open an issue](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/issues/new/choose), or if you feel inclined to try to fix it yourself, [submit a pull request](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/compare).
 
 ##### Stuff from original README.md
 
