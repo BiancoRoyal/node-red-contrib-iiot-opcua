@@ -1,12 +1,12 @@
 
 # node-red-contrib-iiot-opcua 
 
-![Platform Node-RED](http://b.repl.ca/v1/Platform-Node--RED-red.png)
-![Node-RED IIoT OPC UA](http://b.repl.ca/v1/Node--RED-IIoT_OPC_UA-blue.png)
-![License](http://b.repl.ca/v1/License-LicenseType-orange.png)
+![Platform Node-RED](https://img.shields.io/badge/Platform-Node--RED-red.png)
+![Node-RED IIoT OPC UA](https://img.shields.io/badge/Node--RED-IIoT_OPC_UA-blue.png)
+![License](https://img.shields.io/badge/License-LicenseType-orange.png)
 [![NPM version](https://badge.fury.io/js/node-red-contrib-iiot-opcua.png)](https://www.npmjs.com/package/node-red-contrib-iiot-opcua)
-![ES_Deploy_Version](http://b.repl.ca/v1/TypeScript-4.6.4-yellow.png)
-![NodeJS_Version](http://b.repl.ca/v1/NodeJS-14.19.1-green.png)
+![ES_Deploy_Version](https://img.shields.io/badge/TypeScript-4.6.4-yellow.png)
+![NodeJS_Version](https://img.shields.io/badge/NodeJS-14.19.1-green.png)
 [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
 [![Build Status](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua.svg?branch=master)](https://travis-ci.org/BiancoRoyal/node-red-contrib-iiot-opcua)
