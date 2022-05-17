@@ -90,8 +90,7 @@ Every bit helps! If you come across any bugs, please [send a buge report](https:
 
 ### Debug
 
-Debugging on remote devices is important to help users. The verbose logging
-provides interesting points in different abstractions if IDE or console debugging is not possible.
+To increase the verbosity of logging, enable debug modes and verbose logging.
 
 Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 
