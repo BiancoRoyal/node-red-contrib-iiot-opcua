@@ -336,9 +336,6 @@ module.exports = (RED: NodeAPI) => {
     const startCrawling = async (payload: BrowserInputPayloadLike) => {
       if (!nodeConfig.connector.iiot.opcuaSession) {
         nodeConfig.connector.iiot.stateMachine.initopcua()
-        const returnCode = await nodeConfig.connector.functions.waitForExist(nodeConfig.connector.iiot, 'opcuaSession').catch((err: Error) => {
-          return -1
-        })
       }
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
         crawl(nodeConfig.connector.iiot.opcuaSession, payload, statusHandler)
