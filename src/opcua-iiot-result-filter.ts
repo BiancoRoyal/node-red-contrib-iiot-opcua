@@ -14,6 +14,9 @@ import {convertDataValueByDataType, filterListByNodeId, filterListEntryByNodeId}
 import {NodeMessageInFlow} from "@node-red/registry";
 import {BrowserPayload} from "./opcua-iiot-browser";
 import {BrowseResult} from "node-opcua";
+import {isArray} from "./types/assertion";
+import {ReadPayload} from "./opcua-iiot-read";
+import {ListenPayload} from "./opcua-iiot-listener";
 
 interface OPCUAIIoTResultFilter extends nodered.Node {
   nodeId: string
@@ -104,11 +107,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       const value =
         node.justValue
           // if justValue, return the filtered value of the input message
-          ? filterResult({...filtered, nodetype: payload.nodetype})
+          // Spread operator placement should handle all formats of filtered objects
+          ? filterResult({value: filtered, ...filtered, nodetype: payload.nodetype})
           // otherwise return the value field of the payload
           // The field considered 'value' is different for crawler and browsers
           : (filtered.value || filtered.crawlerResults || filtered.browserResults)
 
+      const convertedValue = (this.fixedValue || this.withPrecision) ? convertAllResults(payload, value) : value;
 
       const {msg: msgKey, ...restPayload} = payload;
       const outputPayload = {
@@ -116,8 +121,8 @@ module.exports = (RED: nodered.NodeAPI) => {
         filtertype: "filter",
         justValue: node.justValue,
         nodeId: node.nodeId,
-        value,
         ...filtered,
+        value: convertedValue.length === 1 ? convertedValue[0] : convertedValue,
         filter: true,
       }
 
@@ -158,7 +163,22 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const convertResult = (msg: FilterInputPayload, result: Todo) => {
+    const convertAllResults = (payload: FilterInputPayload, result: Todo | Todo[]) => {
+      if (!isArray(result)) {
+        return convertResult(payload, result)
+      } else {
+        return result.map((item: Todo) => {
+          if ('value' in item) {
+            return convertResult(payload, item.value || item)
+          } else {
+            return item
+          }
+        })
+      }
+    }
+
+    const convertResult = (payload: FilterInputPayload, result: Todo) => {
+      if (result.value) result = result.value
       try {
         let convertedResult = null
         if (node.fixPoint >= 0 && node.fixedValue) {
@@ -183,7 +203,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       } catch (err: any) {
         coreFilter.internalDebugLog('result converting error ' + err.message)
         if (node.showErrors) {
-          this.error(err, {payload: msg})
+          this.error(err, {payload})
         }
         return result
       }
@@ -264,26 +284,37 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const filterByReadType = (payload: Todo) => {
+    const filterByReadType = (payload: ReadPayload) => {
+      if (isArray(payload.value))
+        return {
+          value: payload.value.filter((item: Todo) => {
+            return item.nodeId.toString().includes(this.nodeId)
+          })
+        }
+      else {
+        this.error('wrong payload type');
+        return payload
+      }
+    }
+
+    const filterByWriteType = function (payload: Todo) {
       return {
-        value: payload.value.filter((item: Todo) => {
-          return item.nodeId.toString().includes(this.nodeId)
+        value: payload.nodesToWrite.map((item: Todo) => {
+          while (item.value) {
+            item = item.value
+          }
+          return item;
         })
       }
     }
 
-    // Todo: This feels wrong
-    const filterByWriteType = function (msg: Todo): null {
-      return null // has no value
-    }
-
-    const filterByListenType = function (msg: Todo) {
+    const filterByListenType = function (payload: ListenPayload) {
       let result
 
-      if (msg.payload && msg.payload.hasOwnProperty('value')) {
-        result = msg.payload.value
+      if (payload && payload.hasOwnProperty('value')) {
+        result = payload.value
       } else {
-        result = msg.payload
+        result = payload
       }
 
       if (result && result.hasOwnProperty('value')) {

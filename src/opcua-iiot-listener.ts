@@ -64,7 +64,7 @@ interface OPCUAIIoTCMDDef extends nodered.NodeDef {
 }
 
 
-export type ListenPayload = {
+export type ListenPayload = Todo &{
   injectType: 'listen',
 
 }

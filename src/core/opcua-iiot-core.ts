@@ -623,9 +623,8 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 export function buildNodesToRead(payload: Todo) {
   logger.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(payload))
 
-  let nodePayloadList = payload.nodesToRead || payload.nodesToWrite || (payload.value.length ? payload.value : (payload.crawlerResults || payload.browserResults));
+  let nodePayloadList = payload.nodesToRead || payload.nodesToWrite || (payload.value?.length ? payload.value : (payload.crawlerResults || payload.browserResults || payload.addressSpaceItems));
   if (nodePayloadList && nodePayloadList.length) {
-    // read to read
     return nodePayloadList.map((item: Todo) => {
       return (item.nodeId || item).toString()
     })
@@ -644,10 +643,10 @@ export function buildNodesToRead(payload: Todo) {
 }
 
 export function buildNodesToListen(payload: Todo) {
-  if (payload.addressSpaceItems?.length)
-    return payload.addressSpaceItems
-  else if (payload.addressItemsToRead?.length)
+  if (payload.addressItemsToRead?.length)
     return payload.addressItemsToRead
+  else if (payload.addressSpaceItems?.length)
+    return payload.addressSpaceItems
   else
     return payload.addressSpaceItemList
 }

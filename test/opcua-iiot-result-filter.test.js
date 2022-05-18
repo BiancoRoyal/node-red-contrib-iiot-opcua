@@ -87,7 +87,7 @@ var listenTestFlowPayload = [
     'id': 'n3rff2',
     'type': 'function',
     'name': '',
-    'func': "msg.nodetype = 'listen'\nmsg.injectType = 'subscribe'\nmsg.addressSpaceItems = [{\"name\":\"\",\"nodeId\":\"ns=1;s=Pressure\",\"datatypeName\":\"\"}]\nreturn msg;",
+    'func': "msg.payload.nodetype = 'listen'\nmsg.payload.injectType = 'subscribe'\nmsg.payload.addressSpaceItems = [{\"name\":\"\",\"nodeId\":\"ns=1;s=Pressure\",\"datatypeName\":\"\"}]\nreturn msg;",
     'outputs': 1,
     'noerr': 0,
     'wires': [['n4rff2', 'n5rff2']]
@@ -168,7 +168,7 @@ var writeTestFlowPayload = [
     type: 'inject',
     name: 'TestName',
     topic: 'TestTopic',
-    payload: '{"statusCodes":[{"value":0,"description":"No Error","name":"Good"}],"nodesToWrite":[{"nodeId":"ns=1;s=TestReadWrite","attributeId":13,"indexRange":null,"value":{"value":{"dataType":"Double","value":22980.7896,"arrayType":"Scalar"}}}],"msg":{"_msgid":"11cc64dd.bde67b","topic":"","nodetype":"inject","injectType":"write","addressSpaceItems":[{"name":"TestReadWrite","nodeId":"ns=1;s=TestReadWrite","datatypeName":"Double"}],"payload":1539981968143,"valuesToWrite":[22980.7896]}}',
+    payload: '{"statusCodes":[{"value":0,"description":"Good","name":"Good"}],"nodesToWrite":[{"nodeId":"ns=1;s=TestReadWrite","attributeId":13,"indexRange":null,"value":{"value":{"dataType":"Double","value":22980.7896,"arrayType":"Scalar"}}}],"msg":{"_msgid":"11cc64dd.bde67b","topic":"","nodetype":"inject","injectType":"write","addressSpaceItems":[{"name":"TestReadWrite","nodeId":"ns=1;s=TestReadWrite","datatypeName":"Double"}],"payload":1539981968143,"valuesToWrite":[22980.7896]}}',
     payloadType: 'json',
     repeat: '',
     crontab: '',
@@ -181,7 +181,7 @@ var writeTestFlowPayload = [
     id: 'n3rff4',
     type: 'function',
     name: '',
-    func: "msg.nodetype = 'write'\nmsg.injectType = 'write'\nmsg.addressSpaceItems = [{name:'',nodeId:'ns=1;s=TestReadWrite',datatypeName:''}]\nreturn msg;",
+    func: "msg.payload.nodetype = 'write'\nmsg.payload.injectType = 'write'\nmsg.payload.addressSpaceItems = [{name:'',nodeId:'ns=1;s=TestReadWrite',datatypeName:''}]\nreturn msg;",
     outputs: 1,
     noerr: 0,
     wires: [['n4rff4', 'n5rff4']]
@@ -326,7 +326,7 @@ describe('OPC UA Result Filter node Testing', function () {
         let n5 = helper.getNode('n5rff1')
         n6.on('input', function (msg) {
           expect(msg.payload.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
-          expect(msg.payload.value).toBe(16.041979)
+          expect(msg.payload.value).toBe(16.04)
           expect(msg.topic).toBe('TestTopic')
           done()
         })
@@ -335,6 +335,7 @@ describe('OPC UA Result Filter node Testing', function () {
           payload: {
             "node": "ns=1;s=TemperatureAnalogItem",
             "nodeId": "ns=1;s=TemperatureAnalogItem",
+            "nodetype": "read",
             "nodeClass": 2,
             "browseName": {"namespaceIndex": 0, "name": "TemperatureAnalogItem"},
             "displayName": {"text": "TemperatureAnalogItem"},
@@ -380,7 +381,7 @@ describe('OPC UA Result Filter node Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenTestFlowPayload, function () {
         let n4 = helper.getNode('n4rff2')
         n4.on('input', function (msg) {
-          expect(msg.addressSpaceItems[0].nodeId).toMatch(/Pressure/)
+          expect(msg.payload.addressSpaceItems[0].nodeId).toMatch(/Pressure/)
           done()
         })
       })
@@ -395,14 +396,6 @@ describe('OPC UA Result Filter node Testing', function () {
           expect(msg.payload.value).toBe(16.04)
           expect(msg.topic).toBe('TestTopic')
           done()
-        })
-        n5.receive({
-          topic: 'TestTopic',
-          payload: {
-            nodetype: "read",
-            nodeId: 'ns=1;s=Pressure',
-            value: 16.0445128
-          }
         })
       })
     })
@@ -428,43 +421,29 @@ describe('OPC UA Result Filter node Testing', function () {
         let n2 = helper.getNode('n2rff4')
         n2.on('input', function (msg) {
           expect(msg.payload).toMatchObject({
-            'statusCodes': [
+            statusCodes: [ { value: 0, description: 'Good', name: 'Good' } ],
+            nodesToWrite: [
               {
-                'value': 0,
-                'description': 'No Error',
-                'name': 'Good'
-              }
-            ],
-            'nodesToWrite': [
-              {
-                'nodeId': 'ns=1;s=TestReadWrite',
-                'attributeId': 13,
-                'indexRange': null,
-                'value': {
-                  'value': {
-                    'dataType': 'Double',
-                    'value': 22980.7896,
-                    'arrayType': 'Scalar'
-                  }
+                nodeId: 'ns=1;s=TestReadWrite',
+                attributeId: 13,
+                indexRange: null,
+                value: {
+                  value: { dataType: 'Double', value: 22980.7896, arrayType: 'Scalar' }
                 }
               }
             ],
-            'msg': {
-              '_msgid': '11cc64dd.bde67b',
-              'topic': '',
-              'nodetype': 'inject',
-              'injectType': 'write',
-              'addressSpaceItems': [
-                {
-                  'name': 'TestReadWrite',
-                  'nodeId': 'ns=1;s=TestReadWrite',
-                  'datatypeName': 'Double'
-                }
-              ],
-              'payload': 1539981968143,
-              'valuesToWrite': [
-                22980.7896
-              ]
+            msg: {
+              _msgid: '11cc64dd.bde67b',
+              topic: '',
+              nodetype: 'inject',
+              injectType: 'write',
+              addressSpaceItems: [ {
+                name: 'TestReadWrite',
+                nodeId: 'ns=1;s=TestReadWrite',
+                datatypeName: 'Double'
+              } ],
+              payload: 1539981968143,
+              valuesToWrite: [ 22980.7896 ]
             }
           })
           done()
@@ -495,12 +474,44 @@ describe('OPC UA Result Filter node Testing', function () {
     it('should have nodeId, payload and topic as result', function (done) {
       helper.load([injectNode, functionNode, inputNode], writeTestFlowPayload, function () {
         let n6 = helper.getNode('n6rff4')
+        let n1 = helper.getNode('n1rff4')
         n6.on('input', function (msg) {
+          console.log(msg)
           expect(msg.payload.nodeId).toBe('ns=1;s=TestReadWrite')
-          expect(msg.payload.nodesToWrite[0].value.value.value).toBe(22980.7896)
+          console.log('good morrow 494')
+          expect(msg.payload.value).toBe(22980.7896)
+          console.log('good morrow 496')
           expect(msg.topic).toBe('TestTopic')
+          console.log('good morrow 498')
           done()
         })
+        n1.receive({
+          _msgid: '11cc64dd.bde67b',
+          topic: 'TestTopic',
+        })
+        // n5.receive({
+        //   payload: {
+        //     "node": "ns=1;s=TemperatureAnalogItem",
+        //     "nodeId": 'ns=1;s=TestReadWrite',
+        //     "value": 22980.7896,
+        //     "nodetype": "read",
+        //     "nodeClass": 2,
+        //     "browseName": {"namespaceIndex": 0, "name": "TemperatureAnalogItem"},
+        //     "displayName": {"text": "TemperatureAnalogItem"},
+        //     "description": {},
+        //     "writeMask": 0,
+        //     "userWriteMask": 0,
+        //     "dataType": "Double",
+        //     "valueRank": -1,
+        //     "arrayDimensions": {},
+        //     "accessLevel": 3,
+        //     "userAccessLevel": 3,
+        //     "minimumSamplingInterval": 0,
+        //     "historizing": false,
+        //     "statusCode": {"value": 0, "description": "No Error", "name": "Good"}
+        //   },
+        //   topic: 'TestTopic'
+        // })
       })
     })
 
