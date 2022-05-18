@@ -177,7 +177,8 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('n1rh')
           nodeUnderTest.on('input', (msg) => {
-            expect(msg.payload.value[0].value.dataType).toBe('DateTime')
+            console.log(msg.payload.value)
+            expect(msg.payload.value[0].dataType).toBe('DateTime')
             done()
           })
         })
@@ -188,7 +189,7 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('n1rh')
           nodeUnderTest.on('input', msg => {
-            expect(msg.payload.value[0].value.dataType).toBe('DateTime')
+            expect(msg.payload.value[0].dataType).toBe('DateTime')
             done()
           })
         })
@@ -199,7 +200,10 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('76202549.fd7c1c')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.functions.handleNodeTypeOfMsg({payload: {}})
+          let payload = {value: []}
+          nodeUnderTest.functions.handleNodeTypeOfMsg(payload)
+          console.log(payload)
+          expect(payload).toStrictEqual({ value: [], entryStatus: { bad: 1, good: 0, other: 0 } })
           done()
         })
     })

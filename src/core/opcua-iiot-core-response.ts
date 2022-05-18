@@ -59,7 +59,7 @@ const analyzeBrowserResults = function (node: Node, payload: BrowserPayload) {
 }
 
 const analyzeCrawlerResults = function (node: Node, payload: CrawlerPayload) {
-  handlePayloadStatusCode(node, payload.value, payload as AnyPayload)
+  handlePayloadStatusCode(node, payload.value as StatusInput[], payload as AnyPayload)
 }
 
 const analyzeReadResults = (node: Node, payload: ReadPayload) => {
@@ -115,14 +115,20 @@ const analyzeWriteResults = function (node: Node, msg: Todo) {
   setNodeStatusInfo(node, msg, entryStatus)
 }
 
-const handlePayloadStatusCode = function (node: Node, payload: AnyPayload, statusInputs: StatusInput | StatusInput[]) {
+const handlePayloadStatusCode = function (node: Node, statusInputs: StatusInput | StatusInput[], payload: AnyPayload) {
   let entryStatus = {
     bad: 0,
     good: 0,
     other: 0
   }
 
-  console.log('isArray', isArray(statusInputs))
+  if (!statusInputs || (statusInputs as StatusInput[]).length === 0) {
+    payload.entryStatus = {
+      ...entryStatus,
+      bad: 1
+    }
+    return;
+  }
 
   if (isArray(statusInputs)) {
     entryStatus = handlePayloadArrayOfObjects(statusInputs)
