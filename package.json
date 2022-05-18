@@ -83,6 +83,7 @@
     "create_certificates.js"
   ],
   "devDependencies": {
+    "@actions/core": "^1.8.2",
     "@types/cron": "^2.0.0",
     "@types/debug": "^4.1.7",
     "@types/jest": "^27.4.1",
@@ -131,5 +132,8 @@
     ]
   },
   "main": "index.js",
-  "browserslist": ["> 0.25%", "not dead"]
+  "browserslist": [
+    "> 0.25%",
+    "not dead"
+  ]
 }
