@@ -277,7 +277,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const subscribeMonitoredItem = (msg: Todo) => {
-      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'MonitorListener')) {
+      if (checkSessionNotValid(nodeConfig.connector?.iiot?.opcuaSession, 'MonitorListener')) {
         return
       }
 
@@ -411,11 +411,11 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const setMonitoring = (monitoredItemToSet: ClientMonitoredItem) => {
       const monitoredItem: ClientMonitoredItem = monitoredItemToSet
-      if (!monitoredItem) {
+      if (!monitoredItem || !monitoredItem.on) {
         coreListener.internalDebugLog('monitoredItem Id from server is not valid Id: ' + monitoredItem)
         return
       }
-      if (!isNodeId(monitoredItem.itemToMonitor.nodeId)) {
+      if (!isNodeId(monitoredItem.itemToMonitor?.nodeId)) {
         coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.itemToMonitor.nodeId)
       }
       coreListener.internalDebugLog('add monitoredItem to list Id:' + monitoredItem.itemToMonitor.nodeId + ' nodeId: ' + monitoredItem.itemToMonitor.nodeId)

@@ -166,7 +166,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
       helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
-        n1.iiot.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
+        n1.functions.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
         done()
       })
     })
