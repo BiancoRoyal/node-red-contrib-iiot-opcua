@@ -258,7 +258,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readGoodTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([1, 0, 0])
+          expect(msg.payload.entryStatus).toMatchObject({good: 1, bad: 0, other: 0})
           done()
         })
       })
@@ -268,7 +268,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], writeGoodTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([1, 0, 0])
+          expect(msg.payload.entryStatus).toMatchObject({good: 1, bad: 0, other: 0})
           done()
         })
       })
@@ -278,7 +278,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenGoodTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([1, 0, 0])
+          expect(msg.payload.entryStatus).toMatchObject({good: 1, bad: 0, other: 0})
           done()
         })
       })
@@ -288,7 +288,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readBadTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([0, 1, 0])
+          expect(msg.payload.entryStatus).toMatchObject({good: 0, bad: 1, other: 0})
           done()
         })
       })
@@ -298,7 +298,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], writeBadTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([0, 1, 0])
+          expect(msg.payload.entryStatus).toMatchObject({good: 0, bad: 1, other: 0})
           done()
         })
       })
@@ -308,7 +308,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenBadTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([0, 1, 0])
+          expect(msg.payload.entryStatus).toMatchObject({good: 0, bad: 1, other: 0})
           done()
         })
       })
@@ -318,7 +318,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readOtherTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([0, 0, 1])
+          expect(msg.payload.entryStatus).toMatchObject({good: 1, bad: 0, other: 0})
           done()
         })
       })
@@ -328,7 +328,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], writeOtherTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([0, 0, 1])
+          expect(msg.payload.entryStatus).toMatchObject({good: 0, bad: 0, other: 1})
           done()
         })
       })
@@ -338,7 +338,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenOtherTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([0, 0, 1])
+          expect(msg.payload.entryStatus).toMatchObject({good: 0, bad: 0, other: 1})
           done()
         })
       })

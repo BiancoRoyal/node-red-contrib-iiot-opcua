@@ -219,6 +219,10 @@ const handlePayloadArrayOfStatusCodes = function (payload: ResponseInputPayload)
     other: 0,
   }
 
+  if (!payload.statusCodes){
+    payload.statusCodes = payload.value?.statusCodes
+  }
+
   if (payload.statusCodes) {
     for (entry of payload.statusCodes) {
       if (entry && entry.name) {
