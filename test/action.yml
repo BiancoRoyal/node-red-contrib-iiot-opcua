@@ -1,5 +1,0 @@
-name: 'Test summary generator'
-description: 'Runs test and generates summary'
-runs:
-  using: 'node14'
-  main: '.github/workflows/summary.js'
