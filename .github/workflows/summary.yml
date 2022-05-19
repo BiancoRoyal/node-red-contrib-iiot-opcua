@@ -37,6 +37,9 @@ jobs:
         with:
           name: badges
           path: badges
+      - run: |
+          git config user.name "$(git log -n 1 --pretty=format:%an)"
+          git config user.email "$(git log -n 1 --pretty=format:%ae)"
       - run: git add badges
       - run: git commit --amend
       - run: git push
