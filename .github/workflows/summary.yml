@@ -24,4 +24,4 @@ jobs:
           cache: 'npm'
       - run: npm install
       - run: npm run test:ci
-      - run: cat out.txt > $GITHUB_STEP_SUMMARY
+      - run: cat out.md > $GITHUB_STEP_SUMMARY
