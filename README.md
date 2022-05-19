@@ -9,7 +9,7 @@
 ![NodeJS_Version](https://img.shields.io/badge/NodeJS-14.19.1-green.png)
 [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
-[![Build Status](badge url)](link to build status)
+[![Build status](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/actions/workflows/build.yml/badge.svg)]
 [![Maintainability badge](url)](a url to a maintainability or code quality badge such as CodeClimate)
 [![Test Coverage](badges/badge-lines.svg)](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/actions/workflows/summary.yml)
 
