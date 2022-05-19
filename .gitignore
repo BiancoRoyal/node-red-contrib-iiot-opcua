@@ -1,3 +1,5 @@
+scripts/out*
+
 .idea/
 *.iml
 code/
