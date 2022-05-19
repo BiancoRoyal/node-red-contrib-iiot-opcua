@@ -6,15 +6,12 @@ name: "Generate Summary"
 on: push
 
 jobs:
-  build:
-
+  tests:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [14.19.1]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -23,5 +20,23 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm install
-      - run: npm run test:ci
+      - run: npm run summary
       - run: cat out.md > $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v3
+        with:
+          name: badges
+          path: badges
+  badgeUpdate:
+    name: "Update badges"
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development' || github.ref == 'refs/heads/add-github-actions'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: badges
+          path: badges
+      - run: git add badges
+      - run: git commit --amend
+      - run: git push
