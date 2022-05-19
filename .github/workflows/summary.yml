@@ -42,4 +42,4 @@ jobs:
           git config user.email "$(git log -n 1 --pretty=format:%ae)"
       - run: git add badges
       - run: git commit --amend --no-edit
-      - run: git push
+      - run: git push --force
