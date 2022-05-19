@@ -11,6 +11,7 @@
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
 [![Build Status](badge url)](link to build status)
 [![Maintainability badge](url)](a url to a maintainability or code quality badge such as CodeClimate)
+[![Test Coverage](badges/badge-lines.svg)](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/actions/workflows/summary.yml)
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
 
