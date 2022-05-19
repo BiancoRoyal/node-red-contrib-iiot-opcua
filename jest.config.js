@@ -10,7 +10,7 @@ module.exports = {
   automock: false,
 
   // Stop running tests after the first failure
-  bail: true,
+  bail: false,
 
   // Respect "browser" field in package.json when resolving modules
   // browser: false,
@@ -67,7 +67,7 @@ module.exports = {
 
   // An array of directory names to be searched recursively up from the requiring module's location
   moduleDirectories: [
-    '<rootDir>/node_modules/'
+    'node_modules'
   ],
 
   // An array of file extensions your modules use
