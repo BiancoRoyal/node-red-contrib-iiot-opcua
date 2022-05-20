@@ -116,11 +116,11 @@ const analyzeWriteResults = function (node: Node, msg: Todo) {
 }
 
 const isStatusInput = (status: any): status is StatusInput | StatusInput[] => {
-  if ("statusCode" in status && status instanceof StatusCode) {
+  if ("statusCode" in status && typeof status.statusCode?.name === "string") {
     return true;
   }
-  if ("statusCodes" in status && Array.isArray(status.statusCodes)) {
-    return status.every((item: any) => item instanceof StatusCode);
+  if (Array.isArray(status)) {
+    return status.every((item: any) => typeof item.statusCode?.name === "string");
   }
   return false;
 }
@@ -128,11 +128,18 @@ const isStatusInput = (status: any): status is StatusInput | StatusInput[] => {
 const handlePayloadStatusCode = <T extends Record<any, any>>(node: Node, statusInputs: unknown, payload: AnyPayload) => {
   if (!isStatusInput(statusInputs)) {
     if (isArray(statusInputs)) {
-      payload.entryStatus = {
-        good: statusInputs.length,
-        bad: 0,
-        other: 0,
-      }
+      if (statusInputs.length !== 0)
+        payload.entryStatus = {
+          good: statusInputs.length,
+          bad: 0,
+          other: 0,
+        }
+      else
+        payload.entryStatus = {
+          good: 0,
+          bad: 1,
+          other: 0,
+        }
     } else {
       if (statusInputs instanceof Error) {
         payload.entryStatus = {
