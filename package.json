@@ -74,7 +74,7 @@
     "prepublishOnly": "npm test && npm run coverage && npm run build",
     "release": "standard-version -a",
     "inspect": "jsinspect ./src > .jsinspect-results.json",
-    "rewrite-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "rewrite-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "files": [
     "docs",
