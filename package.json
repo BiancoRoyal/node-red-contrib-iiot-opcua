@@ -7,7 +7,7 @@
     "url": "git@gitlab.sigmalto.com:contitech/node-red-distro.git"
   },
   "dependencies": {
-    "cron": "1.8.2",
+    "cron": "2.0.0",
     "debug": "4.3.4",
     "easy-table": "1.2.0",
     "node-opcua": "2.64.1",
@@ -83,7 +83,7 @@
     "create_certificates.js"
   ],
   "devDependencies": {
-    "@types/cron": "^1.7.3",
+    "@types/cron": "^2.0.0",
     "@types/debug": "^4.1.7",
     "@types/jest": "^27.4.1",
     "@types/node-red": "^1.2.0",
