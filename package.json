@@ -133,5 +133,5 @@
       "test"
     ]
   },
-  "main": "index.js",
+  "main": "index.js"
 }

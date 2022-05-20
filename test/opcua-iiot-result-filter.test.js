@@ -489,29 +489,6 @@ describe('OPC UA Result Filter node Testing', function () {
           _msgid: '11cc64dd.bde67b',
           topic: 'TestTopic',
         })
-        // n5.receive({
-        //   payload: {
-        //     "node": "ns=1;s=TemperatureAnalogItem",
-        //     "nodeId": 'ns=1;s=TestReadWrite',
-        //     "value": 22980.7896,
-        //     "nodetype": "read",
-        //     "nodeClass": 2,
-        //     "browseName": {"namespaceIndex": 0, "name": "TemperatureAnalogItem"},
-        //     "displayName": {"text": "TemperatureAnalogItem"},
-        //     "description": {},
-        //     "writeMask": 0,
-        //     "userWriteMask": 0,
-        //     "dataType": "Double",
-        //     "valueRank": -1,
-        //     "arrayDimensions": {},
-        //     "accessLevel": 3,
-        //     "userAccessLevel": 3,
-        //     "minimumSamplingInterval": 0,
-        //     "historizing": false,
-        //     "statusCode": {"value": 0, "description": "No Error", "name": "Good"}
-        //   },
-        //   topic: 'TestTopic'
-        // })
       })
     })
 
