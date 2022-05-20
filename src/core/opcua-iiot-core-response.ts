@@ -11,7 +11,7 @@
 
 import {Todo} from "../types/placeholders";
 import debug from 'debug';
-import {Node, NodeStatus, NodeStatusFill} from "node-red";
+import {Node, NodeStatusFill} from "node-red";
 import {BrowseResult, StatusCode} from "node-opcua";
 import {NodeIdLike} from "node-opcua-nodeid";
 import {AddressSpaceItem, StatusInput} from "../types/helpers";
@@ -59,7 +59,7 @@ const analyzeBrowserResults = function (node: Node, payload: BrowserPayload) {
 }
 
 const analyzeCrawlerResults = function (node: Node, payload: CrawlerPayload) {
-  handlePayloadStatusCode(node, payload.value as StatusInput[], payload as AnyPayload)
+  handlePayloadStatusCode(node, payload.value, payload as AnyPayload)
 }
 
 const analyzeReadResults = (node: Node, payload: ReadPayload) => {
@@ -115,7 +115,42 @@ const analyzeWriteResults = function (node: Node, msg: Todo) {
   setNodeStatusInfo(node, msg, entryStatus)
 }
 
-const handlePayloadStatusCode = function (node: Node, statusInputs: StatusInput | StatusInput[], payload: AnyPayload) {
+const isStatusInput = (status: any): status is StatusInput | StatusInput[] => {
+  if ("statusCode" in status && status instanceof StatusCode) {
+    return true;
+  }
+  if ("statusCodes" in status && Array.isArray(status.statusCodes)) {
+    return status.every((item: any) => item instanceof StatusCode);
+  }
+  return false;
+}
+
+const handlePayloadStatusCode = <T extends Record<any, any>>(node: Node, statusInputs: unknown, payload: AnyPayload) => {
+  if (!isStatusInput(statusInputs)) {
+    if (isArray(statusInputs)) {
+      payload.entryStatus = {
+        good: statusInputs.length,
+        bad: 0,
+        other: 0,
+      }
+    } else {
+      if (statusInputs instanceof Error) {
+        payload.entryStatus = {
+          bad: 1,
+          other: 0,
+          good: 0,
+        }
+      } else {
+        payload.entryStatus = {
+          bad: 0,
+          other: 0,
+          good: 1,
+        }
+      }
+    }
+    return;
+  }
+
   let entryStatus = {
     bad: 0,
     good: 0,
