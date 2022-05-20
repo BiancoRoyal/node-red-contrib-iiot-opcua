@@ -12,7 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.19.1]
+        node-version:
+          - 12
+          - 14
+          - 16
+          - 18
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +27,8 @@ jobs:
           cache: 'npm'
       - run: npm install
       - run: npm run summary
-      - run: cat out.md > $GITHUB_STEP_SUMMARY
+      - run: echo Test results for NodeJS version ${{ matrix.node-version }} >> $GITHUB_STEP_SUMMARY
+      - run: cat out.md >> $GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v3
         with:
           name: badges
