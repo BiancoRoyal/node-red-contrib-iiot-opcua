@@ -18,6 +18,7 @@ import {isArray} from "./types/assertion";
 import {ReadPayload} from "./opcua-iiot-read";
 import {ListenPayload} from "./opcua-iiot-listener";
 import {WritePayload} from "./opcua-iiot-write";
+import {AnyPayload} from "./types/payloads";
 
 interface OPCUAIIoTResultFilter extends nodered.Node {
   nodeId: string
@@ -137,7 +138,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.send(outputMessage)
     })
 
-    const filterByType = (payload: FilterInputPayload) => {
+    const filterByType = (payload: AnyPayload) => {
       let result = null
       switch (payload.nodetype) {
         case 'read':
