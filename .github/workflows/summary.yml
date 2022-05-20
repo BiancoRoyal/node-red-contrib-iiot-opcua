@@ -28,7 +28,7 @@ jobs:
       - run: npm install
       - run: npm run summary
       - run: echo Test results for NodeJS version ${{ matrix.node-version }} >> $GITHUB_STEP_SUMMARY
-      - run: cat out.md >> $GITHUB_STEP_SUMMARY
+      - run: cat summary.md >> $GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v3
         with:
           name: badges

@@ -68,7 +68,7 @@
     "test:ci": "npm run test -- --ci --silent --json --outputFile=scripts/out.json",
     "test:coverage": "npm run test -- --coverage",
     "test:ci:coverage": "npm run test:ci -- --coverage",
-    "test:summarize": "node scripts/JestOutputToSummary.js > out.md",
+    "test:summarize": "node scripts/JestOutputToSummary.js > summary.md",
     "summary": "npm run test:ci:coverage && npm run test:summarize && jest-coverage-badges input \"./jcoverage/coverage-summary.json\" output \"./badges\"",
     "build": "gulp publish",
     "prepublishOnly": "npm test && npm run coverage && npm run build",
