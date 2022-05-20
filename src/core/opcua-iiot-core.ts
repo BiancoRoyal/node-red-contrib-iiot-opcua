@@ -27,7 +27,7 @@ import {
 import {Todo, TodoVoidFunction} from "../types/placeholders";
 import {Node, NodeMessage, NodeStatus} from "node-red";
 import {NodeMessageInFlow, NodeStatusFill, NodeStatusShape} from "@node-red/registry";
-import {isArray, isNotDefined} from "../types/assertion";
+import {isNotDefined} from "../types/assertion";
 import {
   AttributeIds,
   ClientSession,
@@ -598,7 +598,7 @@ export function normalizeMessage(msg: WriteMessage) {
       if (item.value) return item;
       else return {
         ...item,
-        value: (isArray(msg.payload) && msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index] : msg.payload
+        value: (Array.isArray(msg.payload) && msg.payload.length && msg.payload.length === msg.addressSpaceItems.length) ? msg.payload[index] : msg.payload
       }
 
     })

@@ -17,6 +17,7 @@ import {BrowseResult} from "node-opcua";
 import {isArray} from "./types/assertion";
 import {ReadPayload} from "./opcua-iiot-read";
 import {ListenPayload} from "./opcua-iiot-listener";
+import {WritePayload} from "./opcua-iiot-write";
 
 interface OPCUAIIoTResultFilter extends nodered.Node {
   nodeId: string
@@ -164,10 +165,10 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const convertAllResults = (payload: FilterInputPayload, result: Todo | Todo[]) => {
-      if (!isArray(result)) {
+      if (!Array.isArray(result)) {
         return convertResult(payload, result)
       } else {
-        return result.map((item: Todo) => {
+        return result.map((item) => {
           if ('value' in item) {
             return convertResult(payload, item.value || item)
           } else {
@@ -285,9 +286,11 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const filterByReadType = (payload: ReadPayload) => {
-      if (isArray(payload.value))
+      const value = payload.value;
+
+      if (Array.isArray(value))
         return {
-          value: payload.value.filter((item: Todo) => {
+          value: value.filter((item) => {
             return item.nodeId.toString().includes(this.nodeId)
           })
         }
@@ -297,9 +300,9 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const filterByWriteType = function (payload: Todo) {
+    const filterByWriteType = function (payload: WritePayload) {
       return {
-        value: payload.nodesToWrite.map((item: Todo) => {
+        value: payload.nodesToWrite.map((item) => {
           while (item.value) {
             item = item.value
           }
