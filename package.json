@@ -134,8 +134,4 @@
     ]
   },
   "main": "index.js",
-  "browserslist": [
-    "> 0.25%",
-    "not dead"
-  ]
 }
