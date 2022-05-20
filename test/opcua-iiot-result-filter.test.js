@@ -476,13 +476,9 @@ describe('OPC UA Result Filter node Testing', function () {
         let n6 = helper.getNode('n6rff4')
         let n1 = helper.getNode('n1rff4')
         n6.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload.nodeId).toBe('ns=1;s=TestReadWrite')
-          console.log('good morrow 494')
           expect(msg.payload.value).toBe(22980.7896)
-          console.log('good morrow 496')
           expect(msg.topic).toBe('TestTopic')
-          console.log('good morrow 498')
           done()
         })
         n1.receive({
