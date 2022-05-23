@@ -1,13 +1,7 @@
 name: "Snyk Vulnerability Analysis"
 on:
-  push:
-    branches:
-      - 6-additional-github-actions
-      - main
-  pull_request:
-    types:
-      - synchronize
-      - opened
+  schedule:
+    - cron: "0 0 * * *"
 jobs:
   snyk:
     runs-on: ubuntu-latest
@@ -17,5 +11,3 @@ jobs:
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: monitor
