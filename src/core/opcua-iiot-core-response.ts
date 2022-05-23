@@ -1,6 +1,7 @@
 /**
  The BSD 3-Clause License
 
+ Copyright 2022 - DATATRONiQ GmbH (https://datatroniq.com)
  Copyright 2016,2017,2018 - Klaus Landsdorf (http://bianco-royal.de/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.

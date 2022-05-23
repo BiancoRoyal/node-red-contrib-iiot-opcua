@@ -20,7 +20,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm install
       - run: npm run build
-      - run: tar -czvf distrib.tar.gz opcuaIIoT examples package.json create_certificates.js
+      - run: tar -czvf distrib.tar.gz opcuaIIoT examples package.json create_certificates.js docs index.js README.md CHAMGELOG.md
       - uses: actions/upload-artifact@v3
         with:
           name: build-folders
