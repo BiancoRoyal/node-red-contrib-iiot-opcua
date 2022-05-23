@@ -359,25 +359,6 @@ module.exports = function (RED: nodered.NodeAPI) {
       })
     }
 
-    const waitForExist = async <T extends object>(item: T, key: string, iterationCount = 100, checkInterval = 100): Promise<number> => {
-      return new Promise<number>(
-        (resolve, reject) => {
-
-          const getClient = async <T extends Record<string, any>>(iter: number, item: T): Promise<void> => {
-            if (item.hasOwnProperty(key) && item[key]) {
-              resolve(0)
-            }
-            if (iter < 0) {
-              reject(new Error(key + ' not initialized'))
-            }
-            setTimeout(getClient, checkInterval, iter - 1, item)
-          }
-
-          getClient(iterationCount, item)
-        }
-      )
-    }
-
     /*  #########    SESSION    #########     */
 
     const startSession = async (callerInfo: string) => {
@@ -400,7 +381,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
         return
       }
-      await waitForExist(this.iiot, 'opcuaClient')
       if (!this.iiot.opcuaClient) {
         internalDebugLog('OPC UA Client Connection Is Not Valid On State ' + this.iiot.stateMachine.getMachineState())
         if (this.showErrors) {
@@ -940,7 +920,6 @@ module.exports = function (RED: nodered.NodeAPI) {
     renewFiniteStateMachine()
 
     this.functions = {
-      waitForExist,
       restartWithNewSettings,
       registerForOPCUA,
       deregisterForOPCUA,

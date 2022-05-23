@@ -1,0 +1,40 @@
+name: Build and publish
+on:
+  pull_request:
+    types:
+      - opened
+  push:
+    branches:
+      - main
+      - development
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node: [14]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install
+      - run: npm run build
+      - run: tar -czvf distrib.tar.gz opcuaIIoT examples package.json create_certificates.js
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-folders
+          path: distrib.tar.gz
+
+  publish:
+    runs-on: ubuntu-20.04
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/download-artifact@v3
+        with: # Download artifacts from build.yml hopefully
+          name: build-folders
+          path: distrib.tar.gz
+      - run: printenv
+      - run: tar -xvf distrib.tar.gz/distrib.tar.gz
+      # TODO: Add the steps to publish to NPM

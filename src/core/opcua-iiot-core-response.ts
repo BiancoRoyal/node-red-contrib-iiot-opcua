@@ -11,7 +11,7 @@
 
 import {Todo} from "../types/placeholders";
 import debug from 'debug';
-import {Node, NodeStatus, NodeStatusFill} from "node-red";
+import {Node, NodeStatusFill} from "node-red";
 import {BrowseResult, StatusCode} from "node-opcua";
 import {NodeIdLike} from "node-opcua-nodeid";
 import {AddressSpaceItem, StatusInput} from "../types/helpers";
@@ -115,14 +115,62 @@ const analyzeWriteResults = function (node: Node, msg: Todo) {
   setNodeStatusInfo(node, msg, entryStatus)
 }
 
-const handlePayloadStatusCode = function (node: Node, payload: AnyPayload, statusInputs: StatusInput | StatusInput[]) {
+const isStatusInput = (status: any): status is StatusInput | StatusInput[] => {
+  if ("statusCode" in status && typeof status.statusCode?.name === "string") {
+    return true;
+  }
+  if (Array.isArray(status)) {
+    return status.every((item: any) => typeof item.statusCode?.name === "string");
+  }
+  return false;
+}
+
+const handlePayloadStatusCode = <T extends Record<any, any>>(node: Node, statusInputs: unknown, payload: AnyPayload) => {
+  if (!isStatusInput(statusInputs)) {
+    if (isArray(statusInputs)) {
+      if (statusInputs.length !== 0)
+        payload.entryStatus = {
+          good: statusInputs.length,
+          bad: 0,
+          other: 0,
+        }
+      else
+        payload.entryStatus = {
+          good: 0,
+          bad: 1,
+          other: 0,
+        }
+    } else {
+      if (statusInputs instanceof Error) {
+        payload.entryStatus = {
+          bad: 1,
+          other: 0,
+          good: 0,
+        }
+      } else {
+        payload.entryStatus = {
+          bad: 0,
+          other: 0,
+          good: 1,
+        }
+      }
+    }
+    return;
+  }
+
   let entryStatus = {
     bad: 0,
     good: 0,
     other: 0
   }
 
-  console.log('isArray', isArray(statusInputs))
+  if (!statusInputs || (statusInputs as StatusInput[]).length === 0) {
+    payload.entryStatus = {
+      ...entryStatus,
+      bad: 1
+    }
+    return;
+  }
 
   if (isArray(statusInputs)) {
     entryStatus = handlePayloadArrayOfObjects(statusInputs)
@@ -211,6 +259,10 @@ const handlePayloadArrayOfStatusCodes = function (payload: ResponseInputPayload)
     good: 0,
     bad: 0,
     other: 0,
+  }
+
+  if (!payload.statusCodes){
+    payload.statusCodes = payload.value?.statusCodes
   }
 
   if (payload.statusCodes) {

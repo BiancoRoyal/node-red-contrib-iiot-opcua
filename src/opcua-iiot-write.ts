@@ -59,6 +59,7 @@ export type WriteResultMessage = NodeMessageInFlow & {
 export type WritePayload = {
   nodetype: 'write'
   justValue: Todo
+  nodesToWrite: Todo[]
   value: Todo
   valuesToWrite: Todo
 }

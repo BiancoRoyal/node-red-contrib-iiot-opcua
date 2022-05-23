@@ -10,7 +10,7 @@ module.exports = {
   automock: false,
 
   // Stop running tests after the first failure
-  bail: true,
+  bail: false,
 
   // Respect "browser" field in package.json when resolving modules
   // browser: false,
@@ -41,10 +41,7 @@ module.exports = {
 
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: [
-    'json',
-    'text',
-    'lcov',
-    'clover'
+    'json-summary',
   ],
 
   // An object that configures minimum threshold enforcement for coverage results
@@ -67,7 +64,7 @@ module.exports = {
 
   // An array of directory names to be searched recursively up from the requiring module's location
   moduleDirectories: [
-    '<rootDir>/node_modules/'
+    'node_modules'
   ],
 
   // An array of file extensions your modules use
@@ -151,6 +148,7 @@ module.exports = {
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
+    '<rootDir>/test/e2e/',
     '<rootDir>/code/',
     '<rootDir>/jcoverage/',
     '<rootDir>/opcuaIIoT/',

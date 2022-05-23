@@ -117,7 +117,7 @@ describe('OPC UA Read node Unit Testing', function () {
           expect(nodeUnderTest.attributeId).toBe(3)
           expect(nodeUnderTest.parseStrings).toBe(false)
           expect(nodeUnderTest.justValue).toBe(true)
-          setTimeout(done, 2000)
+          done()
         })
     })
 
