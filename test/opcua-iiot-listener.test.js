@@ -20,6 +20,7 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../src/opcua-iiot-listener')
 
 var helper = require('node-red-node-test-helper')
+const {NodeIdType} = require("node-opcua");
 helper.init(require.resolve('node-red'))
 
 var listenerNodesToLoad = [injectNode, functionNode, inputNode]
@@ -130,8 +131,8 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
           nodeUnderTest.iiot.stateMachine.endsub()
-          let testItem
-          nodeUnderTest.functions.setMonitoring({ monitoredItemId: testItem })
+          let testItem = {nodeId: {identifierType: NodeIdType.STRING, namespace: 0, identifier: 'TestItem'}}
+          nodeUnderTest.functions.setMonitoring({ itemToMonitor: testItem, on: (string, callback) => {console.log('Added ' + string)}})
           done()
         })
     })

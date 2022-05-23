@@ -24,7 +24,7 @@ var readGoodInject = {
   'type': 'inject',
   'name': 'TestInject Read',
   'topic': 'TestTopic',
-  'payload': '[{"value":{"dataType":"Double","arrayType":"Scalar","value":20},"statusCode":{"value":0,"description":"No Error","name":"Good"},"sourcePicoseconds":0,"serverPicoseconds":0}]',
+  'payload': '{"value":{"dataType":"Double","arrayType":"Scalar","value":20, "statusCode":{"value":0,"description":"No Error","name":"Good"}},"sourcePicoseconds":0,"serverPicoseconds":0}',
   'payloadType': 'json',
   'repeat': '',
   'crontab': '',
@@ -38,7 +38,7 @@ var readBadInject = {
   'type': 'inject',
   'name': 'TestInject Read',
   'topic': 'TestTopic',
-  'payload': '[{"value":{"dataType":"Double","arrayType":"Scalar","value":20},"statusCode":{"value":0,"description":"Fatal Error","name":"Bad"},"sourcePicoseconds":0,"serverPicoseconds":0}]',
+  'payload': '{"value":{"dataType":"Double","arrayType":"Scalar","value":20, "statusCode":{"value":0,"description":"Fatal Error","name":"Bad"}},"sourcePicoseconds":0,"serverPicoseconds":0}',
   'payloadType': 'json',
   'repeat': '',
   'crontab': '',
@@ -52,7 +52,7 @@ var readOtherInject = {
   'type': 'inject',
   'name': 'TestInject Read',
   'topic': 'TestTopic',
-  'payload': '[{"value":{"dataType":"Double","arrayType":"Scalar","value":20},"statusCode":{"value":0,"description":"Some Error","name":"Best"},"sourcePicoseconds":0,"serverPicoseconds":0}]',
+  'payload': '{"value":{"dataType":"Double","arrayType":"Scalar","value":20, "statusCode":{"value":0,"description":"Some Error","name":"Best"}},"sourcePicoseconds":0,"serverPicoseconds":0}',
   'payloadType': 'json',
   'repeat': '',
   'crontab': '',
@@ -65,7 +65,7 @@ var readResultSimulation = {
   'id': 'n3rsfrd',
   'type': 'function',
   'name': '',
-  'func': "msg.nodetype = 'read'\nmsg.injectType = 'read'\nreturn msg;",
+  'func': "msg.payload.nodetype = 'read'\nmsg.payload.injectType = 'read'\nreturn msg;",
   'outputs': 1,
   'noerr': 0,
   'wires': [['n4rsf', 'n5rsf']]
@@ -117,7 +117,7 @@ var writeResultSimulation = {
   'id': 'n3rsfwr',
   'type': 'function',
   'name': '',
-  'func': "msg.nodetype = 'write'\nmsg.injectType = 'write'\nreturn msg;",
+  'func': "msg.payload.nodetype = 'write'\nmsg.payload.injectType = 'write'\nreturn msg;",
   'outputs': 1,
   'noerr': 0,
   'wires': [['n4rsf', 'n5rsf']]
@@ -128,7 +128,7 @@ var listenGoodInject = {
   'type': 'inject',
   'name': 'TestInject Listen',
   'topic': 'TestTopic',
-  'payload': '{"value":{"dataType":"UInt16","arrayType":"Scalar","value":0},"statusCode":{"value":0,"description":"No Error","name":"Good"},"sourceTimestamp":"0","sourcePicoseconds":0,"serverTimestamp":"0","serverPicoseconds":0}',
+  'payload': '{"value":{"dataType":"UInt16","arrayType":"Scalar","value":0, "statusCode":{"value":0,"description":"No Error","name":"Good"}},"sourceTimestamp":"0","sourcePicoseconds":0,"serverTimestamp":"0","serverPicoseconds":0}',
   'payloadType': 'json',
   'repeat': '',
   'crontab': '',
@@ -142,7 +142,7 @@ var listenBadInject = {
   'type': 'inject',
   'name': 'TestInject Listen',
   'topic': 'TestTopic',
-  'payload': '{"value":{"dataType":"UInt16","arrayType":"Scalar","value":0},"statusCode":{"value":0,"description":"Fatal Error","name":"Bad"},"sourceTimestamp":"0","sourcePicoseconds":0,"serverTimestamp":"0","serverPicoseconds":0}',
+  'payload': '{"value":{"dataType":"UInt16","arrayType":"Scalar","value":0, "statusCode":{"value":0,"description":"Fatal Error","name":"Bad"}},"sourceTimestamp":"0","sourcePicoseconds":0,"serverTimestamp":"0","serverPicoseconds":0}',
   'payloadType': 'json',
   'repeat': '',
   'crontab': '',
@@ -156,7 +156,7 @@ var listenOtherInject = {
   'type': 'inject',
   'name': 'TestInject Listen',
   'topic': 'TestTopic',
-  'payload': '{"value":{"dataType":"UInt16","arrayType":"Scalar","value":0},"statusCode":{"value":0,"description":"Some Error","name":"Best"},"sourceTimestamp":"0","sourcePicoseconds":0,"serverTimestamp":"0","serverPicoseconds":0}',
+  'payload': '{"value":{"dataType":"UInt16","arrayType":"Scalar","value":0, "statusCode":{"value":0,"description":"Some Error","name":"Best"}},"sourceTimestamp":"0","sourcePicoseconds":0,"serverTimestamp":"0","serverPicoseconds":0}',
   'payloadType': 'json',
   'repeat': '',
   'crontab': '',
@@ -169,7 +169,7 @@ var listenResultSimulation = {
   'id': 'n3rsfli',
   'type': 'function',
   'name': '',
-  'func': "msg.nodetype = 'listen'\nmsg.injectType = 'subscribe'\nreturn msg;",
+  'func': "msg.payload.nodetype = 'listen'\nmsg.payload.injectType = 'subscribe'\nreturn msg;",
   'outputs': 1,
   'noerr': 0,
   'wires': [['n4rsf', 'n5rsf']]
@@ -228,7 +228,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readGoodTestFlowPayload, function () {
         let n4 = helper.getNode('n4rsf')
         n4.on('input', function (msg) {
-          expect(msg.payload).toMatchObject([{'value': {'dataType': 'Double', 'arrayType': 'Scalar', 'value': 20}, 'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'sourcePicoseconds': 0, 'serverPicoseconds': 0}])
+          expect(msg.payload).toMatchObject({'value': {'dataType': 'Double', 'arrayType': 'Scalar', 'value': 20,  'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}},'sourcePicoseconds': 0, 'serverPicoseconds': 0})
           done()
         })
       })
@@ -248,7 +248,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], listenGoodTestFlowPayload, function () {
         let n4 = helper.getNode('n4rsf')
         n4.on('input', function (msg) {
-          expect(msg.payload).toMatchObject({'value': {'dataType': 'UInt16', 'arrayType': 'Scalar', 'value': 0}, 'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'sourceTimestamp': '0', 'sourcePicoseconds': 0, 'serverTimestamp': '0', 'serverPicoseconds': 0})
+          expect(msg.payload).toMatchObject({'value': {'dataType': 'UInt16', 'arrayType': 'Scalar', 'value': 0,'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}},  'sourceTimestamp': '0', 'sourcePicoseconds': 0, 'serverTimestamp': '0', 'serverPicoseconds': 0})
           done()
         })
       })
@@ -318,7 +318,7 @@ describe('OPC UA Response Status node Unit Testing', function () {
       helper.load([injectNode, functionNode, inputNode], readOtherTestFlowPayload, function () {
         let n6 = helper.getNode('n6rsf')
         n6.on('input', function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({good: 1, bad: 0, other: 0})
+          expect(msg.payload.entryStatus).toMatchObject({good: 0, bad: 0, other: 1})
           done()
         })
       })
