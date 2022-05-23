@@ -66,7 +66,7 @@ const analyzeCrawlerResults = function (node: Node, payload: CrawlerPayload) {
 const analyzeReadResults = (node: Node, payload: ReadPayload) => {
   handlePayloadStatusCode(node, payload.value, payload)
   if (payload.readtype === 'HistoryValue') {
-    payload.value.map((item: any) => {
+    payload.value.forEach((item: any) => {
       delete item['statusCode']
     })
   }

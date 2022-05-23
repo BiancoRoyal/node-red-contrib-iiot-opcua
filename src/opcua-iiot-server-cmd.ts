@@ -54,8 +54,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       returnPayload.commandType = node.commandtype
 
       if (msg.payload.addressSpaceItems && msg.payload.addressSpaceItems.length > 0) {
-        let addressSpaceItem
-        for (addressSpaceItem of msg.payload.addressSpaceItems) {
+        for (let addressSpaceItem of msg.payload.addressSpaceItems) {
           returnPayload.nodeId = addressSpaceItem.nodeId
         }
         if (returnPayload.nodeId) {

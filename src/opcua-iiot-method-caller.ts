@@ -129,15 +129,16 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreMethod.callMethods(node.connector.iiot.opcuaSession, msg).then((data: Todo) => {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
-        let result = null
-        let outputArguments = []
         let message = Object.assign({}, data.msg)
         message.payload.nodetype = 'method'
         message.payload.methodType = data.msg.payload.methodType
 
-        for (result of data.results) {
-          outputArguments.push({statusCode: result.statusCode, outputArguments: result.outputArguments})
+      const outputArguments = data.results.map((result: Todo)=> {
+        return {
+          statusCode: result.statusCode,
+          outputArguments: result.outputArguments
         }
+      })
 
         message.payload.value = getDataValue(message, data.results, definitionResults) || outputArguments
         message.payload.definition = definitionResults

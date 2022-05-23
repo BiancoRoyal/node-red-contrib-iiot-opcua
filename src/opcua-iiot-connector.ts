@@ -309,7 +309,7 @@ module.exports = function (RED: nodered.NodeAPI) {
           }
         } else {
           const endpoint = (endpoints || []).find((endpoint) => {
-            endpointMatchForConnecting(endpoint)
+            return endpointMatchForConnecting(endpoint)
           })
 
           if (endpoint && endpoint.endpointUrl != null) {

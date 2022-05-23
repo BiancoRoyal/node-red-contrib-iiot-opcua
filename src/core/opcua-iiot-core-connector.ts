@@ -255,25 +255,25 @@ function logSessionInformation(node: Todo) {
   logger.internalDebugLog('timeout :' + node.iiot.opcuaSession.timeout)
 
   if (node.iiot.opcuaSession.serverNonce) {
-    logger.detailDebugLog('serverNonce :' + node.iiot.opcuaSession.serverNonce ? node.iiot.opcuaSession.serverNonce.toString('hex') : 'none')
+    logger.detailDebugLog('serverNonce :' + (node.iiot.opcuaSession.serverNonce ? node.iiot.opcuaSession.serverNonce.toString('hex') : 'none'))
   }
 
   if (node.iiot.opcuaSession.serverCertificate) {
-    logger.detailDebugLog('serverCertificate :' + node.iiot.opcuaSession.serverCertificate ? node.iiot.opcuaSession.serverCertificate.toString('base64') : 'none')
+    logger.detailDebugLog('serverCertificate :' + (node.iiot.opcuaSession.serverCertificate ? node.iiot.opcuaSession.serverCertificate.toString('base64') : 'none'))
   } else {
     logger.detailDebugLog('serverCertificate : None')
   }
 
-  logger.detailDebugLog('serverSignature :' + node.iiot.opcuaSession.serverSignature ? node.iiot.opcuaSession.serverSignature : 'none')
+  logger.detailDebugLog('serverSignature :' + (node.iiot.opcuaSession.serverSignature ? node.iiot.opcuaSession.serverSignature : 'none'))
 
   if (node.iiot.opcuaSession.lastRequestSentTime) {
     logger.detailDebugLog('lastRequestSentTime : ' + node.iiot.opcuaSession.lastRequestSentTime)
-    logger.internalDebugLog('lastRequestSentTime converted :' + node.iiot.opcuaSession.lastRequestSentTime ? new Date(node.iiot.opcuaSession.lastRequestSentTime).toISOString() : 'none')
+    logger.internalDebugLog('lastRequestSentTime converted :' + (node.iiot.opcuaSession.lastRequestSentTime ? new Date(node.iiot.opcuaSession.lastRequestSentTime).toISOString() : 'none'))
   }
 
   if (node.iiot.opcuaSession.lastResponseReceivedTime) {
     logger.detailDebugLog('lastResponseReceivedTime : ' + node.iiot.opcuaSession.lastResponseReceivedTime)
-    logger.internalDebugLog('lastResponseReceivedTime converted :' + node.iiot.opcuaSession.lastResponseReceivedTime ? new Date(node.iiot.opcuaSession.lastResponseReceivedTime).toISOString() : 'none')
+    logger.internalDebugLog('lastResponseReceivedTime converted :' + (node.iiot.opcuaSession.lastResponseReceivedTime ? new Date(node.iiot.opcuaSession.lastResponseReceivedTime).toISOString() : 'none'))
   }
 }
 

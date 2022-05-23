@@ -552,11 +552,11 @@ const start = function (server: OPCUAServer, node: Todo) {
           if (session.clientDescription) {
             detailDebugLog('Client application URI:' + session.clientDescription.applicationUri)
             detailDebugLog('Client product URI:' + session.clientDescription.productUri)
-            detailDebugLog('Client application name:' + session.clientDescription.applicationName ? session.clientDescription.applicationName.toString() : 'none application name')
-            detailDebugLog('Client application type:' + session.clientDescription.applicationType ? session.clientDescription.applicationType.toString() : 'none application type')
+            detailDebugLog('Client application name:' + (session.clientDescription.applicationName ? session.clientDescription.applicationName.toString() : 'none application name'))
+            detailDebugLog('Client application type:' + (session.clientDescription.applicationType ? session.clientDescription.applicationType.toString() : 'none application type'))
           }
 
-          internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : 'none session name')
+          internalDebugLog('Session name:' + (session.sessionName ? session.sessionName.toString() : 'none session name'))
           internalDebugLog('Session timeout:' + session.sessionTimeout)
           internalDebugLog('Session id:' + session.sessionId)
         })
@@ -564,7 +564,7 @@ const start = function (server: OPCUAServer, node: Todo) {
         server.on('session_closed', function (session: Todo, reason: Todo) {
           internalDebugLog('############## SESSION CLOSED ##############')
           internalDebugLog('reason:' + reason)
-          internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : 'none session name')
+          internalDebugLog('Session name:' + (session.sessionName ? session.sessionName.toString() : 'none session name'))
         })
 
         internalDebugLog('Server Initialized')

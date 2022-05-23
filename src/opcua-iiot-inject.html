@@ -86,7 +86,7 @@
   let injectNode = RED.nodes.registry.getNodeType('OPCUA-IIoT-Inject')
   injectNode.button = {
     onclick: function () {
-      let label = (this.name || this.payload).replace(/&/g, '&amp').replace(/</g, '&lt').replace(/>/g, '&gt')
+      let label = (this.name || this.payload).replace(/&/g, '&amp').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
       if (this.payloadType === 'date') {
         label = this._('opcuaiiotinject.timestamp')
