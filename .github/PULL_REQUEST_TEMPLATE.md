@@ -9,7 +9,7 @@ Please make sure you've read our contributing guidelines (https://github.com/DAT
 
 **What does this Pull Request change?**
 
-**Does this Pull Request introduce any portentially breaking changes?**
+**Does this Pull Request introduce any potentially breaking changes?**
 <!--
 If you have made any changes to the message format sent between nodes or to a node's configuration,
 please include bullet points of what changed and what a current user needs to update to keep the same
