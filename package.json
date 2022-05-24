@@ -93,7 +93,6 @@
     "gulp-clean": "^0.4.0",
     "gulp-htmlmin": "^5.0.1",
     "gulp-jsdoc3": "^3.0.0",
-    "gulp-obfuscate": "^0.2.9",
     "gulp-replace": "^1.1.3",
     "gulp-sequence": "^1.0.0",
     "gulp-sourcemaps": "^3.0.0",
