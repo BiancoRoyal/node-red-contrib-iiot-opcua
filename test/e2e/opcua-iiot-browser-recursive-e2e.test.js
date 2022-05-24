@@ -29,7 +29,7 @@ var browseRecursiveNodesToLoad = [injectNode, asoNode, listenerNode, connectorNo
 
 var testBrowseRecursiveASOFlow = [
   {
-    'id': '58eb5d7c.b3cd24',
+    'id': 'aso0',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 's=TestFolderA',
     'browsename': 'TestA',
@@ -42,12 +42,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'ASO Test Folder A',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': 'f3d82a20.ce4668',
+    'id': 'inject0',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': '',
@@ -61,12 +61,12 @@ var testBrowseRecursiveASOFlow = [
     'addressSpaceItems': [],
     'wires': [
       [
-        '58eb5d7c.b3cd24'
+        'aso0'
       ]
     ]
   },
   {
-    'id': 'fbe6e31.8e4212',
+    'id': 'server',
     'type': 'OPCUA-IIoT-Server',
     'port': '49888',
     'endpoint': '',
@@ -95,7 +95,7 @@ var testBrowseRecursiveASOFlow = [
     'wires': [[]]
   },
   {
-    'id': 'f735200c.5ead8',
+    'id': 'inject2',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': '',
@@ -109,13 +109,13 @@ var testBrowseRecursiveASOFlow = [
     'addressSpaceItems': [],
     'wires': [
       [
-        'd35f33d5.e4106',
-        '54825b89.eaacac'
+        'aso2',
+        'aso7'
       ]
     ]
   },
   {
-    'id': 'd35f33d5.e4106',
+    'id': 'aso2',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 's=TestFolderB',
     'browsename': 'TestB',
@@ -128,12 +128,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'ASO Test Folder B',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': '96038cfa.49c6',
+    'id': 'inject3',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': '',
@@ -147,13 +147,13 @@ var testBrowseRecursiveASOFlow = [
     'addressSpaceItems': [],
     'wires': [
       [
-        'e209347c.0d0df',
-        '1d690492.ec2943'
+        'aso3',
+        'aso8'
       ]
     ]
   },
   {
-    'id': 'e209347c.0d0df',
+    'id': 'aso3',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 's=TestFolderC',
     'browsename': 'TestC',
@@ -166,12 +166,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'ASO Test Folder C',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': 'd29ea6e9.bb0f4',
+    'id': 'inject4',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': '',
@@ -185,13 +185,13 @@ var testBrowseRecursiveASOFlow = [
     'addressSpaceItems': [],
     'wires': [
       [
-        '3323a9be.3f963e',
-        'b2a853b3.f9fbe'
+        'aso4',
+        'aso9'
       ]
     ]
   },
   {
-    'id': '3323a9be.3f963e',
+    'id': 'aso4',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 's=TestFolderD',
     'browsename': 'TestD',
@@ -204,12 +204,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'ASO Test Folder D',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': 'e9a9f3a9.a525d',
+    'id': 'inject5',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': '',
@@ -223,13 +223,13 @@ var testBrowseRecursiveASOFlow = [
     'addressSpaceItems': [],
     'wires': [
       [
-        '99828990.d072e',
-        '1452afc0.e23c98'
+        'aso5',
+        'aso10'
       ]
     ]
   },
   {
-    'id': '99828990.d072e',
+    'id': 'aso5',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 's=TestFolderE',
     'browsename': 'TestE',
@@ -242,12 +242,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'ASO Test Folder E',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': 'fb77eb2f.aacc1',
+    'id': 'inject6',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': '',
@@ -261,13 +261,13 @@ var testBrowseRecursiveASOFlow = [
     'addressSpaceItems': [],
     'wires': [
       [
-        '9a9d2ad9.c84078',
-        '972d4ae5.07bdb8'
+        'aso6',
+        'aso11'
       ]
     ]
   },
   {
-    'id': '9a9d2ad9.c84078',
+    'id': 'aso6',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 's=TestFolderF',
     'browsename': 'TestF',
@@ -280,12 +280,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'ASO Test Folder F',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': '54825b89.eaacac',
+    'id': 'aso7',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 'ns=1;s=TestDoubleA',
     'browsename': 'TestDoubleA',
@@ -298,12 +298,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'Double A',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': '1d690492.ec2943',
+    'id': 'aso8',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 'ns=1;s=TestDoubleB',
     'browsename': 'TestDoubleB',
@@ -316,12 +316,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'Double B',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': 'b2a853b3.f9fbe',
+    'id': 'aso9',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 'ns=1;s=TestDoubleC',
     'browsename': 'TestDoubleC',
@@ -334,12 +334,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'Double C',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': '1452afc0.e23c98',
+    'id': 'aso10',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 'ns=1;s=TestDoubleD',
     'browsename': 'TestDoubleD',
@@ -352,12 +352,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'Double D',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': '972d4ae5.07bdb8',
+    'id': 'aso11',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 'ns=1;s=TestDoubleE',
     'browsename': 'TestDoubleE',
@@ -370,12 +370,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'Double E',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': '26184044.911c18',
+    'id': 'aso12',
     'type': 'OPCUA-IIoT-Server-ASO',
     'nodeId': 'ns=1;s=TestDoubleF',
     'browsename': 'TestDoubleF',
@@ -388,12 +388,12 @@ var testBrowseRecursiveASOFlow = [
     'name': 'Double F',
     'wires': [
       [
-        'fbe6e31.8e4212'
+        'server'
       ]
     ]
   },
   {
-    'id': '5ccc0400.893e04',
+    'id': 'inject7',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
     'payload': '',
@@ -407,14 +407,14 @@ var testBrowseRecursiveASOFlow = [
     'addressSpaceItems': [],
     'wires': [
       [
-        '26184044.911c18'
+        'aso12'
       ]
     ]
   },
   {
-    'id': '35de1778.7785d',
+    'id': 'listener',
     'type': 'OPCUA-IIoT-Listener',
-    'connector': 'c8abf139.f829a',
+    'connector': 'connector',
     'action': 'subscribe',
     'queueSize': 10,
     'name': '',
@@ -430,7 +430,7 @@ var testBrowseRecursiveASOFlow = [
     ]
   },
   {
-    'id': '5298ebe7.3ec52c',
+    'id': 'browserInject',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'listen',
     'payload': '{"interval":500,"queueSize":10,"options":{"requestedPublishingInterval":5000,"requestedLifetimeCount":60,"requestedMaxKeepAliveCount":10,"maxNotificationsPerPublish":5,"publishingEnabled":true,"priority":8}}',
@@ -450,14 +450,14 @@ var testBrowseRecursiveASOFlow = [
     ],
     'wires': [
       [
-        '788db36b.3065c4'
+        'browser'
       ]
     ]
   },
   {
-    'id': '788db36b.3065c4',
+    'id': 'browser',
     'type': 'OPCUA-IIoT-Browser',
-    'connector': 'c8abf139.f829a',
+    'connector': 'connector',
     'nodeId': '',
     'name': '',
     'justValue': false,
@@ -472,13 +472,13 @@ var testBrowseRecursiveASOFlow = [
     'showErrors': true,
     'wires': [
       [
-        'n1f1'
+        'helperNode'
       ]
     ]
   },
-  {id: 'n1f1', type: 'helper'},
+  {id: 'helperNode', type: 'helper'},
   {
-    'id': 'c8abf139.f829a',
+    'id': 'connector',
     'type': 'OPCUA-IIoT-Connector',
     'discoveryUrl': '',
     'endpoint': 'opc.tcp://localhost:49888/',
@@ -527,13 +527,22 @@ describe('OPC UA Browser recursive with ASO nodes e2e Testing', function () {
   describe('Browser Recursive node', function () {
     it('should verify browser items as result of a recursive browse', function (done) {
       helper.load(browseRecursiveNodesToLoad, testBrowseRecursiveASOFlow, function () {
-        let n1 = helper.getNode('n1f1')
+        let n1 = helper.getNode('helperNode')
         n1.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.browserResults).toBeInstanceOf(Array)
           expect(msg.payload.browserResults.length).toBe(11)
           done()
         })
+        const trigger = (node) => {
+          node.receive({payload: 'start'})
+        }
+        const injectors = testBrowseRecursiveASOFlow.map((item) => {return item.id}).filter((item)=>{return item.indexOf('inject') === 0})
+        injectors.forEach((injector) => {
+          setTimeout(trigger, 3000, helper.getNode(injector))
+        })
+        let browserInject = helper.getNode('browserInject')
+        setTimeout(trigger, 6000, browserInject)
       })
     })
   })
