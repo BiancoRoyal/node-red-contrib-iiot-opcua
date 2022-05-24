@@ -425,6 +425,7 @@ var listenToEventsWithResponseOnServer = [
 describe('OPC UA Listener event node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
+      console.log('starting')
       done()
     })
   })
@@ -452,8 +453,8 @@ describe('OPC UA Listener event node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 1) {
             expect(msg.topic).toBe('TestTopicEvent')
-            expect(msg.nodetype).toBe('events')
-            expect(msg.injectType).toBe('listen')
+            expect(msg.payload.nodetype).toBe('events')
+            expect(msg.payload.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })

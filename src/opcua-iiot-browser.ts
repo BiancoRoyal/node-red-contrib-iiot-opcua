@@ -255,7 +255,6 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const listenerParameters = getListenParameters((originMessage.payload as any))
 
-
       const payload: BrowserPayload = {
         ...(originMessage.payload as BrowserInputPayload),
         nodetype: 'browse',
@@ -346,6 +345,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const browseWithAddressSpaceItems = function (msg: NodeMessageInFlow, depth: number, lists: Lists) {
       const payload = msg.payload as BrowserInputPayloadLike
+      payload.addressSpaceItems = (payload.addressSpaceItems?.length && payload.addressSpaceItems.length !== 0 ? payload.addressSpaceItems: payload.addressItemsToBrowse);
       if (payload.addressSpaceItems && payload.addressSpaceItems.length > 0) {
         browseNodeList(payload.addressSpaceItems, msg, depth, lists, browseSendResult)
       } else {
