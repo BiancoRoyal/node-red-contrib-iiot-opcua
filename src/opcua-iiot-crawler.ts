@@ -28,6 +28,7 @@ import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_cr
 import {InjectPayload} from "./opcua-iiot-inject";
 import {DataValue} from "node-opcua";
 import {CompressedBrowseResult} from "./core/opcua-iiot-core-response";
+import {isArray} from "./types/assertion";
 
 interface OPCUAIIoTCrawler extends nodered.Node {
   name: string
@@ -69,7 +70,7 @@ type CrawlerMessage = NodeMessageInFlow & {
 }
 
 export interface CrawlerPayload extends Omit<InjectPayload, 'nodetype'> {
-  crawlerResults: (CrawlerResult | Error)[]
+  crawlerResults: (CrawlerResult[] | Error)[] | CrawlerResult[]
   browseTopic?: string
   crawlerResultsCount?: number
   endpoint?: string
@@ -146,7 +147,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     const filterCrawlerResults = function (crawlerResultToFilter: Todo[]) {
       let crawlerResult = crawlerResultToFilter || []
       let filteredEntries: Todo[] = []
-
       if (nodeConfig.activateFilters && nodeConfig.filters && nodeConfig.filters.length > 0) {
         crawlerResult.forEach(function (item) {
           if (itemIsNotToFilter(item)) {
@@ -214,15 +214,15 @@ module.exports = (RED: nodered.NodeAPI) => {
         if (result.value instanceof Error) {
           return result.value.toString()
         } else {
-          return result.value
+          return filterCrawlerResults(result.value)
         }
       })
 
       // combine the valid results into payload.value
-      const value = results.filter((result) => {
-        return !(result.value instanceof Error)
+      const value = crawlerResult.filter((result) => {
+        return !(typeof result === 'string')
       }).flatMap((result) => {
-        return result.value
+        return result
       })
 
       // list errors in payload.error
@@ -304,6 +304,9 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
         restMessage.browseTopic = nodeConfig.browseTopic
       }
+      if (restMessage.crawlerResults.length === 1 && isArray<CrawlerResult>(restMessage.crawlerResults[0])) {
+        restMessage.crawlerResults = restMessage.crawlerResults[0]
+      }
 
       if (!nodeConfig.justValue) {
         restMessage.crawlerResultsCount = crawlerResult.length
@@ -382,7 +385,6 @@ module.exports = (RED: nodered.NodeAPI) => {
       nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic(payload, nodeConfig);
       payload._msgid = msg._msgid;
       payload.topic = msg.topic;
-
       startCrawling(msg.payload as BrowserInputPayloadLike).finally()
     })
 
