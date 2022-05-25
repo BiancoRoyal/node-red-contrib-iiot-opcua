@@ -67,7 +67,7 @@ interface OPCUAIIoTCMDDef extends nodered.NodeDef {
 
 export type ListenPayload = Todo &{
   injectType: 'listen',
-
+  value: Todo
 }
 
 
@@ -278,7 +278,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const subscribeMonitoredItem = (msg: Todo) => {
-      if (checkSessionNotValid(nodeConfig.connector?.iiot?.opcuaSession, 'MonitorListener')) {
+      if (checkSessionNotValid(nodeConfig?.connector?.iiot?.opcuaSession, 'MonitorListener')) {
         return
       }
 
