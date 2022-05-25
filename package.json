@@ -31,7 +31,7 @@
   "bugs": {
     "url": "https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/issues/new?assignees=&labels=bug&template=bugs.yaml"
   },
-  "homepage": "https://datatroniq.com/",
+  "homepage": "https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/",
   "node-red": {
     "nodes": {
       "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",
