@@ -26,7 +26,7 @@ This project upgrades the original work by migrating to TypeScript, and updating
 * based on node-opcua v2.64 (OPC UA v1.03)
 * extendable with node-opcua-isa95
 
-*The latest version published to NPM was 3.12.1, while our version is based on 3.10.2.
+*The latest version published to NPM was 3.12.1, while this fork is based on 3.10.2.
 
 ## Installing
 
@@ -58,12 +58,13 @@ itself may only contain an ID, a topic, and a payload. This means that any refer
 Every bit helps! If you come across any bugs, please [send a buge report](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/issues/new?type=bug), or if you feel inclined to fix it yourself, [submit a pull request](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/compare).
 
 ### Setting up local development
+
 1. Ensure you are using node 14. This has been developed using node v14.19.1. If using Node Version Manager: `nvm install v14.19.1`
 2. Install Node-RED to a separate directory.
    ```shell
    git clone git@github.com:node-red/node-red.git
    cd node-red
-   git checkout tags/2.2.2
+   git checkout tags/2.2.2 # pls see most recent 2.2.x tag for Node-RED
    npm install
    npm run build
    npm run start # This must be run once to initialize the ~/.node-red directory
@@ -79,7 +80,7 @@ Every bit helps! If you come across any bugs, please [send a buge report](https:
 4. Add `node-red-contrib-iiot-opcua` to Node-RED
    ```shell
    cd ~/.node-red
-   npm install <...>/node-red-contrib-iiot-opcua
+   npm install <path to where you have cloned the project>/node-red-contrib-iiot-opcua
    ```
 5. Start Node-RED
    ```shell
@@ -89,7 +90,7 @@ Every bit helps! If you come across any bugs, please [send a buge report](https:
 
 ### :warning: After making changes, remember to run `npm run build` in the `node-red-contrib-iiot-opcua` directory starting Node-RED! :warning:
 
-### Debug
+### Debugging
 
 To increase the verbosity of logging, enable debug modes and verbose logging.
 
@@ -142,7 +143,12 @@ see Node-RED menu (right upper corner) -> Import -> Examples -> iiot opcua
 
 The BSD 3-Clause License
 
-[Klaus Landsdorf][1]
+[DATATRONiQ][5], current maintainer of node-red-contrib-iiot-opcua
+
+This Node-RED package has been revitalized in 2022 and is based on the node-red-contrib-iiot-opcua package created by [Klaus Landsdorf][1] in 2017.
+Copyright notices by Mika Karaila, Klaus Landsdorf, and others are to honor their work in previous years on Node-RED, OPC-UA, and node-red-contrib-iiot-opcua; we are very grateful for all the time and energy they've invested!!
+
+[Klaus Landsdorf][1], creator of node-red-contrib-iiot-opcua
 
 That is a whole new Node-RED package started in 2017 based on the node-opcua v0.4 and the API documentation.
 The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED and OPC UA.
@@ -151,12 +157,13 @@ The old copyrights by Mika Karaila are just to honor his pioneer work in the yea
 
 This is **not** an official product of the OPC Foundation or Plattform Industrie 4.0.
 
-### Contribution node-opcua
+### Special thanks
 
-I'd like to give special thanks to [Etienne Rossignon][2]
-for the node-opcua packages and very special for the node-opcua-isa95 package!
+Special thanks go to [Etienne Rossignon][2] for the [node-opcua][4] packages and very special for the node-opcua-isa95 package!
+Special thanks also go to [Klaus Landsdorf][1] for creating _node-red-contrib-iiot-opcua_ in the first place!
 
-[1]:https://github.com/biancode/
+[1]:https://github.com/biancode
 [2]:https://github.com/erossignon
 [3]:https://github.com/node-red/node-red
 [4]:https://github.com/node-opcua/node-opcua
+[5]:https://github.com/DATATRONiQ
