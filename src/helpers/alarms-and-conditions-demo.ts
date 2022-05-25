@@ -1,6 +1,7 @@
 /*
  The MIT License (MIT)
 
+ Copyright (c) 2022 DATATRONiQ GmbH
  Copyright (c) 2017,2018 Klaus Landsdorf
  Copyright (c) 2014-2017 Etienne Rossignon
 

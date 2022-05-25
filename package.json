@@ -4,7 +4,7 @@
   "description": "The next evolution IoT/IIoT OPC UA toolbox package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
-    "url": "git@gitlab.sigmalto.com:contitech/node-red-distro.git"
+    "url": "https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua"
   },
   "dependencies": {
     "cron": "2.0.0",
@@ -26,12 +26,12 @@
     "opc ua",
     "modbus"
   ],
-  "author": "Bianco Royal <developers@bianco-royal.de>",
+  "author": "DATATRONiQ GmbH <github@datatroniq.com> (https://datatroniq.com)",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues"
+    "url": "https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/issues/new?assignees=&labels=bug&template=bugs.yaml"
   },
-  "homepage": "https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua#readme",
+  "homepage": "https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/",
   "node-red": {
     "nodes": {
       "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",

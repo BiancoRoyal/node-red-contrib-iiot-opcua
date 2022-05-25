@@ -2,6 +2,7 @@
  * Original Work Copyright 2014 IBM Corp.
  * node-red
  *
+ * Copyright (c) 2022 DATATRONiQ GmbH (https://datatroniq.com)
  * Copyright (c) 2018 Klaus Landsdorf (http://bianco-royal.de/)
  * All rights reserved.
  * node-red-contrib-iiot-opcua
