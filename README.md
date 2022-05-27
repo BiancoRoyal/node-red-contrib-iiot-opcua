@@ -9,9 +9,9 @@
 ![NodeJS_Version](https://img.shields.io/badge/NodeJS-14.19.1-green.png)
 [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
-[![Build status](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/actions/workflows/build.yml/badge.svg)](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/actions/workflows/build.yml)
+[![Build status](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/build.yml/badge.svg)](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/build.yml)
 [![Maintainability badge](url)](a url to a maintainability or code quality badge such as CodeClimate)
-[![Test Coverage](badges/badge-lines.svg)](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/actions/workflows/summary.yml)
+[![Test Coverage](badges/badge-lines.svg)](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/summary.yml)
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
 
@@ -55,7 +55,7 @@ itself may only contain an ID, a topic, and a payload. This means that any refer
 
 ## Contributing
 
-Every bit helps! If you come across any bugs, please [send a buge report](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/issues/new?type=bug), or if you feel inclined to fix it yourself, [submit a pull request](https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/compare).
+Every bit helps! If you come across any bugs, please [send a buge report](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/new?type=bug), or if you feel inclined to fix it yourself, [submit a pull request](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare).
 
 ### Setting up local development
 
@@ -71,7 +71,7 @@ Every bit helps! If you come across any bugs, please [send a buge report](https:
    ```
 3. Clone this repository into its own directry
    ```shell
-   git clone git@github.com:DATATRONiQ/node-red-contrib-iiot-opcua.git
+   git clone git@github.com:BiancoRoyal/node-red-contrib-iiot-opcua.git
    cd node-red-contrib-iiot-opcua
    git checkout development
    npm install
@@ -143,12 +143,12 @@ see Node-RED menu (right upper corner) -> Import -> Examples -> iiot opcua
 
 The BSD 3-Clause License
 
-[DATATRONiQ][5], current maintainer of node-red-contrib-iiot-opcua
+[DATATRONiQ][5], current maintainer of the DATATRONiQ node-red-contrib-iiot-opcua Fork
 
 This Node-RED package has been revitalized in 2022 and is based on the node-red-contrib-iiot-opcua package created by [Klaus Landsdorf][1] in 2017.
 Copyright notices by Mika Karaila, Klaus Landsdorf, and others are to honor their work in previous years on Node-RED, OPC-UA, and node-red-contrib-iiot-opcua; we are very grateful for all the time and energy they've invested!!
 
-[Klaus Landsdorf][1], creator of node-red-contrib-iiot-opcua
+[Klaus Landsdorf][1], creator and current maintainer of the Bianco-Royal node-red-contrib-iiot-opcua
 
 That is a whole new Node-RED package started in 2017 based on the node-opcua v0.4 and the API documentation.
 The old copyrights by Mika Karaila are just to honor his pioneer work in the years 2015/2016 for Node-RED and OPC UA.

@@ -62,13 +62,13 @@ function web () {
 }
 
 function ts () {
-    var ts = require("gulp-typescript")
-    var tsProject = ts.createProject('tsconfig.json');
-    return gulp.src('src/**/*.ts')
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(tsProject())
-        .pipe(sourcemaps.write(''))
-        .pipe(gulp.dest("opcuaIIoT"))
+  const ts = require('gulp-typescript')
+  const tsProject = ts.createProject('tsconfig.json')
+  return gulp.src('src/**/*.ts')
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(tsProject())
+    .pipe(sourcemaps.write(''))
+    .pipe(gulp.dest('opcuaIIoT'))
 }
 
 function doc (cb) {
