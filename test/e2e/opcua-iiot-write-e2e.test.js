@@ -24,6 +24,7 @@ var responseNode = require('../../src/opcua-iiot-response')
 var serverNode = require('../../src/opcua-iiot-server')
 
 var helper = require('node-red-node-test-helper')
+const receive = require("./receive");
 helper.init(require.resolve('node-red'))
 
 var writeNodesToLoad = [injectNodeRedNode, injectNode, functionNodeRedNode, connectorNode, inputNode, responseNode, serverNode]
@@ -55,7 +56,7 @@ var testWriteFlow = [
     'id': 'n3wrf1',
     'type': 'function',
     'name': '',
-    'func': 'msg.valuesToWrite = [12345.22];\nreturn msg;',
+    'func': 'msg.payload.valuesToWrite = [12345.22];\nreturn msg;',
     'outputs': 1,
     'noerr': 0,
     'wires': [['n4wrf1', 'n5wrf1']]
@@ -306,99 +307,125 @@ describe('OPC UA Write node e2e Testing', function () {
           expect(nodeUnderTest.name).toBe('TestWrite')
           expect(nodeUnderTest.showErrors).toBe(true)
           expect(nodeUnderTest.justValue).toBe(false)
-          setTimeout(done, 3000)
+          done()
         })
     })
 
     it('should get a message with payload', function (done) {
       helper.load(writeNodesToLoad, testWriteFlow, function () {
         let n2 = helper.getNode('n2wrf1')
+        let n1 = helper.getNode('n1wrf1')
         n2.on('input', function (msg) {
-          expect(msg.payload).toBe(12345.67)
+          expect(msg.payload.value).toBe(12345.67)
           expect(msg.topic).toBe('TestTopicWrite')
-          setTimeout(done, 2000)
+          done()
         })
+
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should verify addressSpaceItems', function (done) {
       helper.load(writeNodesToLoad, testWriteFlow, function () {
         let n2 = helper.getNode('n2wrf1')
+        let n1 = helper.getNode('n1wrf1')
         n2.on('input', function (msg) {
-          expect(msg.addressSpaceItems).toMatchObject([{
+          expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
             'nodeId': 'ns=1;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          setTimeout(done, 2000)
+          done()
         })
+
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have values to write', function (done) {
       helper.load(writeNodesToLoad, testWriteFlow, function () {
         let n4 = helper.getNode('n4wrf1')
+        let n1 = helper.getNode('n1wrf1')
         n4.on('input', function (msg) {
-          expect(msg.addressSpaceItems).toMatchObject([{
+          expect(msg.payload.addressSpaceItems).toMatchObject([{
             name: 'TestReadWrite',
             nodeId: 'ns=1;s=TestReadWrite',
             datatypeName: 'Double'
           }])
-          expect(msg.valuesToWrite[0]).toBe(12345.22)
           expect(msg.topic).toBe('TestTopicWrite')
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('write')
+          expect(msg.payload.valuesToWrite[0]).toBe(12345.22)
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('write')
           done()
         })
+
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have write results', function (done) {
       helper.load(writeNodesToLoad, testWriteFlow, function () {
         let n6 = helper.getNode('n6wrf1')
+        let n1 = helper.getNode('n1wrf1')
         n6.on('input', function (msg) {
-          expect(msg.addressSpaceItems).toMatchObject([{
+          expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
             'nodeId': 'ns=1;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          expect(msg.payload.statusCodes).toMatchObject([{'value': 0, 'description': 'No Error', 'name': 'Good'}])
+          expect(msg.payload.value.statusCodes).toMatchObject([{
+              _value: 2150891520,
+              _description: 'The node id refers to a node that does not exist in the server address space.',
+              _name: 'BadNodeIdUnknown'
+            }])
           expect(msg.topic).toBe('TestTopicWrite')
-          expect(msg.nodetype).toBe('write')
-          expect(msg.injectType).toBe('write')
+          expect(msg.payload.nodetype).toBe('write')
+          expect(msg.payload.injectType).toBe('write')
           done()
         })
+
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have write results with response', function (done) {
       helper.load(writeNodesToLoad, testWriteFlow, function () {
         let n8 = helper.getNode('n8wrf1')
+        let n1 = helper.getNode('n1wrf1')
         n8.on('input', function (msg) {
-          expect(msg.entryStatus).toMatchObject([1, 0, 0])
+          expect(msg.payload.entryStatus).toMatchObject({good: 0, bad: 1, other: 0})
           expect(msg.topic).toBe('TestTopicWrite')
-          expect(msg.nodetype).toBe('write')
-          expect(msg.injectType).toBe('write')
+          expect(msg.payload.nodetype).toBe('write')
+          expect(msg.payload.injectType).toBe('write')
           done()
         })
+
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have write results from payload without a valuesToWrite property', function (done) {
       helper.load(writeNodesToLoad, testWriteWithoutValuesToWriteFlow, function () {
         let n6 = helper.getNode('n6wrf2')
+        let n1 = helper.getNode('n1wrf2')
         n6.on('input', function (msg) {
-          expect(msg.addressSpaceItems).toMatchObject([{
+          expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
             'nodeId': 'ns=1;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          expect(msg.payload.statusCodes).toMatchObject([{'value': 0, 'description': 'No Error', 'name': 'Good'}])
+          expect(msg.payload.value.statusCodes).toMatchObject([{
+            _value: 2150891520,
+            _description: 'The node id refers to a node that does not exist in the server address space.',
+            _name: 'BadNodeIdUnknown'
+          }])
           expect(msg.topic).toBe('TestTopicWrite')
-          expect(msg.nodetype).toBe('write')
-          expect(msg.injectType).toBe('write')
+          expect(msg.payload.nodetype).toBe('write')
+          expect(msg.payload.injectType).toBe('write')
           done()
         })
+
+        setTimeout(receive, 5000, n1)
       })
     })
   })

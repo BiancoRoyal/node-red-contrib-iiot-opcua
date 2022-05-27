@@ -504,16 +504,15 @@ export function parseNamspaceFromMsgTopic(msg: BrowseMessage | null): number | u
 }
 
 export function parseNamspaceFromItemNodeId(item: NodeIdLike): number | undefined {
-  let nodeNamespace = ''
-  let nodeItem: string = (item as Todo).value || item
-
-  if (nodeItem) {
+  if (typeof item === "string") {
     // TODO: real parsing instead of string operations
     // TODO: which type are relevant here? (String, Integer ...)
-    nodeNamespace = nodeItem.substring(3, nodeItem.indexOf(';'))
+    return Number.parseInt(item.substring(3, item.indexOf(';')))
+  } else if (typeof item === "number") {
+    return item
+  } else {
+    return item.namespace
   }
-
-  return Number.parseInt(nodeNamespace)
 }
 
 export function parseForNodeIdentifier(nodeItem: string): NodeIdentifier {
@@ -614,7 +613,7 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 
   const nodesToWrite = writeInputs.map((item: Todo) =>
     createItemForWriteList(item, buildNewVariant(item.datatypeName, item.value)
-    ));
+  ));
 
   logger.internalDebugLog('buildNodesToWrite output: ' + JSON.stringify(nodesToWrite))
 
