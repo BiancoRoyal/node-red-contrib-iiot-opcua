@@ -77,6 +77,8 @@ export type CoreMachineStates =
 
 // export type CoreStateMachine = Record<CoreMachineStates, Record<string, CoreMachineStates>>
 
+// TODO: @xstate/fsm is a good package to replace it. See: modbus contribution package core client
+// many functions are now available and working well in node-opcua and maybe it needs less control from our package
 function createConnectorStatelyMachine() {
   const stateMachine: Stately.stateMachine = Stately.machine({
     'IDLE': {

@@ -9,6 +9,7 @@
  */
 'use strict'
 
+import * as nodered from "node-red";
 import {Todo} from "./types/placeholders";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {
@@ -28,7 +29,7 @@ import {InjectPayload} from "./opcua-iiot-inject";
 import {DataValue} from "node-opcua";
 import {CompressedBrowseResult} from "./core/opcua-iiot-core-response";
 
-interface OPCUAIIoTCrawler extends Node {
+interface OPCUAIIoTCrawler extends nodered.Node {
   name: string
   justValue: Todo
   singleResult: Todo
@@ -43,7 +44,7 @@ interface OPCUAIIoTCrawler extends Node {
   connector: Node
 }
 
-interface OPCUAIIoTCrawlerDef extends NodeDef {
+interface OPCUAIIoTCrawlerDef extends nodered.NodeDef {
   name: string
   justValue: Todo
   singleResult: Todo
@@ -109,7 +110,7 @@ type CrawlerParent = {
  *
  * @param RED
  */
-module.exports = (RED: NodeAPI) => {
+module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
   function OPCUAIIoTCrawler(this: OPCUAIIoTCrawler & Todo, config: OPCUAIIoTCrawlerDef) {
