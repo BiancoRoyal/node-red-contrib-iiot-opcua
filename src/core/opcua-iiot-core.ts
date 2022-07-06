@@ -13,6 +13,7 @@
 import {debug as Debug} from 'debug'
 import * as os from 'os'
 import * as underscore from 'underscore'
+import {isObject} from 'underscore'
 
 import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {NodeIdLike} from 'node-opcua-nodeid'
@@ -504,16 +505,21 @@ export function parseNamspaceFromMsgTopic(msg: BrowseMessage | null): number | u
 }
 
 export function parseNamspaceFromItemNodeId(item: NodeIdLike): number | undefined {
-  let nodeNamespace = ''
-  let nodeItem: string = (item as Todo).value || item
-
-  if (nodeItem) {
-    // TODO: real parsing instead of string operations
-    // TODO: which type are relevant here? (String, Integer ...)
-    nodeNamespace = nodeItem.substring(3, nodeItem.indexOf(';'))
+  if (typeof item === 'number') {
+    return 0;
   }
 
-  return Number.parseInt(nodeNamespace)
+  const nodeItem = isObject(item) ?
+    item.namespace :
+    item;
+
+  if (typeof nodeItem === 'number') {
+    return nodeItem;
+  }
+
+  // TODO: real parsing instead of string operations
+
+  return Number.parseInt(nodeItem.substring(3, nodeItem.indexOf(';')))
 }
 
 export function parseForNodeIdentifier(nodeItem: string): NodeIdentifier {
