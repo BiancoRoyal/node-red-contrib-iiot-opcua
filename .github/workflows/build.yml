@@ -34,12 +34,11 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/download-artifact@v3
-        with: # Download artifacts from build.yml hopefully
-          name: build-folders
-          path: distrib.tar.gz
-      - run: printenv
-      - run: tar -xvf distrib.tar.gz/distrib.tar.gz
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm install
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
