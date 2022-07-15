@@ -42,6 +42,7 @@
     "showErrors": true,
     "asoDemo": true,
     "allowAnonymous": true,
+    "individualCerts": false,
     "isAuditing": false,
     "serverDiscovery": true,
     "users": [],

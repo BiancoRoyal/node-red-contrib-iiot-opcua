@@ -11,15 +11,16 @@
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
 [![Build status](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/build.yml/badge.svg)](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/build.yml)
 [![Test Coverage](badges/badge-lines.svg)](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/summary.yml)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua)
 
 ## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
-
-The actual [DATATRONiQ][5] contribution to v4.x+ upgrades the original work of v3.x by migrating to TypeScript, 
-and updating dependencies, including updates to new major release versions of Node-RED (v1.x to v2.x+) and node-opcua (v0.7 to v2.64.1).
 
 * tested with Node.js v14.19 and Node-RED v2.2.2
 * based on node-opcua v2.64 (OPC UA v1.03)
 * extendable with node-opcua-isa95
+
+The actual [DATATRONiQ][5] contribution to v4.x+ upgrades the original work of v3.x by migrating to TypeScript,
+and updating dependencies, including updates to new major release versions of Node-RED (v1.x to v2.x+) and node-opcua (v0.7 to v2.64.1).
 
 ## Installing
 

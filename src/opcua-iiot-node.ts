@@ -23,7 +23,6 @@ interface OPCUAIIoTNode extends nodered.Node {
   name: string
   injectType: string
   showErrors: string
-  
 }
 
 interface OPCUAIIoTNodeDef extends nodered.NodeDef {

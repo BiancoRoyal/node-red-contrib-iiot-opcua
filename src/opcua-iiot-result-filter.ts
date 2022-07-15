@@ -135,7 +135,6 @@ module.exports = (RED: nodered.NodeAPI) => {
         topic: node.topic || msg.topic
       }
 
-
       this.send(outputMessage)
     })
 

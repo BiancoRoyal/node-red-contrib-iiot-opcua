@@ -1,30 +1,30 @@
-const fs = require('fs');
-const path = require("path");
+const fs = require('fs')
+const path = require('path')
 
 const read = async (outfilepath) => {
   const result = new Promise((resolve, reject) => {
-      fs.readFile(path.join(__dirname, outfilepath || 'out.json'), 'utf8', function (err, data) {
-        if (err) {
-          reject(err);
-          return
-        }
-        resolve(JSON.parse(data));
-      });
-    }
-  );
+    fs.readFile(path.join(__dirname, outfilepath || 'out.json'), 'utf8', function (err, data) {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve(JSON.parse(data))
+    })
+  }
+  )
 
-  await result;
+  await result
 
   if (result instanceof Error) {
-    console.log('Error reading output file: ' + result.message);
+    console.log('Error reading output file: ' + result.message)
     process.exit(1)
   }
 
-  return result;
+  return result
 }
 
 const write = async () => {
-  const results = await read();
+  const results = await read()
 
   const {
     numTotalTestSuites,
@@ -32,33 +32,32 @@ const write = async () => {
     numPassedTestSuites,
     numPassedTests,
     success,
-    testResults,
-  } = results;
+    testResults
+  } = results
 
   if (!success) {
-    console.log('Jest failed');
+    console.log('Jest failed')
     process.exit(1)
   }
 
   writeMarkdown({
     'Test Suite Completion': (numPassedTestSuites / numTotalTestSuites * 100) + '% (' + numPassedTestSuites + ' / ' + numTotalTestSuites + ')',
-    'Test Completion': (numPassedTests / numTotalTests * 100) + '% (' + numPassedTests + ' / ' + numTotalTests + ')',
+    'Test Completion': (numPassedTests / numTotalTests * 100) + '% (' + numPassedTests + ' / ' + numTotalTests + ')'
   }, 'Overall Results', ['Measure', 'Status'])
 
-  let detailedResults = {}
+  const detailedResults = {}
   testResults.forEach((singleResult) => {
-    const name = singleResult.name.split('/test/')[1];
+    const name = singleResult.name.split('/test/')[1]
     detailedResults[name] = singleResult.status
-  });
+  })
 
   writeMarkdown(detailedResults, 'Detailed Results  ', ['Test', 'Status'])
-
 }
 
 const writeMarkdown = (obj, title, columns) => {
-  if (title) console.log('### ' + title);
+  if (title) console.log('### ' + title)
 
-  const entries = (typeof obj[Object.keys(obj)[0]] === 'string' ? 1 : obj[Object.keys(obj)[0]].length || 1) + 1;
+  const entries = (typeof obj[Object.keys(obj)[0]] === 'string' ? 1 : obj[Object.keys(obj)[0]].length || 1) + 1
 
   const header = [...Array(entries)].map((item, index) => {
     if (index <= columns.length) {
@@ -81,12 +80,11 @@ const writeMarkdown = (obj, title, columns) => {
     }
   })
   console.log()
-
 }
 
 const writeRow = (array) => {
-  const output = array.join(' | ');
-  console.log('| ' + output + ' |   ');
+  const output = array.join(' | ')
+  console.log('| ' + output + ' |   ')
 }
 
-write();
+write()
