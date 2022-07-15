@@ -5,9 +5,11 @@ on:
       - opened
   push:
     branches:
-      - main
+      - develop
+      - alpha
+      - beta
       - master
-      - development
+      - main
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -30,7 +32,7 @@ jobs:
   publish:
     runs-on: ubuntu-20.04
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/download-artifact@v3
         with: # Download artifacts from build.yml hopefully
@@ -38,4 +40,6 @@ jobs:
           path: distrib.tar.gz
       - run: printenv
       - run: tar -xvf distrib.tar.gz/distrib.tar.gz
-      # TODO: Add the steps to publish to NPM
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
