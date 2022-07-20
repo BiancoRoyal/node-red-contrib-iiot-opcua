@@ -41,7 +41,7 @@ module.exports = {
 
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: [
-    'json-summary'
+    'json-summary',
   ],
 
   // An object that configures minimum threshold enforcement for coverage results
@@ -148,7 +148,6 @@ module.exports = {
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
-    '<rootDir>/test/e2e/',
     '<rootDir>/code/',
     '<rootDir>/jcoverage/',
     '<rootDir>/opcuaIIoT/',
