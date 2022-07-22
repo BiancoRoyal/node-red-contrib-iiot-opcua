@@ -8,6 +8,18 @@ We welcome contributions, but request you follow these guidelines.
  - [Feature requests](#feature-requests)
  - [Pull-Requests](#pull-requests)
 
+## How to start
+
+1. install node-red global without the IIoT OPC UA package
+2. run the shell script:  ./clean.sh
+3. run command: npm run dev-link
+4. start node-red and see the IIoT OPC UA nodes for testing
+5. start your test and develop life cycle
+6. Create a new version via 'npm run release & npm run rewrite-changelog'
+
+You can unlink via 'npm run dev-unlink' and test via 'npm test'.
+Check the coverage state before and after your development via 'npm run coverage'!
+
 ## Coding rules
 
 1. Code for one another, and use tools to perform mechanical optimizations.
@@ -16,6 +28,7 @@ We welcome contributions, but request you follow these guidelines.
 4. Utilize familiar paradigms and patterns.
 5. Consistency is king.
 6. Lay good foundations. Be mindful of evolutionary complexity.
+7. Write tests and check the coverage of your code.
 
 ## Raising issues
 
@@ -31,8 +44,8 @@ relevant nodes, press Ctrl-E and copy the flow data from the Export dialog.
 
 At a minimum, please include:
 
- - Version of node.js? (should be >= 14)
- - Version of Node-RED? (should be >=v2.2.0)
+ - Version of node.js? (should be >= 16)
+ - Version of Node-RED? (should be >=v3.0.0)
  - Version of node-red-contrib-iiot-opcua? (should be >=v4.0.0)
  
  - What is your platform? (Linux, macOS, ...)
@@ -44,6 +57,7 @@ For feature requests, please raise them on the relevant project's issue tracker.
 
 ## Pull-Requests
 
+Please, send your PRs to the **develop** branch!
 If you want to raise a pull-request with a new feature, or a refactoring
 of existing code, it may well get rejected if you haven't discussed it on the relevant project's issue tracker first.
 
