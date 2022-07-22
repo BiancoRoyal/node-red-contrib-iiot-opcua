@@ -1,8 +1,13 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-Note: All links from version 3.10.2 and earlier refer to items no longer available on Github, and are therefore broken links.
+### [4.0.3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.2...v4.0.3) (2022-07-22)
+
+
+### Bug Fixes
+
+* gh action publish ([97a2589](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/97a2589cd0e0513fad8f4ab836243811f44bccf9))
 
 ## [3.10.2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v3.10.0...v3.10.2) (2019-03-17)
 
