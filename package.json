@@ -71,7 +71,7 @@
     "test1": "standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
     "coverage": "gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --logHeapUsage --debug",
     "coverage:ci": "jest --coverage --detectOpenHandles --forceExit --logHeapUsage --ci --silent --json --outputFile=scripts/out.json",
-    "coverage:upload": "cat ./jcoverage/lcov.info | codacy-coverage --token ${{ secrets.CODACY_PROJECT_TOKEN }}",
+    "coverage:upload": "cat ./jcoverage/lcov.info | codacy-coverage --token $CODACY_PROJECT_TOKEN_IIOT_OPCUA",
     "test": "standard --fix && jest --detectOpenHandles --forceExit --logHeapUsage",
     "test:ci": "npm run test -- --ci --silent --json --outputFile=scripts/out.json",
     "test:coverage": "npm run test -- --coverage",
