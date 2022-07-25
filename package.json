@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-iiot-opcua",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "An Industrial IoT OPC UA toolbox contribution package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
@@ -91,7 +91,7 @@
     "prepublishOnly": "npm test && npm run coverage && npm run build",
     "release": "standard-version -a",
     "inspect": "jsinspect ./src > .jsinspect-results.json",
-    "rewrite-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "rewrite-changelog": "gulp changelog",
     "dev-link": "npm i && npm run build && npm link",
     "dev-unlink": "npm unlink node-red-contrib-iiot-opcua -g",
     "code:check": "standard --fix"
@@ -112,6 +112,7 @@
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-clean": "^0.4.0",
+    "gulp-conventional-changelog": "^2.0.35",
     "gulp-htmlmin": "^5.0.1",
     "gulp-jsdoc3": "^3.0.0",
     "gulp-replace": "^1.1.3",
