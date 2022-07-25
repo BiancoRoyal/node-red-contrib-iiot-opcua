@@ -99,33 +99,38 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
 
+        // existing interval timer must be deleted
         if (intervalId) {
           clearInterval(intervalId)
+          intervalId = null
         }
 
         if (typeof node.repeat !== "number" || isNaN(node.repeat)) return;
 
         intervalId = setInterval(() => {
-          this.emit('input', {
-            _msgid: RED.util.generateId(), payload: {
-              injectType: "cron"
-            }
-          })
+          this.emit('input', newMessage("cron"))
         }, node.repeat)
+
       } else if (node.crontab !== '') {
         cronjob = new CronJob(node.crontab,
           () => {
-            this.emit('input', {
-              _msgid: RED.util.generateId(), payload: {
-                injectType: "cron"
-              }
-            })
+            this.emit('input', newMessage("cron"))
           },
           null,
           true)
       }
     }
 
+    const newMessage = function (messageType: string) {
+      return {
+        _msgid: RED.util.generateId(),
+        payload: {
+          injectType: messageType
+        }
+      }
+    }
+
+    // existing timers must be deleted
     const resetAllTimer = function () {
       if (onceTimeout) {
         clearTimeout(onceTimeout)
@@ -166,7 +171,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
-      if (Object.keys(msg).length === 0) return;
+      if (Object.keys(msg).length === 0) return; // Todo: Why? Maybe it should be build by newMessage
+
       try {
         const topic = node.topic || msg.topic
         const payload: InjectPayload = {
@@ -191,17 +197,19 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     })
 
+    // existing timer must be deleted
     if (onceTimeout) {
       clearTimeout(onceTimeout)
       onceTimeout = null
     }
+
     let timeout = INPUT_TIMEOUT_MILLISECONDS * node.startDelay
 
     if (this.once) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
-      onceTimeout = setTimeout(() => {
+      onceTimeout = setTimeout(  () => {
         coreInject.detailDebugLog('injecting once at start')
-        this.emit('input', {})
+        this.emit('input', newMessage("once"))
         repeaterSetup()
       }, timeout)
     } else if (node.repeat || node.crontab) {
@@ -215,11 +223,13 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     this.close = async (removed: boolean) => {
-
       if (cronjob) {
         cronjob.stop()
         delete node['cronjob']
       }
+
+      await resetAllTimer() // all timers have to be reset
+
       resetIiotNode(node)
     }
   }
