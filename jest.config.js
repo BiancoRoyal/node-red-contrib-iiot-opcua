@@ -148,7 +148,6 @@ module.exports = {
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
-    '<rootDir>/test/e2e/',
     '<rootDir>/code/',
     '<rootDir>/jcoverage/',
     '<rootDir>/opcuaIIoT/',
@@ -168,7 +167,9 @@ module.exports = {
   // testURL: "http://localhost",
 
   // Setting this value to "fake" allows the use of fake timers for functions such as "setTimeout"
-  timers: 'real',
+  fakeTimers: {
+    enableGlobally: false
+  },
 
   // A map from regular expressions to paths to transformers
   // transform: null,

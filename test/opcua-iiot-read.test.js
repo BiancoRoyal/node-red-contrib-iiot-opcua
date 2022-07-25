@@ -3,7 +3,7 @@
  * node-red
  *
  * Copyright (c) 2022 DATATRONiQ GmbH (https://datatroniq.com)
- * Copyright (c) 2018 Klaus Landsdorf (http://bianco-royal.de/)
+ * Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  * All rights reserved.
  * node-red-contrib-iiot-opcua
  *
@@ -19,32 +19,35 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 
 // iiot opcua
 var readNode = require('../src/opcua-iiot-read')
+const helperExtensions = require('../test/test-helper-extensions')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
 var readNodesToLoad = [injectNode, functionNode, readNode]
 
-var testReadNodeToBeLoaded = [
+var testReadNodeToBeLoaded = helperExtensions.cleanFlowPositionData([
   {
-    'id': '41cb29d.1ab50d8',
-    'type': 'OPCUA-IIoT-Read',
-    'attributeId': 0,
-    'maxAge': 1,
-    'depth': 1,
-    'connector': '',
-    'name': 'ReadAll',
-    'justValue': true,
-    'showStatusActivities': false,
-    'showErrors': false,
-    'parseStrings': false,
-    'wires': [
-      [
-        '5e3fdc1.8b5d624'
-      ]
+    "id": "41cb29d.1ab50d8",
+    "type": "OPCUA-IIoT-Read",
+    "z": "acd804583564cb8c",
+    "attributeId": 0,
+    "maxAge": 1,
+    "depth": 1,
+    "connector": "",
+    "name": "ReadAll",
+    "justValue": true,
+    "showStatusActivities": false,
+    "showErrors": false,
+    "parseStrings": false,
+    "historyDays": "",
+    "x": 300,
+    "y": 100,
+    "wires": [
+      []
     ]
   }
-]
+])
 
 describe('OPC UA Read node Unit Testing', function () {
   beforeEach(function (done) {

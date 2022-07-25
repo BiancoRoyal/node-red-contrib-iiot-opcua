@@ -3,7 +3,7 @@
  * node-red
  *
  * Copyright (c) 2022 DATATRONiQ GmbH (https://datatroniq.com)
- * Copyright (c) 2018 Klaus Landsdorf (http://bianco-royal.de/)
+ * Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  * All rights reserved.
  * node-red-contrib-iiot-opcua
  *
@@ -14,84 +14,128 @@
 jest.setTimeout(10000)
 
 var inputNode = require('../src/opcua-iiot-inject')
+const helperExtensions = require('../test/test-helper-extensions')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testInjectFlow = [
+var testInjectFlow = helperExtensions.cleanFlowPositionData([
   {
-    'id': 'n1ijf1',
-    'type': 'OPCUA-IIoT-Inject',
-    'injectType': 'inject',
-    'payload': '12345',
-    'payloadType': 'num',
-    'topic': 'TestTopicInject',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'startDelay': '0.1',
-    'name': 'TestInject',
-    'addressSpaceItems': [
+    "id": "n1ijf1",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "bd5450f338b10806",
+    "injectType": "inject",
+    "payload": "12345",
+    "payloadType": "num",
+    "topic": "TestTopicInject",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "0.1",
+    "name": "TestInject",
+    "addressSpaceItems": [
       {
-        'name': 'ServerStatus',
-        'nodeId': 'ns=0;i=2256',
-        'datatypeName': 'String'
+        "name": "ServerStatus",
+        "nodeId": "ns=0;i=2256",
+        "datatypeName": "String"
       }
     ],
-    'wires': [['n2ijf1']]
+    "x": 220,
+    "y": 140,
+    "wires": [
+      [
+        "n2ijf1"
+      ]
+    ]
   },
-  {id: 'n2ijf1', type: 'helper'}
-]
+  {
+    "id": "n2ijf1",
+    "type": "helper",
+    "z": "bd5450f338b10806",
+    "x": 390,
+    "y": 140,
+    "wires": []
+  }
+])
 
-var testInjectWithDelayFlow = [
+var testInjectWithDelayFlow = helperExtensions.cleanFlowPositionData([
   {
-    'id': 'n1ijf2',
-    'type': 'OPCUA-IIoT-Inject',
-    'injectType': 'inject',
-    'payload': '12345',
-    'payloadType': 'num',
-    'topic': 'TestTopicInject',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'startDelay': '0.3',
-    'name': 'TestInject',
-    'addressSpaceItems': [
+    "id": "n1ijf2",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "f4e2dc28bedecc0b",
+    "injectType": "inject",
+    "payload": "12345",
+    "payloadType": "num",
+    "topic": "TestTopicInject",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "0.3",
+    "name": "TestInject",
+    "addressSpaceItems": [
       {
-        'name': 'ServerStatus',
-        'nodeId': 'ns=0;i=2256',
-        'datatypeName': 'String'
+        "name": "ServerStatus",
+        "nodeId": "ns=0;i=2256",
+        "datatypeName": "String"
       }
     ],
-    'wires': [['n2ijf2']]
+    "x": 240,
+    "y": 140,
+    "wires": [
+      [
+        "n2ijf2"
+      ]
+    ]
   },
-  {id: 'n2ijf2', type: 'helper'}
-]
+  {
+    "id": "n2ijf2",
+    "type": "helper",
+    "z": "f4e2dc28bedecc0b",
+    "active": false,
+    "x": 430,
+    "y": 140,
+    "wires": []
+  }
+])
 
-var testInjectWithLongDelayFlow = [
+var testInjectWithLongDelayFlow = helperExtensions.cleanFlowPositionData([
   {
-    'id': 'n1ijf3',
-    'type': 'OPCUA-IIoT-Inject',
-    'injectType': 'inject',
-    'payload': '12345',
-    'payloadType': 'num',
-    'topic': 'TestTopicInject',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'startDelay': '0.5',
-    'name': 'TestInject',
-    'addressSpaceItems': [
+    "id": "n1ijf3",
+    "type": "OPCUA-IIoT-Inject",
+    "z": "25eb29b54b156390",
+    "injectType": "inject",
+    "payload": "12345",
+    "payloadType": "num",
+    "topic": "TestTopicInject",
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "startDelay": "0.5",
+    "name": "TestInject",
+    "addressSpaceItems": [
       {
-        'name': 'ServerStatus',
-        'nodeId': 'ns=0;i=2256',
-        'datatypeName': 'String'
+        "name": "ServerStatus",
+        "nodeId": "ns=0;i=2256",
+        "datatypeName": "String"
       }
     ],
-    'wires': [['n2ijf3']]
+    "x": 300,
+    "y": 100,
+    "wires": [
+      [
+        "n2ijf3"
+      ]
+    ]
   },
-  {id: 'n2ijf3', type: 'helper'}
-]
+  {
+    "id": "n2ijf3",
+    "type": "helper",
+    "z": "25eb29b54b156390",
+    "x": 490,
+    "y": 100,
+    "wires": []
+  }
+])
 
 describe('OPC UA Inject node Unit Testing', function () {
   beforeAll(function (done) {
