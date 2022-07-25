@@ -16,10 +16,14 @@ module.exports = {
     // flow is an array of JSON objects with x,y,z from the Node-RED export
     jsonFlow.forEach( (item, index, array) => {
       let newObject = JSON.parse(JSON.stringify(item))
-      delete newObject["x"]
-      delete newObject["y"]
-      delete newObject["z"]
-      cleanFlow.push(newObject)
+      if(newObject.type === 'helper') {
+        cleanFlow.push({"id": newObject.id, "type": "helper", wires: newObject.wires})
+      } else {
+        delete newObject["x"]
+        delete newObject["y"]
+        delete newObject["z"]
+        cleanFlow.push(newObject)
+      }
     } )
 
     return cleanFlow

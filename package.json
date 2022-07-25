@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-iiot-opcua",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "An Industrial IoT OPC UA toolbox contribution package for Node-RED based on node-opcua.",
   "repository": {
     "type": "git",
@@ -73,7 +73,9 @@
     "node": ">=14"
   },
   "scripts": {
-    "postinstall": "node ./create_certificates.js demo --dev -s -r ./certificates",
+    "postinstall": "npm run certificates",
+    "certificates": "node ./create_certificates.js demo --dev -s -r ./certificates",
+    "certificates:renew": "rm -rf ./certificates && node ./create_certificates.js demo --dev -s -r ./certificates",
     "test:clearCache": "jest --clearCache",
     "test:debug": "standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
     "coverage": "gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --logHeapUsage --debug",
@@ -89,9 +91,9 @@
     "prepublishOnly": "npm test && npm run coverage && npm run build",
     "release": "standard-version -a",
     "inspect": "jsinspect ./src > .jsinspect-results.json",
-    "rewrite-changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "dev-link": "npm i && npm run build && npm link && cd ~/.node-red && npm link node-red-contrib-iiot-opcua",
-    "dev-unlink": "npm unlink node-red-contrib-iiot-opcua",
+    "rewrite-changelog": "gulp changelog",
+    "dev-link": "npm i && npm run build && npm link",
+    "dev-unlink": "npm unlink node-red-contrib-iiot-opcua -g",
     "code:check": "standard --fix"
   },
   "files": [
@@ -110,6 +112,7 @@
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-clean": "^0.4.0",
+    "gulp-conventional-changelog": "^2.0.35",
     "gulp-htmlmin": "^5.0.1",
     "gulp-jsdoc3": "^3.0.0",
     "gulp-replace": "^1.1.3",
