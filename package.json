@@ -73,7 +73,9 @@
     "node": ">=14"
   },
   "scripts": {
-    "postinstall": "node ./create_certificates.js demo --dev -s -r ./certificates",
+    "postinstall": "npm run certificates",
+    "certificates": "node ./create_certificates.js demo --dev -s -r ./certificates",
+    "certificates:renew": "rm -rf ./certificates && node ./create_certificates.js demo --dev -s -r ./certificates",
     "test:clearCache": "jest --clearCache",
     "test:debug": "standard --fix && gulp clean && jest --detectOpenHandles --forceExit --bail --logHeapUsage --debug",
     "coverage": "gulp clean && rm -rf ./jcoverage && jest --coverage --detectOpenHandles --forceExit --logHeapUsage --debug",
