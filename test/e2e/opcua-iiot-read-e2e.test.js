@@ -868,7 +868,7 @@ describe('OPC UA Read node e2e Testing', function () {
       helper.load(readNodesToLoad, testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject([0, 1, 0])
+          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.readtype).toBe('HistoryValue')
           expect(msg.payload.historyStart).toBeDefined()
@@ -914,7 +914,7 @@ describe('OPC UA Read node e2e Testing', function () {
         n2.on('input', async function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            expect(msg.payload.entryStatus).toBeUndefined()
+            expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
             expect(msg.topic).toBe('TestTopicRead1')
             expect(msg.payload.historyStart).toBeDefined()
             expect(msg.payload.historyEnd).toBeDefined()
@@ -922,7 +922,7 @@ describe('OPC UA Read node e2e Testing', function () {
           }
 
           if (msgCounter === 2) {
-            expect(msg.payload.entryStatus).toBeUndefined()
+            expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
             expect(msg.topic).toBe('TestTopicRead2')
             expect(msg.payload.historyStart).toBeDefined()
             expect(msg.payload.historyEnd).toBeDefined()
