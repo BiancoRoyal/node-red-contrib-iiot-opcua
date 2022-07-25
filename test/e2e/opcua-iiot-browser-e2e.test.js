@@ -168,11 +168,11 @@ var testBrowseLevelsFlow = [
     'name': 'TestBrowse',
     'justValue': true,
     'recursiveBrowse': false,
-    'recursiveDepth': 1,
+    'recursiveDepth': 3,
     'sendNodesToRead': false,
     'sendNodesToListener': false,
     'sendNodesToBrowser': true,
-    'singleBrowseResult': true,
+    'multipleOutputs': false,
     'showStatusActivities': false,
     'showErrors': false,
     'wires': [['n4f2', 'n5f2']]
@@ -642,6 +642,8 @@ var testBrowserResponseResultFilterFlow = [
   }
 ]
 
+export const trigger = require('./receive.js');
+
 describe('OPC UA Browser node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -667,25 +669,28 @@ describe('OPC UA Browser node e2e Testing', function () {
         let n5 = helper.getNode('n5f1')
         let n1 = helper.getNode('n1f1')
         n5.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.browserResults).toBeInstanceOf(Array)
           expect(msg.payload.browserResults.length).toBe(15)
           done()
         })
-        n1.receive({payload: {value: 69}})
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should verify browser items as single result', function (done) {
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
+        let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.browserResults).toBeInstanceOf(Array)
           expect(msg.payload.browserResults.length).toBe(15)
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -693,6 +698,7 @@ describe('OPC UA Browser node e2e Testing', function () {
       testBrowseItemFlow[2].justValue = false
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
+        let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.endpoint).toBeDefined()
@@ -702,6 +708,8 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.browserResults.length).toBe(msg.payload.browserResultsCount)
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -709,12 +717,15 @@ describe('OPC UA Browser node e2e Testing', function () {
       testBrowseItemFlow[2].sendNodesToRead = true
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
+        let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
           expect(msg.payload.nodesToRead.length).toBe(15)
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -722,12 +733,14 @@ describe('OPC UA Browser node e2e Testing', function () {
       testBrowseItemFlow[2].sendNodesToListener = true
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
+        let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
-          expect(msg.payload.addressItemsToRead).toBeInstanceOf(Array)
-          expect(msg.payload.addressItemsToRead.length).toBe(15)
+          expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
+          expect(msg.payload.nodesToRead.length).toBe(15)
           done()
         })
+        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -735,12 +748,15 @@ describe('OPC UA Browser node e2e Testing', function () {
       testBrowseItemFlow[2].sendNodesToBrowser = true
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
+        let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.addressItemsToBrowse).toBeInstanceOf(Array)
           expect(msg.payload.addressItemsToBrowse.length).toBe(15)
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -750,40 +766,49 @@ describe('OPC UA Browser node e2e Testing', function () {
       testBrowseItemFlow[2].sendNodesToBrowser = true
       helper.load(browseNodesToLoad, testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
+        let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
           expect(msg.payload.nodesToRead.length).toBe(15)
-          expect(msg.payload.addressItemsToRead).toBeInstanceOf(Array)
-          expect(msg.payload.addressItemsToRead.length).toBe(15)
+          expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
+          expect(msg.payload.nodesToRead.length).toBe(15)
           expect(msg.payload.addressItemsToBrowse).toBeInstanceOf(Array)
           expect(msg.payload.addressItemsToBrowse.length).toBe(15)
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should verify browser items as single result with nodes to Browse with levels', function (done) {
       helper.load(browseNodesToLoad, testBrowseLevelsFlow, function () {
         let n4 = helper.getNode('n4f2')
+        let n1 = helper.getNode('n1f2')
         n4.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.addressItemsToBrowse).toBeInstanceOf(Array)
           expect(msg.payload.addressItemsToBrowse.length).toBe(15)
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should verify browser items as single result with nodes to Read with levels', function (done) {
       helper.load(browseNodesToLoad, testBrowseLevelsFlow, function () {
         let n6 = helper.getNode('n6f2')
+        let n1 = helper.getNode('n1f2')
         n6.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
-          expect(msg.payload.addressItemsToRead).toBeInstanceOf(Array)
-          expect(msg.payload.addressItemsToRead.length).toBe(10)
+          expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
+          expect(msg.payload.nodesToRead.length).toBe(10)
           done()
         })
+
+        setTimeout(trigger, 8000, n1)
       })
     })
 
@@ -791,18 +816,22 @@ describe('OPC UA Browser node e2e Testing', function () {
       testBrowseLevelsFlow[2].recursiveBrowse = true
       helper.load(browseNodesToLoad, testBrowseLevelsFlow, function () {
         let n6 = helper.getNode('n6f2')
+        let n1 = helper.getNode('n1f2')
         n6.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
-          expect(msg.payload.addressItemsToRead).toBeInstanceOf(Array)
-          expect(msg.payload.addressItemsToRead.length).toBeGreaterThan(10)
+          expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
+          expect(msg.payload.nodesToRead.length).toBeGreaterThan(10)
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should get ten messages with payload on browser with six response nodes and four result-filter nodes', function (done) {
       helper.load(browseNodesToLoad, testBrowserResponseResultFilterFlow, function () {
         let n1 = helper.getNode('n1f4')
+        let inject = helper.getNode('21337b84.2a8c2c')
         let counter = 0
         n1.on('input', function (msg) {
           counter++
@@ -819,6 +848,7 @@ describe('OPC UA Browser node e2e Testing', function () {
             done()
           }
         })
+        setTimeout(trigger, 5000, inject)
       })
     })
   })
@@ -827,12 +857,15 @@ describe('OPC UA Browser node e2e Testing', function () {
     it('should success on browse for a root id', function (done) {
       helper.load(browseNodesToLoad, testBrowseFlow, function () {
         let n3 = helper.getNode('n3f1')
+        let n1 = helper.getNode('n1f1')
         n3.on('input', function (msg) {
           helper.request()
             .get('/opcuaIIoT/browse/' + n3.id + '/' + encodeURIComponent('ns=0;i=85'))
             .expect(200)
             .end(done)
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
   })
