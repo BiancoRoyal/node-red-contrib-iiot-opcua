@@ -11,6 +11,8 @@ public/vendor/opc-foundation/xml/Opc.Ua.Gds.NodeSet2.xml
 
 public/vendor/opc-foundation/xml/Opc.Ua.Di.NodeSet2.xml
 
+(Harting Mica)
 
-public/vendor/harting/xml/Opc.Ua.Harting.NodeSet2.xml
-
+public/vendor/harting/10_di.xml
+public/vendor/harting/20_autoid.xml
+public/vendor/harting/30_aim.xml
