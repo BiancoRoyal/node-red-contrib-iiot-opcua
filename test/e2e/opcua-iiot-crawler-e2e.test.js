@@ -390,6 +390,118 @@ var testCrawlerJustValueSingleFilteredFlow = [
 
 let testCrawlerWithFilter = [
   {
+    'id': 'n1f4',
+    'type': 'OPCUA-IIoT-Inject',
+    'injectType': 'inject',
+    'payload': 'testpayload',
+    'payloadType': 'str',
+    'topic': 'TestTopicCrawler',
+    'repeat': '',
+    'crontab': '',
+    'once': true,
+    'startDelay': '3',
+    'name': 'Limits',
+    'addressSpaceItems': [
+      {
+        'name': 'Limits',
+        'nodeId': 'ns=0;i=11704',
+        'datatypeName': ''
+      }
+    ],
+    'wires': [
+      [
+        'n2f4', 'n3f4'
+      ]
+    ]
+  },
+  {id: 'n2f4', type: 'helper'},
+  {
+    'id': 'n3f4',
+    'type': 'OPCUA-IIoT-Crawler',
+    'connector': 'n1c4',
+    'name': 'TestCrawler',
+    'justValue': true,
+    'singleResult': true,
+    'showStatusActivities': false,
+    'showErrors': false,
+    'activateFilters': true,
+    'filters': [
+      {
+        'name': 'nodeClass',
+        'value': 'Variable'
+      },
+      {
+        'name': 'typeDefinition',
+        'value': 'ns=0;i=58'
+      },
+      {
+        'name': 'nodeId',
+        'value': 'ns=0;*'
+      }
+    ],
+    'wires': [
+      [
+        'n4f4'
+      ]
+    ]
+  },
+  {id: 'n4f4', type: 'helper'},
+  {
+  'id': '88f582a2.3b9028',
+  'type': 'OPCUA-IIoT-Server',
+  'port': '51188',
+  'endpoint': '',
+  'acceptExternalCommands': true,
+  'maxAllowedSessionNumber': '',
+  'maxConnectionsPerEndpoint': '',
+  'maxAllowedSubscriptionNumber': '',
+  'alternateHostname': '',
+  'name': '',
+  'showStatusActivities': false,
+  'showErrors': false,
+  'asoDemo': true,
+  'allowAnonymous': true,
+  'isAuditing': false,
+  'serverDiscovery': false,
+  'users': [],
+  'xmlsets': [],
+  'publicCertificateFile': '',
+  'privateCertificateFile': '',
+  'registerServerMethod': 1,
+  'discoveryServerEndpointUrl': '',
+  'capabilitiesForMDNS': '',
+  'maxNodesPerRead': 6000,
+  'maxNodesPerBrowse': 6000,
+
+  'wires': [ [ ] ]
+},
+  {
+    'id': 'n1c4',
+    'type': 'OPCUA-IIoT-Connector',
+    'discoveryUrl': '',
+    'endpoint': 'opc.tcp://localhost:51188/',
+    'keepSessionAlive': false,
+    'loginEnabled': false,
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
+    'name': 'LOCAL DEMO SERVER',
+    'showErrors': false,
+    'publicCertificateFile': '',
+    'privateKeyFile': '',
+    'defaultSecureTokenLifetime': '60000',
+    'endpointMustExist': false,
+    'autoSelectRightEndpoint': false,
+    'strategyMaxRetry': '',
+    'strategyInitialDelay': '',
+    'strategyMaxDelay': '',
+    'strategyRandomisationFactor': ''
+  }
+]
+
+
+
+const backup =   [
+  {
     'id': '61167469.38921c',
     'type': 'OPCUA-IIoT-Inject',
     'injectType': 'inject',
@@ -458,8 +570,8 @@ let testCrawlerWithFilter = [
     'endpoint': 'opc.tcp://localhost:51188',
     'keepSessionAlive': false,
     'loginEnabled': false,
-    'securityPolicy': 'Basic256',
-    'securityMode': 'SIGN',
+    'securityPolicy': 'None',
+    'securityMode': 'NONE',
     'name': 'LOCAL DEMO SERVER',
     'showErrors': false,
     'publicCertificateFile': '',
@@ -475,35 +587,6 @@ let testCrawlerWithFilter = [
     'connectionStartDelay': '',
     'reconnectDelay': ''
   },
-  {
-    'id': '88f582a2.3b9028',
-    'type': 'OPCUA-IIoT-Server',
-    'port': '51188',
-    'endpoint': '',
-    'acceptExternalCommands': true,
-    'maxAllowedSessionNumber': '',
-    'maxConnectionsPerEndpoint': '',
-    'maxAllowedSubscriptionNumber': '',
-    'alternateHostname': '',
-    'name': '',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'asoDemo': true,
-    'allowAnonymous': true,
-    'isAuditing': false,
-    'serverDiscovery': false,
-    'users': [],
-    'xmlsets': [],
-    'publicCertificateFile': '',
-    'privateCertificateFile': '',
-    'registerServerMethod': 1,
-    'discoveryServerEndpointUrl': '',
-    'capabilitiesForMDNS': '',
-    'maxNodesPerRead': 6000,
-    'maxNodesPerBrowse': 6000,
-
-    'wires': [ [ ] ]
-  }
 ]
 
 var testCrawlerWithFilterNS0 = [
@@ -766,6 +849,10 @@ var testCrawlerWithAllBasicFilterTypes = [
   }
 ]
 
+const receive = (node) => {
+  node.receive({payload: { value: 'testPayload' }})
+}
+
 describe('OPC UA Crawler node Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -789,76 +876,90 @@ describe('OPC UA Crawler node Testing', function () {
     it('should verify crawler items as result', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerFlow, function () {
         let n4 = helper.getNode('n4f1')
+        let n1 = helper.getNode('ec2b4f2b.59a9e')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBeDefined()
 
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
-          expect(msg.payload.crawlerResults.length).toBe(34)
-          expect(msg.payload.crawlerResultsCount).toBe(34)
+          expect(msg.payload.crawlerResults.length).toBe(36)
+          expect(msg.payload.crawlerResultsCount).toBe(36)
           done()
         })
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should verify crawler items as just values result', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueFlow, function () {
         let n4 = helper.getNode('n4f2')
+        let n1 = helper.getNode('n1f2')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBe(undefined)
 
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
-          expect(msg.payload.crawlerResults.length).toBe(34)
+          expect(msg.payload.crawlerResults.length).toBe(36)
           done()
         })
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should verify crawler items as just values as single result', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFlow, function () {
         let n4 = helper.getNode('n4f3')
+        let n1 = helper.getNode('n1f3')
         n4.on('input', function (msg) {
+          console.log(msg.payload.crawlerResults)
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBe(undefined)
 
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
-          expect(msg.payload.crawlerResults.length).toBe(34)
+          expect(msg.payload.crawlerResults.length).toBe(36)
           done()
         })
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should verify filtered crawler items as just values as single result', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerJustValueSingleFilteredFlow, function () {
         let n4 = helper.getNode('n4f4')
+        let n1 = helper.getNode('n1f4')
         n4.on('input', function (msg) {
+          console.log(msg.payload.crawlerResults[0].references)
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBe(undefined)
 
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
-          expect(msg.payload.crawlerResults.length).toBe(34)
+          expect(msg.payload.crawlerResults.length).toBe(36)
           done()
         })
+        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should verify filtered crawler items as filtered results', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerWithFilter, function () {
-        let h1f = helper.getNode('h1ff')
+        let h1f = helper.getNode('n4f4')
+        let inject = helper.getNode('n1f4')
         h1f.on('input', function (msg) {
+          console.log(msg.payload)
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults[0].references).toBeUndefined()
 
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
           done()
         })
+        setTimeout(receive, 5000, inject)
       })
     })
 
     it('should verify filtered crawler items without ns=0', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerWithFilterNS0, function () {
         let n2 = helper.getNode('nc2h')
+        let inject = helper.getNode('bb36ac76.436a7')
         n2.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
 
@@ -866,18 +967,21 @@ describe('OPC UA Crawler node Testing', function () {
           expect(msg.payload.crawlerResults.length).toBeLessThan(100)
           done()
         })
+        setTimeout(receive, 5000, inject)
       })
     })
 
     it('should filter all basic filter types of crawler result', function (done) {
       helper.load(crawlerNodesToLoad, testCrawlerWithAllBasicFilterTypes, function () {
         let n2 = helper.getNode('ncf2h')
+        let inject = helper.getNode('848ce5aa.9991d')
         n2.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
           expect(msg.payload.crawlerResults).toBeInstanceOf(Array)
           expect(msg.payload.crawlerResults.length).toBeLessThan(57)
           done()
         })
+        setTimeout(receive, 5000, inject)
       })
     })
   })

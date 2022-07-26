@@ -642,6 +642,9 @@ var testBrowserResponseResultFilterFlow = [
   }
 ]
 
+export const trigger = (node) => {
+  node.receive({topic: 'TestTopic', payload: {value: 24}})
+}
 export const trigger = require('./receive.js');
 
 describe('OPC UA Browser node e2e Testing', function () {

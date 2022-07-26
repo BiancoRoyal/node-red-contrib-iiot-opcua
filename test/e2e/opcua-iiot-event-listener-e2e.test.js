@@ -422,6 +422,10 @@ var listenToEventsWithResponseOnServer = [
   }
 ]
 
+const receive = (node) => {
+  node.receive({payload: {value: 'listenerTests'}})
+}
+
 describe('OPC UA Listener event node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -448,15 +452,20 @@ describe('OPC UA Listener event node e2e Testing', function () {
       helper.load(eventNodesToLoad, testListenerEventFlow, function () {
         msgCounter = 0
         let n4 = helper.getNode('n4ev')
+        let n1 = helper.getNode('n1ev')
+        let u1 = helper.getNode('u1ev')
         n4.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
             expect(msg.topic).toBe('TestTopicEvent')
-            expect(msg.nodetype).toBe('events')
-            expect(msg.injectType).toBe('listen')
-            setTimeout(done, 2000)
+            expect(msg.payload.nodetype).toBe('events')
+            expect(msg.payload.injectType).toBe('listen')
+            receive(u1)
+            done()
           }
         })
+
+        setTimeout(receive, 5000, n1)
       })
     })
 

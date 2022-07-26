@@ -38,7 +38,7 @@ interface OPCUAIIoTCrawler extends nodered.Node {
   activateUnsetFilter: Todo
   activateFilters: Todo
   negateFilter: Todo
-  filters: Todo
+  filters: Filter[]
   delayPerMessage: number
   timeout: number
   connector: Node
@@ -53,10 +53,15 @@ interface OPCUAIIoTCrawlerDef extends nodered.NodeDef {
   activateUnsetFilter: Todo
   activateFilters: Todo
   negateFilter: Todo
-  filters: Todo
+  filters: Filter[]
   delayPerMessage: number
   timeout: number
   connector: string
+}
+
+type Filter = {
+  name: string
+  value: string
 }
 
 type CrawlerMessage = NodeMessageInFlow & {
@@ -166,11 +171,10 @@ module.exports = (RED: nodered.NodeAPI) => {
       let result = checkItemForUnsetState(nodeConfig, item)
 
       if (result) {
-        nodeConfig.filters.forEach(function (element: Todo) {
-          result = checkCrawlerItemIsNotToFilter(nodeConfig, item, element, result)
-        })
+        result = nodeConfig.filters.every((element: Todo) => {
+          return checkCrawlerItemIsNotToFilter(nodeConfig, item, element, result) !== 0
+        }) ? 1 : 0
       }
-
       return (nodeConfig.negateFilter) ? !result : result
     }
 
