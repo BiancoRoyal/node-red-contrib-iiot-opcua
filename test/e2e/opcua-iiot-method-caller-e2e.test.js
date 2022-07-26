@@ -282,6 +282,10 @@ var testMethodInjectFlowPayload = [
   }
 ]
 
+const trigger = (node) => {
+  node.receive({topic: 'TestTopic', payload: {value: 24}})
+}
+
 describe('OPC UA Method Caller node e2e Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -307,68 +311,89 @@ describe('OPC UA Method Caller node e2e Testing', function () {
     it('should get a message with payload after inject', function (done) {
       helper.load(methodCallerNodesToLoad, testMethodFlowPayload, function () {
         let n2 = helper.getNode('n2mcf1')
+        let n1 = helper.getNode('n1mcf1')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicMethod')
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('inject')
-          setTimeout(done, 3000)
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('inject')
+          done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should get a message with payload', function (done) {
       helper.load(methodCallerNodesToLoad, testMethodFlowPayload, function () {
         let n2 = helper.getNode('n2mcf1')
+        let n1 = helper.getNode('n1mcf1')
         n2.on('input', function (msg) {
-          expect(msg.payload).toBe(12345)
-          setTimeout(done, 3000)
+          expect(msg.payload.value).toBe(12345)
+          done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should verify the result with response data', function (done) {
       helper.load(methodCallerNodesToLoad, testMethodFlowPayload, function () {
         let n6 = helper.getNode('n6mcf1')
+        let n1 = helper.getNode('n1mcf1')
         n6.on('input', function (msg) {
-          expect(msg.nodetype).toBe('method')
-          expect(msg.entryStatus).toMatchObject([1, 0, 0])
+          console.log(msg)
+          expect(msg.payload.nodetype).toBe('method')
+          expect(msg.payload.entryStatus).toMatchObject([1, 0, 0])
           expect(msg.payload).toMatchObject([{'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'outputArguments': [{'dataType': 'String', 'arrayType': 'Array', 'value': ['Whaff!!!!!', 'Whaff!!!!!', 'Whaff!!!!!']}]}])
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should get a message with payload after inject event inject', function (done) {
       helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function () {
         let n2 = helper.getNode('n2mcf2')
+        let n1 = helper.getNode('n1mcf2')
         n2.on('input', function (msg) {
+          console.log(msg)
           expect(msg.topic).toBe('TestTopicMethod')
           expect(msg.payload).toBe(23456)
-          setTimeout(done, 3000)
+          done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should get a message with payload event inject', function (done) {
       helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function () {
         let n2 = helper.getNode('n2mcf2')
+        let n1 = helper.getNode('n1mcf2')
         n2.on('input', function (msg) {
           expect(msg.payload).toBe(23456)
-          setTimeout(done, 3000)
+          done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
 
     it('should verify the result with response data event inject', function (done) {
       helper.load(eventNodesToLoad, testMethodInjectFlowPayload, function () {
         let n8 = helper.getNode('n8mcf2')
+        let n1 = helper.getNode('n1mcf2')
         n8.on('input', function (msg) {
-          expect(msg.nodetype).toBe('method')
-          expect(msg.entryStatus).toMatchObject([1, 0, 0])
-          expect(msg.payload.results).toBeDefined()
+          console.log(msg)
+          expect(msg.payload.nodetype).toBe('method')
+          expect(msg.payload.entryStatus).toMatchObject({good: 1, bad: 0, other: 0})
+          expect(msg.payload.value).toBeDefined()
           expect(msg.payload.definition).toBeDefined()
           done()
         })
+
+        setTimeout(trigger, 5000, n1)
       })
     })
   })

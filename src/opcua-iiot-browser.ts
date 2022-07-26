@@ -255,7 +255,6 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const listenerParameters = getListenParameters((originMessage.payload as any))
 
-
       const payload: BrowserPayload = {
         ...(originMessage.payload as BrowserInputPayload),
         nodetype: 'browse',

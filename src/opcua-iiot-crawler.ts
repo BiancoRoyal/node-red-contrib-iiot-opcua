@@ -28,6 +28,7 @@ import {NodeCrawlerClientSession} from "node-opcua-client-crawler/source/node_cr
 import {InjectPayload} from "./opcua-iiot-inject";
 import {DataValue} from "node-opcua";
 import {CompressedBrowseResult} from "./core/opcua-iiot-core-response";
+import {isArray} from "./types/assertion";
 
 interface OPCUAIIoTCrawler extends nodered.Node {
   name: string
@@ -38,7 +39,7 @@ interface OPCUAIIoTCrawler extends nodered.Node {
   activateUnsetFilter: Todo
   activateFilters: Todo
   negateFilter: Todo
-  filters: Todo
+  filters: Filter[]
   delayPerMessage: number
   timeout: number
   connector: Node
@@ -53,10 +54,15 @@ interface OPCUAIIoTCrawlerDef extends nodered.NodeDef {
   activateUnsetFilter: Todo
   activateFilters: Todo
   negateFilter: Todo
-  filters: Todo
+  filters: Filter[]
   delayPerMessage: number
   timeout: number
   connector: string
+}
+
+type Filter = {
+  name: string
+  value: string
 }
 
 type CrawlerMessage = NodeMessageInFlow & {
@@ -64,7 +70,7 @@ type CrawlerMessage = NodeMessageInFlow & {
 }
 
 export interface CrawlerPayload extends Omit<InjectPayload, 'nodetype'> {
-  crawlerResults: (CrawlerResult | Error)[]
+  crawlerResults: (CrawlerResult[] | Error)[] | CrawlerResult[]
   browseTopic?: string
   crawlerResultsCount?: number
   endpoint?: string
@@ -135,13 +141,11 @@ module.exports = (RED: nodered.NodeAPI) => {
     nodeConfig.browseTopic = browseTopic;
     nodeConfig.iiot = iiot;
 
-
     nodeConfig.iiot.delayMessageTimer = []
 
     const filterCrawlerResults = function (crawlerResultToFilter: Todo[]) {
       let crawlerResult = crawlerResultToFilter || []
       let filteredEntries: Todo[] = []
-
       if (nodeConfig.activateFilters && nodeConfig.filters && nodeConfig.filters.length > 0) {
         crawlerResult.forEach(function (item) {
           if (itemIsNotToFilter(item)) {
@@ -166,11 +170,10 @@ module.exports = (RED: nodered.NodeAPI) => {
       let result = checkItemForUnsetState(nodeConfig, item)
 
       if (result) {
-        nodeConfig.filters.forEach(function (element: Todo) {
-          result = checkCrawlerItemIsNotToFilter(nodeConfig, item, element, result)
-        })
+        result = nodeConfig.filters.every((element: Todo) => {
+          return checkCrawlerItemIsNotToFilter(nodeConfig, item, element, result) !== 0
+        }) ? 1 : 0
       }
-
       return (nodeConfig.negateFilter) ? !result : result
     }
 
@@ -210,15 +213,15 @@ module.exports = (RED: nodered.NodeAPI) => {
         if (result.value instanceof Error) {
           return result.value.toString()
         } else {
-          return result.value
+          return filterCrawlerResults(result.value)
         }
       })
 
       // combine the valid results into payload.value
-      const value = results.filter((result) => {
-        return !(result.value instanceof Error)
+      const value = crawlerResult.filter((result) => {
+        return !(typeof result === 'string')
       }).flatMap((result) => {
-        return result.value
+        return result
       })
 
       // list errors in payload.error
@@ -257,7 +260,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     const crawlForResults = function (session: NodeCrawlerClientSession, payload: BrowserInputPayloadLike) {
       payload.addressSpaceItems?.forEach((entry) => {
         coreBrowser.crawl(session, entry.nodeId, payload, getSendWrapper(payload))
-
       })
     }
 
@@ -300,6 +302,9 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
         restMessage.browseTopic = nodeConfig.browseTopic
       }
+      if (restMessage.crawlerResults.length === 1 && isArray<CrawlerResult>(restMessage.crawlerResults[0])) {
+        restMessage.crawlerResults = restMessage.crawlerResults[0]
+      }
 
       if (!nodeConfig.justValue) {
         restMessage.crawlerResultsCount = crawlerResult.length
@@ -336,9 +341,15 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const startCrawling = async (payload: BrowserInputPayloadLike) => {
+      if(!nodeConfig.connector) {
+        return
+      }
+
       if (!nodeConfig.connector.iiot.opcuaSession) {
         nodeConfig.connector.iiot.stateMachine.initopcua()
+        return // Todo: it needs time to open a session - if there is no session it has to create one and do crawl on done
       }
+
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
         crawl(nodeConfig.connector.iiot.opcuaSession, payload, statusHandler)
 
@@ -378,13 +389,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic(payload, nodeConfig);
       payload._msgid = msg._msgid;
       payload.topic = msg.topic;
-
       startCrawling(msg.payload as BrowserInputPayloadLike).finally()
     })
 
     registerToConnector(this, setStatus, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
+      resetAllTimer()
       deregisterToConnector(this, () => {
         resetIiotNode(this)
         done()
