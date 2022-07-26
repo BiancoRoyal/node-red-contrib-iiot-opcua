@@ -45,7 +45,7 @@ function wipe () {
     .pipe(clean({ force: true }))
 }
 
-function changelogUpdate() {
+function changelogUpdate () {
   return gulp.src('CHANGELOG.md')
     .pipe(changelog({
       // conventional-changelog options go here
