@@ -504,22 +504,18 @@ export function parseNamspaceFromMsgTopic(msg: BrowseMessage | null): number | u
   return Number.parseInt(nodeNamespace)
 }
 
-export function parseNamspaceFromItemNodeId(item: NodeIdLike): number | undefined {
+export function parseNamespaceFromItemNodeId(item: NodeIdLike): number | undefined {
   if (typeof item === 'number') {
     return 0;
   }
 
-  const nodeItem = isObject(item) ?
-    item.namespace :
-    item;
-
-  if (typeof nodeItem === 'number') {
-    return nodeItem;
+  if(isObject(item) && item.namespace) {
+    return item.namespace
   }
 
   // TODO: real parsing instead of string operations
-
-  return Number.parseInt(nodeItem.substring(3, nodeItem.indexOf(';')))
+  const nodeObject = JSON.parse(JSON.stringify(item))
+  return Number.parseInt(nodeObject.nodeId.substring(3, nodeObject.nodeId.indexOf(';')))
 }
 
 export function parseForNodeIdentifier(nodeItem: string): NodeIdentifier {
@@ -564,7 +560,7 @@ export function parseIdentifierFromItemNodeId(item: NodeIdLike): NodeIdentifier 
 }
 
 export function newOPCUANodeIdFromItemNodeId(item: NodeIdLike): NodeId {
-  let namespace = parseNamspaceFromItemNodeId(item)
+  let namespace = parseNamespaceFromItemNodeId(item)
   let nodeIdentifier = parseIdentifierFromItemNodeId(item)
 
   logger.internalDebugLog('newOPCUANodeIdFromItemNodeId: ' + JSON.stringify(item) + ' -> ' + JSON.stringify(nodeIdentifier) + ' namespace:' + namespace)

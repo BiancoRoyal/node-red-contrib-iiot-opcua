@@ -209,7 +209,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
       onceTimeout = setTimeout(  () => {
         coreInject.detailDebugLog('injecting once at start')
-        this.emit('input', newMessage("once"))
+        this.emit('input', newMessage(this.injectType))
         repeaterSetup()
       }, timeout)
     } else if (node.repeat || node.crontab) {
