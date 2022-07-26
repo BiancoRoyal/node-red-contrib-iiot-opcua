@@ -2,7 +2,7 @@
  The BSD 3-Clause License
 
  Copyright 2022 - DATATRONiQ GmbH (https://datatroniq.com)
- Copyright (c) 2018,2019,2020,2021,2022 Klaus Landsdorf (https://bianco-royal.space/)
+ Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -345,7 +345,12 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const browseWithAddressSpaceItems = function (msg: NodeMessageInFlow, depth: number, lists: Lists) {
       const payload = msg.payload as BrowserInputPayloadLike
-      payload.addressSpaceItems = (payload.addressSpaceItems?.length && payload.addressSpaceItems.length !== 0 ? payload.addressSpaceItems: payload.addressItemsToBrowse);
+
+      // Todo: a browse can overload addressSpaceItems, maybe this have to get more clear code and flow
+      if (payload.addressItemsToBrowse && payload.addressItemsToBrowse.length > 0) {
+        payload.addressSpaceItems = payload.addressItemsToBrowse
+      }
+
       if (payload.addressSpaceItems && payload.addressSpaceItems.length > 0) {
         browseNodeList(payload.addressSpaceItems, msg, depth, lists, browseSendResult)
       } else {

@@ -2,7 +2,7 @@
  The BSD 3-Clause License
 
  Copyright 2022 - DATATRONiQ GmbH (https://datatroniq.com)
- Copyright (c) 2018,2019,2020,2021,2022 Klaus Landsdorf (https://bianco-royal.space/)
+ Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -23,7 +23,6 @@ interface OPCUAIIoTNode extends nodered.Node {
   name: string
   injectType: string
   showErrors: string
-  
 }
 
 interface OPCUAIIoTNodeDef extends nodered.NodeDef {

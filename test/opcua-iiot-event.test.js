@@ -3,7 +3,7 @@
  * node-red
  *
  * Copyright (c) 2022 DATATRONiQ GmbH (https://datatroniq.com)
- * Copyright (c) 2018 Klaus Landsdorf (http://bianco-royal.de/)
+ * Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  * All rights reserved.
  * node-red-contrib-iiot-opcua
  *

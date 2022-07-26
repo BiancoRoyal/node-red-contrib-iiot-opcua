@@ -4,7 +4,7 @@ node -v
 
 rm -rf node_modules/
 
-rm -rf modbus/
+rm -rf opcuaIIoT/
 
 rm -rf code/
 
@@ -20,9 +20,9 @@ npm install
 
 npm i --only=dev
 
-npm test
+# npm test
 
-npm run test-with-coverage
+# npm run coverage
 
 npm run build
 

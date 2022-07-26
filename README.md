@@ -11,16 +11,26 @@
 [![NPM download](https://img.shields.io/npm/dm/node-red-contrib-iiot-opcua.svg)](https://www.npmtrends.com/node-red-contrib-iiot-opcua)
 [![Build status](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/build.yml/badge.svg)](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/build.yml)
 [![Test Coverage](badges/badge-lines.svg)](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/actions/workflows/summary.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9a7257e1cd3c4b8ca4a3f8b30c00a78a)](https://www.codacy.com/gh/BiancoRoyal/node-red-contrib-iiot-opcua/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=BiancoRoyal/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua)
 
-## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
+## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4]
 
+* tested with Node.js v16.15 and Node-RED v3.0.0
 * tested with Node.js v14.19 and Node-RED v2.2.2
-* based on node-opcua v2.64 (OPC UA v1.03)
-* extendable with node-opcua-isa95
+* based on node-opcua v2.64
 
-The actual [DATATRONiQ][5] contribution to v4.x+ upgrades the original work of v3.x by migrating to TypeScript,
-and updating dependencies, including updates to new major release versions of Node-RED (v1.x to v2.x+) and node-opcua (v0.7 to v2.64.1).
+The actual [DATATRONiQ][5] and [Iniationware][6] contributions to v4.x+ upgrade the original work of v3.x by migrating to TypeScript, breaking-changes,
+and updating dependencies, including updates to new major release versions of Node-RED (v1.x to v2.x and higher) and node-opcua (v0.7 to v2.64 and higher).
+Now [DATATRONiQ][5] and [Iniationware][6] working together and try to build a community from the industry and individuals to provide an LTS Industrial IoT package for OPC UA.
+
+## International Node-RED IIoT Website
+
+For an international area, [Iniationware][6] has provided the [Node-RED PLUS International][8] website.
+
+## Node-RED IIoT Webseite Deutschland
+
+Für einen deutschsprachigen Bereich hat [Iniationware][6] die Webseite [Node-RED PLUS Germany][7] bereitgestellt.
 
 ## Installing
 
@@ -41,16 +51,20 @@ The update from v3.x to v4.x changed the way some nodes are implemented.
 As a major version v4.x has breaking-changes. 
 
 ### General Changes
+
 - The message format was standardized. While in older versions, a lot of additional properties were placed directly into the message,
 they have been moved into the message's payload (`msg.payload`). This is to ensure the standard Node-RED message format is used, where the message
 itself may only contain an ID, a topic, and a payload. This means that any references like `msg.nodetype` should be changed to `msg.payload.nodetype`.
 
 ### Browser
+
 - The option `singleBrowseResult` has been replaced with `multipleOutputs`, and the default value now combines all outputs into one message. To maintain the same output, replace `singleBrowseResult` with `multipleOutputs` and swap the corresponding boolean value (true becomes false, false becomes true).
 
 ### Flex-Server
+
 - The `node-opcua` library is now directly accessible as `opcua`. This means all references to `coreServer.core.nodeOPCUA` should be replaced with `opcua`.
 - `node.iiot.assert` is no longer accessible. The functionality can be replaced by using an `if` statement that throws a new error (`if (errorConfition) throw new Error('Error Message'`). Errors can be displayed by using a `catch` node connected to a `debug` node, which displys the entire message.
+
 
 
 ## Contributing
@@ -59,48 +73,6 @@ Every bit helps! If you come across any bugs,
 please [send a bug report](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/new?type=bug), 
 or if you feel inclined to fix it yourself, [submit a pull request](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare).
 
-### Setting up local development
-
-1. Ensure you are using node 14. This has been developed using node v14.19.1. If using Node Version Manager: `nvm install v14.19.1`
-2. Install Node-RED to a separate directory.
-   ```shell
-   git clone git@github.com:node-red/node-red.git
-   cd node-red
-   git checkout tags/2.2.2 # pls see most recent 2.2.x tag for Node-RED
-   npm install
-   npm run build
-   npm run start # This must be run once to initialize the ~/.node-red directory
-   ```
-3. Clone this repository into its own directory
-   ```shell
-   git clone git@github.com:BiancoRoyal/node-red-contrib-iiot-opcua.git
-   cd node-red-contrib-iiot-opcua
-   git checkout development
-   npm install
-   npm run build
-   ```
-4. Add `node-red-contrib-iiot-opcua` to Node-RED
-   ```shell
-   cd ~/.node-red
-   npm install <path to where you have cloned the project>/node-red-contrib-iiot-opcua
-   ```
-5. Start Node-RED
-   ```shell
-   cd <...>/node-red
-   npm run staart
-   ``` 
-6. Link Node-RED to a separate development directory.
-   ```shell
-   git clone git@github.com:BiancoRoyal/node-red-contrib-iiot-opcua.git
-   cd node-red-contrib-iiot-opcua
-   git checkout development
-   npm install
-   npm run dev-link
-   DEBUG=*opcua* node-red -v
-   ```
-
-### :warning: After making changes, remember to run `npm run build` in the `node-red-contrib-iiot-opcua` directory and re-starting Node-RED! :warning:
-
 ### Debugging
 
 To increase the verbosity of logging, enable debug modes and verbose logging.
@@ -108,6 +80,8 @@ To increase the verbosity of logging, enable debug modes and verbose logging.
 Start debug with Node-RED in verbose (-v) mode to get a verbose logging:
 
     DEBUG=opcuaIIoT* npm run start -v 1>nodeREDIIoTOPCUA.log 2>&1
+
+
 
 ## Examples
 
@@ -182,3 +156,6 @@ Special thanks also go to [Klaus Landsdorf][1] for creating _node-red-contrib-ii
 [3]:https://github.com/node-red/node-red
 [4]:https://github.com/node-opcua/node-opcua
 [5]:https://github.com/DATATRONiQ
+[6]:https://github.com/Iniationware
+[7]:https://node-red-plus.de/
+[8]:https://node-red.plus/

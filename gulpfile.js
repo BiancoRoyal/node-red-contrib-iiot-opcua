@@ -1,7 +1,7 @@
 /*
  The BSD 3-Clause License
 
- Copyright (c) 2018,2019,2020,2021,2022 Klaus Landsdorf (https://bianco-royal.space/)
+ Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  All rights reserved.
  node-red-contrib-iiot-opcua
  */
@@ -14,6 +14,7 @@ const htmlmin = require('gulp-htmlmin')
 const jsdoc = require('gulp-jsdoc3')
 const clean = require('gulp-clean')
 const sourcemaps = require('gulp-sourcemaps')
+const changelog = require('gulp-conventional-changelog')
 
 function icons () {
   return gulp.src('src/icons/**/*').pipe(gulp.dest('opcuaIIoT/icons'))
@@ -42,6 +43,24 @@ function maps () {
 function wipe () {
   return gulp.src(['opcuaIIoT', 'docs/gen', 'maps', 'code', 'coverage', 'jcoverage', 'suite/jcoverage', 'pki', 'suite/pki', 'test/pki'], { allowEmpty: true })
     .pipe(clean({ force: true }))
+}
+
+function changelogUpdate () {
+  return gulp.src('CHANGELOG.md')
+    .pipe(changelog({
+      // conventional-changelog options go here
+      preset: 'angular',
+      releaseCount: 0
+    }, {
+      // context goes here
+    }, {
+      // git-raw-commits options go here
+    }, {
+      // conventional-commits-parser options go here
+    }, {
+      // conventional-changelog-writer options go here
+    }))
+    .pipe(gulp.dest('./'))
 }
 
 function web () {
@@ -88,4 +107,5 @@ const build = series(wipe, web, ts, locale, publics, icons)
 exports.docs = docs
 exports.clean = wipe
 exports.build = build
-exports.publish = parallel(build, maps, docs)
+exports.changelog = changelogUpdate
+exports.publish = parallel(build, maps, docs, changelogUpdate)

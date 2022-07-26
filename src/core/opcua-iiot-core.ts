@@ -2,7 +2,7 @@
  The BSD 3-Clause License
 
  Copyright 2022 - DATATRONiQ GmbH (https://datatroniq.com)
- Copyright (c) 2018,2019,2020,2021,2022 Klaus Landsdorf (https://bianco-royal.space/)
+ Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  Copyright 2015,2016 - Mika Karaila, Valmet Automation Inc. (node-red-contrib-opcua)
  All rights reserved.
  node-red-contrib-iiot-opcua
@@ -13,6 +13,7 @@
 import {debug as Debug} from 'debug'
 import * as os from 'os'
 import * as underscore from 'underscore'
+import {isObject} from 'underscore'
 
 import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {NodeIdLike} from 'node-opcua-nodeid'
@@ -504,16 +505,21 @@ export function parseNamspaceFromMsgTopic(msg: BrowseMessage | null): number | u
 }
 
 export function parseNamspaceFromItemNodeId(item: NodeIdLike): number | undefined {
-  let nodeNamespace = ''
-  let nodeItem: string = (item as Todo).value || item
-
-  if (nodeItem) {
-    // TODO: real parsing instead of string operations
-    // TODO: which type are relevant here? (String, Integer ...)
-    nodeNamespace = nodeItem.substring(3, nodeItem.indexOf(';'))
+  if (typeof item === 'number') {
+    return 0;
   }
 
-  return Number.parseInt(nodeNamespace)
+  const nodeItem = isObject(item) ?
+    item.namespace :
+    item;
+
+  if (typeof nodeItem === 'number') {
+    return nodeItem;
+  }
+
+  // TODO: real parsing instead of string operations
+
+  return Number.parseInt(nodeItem.substring(3, nodeItem.indexOf(';')))
 }
 
 export function parseForNodeIdentifier(nodeItem: string): NodeIdentifier {
@@ -624,13 +630,29 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
 export function buildNodesToRead(payload: Todo) {
   logger.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(payload))
 
-  let nodePayloadList = payload.nodesToRead || payload.nodesToWrite || (payload.value?.length ? payload.value : (payload.crawlerResults || payload.browserResults || payload.addressSpaceItems));
+  let injectArrayOfNodeIds = (payload.value?.length && payload.value.type === Array) ? payload.value : payload.addressSpaceItems;
+  /*
+    there are some possible ways to receive the Array<any> from Browser or Inject
+
+    TODO: payload.injectType and/or payload.nodetype should be used to make a clear decision here
+
+    read : nodesToRead
+    write : nodesToWrite
+    browse : browserResults
+    crawl : crawlerResults
+    value : inject with Array<any>
+    addressSpaceItems : inject fall back for all types
+
+  */
+
+  let nodePayloadList:Array<Todo> = payload.nodesToRead || payload.nodesToWrite || payload.crawlerResults || payload.browserResults || injectArrayOfNodeIds;
+
   if (nodePayloadList && nodePayloadList.length) {
     return nodePayloadList.map((item: Todo) => {
       return (item.nodeId || item).toString()
     })
   } else {
-    let nodeList = payload.nodesToRead || payload.nodesToWrite
+    let nodeList:Array<Todo> = payload.nodesToRead || payload.nodesToWrite
     if (nodeList && nodeList.length) {
       // legacy
       return nodeList.map((item: Todo) => {

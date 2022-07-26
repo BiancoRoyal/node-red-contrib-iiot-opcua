@@ -3,7 +3,7 @@
  * node-red
  *
  * Copyright (c) 2022 DATATRONiQ GmbH (https://datatroniq.com)
- * Copyright (c) 2018 Klaus Landsdorf (http://bianco-royal.de/)
+ * Copyright (c) 2018-2022 Klaus Landsdorf (http://node-red.plus/)
  * All rights reserved.
  * node-red-contrib-iiot-opcua
  *
@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(300000)
+jest.setTimeout(30000)
 
 var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
@@ -534,9 +534,7 @@ describe('OPC UA Browser recursive with ASO nodes e2e Testing', function () {
           expect(msg.payload.browserResults.length).toBe(11)
           done()
         })
-        const trigger = (node) => {
-          node.receive({payload: 'start'})
-        }
+        const trigger = require('./receive');
         const injectors = testBrowseRecursiveASOFlow.map((item) => {return item.id}).filter((item)=>{return item.indexOf('inject') === 0})
         injectors.forEach((injector) => {
           setTimeout(trigger, 3000, helper.getNode(injector))

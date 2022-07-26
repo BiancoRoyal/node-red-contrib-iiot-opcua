@@ -2,7 +2,7 @@
  The MIT License (MIT)
 
  Copyright (c) 2022 DATATRONiQ GmbH
- Copyright (c) 2017,2018 Klaus Landsdorf
+ Copyright (c) 2017-2022 Klaus Landsdorf (http://node-red.plus/)
  Copyright (c) 2014-2017 Etienne Rossignon
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
