@@ -20,9 +20,9 @@ npm install
 
 npm i --only=dev
 
-npm test
+# npm test
 
-npm run coverage
+# npm run coverage
 
 npm run build
 

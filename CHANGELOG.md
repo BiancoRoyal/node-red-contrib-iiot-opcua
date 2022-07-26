@@ -1,8 +1,9 @@
-## [4.0.5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.4...v4.0.5) (2022-07-25)
+## [4.0.6](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.5...v4.0.6) (2022-07-26)
 
 
 ### Bug Fixes
 
+* codacy markdown ([7867233](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/78672331e0579cac328a6c822f9bfe7199b351aa))
 * inject node once did not work ([3441933](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/344193377aae42aab4a300955f8889a85cdffdd1))
 * read from inject does not work ([76ce558](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/76ce558488b8b78cacae28b0dab53b6ba450e970))
 * test has now good reads ([af60409](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/af6040925c3fe861a8a26ebbfb2eca405c3a8a31))

@@ -2,5 +2,8 @@ version: 2
 updates:
   - package-ecosystem: 'npm'
     directory: '/'
+    target-branch: "develop"
     schedule:
-      interval: 'daily'
+      interval: "weekly"
+    ignore:
+      - dependency-name: "node-opcua*"
