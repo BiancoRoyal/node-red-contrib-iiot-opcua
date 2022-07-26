@@ -1098,12 +1098,13 @@ export function checkItemForUnsetState(node: Todo, item: Todo): number {
 }
 
 export function resetIiotNode(node: Todo) {
-  if (isInitializedIIoTNode(node.iiot) && node.iiot.resetAllTimer) {
+  if (node && isInitializedIIoTNode(node.iiot) && node.iiot.resetAllTimer) {
     node.iiot.resetAllTimer()
   }
-  // if (isInitializedIIoTNode(node)) {
-  //     node.iiot = null
-  // }
+
+  if (node && node.resetAllTimer) {
+    node.resetAllTimer() // call to close all timer otherwise it stops until timeout and node-red hangs on
+  }
 }
 
 export function filterListEntryByNodeId(nodeId: string, list: string[]) {

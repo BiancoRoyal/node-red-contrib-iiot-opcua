@@ -141,7 +141,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     nodeConfig.browseTopic = browseTopic;
     nodeConfig.iiot = iiot;
 
-
     nodeConfig.iiot.delayMessageTimer = []
 
     const filterCrawlerResults = function (crawlerResultToFilter: Todo[]) {
@@ -261,7 +260,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     const crawlForResults = function (session: NodeCrawlerClientSession, payload: BrowserInputPayloadLike) {
       payload.addressSpaceItems?.forEach((entry) => {
         coreBrowser.crawl(session, entry.nodeId, payload, getSendWrapper(payload))
-
       })
     }
 
@@ -343,9 +341,15 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const startCrawling = async (payload: BrowserInputPayloadLike) => {
+      if(!nodeConfig.connector) {
+        return
+      }
+
       if (!nodeConfig.connector.iiot.opcuaSession) {
         nodeConfig.connector.iiot.stateMachine.initopcua()
+        return // Todo: it needs time to open a session - if there is no session it has to create one and do crawl on done
       }
+
       if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
         crawl(nodeConfig.connector.iiot.opcuaSession, payload, statusHandler)
 
@@ -391,6 +395,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     registerToConnector(this, setStatus, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
+      resetAllTimer()
       deregisterToConnector(this, () => {
         resetIiotNode(this)
         done()

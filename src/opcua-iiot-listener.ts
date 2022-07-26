@@ -731,12 +731,16 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('close', (done: () => void) => {
       terminateSubscription(() => {
-        if (nodeConfig.iiot?.opcuaSubscription)
+
+        if (nodeConfig.iiot?.opcuaSubscription) {
           nodeConfig.iiot.opcuaSubscription = null
+        }
+
         deregisterToConnector(nodeConfig, () => {
           resetIiotNode(nodeConfig)
           done()
         })
+
         coreListener.internalDebugLog('Close Listener Node')
       })
     })
