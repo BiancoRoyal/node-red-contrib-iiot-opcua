@@ -917,6 +917,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         done()
       }
     }
+
     renewFiniteStateMachine()
 
     this.functions = {
@@ -925,7 +926,6 @@ module.exports = function (RED: nodered.NodeAPI) {
       deregisterForOPCUA,
       getUpdatedServerOptions
     }
-
 
     if (process.env.isTest == 'TRUE') {
       this.functions = {
@@ -940,7 +940,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         deregisterForOPCUA,
       }
     }
-
   }
 
 
