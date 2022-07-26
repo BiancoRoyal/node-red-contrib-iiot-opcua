@@ -14,7 +14,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9a7257e1cd3c4b8ca4a3f8b30c00a78a)](https://www.codacy.com/gh/BiancoRoyal/node-red-contrib-iiot-opcua/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=BiancoRoyal/node-red-contrib-iiot-opcua&amp;utm_campaign=Badge_Grade)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua)
 
-## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4].
+## The IoT/IIoT OPC UA toolbox package for [Node-RED][3] based on [node-opcua][4]
 
 * tested with Node.js v16.15 and Node-RED v3.0.0
 * tested with Node.js v14.19 and Node-RED v2.2.2
@@ -51,14 +51,17 @@ The update from v3.x to v4.x changed the way some nodes are implemented.
 As a major version v4.x has breaking-changes. 
 
 ### General Changes
+
 - The message format was standardized. While in older versions, a lot of additional properties were placed directly into the message,
 they have been moved into the message's payload (`msg.payload`). This is to ensure the standard Node-RED message format is used, where the message
 itself may only contain an ID, a topic, and a payload. This means that any references like `msg.nodetype` should be changed to `msg.payload.nodetype`.
 
 ### Browser
+
 - The option `singleBrowseResult` has been replaced with `multipleOutputs`, and the default value now combines all outputs into one message. To maintain the same output, replace `singleBrowseResult` with `multipleOutputs` and swap the corresponding boolean value (true becomes false, false becomes true).
 
 ### Flex-Server
+
 - The `node-opcua` library is now directly accessible as `opcua`. This means all references to `coreServer.core.nodeOPCUA` should be replaced with `opcua`.
 - `node.iiot.assert` is no longer accessible. The functionality can be replaced by using an `if` statement that throws a new error (`if (errorConfition) throw new Error('Error Message'`). Errors can be displayed by using a `catch` node connected to a `debug` node, which displys the entire message.
 
