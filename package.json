@@ -106,7 +106,7 @@
     "@node-red/nodes": "^3.0.1",
     "@types/cron": "^2.0.0",
     "@types/debug": "^4.1.7",
-    "@types/jest": "^27.4.1",
+    "@types/jest": "^28.1.6",
     "@types/node-red": "^1.2.1",
     "chai": "^4.3.6",
     "gulp": "^4.0.2",
