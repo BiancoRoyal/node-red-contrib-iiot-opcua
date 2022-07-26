@@ -44,6 +44,7 @@ export type BrowserInputPayload = {
   root: Todo
   actiontype: string
   addressSpaceItems: AddressSpaceItem[]
+  addressItemsToBrowse: AddressSpaceItem[]
   injectType: string,
   manualInject: boolean
 }
