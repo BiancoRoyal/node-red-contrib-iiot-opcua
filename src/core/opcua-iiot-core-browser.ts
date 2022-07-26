@@ -33,7 +33,7 @@ import {ErrorCallback} from "node-opcua-status-code";
 import {BrowseDescriptionLike} from "node-opcua-client/source/client_session";
 import {isUndefined} from "underscore";
 import {ReferenceDescription} from "node-opcua-types/dist/_generated_opcua_types";
-import {AddressSpaceItem} from "../types/helpers";
+import {AddressSpaceItem, Like} from "../types/helpers";
 
 const internalDebugLog = debug('opcuaIIoT:browser') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:browser:details') // eslint-disable-line no-use-before-define
@@ -49,9 +49,7 @@ export type BrowserInputPayload = {
   manualInject: boolean
 }
 
-export type BrowserInputPayloadLike = {
-  [k in keyof BrowserInputPayload]?: BrowserInputPayload[k]
-}
+export type BrowserInputPayloadLike = Like<BrowserInputPayload>
 
 
 const browse = (session: Todo, nodeIdToBrowse: Todo) => {
