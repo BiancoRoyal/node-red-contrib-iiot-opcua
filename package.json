@@ -7,7 +7,7 @@
     "url": "https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua"
   },
   "dependencies": {
-    "cron": "2.0.0",
+    "cron": "2.1.0",
     "debug": "4.3.4",
     "g": "^2.0.1",
     "node-opcua": "2.64.1",
@@ -106,7 +106,7 @@
     "@node-red/nodes": "^3.0.1",
     "@types/cron": "^2.0.0",
     "@types/debug": "^4.1.7",
-    "@types/jest": "^27.4.1",
+    "@types/jest": "^28.1.6",
     "@types/node-red": "^1.2.1",
     "chai": "^4.3.6",
     "gulp": "^4.0.2",
