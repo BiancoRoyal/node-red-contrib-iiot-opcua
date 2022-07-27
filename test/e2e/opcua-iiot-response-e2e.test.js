@@ -1184,7 +1184,6 @@ describe('OPC UA Response node e2e Testing', function () {
         let nut = helper.getNode('n1rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload).toBeDefined()
           done()
         })
@@ -1198,7 +1197,6 @@ describe('OPC UA Response node e2e Testing', function () {
         let nut = helper.getNode('n2rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
-          console.log(msg)
           expect(msg.payload).toBeDefined()
           done()
         })

@@ -429,7 +429,6 @@ const receive = (node) => {
 describe('OPC UA Listener event node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
-      console.log('starting')
       done()
     })
   })
