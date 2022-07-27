@@ -1153,6 +1153,10 @@ var testMethodResponseFlow = [
   }
 ]
 
+const receive = (node) => {
+  node.receive({payload: {value: 'testPayload'}})
+}
+
 describe('OPC UA Response node e2e Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -1178,60 +1182,78 @@ describe('OPC UA Response node e2e Testing', function () {
     it('should get a message with payload on read not compressed', function (done) {
       helper.load(testResponseNodes, testReadResponseFlow, function () {
         let nut = helper.getNode('n1rsf1')
+        let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
           done()
         })
+
+        setTimeout(receive, 5000, inject)
       })
     })
 
     it('should get a message with payload on read compressed', function (done) {
       helper.load(testResponseNodes, testReadResponseFlow, function () {
         let nut = helper.getNode('n2rsf1')
+        let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
           done()
         })
+
+        setTimeout(receive, 5000, inject)
       })
     })
 
     it('should get a message with payload on read TestReadWrite filtered not compressed', function (done) {
       helper.load(testResponseNodes, testReadResponseFlow, function () {
         let nut = helper.getNode('n4rsf1')
+        let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
           done()
         })
+
+        setTimeout(receive, 5000, inject)
       })
     })
 
     it('should get a message with payload on read TestReadWrite filtered compressed', function (done) {
       helper.load(testResponseNodes, testReadResponseFlow, function () {
         let nut = helper.getNode('n3rsf1')
+        let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
           done()
         })
+
+        setTimeout(receive, 5000, inject)
       })
     })
 
     it('should get a message with payload on read Counter filtered not compressed', function (done) {
       helper.load(testResponseNodes, testReadResponseFlow, function () {
         let nut = helper.getNode('n6rsf1')
+        let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
           done()
         })
+
+        setTimeout(receive, 5000, inject)
       })
     })
 
     it('should get a message with payload on read Counter filtered compressed', function (done) {
       helper.load(testResponseNodes, testReadResponseFlow, function () {
         let nut = helper.getNode('n5rsf1')
+        let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
           done()
         })
+
+        setTimeout(receive, 5000, inject)
       })
     })
 

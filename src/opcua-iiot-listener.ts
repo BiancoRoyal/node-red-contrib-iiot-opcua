@@ -664,8 +664,10 @@ module.exports = (RED: nodered.NodeAPI) => {
     if (nodeConfig.connector) {
       nodeConfig.connector.on('connector_init', () => {
         coreListener.internalDebugLog('Reset Subscription On Connector Init')
-        if (nodeConfig.iiot?.opcuaSubscription)
+        if (nodeConfig.iiot?.opcuaSubscription) {
           nodeConfig.iiot.opcuaSubscription = null
+        }
+
         nodeConfig.iiot.monitoredItems = new Map()
         nodeConfig.iiot.monitoredASO = new Map()
         nodeConfig.iiot.stateMachine = coreListener.createListenerStateMachine()
@@ -682,31 +684,34 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       nodeConfig.connector.on('connection_end', () => {
         terminateSubscription(() => {
-          if (nodeConfig.iiot?.opcuaSubscription)
+          if (nodeConfig.iiot?.opcuaSubscription) {
             nodeConfig.iiot.opcuaSubscription = null
+          }
           coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection ends')
         })
       })
 
       nodeConfig.connector.on('connection_reconfigure', () => {
         terminateSubscription(() => {
-          if (nodeConfig.iiot?.opcuaSubscription)
+          if (nodeConfig.iiot?.opcuaSubscription) {
             nodeConfig.iiot.opcuaSubscription = null
+          }
           coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection reconfigure')
         })
       })
 
       nodeConfig.connector.on('connection_renew', () => {
         terminateSubscription(() => {
-          if (nodeConfig.iiot?.opcuaSubscription)
+          if (nodeConfig.iiot?.opcuaSubscription) {
             nodeConfig.iiot.opcuaSubscription = null
+          }
           coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection renew')
         })
       })
     }
 
     const terminateSubscription = function (done: () => void) {
-      if (nodeConfig.iiot.opcuaSubscription && nodeConfig.iiot.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
+      if (nodeConfig.iiot?.opcuaSubscription && nodeConfig.iiot?.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
         nodeConfig.iiot.stateMachine.terminatesub()
         nodeConfig.iiot.opcuaSubscription.terminate(() => {
           nodeConfig.iiot.opcuaSubscription.removeAllListeners()
@@ -714,7 +719,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           done()
         })
       } else {
-        nodeConfig.iiot.stateMachine.idlesub()
+        nodeConfig.iiot?.stateMachine.idlesub()
         done()
       }
     }
@@ -731,12 +736,16 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('close', (done: () => void) => {
       terminateSubscription(() => {
-        if (nodeConfig.iiot?.opcuaSubscription)
+
+        if (nodeConfig.iiot?.opcuaSubscription) {
           nodeConfig.iiot.opcuaSubscription = null
+        }
+
         deregisterToConnector(nodeConfig, () => {
           resetIiotNode(nodeConfig)
           done()
         })
+
         coreListener.internalDebugLog('Close Listener Node')
       })
     })
