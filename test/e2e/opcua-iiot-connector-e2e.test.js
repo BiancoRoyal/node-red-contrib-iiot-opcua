@@ -409,7 +409,20 @@ describe('OPC UA Connector node e2e Testing', function () {
           expect(msg.payload.nodetype).toBe('method')
           expect(msg.payload.injectType).toBe('inject')
           expect(msg.payload.methodType).toBe('basic')
-          expect(msg.payload.value).toMatchObject([{'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'outputArguments': [{'dataType': 'String', 'arrayType': 'Array', 'value': ['Whaff!!!!!', 'Whaff!!!!!', 'Whaff!!!!!']}]}])
+
+          // TODO: string vs. int on ENUMS has problems in tests and outputs
+          // if I copy the live data, then I get strings like Double etc.
+          // the test needs node-opcua enums or int to compare, otherwise it fails here
+          expect(msg.payload.value).toMatchObject([
+            {'statusCode': {'value': 0, 'description': 'The operation succeeded.', 'name': 'Good'},
+              'outputArguments': [
+                {
+                  'dataType': 'String',
+                  'arrayType': 'Array',
+                  'value': ['Whaff!!!!!', 'Whaff!!!!!', 'Whaff!!!!!']
+                }
+                ]
+            }])
           done()
         })
       })
