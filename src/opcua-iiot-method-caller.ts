@@ -139,9 +139,12 @@ module.exports = (RED: nodered.NodeAPI) => {
           outputArguments.push({statusCode: result.statusCode, outputArguments: result.outputArguments})
         }
 
-        message.payload.value = getDataValue(message, data.results, definitionResults) || outputArguments
+        message.payload.results = data.results
         message.payload.definition = definitionResults
-        message.payload.value = message.payload.value.result.map((item: Todo) => {
+
+        message.payload.value = getDataValue(message, data.results, definitionResults) || outputArguments
+        // TODO: we have to check this again what value is to be ...
+        /* ?.map((item: Todo) => {
           if (item.statusCode) {
             return {
               ...item,
@@ -153,7 +156,7 @@ module.exports = (RED: nodered.NodeAPI) => {
             }
           }
           return item
-        })
+        })*/
         message.payload.outputArguments = outputArguments;
 
         this.send(message)
