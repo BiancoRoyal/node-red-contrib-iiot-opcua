@@ -24,7 +24,6 @@ var responseNode = require('../../src/opcua-iiot-response')
 var serverNode = require('../../src/opcua-iiot-server')
 
 var helper = require('node-red-node-test-helper')
-const receive = require("./receive");
 helper.init(require.resolve('node-red'))
 
 var writeNodesToLoad = [injectNodeRedNode, injectNode, functionNodeRedNode, connectorNode, inputNode, responseNode, serverNode]
@@ -71,15 +70,12 @@ describe('OPC UA Write node e2e Testing', function () {
           expect(msg.topic).toBe('TestTopicWrite')
           done()
         })
-
-        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should verify addressSpaceItems', function (done) {
       helper.load(writeNodesToLoad, testFlows.testWriteFlow, function () {
         let n2 = helper.getNode('n2wrf1')
-        let n1 = helper.getNode('n1wrf1')
         n2.on('input', function (msg) {
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
@@ -88,15 +84,12 @@ describe('OPC UA Write node e2e Testing', function () {
           }])
           done()
         })
-
-        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have values to write', function (done) {
       helper.load(writeNodesToLoad, testFlows.testWriteFlow, function () {
         let n4 = helper.getNode('n4wrf1')
-        let n1 = helper.getNode('n1wrf1')
         n4.on('input', function (msg) {
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             name: 'TestReadWrite',
@@ -109,15 +102,12 @@ describe('OPC UA Write node e2e Testing', function () {
           expect(msg.payload.injectType).toBe('write')
           done()
         })
-
-        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have write results', function (done) {
       helper.load(writeNodesToLoad, testFlows.testWriteFlow, function () {
         let n6 = helper.getNode('n6wrf1')
-        let n1 = helper.getNode('n1wrf1')
         n6.on('input', function (msg) {
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
@@ -131,15 +121,12 @@ describe('OPC UA Write node e2e Testing', function () {
           expect(msg.payload.injectType).toBe('write')
           done()
         })
-
-        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have write results with response', function (done) {
       helper.load(writeNodesToLoad, testFlows.testWriteFlow, function () {
         let n8 = helper.getNode('n8wrf1')
-        let n1 = helper.getNode('n1wrf1')
         n8.on('input', function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicWrite')
@@ -147,15 +134,12 @@ describe('OPC UA Write node e2e Testing', function () {
           expect(msg.payload.injectType).toBe('write')
           done()
         })
-
-        setTimeout(receive, 5000, n1)
       })
     })
 
     it('should have write results from payload without a valuesToWrite property', function (done) {
       helper.load(writeNodesToLoad, testFlows.testWriteWithoutValuesToWriteFlow, function () {
         let n6 = helper.getNode('n6wrf2')
-        let n1 = helper.getNode('n1wrf2')
         n6.on('input', function (msg) {
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
@@ -169,8 +153,6 @@ describe('OPC UA Write node e2e Testing', function () {
           expect(msg.payload.injectType).toBe('write')
           done()
         })
-
-        setTimeout(receive, 5000, n1)
       })
     })
   })

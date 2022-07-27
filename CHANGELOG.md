@@ -1,3 +1,7 @@
+## [4.0.7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.6...v4.0.7) (2022-07-26)
+
+
+
 ## [4.0.6](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.5...v4.0.6) (2022-07-26)
 
 

@@ -108,24 +108,24 @@ module.exports = function (RED: nodered.NodeAPI) {
         if (typeof node.repeat !== "number" || isNaN(node.repeat)) return;
 
         intervalId = setInterval(() => {
-          this.emit('input', newMessage("cron"))
+          this.emit('input', newMessage())
         }, node.repeat)
 
       } else if (node.crontab !== '') {
         cronjob = new CronJob(node.crontab,
           () => {
-            this.emit('input', newMessage("cron"))
+            this.emit('input', newMessage())
           },
           null,
           true)
       }
     }
 
-    const newMessage = function (messageType: string) {
+    const newMessage = function () {
       return {
         _msgid: RED.util.generateId(),
         payload: {
-          injectType: messageType
+          injectType: node.injectType
         }
       }
     }
@@ -209,7 +209,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
       onceTimeout = setTimeout(  () => {
         coreInject.detailDebugLog('injecting once at start')
-        this.emit('input', newMessage(this.injectType))
+        this.emit('input', newMessage())
         repeaterSetup()
       }, timeout)
     } else if (node.repeat || node.crontab) {
