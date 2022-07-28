@@ -5,5 +5,7 @@ updates:
     target-branch: "develop"
     schedule:
       interval: "weekly"
+    allow:
+      - dependency-type: "production"
     ignore:
       - dependency-name: "node-opcua*"
