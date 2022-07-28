@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - develop
+      - development
       - alpha
       - beta
       - master
