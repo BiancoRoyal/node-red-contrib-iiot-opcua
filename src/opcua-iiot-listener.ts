@@ -487,7 +487,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (nodeConfig.justValue) {
         dataValuesString = JSON.stringify(dataValue, null, 2)
         try {
-          RED.util.setMessageProperty(msg.poyload, 'value', JSON.parse(dataValuesString))
+          RED.util.setMessageProperty(msg.payload, 'value', JSON.parse(dataValuesString))
         } catch (err: any) {
           if (nodeConfig.showErrors) {
             this.warn('JSON not to parse from string for monitored item')
