@@ -47,7 +47,7 @@
   },
   "homepage": "https://noderedplus.de/",
   "node-red": {
-    "version": ">=2.0.0",
+    "version": ">=2",
     "nodes": {
       "OPCUA-IIoT-Connector": "opcuaIIoT/opcua-iiot-connector.js",
       "OPCUA-IIoT-Flex-Connector": "opcuaIIoT/opcua-iiot-flex-connector.js",
