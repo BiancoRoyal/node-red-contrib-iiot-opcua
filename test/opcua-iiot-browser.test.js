@@ -22,26 +22,7 @@ helper.init(require.resolve('node-red'))
 
 var browseNodesToLoad = [injectNode, functionNode, browserNode]
 
-var testUnitBrowserFlow = [
-  {
-    'id': '4ac0b7c8.bebe18',
-    'type': 'OPCUA-IIoT-Browser',
-    'connector': '',
-    'nodeId': 'ns=1;i=1234',
-    'name': 'TestNameBrowser',
-    'justValue': true,
-    'sendNodesToRead': false,
-    'sendNodesToListener': false,
-    'sendNodesToBrowser': false,
-    'singleBrowseResult': false,
-    'showStatusActivities': false,
-    'showErrors': false,
-    'wires': [
-      []
-    ]
-  },
-  {id: 'n1helper', type: 'helper'}
-]
+var testFlows = require('./flows/browser-flows')
 
 describe('OPC UA Browser node Unit Testing', function () {
   beforeEach(function (done) {
@@ -63,17 +44,22 @@ describe('OPC UA Browser node Unit Testing', function () {
   })
 
   describe('Browser node', function () {
-    it('should be loaded', function (done) {
-      helper.load(browseNodesToLoad, testUnitBrowserFlow,
+    it('should be loaded with correct defaults', function (done) {
+      helper.load(browseNodesToLoad, testFlows.testUnitBrowseFlow,
         function () {
           let nodeUnderTest = helper.getNode('4ac0b7c8.bebe18')
-          expect(nodeUnderTest.name).toBe('TestNameBrowser')
           expect(nodeUnderTest.nodeId).toBe('ns=1;i=1234')
+          expect(nodeUnderTest.name).toBe('TestNameBrowser')
           expect(nodeUnderTest.justValue).toBe(true)
           expect(nodeUnderTest.sendNodesToRead).toBe(false)
           expect(nodeUnderTest.sendNodesToListener).toBe(false)
           expect(nodeUnderTest.sendNodesToBrowser).toBe(false)
+          expect(nodeUnderTest.multipleOutputs).toBe(false)
+          expect(nodeUnderTest.recursiveBrowse).toBe(false)
+          expect(nodeUnderTest.recursiveDepth).toBe(1)
+          expect(nodeUnderTest.delayPerMessage).toBe(0.2)
           expect(nodeUnderTest.showStatusActivities).toBe(false)
+          expect(nodeUnderTest.showErrors).toBe(false)
           setTimeout(done, 3000)
         })
     })
