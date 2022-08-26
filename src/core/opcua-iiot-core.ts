@@ -42,6 +42,7 @@ import {
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
 import {ConnectorIIoT} from "./opcua-iiot-core-connector";
+import {isUndefined} from "underscore";
 
 export {Debug, os, underscore, nodeOPCUAId}
 
@@ -177,7 +178,7 @@ export function buildNewVariant(datatype: DataTypeInput, value: any): DataValueO
     dataType: DataType.Null,
     value: null
   }
-  if (value.value)
+  if (!isUndefined(value.value))
     value = value.value
 
   logger.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
