@@ -354,10 +354,10 @@ describe('OPC UA Core', function () {
 
     it('should build new variant Double', function (done) {
       const dataTypeOPCUA = DataType.Double
-      const parsedValue = parseFloat('22.2')
-      const variantFromString = core.buildNewVariant('Double', '22.2')
-      const variantFromString2 = core.buildNewVariant('Double', '22.2')
-      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 22.2)
+      const parsedValue = parseFloat('0.0')
+      const variantFromString = core.buildNewVariant('Double', '0.0')
+      const variantFromString2 = core.buildNewVariant('Double', '0.0')
+      const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 0.0)
       expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
       expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
@@ -437,6 +437,22 @@ describe('OPC UA Core', function () {
       let variantFromString2 = core.buildNewVariant('Boolean', '1')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 1)
       let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, true)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
+      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromString2)
+      expect(variantFromString).to.deep.equal(variantFromObject)
+      expect(variantFromString).to.deep.equal(variantFromNumberObject)
+      expect(variantFromObject).to.deep.equal(variantFromNumberObject)
+      done()
+    })
+
+    it('should build new variant Boolean (false)', function (done) {
+      let dataTypeOPCUA = DataType.Boolean
+      let parsedValue = false
+      let variantFromString = core.buildNewVariant('Boolean', 'false')
+      let variantFromString2 = core.buildNewVariant('Boolean', '')
+      let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 0)
+      let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, false)
       expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
       expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
