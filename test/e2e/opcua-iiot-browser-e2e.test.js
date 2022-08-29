@@ -59,8 +59,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.browserResults.length).toBe(15)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -74,8 +72,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.browserResults.length).toBe(15)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -93,8 +89,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.browserResults.length).toBe(msg.payload.browserResultsCount)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -109,8 +103,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.nodesToRead.length).toBe(15)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -125,7 +117,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.nodesToRead.length).toBe(15)
           done()
         })
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -140,8 +131,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.addressItemsToBrowse.length).toBe(15)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -162,8 +151,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.addressItemsToBrowse.length).toBe(15)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -177,8 +164,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.addressItemsToBrowse.length).toBe(15)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -192,8 +177,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.nodesToRead.length).toBe(10)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -208,8 +191,6 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.nodesToRead.length).toBeGreaterThan(10)
           done()
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
 
@@ -249,8 +230,6 @@ describe('OPC UA Browser node e2e Testing', function () {
             .expect(200)
             .end(done)
         })
-
-        setTimeout(trigger, 5000, n1)
       })
     })
   })
