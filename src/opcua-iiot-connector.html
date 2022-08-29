@@ -127,7 +127,7 @@
       let discoveryLookupButton = $("#node-config-lookup-discovery")
       let discoveryUrlField = $("#node-config-input-discoveryUrl")
 
-      discoveryLookupButton.click(function () {
+      discoveryLookupButton.on("click", function () {
         discoveryLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/client/discover/' + node.id + '/' + encodeURIComponent(discoveryUrlField.val()), function (data) {
           discoveryLookupButton.removeClass('disabled')
@@ -163,7 +163,7 @@
       let securityPolicyField = $("#node-config-input-securityPolicy")
       let securityModeField = $("#node-config-input-securityMode")
 
-      endpointsLookupButton.click(function () {
+      endpointsLookupButton.on("click", function () {
         endpointsLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/client/endpoints/' + node.id + '/' + encodeURIComponent(endpointField.val()), function (data) {
           endpointsLookupButton.removeClass('disabled')

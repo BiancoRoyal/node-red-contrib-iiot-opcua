@@ -63,7 +63,7 @@
       let datatypeLookupButton = $("#node-lookup-datatype")
       let datatypeField = $("#node-input-datatype")
 
-      datatypeLookupButton.click(function () {
+      datatypeLookupButton.on("click", function () {
         datatypeLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/list/DataTypeIds', function (data) {
           datatypeLookupButton.removeClass('disabled')

@@ -44,7 +44,7 @@
       let nodeIdLookupButton = $("#node-lookup-nodeId")
       let nodeIdField = $("#node-input-nodeId")
 
-      nodeIdLookupButton.click(function () {
+      nodeIdLookupButton.on("click", function () {
         nodeIdLookupButton.addClass('disabled')
         let rootid = nodeIdField.val() || 'ns=0;i=84' // root
         $.getJSON('/opcuaIIoT/browse/'+ node.id + '/' + encodeURIComponent(rootid), function (data) {
@@ -177,6 +177,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Browser">
+@browser-data-help
  <h2>OPC UA IIoT Browser</h2>
 
  <p>Use the Browser to browse OPC UA address spaces.
@@ -244,6 +245,10 @@
         </ul>
     </ul>
  </div>
+
+<h3> Defaults </h3>
+
+<p>  </p>
 
  <strong>Name</strong>
  <p>Name in the flow of Node-RED.</p>

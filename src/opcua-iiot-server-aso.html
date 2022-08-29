@@ -39,7 +39,7 @@
       let objecttypeLookupButton = $("#node-lookup-objecttype")
       let objecttypeInputField = $("#node-input-objecttype")
 
-      objecttypeLookupButton.click(function () {
+      objecttypeLookupButton.on("click", function () {
         objecttypeLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/list/InstanceTypeIds', function (data) {
           objecttypeLookupButton.removeClass('disabled')
@@ -70,7 +70,7 @@
       let datatypeLookupButton = $("#node-lookup-datatype")
       let datatypeField = $("#node-input-datatype")
 
-      datatypeLookupButton.click(function () {
+      datatypeLookupButton.on("click", function () {
         datatypeLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/list/DataTypeIds', function (data) {
           datatypeLookupButton.removeClass('disabled')
@@ -101,7 +101,7 @@
       let referencetypeLookupButton = $("#node-lookup-referencetype")
       let referencetypeField = $("#node-input-referencetype")
 
-      referencetypeLookupButton.click(function () {
+      referencetypeLookupButton.on("click", function () {
         referencetypeLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/list/ReferenceTypeIds', function (data) {
           referencetypeLookupButton.removeClass('disabled')
