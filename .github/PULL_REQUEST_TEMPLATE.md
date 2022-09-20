@@ -1,7 +1,7 @@
 <!--
 Thank you for contributing to this project!
 
-Please make sure you've read our contributing guidelines (https://github.com/DATATRONiQ/node-red-contrib-iiot-opcua/blob/development/.github/CONTRIBUTING.md)
+Please make sure you've read our contributing guidelines (https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/blob/develop/.github/CONTRIBUTING.md)
 
 -->
 

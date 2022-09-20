@@ -1,3 +1,16 @@
+## [4.0.9](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.8...v4.0.9) (2022-07-29)
+
+
+### Bug Fixes
+
+* **connector:** tests mostly working again  ([81f9917](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/81f991766a625d009298aefe7828fd39f2987130))
+* **method-caller:** duplicate in value assign ([7cb32f5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/7cb32f5193dff5e52734cc16f6a8dd81d63edc0b))
+* **test:** connector method caller ([d58cf1d](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d58cf1d853cbc78a30b6fa63f9d87002fe1fcb59))
+* **test:** method caller works again but needs more ([52f93d3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/52f93d3fca03550091577ada638c4954d9c403a1))
+* **test:** test works again ([16633a2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/16633a2ca61d246ae0f1235e5d83ed2385755c9b))
+
+
+
 ## [4.0.7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.6...v4.0.7) (2022-07-26)
 
 

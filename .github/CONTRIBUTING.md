@@ -45,8 +45,8 @@ relevant nodes, press Ctrl-E and copy the flow data from the Export dialog.
 At a minimum, please include:
 
 - Version of node.js? (should be >= 16)
-- Version of Node-RED? (should be >=v3.0.0)
-- Version of node-red-contrib-iiot-opcua? (should be >=v4.0.0)
+- Version of Node-RED? (should be >= 3)
+- Version of node-red-contrib-iiot-opcua? (should be >= 4)
 
 - What is your platform? (Linux, macOS, ...)
 - What does `DEBUG=opcuaIIoT:* node-red -v` say? (log files are welcome)
