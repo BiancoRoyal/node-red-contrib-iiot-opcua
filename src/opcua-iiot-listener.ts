@@ -498,7 +498,13 @@ module.exports = (RED: nodered.NodeAPI) => {
           msg.error = err.message
         }
       } else {
-        msg.payload = {...msg.payload, value: dataValue, monitoredItem}
+        msg.payload = {
+          ...msg.payload,
+          value: dataValue,
+          statusCode: monitoredItem.statusCode, 
+          itemToMonitor: monitoredItem.itemToMonitor,
+          monitoredItemId: monitoredItem.itemToMonitor
+        }
       }
 
       this.send(msg)
