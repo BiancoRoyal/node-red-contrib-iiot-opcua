@@ -154,6 +154,8 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     this.setMaxListeners(UNLIMITED_LISTENERS)
 
+    const thisNode = this
+
     internalDebugLog('Open Connector Node')
 
     let sessionStartTimeout: NodeJS.Timeout | null
@@ -538,6 +540,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     this.on('close', (done: () => void) => {
+      thisNode.removeAllListeners()
       if (!isInitializedIIoTNode<ConnectorIIoT>(this.iiot)) {
         done() // if we have a very fast deploy clicking uer
       } else {

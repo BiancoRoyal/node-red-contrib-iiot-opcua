@@ -34,7 +34,7 @@ interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
   topic: string
   payload: string
   payloadType: string
-  repeat: string
+  repeat: number
   crontab: string
   once: boolean
   startDelay: string
@@ -75,6 +75,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.startDelay = parseFloat(config.startDelay) || 10
     this.name = config.name
     this.injectType = config.injectType || 'inject'
+    this.repeat = config.repeat || 0
 
     this.addressSpaceItems = config.addressSpaceItems || []
 
@@ -90,8 +91,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     const repeaterSetup = () => {
       coreInject.internalDebugLog('Repeat Is ' + node.repeat)
       coreInject.internalDebugLog('Crontab Is ' + node.crontab)
-      if (node.repeat !== '') {
-        node.repeat = parseFloat(config.repeat) * REPEAT_FACTOR
+      if (node.repeat !== 0) {
+        node.repeat = config.repeat * REPEAT_FACTOR
 
         if (node.repeat === 0) {
           node.repeat = ONE_SECOND

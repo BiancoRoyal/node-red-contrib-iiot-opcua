@@ -19,123 +19,7 @@ const helperExtensions = require('../test/test-helper-extensions')
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testInjectFlow = helperExtensions.cleanFlowPositionData([
-  {
-    "id": "n1ijf1",
-    "type": "OPCUA-IIoT-Inject",
-    "z": "bd5450f338b10806",
-    "injectType": "inject",
-    "payload": "12345",
-    "payloadType": "num",
-    "topic": "TestTopicInject",
-    "repeat": "",
-    "crontab": "",
-    "once": true,
-    "startDelay": "0.1",
-    "name": "TestInject",
-    "addressSpaceItems": [
-      {
-        "name": "ServerStatus",
-        "nodeId": "ns=0;i=2256",
-        "datatypeName": "String"
-      }
-    ],
-    "x": 220,
-    "y": 140,
-    "wires": [
-      [
-        "n2ijf1"
-      ]
-    ]
-  },
-  {
-    "id": "n2ijf1",
-    "type": "helper",
-    "z": "bd5450f338b10806",
-    "x": 390,
-    "y": 140,
-    "wires": []
-  }
-])
-
-var testInjectWithDelayFlow = helperExtensions.cleanFlowPositionData([
-  {
-    "id": "n1ijf2",
-    "type": "OPCUA-IIoT-Inject",
-    "z": "f4e2dc28bedecc0b",
-    "injectType": "inject",
-    "payload": "12345",
-    "payloadType": "num",
-    "topic": "TestTopicInject",
-    "repeat": "",
-    "crontab": "",
-    "once": true,
-    "startDelay": "0.3",
-    "name": "TestInject",
-    "addressSpaceItems": [
-      {
-        "name": "ServerStatus",
-        "nodeId": "ns=0;i=2256",
-        "datatypeName": "String"
-      }
-    ],
-    "x": 240,
-    "y": 140,
-    "wires": [
-      [
-        "n2ijf2"
-      ]
-    ]
-  },
-  {
-    "id": "n2ijf2",
-    "type": "helper",
-    "z": "f4e2dc28bedecc0b",
-    "active": false,
-    "x": 430,
-    "y": 140,
-    "wires": []
-  }
-])
-
-var testInjectWithLongDelayFlow = helperExtensions.cleanFlowPositionData([
-  {
-    "id": "n1ijf3",
-    "type": "OPCUA-IIoT-Inject",
-    "z": "25eb29b54b156390",
-    "injectType": "inject",
-    "payload": "12345",
-    "payloadType": "num",
-    "topic": "TestTopicInject",
-    "repeat": "",
-    "crontab": "",
-    "once": true,
-    "startDelay": "0.5",
-    "name": "TestInject",
-    "addressSpaceItems": [
-      {
-        "name": "ServerStatus",
-        "nodeId": "ns=0;i=2256",
-        "datatypeName": "String"
-      }
-    ],
-    "x": 300,
-    "y": 100,
-    "wires": [
-      [
-        "n2ijf3"
-      ]
-    ]
-  },
-  {
-    "id": "n2ijf3",
-    "type": "helper",
-    "z": "25eb29b54b156390",
-    "x": 490,
-    "y": 100,
-    "wires": []
-  }
-])
+var testFlows = require('./flows/inject-flows')
 
 describe('OPC UA Inject node Unit Testing', function () {
   beforeAll(function (done) {
@@ -159,24 +43,26 @@ describe('OPC UA Inject node Unit Testing', function () {
   })
 
   describe('Inject node', function () {
+
+    it('should load with default settings', function (done) {
+      helper.load([inputNode], testFlows.testUnitDefaultInjectFlow,
+        function () {
+          let nodeUnderTest = helper.getNode('0128054740bdc14c')
+          expect(nodeUnderTest.name).toBe('')
+          expect(nodeUnderTest.injectType).toBe('inject')
+          expect(nodeUnderTest.payload).toBe('')
+          expect(nodeUnderTest.topic).toBe('')
+          expect(nodeUnderTest.payloadType).toBe('date')
+          expect(nodeUnderTest.startDelay).toBe(10)
+          expect(nodeUnderTest.repeat).toBe(0)
+          expect(nodeUnderTest.crontab).toBe('')
+          expect(nodeUnderTest.once).toBe(false)
+          done()
+        })
+    })
+
     it('should load with basic settings', function (done) {
-      helper.load([inputNode], [
-        {
-          'id': 'f93b472c.486038',
-          'type': 'OPCUA-IIoT-Inject',
-          'injectType': 'inject',
-          'payload': '123456',
-          'payloadType': 'num',
-          'topic': 'TestTopicInject',
-          'repeat': '',
-          'crontab': '',
-          'once': false,
-          'name': 'TestName',
-          'addressSpaceItems': [],
-          'wires': [
-            []
-          ]
-        }],
+      helper.load([inputNode], testFlows.testUnitInjectFlow,
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
         expect(nodeUnderTest.name).toBe('TestName')
@@ -189,7 +75,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with payload', function (done) {
-      helper.load([inputNode], testInjectFlow, function () {
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -201,7 +87,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with topic', function (done) {
-      helper.load([inputNode], testInjectFlow, function () {
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -214,24 +100,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should load with basic settings read node', function (done) {
-      helper.load([inputNode], [
-        {
-          'id': 'f93b472c.486038',
-          'type': 'OPCUA-IIoT-Inject',
-          'injectType': 'read',
-          'payload': '123456',
-          'payloadType': 'num',
-          'topic': 'TestTopicInject',
-          'repeat': '',
-          'crontab': '',
-          'once': false,
-          'startDelay': '1',
-          'name': 'TestName',
-          'addressSpaceItems': [],
-          'wires': [
-            []
-          ]
-        }],
+      helper.load([inputNode], testFlows.testUnitReadInjectFlow,
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
         expect(nodeUnderTest.name).toBe('TestName')
@@ -243,9 +112,11 @@ describe('OPC UA Inject node Unit Testing', function () {
       })
     })
 
+    
+
     it('should send a message with payload read node', function (done) {
-      testInjectFlow[0].injectType = 'read'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'read'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -257,8 +128,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with topic read node', function (done) {
-      testInjectFlow[0].injectType = 'read'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'read'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -270,8 +141,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types read node', function (done) {
-      testInjectFlow[0].injectType = 'read'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'read'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -284,24 +155,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should load with basic settings listen node', function (done) {
-      helper.load([inputNode], [
-        {
-          'id': 'f93b472c.486038',
-          'type': 'OPCUA-IIoT-Inject',
-          'injectType': 'listen',
-          'payload': '123456',
-          'payloadType': 'num',
-          'topic': 'TestTopicInject',
-          'repeat': '',
-          'crontab': '',
-          'once': false,
-          'startDelay': '1',
-          'name': 'TestName',
-          'addressSpaceItems': [],
-          'wires': [
-            []
-          ]
-        }],
+      helper.load([inputNode], testFlows.testUnitListenInjectFlow,
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
         expect(nodeUnderTest.name).toBe('TestName')
@@ -314,8 +168,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with payload listen node', function (done) {
-      testInjectFlow[0].injectType = 'listen'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'listen'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -327,8 +181,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with topic listen node', function (done) {
-      testInjectFlow[0].injectType = 'listen'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'listen'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -340,8 +194,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types listen node', function (done) {
-      testInjectFlow[0].injectType = 'listen'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'listen'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -354,24 +208,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should load with basic settings write node', function (done) {
-      helper.load([inputNode], [
-        {
-          'id': 'f93b472c.486038',
-          'type': 'OPCUA-IIoT-Inject',
-          'injectType': 'write',
-          'payload': '123456',
-          'payloadType': 'num',
-          'topic': 'TestTopicInject',
-          'repeat': '',
-          'crontab': '',
-          'once': false,
-          'startDelay': '1',
-          'name': 'TestName',
-          'addressSpaceItems': [],
-          'wires': [
-            []
-          ]
-        }],
+      helper.load([inputNode], testFlows.testUnitWriteInjectFlow,
       function () {
         let nodeUnderTest = helper.getNode('f93b472c.486038')
         expect(nodeUnderTest.name).toBe('TestName')
@@ -384,8 +221,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with payload write node', function (done) {
-      testInjectFlow[0].injectType = 'write'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'write'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -397,8 +234,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with topic write node', function (done) {
-      testInjectFlow[0].injectType = 'write'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'write'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -410,8 +247,8 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types write node', function (done) {
-      testInjectFlow[0].injectType = 'write'
-      helper.load([inputNode], testInjectFlow, function () {
+      testFlows.testInjectFlow[0].injectType = 'write'
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
@@ -424,7 +261,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types and delay write node', function (done) {
-      helper.load([inputNode], testInjectWithDelayFlow, function () {
+      helper.load([inputNode], testFlows.testInjectWithDelayFlow, function () {
         const n2 = helper.getNode('n2ijf2')
         const n1 = helper.getNode('n1ijf2')
         n2.on('input', function (msg) {
@@ -437,7 +274,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types and long delay', function (done) {
-      helper.load([inputNode], testInjectWithLongDelayFlow, function () {
+      helper.load([inputNode], testFlows.testInjectWithLongDelayFlow, function () {
         const n2 = helper.getNode('n2ijf3')
         const n1 = helper.getNode('n1ijf3')
         n2.on('input', function (msg) {
@@ -450,7 +287,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should fail on inject button request with wrong id', function (done) {
-      helper.load([inputNode], testInjectFlow, function () {
+      helper.load([inputNode], testFlows.testInjectFlow, function () {
         helper.request()
           .get('/opcuaIIoT/inject/1')
           .expect(404)
@@ -459,7 +296,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     // it('should success on inject button request', function (done) {
-    //   helper.load([inputNode], testInjectFlow, function () {
+    //   helper.load([inputNode], testFlows.testInjectFlow, function () {
     //       helper.request()
     //         .post('/opcuaIIoT/inject/n1ijf1')
     //         .expect(200)
