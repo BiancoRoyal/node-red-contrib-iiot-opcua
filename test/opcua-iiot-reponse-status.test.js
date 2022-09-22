@@ -176,32 +176,19 @@ var listenResultSimulation = {
   'wires': [['n4rsf', 'n5rsf']]
 }
 
-var testFlowPayload = [
-  {id: 'n2rsf', type: 'helper'},
-  {id: 'n4rsf', type: 'helper'},
-  {
-    'id': 'n5rsf',
-    'type': 'OPCUA-IIoT-Response',
-    'name': 'TestResponse',
-    'compressedStruct': false,
-    'showStatusActivities': false,
-    'showErrors': false,
-    'wires': [['n6rsf']]
-  },
-  {id: 'n6rsf', type: 'helper'}
-]
+var testFlows = require('./flows/response-flows')
 
-var readGoodTestFlowPayload = testFlowPayload.concat([readResultSimulation, readGoodInject])
-var writeGoodTestFlowPayload = testFlowPayload.concat([writeResultSimulation, writeGoodInject])
-var listenGoodTestFlowPayload = testFlowPayload.concat([listenResultSimulation, listenGoodInject])
+var readGoodTestFlowPayload = testFlows.testFlowPayload.concat([readResultSimulation, readGoodInject])
+var writeGoodTestFlowPayload = testFlows.testFlowPayload.concat([writeResultSimulation, writeGoodInject])
+var listenGoodTestFlowPayload = testFlows.testFlowPayload.concat([listenResultSimulation, listenGoodInject])
 
-var readBadTestFlowPayload = testFlowPayload.concat([readResultSimulation, readBadInject])
-var writeBadTestFlowPayload = testFlowPayload.concat([writeResultSimulation, writeBadInject])
-var listenBadTestFlowPayload = testFlowPayload.concat([listenResultSimulation, listenBadInject])
+var readBadTestFlowPayload = testFlows.testFlowPayload.concat([readResultSimulation, readBadInject])
+var writeBadTestFlowPayload = testFlows.testFlowPayload.concat([writeResultSimulation, writeBadInject])
+var listenBadTestFlowPayload = testFlows.testFlowPayload.concat([listenResultSimulation, listenBadInject])
 
-var readOtherTestFlowPayload = testFlowPayload.concat([readResultSimulation, readOtherInject])
-var writeOtherTestFlowPayload = testFlowPayload.concat([writeResultSimulation, writeOtherInject])
-var listenOtherTestFlowPayload = testFlowPayload.concat([listenResultSimulation, listenOtherInject])
+var readOtherTestFlowPayload = testFlows.testFlowPayload.concat([readResultSimulation, readOtherInject])
+var writeOtherTestFlowPayload = testFlows.testFlowPayload.concat([writeResultSimulation, writeOtherInject])
+var listenOtherTestFlowPayload = testFlows.testFlowPayload.concat([listenResultSimulation, listenOtherInject])
 
 describe('OPC UA Response Status node Unit Testing', function () {
   beforeAll(function (done) {

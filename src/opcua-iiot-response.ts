@@ -32,12 +32,12 @@ type Filter = {
 
 interface OPCUAIIoTResponse extends nodered.Node {
   name: string
-  compressStructure: string
-  showStatusActivities: string
-  showErrors: string
-  activateUnsetFilter: string
-  activateFilters: string
-  negateFilter: string
+  compressStructure: boolean
+  showStatusActivities: boolean
+  showErrors: boolean
+  activateUnsetFilter: boolean
+  activateFilters: boolean
+  negateFilter: boolean
   filters: Filter[]
   iiot: Todo
   functions?: Record<string, (...args: any) => any>
@@ -45,12 +45,12 @@ interface OPCUAIIoTResponse extends nodered.Node {
 
 interface OPCUAIIoTResponseDef extends nodered.NodeDef {
   name: string
-  compressStructure: string
-  showStatusActivities: string
-  showErrors: string
-  activateUnsetFilter: string
-  activateFilters: string
-  negateFilter: string
+  compressStructure: boolean
+  showStatusActivities: boolean
+  showErrors: boolean
+  activateUnsetFilter: boolean
+  activateFilters: boolean
+  negateFilter: boolean
   filters: Filter[]
 }
 
