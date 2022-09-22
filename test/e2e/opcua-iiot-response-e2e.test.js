@@ -129,7 +129,9 @@ describe('OPC UA Response node e2e Testing', function () {
         n1.on('input', function (msg) {
           counter++
           expect(msg.payload).toBeDefined()
-          expect(msg.payload.length).toBeGreaterThan(0)
+          expect(msg.payload.value).toBeDefined()
+          expect(typeof msg.payload.value).toBe(Array)
+          expect(msg.payload.value.length).toBeGreaterThan(0)
 
           if (counter === 4) {
             done()                                // Todo: Test fails with "Callback was already called" live error log is at ./ResponseE2EErrorLog.txt
