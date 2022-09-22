@@ -114,6 +114,7 @@ module.exports = {
     {
       "id": "c1cf1",
       "type": "OPCUA-IIoT-Connector",
+      "z": "1f545f09faa793c4",
       "discoveryUrl": "",
       "endpoint": "opc.tcp://localhost:51962/",
       "keepSessionAlive": false,
@@ -141,9 +142,17 @@ module.exports = {
 
   "testConnectorReadFlow":  helperExtensions.cleanFlowPositionData( [
     {
+      "id": "40b2f9f2867c669f",
+      "type": "tab",
+      "label": "Test Connector Read Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "n1cf2",
       "type": "OPCUA-IIoT-Inject",
-      "z": "6fceee54d88ab861",
+      "z": "40b2f9f2867c669f",
       "injectType": "read",
       "payload": "testpayload",
       "payloadType": "str",
@@ -160,7 +169,7 @@ module.exports = {
           "datatypeName": ""
         }
       ],
-      "x": 180,
+      "x": 280,
       "y": 160,
       "wires": [
         [
@@ -172,16 +181,16 @@ module.exports = {
     {
       "id": "n2cf2",
       "type": "helper",
-      "z": "6fceee54d88ab861",
+      "z": "40b2f9f2867c669f",
       "active": true,
-      "x": 470,
+      "x": 570,
       "y": 220,
       "wires": []
     },
     {
       "id": "n3cf2",
       "type": "OPCUA-IIoT-Read",
-      "z": "6fceee54d88ab861",
+      "z": "40b2f9f2867c669f",
       "attributeId": 0,
       "maxAge": 1,
       "depth": 1,
@@ -191,7 +200,8 @@ module.exports = {
       "showStatusActivities": false,
       "showErrors": false,
       "parseStrings": false,
-      "x": 460,
+      "historyDays": "",
+      "x": 560,
       "y": 160,
       "wires": [
         [
@@ -202,16 +212,16 @@ module.exports = {
     {
       "id": "n5cf2",
       "type": "helper",
-      "z": "6fceee54d88ab861",
+      "z": "40b2f9f2867c669f",
       "active": true,
-      "x": 670,
+      "x": 770,
       "y": 160,
       "wires": []
     },
     {
       "id": "s1cf2",
       "type": "OPCUA-IIoT-Server",
-      "z": "6fceee54d88ab861",
+      "z": "40b2f9f2867c669f",
       "port": "51980",
       "endpoint": "",
       "acceptExternalCommands": true,
@@ -236,7 +246,7 @@ module.exports = {
       "maxNodesPerRead": 1000,
       "maxNodesPerBrowse": 2000,
       "delayToClose": "",
-      "x": 470,
+      "x": 570,
       "y": 80,
       "wires": [
         []
@@ -245,6 +255,7 @@ module.exports = {
     {
       "id": "c1cf2",
       "type": "OPCUA-IIoT-Connector",
+      "z": "40b2f9f2867c669f",
       "discoveryUrl": "",
       "endpoint": "opc.tcp://localhost:51980/",
       "keepSessionAlive": false,
@@ -253,6 +264,7 @@ module.exports = {
       "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
@@ -261,7 +273,11 @@ module.exports = {
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
   ] ),
 
@@ -706,13 +722,21 @@ module.exports = {
       "reconnectDelay": "",
       "maxBadSessionRequests": ""
     }
-  ]),
+  ] ),
 
   "testConnectorHTTPFlow":  helperExtensions.cleanFlowPositionData( [
     {
+      "id": "e5718e4412a767c4",
+      "type": "tab",
+      "label": "Test Connector HTTP Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "n1cf6",
       "type": "OPCUA-IIoT-Method-Caller",
-      "z": "0b4d012a99f54044",
+      "z": "e5718e4412a767c4",
       "connector": "c1cf6",
       "objectId": "ns=1;i=1234",
       "methodId": "ns=1;i=12345",
@@ -734,8 +758,8 @@ module.exports = {
           "value": "6"
         }
       ],
-      "x": 320,
-      "y": 140,
+      "x": 460,
+      "y": 180,
       "wires": [
         []
       ]
@@ -743,7 +767,7 @@ module.exports = {
     {
       "id": "s1cf6",
       "type": "OPCUA-IIoT-Server",
-      "z": "0b4d012a99f54044",
+      "z": "e5718e4412a767c4",
       "port": "51991",
       "endpoint": "",
       "acceptExternalCommands": true,
@@ -768,8 +792,8 @@ module.exports = {
       "maxNodesPerRead": 1000,
       "maxNodesPerBrowse": 2000,
       "delayToClose": "",
-      "x": 310,
-      "y": 80,
+      "x": 450,
+      "y": 120,
       "wires": [
         []
       ]
@@ -777,6 +801,7 @@ module.exports = {
     {
       "id": "c1cf6",
       "type": "OPCUA-IIoT-Connector",
+      "z": "e5718e4412a767c4",
       "discoveryUrl": "",
       "endpoint": "opc.tcp://localhost:51991/",
       "keepSessionAlive": false,
@@ -785,6 +810,7 @@ module.exports = {
       "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
@@ -793,7 +819,11 @@ module.exports = {
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
   ] )
 }
