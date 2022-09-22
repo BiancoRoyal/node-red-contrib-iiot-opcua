@@ -1270,7 +1270,7 @@
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityMode": "None",
     "name": "Unified Automation Cpp Demo Server",
     "showErrors": true,
     "publicCertificateFile": "",

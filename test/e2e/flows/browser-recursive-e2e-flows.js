@@ -517,7 +517,7 @@ module.exports = {
       "keepSessionAlive": true,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "LOCAL SERVER",
       "showErrors": false,
       "individualCerts": false,

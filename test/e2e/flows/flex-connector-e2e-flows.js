@@ -201,7 +201,7 @@ module.exports = {
       "keepSessionAlive": true,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "LOCAL FLEX CONNECTOR",
       "showErrors": true,
       "publicCertificateFile": "",

@@ -159,7 +159,7 @@
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityMode": "None",
     "name": "LOCAL FLEX CONECTOR SERVER",
     "showErrors": true,
     "publicCertificateFile": "",

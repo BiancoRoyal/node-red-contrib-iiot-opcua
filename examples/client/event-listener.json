@@ -101,7 +101,7 @@
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityMode": "None",
     "name": "LOCAL EVENT SERVER",
     "showErrors": false,
     "publicCertificateFile": "",

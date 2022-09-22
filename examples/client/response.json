@@ -963,7 +963,7 @@
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityMode": "None",
     "name": "LOCAL SERVER RESPONSE",
     "showErrors": false,
     "individualCerts": false,

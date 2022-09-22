@@ -345,7 +345,7 @@
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityMode": "None",
     "name": "LOCAL DEMO SERVER",
     "showErrors": false,
     "publicCertificateFile": "",

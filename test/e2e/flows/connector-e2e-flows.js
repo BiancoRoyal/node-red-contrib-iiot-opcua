@@ -4,9 +4,17 @@ module.exports = {
 
   "testConnectorBrowseFlow":  helperExtensions.cleanFlowPositionData( [
     {
+      "id": "1f545f09faa793c4",
+      "type": "tab",
+      "label": "Test Connector Browse Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "n1cf1",
       "type": "OPCUA-IIoT-Inject",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "injectType": "inject",
       "payload": "testpayload",
       "payloadType": "str",
@@ -17,8 +25,8 @@ module.exports = {
       "startDelay": "4",
       "name": "TestInject",
       "addressSpaceItems": [],
-      "x": 140,
-      "y": 140,
+      "x": 280,
+      "y": 180,
       "wires": [
         [
           "n2cf1",
@@ -29,16 +37,16 @@ module.exports = {
     {
       "id": "n2cf1",
       "type": "helper",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "active": true,
-      "x": 350,
-      "y": 200,
+      "x": 490,
+      "y": 240,
       "wires": []
     },
     {
       "id": "n3cf1",
       "type": "OPCUA-IIoT-Browser",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "connector": "c1cf1",
       "nodeId": "ns=1;i=1234",
       "name": "TestBrowser",
@@ -46,12 +54,14 @@ module.exports = {
       "sendNodesToRead": false,
       "sendNodesToListener": false,
       "sendNodesToBrowser": false,
+      "multipleOutputs": false,
       "recursiveBrowse": false,
       "recursiveDepth": 1,
+      "delayPerMessage": "",
       "showStatusActivities": false,
       "showErrors": false,
-      "x": 350,
-      "y": 140,
+      "x": 490,
+      "y": 180,
       "wires": [
         [
           "n5cf1"
@@ -61,16 +71,16 @@ module.exports = {
     {
       "id": "n5cf1",
       "type": "helper",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "active": true,
-      "x": 530,
-      "y": 140,
+      "x": 690,
+      "y": 180,
       "wires": []
     },
     {
       "id": "s1cf1",
       "type": "OPCUA-IIoT-Server",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "port": "51962",
       "endpoint": "",
       "acceptExternalCommands": true,
@@ -95,8 +105,8 @@ module.exports = {
       "maxNodesPerRead": 1000,
       "maxNodesPerBrowse": 2000,
       "delayToClose": "",
-      "x": 350,
-      "y": 60,
+      "x": 490,
+      "y": 100,
       "wires": [
         []
       ]
@@ -109,9 +119,10 @@ module.exports = {
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
@@ -120,7 +131,11 @@ module.exports = {
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
   ] ),
 
@@ -235,7 +250,7 @@ module.exports = {
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
       "publicCertificateFile": "",
@@ -359,7 +374,7 @@ module.exports = {
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
       "publicCertificateFile": "",
@@ -377,9 +392,17 @@ module.exports = {
 
   "testConnectorWriteFlow":  helperExtensions.cleanFlowPositionData( [
     {
+      "id": "1f545f09faa793c4",
+      "type": "tab",
+      "label": "Test Connector Write Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "n1cf4",
       "type": "OPCUA-IIoT-Inject",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "injectType": "write",
       "payload": "1000",
       "payloadType": "num",
@@ -396,7 +419,7 @@ module.exports = {
           "datatypeName": "Double"
         }
       ],
-      "x": 160,
+      "x": 280,
       "y": 140,
       "wires": [
         [
@@ -408,22 +431,22 @@ module.exports = {
     {
       "id": "n2cf4",
       "type": "helper",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "active": true,
-      "x": 390,
+      "x": 510,
       "y": 200,
       "wires": []
     },
     {
       "id": "n3cf4",
       "type": "OPCUA-IIoT-Write",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "connector": "c1cf4",
       "name": "TestWrite",
       "justValue": true,
       "showStatusActivities": false,
       "showErrors": false,
-      "x": 380,
+      "x": 500,
       "y": 140,
       "wires": [
         [
@@ -434,16 +457,16 @@ module.exports = {
     {
       "id": "n5cf4",
       "type": "helper",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "active": true,
-      "x": 610,
+      "x": 730,
       "y": 140,
       "wires": []
     },
     {
       "id": "s1cf4",
       "type": "OPCUA-IIoT-Server",
-      "z": "6fceee54d88ab861",
+      "z": "1f545f09faa793c4",
       "port": "51982",
       "endpoint": "",
       "acceptExternalCommands": true,
@@ -478,7 +501,7 @@ module.exports = {
       "maxNodesPerRead": 1000,
       "maxNodesPerBrowse": 2000,
       "delayToClose": "",
-      "x": 390,
+      "x": 510,
       "y": 80,
       "wires": [
         []
@@ -487,14 +510,16 @@ module.exports = {
     {
       "id": "c1cf4",
       "type": "OPCUA-IIoT-Connector",
+      "z": "1f545f09faa793c4",
       "discoveryUrl": "",
       "endpoint": "opc.tcp://localhost:51982/",
       "keepSessionAlive": false,
       "loginEnabled": false,
-      "securityPolicy": "Basic256",
-      "securityMode": "SIGNANDENCRYPT",
+      "securityPolicy": "None",
+      "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
@@ -503,7 +528,11 @@ module.exports = {
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
   ] ),
 
@@ -635,7 +664,7 @@ module.exports = {
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
       "publicCertificateFile": "",
@@ -724,7 +753,7 @@ module.exports = {
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
       "publicCertificateFile": "",
