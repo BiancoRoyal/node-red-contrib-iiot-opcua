@@ -2,9 +2,17 @@ const helperExtensions = require('../../test-helper-extensions')
 module.exports = {
   "testBrowseRecursiveASOFlow":  helperExtensions.cleanFlowPositionData([
     {
+      "id": "fb6e1fb0f20c797a",
+      "type": "tab",
+      "label": "Test Browse Recursive ASO Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "aso0",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "s=TestFolderA",
       "browsename": "TestA",
       "displayname": "Test Folder A",
@@ -14,8 +22,8 @@ module.exports = {
       "referenceNodeId": "ns=0;i=85",
       "referencetype": "Organizes",
       "name": "ASO Test Folder A",
-      "x": 390,
-      "y": 120,
+      "x": 410,
+      "y": 140,
       "wires": [
         [
           "server"
@@ -25,7 +33,7 @@ module.exports = {
     {
       "id": "inject0",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "inject",
       "payload": "",
       "payloadType": "date",
@@ -36,8 +44,8 @@ module.exports = {
       "startDelay": "4",
       "name": "",
       "addressSpaceItems": [],
-      "x": 130,
-      "y": 120,
+      "x": 150,
+      "y": 140,
       "wires": [
         [
           "aso0"
@@ -47,7 +55,7 @@ module.exports = {
     {
       "id": "server",
       "type": "OPCUA-IIoT-Server",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "port": "49888",
       "endpoint": "",
       "acceptExternalCommands": true,
@@ -73,8 +81,8 @@ module.exports = {
       "maxNodesPerRead": "",
       "maxNodesPerBrowse": "",
       "delayToClose": "",
-      "x": 770,
-      "y": 360,
+      "x": 790,
+      "y": 380,
       "wires": [
         []
       ]
@@ -82,7 +90,7 @@ module.exports = {
     {
       "id": "inject2",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "inject",
       "payload": "",
       "payloadType": "date",
@@ -93,8 +101,8 @@ module.exports = {
       "startDelay": "5",
       "name": "",
       "addressSpaceItems": [],
-      "x": 130,
-      "y": 180,
+      "x": 150,
+      "y": 200,
       "wires": [
         [
           "aso2",
@@ -105,7 +113,7 @@ module.exports = {
     {
       "id": "aso2",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "s=TestFolderB",
       "browsename": "TestB",
       "displayname": "Test Folder B",
@@ -115,8 +123,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderA",
       "referencetype": "Organizes",
       "name": "ASO Test Folder B",
-      "x": 390,
-      "y": 180,
+      "x": 410,
+      "y": 200,
       "wires": [
         [
           "server"
@@ -126,7 +134,7 @@ module.exports = {
     {
       "id": "inject3",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "inject",
       "payload": "",
       "payloadType": "date",
@@ -137,8 +145,8 @@ module.exports = {
       "startDelay": "6",
       "name": "",
       "addressSpaceItems": [],
-      "x": 130,
-      "y": 280,
+      "x": 150,
+      "y": 300,
       "wires": [
         [
           "aso3",
@@ -149,7 +157,7 @@ module.exports = {
     {
       "id": "aso3",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "s=TestFolderC",
       "browsename": "TestC",
       "displayname": "Test Folder C",
@@ -159,8 +167,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderB",
       "referencetype": "Organizes",
       "name": "ASO Test Folder C",
-      "x": 390,
-      "y": 280,
+      "x": 410,
+      "y": 300,
       "wires": [
         [
           "server"
@@ -170,7 +178,7 @@ module.exports = {
     {
       "id": "inject4",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "inject",
       "payload": "",
       "payloadType": "date",
@@ -181,8 +189,8 @@ module.exports = {
       "startDelay": "7",
       "name": "",
       "addressSpaceItems": [],
-      "x": 130,
-      "y": 380,
+      "x": 150,
+      "y": 400,
       "wires": [
         [
           "aso4",
@@ -193,7 +201,7 @@ module.exports = {
     {
       "id": "aso4",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "s=TestFolderD",
       "browsename": "TestD",
       "displayname": "Test Folder D",
@@ -203,8 +211,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderC",
       "referencetype": "Organizes",
       "name": "ASO Test Folder D",
-      "x": 390,
-      "y": 380,
+      "x": 410,
+      "y": 400,
       "wires": [
         [
           "server"
@@ -214,7 +222,7 @@ module.exports = {
     {
       "id": "inject5",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "inject",
       "payload": "",
       "payloadType": "date",
@@ -225,8 +233,8 @@ module.exports = {
       "startDelay": "8",
       "name": "",
       "addressSpaceItems": [],
-      "x": 130,
-      "y": 480,
+      "x": 150,
+      "y": 500,
       "wires": [
         [
           "aso5",
@@ -237,7 +245,7 @@ module.exports = {
     {
       "id": "aso5",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "s=TestFolderE",
       "browsename": "TestE",
       "displayname": "Test Folder E",
@@ -247,8 +255,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderD",
       "referencetype": "Organizes",
       "name": "ASO Test Folder E",
-      "x": 390,
-      "y": 480,
+      "x": 410,
+      "y": 500,
       "wires": [
         [
           "server"
@@ -258,7 +266,7 @@ module.exports = {
     {
       "id": "inject6",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "inject",
       "payload": "",
       "payloadType": "date",
@@ -269,8 +277,8 @@ module.exports = {
       "startDelay": "9",
       "name": "",
       "addressSpaceItems": [],
-      "x": 130,
-      "y": 580,
+      "x": 150,
+      "y": 600,
       "wires": [
         [
           "aso6",
@@ -281,7 +289,7 @@ module.exports = {
     {
       "id": "aso6",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "s=TestFolderF",
       "browsename": "TestF",
       "displayname": "Test Folder F",
@@ -291,8 +299,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderE",
       "referencetype": "Organizes",
       "name": "ASO Test Folder F",
-      "x": 390,
-      "y": 580,
+      "x": 410,
+      "y": 600,
       "wires": [
         [
           "server"
@@ -302,7 +310,7 @@ module.exports = {
     {
       "id": "aso7",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "ns=1;s=TestDoubleA",
       "browsename": "TestDoubleA",
       "displayname": "Test Double A",
@@ -312,8 +320,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderA",
       "referencetype": "Organizes",
       "name": "Double A",
-      "x": 360,
-      "y": 220,
+      "x": 380,
+      "y": 240,
       "wires": [
         [
           "server"
@@ -323,7 +331,7 @@ module.exports = {
     {
       "id": "aso8",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "ns=1;s=TestDoubleB",
       "browsename": "TestDoubleB",
       "displayname": "Test Double B",
@@ -333,8 +341,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderB",
       "referencetype": "Organizes",
       "name": "Double B",
-      "x": 360,
-      "y": 320,
+      "x": 380,
+      "y": 340,
       "wires": [
         [
           "server"
@@ -344,7 +352,7 @@ module.exports = {
     {
       "id": "aso9",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "ns=1;s=TestDoubleC",
       "browsename": "TestDoubleC",
       "displayname": "Test Double C",
@@ -354,8 +362,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderC",
       "referencetype": "Organizes",
       "name": "Double C",
-      "x": 360,
-      "y": 420,
+      "x": 380,
+      "y": 440,
       "wires": [
         [
           "server"
@@ -365,7 +373,7 @@ module.exports = {
     {
       "id": "aso10",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "ns=1;s=TestDoubleD",
       "browsename": "TestDoubleD",
       "displayname": "Test Double D",
@@ -375,8 +383,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderD",
       "referencetype": "Organizes",
       "name": "Double D",
-      "x": 360,
-      "y": 520,
+      "x": 380,
+      "y": 540,
       "wires": [
         [
           "server"
@@ -386,7 +394,7 @@ module.exports = {
     {
       "id": "aso11",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "ns=1;s=TestDoubleE",
       "browsename": "TestDoubleE",
       "displayname": "Test Double E",
@@ -396,8 +404,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderE",
       "referencetype": "Organizes",
       "name": "Double E",
-      "x": 360,
-      "y": 620,
+      "x": 380,
+      "y": 640,
       "wires": [
         [
           "server"
@@ -407,7 +415,7 @@ module.exports = {
     {
       "id": "aso12",
       "type": "OPCUA-IIoT-Server-ASO",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "nodeId": "ns=1;s=TestDoubleF",
       "browsename": "TestDoubleF",
       "displayname": "Test Double F",
@@ -417,8 +425,8 @@ module.exports = {
       "referenceNodeId": "ns=1;s=TestFolderF",
       "referencetype": "Organizes",
       "name": "Double F",
-      "x": 360,
-      "y": 60,
+      "x": 380,
+      "y": 80,
       "wires": [
         [
           "server"
@@ -428,7 +436,7 @@ module.exports = {
     {
       "id": "inject7",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "inject",
       "payload": "",
       "payloadType": "date",
@@ -439,8 +447,8 @@ module.exports = {
       "startDelay": "",
       "name": "",
       "addressSpaceItems": [],
-      "x": 130,
-      "y": 60,
+      "x": 150,
+      "y": 80,
       "wires": [
         [
           "aso12"
@@ -450,7 +458,7 @@ module.exports = {
     {
       "id": "browserInject",
       "type": "OPCUA-IIoT-Inject",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "injectType": "listen",
       "payload": "{\"interval\":500,\"queueSize\":10,\"options\":{\"requestedPublishingInterval\":5000,\"requestedLifetimeCount\":60,\"requestedMaxKeepAliveCount\":10,\"maxNotificationsPerPublish\":5,\"publishingEnabled\":true,\"priority\":8}}",
       "payloadType": "json",
@@ -467,8 +475,8 @@ module.exports = {
           "datatypeName": ""
         }
       ],
-      "x": 110,
-      "y": 760,
+      "x": 130,
+      "y": 780,
       "wires": [
         [
           "browser"
@@ -478,7 +486,7 @@ module.exports = {
     {
       "id": "browser",
       "type": "OPCUA-IIoT-Browser",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "connector": "connector",
       "nodeId": "",
       "name": "",
@@ -492,8 +500,8 @@ module.exports = {
       "delayPerMessage": "0.2",
       "showStatusActivities": true,
       "showErrors": true,
-      "x": 380,
-      "y": 760,
+      "x": 400,
+      "y": 780,
       "wires": [
         [
           "helperNode"
@@ -503,15 +511,16 @@ module.exports = {
     {
       "id": "helperNode",
       "type": "helper",
-      "z": "91d25068b5d8e7cc",
+      "z": "fb6e1fb0f20c797a",
       "active": true,
-      "x": 570,
-      "y": 760,
+      "x": 590,
+      "y": 780,
       "wires": []
     },
     {
       "id": "connector",
       "type": "OPCUA-IIoT-Connector",
+      "z": "fb6e1fb0f20c797a",
       "discoveryUrl": "",
       "endpoint": "opc.tcp://localhost:49888/",
       "keepSessionAlive": true,

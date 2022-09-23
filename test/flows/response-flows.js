@@ -5,9 +5,17 @@ module.exports = {
 
   "testFlowPayload": helperExtensions.cleanFlowPositionData([
     {
+      "id": "628990c93a2db9aa",
+      "type": "tab",
+      "label": "Test Flow Payload",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "n2rsf",
       "type": "helper",
-      "z": "e41e66b2c57b1657",
+      "z": "628990c93a2db9aa",
       "name": "",
       "tosidebar": true,
       "console": false,
@@ -16,14 +24,14 @@ module.exports = {
       "targetType": "msg",
       "statusVal": "",
       "statusType": "auto",
-      "x": 490,
-      "y": 240,
+      "x": 530,
+      "y": 320,
       "wires": []
     },
     {
       "id": "n4rsf",
       "type": "helper",
-      "z": "e41e66b2c57b1657",
+      "z": "628990c93a2db9aa",
       "name": "",
       "tosidebar": true,
       "console": false,
@@ -32,14 +40,14 @@ module.exports = {
       "targetType": "msg",
       "statusVal": "",
       "statusType": "auto",
-      "x": 490,
-      "y": 120,
+      "x": 530,
+      "y": 200,
       "wires": []
     },
     {
       "id": "n5rsf",
       "type": "OPCUA-IIoT-Response",
-      "z": "e41e66b2c57b1657",
+      "z": "628990c93a2db9aa",
       "name": "TestResponse",
       "compressStructure": false,
       "showStatusActivities": false,
@@ -48,8 +56,8 @@ module.exports = {
       "activateFilters": false,
       "negateFilter": false,
       "filters": [],
-      "x": 160,
-      "y": 180,
+      "x": 200,
+      "y": 260,
       "wires": [
         [
           "n6rsf"
@@ -59,7 +67,7 @@ module.exports = {
     {
       "id": "n6rsf",
       "type": "helper",
-      "z": "e41e66b2c57b1657",
+      "z": "628990c93a2db9aa",
       "name": "",
       "tosidebar": true,
       "console": false,
@@ -68,8 +76,8 @@ module.exports = {
       "targetType": "msg",
       "statusVal": "",
       "statusType": "auto",
-      "x": 490,
-      "y": 180,
+      "x": 530,
+      "y": 260,
       "wires": []
     }
   ]),
@@ -77,7 +85,7 @@ module.exports = {
     {
       "id": "e41e66b2c57b1657",
       "type": "tab",
-      "label": "Flow 1",
+      "label": "testResponseFlow",
       "disabled": false,
       "info": "",
       "env": []
@@ -176,7 +184,7 @@ module.exports = {
     {
       "id": "e41e66b2c57b1657",
       "type": "tab",
-      "label": "Flow 1",
+      "label": "Test Compressed Response Flow",
       "disabled": false,
       "info": "",
       "env": []
@@ -273,6 +281,14 @@ module.exports = {
   ]),
   "testDefaultResponseFlow" : helperExtensions.cleanFlowPositionData([
     {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Default Response Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "be0763d2593bd6ef",
       "type": "OPCUA-IIoT-Response",
       "z": "e41e66b2c57b1657",
@@ -284,8 +300,8 @@ module.exports = {
       "activateFilters": false,
       "negateFilter": false,
       "filters": [],
-      "x": 310,
-      "y": 300,
+      "x": 330,
+      "y": 160,
       "wires": [
         [
           "64b6a8760a5244c2"
@@ -304,8 +320,8 @@ module.exports = {
       "complete": "false",
       "statusVal": "",
       "statusType": "auto",
-      "x": 500,
-      "y": 300,
+      "x": 520,
+      "y": 160,
       "wires": []
     }
   ])

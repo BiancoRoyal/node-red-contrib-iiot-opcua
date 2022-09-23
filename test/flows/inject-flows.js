@@ -4,6 +4,14 @@ module.exports = {
 
   "testUnitDefaultInjectFlow" : helperExtensions.cleanFlowPositionData([
     {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Unit Default Inject Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "0128054740bdc14c",
       "type": "OPCUA-IIoT-Inject",
       "z": "e41e66b2c57b1657",
@@ -17,8 +25,8 @@ module.exports = {
       "startDelay": "",
       "name": "",
       "addressSpaceItems": [],
-      "x": 200,
-      "y": 300,
+      "x": 300,
+      "y": 160,
       "wires": [
         [
           "03503f5859503430"
@@ -37,13 +45,21 @@ module.exports = {
       "complete": "false",
       "statusVal": "",
       "statusType": "auto",
-      "x": 420,
-      "y": 300,
+      "x": 520,
+      "y": 160,
       "wires": []
     }
   ]),
 
   "testUnitInjectFlow": helperExtensions.cleanFlowPositionData([
+    {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Unit Inject Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "f93b472c.486038",
       "type": "OPCUA-IIoT-Inject",
@@ -59,7 +75,7 @@ module.exports = {
       "name": "TestName",
       "addressSpaceItems": [],
       "x": 240,
-      "y": 280,
+      "y": 140,
       "wires": [
         [
           "72ce3c9207555c36"
@@ -79,12 +95,20 @@ module.exports = {
       "statusVal": "",
       "statusType": "auto",
       "x": 420,
-      "y": 280,
+      "y": 140,
       "wires": []
     }
   ]),
 
   "testInjectFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Inject Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "n1ijf1",
       "type": "OPCUA-IIoT-Inject",
@@ -105,8 +129,8 @@ module.exports = {
           "datatypeName": "String"
         }
       ],
-      "x": 220,
-      "y": 300,
+      "x": 240,
+      "y": 140,
       "wires": [
         [
           "n2ijf1"
@@ -117,13 +141,21 @@ module.exports = {
       "id": "n2ijf1",
       "type": "helper",
       "z": "e41e66b2c57b1657",
-      "x": 390,
-      "y": 300,
+      "x": 410,
+      "y": 140,
       "wires": []
     }
   ]),
 
   "testInjectWithDelayFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Inject with Delay Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "n1ijf2",
       "type": "OPCUA-IIoT-Inject",
@@ -144,8 +176,8 @@ module.exports = {
           "datatypeName": "String"
         }
       ],
-      "x": 240,
-      "y": 220,
+      "x": 220,
+      "y": 140,
       "wires": [
         [
           "n2ijf2"
@@ -157,13 +189,21 @@ module.exports = {
       "type": "helper",
       "z": "e41e66b2c57b1657",
       "active": true,
-      "x": 430,
-      "y": 220,
+      "x": 410,
+      "y": 140,
       "wires": []
     }
   ]),
 
   "testInjectWithLongDelayFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Inject with long Delay Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "n1ijf3",
       "type": "OPCUA-IIoT-Inject",
@@ -185,7 +225,7 @@ module.exports = {
         }
       ],
       "x": 220,
-      "y": 220,
+      "y": 180,
       "wires": [
         [
           "n2ijf3"
@@ -205,12 +245,20 @@ module.exports = {
       "statusVal": "",
       "statusType": "auto",
       "x": 410,
-      "y": 220,
+      "y": 180,
       "wires": []
     }
   ]),
 
   "testUnitReadInjectFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Unit Read Inject Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "f93b472c.486038",
       "type": "OPCUA-IIoT-Inject",
@@ -225,8 +273,8 @@ module.exports = {
       "startDelay": "1",
       "name": "TestName",
       "addressSpaceItems": [],
-      "x": 240,
-      "y": 220,
+      "x": 200,
+      "y": 160,
       "wires": [
         [
           "ff8bd45da20c638e"
@@ -245,13 +293,21 @@ module.exports = {
       "complete": "false",
       "statusVal": "",
       "statusType": "auto",
-      "x": 440,
-      "y": 220,
+      "x": 400,
+      "y": 160,
       "wires": []
     }
   ]),
 
   "testUnitListenInjectFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Unit Listen Inject Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "f93b472c.486038",
       "type": "OPCUA-IIoT-Inject",
@@ -266,8 +322,8 @@ module.exports = {
       "startDelay": "1",
       "name": "TestName",
       "addressSpaceItems": [],
-      "x": 220,
-      "y": 260,
+      "x": 180,
+      "y": 140,
       "wires": [
         [
           "8b5a7c3a6083bf35"
@@ -286,13 +342,21 @@ module.exports = {
       "complete": "false",
       "statusVal": "",
       "statusType": "auto",
-      "x": 420,
-      "y": 260,
+      "x": 380,
+      "y": 140,
       "wires": []
     }
   ]),
 
   "testUnitWriteInjectFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "e41e66b2c57b1657",
+      "type": "tab",
+      "label": "Test Unit Write Inject Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "f93b472c.486038",
       "type": "OPCUA-IIoT-Inject",
@@ -307,8 +371,8 @@ module.exports = {
       "startDelay": "1",
       "name": "TestName",
       "addressSpaceItems": [],
-      "x": 200,
-      "y": 320,
+      "x": 160,
+      "y": 140,
       "wires": [
         [
           "9c90f296e81f2ef9"
@@ -327,8 +391,8 @@ module.exports = {
       "complete": "false",
       "statusVal": "",
       "statusType": "auto",
-      "x": 420,
-      "y": 320,
+      "x": 380,
+      "y": 140,
       "wires": []
     }
   ])

@@ -76,7 +76,7 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single of full result', function (done) {
-      testFlows.testBrowseItemFlow[2].justValue = false
+      testFlows.testBrowseItemFlow[3].justValue = false
       helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
@@ -93,7 +93,7 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Read', function (done) {
-      testFlows.testBrowseItemFlow[2].sendNodesToRead = true
+      testFlows.testBrowseItemFlow[3].sendNodesToRead = true
       helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
@@ -107,7 +107,7 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Listener', function (done) {
-      testFlows.testBrowseItemFlow[2].sendNodesToListener = true
+      testFlows.testBrowseItemFlow[3].sendNodesToListener = true
       helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
@@ -121,7 +121,7 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Browser', function (done) {
-      testFlows.testBrowseItemFlow[2].sendNodesToBrowser = true
+      testFlows.testBrowseItemFlow[3].sendNodesToBrowser = true
       helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
@@ -135,9 +135,9 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with nodes to Read, Browse, and Listener', function (done) {
-      testFlows.testBrowseItemFlow[2].sendNodesToRead = true
-      testFlows.testBrowseItemFlow[2].sendNodesToListener = true
-      testFlows.testBrowseItemFlow[2].sendNodesToBrowser = true
+      testFlows.testBrowseItemFlow[3].sendNodesToRead = true
+      testFlows.testBrowseItemFlow[3].sendNodesToListener = true
+      testFlows.testBrowseItemFlow[3].sendNodesToBrowser = true
       helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
@@ -181,7 +181,7 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with nodes to Read with levels recursive', function (done) {
-      testFlows.testBrowseLevelsFlow[2].recursiveBrowse = true
+      testFlows.testBrowseLevelsFlow[3].recursiveBrowse = true
       helper.load(browseNodesToLoad, testFlows.testBrowseLevelsFlow, function () {
         let n6 = helper.getNode('n6f2')
         let n1 = helper.getNode('n1f2')

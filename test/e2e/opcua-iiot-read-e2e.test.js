@@ -53,7 +53,7 @@ describe('OPC UA Read node e2e Testing', function () {
 
   describe('Read node',  function () {
     it('should get a message with payload for attributeId All',  function (done) {
-      testFlows.testReadFlow[2].attributeId = 0
+      testFlows.testReadFlow[3].attributeId = 0
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -69,7 +69,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId All', function (done) {
-      testFlows.testReadFlow[2].attributeId = 0
+      testFlows.testReadFlow[3].attributeId = 0
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
@@ -82,7 +82,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId 0', function (done) {
-      testFlows.testReadFlow[2].attributeId = 0
+      testFlows.testReadFlow[3].attributeId = 0
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
@@ -99,7 +99,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId 0 from flex server', function (done) {
-      testFlows.testReadFlow[2].attributeId = 0
+      testFlows.testReadFlow[3].attributeId = 0
       helper.load(readNodesToLoadWithFlexServer, testFlows.testReadFlexServerFlow, function () {
         let n6 = helper.getNode('n6rdf3')
         n6.on('input', async function (msg) {
@@ -112,7 +112,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should get a message with payload for attributeId Node-ID', function (done) {
-      testFlows.testReadFlow[2].attributeId = 1
+      testFlows.testReadFlow[3].attributeId = 1
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -128,7 +128,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Node-ID', function (done) {
-      testFlows.testReadFlow[2].attributeId = 1
+      testFlows.testReadFlow[3].attributeId = 1
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
@@ -141,7 +141,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId Node-ID', function (done) {
-      testFlows.testReadFlow[2].attributeId = 1
+      testFlows.testReadFlow[3].attributeId = 1
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
@@ -154,7 +154,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should get a message with payload for attributeId Node-Class', function (done) {
-      testFlows.testReadFlow[2].attributeId = 2
+      testFlows.testReadFlow[3].attributeId = 2
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -170,7 +170,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Node-Class', function (done) {
-      testFlows.testReadFlow[2].attributeId = 2
+      testFlows.testReadFlow[3].attributeId = 2
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
@@ -183,7 +183,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId Node-Class', function (done) {
-      testFlows.testReadFlow[2].attributeId = 2
+      testFlows.testReadFlow[3].attributeId = 2
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
@@ -196,7 +196,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should get a message with payload for attributeId Browse-Name', function (done) {
-      testFlows.testReadFlow[2].attributeId = 3
+      testFlows.testReadFlow[3].attributeId = 3
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -212,7 +212,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Browse-Name', function (done) {
-      testFlows.testReadFlow[2].attributeId = 3
+      testFlows.testReadFlow[3].attributeId = 3
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
@@ -225,7 +225,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId Browse-Name', function (done) {
-      testFlows.testReadFlow[2].attributeId = 3
+      testFlows.testReadFlow[3].attributeId = 3
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
@@ -238,7 +238,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should get a message with payload for attributeId Display-Name', function (done) {
-      testFlows.testReadFlow[2].attributeId = 4
+      testFlows.testReadFlow[3].attributeId = 4
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -254,7 +254,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Display-Name', function (done) {
-      testFlows.testReadFlow[2].attributeId = 4
+      testFlows.testReadFlow[3].attributeId = 4
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
@@ -267,7 +267,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId Display-Name', function (done) {
-      testFlows.testReadFlow[2].attributeId = 4
+      testFlows.testReadFlow[3].attributeId = 4
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
@@ -280,7 +280,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should get a message with payload for attributeId Value', function (done) {
-      testFlows.testReadFlow[2].attributeId = 13
+      testFlows.testReadFlow[3].attributeId = 13
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -296,7 +296,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Value', function (done) {
-      testFlows.testReadFlow[2].attributeId = 13
+      testFlows.testReadFlow[3].attributeId = 13
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
@@ -309,7 +309,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId Value', function (done) {
-      testFlows.testReadFlow[2].attributeId = 13
+      testFlows.testReadFlow[3].attributeId = 13
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
@@ -322,7 +322,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should get a message with payload for attributeId History', function (done) {
-      testFlows.testReadFlow[2].attributeId = 130
+      testFlows.testReadFlow[3].attributeId = 130
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -338,7 +338,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId History', function (done) {
-      testFlows.testReadFlow[2].attributeId = 130
+      testFlows.testReadFlow[3].attributeId = 130
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
@@ -353,7 +353,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results with response for attributeId History', function (done) {
-      testFlows.testReadFlow[2].attributeId = 130
+      testFlows.testReadFlow[3].attributeId = 130
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {

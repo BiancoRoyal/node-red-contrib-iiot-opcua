@@ -115,7 +115,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     
 
     it('should send a message with payload read node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'read'
+      testFlows.testInjectFlow[1].injectType = 'read'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -128,7 +128,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with topic read node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'read'
+      testFlows.testInjectFlow[1].injectType = 'read'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -141,7 +141,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types read node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'read'
+      testFlows.testInjectFlow[1].injectType = 'read'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -168,7 +168,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with payload listen node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'listen'
+      testFlows.testInjectFlow[1].injectType = 'listen'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -181,7 +181,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with topic listen node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'listen'
+      testFlows.testInjectFlow[1].injectType = 'listen'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -194,7 +194,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types listen node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'listen'
+      testFlows.testInjectFlow[1].injectType = 'listen'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -221,7 +221,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with payload write node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'write'
+      testFlows.testInjectFlow[1].injectType = 'write'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -234,7 +234,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with topic write node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'write'
+      testFlows.testInjectFlow[1].injectType = 'write'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
@@ -247,7 +247,7 @@ describe('OPC UA Inject node Unit Testing', function () {
     })
 
     it('should send a message with types write node', function (done) {
-      testFlows.testInjectFlow[0].injectType = 'write'
+      testFlows.testInjectFlow[1].injectType = 'write'
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
