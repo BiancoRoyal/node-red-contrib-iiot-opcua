@@ -24,13 +24,13 @@ The actual [DATATRONiQ][5] and [Iniationware][6] contributions to v4.x+ upgrade 
 and updating dependencies, including updates to new major release versions of Node-RED (v1.x to v2.x and higher) and node-opcua (v0.7 to v2.64 and higher).
 Now [DATATRONiQ][5] and [Iniationware][6] working together and try to build a community from the industry and individuals to provide an LTS Industrial IoT package for OPC UA.
 
-## International Node-RED IIoT Website
+## International IIoT Website for Node-RED
 
-For an international area, [Iniationware][6] has provided the [Node-RED PLUS International][8] website.
+For an international area, [Iniationware][6] has provided the [PLUS for Node-RED International][8] website.
 
-## Node-RED IIoT Webseite Deutschland
+## IIoT Webseite Deutschland für Node-RED
 
-Für einen deutschsprachigen Bereich hat [Iniationware][6] die Webseite [Node-RED PLUS Germany][7] bereitgestellt.
+Für einen deutschsprachigen Bereich hat [Iniationware][6] die Webseite [PLUS for Node-RED Germany][7] bereitgestellt.
 
 ## Installing
 
