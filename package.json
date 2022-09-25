@@ -18,9 +18,9 @@
   },
   "keywords": [
     "node-red",
-    "node-opcua",
+    "plusfornodered",
+    "opcua",
     "automation",
-    "iiot",
     "biancoroyal"
   ],
   "author": "Klaus Landsdorf <developers@bianco-royal.de> (https://bianco-royal.space/)",
