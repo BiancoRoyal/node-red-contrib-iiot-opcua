@@ -16,6 +16,7 @@ import {Todo, TodoVoidFunction} from "./types/placeholders";
 import _ from 'underscore';
 import coreListener from "./core/opcua-iiot-core-listener";
 import {
+  buildNodeListFromClient,
   buildNodesToListen,
   checkConnectorState,
   checkSessionNotValid,
@@ -478,6 +479,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       let msg: Todo = {
         payload: {
           addressSpaceItems: [{name: '', nodeId, datatypeName: ''}],
+          nodeId,
           nodetype: 'listen',
           injectType: 'subscribe'
         },
@@ -503,7 +505,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         }
       } else {
         msg.payload = {
-          ...msg.payload,
+          ... msg.payload,
           value: dataValue,
           statusCode: monitoredItem.statusCode,
           itemToMonitor: monitoredItem.itemToMonitor,
@@ -555,6 +557,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       let msg = {
         payload: {
           addressSpaceItems: [{name: '', nodeId: nodeId, datatypeName: ''}],
+          nodeId,
           nodetype: 'listen',
           injectType: 'event'
         },
@@ -636,7 +639,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         ...payload,
         nodetype: payload.nodetype === 'browse' ? 'inject' : payload.nodetype,
         injectType: payload.nodetype === 'browse' ? 'listen' : payload.injectType,
-        addressSpaceItems: buildNodesToListen(payload)
+        addressSpaceItems: buildNodeListFromClient(payload)
       }
 
       const outputMessage = {
