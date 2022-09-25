@@ -91,29 +91,33 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig: Todo = this;
+    let self: Todo = this;
 
-    nodeConfig.iiot = coreListener.initListenerNode()
+    self.iiot = coreListener.initListenerNode()
 
-    nodeConfig.iiot.stateMachine = coreListener.createListenerStateMachine()
-    coreListener.internalDebugLog('Start FSM: ' + nodeConfig.iiot.stateMachine.getMachineState())
-    coreListener.detailDebugLog('FSM events:' + nodeConfig.iiot.stateMachine.getMachineEvents())
+    self.iiot.stateMachine = coreListener.createListenerStateMachine()
+    coreListener.internalDebugLog('Start FSM: ' + self.iiot.stateMachine.getMachineState())
+    coreListener.detailDebugLog('FSM events:' + self.iiot.stateMachine.getMachineEvents())
 
     const createSubscription = (msg: Todo) => {
-      if (nodeConfig.iiot.stateMachine.getMachineState() !== 'IDLE') {
-        coreListener.internalDebugLog('New Subscription Request On State ' + nodeConfig.iiot.stateMachine.getMachineState())
+      if (self.iiot.stateMachine.getMachineState() !== 'IDLE') {
+        coreListener.internalDebugLog('New Subscription Request On State ' + self.iiot.stateMachine.getMachineState())
         return
       }
-      coreListener.internalDebugLog('Create Subscription On State ' + nodeConfig.iiot.stateMachine.getMachineState())
-      if (nodeConfig.iiot?.opcuaSubscription)
-        nodeConfig.iiot.opcuaSubscription = null
-      nodeConfig.iiot.stateMachine.requestinitsub()
+
+      coreListener.internalDebugLog('Create Subscription On State ' + self.iiot.stateMachine.getMachineState())
+
+      if (self.iiot?.opcuaSubscription) {
+        self.iiot.opcuaSubscription = null
+      }
+
+      self.iiot.stateMachine.requestinitsub()
 
       const timeMilliseconds = (typeof msg.payload.value === 'number') ? msg.payload.value : null
       const dynamicOptions = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
-      coreListener.internalDebugLog('create subscription, type: ' + nodeConfig.action)
+      coreListener.internalDebugLog('create subscription, type: ' + self.action)
       const options = dynamicOptions ||
-      nodeConfig.action === 'events'
+      self.action === 'events'
         ? coreListener.getEventSubscriptionParameters(timeMilliseconds)
         : coreListener.getSubscriptionParameters(timeMilliseconds);
 
@@ -124,25 +128,25 @@ module.exports = (RED: nodered.NodeAPI) => {
     const setSubscriptionEvents = (subscription: ClientSubscription) => {
       subscription.on('started', () => {
         coreListener.internalDebugLog('Subscription started')
-        nodeConfig.oldStatusParameter = setNodeStatusTo(this, 'started', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
-        nodeConfig.iiot.monitoredItems.clear()
-        nodeConfig.iiot.stateMachine.startsub()
+        self.oldStatusParameter = setNodeStatusTo(this, 'started', self.oldStatusParameter, self.showStatusActivities, statusHandler)
+        self.iiot.monitoredItems.clear()
+        self.iiot.stateMachine.startsub()
       })
 
       subscription.on('terminated', () => {
         coreListener.internalDebugLog('Subscription terminated')
-        nodeConfig.oldStatusParameter = setNodeStatusTo(this, 'terminated', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
-        nodeConfig.iiot.stateMachine.terminatesub().idlesub()
+        self.oldStatusParameter = setNodeStatusTo(this, 'terminated', self.oldStatusParameter, self.showStatusActivities, statusHandler)
+        self.iiot.stateMachine.terminatesub().idlesub()
         resetSubscription()
       })
 
       subscription.on('internal_error', (err: Error) => {
         coreListener.internalDebugLog('internal_error: ' + err.message)
-        if (nodeConfig.showErrors) {
+        if (self.showErrors) {
           this.error(err, {payload: 'Internal Error'})
         }
-        nodeConfig.oldStatusParameter = setNodeStatusTo(this, 'error', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
-        nodeConfig.iiot.stateMachine.errorsub()
+        self.oldStatusParameter = setNodeStatusTo(this, 'error', self.oldStatusParameter, self.showStatusActivities, statusHandler)
+        self.iiot.stateMachine.errorsub()
         resetSubscription()
       })
 
@@ -153,7 +157,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const makeSubscription = function (parameters: ClientSubscriptionOptions) {
-      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'ListenerSubscription')) {
+      if (checkSessionNotValid(self.connector.iiot.opcuaSession, 'ListenerSubscription')) {
         return
       }
       if (!parameters) {
@@ -162,14 +166,14 @@ module.exports = (RED: nodered.NodeAPI) => {
       } else {
         coreListener.internalDebugLog('Subscription Parameters: ' + JSON.stringify(parameters))
       }
-      nodeConfig.iiot.opcuaSubscription = ClientSubscription.create(nodeConfig.connector.iiot.opcuaSession, parameters)
+      self.iiot.opcuaSubscription = ClientSubscription.create(self.connector.iiot.opcuaSession, parameters)
       coreListener.internalDebugLog('New Subscription Created')
 
-      if (nodeConfig.connector) {
-        nodeConfig.iiot.hasOpcUaSubscriptions = true
+      if (self.connector) {
+        self.iiot.hasOpcUaSubscriptions = true
       }
-      setSubscriptionEvents(nodeConfig.iiot.opcuaSubscription)
-      nodeConfig.iiot.stateMachine.initsub()
+      setSubscriptionEvents(self.iiot.opcuaSubscription)
+      self.iiot.stateMachine.initsub()
     }
 
     const resetSubscription = function () {
@@ -179,62 +183,62 @@ module.exports = (RED: nodered.NodeAPI) => {
     const sendAllMonitoredItems = (payload: Todo) => {
       let addressSpaceItems: Todo[] = []
 
-      nodeConfig.iiot.monitoredASO.forEach(function (key: Todo) {
+      self.iiot.monitoredASO.forEach(function (key: Todo) {
         addressSpaceItems.push({name: '', nodeId: key, datatypeName: ''})
       })
 
       this.send(({payload: payload, addressSpaceItems: addressSpaceItems} as Todo))
 
-      nodeConfig.iiot.monitoredItems.clear()
-      nodeConfig.iiot.monitoredASO.clear()
+      self.iiot.monitoredItems.clear()
+      self.iiot.monitoredASO.clear()
     }
 
     const subscribeActionInput = function (msg: Todo) {
-      if (nodeConfig.iiot.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
-        nodeConfig.iiot.messageQueue.push(msg)
+      if (self.iiot.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+        self.iiot.messageQueue.push(msg)
       } else {
         subscribeMonitoredItem(msg)
       }
     }
 
     const subscribeEventsInput = function (msg: Todo) {
-      if (nodeConfig.iiot.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
-        nodeConfig.iiot.messageQueue.push(msg)
+      if (self.iiot.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+        self.iiot.messageQueue.push(msg)
       } else {
         subscribeMonitoredEvent(msg)
       }
     }
 
     const updateSubscriptionStatus = () => {
-      coreListener.internalDebugLog('listening' + ' (' + nodeConfig.iiot.monitoredItems.size + ')')
-      nodeConfig.oldStatusParameter = setNodeStatusTo(this, 'listening' + ' (' + nodeConfig.iiot.monitoredItems.size + ')', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
+      coreListener.internalDebugLog('listening' + ' (' + self.iiot.monitoredItems.size + ')')
+      self.oldStatusParameter = setNodeStatusTo(this, 'listening' + ' (' + self.iiot.monitoredItems.size + ')', self.oldStatusParameter, self.showStatusActivities, statusHandler)
     }
 
     const handleMonitoringOfGroupedItems = (msg: Todo) => {
-      if (nodeConfig.iiot.monitoredItemGroup && nodeConfig.iiot.monitoredItemGroup.groupId !== null) {
-        nodeConfig.iiot.monitoredItemGroup.terminate(function (err: Error) {
+      if (self.iiot.monitoredItemGroup && self.iiot.monitoredItemGroup.groupId !== null) {
+        self.iiot.monitoredItemGroup.terminate(function (err: Error) {
           if (err) {
             coreListener.internalDebugLog('Monitoring Terminate Error')
             coreListener.internalDebugLog(err)
           }
-          nodeConfig.iiot.monitoredItems.clear()
-          nodeConfig.iiot.monitoredASO.clear()
-          nodeConfig.iiot.monitoredItemGroup.groupId = null
+          self.iiot.monitoredItems.clear()
+          self.iiot.monitoredASO.clear()
+          self.iiot.monitoredItemGroup.groupId = null
           updateSubscriptionStatus()
         })
       } else {
-        coreListener.buildNewMonitoredItemGroup(this, msg, msg.payload.addressSpaceItems, nodeConfig.iiot.opcuaSubscription)
+        coreListener.buildNewMonitoredItemGroup(this, msg, msg.payload.addressSpaceItems, self.iiot.opcuaSubscription)
           .then((result: Todo) => {
             if (!result.monitoredItemGroup) {
               this.error(new Error('No Monitored Item Group In Result Of NodeOPCUA'))
             } else {
               result.monitoredItemGroup.groupId = _.uniqueId('group_')
-              nodeConfig.iiot.monitoredItemGroup = result.monitoredItemGroup
+              self.iiot.monitoredItemGroup = result.monitoredItemGroup
             }
           }).catch((err: Error) => {
           coreListener.subscribeDebugLog('Monitoring Build Item Group Error')
           coreListener.subscribeDebugLog(err)
-          if (nodeConfig.showErrors) {
+          if (self.showErrors) {
             this.error(err, msg)
           }
         })
@@ -244,26 +248,26 @@ module.exports = (RED: nodered.NodeAPI) => {
     const handleMonitoringOfItems = (msg: Todo) => {
       const itemsToMonitor = msg.payload.addressSpaceItems.filter((addressSpaceItem: Todo) => {
         const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-        return typeof nodeConfig.iiot.monitoredASO.get(nodeIdToMonitor) === 'undefined'
+        return typeof self.iiot.monitoredASO.get(nodeIdToMonitor) === 'undefined'
       })
 
       const itemsToTerminate = msg.payload.addressSpaceItems.filter((addressSpaceItem: Todo) => {
         const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-        return typeof nodeConfig.iiot.monitoredASO.get(nodeIdToMonitor) !== 'undefined'
+        return typeof self.iiot.monitoredASO.get(nodeIdToMonitor) !== 'undefined'
       })
 
       if (itemsToMonitor.length > 0) {
         const monitorMessage = Object.assign({}, msg)
         monitorMessage.addressSpaceItems = itemsToMonitor
         coreListener.subscribeDebugLog('itemsToMonitor ' + itemsToMonitor.length)
-        coreListener.monitorItems(this, monitorMessage, nodeConfig.iiot.opcuaSubscription)
+        coreListener.monitorItems(this, monitorMessage, self.iiot.opcuaSubscription)
       }
 
       if (itemsToTerminate.length > 0) {
         coreListener.subscribeDebugLog('itemsToTerminate ' + itemsToTerminate.length)
         itemsToTerminate.forEach((addressSpaceItem: Todo) => {
           const nodeIdToMonitor = (typeof addressSpaceItem.nodeId === 'string') ? addressSpaceItem.nodeId : addressSpaceItem.nodeId.toString()
-          const item = nodeConfig.iiot.monitoredASO.get(nodeIdToMonitor)
+          const item = self.iiot.monitoredASO.get(nodeIdToMonitor)
           if (item && item.monitoredItem) {
             coreListener.subscribeDebugLog('Monitored Item Unsubscribe ' + nodeIdToMonitor)
             item.monitoredItem.terminate(function (err: Error) {
@@ -278,7 +282,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const subscribeMonitoredItem = (msg: Todo) => {
-      if (checkSessionNotValid(nodeConfig?.connector?.iiot?.opcuaSession, 'MonitorListener')) {
+      if (checkSessionNotValid(self?.connector?.iiot?.opcuaSession, 'MonitorListener')) {
         return
       }
 
@@ -289,13 +293,13 @@ module.exports = (RED: nodered.NodeAPI) => {
         msg.payload.addressSpaceItems = msg.payload.browseResults
       }
       if (msg.payload.addressSpaceItems?.length) {
-        if (nodeConfig.useGroupItems) {
+        if (self.useGroupItems) {
           handleMonitoringOfGroupedItems(msg)
         } else {
           handleMonitoringOfItems(msg)
         }
       } else {
-        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'error', nodeConfig.oldStatusParameter, true, statusHandler)
+        self.oldStatusParameter = setNodeStatusTo(self, 'error', self.oldStatusParameter, true, statusHandler)
         this.send({
           ...msg,
           payload: {
@@ -325,23 +329,23 @@ module.exports = (RED: nodered.NodeAPI) => {
           nodeIdToMonitor = addressSpaceItem.nodeId.toString()
         }
 
-        const item = nodeConfig.iiot.monitoredASO.get(nodeIdToMonitor)
+        const item = self.iiot.monitoredASO.get(nodeIdToMonitor)
 
         if (!item) {
           coreListener.eventDebugLog('Register Event Item ' + nodeIdToMonitor)
-          coreListener.buildNewEventItem(nodeIdToMonitor, msg, nodeConfig.iiot.opcuaSubscription)
+          coreListener.buildNewEventItem(nodeIdToMonitor, msg, self.iiot.opcuaSubscription)
             .then(function (result: Todo) {
               if (result.monitoredItem.itemToMonitor.nodeId) {
                 coreListener.eventDebugLog('Event Item Registered ' + result.monitoredItem.itemToMonitor.nodeId + ' to ' + result.nodeId)
-                nodeConfig.iiot.monitoredASO.set(result?.nodeId?.toString(), {
+                self.iiot.monitoredASO.set(result?.nodeId?.toString(), {
                   monitoredItem: result.monitoredItem,
-                  topic: msg.topic || nodeConfig.topic
+                  topic: msg.topic || self.topic
                 })
               }
             }).catch((err: Error) => {
             coreListener.eventDebugLog('Build Event Error')
             coreListener.eventDebugLog(err)
-            if (nodeConfig.showErrors) {
+            if (self.showErrors) {
               this.error(err, msg)
             }
           })
@@ -357,7 +361,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const subscribeMonitoredEvent = (msg: Todo) => {
-      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'EventListener')) {
+      if (checkSessionNotValid(self.connector.iiot.opcuaSession, 'EventListener')) {
         return
       }
 
@@ -375,7 +379,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         } else {
           coreListener.internalDebugLog(err.message + ' on monitoredItem')
         }
-        if (nodeConfig.showErrors) {
+        if (self.showErrors) {
           this.error(err, msg)
         }
       }
@@ -386,18 +390,18 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreListener.internalDebugLog('updateMonitoredItemLists = UMIL')
 
       if (monitoredItem && monitoredItem.itemToMonitor) {
-        if (nodeConfig.iiot.monitoredItems.has(monitoredItem?.itemToMonitor?.nodeId?.toString())) {
-          nodeConfig.iiot.monitoredItems.delete(monitoredItem?.itemToMonitor?.nodeId?.toString())
+        if (self.iiot.monitoredItems.has(monitoredItem?.itemToMonitor?.nodeId?.toString())) {
+          self.iiot.monitoredItems.delete(monitoredItem?.itemToMonitor?.nodeId?.toString())
         }
 
         if (isNodeId(monitoredItem.itemToMonitor.nodeId)) {
           coreListener.internalDebugLog('UMIL Terminate Monitored Item ' + monitoredItem.itemToMonitor.nodeId)
-          if (nodeConfig.iiot.monitoredASO.has(nodeId)) {
-            nodeConfig.iiot.monitoredASO.delete(nodeId)
+          if (self.iiot.monitoredASO.has(nodeId)) {
+            self.iiot.monitoredASO.delete(nodeId)
           }
         } else {
           coreListener.internalDebugLog('UMIL monitoredItem NodeId is not valid Id:' + monitoredItem.itemToMonitor.nodeId)
-          nodeConfig.iiot.monitoredASO.forEach(function (value: Todo, key: Todo, map: Todo) {
+          self.iiot.monitoredASO.forEach(function (value: Todo, key: Todo, map: Todo) {
             coreListener.internalDebugLog('UMIL monitoredItem removing from ASO list key:' + key + ' value ' + value.monitoredItem.itemToMonitor.nodeId)
             if (value.monitoredItem.itemToMonitor.nodeId && value.monitoredItem.itemToMonitor.nodeId === monitoredItem.itemToMonitor.nodeId) {
               coreListener.internalDebugLog('UMIL monitoredItem removed from ASO list' + key)
@@ -420,7 +424,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreListener.internalDebugLog('monitoredItem NodeId is not valid Id:' + monitoredItem.itemToMonitor.nodeId)
       }
       coreListener.internalDebugLog('add monitoredItem to list Id:' + monitoredItem.itemToMonitor.nodeId + ' nodeId: ' + monitoredItem.itemToMonitor.nodeId)
-      nodeConfig.iiot.monitoredItems.set(monitoredItem?.itemToMonitor?.nodeId?.toString(), monitoredItem)
+      self.iiot.monitoredItems.set(monitoredItem?.itemToMonitor?.nodeId?.toString(), monitoredItem)
 
       monitoredItem.on('initialized', function () {
         coreListener.internalDebugLog('monitoredItem ' + monitoredItem.itemToMonitor.nodeId + ' initialized on ' + monitoredItem.itemToMonitor.nodeId)
@@ -439,7 +443,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       monitoredItem.on('err', (err: Error) => {
         const error = new Error(monitoredItem.itemToMonitor.nodeId.toString() + ': ' + (err?.message || err))
         coreListener.internalDebugLog('monitoredItem Error: ' + error + ' on ' + monitoredItem.itemToMonitor.nodeId)
-        if (nodeConfig.showErrors) {
+        if (self.showErrors) {
           this.error(error, ({payload: 'Monitored Item Error', monitoredItem: monitoredItem} as Todo))
         }
 
@@ -468,8 +472,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       const nodeId = (isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem?.itemToMonitor?.nodeId?.toString() : 'invalid'
-      const item = nodeConfig.iiot.monitoredASO.get(nodeId)
-      const topic = (item) ? item.topic : nodeConfig.topic
+      const item = self.iiot.monitoredASO.get(nodeId)
+      const topic = (item) ? item.topic : self.topic
 
       let msg: Todo = {
         payload: {
@@ -483,13 +487,13 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreListener.internalDebugLog('sendDataFromMonitoredItem: ' + msg.payload.addressSpaceItems[0].nodeId)
 
       let dataValuesString: string
-      msg.justValue = nodeConfig.justValue
-      if (nodeConfig.justValue) {
+      msg.justValue = self.justValue
+      if (self.justValue) {
         dataValuesString = JSON.stringify(dataValue, null, 2)
         try {
           RED.util.setMessageProperty(msg.payload, 'value', JSON.parse(dataValuesString))
         } catch (err: any) {
-          if (nodeConfig.showErrors) {
+          if (self.showErrors) {
             this.warn('JSON not to parse from string for monitored item')
             this.error(err, msg)
           }
@@ -501,7 +505,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         msg.payload = {
           ...msg.payload,
           value: dataValue,
-          statusCode: monitoredItem.statusCode, 
+          statusCode: monitoredItem.statusCode,
           itemToMonitor: monitoredItem.itemToMonitor,
           monitoredItemId: monitoredItem.itemToMonitor
         }
@@ -514,12 +518,12 @@ module.exports = (RED: nodered.NodeAPI) => {
       coreListener.eventDetailDebugLog('Monitored Event Results ' + eventResults)
 
       let dataValuesString: string
-      if (nodeConfig.justValue) {
+      if (self.justValue) {
         dataValuesString = JSON.stringify(dataValue, null, 2)
         try {
           RED.util.setMessageProperty(msg.payload, 'value', JSON.parse(dataValuesString))
         } catch (err: any) {
-          if (nodeConfig.showErrors) {
+          if (self.showErrors) {
             this.warn('JSON not to parse from string for monitored item')
             this.error(err, msg)
           }
@@ -545,8 +549,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       const nodeId = (isNodeId(monitoredItem.itemToMonitor.nodeId)) ? monitoredItem?.itemToMonitor?.nodeId?.toString() : 'invalid'
-      const item = nodeConfig.iiot.monitoredASO.get(nodeId)
-      const topic = (item) ? item.topic : nodeConfig.topic
+      const item = self.iiot.monitoredASO.get(nodeId)
+      const topic = (item) ? item.topic : self.topic
 
       let msg = {
         payload: {
@@ -554,10 +558,10 @@ module.exports = (RED: nodered.NodeAPI) => {
           nodetype: 'listen',
           injectType: 'event'
         },
-        topic: topic || nodeConfig.topic, // default if item.topic is empty
+        topic: topic || self.topic, // default if item.topic is empty
       }
 
-      coreListener.analyzeEvent(nodeConfig.connector.iiot.opcuaSession, getBrowseName, dataValue)
+      coreListener.analyzeEvent(self.connector.iiot.opcuaSession, getBrowseName, dataValue)
         .then((eventResults: Todo) => {
           handleEventResults(msg, dataValue, eventResults, monitoredItem)
         }).catch((err: Error) => {
@@ -568,7 +572,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     const errorHandling = (err: Error) => {
       coreListener.internalDebugLog('Basic Error Handling')
       coreListener.internalDebugLog(err)
-      if (nodeConfig.showErrors) {
+      if (self.showErrors) {
         this.error(err, {payload: 'Error Handling'})
       }
 
@@ -598,7 +602,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const handleListenerInput = (msg: Todo) => {
-      switch (nodeConfig.action) {
+      switch (self.action) {
         case 'subscribe':
           subscribeMonitoredItem(msg)
           break
@@ -623,7 +627,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
-      if (!checkConnectorState(nodeConfig, msg, 'Listener', errorHandler, emitHandler, statusHandler)) {
+      if (!checkConnectorState(self, msg, 'Listener', errorHandler, emitHandler, statusHandler)) {
         return
       }
       const payload = msg.payload as EventPayloadLike
@@ -642,18 +646,18 @@ module.exports = (RED: nodered.NodeAPI) => {
 
       if (!outputPayload.addressSpaceItems || !outputPayload.addressSpaceItems.length) {
         coreListener.subscribeDebugLog('Address-Space-Item Set Not Valid')
-        if (nodeConfig.showErrors) {
+        if (self.showErrors) {
           this.error(new Error('Address-Space-Item Set Not Valid'), msg)
         }
         return
       }
 
-      if (nodeConfig.iiot.stateMachine.getMachineState() === 'IDLE') {
-        nodeConfig.iiot.messageQueue.push(outputMessage)
+      if (self.iiot.stateMachine.getMachineState() === 'IDLE') {
+        self.iiot.messageQueue.push(outputMessage)
         createSubscription(outputMessage)
       } else {
-        if (!coreListener.checkState(nodeConfig, outputMessage, 'Input')) {
-          nodeConfig.iiot.messageQueue.push(outputMessage)
+        if (!coreListener.checkState(self, outputMessage, 'Input')) {
+          self.iiot.messageQueue.push(outputMessage)
           return
         }
         handleListenerInput(outputMessage)
@@ -667,49 +671,49 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     registerToConnector(this, statusHandler, onAlias, errorHandler)
 
-    if (nodeConfig.connector) {
-      nodeConfig.connector.on('connector_init', () => {
+    if (self.connector) {
+      self.connector.on('connector_init', () => {
         coreListener.internalDebugLog('Reset Subscription On Connector Init')
-        if (nodeConfig.iiot?.opcuaSubscription) {
-          nodeConfig.iiot.opcuaSubscription = null
+        if (self.iiot?.opcuaSubscription) {
+          self.iiot.opcuaSubscription = null
         }
 
-        nodeConfig.iiot.monitoredItems = new Map()
-        nodeConfig.iiot.monitoredASO = new Map()
-        nodeConfig.iiot.stateMachine = coreListener.createListenerStateMachine()
-        nodeConfig.iiot.monitoredItemGroup = null
+        self.iiot.monitoredItems = new Map()
+        self.iiot.monitoredASO = new Map()
+        self.iiot.stateMachine = coreListener.createListenerStateMachine()
+        self.iiot.monitoredItemGroup = null
       })
 
-      nodeConfig.connector.on('connection_stopped', () => {
+      self.connector.on('connection_stopped', () => {
         terminateSubscription(() => {
-          if (nodeConfig.iiot?.opcuaSubscription)
-            nodeConfig.iiot.opcuaSubscription = null
+          if (self.iiot?.opcuaSubscription)
+            self.iiot.opcuaSubscription = null
           coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection stopped')
         })
       })
 
-      nodeConfig.connector.on('connection_end', () => {
+      self.connector.on('connection_end', () => {
         terminateSubscription(() => {
-          if (nodeConfig.iiot?.opcuaSubscription) {
-            nodeConfig.iiot.opcuaSubscription = null
+          if (self.iiot?.opcuaSubscription) {
+            self.iiot.opcuaSubscription = null
           }
           coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection ends')
         })
       })
 
-      nodeConfig.connector.on('connection_reconfigure', () => {
+      self.connector.on('connection_reconfigure', () => {
         terminateSubscription(() => {
-          if (nodeConfig.iiot?.opcuaSubscription) {
-            nodeConfig.iiot.opcuaSubscription = null
+          if (self.iiot?.opcuaSubscription) {
+            self.iiot.opcuaSubscription = null
           }
           coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection reconfigure')
         })
       })
 
-      nodeConfig.connector.on('connection_renew', () => {
+      self.connector.on('connection_renew', () => {
         terminateSubscription(() => {
-          if (nodeConfig.iiot?.opcuaSubscription) {
-            nodeConfig.iiot.opcuaSubscription = null
+          if (self.iiot?.opcuaSubscription) {
+            self.iiot.opcuaSubscription = null
           }
           coreListener.internalDebugLog('Subscription Was Terminated On Connector Event -> connection renew')
         })
@@ -717,21 +721,21 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const terminateSubscription = function (done: () => void) {
-      if (nodeConfig.iiot?.opcuaSubscription && nodeConfig.iiot?.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
-        nodeConfig.iiot.stateMachine.terminatesub()
-        nodeConfig.iiot.opcuaSubscription.terminate(() => {
-          nodeConfig.iiot.opcuaSubscription.removeAllListeners()
-          nodeConfig.iiot.stateMachine.idlesub()
+      if (self.iiot?.opcuaSubscription && self.iiot?.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
+        self.iiot.stateMachine.terminatesub()
+        self.iiot.opcuaSubscription.terminate(() => {
+          self.iiot.opcuaSubscription.removeAllListeners()
+          self.iiot.stateMachine.idlesub()
           done()
         })
       } else {
-        nodeConfig.iiot?.stateMachine.idlesub()
+        self.iiot?.stateMachine.idlesub()
         done()
       }
     }
 
     if (process.env.TEST === 'true')
-      nodeConfig.functions = {
+      self.functions = {
         createSubscription,
         subscribeActionInput,
         subscribeMonitoredItem,
@@ -741,15 +745,20 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
     this.on('close', (done: () => void) => {
+      coreListener.internalDebugLog('Close Listener Node - start with terminate of the OPC UA subscription')
+      self.removeAllListeners()
+
       terminateSubscription(() => {
 
-        if (nodeConfig.iiot?.opcuaSubscription) {
-          nodeConfig.iiot.opcuaSubscription = null
+        if (self.iiot?.opcuaSubscription) {
+          self.iiot.opcuaSubscription = null
         }
 
-        deregisterToConnector(nodeConfig, () => {
-          resetIiotNode(nodeConfig)
+        coreListener.internalDebugLog('Close Listener Node - start with signal to deregister in the connector')
+        deregisterToConnector(self, () => {
+          resetIiotNode(self)
           done()
+          coreListener.internalDebugLog('Close of Listener Node done')
         })
 
         coreListener.internalDebugLog('Close Listener Node')
@@ -758,46 +767,46 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     /* #########   FSM EVENTS  #########     */
 
-    nodeConfig.iiot.stateMachine.onIDLE = function () {
+    self.iiot.stateMachine.onIDLE = function () {
       coreListener.detailDebugLog('Listener IDLE Event FSM')
     }
 
-    nodeConfig.iiot.stateMachine.onREQUESTED = function () {
+    self.iiot.stateMachine.onREQUESTED = function () {
       coreListener.detailDebugLog('Listener REQUESTED Event FSM')
     }
 
-    nodeConfig.iiot.stateMachine.onINIT = function () {
+    self.iiot.stateMachine.onINIT = function () {
       coreListener.detailDebugLog('Listener INIT Event FSM')
     }
 
-    nodeConfig.iiot.stateMachine.onSTARTED = function () {
+    self.iiot.stateMachine.onSTARTED = function () {
       coreListener.detailDebugLog('Listener STARTED Event FSM')
 
-      switch (nodeConfig.action) {
+      switch (self.action) {
         case 'subscribe':
-          while (nodeConfig.iiot.messageQueue.length > 0) {
-            subscribeMonitoredItem(nodeConfig.iiot.messageQueue.shift())
+          while (self.iiot.messageQueue.length > 0) {
+            subscribeMonitoredItem(self.iiot.messageQueue.shift())
           }
           break
         case 'events':
-          while (nodeConfig.iiot.messageQueue.length > 0) {
-            subscribeMonitoredEvent(nodeConfig.iiot.messageQueue.shift())
+          while (self.iiot.messageQueue.length > 0) {
+            subscribeMonitoredEvent(self.iiot.messageQueue.shift())
           }
           break
         default:
-          coreListener.internalDebugLog('Unknown Action Type ' + nodeConfig.action)
+          coreListener.internalDebugLog('Unknown Action Type ' + self.action)
       }
     }
 
-    nodeConfig.iiot.stateMachine.onTERMINATED = function () {
+    self.iiot.stateMachine.onTERMINATED = function () {
       coreListener.detailDebugLog('Listener TERMINATED Event FSM')
     }
 
-    nodeConfig.iiot.stateMachine.onERROR = function () {
+    self.iiot.stateMachine.onERROR = function () {
       coreListener.detailDebugLog('Listener ERROR Event FSM')
     }
 
-    nodeConfig.iiot.stateMachine.onEND = function () {
+    self.iiot.stateMachine.onEND = function () {
       coreListener.detailDebugLog('Listener END Event FSM')
     }
   }

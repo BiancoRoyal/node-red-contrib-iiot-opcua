@@ -24,6 +24,7 @@ import {CrawlerPayload} from "./opcua-iiot-crawler";
 import {BrowserPayload} from "./opcua-iiot-browser";
 import {AnyPayload} from "./types/payloads";
 import {ReadPayload} from "./opcua-iiot-read";
+import _ from 'underscore';
 
 type Filter = {
   name: string
@@ -286,7 +287,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.on('input', (msg: NodeMessageInFlow) => {
       try {
         if (node.activateUnsetFilter) {
-          if (msg.payload === void 0 || msg.payload === null || msg.payload === {}) {
+          // TODO: has to be migrated to payload.value here
+          if (msg.payload === void 0 || _.isNull(msg.payload) || _.isEmpty(msg.payload)) {
             return
           }
         }

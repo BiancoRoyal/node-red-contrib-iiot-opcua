@@ -43,6 +43,8 @@ import {
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
 import {ConnectorIIoT} from "./opcua-iiot-core-connector";
+import coreListener from "./opcua-iiot-core-listener";
+import _ from 'underscore'
 
 export {Debug, os, underscore, nodeOPCUAId}
 
@@ -1094,12 +1096,18 @@ export function checkItemForUnsetState(node: Todo, item: Todo): number {
 }
 
 export function resetIiotNode(node: Todo) {
-  if (node?.iiot && isInitializedIIoTNode(node.iiot) && node.iiot.resetAllTimer) {
-    node.iiot.resetAllTimer()
+  coreListener.internalDebugLog('reset IIoT of the Node with id:' + node.id)
+
+  if(_.isObject(node) == false || _.isEmpty(node.iiot)) {
+    return
+  } else {
+    if(_.isFunction(node.resetAllTimer)) {
+      node.resetAllTimer() // call to close all timer otherwise it stops until timeout and node-red hangs on
+    }
   }
 
-  if (node?.resetAllTimer) {
-    node.resetAllTimer() // call to close all timer otherwise it stops until timeout and node-red hangs on
+  if (isInitializedIIoTNode(node.iiot) && _.isFunction(node.iiot.resetAllTimer)) {
+    node.iiot.resetAllTimer()
   }
 }
 

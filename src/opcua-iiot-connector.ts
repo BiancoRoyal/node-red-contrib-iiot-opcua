@@ -565,7 +565,13 @@ module.exports = function (RED: nodered.NodeAPI) {
     })
 
     const opcuaDisconnect = (done: () => void) => {
-      if (isUndefined(this.iiot) || isUndefined(this.iiot.registeredNodeList)) {
+
+      if ( isUndefined(this.iiot) ||
+           isUndefined(this.iiot.registeredNodeList) ||
+          _.isEmpty(this.iiot) ||
+          _.isArray(this.iiot.registeredNodeList) === false)
+      {
+        opcuaDirectDisconnect(done)
         return
       }
 
@@ -586,13 +592,15 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     const opcuaDirectDisconnect = (done: () => void) => {
-      if (isUndefined(this.iiot)) {
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        done()
         return
       }
 
       detailDebugLog('OPC UA Disconnect From Connector ' + this.iiot.stateMachine.getMachineState())
       disconnectNodeOPCUA(() => {
         if (isUndefined(this.iiot)) {
+          done()
           return
         }
         this.iiot.stateMachine.lock().close()
