@@ -1,3 +1,12 @@
+## [4.0.10](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.9...v4.0.10) (2022-09-20)
+
+
+### Bug Fixes
+
+* **listener:** deconstruct monitoredItem during sendDataFromMonitoredItem ([081414a](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/081414a3a092a75e888f90b863b3a821984d1e32))
+
+
+
 ## [4.0.9](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.8...v4.0.9) (2022-07-29)
 
 
