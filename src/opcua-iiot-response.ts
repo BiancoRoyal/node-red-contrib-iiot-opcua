@@ -257,10 +257,12 @@ module.exports = (RED: nodered.NodeAPI) => {
         let filteredEntries = extractEntries(payload)
         if (filteredEntries?.length) {
           payload.value = filteredEntries
+          payload.payloadType = "filtered"
           return payload
         }
       } else {
         if (itemIsNotToFilter(payload)) {
+          payload.payloadType = "unfiltered"
           return payload
         }
       }
@@ -296,16 +298,19 @@ module.exports = (RED: nodered.NodeAPI) => {
 
         const inputPayload = msg.payload as AnyPayload;
         const handledPayload = {
-          ...handleNodeTypeOfMsg(inputPayload),
-          compressed: node.compressStructure
+          ... handleNodeTypeOfMsg(inputPayload),
+          compressed: node.compressStructure,
+          payloadType: "handled",
         }
+
         if (node.activateFilters && node.filters && node.filters.length > 0) {
           const filteredPayload = filterMsg(handledPayload)
+
           if (filteredPayload) {
-            this.send({...msg, payload: filteredPayload})
+            this.send({... msg, payload: filteredPayload})
           }
         } else {
-          this.send({...msg, payload: handledPayload})
+          this.send({... msg, payload: handledPayload})
         }
       } catch (err) {
         coreResponse.internalDebugLog(err)

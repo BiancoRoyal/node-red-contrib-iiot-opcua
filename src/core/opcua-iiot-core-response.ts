@@ -47,7 +47,8 @@ export type ResponseInputPayload = {
   dataType?: Todo
   nodeId?: NodeIdLike
   methodType?: string
-  nodetype?: string
+  nodetype?: string,
+  payloadType?: string
 }
 
 const internalDebugLog = debug('opcuaIIoT:response') // eslint-disable-line no-use-before-define
