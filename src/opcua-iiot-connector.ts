@@ -154,7 +154,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     this.setMaxListeners(UNLIMITED_LISTENERS)
 
-    const thisNode = this
+    const self = this
 
     internalDebugLog('Open Connector Node')
 
@@ -464,7 +464,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     const closeSession = (done: () => void) => {
-      if (isUndefined(this.iiot)) {
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        done()
         return
       }
 
@@ -511,7 +512,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     const disconnectNodeOPCUA = (done: () => void) => {
-      if (isUndefined(this.iiot)) {
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        done()
         return
       }
 
@@ -540,7 +542,13 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     this.on('close', (done: () => void) => {
-      thisNode.removeAllListeners()
+      self.removeAllListeners()
+
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        done()
+        return
+      }
+
       if (!isInitializedIIoTNode<ConnectorIIoT>(this.iiot)) {
         done() // if we have a very fast deploy clicking uer
       } else {

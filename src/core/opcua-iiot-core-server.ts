@@ -22,7 +22,9 @@ import {
   nodesets,
   OPCUAServer,
   OPCUAServerEndPoint,
+  OPCUAServerOptions,
   RegisterServerMethod,
+  ServerCapabilitiesOptions,
   standardUnits,
   StatusCodes,
   Variant,
@@ -896,10 +898,12 @@ const createServer = async (node: Todo, serverOptions: Todo, postInitialize: () 
   coreServer.setOPCUAServerListener(node)
 }
 
-const createServerObject = async (maxSubscriptions: number, serverOptions: Todo) => {
+const createServerObject = async (maxSubscriptions: number, serverOptions: OPCUAServerOptions) => {
   // TODO: now via serverOptions.serverCapabilities.maxSessions
+
+  serverOptions.maxAllowedSessionNumber = maxSubscriptions || 10
   let server =  new OPCUAServer(serverOptions)
-  server.engine.serverCapabilities.maxSessions = maxSubscriptions || 10
+  // TODO: later at server.engine.serverCapabilities.maxSessions = maxSubscriptions || 10
   return server
 }
 
