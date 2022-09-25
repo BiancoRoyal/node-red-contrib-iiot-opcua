@@ -928,6 +928,8 @@ export function deregisterToConnector(node: NodeWithConnector, done: () => void)
 
   if (isInitializedIIoTNode(node.connector)) {
     node.connector?.functions?.deregisterForOPCUA(node, done)
+  } else {
+    done()
   }
 }
 

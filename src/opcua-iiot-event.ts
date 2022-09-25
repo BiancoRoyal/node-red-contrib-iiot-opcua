@@ -73,20 +73,20 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let nodeConfig: OPCUAIIoTEvent & Todo = this
-    nodeConfig.iiot = {}
+    let self: OPCUAIIoTEvent & Todo = this
+    self.iiot = {}
 
     const statusCall = (status: NodeStatus | string) => {
       this.status(status)
     }
-    nodeConfig.iiot.subscribed = false
+    self.iiot.subscribed = false
 
     statusCall({fill: 'blue', shape: 'ring', text: 'new'})
     this.on('input', (msg: NodeMessageInFlow) => {
-      nodeConfig.iiot.subscribed = !nodeConfig.iiot.subscribed
+      self.iiot.subscribed = !self.iiot.subscribed
 
-      if (nodeConfig.usingListener) {
-        if (nodeConfig.iiot.subscribed) {
+      if (self.usingListener) {
+        if (self.iiot.subscribed) {
           statusCall({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
           statusCall({fill: 'blue', shape: 'ring', text: 'not subscribed'})
@@ -105,10 +105,10 @@ module.exports = function (RED: nodered.NodeAPI) {
       const uaEventFilter: EventFilter = constructEventFilter(uaEventFields)
       const responsePayload: EventPayload = {
         ...msg.payload as InjectPayload | BrowserPayload,
-        eventType: nodeConfig.eventType,
+        eventType: self.eventType,
         uaEventFilter: uaEventFilter,
         uaEventFields: uaEventFields,
-        queueSize: nodeConfig.queueSize,
+        queueSize: self.queueSize,
         interval: typeof interval === 'number' ? interval : 1000
       }
 
@@ -124,7 +124,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     })
 
     const getAdditionalEventFields = () => {
-      switch (nodeConfig.resultType) {
+      switch (self.resultType) {
         case 'condition':
           return (coreListener.getConditionFields())
         case 'state':

@@ -793,7 +793,7 @@ module.exports = {
       "connector": "ef9763f4.0e6728",
       "name": "",
       "justValue": false,
-      "singleResult": false,
+      "singleResult": true,
       "showStatusActivities": false,
       "showErrors": true,
       "activateUnsetFilter": false,

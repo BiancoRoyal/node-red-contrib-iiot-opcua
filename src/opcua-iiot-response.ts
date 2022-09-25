@@ -74,59 +74,59 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.negateFilter = config.negateFilter
     this.filters = config.filters
 
-    let node: OPCUAIIoTResponse = this
-    node.iiot = {}
+    let self: OPCUAIIoTResponse = this
+    self.iiot = {}
 
     // prototype functions don't seem to be copied in the above line
     // explicitly define node.status here, so it can be used by functions in core-response.ts
-    node.status = this.status
+    self.status = this.status
 
 
     this.status({fill: 'green', shape: 'ring', text: 'active'})
 
     const handleBrowserMsg = function (payload: BrowserPayload) {
-      coreResponse.analyzeBrowserResults(node, payload)
-      if (node.compressStructure) {
+      coreResponse.analyzeBrowserResults(self, payload)
+      if (self.compressStructure) {
         coreResponse.compressBrowseMessageStructure(payload)
       }
       return payload
     }
 
     const handleCrawlerMsg = function (payload: CrawlerPayload) {
-      coreResponse.analyzeCrawlerResults(node, payload)
-      if (node.compressStructure) {
+      coreResponse.analyzeCrawlerResults(self, payload)
+      if (self.compressStructure) {
         coreResponse.compressCrawlerMessageStructure(payload)
       }
       return payload
     }
 
     const handleReadMsg = function (payload: ReadPayload) {
-      coreResponse.analyzeReadResults(node, payload)
-      if (node.compressStructure) {
+      coreResponse.analyzeReadResults(self, payload)
+      if (self.compressStructure) {
         coreResponse.compressReadMessageStructure(payload)
       }
       return payload
     }
 
     const handleWriteMsg = function (payload: ResponseInputPayload) {
-      coreResponse.analyzeWriteResults(node, payload)
-      if (node.compressStructure) {
+      coreResponse.analyzeWriteResults(self, payload)
+      if (self.compressStructure) {
         coreResponse.compressWriteMessageStructure(payload)
       }
       return payload
     }
 
     const handleListenerMsg = function (payload: ResponseInputPayload) {
-      coreResponse.analyzeListenerResults(node, payload)
-      if (node.compressStructure) {
+      coreResponse.analyzeListenerResults(self, payload)
+      if (self.compressStructure) {
         coreResponse.compressListenMessageStructure(payload)
       }
       return payload
     }
 
     const handleMethodMsg = function (payload: ResponseInputPayload) {
-      coreResponse.analyzeMethodResults(node, payload)
-      if (node.compressStructure) {
+      coreResponse.analyzeMethodResults(self, payload)
+      if (self.compressStructure) {
         coreResponse.compressMethodMessageStructure(payload)
       }
       return payload
@@ -134,8 +134,8 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const handleDefaultMsg = function (payload: ResponseInputPayload) {
       if (payload) {
-        coreResponse.handlePayloadStatusCode(node, (payload.value as StatusInput | StatusInput[]), payload)
-        if (node.compressStructure) {
+        coreResponse.handlePayloadStatusCode(self, (payload.value as StatusInput | StatusInput[]), payload)
+        if (self.compressStructure) {
           coreResponse.compressDefaultMessageStructure(payload)
         }
       }
@@ -288,7 +288,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('input', (msg: NodeMessageInFlow) => {
       try {
-        if (node.activateUnsetFilter) {
+        if (self.activateUnsetFilter) {
           // TODO: has to be migrated to payload.value here
           if (msg.payload === void 0 || _.isNull(msg.payload) || _.isEmpty(msg.payload)) {
             return
@@ -299,11 +299,11 @@ module.exports = (RED: nodered.NodeAPI) => {
         const inputPayload = msg.payload as AnyPayload;
         const handledPayload = {
           ... handleNodeTypeOfMsg(inputPayload),
-          compressed: node.compressStructure,
+          compressed: self.compressStructure,
           payloadType: "handled",
         }
 
-        if (node.activateFilters && node.filters && node.filters.length > 0) {
+        if (self.activateFilters && self.filters && self.filters.length > 0) {
           const filteredPayload = filterMsg(handledPayload)
 
           if (filteredPayload) {
@@ -314,24 +314,24 @@ module.exports = (RED: nodered.NodeAPI) => {
         }
       } catch (err) {
         coreResponse.internalDebugLog(err)
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.error(err, msg)
         }
       }
     })
 
     const itemIsNotToFilter = function (item: any) {
-      let result = checkItemForUnsetState(node, item)
+      let result = checkItemForUnsetState(self, item)
 
-      node.filters.forEach((element: any) => {
-        result = checkResponseItemIsNotToFilter(node, item, element, result)
+      self.filters.forEach((element: any) => {
+        result = checkResponseItemIsNotToFilter(self, item, element, result)
       })
 
-      return (node.negateFilter) ? !result : result
+      return (self.negateFilter) ? !result : result
     }
 
     if (process.env.TEST === "true")
-      node.functions = {
+      self.functions = {
         handleNodeTypeOfMsg,
       }
   }

@@ -26,7 +26,7 @@ interface OPCUAIIoTASO extends nodered.Node {
   datatype: string
   value: string
   name: string
-  
+
 }
 
 interface OPCUAIIoTCMDASO extends nodered.NodeDef {
@@ -61,31 +61,31 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.value = config.value
     this.name = config.name
 
-    let node = this
+    let self = this
     internalDebugLog('Open ASO Node')
 
     this.on('input', (msg: NodeMessageInFlow | Todo) => {
       if (msg.payload.nodetype === 'inject') {
-        node.nodeId = msg.payload.topic || node.nodeId
-        node.datatype = msg.payload.datatype || node.datatype
-        node.value = msg.payload.payload || node.value
+        self.nodeId = msg.payload.topic || self.nodeId
+        self.datatype = msg.payload.datatype || self.datatype
+        self.value = msg.payload.payload || self.value
       }
-      const value = node.value || msg.payload.value;
+      const value = self.value || msg.payload.value;
       msg = {payload: {}} // clean message
       msg.topic = 'ServerAddressSpaceObject'
       msg.payload.nodetype = 'inject'
       msg.payload.injectType = 'ASO'
 
-      if (node.nodeId.includes('i=') || node.nodeId.includes('s=') || node.nodeId.includes('b=')) {
-        msg.payload.nodeId = node.nodeId
-        msg.payload.browsename = node.browsename
-        msg.payload.displayname = node.displayname
-        msg.payload.objecttype = node.objecttype
-        msg.payload.datatype = node.datatype
+      if (self.nodeId.includes('i=') || self.nodeId.includes('s=') || self.nodeId.includes('b=')) {
+        msg.payload.nodeId = self.nodeId
+        msg.payload.browsename = self.browsename
+        msg.payload.displayname = self.displayname
+        msg.payload.objecttype = self.objecttype
+        msg.payload.datatype = self.datatype
         msg.payload.value = value
 
-        msg.payload.referenceNodeId = node.referenceNodeId || OBJECTS_ROOT
-        msg.payload.referencetype = node.referencetype || ReferenceTypeIds.Organizes
+        msg.payload.referenceNodeId = self.referenceNodeId || OBJECTS_ROOT
+        msg.payload.referencetype = self.referencetype || ReferenceTypeIds.Organizes
 
         internalDebugLog('node msg stringified: ' + JSON.stringify(msg))
         this.send(msg)
@@ -97,7 +97,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('close', (done: () => void) => {
       internalDebugLog('Close ASO Node')
-      resetIiotNode(node)
+      resetIiotNode(self)
       done()
     })
   }

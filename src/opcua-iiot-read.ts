@@ -76,12 +76,12 @@ module.exports = (RED: NodeAPI) => {
     this.historyDays = parseInt(config.historyDays) || 1
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: Todo = this;
-    node.iiot = initCoreNode()
+    let self: Todo = this;
+    self.iiot = initCoreNode()
 
     const handleReadError = (err: Error, msg: NodeMessage) => {
       coreClient.readDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
 
@@ -91,7 +91,7 @@ module.exports = (RED: NodeAPI) => {
     }
 
     if (process.env.TEST === "true")
-      node.functions = {
+      self.functions = {
         handleReadError
       }
 
@@ -102,11 +102,11 @@ module.exports = (RED: NodeAPI) => {
             this.send(buildResultMessage('AllAttributes', readResult))
           } catch (err) {
             /* istanbul ignore next */
-            node.iiot.handleReadError(err, readResult.msg)
+            self.iiot.handleReadError(err, readResult.msg)
           }
         }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
@@ -117,30 +117,30 @@ module.exports = (RED: NodeAPI) => {
           this.send(message)
         }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
     const readHistoryDataFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
       const startDate = new Date()
-      node.iiot.historyStart = new Date()
-      node.iiot.historyStart.setDate(startDate.getDate() - node.historyDays)
-      node.iiot.historyEnd = new Date()
+      self.iiot.historyStart = new Date()
+      self.iiot.historyStart.setDate(startDate.getDate() - self.historyDays)
+      self.iiot.historyEnd = new Date()
 
       coreClient.readHistoryValue(
         session,
         itemsToRead,
-        msg.payload.historyStart || node.iiot.historyStart,
-        msg.payload.historyEnd || node.iiot.historyEnd,
+        msg.payload.historyStart || self.iiot.historyStart,
+        msg.payload.historyEnd || self.iiot.historyEnd,
         msg)
         .then((readResult: Todo) => {
           let message = buildResultMessage('HistoryValue', readResult)
-          message.payload.historyStart = readResult.startDate || node.iiot.historyStart
-          message.payload.historyEnd = readResult.endDate || node.iiot.historyEnd
+          message.payload.historyStart = readResult.startDate || self.iiot.historyStart
+          message.payload.historyEnd = readResult.endDate || self.iiot.historyEnd
           this.send(message)
         }).catch((err: Error) => {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
@@ -149,21 +149,21 @@ module.exports = (RED: NodeAPI) => {
       const transformItem = (item: NodeIdLike): ReadValueIdOptions => {
         return {
           nodeId: item,
-          attributeId: Number(node.attributeId) || undefined
+          attributeId: Number(self.attributeId) || undefined
         }
       }
 
       const transformedItemsToRead = itemsToRead.map(transformItem)
 
 
-      coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg)
+      coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || self.maxAge, msg)
         .then((readResult: Todo) => {
           let message = buildResultMessage('Default', readResult)
-          message.payload.maxAge = node.maxAge
+          message.payload.maxAge = self.maxAge
           this.send(message)
         }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
@@ -173,8 +173,8 @@ module.exports = (RED: NodeAPI) => {
         return
       }
 
-      coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
-      switch (parseInt(node.attributeId)) {
+      coreClient.readDebugLog('Read With AttributeId ' + self.attributeId)
+      switch (parseInt(self.attributeId)) {
         case coreClient.READ_TYPE.ALL:
           readAllFromNodeId(session, itemsToRead, msg)
           break
@@ -194,8 +194,8 @@ module.exports = (RED: NodeAPI) => {
         ...readResult.msg.payload,
         nodetype: 'read',
         readtype: readType,
-        attributeId: node.attributeId,
-        justValue: node.justValue,
+        attributeId: self.attributeId,
+        justValue: self.justValue,
         payloadType: 'read'
       }
 
@@ -203,7 +203,7 @@ module.exports = (RED: NodeAPI) => {
 
       payload = setMessageProperties(payload, readResult, dataValuesString)
 
-      if (!node.justValue) {
+      if (!self.justValue) {
         payload = enhanceMessage(payload, readResult)
       }
 
@@ -217,7 +217,7 @@ module.exports = (RED: NodeAPI) => {
 
     const extractDataValueString = function (readResult: Todo) {
       let dataValuesString
-      if (node.justValue) {
+      if (self.justValue) {
         dataValuesString = JSON.stringify(readResult.results, null, 2)
       } else {
         dataValuesString = JSON.stringify(readResult, null, 2)
@@ -229,7 +229,7 @@ module.exports = (RED: NodeAPI) => {
       try {
         RED.util.setMessageProperty(payload, 'value', JSON.parse(stringValue))
       } /* istanbul ignore next */ catch (err: any) {
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
           this.error(err, readResult.msg)
         }
@@ -246,7 +246,7 @@ module.exports = (RED: NodeAPI) => {
         let dataValuesString = JSON.stringify(readResult.results, null, 2)
         RED.util.setMessageProperty(payload, 'resultsConverted', JSON.parse(dataValuesString))
       } /* istanbul ignore next */ catch (err: any) {
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.warn('JSON not to parse from string for dataValues type ' + readResult.results)
           this.error(err, readResult.msg)
         }
@@ -270,12 +270,12 @@ module.exports = (RED: NodeAPI) => {
     }
 
     this.on('input', function (msg: NodeMessageInFlow, send: (msg: NodeMessage | Array<NodeMessage | NodeMessage[] | null>) => void, done: () => void) {
-      if (!checkConnectorState(node, msg, 'Read', errorHandler, emitHandler, statusHandler)) {
+      if (!checkConnectorState(self, msg, 'Read', errorHandler, emitHandler, statusHandler)) {
         return
       }
 
       try {
-        readFromSession(node.connector.iiot.opcuaSession, buildNodesToRead(msg.payload), msg)
+        readFromSession(self.connector.iiot.opcuaSession, buildNodesToRead(msg.payload), msg)
       } /* istanbul ignore next */ catch (err: any) {
         handleReadError(err, msg)
       }
@@ -287,18 +287,18 @@ module.exports = (RED: NodeAPI) => {
 
     }
 
-    registerToConnector(node, statusHandler, onAlias, errorHandler)
+    registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
-      deregisterToConnector(node, () => {
-        resetIiotNode(node)
+      deregisterToConnector(self, () => {
+        resetIiotNode(self)
         done()
       })
     })
 
     if (process.env.isTest === 'TRUE') {
-      node.iiot = {
-        ...node.iiot,
+      self.iiot = {
+        ...self.iiot,
         handleReadError,
       }
     }

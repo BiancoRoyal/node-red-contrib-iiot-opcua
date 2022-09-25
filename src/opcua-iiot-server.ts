@@ -38,18 +38,18 @@ module.exports = (RED: nodered.NodeAPI) => {
     coreServer.internalDebugLog('Open Server Node')
 
     this.asoDemo = config.asoDemo // ASO (address space objects) Demo
-    let node: Todo = this;
+    let self: Todo = this;
     coreServer.readConfigOfServerNode(this, config)
-    coreServer.initServerNode(node)
-    coreServer.loadNodeSets(node, __dirname)
+    coreServer.initServerNode(self)
+    coreServer.loadNodeSets(self, __dirname)
     // node = coreServer.loadCertificates(node)
 
     const initNewServer = () => {
-      node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = coreServer.buildGeneralServerOptions(node, 'Fix')
+      self = coreServer.initRegisterServerMethod(self)
+      let serverOptions = coreServer.buildGeneralServerOptions(self, 'Fix')
 
       try {
-        coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
+        coreServer.createServer(self, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
       } catch (err) {
         this.emit('server_create_error')
         handleServerError(err as Error, {payload: 'Server Failure! Please, check the server settings!'})
@@ -58,7 +58,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const handleServerError = (err: Error, msg: Todo) => {
       coreServer.internalDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
     }
@@ -72,21 +72,21 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const postInitialize = () => {
-      coreServer.constructAddressSpace(node.iiot.opcuaServer, node.asoDemo)
+      coreServer.constructAddressSpace(self.iiot.opcuaServer, self.asoDemo)
         .then((err: Todo) => {
           if (err) {
             handleServerError(err, {payload: 'Server Address Space Problem'})
           } else {
-            coreServer.start(node.iiot.opcuaServer, node)
+            coreServer.start(self.iiot.opcuaServer, self)
               .then(() => {
-                node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+                self.oldStatusParameter = setNodeStatusTo(self, 'active', self.oldStatusParameter, self.showStatusActivities, statusHandler)
                 this.emit('server_running')
               }).catch((err: Error) => {
-              if (isInitializedIIoTNode(node)) {
-                node.iiot.opcuaServer = null
+              if (isInitializedIIoTNode(self)) {
+                self.iiot.opcuaServer = null
               }
               this.emit('server_start_error')
-              node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+              self.oldStatusParameter = setNodeStatusTo(self, 'errors', self.oldStatusParameter, self.showStatusActivities, statusHandler)
               handleServerError(err, {payload: 'Server Start Failure'})
             })
           }
@@ -98,7 +98,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     initNewServer()
 
     this.on('input', (msg: Todo) => {
-      if (!node.iiot.opcuaServer || !node.iiot.initialized) {
+      if (!self.iiot.opcuaServer || !self.iiot.initialized) {
         handleServerError(new Error('Server Not Ready For Inputs'), msg)
         return
       }
@@ -120,11 +120,11 @@ module.exports = (RED: nodered.NodeAPI) => {
     const changeAddressSpace = (msg: Todo) => {
       // TODO: refactor to work with the new OPC UA type list and option to set add type
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
-        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, false, handleServerError)
+        coreServer.addVariableToAddressSpace(self, msg, msg.payload.objecttype, false, handleServerError)
       } else if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Property') > -1) {
-        coreServer.addVariableToAddressSpace(node, msg, msg.payload.objecttype, true, handleServerError)
+        coreServer.addVariableToAddressSpace(self, msg, msg.payload.objecttype, true, handleServerError)
       } else {
-        coreServer.addObjectToAddressSpace(node, msg, msg.payload.objecttype, handleServerError)
+        coreServer.addObjectToAddressSpace(self, msg, msg.payload.objecttype, handleServerError)
       }
     }
 
@@ -134,7 +134,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           restartServer()
           break
         case 'deleteNode':
-          coreServer.deleteNodeFromAddressSpace(node, msg, handleServerError)
+          coreServer.deleteNodeFromAddressSpace(self, msg, handleServerError)
           break
         default:
           handleServerError(new Error('Unknown OPC UA Command'), msg)
@@ -151,9 +151,9 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const restartServer = () => {
       coreServer.internalDebugLog('Restart OPC UA Server')
-      coreServer.restartServer(node, statusHandler, emitHandler, sendHandler)
+      coreServer.restartServer(self, statusHandler, emitHandler, sendHandler)
 
-      if (node.iiot.opcuaServer) {
+      if (self.iiot.opcuaServer) {
         coreServer.internalDebugLog('OPC UA Server restarted')
       } else {
         coreServer.internalDebugLog('Can not restart OPC UA Server')
@@ -163,7 +163,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.on('close', (done: () => void) => {
       closeServer(() => {
         coreServer.internalDebugLog('Close Server Node')
-        resetIiotNode(node)
+        resetIiotNode(self)
         done()
       })
     })
@@ -173,14 +173,14 @@ module.exports = (RED: nodered.NodeAPI) => {
       closeServer(() => {
         coreServer.internalDebugLog('Server Node Shutdown')
       })
-      node.iiot.opcuaServer = null
+      self.iiot.opcuaServer = null
       initNewServer()
     })
 
     const closeServer = (done: () => void) => {
       coreServer.destructAddressSpace(() => {
-        node.iiot.opcuaServer.removeAllListeners()
-        node.iiot.opcuaServer.shutdown(node.delayToClose, done)
+        self.iiot.opcuaServer.removeAllListeners()
+        self.iiot.opcuaServer.shutdown(self.delayToClose, done)
       })
     }
   }

@@ -81,12 +81,12 @@ module.exports = (RED: NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: Todo = this;
-    node.iiot = initCoreNode()
+    let self: Todo = this;
+    self.iiot = initCoreNode()
 
     const handleWriteError = (err: Error, msg: NodeMessage) => {
       coreClient.writeDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
 
@@ -110,18 +110,18 @@ module.exports = (RED: NodeAPI) => {
           this.send(message)
         } catch (err: any) {
           /* istanbul ignore next */
-          isInitializedIIoTNode(node) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+          isInitializedIIoTNode(self) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err: Error) {
         /* istanbul ignore next */
-        isInitializedIIoTNode(node) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+        isInitializedIIoTNode(self) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
     const buildResultMessage = (result: WriteResult): WriteResultMessage => {
       let message = Object.assign({}, result.msg)
       message.payload.nodetype = 'write'
-      message.payload.justValue = node.justValue
+      message.payload.justValue = self.justValue
 
       message.payload.value = extractDataValue(message, result)
       return message
@@ -129,7 +129,7 @@ module.exports = (RED: NodeAPI) => {
 
     const extractDataValue = (message: WriteResultMessage, result: WriteResult): Todo => {
       let dataValues: string
-      if (node.justValue) {
+      if (self.justValue) {
         if (message.payload.valuesToWrite) {
           delete message.payload['valuesToWrite']
         }
@@ -156,17 +156,17 @@ module.exports = (RED: NodeAPI) => {
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
-      if (!checkConnectorState(node, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
+      if (!checkConnectorState(self, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
         return
       }
       const payload = msg.payload as BrowserPayload
       // recursivePrintTypes(msg);
       if (payload.injectType === 'write') {
-        writeToSession(node.connector.iiot.opcuaSession, msg)
+        writeToSession(self.connector.iiot.opcuaSession, msg)
       } else {
         coreClient.writeDebugLog('Wrong Inject Type ' + payload.injectType + '! The Type has to be write.')
         /* istanbul ignore next */
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.warn('Wrong Inject Type ' + payload.injectType + '! The msg.payload.injectType has to be write.')
         }
       }
@@ -177,16 +177,16 @@ module.exports = (RED: NodeAPI) => {
       this.on(event, callback)
     }
 
-    registerToConnector(node, statusHandler, onAlias, errorHandler)
+    registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: TodoVoidFunction) => {
-      deregisterToConnector(node, () => {
-        resetIiotNode(node)
+      deregisterToConnector(self, () => {
+        resetIiotNode(self)
         done()
       })
     })
     if (process.env.TEST === "true") {
-      node.functions = {
+      self.functions = {
         handleWriteError
       }
     }

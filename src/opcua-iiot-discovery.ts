@@ -54,7 +54,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.name = config.name
     this.discoveryPort = config.discoveryPort || coreDiscovery.DEFAULT_OPCUA_DISCOVERY_PORT
 
-    let node: Todo = this
+    let self: Todo = this
 
     //Create and Start the Discovery Server
     const startDiscoveryServer = async () => {
@@ -77,9 +77,9 @@ module.exports = (RED: nodered.NodeAPI) => {
         privateKeyFile,
         serverCertificateManager,
         serverInfo: {
-          applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), node.name || 'discovery'),
+          applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), self.name || 'discovery'),
         },
-        port: node.discoveryPort,
+        port: self.discoveryPort,
       })
 
       try {
@@ -96,7 +96,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.status({fill: 'yellow', shape: 'ring', text: 'starting'})
 
-    node.discoveryServer = startDiscoveryServer().then((server) => {
+    self.discoveryServer = startDiscoveryServer().then((server) => {
       this.status({fill: 'green', shape: 'dot', text: 'active'})
       return server
     }).catch((err) => {
@@ -134,7 +134,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('input', async (msg) => {
       // Ensure that the discovery server has been started
-      const discoveryServer: OPCUADiscoveryServer = await node.discoveryServer
+      const discoveryServer: OPCUADiscoveryServer = await self.discoveryServer
 
       if (!discoveryServer) {
         const error = new Error('Discovery server undefined')
@@ -160,8 +160,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     })
 
     this.on('close', function (done: () => void) {
-      if (node.discoveryServer) {
-        node.discoveryServer.shutdown(function () {
+      if (self.discoveryServer) {
+        self.discoveryServer.shutdown(function () {
           coreDiscovery.internalDebugLog('shutdown')
           done()
         })

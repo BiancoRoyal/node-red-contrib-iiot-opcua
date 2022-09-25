@@ -42,8 +42,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig = this;
-    nodeConfig.iiot = {}
+    let self = this;
+    self.iiot = {}
 
     this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
@@ -52,11 +52,11 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const payload: Todo = msg.payload
 
-      if (nodeConfig.connector) {
+      if (self.connector) {
         if (payload.endpoint && payload.endpoint.includes('opc.tcp:')) {
           coreConnector.internalDebugLog('connector change possible')
           coreConnector.internalDebugLog(payload)
-          nodeConfig.connector.functions.restartWithNewSettings(payload, () => {
+          self.connector.functions.restartWithNewSettings(payload, () => {
             coreConnector.internalDebugLog('connector change injected')
             this.send(msg)
           })

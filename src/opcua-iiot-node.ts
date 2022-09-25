@@ -53,19 +53,19 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.injectType = config.injectType
     this.showErrors = config.showErrors
 
-    let node: Todo = this
-    node.iiot = {}
-    node.iiot.subscribed = false
+    let self: Todo = this
+    self.iiot = {}
+    self.iiot.subscribed = false
     this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     this.on('input', (msg: NodeMessageInFlow) => {
 
-      node.iiot.subscribed = !node.iiot.subscribed
+      self.iiot.subscribed = !self.iiot.subscribed
       const payload = msg.payload as Todo
       const value: Todo = typeof msg.payload === "string" ? msg.payload : (msg.payload as Todo).value;
 
-      if (node.injectType === 'listen') {
-        if (node.iiot.subscribed) {
+      if (self.injectType === 'listen') {
+        if (self.iiot.subscribed) {
           this.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
           this.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})
@@ -73,25 +73,25 @@ module.exports = (RED: nodered.NodeAPI) => {
       } else {
         this.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
-      const topic = msg.topic || node.topic
+      const topic = msg.topic || self.topic
       const valuesToWrite = payload.valuesToWrite || []
       const addressSpaceItems = payload.addressSpaceItems || []
-      if (node.injectType === 'write') {
-        addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
+      if (self.injectType === 'write') {
+        addressSpaceItems.push({name: self.name, nodeId: self.nodeId, datatypeName: self.datatype})
         try {
-          valuesToWrite.push(convertDataValueByDataType({value: node.value === '' ? msg.payload : node.value}, node.datatype))
+          valuesToWrite.push(convertDataValueByDataType({value: self.value === '' ? msg.payload : self.value}, self.datatype))
         } catch (err) {
           logger.internalDebugLog(err)
-          if (node.showErrors) {
+          if (self.showErrors) {
             this.error(err, msg)
           }
         }
       } else {
-        addressSpaceItems.push({name: node.name, nodeId: node.nodeId, datatypeName: node.datatype})
+        addressSpaceItems.push({name: self.name, nodeId: self.nodeId, datatypeName: self.datatype})
       }
       const outputPayload = {
         nodetype: "node",
-        injectType: node.injectType || payload.injectType,
+        injectType: self.injectType || payload.injectType,
         addressSpaceItems,
         valuesToWrite,
         value,

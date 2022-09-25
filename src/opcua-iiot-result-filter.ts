@@ -84,8 +84,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.name = config.name
     this.showErrors = config.showErrors
 
-    let node: Todo = this
-    node.iiot = {};
+    let self: Todo = this
+    self.iiot = {};
 
     this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
@@ -108,7 +108,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       const payload = msg.payload as FilterInputPayload & BrowserPayload
       const filtered = filterByType(payload)
       const value =
-        node.justValue
+        self.justValue
           // if justValue, return the filtered value of the input message
           // Spread operator placement should handle all formats of filtered objects
           ? filterResult({value: filtered, ...filtered, nodetype: payload.nodetype})
@@ -122,8 +122,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       const outputPayload = {
         ...restPayload,
         filtertype: "filter",
-        justValue: node.justValue,
-        nodeId: node.nodeId,
+        justValue: self.justValue,
+        nodeId: self.nodeId,
         ...filtered,
         value: convertedValue.length === 1 ? convertedValue[0] : convertedValue,
         filter: true,
@@ -132,7 +132,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       const outputMessage = {
         payload: outputPayload,
         _msgid: msg._msgid,
-        topic: node.topic || msg.topic
+        topic: self.topic || msg.topic
       }
 
       this.send(outputMessage)
@@ -158,7 +158,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           break
         default:
           coreFilter.internalDebugLog('unknown node type injected to filter for ' + payload.nodetype)
-          if (node.showErrors) {
+          if (self.showErrors) {
             this.error(new Error('unknown node type injected to filter for ' + payload.nodetype), {payload: payload})
           }
       }
@@ -183,28 +183,28 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (result.value) result = result.value
       try {
         let convertedResult = null
-        if (node.fixPoint >= 0 && node.fixedValue) {
-          convertedResult = Number.parseFloat(result).toFixed(node.fixPoint)
+        if (self.fixPoint >= 0 && self.fixedValue) {
+          convertedResult = Number.parseFloat(result).toFixed(self.fixPoint)
           convertedResult = parseFloat(convertedResult)
         }
 
-        if (node.precision >= 0 && node.withPrecision) {
-          convertedResult = Number.parseFloat(result).toPrecision(node.precision)
+        if (self.precision >= 0 && self.withPrecision) {
+          convertedResult = Number.parseFloat(result).toPrecision(self.precision)
           convertedResult = parseFloat(convertedResult)
         }
 
         if (convertedResult === null) {
           convertedResult = result
         }
-        if (node.withValueCheck && typeof convertedResult === "number") {
-          if (convertedResult < node.minvalue || convertedResult > node.maxvalue) {
-            convertedResult = node.defaultvalue
+        if (self.withValueCheck && typeof convertedResult === "number") {
+          if (convertedResult < self.minvalue || convertedResult > self.maxvalue) {
+            convertedResult = self.defaultvalue
           }
         }
         return convertedResult
       } catch (err: any) {
         coreFilter.internalDebugLog('result converting error ' + err.message)
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.error(err, {payload})
         }
         return result
@@ -215,7 +215,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       let result = payload.value
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('result null or undefined')
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.error(new Error('converted result null or undefined'), {payload})
         }
         return result
@@ -225,7 +225,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         result = result.value
       }
 
-      if (!node.datatype) {
+      if (!self.datatype) {
         coreFilter.internalDebugLog('data type unknown - set the data type inside the result filter node')
         return result
       }
@@ -233,7 +233,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       result = convertDataType(result)
       if (result === null || result === void 0) {
         coreFilter.internalDebugLog('data type result null or undefined')
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.error(new Error('converted by data type result null or undefined'), {payload})
         }
       } else {
@@ -329,23 +329,23 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const filterByBrowserType = (payload: BrowserPayload & Todo) => {
-      const browserResults = filterListByNodeId(node.nodeId, payload.browserResults)
+      const browserResults = filterListByNodeId(self.nodeId, payload.browserResults)
 
       const addressSpaceItems = (payload.addressSpaceItems && payload.addressSpaceItems.length) ?
-        filterListByNodeId(node.nodeId, payload.addressSpaceItems) : [];
+        filterListByNodeId(self.nodeId, payload.addressSpaceItems) : [];
 
       const nodesToRead = (payload.nodesToRead && payload.nodesToRead.length) ?
-        filterListEntryByNodeId(node.nodeId, payload.nodesToRead) : [];
+        filterListEntryByNodeId(self.nodeId, payload.nodesToRead) : [];
       const nodesToReadCount = (payload.nodesToRead && payload.nodesToRead.length) ?
         nodesToRead.length : 0;
 
       const addressItemsToRead = (payload.addressItemsToRead && payload.addressItemsToRead.length) ?
-        filterListByNodeId(node.nodeId, payload.addressItemsToRead) : []
+        filterListByNodeId(self.nodeId, payload.addressItemsToRead) : []
       const addressItemsToReadCount = (payload.addressItemsToRead && payload.addressItemsToRead.length) ?
         addressItemsToRead.length : 0
 
       const addressItemsToBrowse = (payload.addressItemsToBrowse && payload.addressItemsToBrowse.length) ?
-        filterListByNodeId(node.nodeId, payload.addressItemsToBrowse) : []
+        filterListByNodeId(self.nodeId, payload.addressItemsToBrowse) : []
       const addressItemsToBrowseCount = (payload.addressItemsToBrowse && payload.addressItemsToBrowse.length) ?
         addressItemsToBrowse.length : 0
 
@@ -362,10 +362,10 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const filterByCrawlerType = function (msg: Todo) {
-      const crawlerResults = filterListByNodeId(node.nodeId, msg.crawlerResults)
+      const crawlerResults = filterListByNodeId(self.nodeId, msg.crawlerResults)
 
       const addressItems = (msg.addressSpaceItems && msg.addressSpaceItems.length) ?
-        filterListByNodeId(node.nodeId, msg.addressSpaceItems) : []
+        filterListByNodeId(self.nodeId, msg.addressSpaceItems) : []
 
       return {
         crawlerResults,
@@ -374,19 +374,19 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const convertDataType = function (result: Todo) {
-      coreFilter.internalDebugLog('data type convert for ' + node.nodeId)
-      return convertDataValueByDataType(result, node.datatype)
+      coreFilter.internalDebugLog('data type convert for ' + self.nodeId)
+      return convertDataValueByDataType(result, self.datatype)
     }
 
-    if (node.withValueCheck) {
-      node.minvalue = convertDataType(node.minvalue)
-      node.maxvalue = convertDataType(node.maxvalue)
+    if (self.withValueCheck) {
+      self.minvalue = convertDataType(self.minvalue)
+      self.maxvalue = convertDataType(self.maxvalue)
     }
 
     this.status({fill: 'green', shape: 'dot', text: 'active'})
 
     if (process.env.TEST === "true")
-      node.functions = {
+      self.functions = {
         convertResultValue
       }
   }

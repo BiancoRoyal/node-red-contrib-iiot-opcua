@@ -72,12 +72,12 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.inputArguments = config.inputArguments
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: Todo = this
-    node.iiot = initCoreNode()
+    let self: Todo = this
+    self.iiot = initCoreNode()
 
     const handleMethodError = (err: Error, msg: Todo) => {
       coreMethod.internalDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
 
@@ -87,7 +87,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const handleMethodWarn = (message: Todo) => {
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.warn(message)
       }
 
@@ -100,11 +100,11 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       if (msg.payload.methodId && msg.payload.inputArguments) {
-        coreMethod.getArgumentDefinition(node.connector.iiot.opcuaSession, msg).then(function (results: Todo) {
+        coreMethod.getArgumentDefinition(self.connector.iiot.opcuaSession, msg).then(function (results: Todo) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
           callMethod(msg, results)
         }).catch((err: Error) => {
-          isInitializedIIoTNode(node) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
+          isInitializedIIoTNode(self) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
         })
       } else {
         coreMethod.internalDebugLog(new Error('No Method Id And/Or Parameters'))
@@ -112,7 +112,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const getDataValue = (message: Todo, result: Todo, definitionResults: Todo) => {
-      if (node.justValue) {
+      if (self.justValue) {
         if (message.payload.inputArguments) {
           delete message.payload['inputArguments']
         }
@@ -126,7 +126,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const callMethod = (msg: Todo, definitionResults: Todo) => {
-      coreMethod.callMethods(node.connector.iiot.opcuaSession, msg).then((data: Todo) => {
+      coreMethod.callMethods(self.connector.iiot.opcuaSession, msg).then((data: Todo) => {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
         let result = null
@@ -162,7 +162,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         this.send(message)
       }).catch((err: Error) => {
         coreMethod.internalDebugLog(err)
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.error(err, msg)
         }
       })
@@ -181,15 +181,15 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.on('input', function (msg: Todo) {
-      if (!checkConnectorState(node, msg, 'MethodCaller', errorHandler, emitHandler, statusHandler)) {
+      if (!checkConnectorState(self, msg, 'MethodCaller', errorHandler, emitHandler, statusHandler)) {
         return
       }
 
-      const message = coreMethod.buildCallMessage(node, msg)
-      if (coreMethod.invalidMessage(node, message, handleMethodWarn)) {
+      const message = coreMethod.buildCallMessage(self, msg)
+      if (coreMethod.invalidMessage(self, message, handleMethodWarn)) {
         return
       }
-      callMethodOnSession(node.connector.iiot.opcuaSession, message)
+      callMethodOnSession(self.connector.iiot.opcuaSession, message)
     })
 
     const onAlias = (event: string, callback: (...args: any) => void) => {
@@ -197,17 +197,17 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.on(event, callback)
     }
 
-    registerToConnector(node as Todo, statusHandler, onAlias, errorHandler)
+    registerToConnector(self as Todo, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
-      deregisterToConnector(node as Todo, () => {
-        resetIiotNode(node)
+      deregisterToConnector(self as Todo, () => {
+        resetIiotNode(self)
         done()
       })
     })
 
     if (process.env.TEST === "true")
-      node.functions = {
+      self.functions = {
         handleMethodError,
         handleMethodWarn,
         callMethodOnSession
