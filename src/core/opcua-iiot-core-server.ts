@@ -897,8 +897,10 @@ const createServer = async (node: Todo, serverOptions: Todo, postInitialize: () 
 }
 
 const createServerObject = async (maxSubscriptions: number, serverOptions: Todo) => {
-  OPCUAServer.MAX_SUBSCRIPTION = maxSubscriptions
-  return new OPCUAServer(serverOptions)
+  // TODO: now via serverOptions.serverCapabilities.maxSessions
+  let server =  new OPCUAServer(serverOptions)
+  server.engine.serverCapabilities.maxSessions = maxSubscriptions || 10
+  return server
 }
 
 const setOPCUAServerListener = function (node: Todo) {
