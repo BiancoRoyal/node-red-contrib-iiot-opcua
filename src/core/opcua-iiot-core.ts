@@ -680,12 +680,13 @@ export function buildNodesFromCrawler(payload: Todo) {
   return payload.crawlerResults || payload.addressSpaceItems
 }
 
-export function buildNodeListFromClient(payload: { nodetype: Todo }) {
+export function buildNodeListFromClient(payload: Todo) {
   switch (payload.nodetype) {
     case 'read':
     case 'write':
       return buildNodesToRead(payload)
     case 'listen':
+    case 'inject':
       return buildNodesToListen(payload)
     case 'browse':
       return buildNodesFromBrowser(payload)
