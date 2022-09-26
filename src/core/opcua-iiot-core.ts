@@ -688,6 +688,7 @@ export function buildNodeListFromClient(payload: Todo) {
       return buildNodesToRead(payload)
     case 'listen':
     case 'inject':
+    case 'events':
       return buildNodesToListen(payload)
     case 'browse':
       return buildNodesFromBrowser(payload)

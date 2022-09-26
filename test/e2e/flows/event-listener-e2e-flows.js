@@ -243,7 +243,8 @@ module.exports = {
       "y": 120,
       "wires": [
         [
-          "7a62a52a.b16114"
+          "7a62a52a.b16114",
+          "356463b32e5a3d12"
         ]
       ]
     },
@@ -253,16 +254,18 @@ module.exports = {
       "z": "78ee76f7492485f7",
       "eventType": "BaseEventType",
       "eventTypeLabel": "BaseEventType (i=2041)",
+      "resultType": "all",
       "queueSize": "1000",
       "usingListener": true,
       "name": "Base Events",
       "showStatusActivities": false,
-      "showErrors": false,
+      "showErrors": true,
       "x": 410,
       "y": 120,
       "wires": [
         [
-          "76db0764.6b88c8"
+          "76db0764.6b88c8",
+          "4d43572b0c03c4e3"
         ]
       ]
     },
@@ -326,6 +329,24 @@ module.exports = {
       "wires": [
         []
       ]
+    },
+    {
+      "id": "4d43572b0c03c4e3",
+      "type": "helper",
+      "z": "78ee76f7492485f7",
+      "active": true,
+      "x": 610,
+      "y": 200,
+      "wires": []
+    },
+    {
+      "id": "356463b32e5a3d12",
+      "type": "helper",
+      "z": "78ee76f7492485f7",
+      "active": true,
+      "x": 390,
+      "y": 200,
+      "wires": []
     },
     {
       "id": "4de0c979.b3757",
