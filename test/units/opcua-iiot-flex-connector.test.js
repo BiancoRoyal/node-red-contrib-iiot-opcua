@@ -13,7 +13,7 @@
 
 jest.setTimeout(5000)
 
-var inputNode = require('../src/opcua-iiot-flex-connector')
+var inputNode = require('../../src/opcua-iiot-flex-connector')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))

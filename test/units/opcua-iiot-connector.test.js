@@ -22,7 +22,7 @@ var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
 // iiot opc ua nodes
-var inputNode = require('../src/opcua-iiot-connector')
+var inputNode = require('../../src/opcua-iiot-connector')
 
 var nodesToLoadConnector = [injectNode, functionNode, inputNode]
 

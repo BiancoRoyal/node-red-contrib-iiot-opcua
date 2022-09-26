@@ -13,8 +13,8 @@
 
 jest.setTimeout(10000)
 
-var inputNode = require('../src/opcua-iiot-inject')
-const helperExtensions = require('../test/test-helper-extensions')
+var inputNode = require('../../src/opcua-iiot-inject')
+const helperExtensions = require('../helper/test-helper-extensions')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))

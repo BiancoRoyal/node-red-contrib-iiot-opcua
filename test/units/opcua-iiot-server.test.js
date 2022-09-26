@@ -13,7 +13,7 @@
 
 jest.setTimeout(8000)
 
-var serverNode = require('../src/opcua-iiot-server')
+var serverNode = require('../../src/opcua-iiot-server')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))

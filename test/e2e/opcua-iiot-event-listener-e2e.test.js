@@ -28,10 +28,6 @@ var eventNodesToLoad = [injectNode, eventNode, connectorNode, inputNode, serverN
 
 var testFlows = require('./flows/event-listener-e2e-flows')
 
-const receive = (node) => {
-  node.receive({payload: {value: 'listenerTests'}})
-}
-
 describe('OPC UA Listener event node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {

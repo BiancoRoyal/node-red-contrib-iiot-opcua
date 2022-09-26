@@ -25,8 +25,6 @@ var resultFilterNode = require('../../src/opcua-iiot-result-filter')
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-const trigger = require('./helper/receive');
-
 var browseRecursiveNodesToLoad = [injectNode, asoNode, listenerNode, connectorNode, resultFilterNode, inputNode, serverNode, responseNode]
 
 var testFlows = require('./flows/browser-recursive-e2e-flows')
@@ -60,14 +58,6 @@ describe('OPC UA Browser recursive with ASO nodes e2e Testing', function () {
           expect(msg.payload.browserResults.length).toBe(11)
           done()
         })
-
-        const injectors = testFlows.testBrowseRecursiveASOFlow.map((item) => {return item.id}).filter((item)=>{return item.indexOf('inject') === 0})
-        injectors.forEach((injector) => {
-          setTimeout(trigger, 3000, helper.getNode(injector))
-        })
-
-        let browserInject = helper.getNode('browserInject')
-        setTimeout(trigger, 5000, browserInject)
       })
     })
   })

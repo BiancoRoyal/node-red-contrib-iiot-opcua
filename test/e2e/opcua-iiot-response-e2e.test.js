@@ -30,10 +30,6 @@ var testResponseNodes = [injectNode, connectorNode, browserNode, crawlerNode, me
 
 var testFlows = require('./flows/response-e2e-flows')
 
-const receive = (node) => {
-  node.receive({payload: {value: 'testPayload'}})
-}
-
 describe('OPC UA Response node e2e Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {

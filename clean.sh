@@ -8,6 +8,8 @@ rm -rf opcuaIIoT/
 
 rm -rf code/
 
+rm -rf certificates/
+
 rm -rf coverage/
 
 rm -rf docs/gen
@@ -20,9 +22,13 @@ npm install
 
 npm i --only=dev
 
-# npm test
+npm run test:units
 
-# npm run coverage
+npm run test:e2e
+
+npm test
+
+npm run coverage
 
 npm run build
 

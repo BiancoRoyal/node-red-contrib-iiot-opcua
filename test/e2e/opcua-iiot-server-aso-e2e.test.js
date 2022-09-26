@@ -23,152 +23,154 @@ helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/server-aso-e2e-flows')
 
-beforeAll(function (done) {
-  helper.startServer(function () {
-    done()
-  })
-})
-
-afterEach(function (done) {
-  helper.unload().then(function () {
-    done()
-  }).catch(function () {
-    done()
-  })
-})
-
-afterAll(function (done) {
-  helper.stopServer(function () {
-    done()
-  })
-})
-
-describe('Address Space Operation node e2e Testing', function () {
-  it('should get all ASO data types with message with payload', function (done) {
-    helper.load([injectNode, functionNode, inputNode, serverNode],  testFlows.testASOFlow, function () {
-      let n4 = helper.getNode('n4')
-      let test = 0
-      n4.on('input', function (msg) {
-        expect(msg.payload.nodetype).toBe('inject')
-        expect(msg.payload.injectType).toBe('ASO')
-
-        switch (msg.payload.datatype) {
-          case 'FolderType':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')
-            test ^= 1
-            break
-          case 'DateTime':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDateTime')
-            test ^= 2
-            break
-          case 'Boolean':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestBoolean')
-            test ^= 4
-            break
-          case 'Double':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDouble')
-            test ^= 8
-            break
-          case 'UInt16':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt16')
-            test ^= 16
-            break
-          case 'UInt32':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt32')
-            test ^= 32
-            break
-          case 'UInt64':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt64')
-            test ^= 64
-            break
-          case 'String':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestString')
-            test ^= 128
-            break
-          case 'Int16':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt16')
-            test ^= 256
-            break
-          case 'Int32':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt32')
-            test ^= 512
-            break
-          case 'LocalizedText':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestLocalizedText')
-            test ^= 1024
-            break
-          default:
-            break
-        }
-
-        if (test === Math.pow(2, 11) - 1) {
-          done()
-        }
-      })
+describe('OPC UA Server ASO node Testing', function () {
+  beforeAll(function (done) {
+    helper.startServer(function () {
+      done()
     })
   })
 
-  it('should verify an inject message for address space operation', function (done) {
-    helper.load([injectNode, functionNode, inputNode, serverNode],  testFlows.testASOFlow, function () {
-      let n4 = helper.getNode('n4')
-      let test = 0
-      n4.on('input', function (msg) {
-        expect(msg.payload.nodetype).toBe('inject')
-        expect(msg.payload.injectType).toBe('ASO')
+  afterEach(function (done) {
+    helper.unload().then(function () {
+      done()
+    }).catch(function () {
+      done()
+    })
+  })
 
-        switch (msg.payload.datatype) {
-          case 'FolderType':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')
-            expect(msg.payload.browsename).toBe('TestVariables')
-            test ^= 1
-            break
-          case 'DateTime':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDateTime')
-            test ^= 2
-            break
-          case 'Boolean':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestBoolean')
-            test ^= 4
-            break
-          case 'Double':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDouble')
-            test ^= 8
-            break
-          case 'UInt16':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt16')
-            test ^= 16
-            break
-          case 'UInt32':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt32')
-            test ^= 32
-            break
-          case 'UInt64':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt64')
-            test ^= 64
-            break
-          case 'String':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestString')
-            test ^= 128
-            break
-          case 'Int16':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt16')
-            test ^= 256
-            break
-          case 'Int32':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt32')
-            test ^= 512
-            break
-          case 'LocalizedText':
-            expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestLocalizedText')
-            test ^= 1024
-            break
-          default:
-            break
-        }
+  afterAll(function (done) {
+    helper.stopServer(function () {
+      done()
+    })
+  })
 
-        if (test === Math.pow(2, 11) - 1) {
-          done()
-        }
+  describe('Address Space Operation node e2e Testing', function () {
+    it('should get all ASO data types with message with payload', function (done) {
+      helper.load([injectNode, functionNode, inputNode, serverNode], testFlows.testASOFlow, function () {
+        let n4 = helper.getNode('n4')
+        let test = 0
+        n4.on('input', function (msg) {
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('ASO')
+
+          switch (msg.payload.datatype) {
+            case 'FolderType':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')
+              test ^= 1
+              break
+            case 'DateTime':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDateTime')
+              test ^= 2
+              break
+            case 'Boolean':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestBoolean')
+              test ^= 4
+              break
+            case 'Double':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDouble')
+              test ^= 8
+              break
+            case 'UInt16':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt16')
+              test ^= 16
+              break
+            case 'UInt32':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt32')
+              test ^= 32
+              break
+            case 'UInt64':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt64')
+              test ^= 64
+              break
+            case 'String':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestString')
+              test ^= 128
+              break
+            case 'Int16':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt16')
+              test ^= 256
+              break
+            case 'Int32':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt32')
+              test ^= 512
+              break
+            case 'LocalizedText':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestLocalizedText')
+              test ^= 1024
+              break
+            default:
+              break
+          }
+
+          if (test === Math.pow(2, 11) - 1) {
+            done()
+          }
+        })
+      })
+    })
+
+    it('should verify an inject message for address space operation', function (done) {
+      helper.load([injectNode, functionNode, inputNode, serverNode], testFlows.testASOFlow, function () {
+        let n4 = helper.getNode('n4')
+        let test = 0
+        n4.on('input', function (msg) {
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('ASO')
+
+          switch (msg.payload.datatype) {
+            case 'FolderType':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestVariables')
+              expect(msg.payload.browsename).toBe('TestVariables')
+              test ^= 1
+              break
+            case 'DateTime':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDateTime')
+              test ^= 2
+              break
+            case 'Boolean':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestBoolean')
+              test ^= 4
+              break
+            case 'Double':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestDouble')
+              test ^= 8
+              break
+            case 'UInt16':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt16')
+              test ^= 16
+              break
+            case 'UInt32':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt32')
+              test ^= 32
+              break
+            case 'UInt64':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestUInt64')
+              test ^= 64
+              break
+            case 'String':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestString')
+              test ^= 128
+              break
+            case 'Int16':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt16')
+              test ^= 256
+              break
+            case 'Int32':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestInt32')
+              test ^= 512
+              break
+            case 'LocalizedText':
+              expect(msg.payload.nodeId.toString()).toBe('ns=1;s=TestLocalizedText')
+              test ^= 1024
+              break
+            default:
+              break
+          }
+
+          if (test === Math.pow(2, 11) - 1) {
+            done()
+          }
+        })
       })
     })
   })

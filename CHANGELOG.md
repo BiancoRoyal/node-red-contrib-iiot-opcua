@@ -1,4 +1,4 @@
-## [4.0.11](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.9...v4.0.11) (2022-09-25)
+## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-09-26)
 
 
 ### Bug Fixes
@@ -13,7 +13,6 @@
 * **event-listener:** e2e tests improved ([73a6e94](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/73a6e94af2dc659fad3ff7c039dc938d40e6abe1))
 * **flex-connector:** new throw error and e2e works again ([efce751](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/efce751dcae371dcc1c6263d98f6bc09db71288c))
 * **flex-server:** missing new msg structure handling ([be856dd](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/be856dd83d271085096f66914a8c8df981000085))
-* **listener:** deconstruct monitoredItem during sendDataFromMonitoredItem ([081414a](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/081414a3a092a75e888f90b863b3a821984d1e32))
 * **listener:** did not stop directly ([cad1543](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/cad1543525748cf9d8e87c1c6ae1d2ab8e94d219))
 * **listener:** e2e test improved ([bb3ac03](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/bb3ac036073396c31425786550fcf2f5ed32fda6))
 * **server-cmd:** e2e test server cmd works again ([ee47e17](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/ee47e178bdaab993b816da0e9c06957e51fb4bbc))
@@ -27,6 +26,15 @@
 ### Features
 
 * **response:** new payload type in json ([de22d9b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/de22d9b25ee4c7bede50a4077f691097ddcf5f5f))
+
+
+
+## [4.0.10](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.9...v4.0.10) (2022-09-20)
+
+
+### Bug Fixes
+
+* **listener:** deconstruct monitoredItem during sendDataFromMonitoredItem ([081414a](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/081414a3a092a75e888f90b863b3a821984d1e32))
 
 
 

@@ -1,5 +1,5 @@
 
-const helperExtensions = require('../../test-helper-extensions')
+const helperExtensions = require('../../helper/test-helper-extensions')
 
 module.exports = {
 

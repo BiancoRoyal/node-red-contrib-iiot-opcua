@@ -31,7 +31,6 @@ var readNodesToLoadWithFlexServer = [injectNode, functionNode, connectorNode, in
 
 var testFlows = require('./flows/read-e2e-flows')
 
-
 describe('OPC UA Read node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {

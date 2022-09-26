@@ -18,8 +18,8 @@ var injectNode = require('@node-red/nodes/core/common/20-inject')
 var functionNode = require('@node-red/nodes/core/function/10-function')
 
 // iiot opcua
-var readNode = require('../src/opcua-iiot-read')
-const helperExtensions = require('../test/test-helper-extensions')
+var readNode = require('../../src/opcua-iiot-read')
+const helperExtensions = require('../helper/test-helper-extensions')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))

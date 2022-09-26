@@ -17,7 +17,7 @@ jest.setTimeout(5000)
 
 var injectNode = require('@node-red/nodes/core/common/20-inject')
 var functionNode = require('@node-red/nodes/core/function/10-function')
-var responseNode = require('../src/opcua-iiot-response')
+var responseNode = require('../../src/opcua-iiot-response')
 
 var responseFlowNodes = [injectNode, functionNode, responseNode]
 
@@ -25,7 +25,7 @@ var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/response-flows')
-const helperExtensions = require('./test-helper-extensions')
+const helperExtensions = require('../helper/test-helper-extensions')
 
 describe('OPC UA Response node Unit Testing', function () {
   beforeAll(function (done) {

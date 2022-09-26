@@ -27,8 +27,6 @@ var browseNodesToLoad = [injectNode, connectorNode, resultFilterNode, inputNode,
 
 var testFlows = require('./flows/browser-e2e-flows')
 
-const trigger = require('./helper/receive.js');
-
 describe('OPC UA Browser node e2e Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
@@ -214,7 +212,6 @@ describe('OPC UA Browser node e2e Testing', function () {
             done()
           }
         })
-        setTimeout(trigger, 5000, inject)
       })
     })
   })

@@ -14,7 +14,7 @@
 jest.setTimeout(5000)
 
 var injectNode = require('@node-red/nodes/core/common/20-inject')
-var inputNode = require('../src/opcua-iiot-event')
+var inputNode = require('../../src/opcua-iiot-event')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))

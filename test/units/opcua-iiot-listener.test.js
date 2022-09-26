@@ -18,7 +18,7 @@ jest.setTimeout(5000)
 // iiot opc ua nodes
 var injectNode = require('@node-red/nodes/core/common/20-inject')
 var functionNode = require('@node-red/nodes/core/function/10-function')
-var inputNode = require('../src/opcua-iiot-listener')
+var inputNode = require('../../src/opcua-iiot-listener')
 
 var helper = require('node-red-node-test-helper')
 const {NodeIdType} = require("node-opcua");
