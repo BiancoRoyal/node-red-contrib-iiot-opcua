@@ -18,6 +18,7 @@ import coreListener from "./core/opcua-iiot-core-listener";
 import {InjectPayload} from "./opcua-iiot-inject";
 import {BrowserPayload} from "./opcua-iiot-browser";
 import {Like} from "./types/helpers";
+import {BasicPayload} from "./core/opcua-iiot-core";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string
@@ -45,10 +46,11 @@ interface OPCUAIIoTEventDef extends nodered.NodeDef {
 export type EventMessage = NodeMessageInFlow & {
   payload: EventPayload
 }
-export type EventPayload = (InjectPayload | BrowserPayload) & {
+export type EventPayload = (InjectPayload | BrowserPayload | BasicPayload) & {
   eventType?: string,
   uaEventFilter?: EventFilter,
   uaEventFields?: string[],
+  nodetype: 'events' | string,
   queueSize?: number,
   interval?: number,
 }
@@ -104,10 +106,11 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const uaEventFilter: EventFilter = constructEventFilter(uaEventFields)
       const responsePayload: EventPayload = {
-        ...msg.payload as InjectPayload | BrowserPayload,
+        ...msg.payload as BasicPayload,
         eventType: self.eventType,
         uaEventFilter: uaEventFilter,
         uaEventFields: uaEventFields,
+        nodetype: 'events',
         queueSize: self.queueSize,
         interval: typeof interval === 'number' ? interval : 1000
       }

@@ -18,6 +18,7 @@ import {isObject} from 'underscore'
 import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {NodeIdLike} from 'node-opcua-nodeid'
 import {
+  AddressSpaceItem,
   BrowseMessage,
   DataTypeInput,
   NodeIdentifier,
@@ -1136,6 +1137,15 @@ export function isNodeTypeToFilterResponse(payload: Todo) {
 
 export function isInitializedIIoTNode<T>(node: T | undefined): node is T {
   return !!node
+}
+
+export interface BasicPayload {
+  value: any
+  payloadType: string
+  nodetype: string
+  injectType: string
+  addressSpaceItems: AddressSpaceItem[]
+  manualInject: boolean
 }
 
 

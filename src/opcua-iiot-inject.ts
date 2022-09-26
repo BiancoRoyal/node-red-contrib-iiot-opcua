@@ -12,7 +12,7 @@ import * as nodered from "node-red";
 import {NodeMessageInFlow} from "node-red";
 import {Todo} from "./types/placeholders";
 import coreInject from "./core/opcua-iiot-core-inject";
-import {resetIiotNode} from "./core/opcua-iiot-core";
+import {resetIiotNode, BasicPayload} from "./core/opcua-iiot-core";
 import {CronJob} from 'cron';
 import {AddressSpaceItem} from "./types/helpers";
 
@@ -46,13 +46,8 @@ export interface InjectMessage extends NodeMessageInFlow {
   payload: InjectPayload
 }
 
-export interface InjectPayload {
-  value: any
-  payloadType: string
-  nodetype: 'inject'
-  injectType: string
-  addressSpaceItems: AddressSpaceItem[]
-  manualInject: boolean
+export interface InjectPayload extends BasicPayload {
+  nodetype: 'inject' | string
 }
 
 /**

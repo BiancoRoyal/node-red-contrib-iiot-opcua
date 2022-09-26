@@ -74,8 +74,8 @@ describe('OPC UA Listener event node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 1) {
             expect(msg.payload.eventType).toBe('BaseEventType')
-            expect(msg.payload.eventFilter).toBeDefined()
-            expect(msg.payload.eventFields).toBeDefined()
+            expect(msg.payload.uaEventFilter).toBeDefined()
+            expect(msg.payload.uaEventFields).toBeDefined()
             setTimeout(done, 2000)
           }
         })
@@ -90,8 +90,8 @@ describe('OPC UA Listener event node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 2) {
             expect(msg.topic).toBe('TestTopicEventUnsubscribe')
-            expect(msg.nodetype).toBe('inject')
-            expect(msg.injectType).toBe('listen')
+            expect(msg.payload.nodetype).toBe('inject')
+            expect(msg.payload.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })
@@ -106,8 +106,8 @@ describe('OPC UA Listener event node e2e Testing', function () {
           msgCounter++
           if (msgCounter === 2) {
             expect(msg.topic).toBe('TestTopicEventUnsubscribe')
-            expect(msg.nodetype).toBe('events')
-            expect(msg.injectType).toBe('listen')
+            expect(msg.payload.nodetype).toBe('events')
+            expect(msg.payload.injectType).toBe('listen')
             setTimeout(done, 2000)
           }
         })
