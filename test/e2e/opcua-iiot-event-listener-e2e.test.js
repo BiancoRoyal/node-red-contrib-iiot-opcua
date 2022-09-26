@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(40000)
+jest.setTimeout(50000)
 
 // iiot opc ua nodes
 var injectNode = require('../../src/opcua-iiot-inject')
@@ -117,6 +117,9 @@ describe('OPC UA Listener event node e2e Testing', function () {
     it('should get a message with payload after base event subscribe', function (done) {
       helper.load(eventNodesToLoad, testFlows.listenToEventsOnServer, function () {
         let n1 = helper.getNode('nh1ev')
+
+        const test = 0
+
         n1.on('input', function (msg) {
           done()
         })

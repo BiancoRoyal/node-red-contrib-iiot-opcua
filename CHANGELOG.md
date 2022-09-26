@@ -9,6 +9,7 @@
 * **core:** missing inject handling and wrong method call ([b8ff7e3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b8ff7e3ed53fce7cdd4880d7108e7519670c9d74))
 * **crawler:** tests improved ([0d73663](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/0d736637785c986340d6d85eaf69f154b8a4596a))
 * **e2e-flows:** new enum value None instead NONE of node-opcua ([4b45547](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/4b455477253789c6162457d7d694835a78e114dd))
+* event node changes now the nodetype to "events" ([eb6264d](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/eb6264dbccca5b6b16f097059095f8408dbe4d69))
 * event shortcut functions deprecated ([04dafc3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/04dafc3ee726a4fd93c1bdeeb83ced527a22db7a))
 * **event-listener:** e2e tests improved ([73a6e94](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/73a6e94af2dc659fad3ff7c039dc938d40e6abe1))
 * **flex-connector:** new throw error and e2e works again ([efce751](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/efce751dcae371dcc1c6263d98f6bc09db71288c))
