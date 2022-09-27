@@ -1,4 +1,4 @@
-## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-09-26)
+## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-09-27)
 
 
 ### Bug Fixes
@@ -14,18 +14,23 @@
 * **event-listener:** e2e tests improved ([73a6e94](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/73a6e94af2dc659fad3ff7c039dc938d40e6abe1))
 * **flex-connector:** new throw error and e2e works again ([efce751](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/efce751dcae371dcc1c6263d98f6bc09db71288c))
 * **flex-server:** missing new msg structure handling ([be856dd](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/be856dd83d271085096f66914a8c8df981000085))
+* listener now handles nodetype='events' msg and subs events ([c20d6ea](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/c20d6eafa4adc8536ce441e61acc8f37f8c7ba61))
+* listener now handles nodetype='events' msg and subs events ([2ef0bfc](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2ef0bfcf6f4b1f0ff69feb5911e25e1fbcd5959b))
 * **listener:** did not stop directly ([cad1543](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/cad1543525748cf9d8e87c1c6ae1d2ab8e94d219))
 * **listener:** e2e test improved ([bb3ac03](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/bb3ac036073396c31425786550fcf2f5ed32fda6))
+* **response-test:** wrong node id ([6fc8405](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/6fc84053c8460e34ad9f1a10b97dd56766d345eb))
 * **server-cmd:** e2e test server cmd works again ([ee47e17](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/ee47e178bdaab993b816da0e9c06957e51fb4bbc))
 * **test:** cleaned and extracted flows of ASO test and fixed msg testing ([e96998c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e96998cf41e765919c9d8d54664a4f69e0a0b24f))
 * **test:** more result filter e2e tests pass again ([10d9b0e](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/10d9b0e41b31f961072772ae91c948211f93c9b3))
 * **test:** payload type is object rather than Array ([2e59210](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2e592102b84634e33d07f579a36f0236560bed59))
 * **tests:** None instead NONE of node-opcua for all tests ([778ee96](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/778ee9646e5ac0663b0d521eb5e43cc4bcb6613f))
 * **tests:** server NONE to None as connector parameter ([d811b04](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d811b046e15d36a31bde627281561c311858ebed))
+* **units:** removed node.receive() from inject tests ([d018120](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d018120b8310aaa70105f8987a3b4d4749a20da6))
 
 
 ### Features
 
+* added npm run scripts for e2e, unit and core tests on their own ([f282bd4](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f282bd4264ffc63cd52a9f3d4ba26539229a7d4c))
 * **response:** new payload type in json ([de22d9b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/de22d9b25ee4c7bede50a4077f691097ddcf5f5f))
 
 
