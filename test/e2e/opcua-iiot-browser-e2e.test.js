@@ -48,7 +48,11 @@ describe('OPC UA Browser node e2e Testing', function () {
 
   describe('Browser node', function () {
     it('should verify browser items as result', function (done) {
-      helper.load(browseNodesToLoad, testFlows.testBrowseFlow, function () {
+      const flow = testFlows.testBrowseFlow
+      flow[9].port = 50100
+      flow[10].endpoint = "opc.tcp://localhost:50100/"
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f1')
         let n1 = helper.getNode('n1f1')
         n5.on('input', function (msg) {
@@ -61,7 +65,11 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result', function (done) {
-      helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
+      const flow = testFlows.testBrowseItemFlow
+      flow[5].port = 50101
+      flow[6].endpoint = "opc.tcp://localhost:50101/"
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
@@ -74,8 +82,12 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single of full result', function (done) {
-      testFlows.testBrowseItemFlow[3].justValue = false
-      helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
+      const flow = testFlows.testBrowseItemFlow
+      flow[5].port = 50102
+      flow[6].endpoint = "opc.tcp://localhost:50102/"
+      flow[3].justValue = false
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
@@ -91,8 +103,11 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Read', function (done) {
-      testFlows.testBrowseItemFlow[3].sendNodesToRead = true
-      helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
+      const flow = testFlows.testBrowseItemFlow
+      flow[5].port = 50103
+      flow[6].endpoint = "opc.tcp://localhost:50103/"
+      flow[3].sendNodesToRead = true
+      helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
@@ -105,8 +120,12 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Listener', function (done) {
-      testFlows.testBrowseItemFlow[3].sendNodesToListener = true
-      helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
+      const flow = testFlows.testBrowseItemFlow
+      flow[5].port = 50104
+      flow[6].endpoint = "opc.tcp://localhost:50104/"
+      flow[3].sendNodesToListener = true
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
@@ -119,8 +138,12 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with Nodes To Browser', function (done) {
-      testFlows.testBrowseItemFlow[3].sendNodesToBrowser = true
-      helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
+      const flow = testFlows.testBrowseItemFlow
+      flow[5].port = 50105
+      flow[6].endpoint = "opc.tcp://localhost:50105/"
+      flow[3].sendNodesToBrowser = true
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
@@ -133,10 +156,14 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with nodes to Read, Browse, and Listener', function (done) {
-      testFlows.testBrowseItemFlow[3].sendNodesToRead = true
-      testFlows.testBrowseItemFlow[3].sendNodesToListener = true
-      testFlows.testBrowseItemFlow[3].sendNodesToBrowser = true
-      helper.load(browseNodesToLoad, testFlows.testBrowseItemFlow, function () {
+      const flow = testFlows.testBrowseItemFlow
+      flow[5].port = 50106
+      flow[6].endpoint = "opc.tcp://localhost:50106/"
+      flow[3].sendNodesToRead = true
+      flow[3].sendNodesToListener = true
+      flow[3].sendNodesToBrowser = true
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
         let n1 = helper.getNode('n1f3')
         n5.on('input', function (msg) {
@@ -153,7 +180,11 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with nodes to Browse with levels', function (done) {
-      helper.load(browseNodesToLoad, testFlows.testBrowseLevelsFlow, function () {
+      const flow = testFlows.testBrowseLevelsFlow
+      flow[7].port = 50107
+      flow[8].endpoint = "opc.tcp://localhost:50107/"
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f2')
         let n1 = helper.getNode('n1f2')
         n4.on('input', function (msg) {
@@ -166,7 +197,11 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with nodes to Read with levels', function (done) {
-      helper.load(browseNodesToLoad, testFlows.testBrowseLevelsFlow, function () {
+      const flow = testFlows.testBrowseLevelsFlow
+      flow[7].port = 50108
+      flow[8].endpoint = "opc.tcp://localhost:50108/"
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6f2')
         let n1 = helper.getNode('n1f2')
         n6.on('input', function (msg) {
@@ -179,8 +214,12 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should verify browser items as single result with nodes to Read with levels recursive', function (done) {
-      testFlows.testBrowseLevelsFlow[3].recursiveBrowse = true
-      helper.load(browseNodesToLoad, testFlows.testBrowseLevelsFlow, function () {
+      const flow = testFlows.testBrowseLevelsFlow
+      flow[7].port = 50109
+      flow[8].endpoint = "opc.tcp://localhost:50109/"
+      flow[3].recursiveBrowse = true
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6f2')
         let n1 = helper.getNode('n1f2')
         n6.on('input', function (msg) {
@@ -193,7 +232,11 @@ describe('OPC UA Browser node e2e Testing', function () {
     })
 
     it('should get ten messages with payload on browser with six response nodes and four result-filter nodes', function (done) {
-      helper.load(browseNodesToLoad, testFlows.testBrowserResponseResultFilterFlow, function () {
+      const flow = testFlows.testBrowserResponseResultFilterFlow
+      flow[14].port = 50110
+      flow[15].endpoint = "opc.tcp://localhost:50110/"
+
+      helper.load(browseNodesToLoad, flow, function () {
         let n1 = helper.getNode('n1f4')
         let inject = helper.getNode('21337b84.2a8c2c')
         let counter = 0
@@ -218,6 +261,10 @@ describe('OPC UA Browser node e2e Testing', function () {
 
   describe('Browser node HTTP requests', function () {
     it('should success on browse for a root id', function (done) {
+      const flow = testFlows.testBrowseFlow
+      flow[9].port = 50111
+      flow[10].endpoint = "opc.tcp://localhost:50111/"
+
       helper.load(browseNodesToLoad, testFlows.testBrowseFlow, function () {
         let n3 = helper.getNode('n3f1')
         let n1 = helper.getNode('n1f1')
