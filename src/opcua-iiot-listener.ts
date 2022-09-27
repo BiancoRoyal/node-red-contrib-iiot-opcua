@@ -737,7 +737,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    if (process.env.TEST === 'true')
+    if (process.env.TEST === 'true') {
       self.functions = {
         createSubscription,
         subscribeActionInput,
@@ -746,6 +746,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         errorHandling,
         setMonitoring
       }
+    }
 
     this.on('close', (done: () => void) => {
       coreListener.internalDebugLog('Close Listener Node - start with terminate of the OPC UA subscription')
