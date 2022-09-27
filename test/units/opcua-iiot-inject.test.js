@@ -82,7 +82,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           msg.should.have.property("payload")
           done()
         })
-        n1.receive({payload:12345})
       })
     })
 
@@ -95,7 +94,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           msg.should.have.property("topic")
           done()
         })
-        n1.receive({payload: "12345", topic: "TestTopicInject"})
       })
     })
 
@@ -123,7 +121,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.injectType).toBe("read")
           done()
         })
-        n1.receive({payload: "123456ß"})
       })
     })
 
@@ -136,7 +133,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.topic).toBe('TestTopicInject')
           done()
         })
-        n1.receive()
       })
     })
 
@@ -150,7 +146,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.injectType).toBe('read')
           done()
         })
-        n1.receive()
       })
     })
 
@@ -176,7 +171,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.value).toBe(12345)
           done()
         })
-        n1.receive()
       })
     })
 
@@ -189,7 +183,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.topic).toBe('TestTopicInject')
           done()
         })
-        n1.receive()
       })
     })
 
@@ -203,7 +196,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.injectType).toBe('listen')
           done()
         })
-        n1.receive()
       })
     })
 
@@ -229,7 +221,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.value).toBe(12345)
           done()
         })
-        n1.receive()
       })
     })
 
@@ -242,7 +233,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.topic).toBe('TestTopicInject')
           done()
         })
-        n1.receive()
       })
     })
 
@@ -256,7 +246,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.injectType).toBe('write')
           done()
         })
-        n1.receive()
       })
     })
 
@@ -269,7 +258,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.injectType).toBe('inject')
           done()
         })
-        n1.receive()
       })
     })
 
@@ -282,7 +270,6 @@ describe('OPC UA Inject node Unit Testing', function () {
           expect(msg.payload.injectType).toBe('inject')
           done()
         })
-        n1.receive()
       })
     })
 
