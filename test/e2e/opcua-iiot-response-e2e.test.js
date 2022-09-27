@@ -160,7 +160,7 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get six messages with payload on crawler with six response nodes on all possible setting of options', function (done) {
       helper.load(testResponseNodes, testFlows.testCrawlerResponseFlow, function () {
-        let n1 = helper.getNode('n1rsf4')
+        let n1 = helper.getNode('193c2083a00aab84')
         let counter = 0
         n1.on('input', function (msg) {
           counter++
