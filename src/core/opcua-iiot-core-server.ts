@@ -44,6 +44,7 @@ import debug from 'debug'
 import path from 'path'
 import {NodeMessage, NodeStatus} from "node-red";
 import {constructAlarmAddressSpaceDemo} from "../helpers/alarms-and-conditions-demo";
+import {LocaleId} from "node-opcua-basic-types/source/locale_id";
 
 const internalDebugLog = debug('opcuaIIoT:server') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:server:details') // eslint-disable-line no-use-before-define
@@ -784,7 +785,7 @@ const addVariableToAddressSpace = function (node: TodoTypeAny, msg: TodoTypeAny,
 
   newNodeOPCUAVariable.nodeId = msg.payload.nodeId
   newNodeOPCUAVariable.browseName = msg.payload.browsename
-  newNodeOPCUAVariable.displayName = new LocalizedText({locale: null, text: msg.payload.displayname})
+  newNodeOPCUAVariable.displayName = new LocalizedText({locale: "en-US", text: msg.payload.displayname})
   newNodeOPCUAVariable.dataType = msg.payload.datatype
   newNodeOPCUAVariable.value = {
     get() {

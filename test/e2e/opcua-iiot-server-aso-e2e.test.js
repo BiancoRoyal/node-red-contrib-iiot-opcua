@@ -188,10 +188,10 @@ describe('OPC UA Server ASO node Testing', function () {
           expect(msg.payload.addressSpaceItems.length).toBe(1)
 
           expect(msg.payload.value).toBeDefined()
-          expect(msg.payload.value.length).toBe(10)
+          expect(msg.payload.value.length).toBe(11)
 
           expect(msg.payload.browserResults).toBeDefined()
-          expect(msg.payload.browserResults.length).toBe(10)
+          expect(msg.payload.browserResults.length).toBe(11)
 
           done()
         })

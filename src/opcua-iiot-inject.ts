@@ -120,9 +120,12 @@ module.exports = function (RED: nodered.NodeAPI) {
     const newMessage = function () {
       return {
         _msgid: RED.util.generateId(),
-        payload: {
-          injectType: self.injectType
-        }
+        topic: self.topic,
+        payload: generateOutputValue(self.payload, {
+          _msgid: RED.util.generateId(),
+          payload: {
+            injectType: self.injectType }
+        })
       }
     }
 

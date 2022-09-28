@@ -306,6 +306,9 @@ export function getVariantValue(datatype: DataTypeInput, value: any): number | D
     case DataType.UInt32:
       let uint32 = new Uint32Array([value])
       return uint32[0]
+    case 'UInt64':
+    case DataType.UInt64:
+      return parseInt(value)
     case 'Int16':
     case DataType.Int16:
     case 'Int32':
