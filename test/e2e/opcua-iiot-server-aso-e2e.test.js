@@ -14,9 +14,15 @@
 jest.setTimeout(20000)
 
 var functionNode = require('@node-red/nodes/core/function/10-function')
+
 var injectNode = require('../../src/opcua-iiot-inject')
 var inputNode = require('../../src/opcua-iiot-server-aso')
 var serverNode = require('../../src/opcua-iiot-server')
+var connectorNode = require('../../src/opcua-iiot-connector')
+var readNode = require('../../src/opcua-iiot-read')
+var browserNode = require('../../src/opcua-iiot-browser')
+
+var readAsoNodesToLoad = [functionNode, injectNode, inputNode, serverNode, connectorNode, readNode,  browserNode]
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
@@ -170,6 +176,24 @@ describe('OPC UA Server ASO node Testing', function () {
           if (test === Math.pow(2, 11) - 1) {
             done()
           }
+        })
+      })
+    })
+
+    it('should verify read via browser for address space operations', function (done) {
+      helper.load(readAsoNodesToLoad, testFlows.testASOReadFlow, function () {
+        let n4 = helper.getNode('41ac95a6194a3536')
+        n4.on('input', function (msg) {
+          expect(msg.payload.addressSpaceItems).toBeDefined()
+          expect(msg.payload.addressSpaceItems.length).toBe(1)
+
+          expect(msg.payload.value).toBeDefined()
+          expect(msg.payload.value.length).toBe(10)
+
+          expect(msg.payload.browserResults).toBeDefined()
+          expect(msg.payload.browserResults.length).toBe(10)
+
+          done()
         })
       })
     })
