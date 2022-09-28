@@ -10,7 +10,7 @@
 
 import * as nodered from "node-red";
 import {NodeMessageInFlow} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {logger} from "./core/opcua-iiot-core-connector";
 import {resetIiotNode} from "./core/opcua-iiot-core";
 import internalDebugLog = logger.internalDebugLog;
@@ -45,8 +45,8 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     let self = this
 
-    this.on('input', (msg: NodeMessageInFlow | Todo) => {
-      let returnPayload: Todo = {};
+    this.on('input', (msg: NodeMessageInFlow | TodoTypeAny) => {
+      let returnPayload: TodoTypeAny = {};
 
       returnPayload.nodetype = 'inject'
       returnPayload.injectType = 'CMD'

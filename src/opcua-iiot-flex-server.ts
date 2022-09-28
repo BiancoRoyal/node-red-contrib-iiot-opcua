@@ -11,7 +11,7 @@
 
 import * as nodered from "node-red";
 import {NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {VM} from "vm2";
@@ -23,7 +23,7 @@ type OPCUAIIoTFlexServer = nodered.Node & {
 }
 
 interface OPCUAIIoTFlexServerDef extends nodered.NodeDef {
-  addressSpaceScript: Todo
+  addressSpaceScript: TodoTypeAny
 }
 
 /**
@@ -39,7 +39,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     RED.nodes.createNode(this, config)
     coreServer.flexInternalDebugLog('Open Server Node')
 
-    let self: Todo = this;
+    let self: TodoTypeAny = this;
 
     coreServer.readConfigOfServerNode(self, config)
     coreServer.initServerNode(self)
@@ -96,7 +96,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           }
         },
         sandboxEnv: {
-          get: function (envVar: Todo) {
+          get: function (envVar: TodoTypeAny) {
             let flow = self._flow
             return flow.getSetting(envVar)
           }
@@ -126,7 +126,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const handleServerError = (err: Error, msg: Todo) => {
+    const handleServerError = (err: Error, msg: TodoTypeAny) => {
       coreServer.internalDebugLog(err)
       if (self.showErrors) {
         this.error(err, msg)
@@ -154,7 +154,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     initNewServer()
 
-    this.on('input', function (msg: Todo) {
+    this.on('input', function (msg: TodoTypeAny) {
       if (!self.iiot.opcuaServer || !self.iiot.initialized) {
         handleServerError(new Error('Server Not Ready For Inputs'), msg)
         return
@@ -167,7 +167,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     })
 
-    const executeOpcuaCommand = (msg: Todo) => {
+    const executeOpcuaCommand = (msg: TodoTypeAny) => {
       if (msg.payload.commandType === 'restart') {
         restartServer()
         this.send(msg)
@@ -176,7 +176,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const sendHandler = (msg: Todo) => {
+    const sendHandler = (msg: TodoTypeAny) => {
       this.send(msg)
     }
 

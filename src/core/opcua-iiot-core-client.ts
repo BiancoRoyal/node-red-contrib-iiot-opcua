@@ -11,7 +11,7 @@
 // SOURCE-MAP-REQUIRED
 
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 
 import debug from "debug";
 import {ClientSession, DataValue, StatusCode, StatusCodes} from "node-opcua";
@@ -37,7 +37,7 @@ const READ_TYPE = Object.freeze({
   HISTORY: 130
 }) // eslint-disable-line no-use-before-define
 
-const write = (session: ClientSession, nodesToWrite: WriteValueOptions[], originMsg: Todo): Promise<WriteResult> => {
+const write = (session: ClientSession, nodesToWrite: WriteValueOptions[], originMsg: TodoTypeAny): Promise<WriteResult> => {
   return new Promise(
     (resolve, reject) => {
       if (session) {
@@ -60,7 +60,7 @@ const write = (session: ClientSession, nodesToWrite: WriteValueOptions[], origin
   )
 }
 
-const read = function (session: ClientSession, nodesToRead: ReadValueIdOptions[], maxAge: number, msg: Todo) {
+const read = function (session: ClientSession, nodesToRead: ReadValueIdOptions[], maxAge: number, msg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
@@ -82,12 +82,12 @@ const read = function (session: ClientSession, nodesToRead: ReadValueIdOptions[]
   )
 }
 
-const readVariableValue = function (session: Todo, nodesToRead: Todo, originMsg: Todo) {
+const readVariableValue = function (session: TodoTypeAny, nodesToRead: TodoTypeAny, originMsg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readVariableValue(nodesToRead, function (err: Error, dataValues: Todo) {
+        session.readVariableValue(nodesToRead, function (err: Error, dataValues: TodoTypeAny) {
           if (err) {
             reject(err)
           } else {
@@ -105,12 +105,12 @@ const readVariableValue = function (session: Todo, nodesToRead: Todo, originMsg:
   )
 }
 
-const readHistoryValue = function (session: Todo, nodesToRead: Todo, startDate: Todo, endDate: Todo, originMsg: Todo) {
+const readHistoryValue = function (session: TodoTypeAny, nodesToRead: TodoTypeAny, startDate: TodoTypeAny, endDate: TodoTypeAny, originMsg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readHistoryValue(nodesToRead, startDate, endDate, function (err: Error, dataValues: Todo) {
+        session.readHistoryValue(nodesToRead, startDate, endDate, function (err: Error, dataValues: TodoTypeAny) {
           if (err) {
             reject(err)
           } else {
@@ -130,12 +130,12 @@ const readHistoryValue = function (session: Todo, nodesToRead: Todo, startDate: 
   )
 }
 
-const readAllAttributes = function (session: Todo, nodesToRead: Todo, originMsg: Todo) {
+const readAllAttributes = function (session: TodoTypeAny, nodesToRead: TodoTypeAny, originMsg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readAllAttributes(nodesToRead, function (err: Error, dataValues: Todo) {
+        session.readAllAttributes(nodesToRead, function (err: Error, dataValues: TodoTypeAny) {
           if (err) {
             reject(err)
           } else {
@@ -153,7 +153,7 @@ const readAllAttributes = function (session: Todo, nodesToRead: Todo, originMsg:
   )
 }
 
-const stringifyFormatted = function (dataValues: Todo) {
+const stringifyFormatted = function (dataValues: TodoTypeAny) {
   return JSON.stringify(dataValues, null, 2)
 }
 

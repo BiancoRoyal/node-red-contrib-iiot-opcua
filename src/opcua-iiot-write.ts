@@ -10,7 +10,7 @@
 'use strict'
 
 import {
-  Todo,
+  TodoTypeAny,
   TodoVoidFunction,
 } from "./types/placeholders";
 import coreClient from "./core/opcua-iiot-core-client";
@@ -50,8 +50,8 @@ interface OPCUAIIoTWriteDef extends NodeDef {
 
 export type WriteResult = {
   statusCodes: StatusCode[] | undefined,
-  nodesToWrite: Todo,
-  msg: NodeMessageInFlow & Todo
+  nodesToWrite: TodoTypeAny,
+  msg: NodeMessageInFlow & TodoTypeAny
 }
 
 export type WriteResultMessage = NodeMessageInFlow & {
@@ -60,10 +60,10 @@ export type WriteResultMessage = NodeMessageInFlow & {
 
 export type WritePayload = {
   nodetype: 'write'
-  justValue: Todo
-  nodesToWrite: Todo[]
-  value: Todo
-  valuesToWrite: Todo
+  justValue: TodoTypeAny
+  nodesToWrite: TodoTypeAny[]
+  value: TodoTypeAny
+  valuesToWrite: TodoTypeAny
 }
 
 /**
@@ -82,7 +82,7 @@ module.exports = (RED: NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let self: Todo = this;
+    let self: TodoTypeAny = this;
     self.iiot = initCoreNode()
 
     const handleWriteError = (err: Error, msg: NodeMessage) => {
@@ -97,7 +97,7 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const writeToSession = (session: ClientSession, originMsg: Todo) => {
+    const writeToSession = (session: ClientSession, originMsg: TodoTypeAny) => {
       if (checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
@@ -128,7 +128,7 @@ module.exports = (RED: NodeAPI) => {
       return message
     }
 
-    const extractDataValue = (message: WriteResultMessage, result: WriteResult): Todo => {
+    const extractDataValue = (message: WriteResultMessage, result: WriteResult): TodoTypeAny => {
       let dataValues: string
       if (self.justValue) {
         if (message.payload.valuesToWrite) {

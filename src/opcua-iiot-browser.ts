@@ -347,6 +347,9 @@ module.exports = function (RED: nodered.NodeAPI) {
       const payload = msg.payload as BrowserInputPayloadLike
 
       // Todo: a browse can overload addressSpaceItems, maybe this have to get more clear code and flow
+      // Yes, it should get addressSpaceItems to browse from and should send addressSpaceItems as the result from the browse later
+      // A good point could it be to use terms like addressSpaceItemsInput and addressSpaceItemsOutput
+
       if (payload.addressItemsToBrowse && payload.addressItemsToBrowse.length > 0) {
         payload.addressSpaceItems = payload.addressItemsToBrowse
       }

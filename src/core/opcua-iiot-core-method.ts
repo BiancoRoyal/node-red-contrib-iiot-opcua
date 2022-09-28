@@ -9,7 +9,7 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 
 import debug from 'debug';
 import {ClientSession, coerceNodeId} from "node-opcua";
@@ -18,7 +18,7 @@ import {convertDataValueByDataType} from "./opcua-iiot-core";
 const internalDebugLog = debug('opcuaIIoT:method') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:method:details') // eslint-disable-line no-use-before-define
 
-const getArgumentDefinition = function (session: Todo, msg: Todo) {
+const getArgumentDefinition = function (session: TodoTypeAny, msg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -27,11 +27,11 @@ const getArgumentDefinition = function (session: Todo, msg: Todo) {
         try {
           let methodId = coerceNodeId(msg.payload.methodId)
 
-          session.getArgumentDefinition(methodId, function (err: Error, inputArguments: Todo, outputArguments: Todo) {
+          session.getArgumentDefinition(methodId, function (err: Error, inputArguments: TodoTypeAny, outputArguments: TodoTypeAny) {
             if (err) {
               reject(err)
             } else {
-              let results: Todo = {}
+              let results: TodoTypeAny = {}
               results.methodId = methodId
               results.methodDefinition = {}
               results.methodDefinition.inputArguments = inputArguments
@@ -46,14 +46,14 @@ const getArgumentDefinition = function (session: Todo, msg: Todo) {
     })
 }
 
-const callMethods = function (session: ClientSession, msg: Todo) {
+const callMethods = function (session: ClientSession, msg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
         reject(new Error('Methods Call Session Not Valid'))
       } else {
         try {
-          msg.payload.inputArguments.forEach(function (element: Todo) {
+          msg.payload.inputArguments.forEach(function (element: TodoTypeAny) {
             element.value = convertDataValueByDataType(element.value, element.dataType)
           })
           let methodCalls = [{
@@ -62,7 +62,7 @@ const callMethods = function (session: ClientSession, msg: Todo) {
             inputArguments: msg.payload.inputArguments
           }]
 
-          session.call(methodCalls, function (err: Todo, results: Todo) {
+          session.call(methodCalls, function (err: TodoTypeAny, results: TodoTypeAny) {
             if (err) {
               reject(err)
             } else {
@@ -76,19 +76,19 @@ const callMethods = function (session: ClientSession, msg: Todo) {
     })
 }
 
-const buildMessagesFromMethodCalls = function (methodCallsResults: Todo) {
+const buildMessagesFromMethodCalls = function (methodCallsResults: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!methodCallsResults) {
         reject(new Error('Methods Call Results To Messages Session Not Valid'))
       } else {
-        let resultMessages: Todo[] = []
+        let resultMessages: TodoTypeAny[] = []
         resolve({methodCallsResults: methodCallsResults, messages: resultMessages})
       }
     })
 }
 
-const invalidMessage = function (node: Todo, message: Todo, handleMethodWarn: (message: Todo) => void) {
+const invalidMessage = function (node: TodoTypeAny, message: TodoTypeAny, handleMethodWarn: (message: TodoTypeAny) => void) {
   let response = false
 
   if (!message.payload.objectId) {
@@ -114,7 +114,7 @@ const invalidMessage = function (node: Todo, message: Todo, handleMethodWarn: (m
   return response
 }
 
-const buildCallMessage = function (node: Todo, msg: Todo) {
+const buildCallMessage = function (node: TodoTypeAny, msg: TodoTypeAny) {
   let message = msg
   message.payload.objectId = msg.payload.objectId || node.objectId
   message.payload.methodId = msg.payload.methodId || node.methodId

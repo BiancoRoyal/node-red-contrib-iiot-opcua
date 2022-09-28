@@ -9,9 +9,10 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreResponse, {ResponseInputPayload} from "./core/opcua-iiot-core-response";
 import {
+  IotOpcUaNodeMessage,
   checkItemForUnsetState,
   checkResponseItemIsNotToFilter,
   isNodeTypeToFilterResponse
@@ -40,7 +41,7 @@ interface OPCUAIIoTResponse extends nodered.Node {
   activateFilters: boolean
   negateFilter: boolean
   filters: Filter[]
-  iiot: Todo
+  iiot: TodoTypeAny
   functions?: Record<string, (...args: any) => any>
 }
 
@@ -200,22 +201,22 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const extractPayloadEntriesFromFilter = function (payload: ResponseInputPayload) {
-      return payload.value.filter((item: Todo) => {
+      return payload.value.filter((item: TodoTypeAny) => {
         return itemIsNotToFilter(item)
       })
     }
 
     const extractMethodEntriesFromFilter = function (payload: ResponseInputPayload) {
-      let filteredEntries: Todo[] = []
-      let filteredValues: Todo[] = []
-      payload.addressSpaceItems.forEach((item: Todo, index: number) => {
+      let filteredEntries: TodoTypeAny[] = []
+      let filteredValues: TodoTypeAny[] = []
+      payload.addressSpaceItems.forEach((item: TodoTypeAny, index: number) => {
         if (itemIsNotToFilter(item)) {
           filteredEntries.push(item)
           filteredValues.push(index)
         }
       })
 
-      let outputArguments: Todo
+      let outputArguments: TodoTypeAny
       if (payload.results) {
         outputArguments = payload.results.outputArguments
       } else {
@@ -223,7 +224,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
 
       if (outputArguments) {
-        outputArguments.forEach((item: Todo, index: number) => {
+        outputArguments.forEach((item: TodoTypeAny, index: number) => {
           if (itemIsNotToFilter(item)) {
             if (filteredValues.includes(index)) {
               filteredEntries[index].dataType = item.dataType
@@ -288,12 +289,19 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('input', (msg: NodeMessageInFlow) => {
       try {
+
+        const internalMsg = msg as IotOpcUaNodeMessage
+
         if (self.activateUnsetFilter) {
-          // TODO: has to be migrated to payload.value here
-          if (msg.payload === void 0 || _.isNull(msg.payload) || _.isEmpty(msg.payload)) {
+          if (msg.payload === void 0 ||
+              _.isNull(msg.payload) ||
+              _.isEmpty(msg.payload) ||
+              _.isNull(internalMsg.payload.value) ||
+              _.isEmpty(internalMsg.payload.value)) {
             return
           }
         }
+
         msg = normalizeMessage(msg as any)
 
         const inputPayload = msg.payload as AnyPayload;

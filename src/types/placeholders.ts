@@ -6,5 +6,5 @@
  node-red-contrib-iiot-opcua
  */
 
-export type Todo = any;
+export type TodoTypeAny = any;
 export type TodoVoidFunction = (...args: any) => void;

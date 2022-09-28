@@ -10,23 +10,23 @@
 'use strict'
 import * as nodered from "node-red";
 import {NodeMessageInFlow} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreInject from "./core/opcua-iiot-core-inject";
-import {resetIiotNode, BasicPayload} from "./core/opcua-iiot-core";
+import {resetIiotNode, IotOpcUaNodeMessage} from "./core/opcua-iiot-core";
 import {CronJob} from 'cron';
 import {AddressSpaceItem} from "./types/helpers";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string
   topic: string
-  payload: Todo // TODO: config.payload
-  payloadType: Todo
+  payload: any
+  payloadType: TodoTypeAny
   repeat: number
   crontab: string
-  once: Todo
-  startDelay: number // TODO: parseFloat(config.startDelay) || 10
+  once: TodoTypeAny
+  startDelay: number
   injectType: string
-  addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
+  addressSpaceItems: Array<AddressSpaceItem>
 }
 
 interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
@@ -39,15 +39,15 @@ interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
   once: boolean
   startDelay: string
   injectType: string
-  addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
+  addressSpaceItems: Array<AddressSpaceItem>
 }
 
 export interface InjectMessage extends NodeMessageInFlow {
   payload: InjectPayload
 }
 
-export interface InjectPayload extends BasicPayload {
-  nodetype: 'inject' | string
+export interface InjectPayload extends IotOpcUaNodeMessage {
+  nodetype: 'inject' | string // Todo: fix typo to nodeType with version 5.x - first we need the cli tools working for version migrations
 }
 
 /**
@@ -74,7 +74,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     this.addressSpaceItems = config.addressSpaceItems || []
 
-    let self: Todo = this
+    let self: TodoTypeAny = this
 
     let intervalId: NodeJS.Timer | null = null
     let onceTimeout: NodeJS.Timeout | null = null
@@ -167,18 +167,24 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
-      if (Object.keys(msg).length === 0) return; // Todo: Why? Maybe it should be build by newMessage
+      if (Object.keys(msg).length === 0) {
+        // security: never use a completely empty message with any key, this is not a valid node-red msg than
+        return;
+      }
 
       try {
         const topic = self.topic || msg.topic
+
         const payload: InjectPayload = {
+          payload: msg.payload,
           payloadType: self.payloadType,
           value: generateOutputValue(self.payloadType, msg),
           nodetype: 'inject',
-          injectType: (msg.payload as Todo)?.injectType || self.injectType,
+          injectType: (msg.payload as TodoTypeAny)?.injectType || self.injectType,
           addressSpaceItems: [...self.addressSpaceItems],
           manualInject: Object.keys(msg).length !== 0
         }
+
         const outputMessage: NodeMessageInFlow = {
           ...msg,
           topic,

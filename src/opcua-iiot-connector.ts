@@ -376,6 +376,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
         return
       }
+
       if (this.iiot.stateMachine.getMachineState() !== 'OPEN') {
         internalDebugLog('Session Request Not Allowed On State ' + this.iiot.stateMachine.getMachineState())
         if (this.showErrors) {
@@ -383,6 +384,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
         return
       }
+
       if (!this.iiot.opcuaClient) {
         internalDebugLog('OPC UA Client Connection Is Not Valid On State ' + this.iiot.stateMachine.getMachineState())
         if (this.showErrors) {
@@ -394,8 +396,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.iiot.stateMachine.sessionrequest()
       const res = await this.iiot.opcuaClient.createSession(this.iiot.userIdentity)
         .then((session: ClientSession) => {
-          if (isUndefined(this.iiot))
-            return
+          if (isUndefined(this.iiot)) return
 
           session.requestedMaxReferencesPerNode = 100000
           this.iiot.opcuaSession = session
@@ -491,6 +492,14 @@ module.exports = function (RED: nodered.NodeAPI) {
         internalDebugLog('Close Session Without Session On State ' + this.iiot.stateMachine.getMachineState())
         done()
       }
+    }
+
+    const hasNoSession = () => {
+      return _.isUndefined(this.iiot) || _.isUndefined(this.iiot?.opcuaSession) || _.isNull(this.iiot?.opcuaSession)
+    }
+
+    const hasSession = () => {
+      return !hasNoSession()
     }
 
     const handleSessionClose = (statusCode: number) => {

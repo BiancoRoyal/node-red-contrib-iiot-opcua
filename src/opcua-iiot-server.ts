@@ -11,7 +11,7 @@
 
 import * as nodered from "node-red";
 import {NodeMessage, NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {isInitializedIIoTNode, resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 
@@ -38,7 +38,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     coreServer.internalDebugLog('Open Server Node')
 
     this.asoDemo = config.asoDemo // ASO (address space objects) Demo
-    let self: Todo = this;
+    let self: TodoTypeAny = this;
     coreServer.readConfigOfServerNode(this, config)
     coreServer.initServerNode(self)
     coreServer.loadNodeSets(self, __dirname)
@@ -56,7 +56,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const handleServerError = (err: Error, msg: Todo) => {
+    const handleServerError = (err: Error, msg: TodoTypeAny) => {
       coreServer.internalDebugLog(err)
       if (self.showErrors) {
         this.error(err, msg)
@@ -73,7 +73,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const postInitialize = () => {
       coreServer.constructAddressSpace(self.iiot.opcuaServer, self.asoDemo)
-        .then((err: Todo) => {
+        .then((err: TodoTypeAny) => {
           if (err) {
             handleServerError(err, {payload: 'Server Address Space Problem'})
           } else {
@@ -97,7 +97,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     initNewServer()
 
-    this.on('input', (msg: Todo) => {
+    this.on('input', (msg: TodoTypeAny) => {
       if (!self.iiot.opcuaServer || !self.iiot.initialized) {
         handleServerError(new Error('Server Not Ready For Inputs'), msg)
         return
@@ -117,7 +117,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.send(msg)
     })
 
-    const changeAddressSpace = (msg: Todo) => {
+    const changeAddressSpace = (msg: TodoTypeAny) => {
       // TODO: refactor to work with the new OPC UA type list and option to set add type
       if (msg.payload.objecttype && msg.payload.objecttype.indexOf('Variable') > -1) {
         coreServer.addVariableToAddressSpace(self, msg, msg.payload.objecttype, false, handleServerError)
@@ -128,7 +128,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const executeOpcuaCommand = (msg: Todo) => {
+    const executeOpcuaCommand = (msg: TodoTypeAny) => {
       switch (msg.payload.commandType) {
         case 'restart':
           restartServer()
@@ -141,7 +141,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const sendHandler = (msg: Todo) => {
+    const sendHandler = (msg: TodoTypeAny) => {
       this.send(msg)
     }
 

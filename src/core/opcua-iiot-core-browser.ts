@@ -10,7 +10,7 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 import {initCoreNode, isSessionBad, OBJECTS_ROOT, setNodeStatusTo} from "./opcua-iiot-core";
 import {
   BrowseDirection,
@@ -41,7 +41,7 @@ const crawlerInternalDebugLog = debug('opcuaIIoT:browser:crawler') // eslint-dis
 const crawlerDetailDebugLog = debug('opcuaIIoT:browser:crawler:details') // eslint-disable-line no-use-before-define
 
 export type BrowserInputPayload = {
-  root: Todo
+  root: TodoTypeAny
   actiontype: string
   addressSpaceItems: AddressSpaceItem[]
   addressItemsToBrowse: AddressSpaceItem[]
@@ -52,7 +52,7 @@ export type BrowserInputPayload = {
 export type BrowserInputPayloadLike = Like<BrowserInputPayload>
 
 
-const browse = (session: Todo, nodeIdToBrowse: Todo) => {
+const browse = (session: TodoTypeAny, nodeIdToBrowse: TodoTypeAny) => {
   return new Promise<BrowseResult[]>(
     function (resolve, reject) {
       let browseOptions = [
@@ -92,7 +92,7 @@ const browseAddressSpaceItems = function (session: ClientSession, addressSpaceIt
     function (resolve, reject) {
       let browseOptions: BrowseDescriptionLike[] = []
 
-      addressSpaceItems.flatMap(function (item: Todo) {
+      addressSpaceItems.flatMap(function (item: TodoTypeAny) {
         browseOptions.push({
           nodeId: item.nodeId,
           referenceTypeId: 'Organizes',
@@ -134,16 +134,16 @@ const createCrawler = function (session: NodeCrawlerClientSession) {
   return new NodeCrawler(session)
 }
 
-const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg: BrowserInputPayloadLike, sendWrapper: (result: Error | Todo) => void) => {
+const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg: BrowserInputPayloadLike, sendWrapper: (result: Error | TodoTypeAny) => void) => {
   if (!nodeIdToCrawl) {
     return new Error('NodeId To Crawl Not Valid')
   }
   const message = Object.assign({}, msg)
   const crawler = createCrawler(session)
-  let crawlerResult: Todo[] = []
+  let crawlerResult: TodoTypeAny[] = []
 
   const data = {
-    onBrowse: function (crawler: Todo, cacheNode: Todo) {
+    onBrowse: function (crawler: TodoTypeAny, cacheNode: TodoTypeAny) {
       crawlerResult.push(cacheNode)
       NodeCrawler.follow(crawler, cacheNode, this)
     }
@@ -184,14 +184,14 @@ const crawl = (session: NodeCrawlerClientSession, nodeIdToCrawl: NodeIdLike, msg
  * This seems needlessly overcomplicated, but that is necessary to avoid UnhandledPromiseRejection errors from the crawl function.
  *
  */
-const crawlAddressSpaceItems = (session: NodeCrawlerClientSession, payload: Todo, sendWrapper: (result: Error | Todo) => void, timeout: number) => {
+const crawlAddressSpaceItems = (session: NodeCrawlerClientSession, payload: TodoTypeAny, sendWrapper: (result: Error | TodoTypeAny) => void, timeout: number) => {
   const crawler = createCrawler(session)
 
-  const crawlerPromises: Todo = []
-  const resolvers: Todo = []
+  const crawlerPromises: TodoTypeAny = []
+  const resolvers: TodoTypeAny = []
 
 
-  payload.addressSpaceItems.forEach((item: Todo, index: number) => {
+  payload.addressSpaceItems.forEach((item: TodoTypeAny, index: number) => {
     if (!item.nodeId) {
       coreBrowser.internalDebugLog('Item Not To Crawl - Missing NodeId')
       return
@@ -199,7 +199,7 @@ const crawlAddressSpaceItems = (session: NodeCrawlerClientSession, payload: Todo
 
     // Each item should track results itself
     // results will be combined in the payload.value field, but remain independent in payload.crawlerResult
-    let crawlerResult: Todo[] = []
+    let crawlerResult: TodoTypeAny[] = []
     const data: UserData = {
       onBrowse: (crawler: NodeCrawlerBase, cacheNode: CacheNode, userData: UserData) => {
         if (!cacheNode) {
@@ -229,7 +229,7 @@ const crawlAddressSpaceItems = (session: NodeCrawlerClientSession, payload: Todo
         resolvers[index].resolve(crawlerResult)
         // Ensure only one message is sent
         if (index === payload.addressSpaceItems.length - 1) {
-          Promise.allSettled(crawlerPromises).then((promiseList: Todo) => {
+          Promise.allSettled(crawlerPromises).then((promiseList: TodoTypeAny) => {
             sendWrapper({rootNodeId: item.nodeId, payload, crawlerResult: promiseList, promises: true})
           }).catch((err) => {
             sendWrapper(err)
@@ -261,7 +261,7 @@ const browseToRoot = function () {
   return OBJECTS_ROOT
 }
 
-const extractNodeIdFromTopic = function (payload: BrowserInputPayloadLike, node: Todo) {
+const extractNodeIdFromTopic = function (payload: BrowserInputPayloadLike, node: TodoTypeAny) {
   let rootNodeId = null
 
   if (payload.actiontype === 'browse') { // event driven browsing
@@ -327,10 +327,10 @@ const initBrowserNode = function () {
 }
 
 const browseErrorHandling = function (
-  node: Node & Todo,
+  node: Node & TodoTypeAny,
   err: Error,
-  msg: Todo,
-  lists: Todo,
+  msg: TodoTypeAny,
+  lists: TodoTypeAny,
   errorHandler: (err: Error, msg: NodeMessageInFlow) => void,
   statusHandler: (status: string | NodeStatus) => void,
   oldStatusParameter: NodeStatus | undefined = undefined,
@@ -365,7 +365,7 @@ const browseErrorHandling = function (
  *
  * The endCallback function should do error checking and then call the crawl function
  */
-const verifyNodeExists = (session: NodeCrawlerClientSession, nodeId: Todo, endCallback: ResponseCallback<DataValue[]>) => {
+const verifyNodeExists = (session: NodeCrawlerClientSession, nodeId: TodoTypeAny, endCallback: ResponseCallback<DataValue[]>) => {
   session.read([{nodeId: nodeId}], endCallback)
 }
 

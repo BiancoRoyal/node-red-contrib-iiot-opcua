@@ -9,7 +9,7 @@
 'use strict'
 import * as nodered from "node-red";
 import {NodeMessage, NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreConnector from "./core/opcua-iiot-core-connector";
 import {deregisterToConnector, registerToConnector, resetIiotNode} from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
@@ -18,7 +18,7 @@ export interface OPCUAIIoTFlexConnector extends nodered.Node {
   showStatusActivities: boolean
   showErrors: boolean
   connector: any
-  iiot?: Todo
+  iiot?: TodoTypeAny
 }
 
 interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
@@ -50,7 +50,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.on('input', (msg: NodeMessageInFlow) => {
       coreConnector.internalDebugLog('connector change request input')
 
-      const payload: Todo = msg.payload
+      const payload: TodoTypeAny = msg.payload
 
       if (self.connector) {
         if (payload.endpoint && payload.endpoint.includes('opc.tcp:')) {
@@ -86,7 +86,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     registerToConnector(this, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
-      deregisterToConnector(this as Todo, () => {
+      deregisterToConnector(this as TodoTypeAny, () => {
         resetIiotNode(this)
         done()
       })

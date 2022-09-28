@@ -115,8 +115,9 @@ describe('OPC UA Write node e2e Testing', function () {
             'nodeId': 'ns=1;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          // Todo: StatusCode Good check instead JSON
-          expect(msg.payload.value.statusCodes).toMatchObject([{'_value': 0, '_description': 'The operation succeeded.', '_name': 'Good'}])
+          expect(msg.payload.value.statusCodes).toBeDefined()
+          expect(msg.payload.value.statusCodes?.length).toBeGreaterThan(0)
+          expect(msg.payload.value.statusCodes[0]).toMatchObject(StatusCodes.Good)
           expect(msg.topic).toBe('TestTopicWrite')
           expect(msg.payload.nodetype).toBe('write')
           expect(msg.payload.injectType).toBe('write')
@@ -147,7 +148,6 @@ describe('OPC UA Write node e2e Testing', function () {
             'nodeId': 'ns=1;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          // Todo: StatusCode Good check instead JSON
           expect(msg.payload.value.statusCodes).toBeDefined()
           expect(msg.payload.value.statusCodes?.length).toBeGreaterThan(0)
           expect(msg.payload.value.statusCodes[0]).toMatchObject(StatusCodes.Good)

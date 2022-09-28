@@ -6,7 +6,7 @@
  node-red-contrib-iiot-opcua
  */
 
-import {Todo} from "./placeholders";
+import {TodoTypeAny} from "./placeholders";
 import {AttributeIds, DataType, DataValue, NodeId, NodeIdType, StatusCode} from "node-opcua";
 import {NodeMessageInFlow} from "node-red";
 
@@ -28,7 +28,7 @@ export type WriteMessage = {
   payload: {
     nodesToWrite: NodeToWrite[],
   }
-  valuesToWrite?: Todo[]
+  valuesToWrite?: TodoTypeAny[]
 }
 
 export type AddressSpaceItem = {

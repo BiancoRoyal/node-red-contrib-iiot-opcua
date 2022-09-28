@@ -10,7 +10,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {
   checkCrawlerItemIsNotToFilter,
@@ -32,13 +32,13 @@ import {isArray} from "./types/assertion";
 
 interface OPCUAIIoTCrawler extends nodered.Node {
   name: string
-  justValue: Todo
-  singleResult: Todo
+  justValue: TodoTypeAny
+  singleResult: TodoTypeAny
   showStatusActivities: boolean
   showErrors: boolean
-  activateUnsetFilter: Todo
-  activateFilters: Todo
-  negateFilter: Todo
+  activateUnsetFilter: TodoTypeAny
+  activateFilters: TodoTypeAny
+  negateFilter: TodoTypeAny
   filters: Filter[]
   delayPerMessage: number
   timeout: number
@@ -47,13 +47,13 @@ interface OPCUAIIoTCrawler extends nodered.Node {
 
 interface OPCUAIIoTCrawlerDef extends nodered.NodeDef {
   name: string
-  justValue: Todo
-  singleResult: Todo
+  justValue: TodoTypeAny
+  singleResult: TodoTypeAny
   showStatusActivities: boolean
   showErrors: boolean
-  activateUnsetFilter: Todo
-  activateFilters: Todo
-  negateFilter: Todo
+  activateUnsetFilter: TodoTypeAny
+  activateFilters: TodoTypeAny
+  negateFilter: TodoTypeAny
   filters: Filter[]
   delayPerMessage: number
   timeout: number
@@ -119,7 +119,7 @@ type CrawlerParent = {
 module.exports = (RED: nodered.NodeAPI) => {
   // SOURCE-MAP-REQUIRED
 
-  function OPCUAIIoTCrawler(this: OPCUAIIoTCrawler & Todo, config: OPCUAIIoTCrawlerDef) {
+  function OPCUAIIoTCrawler(this: OPCUAIIoTCrawler & TodoTypeAny, config: OPCUAIIoTCrawlerDef) {
     RED.nodes.createNode(this, config)
 
     this.name = config.name
@@ -136,16 +136,16 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.connector = RED.nodes.getNode(config.connector)
 
-    let self: Todo = this;
+    let self: TodoTypeAny = this;
     const {iiot, browseTopic} = coreBrowser.initBrowserNode();
     self.browseTopic = browseTopic;
     self.iiot = iiot;
 
     self.iiot.delayMessageTimer = []
 
-    const filterCrawlerResults = function (crawlerResultToFilter: Todo[]) {
+    const filterCrawlerResults = function (crawlerResultToFilter: TodoTypeAny[]) {
       let crawlerResult = crawlerResultToFilter || []
-      let filteredEntries: Todo[] = []
+      let filteredEntries: TodoTypeAny[] = []
       if (self.activateFilters && self.filters && self.filters.length > 0) {
         crawlerResult.forEach(function (item) {
           if (itemIsNotToFilter(item)) {
@@ -166,18 +166,18 @@ module.exports = (RED: nodered.NodeAPI) => {
       return crawlerResult
     }
 
-    const itemIsNotToFilter = function (item: Todo) {
+    const itemIsNotToFilter = function (item: TodoTypeAny) {
       let result = checkItemForUnsetState(self, item)
 
       if (result) {
-        result = self.filters.every((element: Todo) => {
+        result = self.filters.every((element: TodoTypeAny) => {
           return checkCrawlerItemIsNotToFilter(self, item, element, result) !== 0
         }) ? 1 : 0
       }
       return (self.negateFilter) ? !result : result
     }
 
-    const crawl = async (session: Todo, payload: BrowserInputPayloadLike, statusHandler: (status: string | NodeStatus) => void) => {
+    const crawl = async (session: TodoTypeAny, payload: BrowserInputPayloadLike, statusHandler: (status: string | NodeStatus) => void) => {
       if (checkSessionNotValid(self.connector.iiot.opcuaSession, 'Crawler')) {
         return
       }
@@ -204,10 +204,10 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     type PromiseResult = {
       status: string,
-      value: Error | Todo
+      value: Error | TodoTypeAny
     }
 
-    const handleResultArray = (results: PromiseResult[], payload: Todo) => {
+    const handleResultArray = (results: PromiseResult[], payload: TodoTypeAny) => {
       // map each result 1-to-1 input to output
       const crawlerResult = results.map(function (result) {
         if (result.value instanceof Error) {
@@ -243,7 +243,7 @@ module.exports = (RED: nodered.NodeAPI) => {
      * Returns a sendWrapper function with the correct payload context
      */
     const getSendWrapper = (payload: BrowserInputPayloadLike) => {
-      return (result: Error | Todo) => {
+      return (result: Error | TodoTypeAny) => {
         if (result.promises) {
           handleResultArray(result.crawlerResult, payload)
         } else if (result instanceof Error) {
@@ -251,7 +251,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         } else {
           coreBrowser.internalDebugLog(result.rootNodeId + ' Crawler Results ' + result.crawlerResult.length);
           const filteredResults = filterCrawlerResults(result.crawlerResult);
-          (payload as Todo).value = [filteredResults]
+          (payload as TodoTypeAny).value = [filteredResults]
           sendMessage(payload as FlatMessage<CrawlerPayload>, filteredResults)
         }
       }
@@ -279,7 +279,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       topic: string,
     }
 
-    const sendMessage = (payload: FlatMessage<CrawlerPayload>, crawlerResult: Todo) => {
+    const sendMessage = (payload: FlatMessage<CrawlerPayload>, crawlerResult: TodoTypeAny) => {
       const {
         _msgid,
         topic,
@@ -334,7 +334,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const resetAllTimer = function () {
-      self.iiot.delayMessageTimer.forEach((timerId: Todo) => {
+      self.iiot.delayMessageTimer.forEach((timerId: TodoTypeAny) => {
         clearTimeout(timerId)
         timerId = null
       })
@@ -345,9 +345,8 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      if (!self.connector.iiot.opcuaSession) {
-        self.connector.iiot.stateMachine.initopcua()
-        return // Todo: it needs time to open a session - if there is no session it has to create one and do crawl on done
+      if (self.connector.hasNoSession()) {
+        await self.connector.startSession(self.id)
       }
 
       if (self.browseTopic && self.browseTopic !== '') {

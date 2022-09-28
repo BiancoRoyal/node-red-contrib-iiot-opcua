@@ -11,7 +11,7 @@
 
 import * as nodered from "node-red";
 import {NodeMessageInFlow} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreDiscovery from "./core/opcua-iiot-core-discovery";
 import {
   ApplicationType,
@@ -54,7 +54,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.name = config.name
     this.discoveryPort = config.discoveryPort || coreDiscovery.DEFAULT_OPCUA_DISCOVERY_PORT
 
-    let self: Todo = this
+    let self: TodoTypeAny = this
 
     //Create and Start the Discovery Server
     const startDiscoveryServer = async () => {
@@ -86,7 +86,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         await discoveryServer.start()
         this.status({fill: 'green', shape: 'dot', text: 'active'})
         coreDiscovery.internalDebugLog('discovery server started')
-      } catch (err: Todo) {
+      } catch (err: TodoTypeAny) {
         this.status({fill: 'red', shape: 'dot', text: 'error'})
         this.error(new Error('Error starting discovery server: ' + err.message))
       }
@@ -111,7 +111,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     // Create the payload objects
-    const parseServerList = (serverList: ApplicationDescription[]): { discoveryUrls: string[], endpoints: Todo[] } => {
+    const parseServerList = (serverList: ApplicationDescription[]): { discoveryUrls: string[], endpoints: TodoTypeAny[] } => {
       const endpoints = serverList.map((server) => {
         return {
           applicationUri: server.applicationUri,

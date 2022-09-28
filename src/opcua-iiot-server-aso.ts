@@ -9,7 +9,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {NodeMessageInFlow} from "node-red";
 import {OBJECTS_ROOT, resetIiotNode} from "./core/opcua-iiot-core";
 import {ReferenceTypeIds} from "node-opcua";
@@ -64,7 +64,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     let self = this
     internalDebugLog('Open ASO Node')
 
-    this.on('input', (msg: NodeMessageInFlow | Todo) => {
+    this.on('input', (msg: NodeMessageInFlow | TodoTypeAny) => {
       if (msg.payload.nodetype === 'inject') {
         self.nodeId = msg.payload.topic || self.nodeId
         self.datatype = msg.payload.datatype || self.datatype
