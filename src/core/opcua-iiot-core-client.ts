@@ -14,7 +14,7 @@
 import {Todo} from "../types/placeholders";
 
 import debug from "debug";
-import {ClientSession, DataValue, StatusCodes} from "node-opcua";
+import {ClientSession, DataValue, StatusCode, StatusCodes} from "node-opcua";
 import {ReadValueIdOptions} from "node-opcua-service-read";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {WriteResult} from "../opcua-iiot-write";
@@ -42,7 +42,7 @@ const write = (session: ClientSession, nodesToWrite: WriteValueOptions[], origin
     (resolve, reject) => {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.write(nodesToWrite, (err: Error | null, statusCodes?: StatusCodes[]) => {
+        session.write(nodesToWrite, (err: Error | null, statusCodes?: StatusCode[]) => {
           if (err) {
             reject(err)
           } else {

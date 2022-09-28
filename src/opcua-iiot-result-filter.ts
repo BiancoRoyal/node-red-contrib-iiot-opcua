@@ -14,7 +14,7 @@ import coreFilter from './core/opcua-iiot-core-filter';
 import {convertDataValueByDataType, filterListByNodeId, filterListEntryByNodeId} from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {BrowserPayload} from "./opcua-iiot-browser";
-import {BrowseResult} from "node-opcua";
+import {BrowseResult, StatusCodes} from "node-opcua";
 import {isArray} from "./types/assertion";
 import {ReadPayload} from "./opcua-iiot-read";
 import {ListenPayload} from "./opcua-iiot-listener";
@@ -90,7 +90,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     type FilterInputPayload = {
-      statusCodes: Todo[]
+      statusCodes: StatusCodes[]
       nodesToWrite: Todo[]
       nodetype: string
       value: any

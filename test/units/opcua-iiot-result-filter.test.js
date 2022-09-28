@@ -422,7 +422,7 @@ describe('OPC UA Result Filter node Testing', function () {
         let n2 = helper.getNode('n2rff4')
         n2.on('input', function (msg) {
           expect(msg.payload).toMatchObject({
-            statusCodes: [ { value: 0, description: 'Good', name: 'Good' } ],
+            statusCodes: StatusCodes.Good,
             nodesToWrite: [
               {
                 nodeId: 'ns=1;s=TestReadWrite',

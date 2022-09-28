@@ -25,10 +25,11 @@ import {
   registerToConnector,
   resetIiotNode
 } from "./core/opcua-iiot-core";
+
 import {WriteValueOptions} from "node-opcua-service-write";
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
 import {BrowserPayload} from "./opcua-iiot-browser";
-import {ClientSession} from "node-opcua";
+import {ClientSession, StatusCode, StatusCodes} from "node-opcua";
 
 
 interface OPCUAIIoTWrite extends Node {
@@ -48,7 +49,7 @@ interface OPCUAIIoTWriteDef extends NodeDef {
 }
 
 export type WriteResult = {
-  statusCodes: Todo,
+  statusCodes: StatusCode[] | undefined,
   nodesToWrite: Todo,
   msg: NodeMessageInFlow & Todo
 }
