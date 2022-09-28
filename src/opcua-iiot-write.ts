@@ -181,6 +181,8 @@ module.exports = (RED: NodeAPI) => {
     registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: TodoVoidFunction) => {
+      self.removeAllListeners()
+
       deregisterToConnector(self, () => {
         resetIiotNode(self)
         done()

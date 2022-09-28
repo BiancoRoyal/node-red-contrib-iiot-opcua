@@ -408,6 +408,8 @@ module.exports = function (RED: nodered.NodeAPI) {
     registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
+      self.removeAllListeners()
+
       deregisterToConnector(self, () => {
         resetIiotNode(self)
         done()

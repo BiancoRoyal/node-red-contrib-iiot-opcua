@@ -345,8 +345,8 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      if (self.connector.hasNoSession()) {
-        await self.connector.startSession(self.id)
+      if (self.connector.functions.hasNoSession()) {
+        await self.connector.functions.startSession(self.id)
       }
 
       if (self.browseTopic && self.browseTopic !== '') {
@@ -396,6 +396,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.on('close', (done: () => void) => {
       self.removeAllListeners()
       resetAllTimer()
+
       deregisterToConnector(this, () => {
         resetIiotNode(this)
         done()

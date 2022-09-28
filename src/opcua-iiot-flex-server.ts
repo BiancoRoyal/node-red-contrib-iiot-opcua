@@ -196,6 +196,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.on('close', function (done: () => void) {
+      self.removeAllListeners()
+
       closeServer(() => {
         coreServer.flexInternalDebugLog('Close Server Node')
         resetIiotNode(self)

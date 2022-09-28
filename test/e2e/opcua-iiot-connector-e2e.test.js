@@ -240,21 +240,21 @@ describe('OPC UA Connector node e2e Testing', function () {
             {
               "nodeId": "ns=1;s=Pressure",
               "browseName": "1:Pressure",
-              "displayName": "locale=null text=Pressure",
+              "displayName": "locale=en-US text=Pressure",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },
             {
               "nodeId": "ns=1;s=Matrix",
               "browseName": "1:Matrix",
-              "displayName": "locale=null text=Matrix",
+              "displayName": "locale=en-US text=Matrix",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },
             {
               "nodeId": "ns=1;s=Position",
               "browseName": "1:Position",
-              "displayName": "locale=null text=Position",
+              "displayName": "locale=en-US text=Position",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },
@@ -282,28 +282,28 @@ describe('OPC UA Connector node e2e Testing', function () {
             {
               "nodeId": "ns=1;s=FanSpeed",
               "browseName": "1:FanSpeed",
-              "displayName": "locale=null text=FanSpeed",
+              "displayName": "locale=en-US text=Fan Speed",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },
             {
               "nodeId": "ns=1;s=TemperatureAnalogItem",
               "browseName": "1:TemperatureAnalogItem",
-              "displayName": "locale=null text=TemperatureAnalogItem",
+              "displayName": "locale=en-US text=Temperature",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=2368"
             },
             {
               "nodeId": "ns=1;i=16479",
               "browseName": "1:MyVariable1",
-              "displayName": "locale=null text=MyVariable1",
+              "displayName": "locale=null text=My Variable 1",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },
             {
               "nodeId": "ns=1;b=1020FFAA",
               "browseName": "1:MyVariable2",
-              "displayName": "locale=null text=MyVariable2",
+              "displayName": "locale=null text=My Variable 2",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },
@@ -324,14 +324,14 @@ describe('OPC UA Connector node e2e Testing', function () {
             {
               "nodeId": "ns=1;s=Counter",
               "browseName": "1:Counter",
-              "displayName": "locale=null text=Counter",
+              "displayName": "locale=en-US text=Counter",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },
             {
               "nodeId": "ns=1;s=FullCounter",
               "browseName": "1:FullCounter",
-              "displayName": "locale=null text=FullCounter",
+              "displayName": "locale=en-US text=Full-Counter",
               "nodeClass": "2",
               "datatypeName": "ns=0;i=63"
             },

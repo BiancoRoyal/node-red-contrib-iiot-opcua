@@ -160,6 +160,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     })
 
     this.on('close', function (done: () => void) {
+      self.removeAllListeners()
+
       if (self.discoveryServer) {
         self.discoveryServer.shutdown(function () {
           coreDiscovery.internalDebugLog('shutdown')

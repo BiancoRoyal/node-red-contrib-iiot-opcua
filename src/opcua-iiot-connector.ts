@@ -952,7 +952,10 @@ module.exports = function (RED: nodered.NodeAPI) {
       restartWithNewSettings,
       registerForOPCUA,
       deregisterForOPCUA,
-      getUpdatedServerOptions
+      getUpdatedServerOptions,
+      hasNoSession,
+      hasSession,
+      startSession
     }
 
     if (process.env.isTest == 'TRUE') {
@@ -962,7 +965,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         connectToClient,
         connectOPCUAEndpoint,
         resetBadSession,
-        startSession,
         renewConnection,
         handleError,
         deregisterForOPCUA,

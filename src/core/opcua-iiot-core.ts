@@ -649,17 +649,17 @@ export function buildNodesToRead(payload: TodoTypeAny) {
 
   if (nodePayloadList && nodePayloadList.length) {
     return nodePayloadList.map((item: AddressSpaceItem) => {
-      return (item.nodeId || item).toString()
+      return item
     })
   } else {
     let nodeList:Array<AddressSpaceItem> = payload.nodesToRead || payload.nodesToWrite
     if (nodeList && nodeList.length) {
       // legacy
       return nodeList.map((item: AddressSpaceItem) => {
-        return (item.nodeId || item).toString()
+        return item
       })
     } else if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
-      return payload.addressSpaceItems.map((item: AddressSpaceItem) => item.nodeId)
+      return payload.addressSpaceItems.map((item: AddressSpaceItem) => item)
     }
   }
   return []

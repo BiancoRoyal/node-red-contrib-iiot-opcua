@@ -178,6 +178,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     })
 
     const closeServer = (done: () => void) => {
+      self.removeAllListeners()
+
       coreServer.destructAddressSpace(() => {
         self.iiot.opcuaServer.removeAllListeners()
         self.iiot.opcuaServer.shutdown(self.delayToClose, done)

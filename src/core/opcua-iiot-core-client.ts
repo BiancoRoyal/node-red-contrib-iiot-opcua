@@ -14,12 +14,14 @@
 import {TodoTypeAny} from "../types/placeholders";
 
 import debug from "debug";
-import {ClientSession, ClientSessionWriteService, DataValue, StatusCode, StatusCodes} from "node-opcua";
+import {ClientSession, ClientSessionWriteService, DataValue, NodeAttributes, StatusCode, StatusCodes} from "node-opcua";
 import {ReadValueIdOptions} from "node-opcua-service-read";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {WriteResult} from "../opcua-iiot-write";
 import {ClientSessionReadHistoryService, ClientSessionReadService} from "node-opcua-client/source/client_session";
 import {HistoryReadResult} from "node-opcua-service-history";
+import {AddressSpaceItem} from "../types/helpers";
+import {NodeIdLike} from "node-opcua-nodeid";
 
 const internalDebugLog = debug('opcuaIIoT:client') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:client:details') // eslint-disable-line no-use-before-define
@@ -132,17 +134,19 @@ const readHistoryValue = function (session: ClientSessionReadHistoryService, nod
   )
 }
 
-const readAllAttributes = function (session: ClientSessionReadService, nodesToRead: TodoTypeAny, originMsg: TodoTypeAny) {
+const readAllAttributes = function (session: ClientSession, nodesToRead: TodoTypeAny[], originMsg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.read(nodesToRead, function (err: Error | null, dataValues?: DataValue[]) {
+        const nodeIdStrings = nodesToRead.map( (item: TodoTypeAny | string) => item.nodeId || item )
+        // @ts-ignore see ClientSessionImpl
+        session.readAllAttributes(nodeIdStrings, function (err: Error | null, data?: NodeAttributes[]) {
           if (err) {
             reject(err)
           } else {
             resolve({
-              results: dataValues,
+              results: data,
               nodesToRead,
               msg
             })

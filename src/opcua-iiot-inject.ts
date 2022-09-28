@@ -231,7 +231,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
 
       await resetAllTimer() // all timers have to be reset
-
+      self.removeAllListeners()
       resetIiotNode(self)
     }
   }

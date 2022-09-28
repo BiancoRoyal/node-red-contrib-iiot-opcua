@@ -31,6 +31,7 @@
 ### Features
 
 * added npm run scripts for e2e, unit and core tests on their own ([f282bd4](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f282bd4264ffc63cd52a9f3d4ba26539229a7d4c))
+* direct use of OPC UA object types ([9b9cc72](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/9b9cc72ba65a011cfb49697615d73622a3fa6768))
 * **response:** new payload type in json ([de22d9b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/de22d9b25ee4c7bede50a4077f691097ddcf5f5f))
 
 

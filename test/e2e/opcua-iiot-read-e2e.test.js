@@ -30,6 +30,7 @@ var readNodesToLoad = [injectNode, functionNode, connectorNode, inputNode, respo
 var readNodesToLoadWithFlexServer = [injectNode, functionNode, connectorNode, inputNode, responseNode, flexServerNode]
 
 var testFlows = require('./flows/read-e2e-flows')
+const { AttributeIds } = require('node-opcua')
 
 describe('OPC UA Read node e2e Testing', function () {
   beforeEach(function (done) {
@@ -111,7 +112,7 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should get a message with payload for attributeId Node-ID', function (done) {
-      testFlows.testReadFlow[3].attributeId = 1
+      testFlows.testReadFlow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -127,33 +128,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Node-ID', function (done) {
-      testFlows.testReadFlow[3].attributeId = 1
+      testFlows.testReadFlow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(1)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeId)
          await done()
         })
       })
     })
 
     it('should have read results with response for attributeId Node-ID', function (done) {
-      testFlows.testReadFlow[3].attributeId = 1
+      testFlows.testReadFlow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(1)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeId)
          await done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Node-Class', function (done) {
-      testFlows.testReadFlow[3].attributeId = 2
+      testFlows.testReadFlow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -169,33 +170,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Node-Class', function (done) {
-      testFlows.testReadFlow[3].attributeId = 2
+      testFlows.testReadFlow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(2)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeClass)
          await done()
         })
       })
     })
 
     it('should have read results with response for attributeId Node-Class', function (done) {
-      testFlows.testReadFlow[3].attributeId = 2
+      testFlows.testReadFlow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(2)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeClass)
          await done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Browse-Name', function (done) {
-      testFlows.testReadFlow[3].attributeId = 3
+      testFlows.testReadFlow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -211,33 +212,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Browse-Name', function (done) {
-      testFlows.testReadFlow[3].attributeId = 3
+      testFlows.testReadFlow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(3)
+          expect(msg.payload.attributeId).toBe(AttributeIds.BrowseName)
          await done()
         })
       })
     })
 
     it('should have read results with response for attributeId Browse-Name', function (done) {
-      testFlows.testReadFlow[3].attributeId = 3
+      testFlows.testReadFlow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(3)
+          expect(msg.payload.attributeId).toBe(AttributeIds.BrowseName)
          await done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Display-Name', function (done) {
-      testFlows.testReadFlow[3].attributeId = 4
+      testFlows.testReadFlow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -253,33 +254,33 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Display-Name', function (done) {
-      testFlows.testReadFlow[3].attributeId = 4
+      testFlows.testReadFlow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(4)
+          expect(msg.payload.attributeId).toBe(AttributeIds.DisplayName)
          await done()
         })
       })
     })
 
     it('should have read results with response for attributeId Display-Name', function (done) {
-      testFlows.testReadFlow[3].attributeId = 4
+      testFlows.testReadFlow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(4)
+          expect(msg.payload.attributeId).toBe(AttributeIds.DisplayName)
          await done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Value', function (done) {
-      testFlows.testReadFlow[3].attributeId = 13
+      testFlows.testReadFlow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -295,26 +296,26 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Value', function (done) {
-      testFlows.testReadFlow[3].attributeId = 13
+      testFlows.testReadFlow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(13)
+          expect(msg.payload.attributeId).toBe(AttributeIds.Value)
          await done()
         })
       })
     })
 
     it('should have read results with response for attributeId Value', function (done) {
-      testFlows.testReadFlow[3].attributeId = 13
+      testFlows.testReadFlow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(13)
+          expect(msg.payload.attributeId).toBe(AttributeIds.Value)
          await done()
         })
       })
