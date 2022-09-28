@@ -942,7 +942,8 @@ module.exports = {
       "y": 260,
       "wires": [
         [
-          "f5f06fb809fd7047"
+          "f5f06fb809fd7047",
+          "4caa28be4e6e1e2e"
         ]
       ]
     },
@@ -995,7 +996,7 @@ module.exports = {
       ],
       "delayPerMessage": "1",
       "timeout": "",
-      "x": 380,
+      "x": 420,
       "y": 260,
       "wires": [
         [
@@ -1004,7 +1005,8 @@ module.exports = {
           "3f676e3bd2f106c8",
           "6963af641de6ddca",
           "dd4c1acb421adf93",
-          "f130fa19f0b3c124"
+          "f130fa19f0b3c124",
+          "7cd640ede7e24fdb"
         ]
       ]
     },
@@ -1020,8 +1022,8 @@ module.exports = {
       "activateFilters": false,
       "negateFilter": false,
       "filters": [],
-      "x": 610,
-      "y": 360,
+      "x": 710,
+      "y": 420,
       "wires": [
         [
           "193c2083a00aab84"
@@ -1045,8 +1047,8 @@ module.exports = {
           "value": "ns=1;s=PumpSpeed"
         }
       ],
-      "x": 620,
-      "y": 320,
+      "x": 720,
+      "y": 360,
       "wires": [
         [
           "193c2083a00aab84"
@@ -1070,8 +1072,8 @@ module.exports = {
           "value": "ns=1;s=PumpSpeed"
         }
       ],
-      "x": 630,
-      "y": 280,
+      "x": 720,
+      "y": 300,
       "wires": [
         [
           "193c2083a00aab84"
@@ -1095,7 +1097,7 @@ module.exports = {
           "value": "ns=1;s=PumpSpeed"
         }
       ],
-      "x": 630,
+      "x": 720,
       "y": 240,
       "wires": [
         [
@@ -1115,8 +1117,8 @@ module.exports = {
       "activateFilters": false,
       "negateFilter": false,
       "filters": [],
-      "x": 620,
-      "y": 200,
+      "x": 720,
+      "y": 180,
       "wires": [
         [
           "193c2083a00aab84"
@@ -1135,8 +1137,8 @@ module.exports = {
       "activateFilters": false,
       "negateFilter": false,
       "filters": [],
-      "x": 610,
-      "y": 160,
+      "x": 710,
+      "y": 120,
       "wires": [
         [
           "193c2083a00aab84"
@@ -1156,7 +1158,7 @@ module.exports = {
       "targetType": "msg",
       "statusVal": "",
       "statusType": "auto",
-      "x": 870,
+      "x": 970,
       "y": 260,
       "wires": []
     },
@@ -1194,6 +1196,40 @@ module.exports = {
       "wires": [
         []
       ]
+    },
+    {
+      "id": "7cd640ede7e24fdb",
+      "type": "helper",
+      "z": "5b918096b0a4412e",
+      "name": "",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "payload",
+      "targetType": "msg",
+      "statusVal": "",
+      "statusType": "auto",
+      "x": 710,
+      "y": 480,
+      "wires": []
+    },
+    {
+      "id": "4caa28be4e6e1e2e",
+      "type": "helper",
+      "z": "5b918096b0a4412e",
+      "name": "",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "payload",
+      "targetType": "msg",
+      "statusVal": "",
+      "statusType": "auto",
+      "x": 430,
+      "y": 360,
+      "wires": []
     },
     {
       "id": "75c3ccba6f951e5e",

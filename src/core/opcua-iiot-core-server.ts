@@ -115,6 +115,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           new LocalizedText({text: 'OPCUA-IIoT Server Sicht', locale: 'de-DE'})
         ]
       })
+
       if (!asoDemo) {
         resolve(null)
       } else {
@@ -127,7 +128,6 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
         }, 500)
 
         intervalList.push(simulatorInterval)
-
 
         let vendorName = namespace.addObject({
           organizedBy: addressSpace.rootFolder.objects,
@@ -153,6 +153,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 'i=16479',
           browseName: 'MyVariable1',
+          displayName: 'My Variable 1',
           dataType: 'Double',
           value: {
             get: function () {
@@ -170,6 +171,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 'b=1020FFAA',
           browseName: 'MyVariable2',
+          displayName: 'My Variable 2',
           dataType: 'Double',
           value: {
             get: function () {
@@ -241,6 +243,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 's=Counter',
           browseName: 'Counter',
+          displayName: [
+            new LocalizedText({text: 'Counter', locale: 'en-US'}),
+            new LocalizedText({text: 'Zähler', locale: 'de-DE'})
+          ],
           dataType: 'UInt16',
 
           value: {
@@ -267,6 +273,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 's=FullCounter',
           browseName: 'FullCounter',
+          displayName: [
+            new LocalizedText({text: 'Full-Counter', locale: 'en-US'}),
+            new LocalizedText({text: 'Voll-Zähler', locale: 'de-DE'})
+          ],
           dataType: 'Int32',
 
           value: {
@@ -295,6 +305,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=Pressure',
           browseName: 'Pressure',
+          displayName: [
+            new LocalizedText({text: 'Pressure', locale: 'en-US'}),
+            new LocalizedText({text: 'Druck', locale: 'de-DE'})
+          ],
           dataType: 'Double',
           value: {
             timestamped_get: function () {
@@ -307,6 +321,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=Matrix',
           browseName: 'Matrix',
+          displayName: [new LocalizedText({text: 'Matrix', locale: 'en-US'})],
           dataType: 'Double',
           valueRank: 2,
           arrayDimensions: [3, 3],
@@ -326,6 +341,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=Position',
           browseName: 'Position',
+          displayName: [new LocalizedText({text: 'Position', locale: 'en-US'})],
           dataType: 'Double',
           valueRank: 1,
           arrayDimensions: null,
@@ -403,6 +419,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=FanSpeed',
           browseName: 'FanSpeed',
+          displayName: [
+            new LocalizedText({text: 'Fan Speed', locale: 'en-US'}),
+            new LocalizedText({text: 'Geschwindigkeit Lüfter', locale: 'de-DE'})
+          ],
           dataType: 'Double',
           value: new Variant({dataType: 'Double', value: 1000.0})
         })
@@ -464,6 +484,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=TemperatureAnalogItem',
           browseName: 'TemperatureAnalogItem',
+          displayName: [
+            new LocalizedText({text: 'Temperature', locale: 'en-US'}),
+            new LocalizedText({text: 'Temperatur', locale: 'de-DE'})
+          ],
           definition: '(tempA -25) + tempB',
           valuePrecision: 0.5,
           engineeringUnitsRange: {low: 100, high: 200},
@@ -474,7 +498,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
             get: function () {
               return new Variant({
                 dataType: 'Double',
-                value: Math.random() + 19.0
+                value: Math.min(200, Math.random() + 19.0)
               })
             }
           }
