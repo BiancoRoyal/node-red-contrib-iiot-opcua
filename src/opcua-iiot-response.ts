@@ -298,6 +298,7 @@ module.exports = (RED: nodered.NodeAPI) => {
               _.isEmpty(msg.payload) ||
               _.isNull(internalMsg.payload.value) ||
               _.isEmpty(internalMsg.payload.value)) {
+            self.error(new Error("Message Structure Is Not As Expected! (expected: msg.payload.value)"))
             return
           }
         }

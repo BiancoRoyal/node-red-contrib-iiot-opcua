@@ -12,13 +12,14 @@
 import {TodoTypeAny} from "../types/placeholders";
 
 import debug from 'debug';
-import {ClientSession, coerceNodeId} from "node-opcua";
+import {ArgumentDefinition, ClientSession, ClientSessionCallService, coerceNodeId} from "node-opcua";
 import {convertDataValueByDataType} from "./opcua-iiot-core";
+import {CallMethodResult} from "node-opcua-service-call";
 
 const internalDebugLog = debug('opcuaIIoT:method') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:method:details') // eslint-disable-line no-use-before-define
 
-const getArgumentDefinition = function (session: TodoTypeAny, msg: TodoTypeAny) {
+const getArgumentDefinition = function (session: ClientSessionCallService, msg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -27,15 +28,15 @@ const getArgumentDefinition = function (session: TodoTypeAny, msg: TodoTypeAny) 
         try {
           let methodId = coerceNodeId(msg.payload.methodId)
 
-          session.getArgumentDefinition(methodId, function (err: Error, inputArguments: TodoTypeAny, outputArguments: TodoTypeAny) {
+          session.getArgumentDefinition(methodId, function (err: Error | null, args?: ArgumentDefinition) {
             if (err) {
               reject(err)
             } else {
               let results: TodoTypeAny = {}
               results.methodId = methodId
               results.methodDefinition = {}
-              results.methodDefinition.inputArguments = inputArguments
-              results.methodDefinition.outputArguments = outputArguments
+              results.methodDefinition.inputArguments = args?.inputArguments
+              results.methodDefinition.outputArguments = args?.outputArguments
               resolve(results)
             }
           })
@@ -46,7 +47,7 @@ const getArgumentDefinition = function (session: TodoTypeAny, msg: TodoTypeAny) 
     })
 }
 
-const callMethods = function (session: ClientSession, msg: TodoTypeAny) {
+const callMethods = function (session: ClientSessionCallService, msg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -62,7 +63,7 @@ const callMethods = function (session: ClientSession, msg: TodoTypeAny) {
             inputArguments: msg.payload.inputArguments
           }]
 
-          session.call(methodCalls, function (err: TodoTypeAny, results: TodoTypeAny) {
+          session.call(methodCalls, function (err: Error | null, results?: CallMethodResult[]) {
             if (err) {
               reject(err)
             } else {
@@ -76,7 +77,7 @@ const callMethods = function (session: ClientSession, msg: TodoTypeAny) {
     })
 }
 
-const buildMessagesFromMethodCalls = function (methodCallsResults: TodoTypeAny) {
+const buildMessagesFromMethodCalls = function (methodCallsResults: CallMethodResult[]) {
   return new Promise(
     function (resolve, reject) {
       if (!methodCallsResults) {

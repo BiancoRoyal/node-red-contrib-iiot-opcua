@@ -16,7 +16,7 @@ import {
   BrowseDirection,
   BrowseResult,
   CacheNode,
-  ClientSession,
+  ClientSession, ClientSessionBrowseService,
   NodeCrawler,
   NodeCrawlerBase,
   NodeCrawlerClientSession,
@@ -52,7 +52,7 @@ export type BrowserInputPayload = {
 export type BrowserInputPayloadLike = Like<BrowserInputPayload>
 
 
-const browse = (session: TodoTypeAny, nodeIdToBrowse: TodoTypeAny) => {
+const browse = (session: ClientSessionBrowseService, nodeIdToBrowse: TodoTypeAny) => {
   return new Promise<BrowseResult[]>(
     function (resolve, reject) {
       let browseOptions = [
@@ -87,7 +87,7 @@ const browse = (session: TodoTypeAny, nodeIdToBrowse: TodoTypeAny) => {
   )
 }
 
-const browseAddressSpaceItems = function (session: ClientSession, addressSpaceItems: AddressSpaceItem[]) {
+const browseAddressSpaceItems = function (session: ClientSessionBrowseService, addressSpaceItems: AddressSpaceItem[]) {
   return new Promise<BrowseResult[]>(
     function (resolve, reject) {
       let browseOptions: BrowseDescriptionLike[] = []
@@ -115,6 +115,7 @@ const browseAddressSpaceItems = function (session: ClientSession, addressSpaceIt
         resolve([]);
         return;
       }
+
       session.browse(browseOptions, (err: Error | null, browseResult?: BrowseResult[]) => {
         if (err) {
           reject(err)

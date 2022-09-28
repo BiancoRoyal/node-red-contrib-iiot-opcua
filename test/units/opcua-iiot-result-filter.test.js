@@ -20,6 +20,7 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../../src/opcua-iiot-result-filter')
 
 var helper = require('node-red-node-test-helper')
+const { StatusCodes } = require('node-opcua')
 helper.init(require.resolve('node-red'))
 
 var readTestFlowPayload = [
@@ -422,29 +423,43 @@ describe('OPC UA Result Filter node Testing', function () {
         let n2 = helper.getNode('n2rff4')
         n2.on('input', function (msg) {
           expect(msg.payload).toMatchObject({
-            statusCodes: StatusCodes.Good,
+            statusCodes: [
+              {
+                value: 0,
+                description: "Good",
+                name: "Good"
+              }
+            ],
             nodesToWrite: [
               {
-                nodeId: 'ns=1;s=TestReadWrite',
+                nodeId: "ns=1;s=TestReadWrite",
                 attributeId: 13,
                 indexRange: null,
                 value: {
-                  value: { dataType: 'Double', value: 22980.7896, arrayType: 'Scalar' }
+                  value: {
+                    dataType: "Double",
+                    value: 22980.7896,
+                    arrayType: "Scalar"
+                  }
                 }
               }
             ],
             msg: {
-              _msgid: '11cc64dd.bde67b',
-              topic: '',
-              nodetype: 'inject',
-              injectType: 'write',
-              addressSpaceItems: [ {
-                name: 'TestReadWrite',
-                nodeId: 'ns=1;s=TestReadWrite',
-                datatypeName: 'Double'
-              } ],
+              _msgid: "11cc64dd.bde67b",
+              topic: "",
+              nodetype: "inject",
+              injectType: "write",
+              addressSpaceItems: [
+                {
+                  name: "TestReadWrite",
+                  nodeId: "ns=1;s=TestReadWrite",
+                  datatypeName: "Double"
+                }
+              ],
               payload: 1539981968143,
-              valuesToWrite: [ 22980.7896 ]
+              valuesToWrite: [
+                22980.7896
+              ]
             }
           })
           done()

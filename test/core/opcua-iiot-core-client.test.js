@@ -18,14 +18,14 @@ describe('OPC UA Core Client', function () {
   describe('write', function () {
     it('should return Error object, if none value is present', function (done) {
       coreClient.write(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Write', err.message)
+        assert.equal('ClientSessionWriteService Not Valid To Write', err.message)
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreClient.write(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Write', err.message)
+        assert.equal('ClientSessionWriteService Not Valid To Write', err.message)
         done()
       })).to.be.instanceOf(Promise)
     })
@@ -34,14 +34,14 @@ describe('OPC UA Core Client', function () {
   describe('read', function () {
     it('should return Error object, if none value is present', function (done) {
       coreClient.read(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read', err.message)
+        assert.equal('ClientSessionReadService Not Valid To Read', err.message)
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreClient.read(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read', err.message)
+        assert.equal('ClientSessionReadService Not Valid To Read', err.message)
         done()
       })).to.be.instanceOf(Promise)
     })
@@ -50,14 +50,14 @@ describe('OPC UA Core Client', function () {
   describe('readVariableValue', function () {
     it('should return Error object, if none value is present', function (done) {
       coreClient.readVariableValue(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read Variable Value', err.message)
+        assert.equal('ClientSessionReadService Not Valid To Read Variable Value', err.message)
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreClient.readVariableValue(null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read Variable Value', err.message)
+        assert.equal('ClientSessionReadService Not Valid To Read Variable Value', err.message)
         done()
       })).to.be.instanceOf(Promise)
     })
@@ -66,14 +66,14 @@ describe('OPC UA Core Client', function () {
   describe('readHistoryValue', function () {
     it('should return Error object, if none value is present', function (done) {
       coreClient.readHistoryValue(null, null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read History Value', err.message)
+        assert.equal('ClientSessionReadHistoryService Not Valid To Read History Value', err.message)
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreClient.readHistoryValue(null, null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read History Value', err.message)
+        assert.equal('ClientSessionReadHistoryService Not Valid To Read History Value', err.message)
         done()
       })).to.be.instanceOf(Promise)
     })
@@ -82,14 +82,14 @@ describe('OPC UA Core Client', function () {
   describe('readAllAttributes', function () {
     it('should return Error object, if none value is present', function (done) {
       coreClient.readAllAttributes(null, null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read All Attributes', err.message)
+        assert.equal('ClientSessionReadService Not Valid To Read All Attributes', err.message)
         done()
       })
     })
 
     it('should be instance of Promise, if none value is present', function (done) {
       expect(coreClient.readAllAttributes(null, null, null, null).catch(function (err) {
-        assert.equal('Session Not Valid To Read All Attributes', err.message)
+        assert.equal('ClientSessionReadService Not Valid To Read All Attributes', err.message)
         done()
       })).to.be.instanceOf(Promise)
     })

@@ -29,7 +29,7 @@ import {
 import {WriteValueOptions} from "node-opcua-service-write";
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
 import {BrowserPayload} from "./opcua-iiot-browser";
-import {ClientSession, StatusCode, StatusCodes} from "node-opcua";
+import {ClientSession, ClientSessionWriteService, StatusCode, StatusCodes} from "node-opcua";
 
 
 interface OPCUAIIoTWrite extends Node {
@@ -97,7 +97,7 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const writeToSession = (session: ClientSession, originMsg: TodoTypeAny) => {
+    const writeToSession = (session: ClientSessionWriteService, originMsg: TodoTypeAny) => {
       if (checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
