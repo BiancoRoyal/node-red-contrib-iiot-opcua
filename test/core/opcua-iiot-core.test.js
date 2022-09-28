@@ -106,19 +106,19 @@ describe('OPC UA Core', function () {
   describe('core build functions', function () {
 
     it('should return the right namesapce zero from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
+      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
       assert.equal('0', result)
       done()
     })
 
     it('should return the right namesapce five from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
+      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
       assert.equal('1', result)
       done()
     })
 
     it('should return the right namesapce two from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
+      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
       assert.equal('2', result)
       done()
     })
