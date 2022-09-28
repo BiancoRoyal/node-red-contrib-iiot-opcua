@@ -8,7 +8,7 @@
  */
 'use strict'
 
-jest.setTimeout(5000)
+// jest.setTimeout(30000)
 
 let {default: coreConnector} = require('../../src/core/opcua-iiot-core-connector')
 const events = require('events')

@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(8000)
+// jest.setTimeout(30000)
 
 var serverNode = require('../../src/opcua-iiot-server')
 

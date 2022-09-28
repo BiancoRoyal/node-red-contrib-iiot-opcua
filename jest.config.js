@@ -181,11 +181,23 @@ module.exports = {
   // unmockedModulePathPatterns: undefined,
 
   // Indicates whether each individual test should be reported during the run
-  verbose: true
+  verbose: true,
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
   // watchPathIgnorePatterns: [],
 
   // Whether to use watchman for file crawling
   // watchman: true,
+
+  detectOpenHandles: true,
+
+  forceExit: true,
+
+  logHeapUsage: true,
+
+  maxConcurrency: 8,
+
+  maxWorkers: '85%',
+
+  testTimeout: 30000
 }

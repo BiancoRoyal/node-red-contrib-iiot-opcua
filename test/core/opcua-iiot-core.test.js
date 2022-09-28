@@ -8,7 +8,7 @@
  */
 'use strict'
 
-jest.setTimeout(5000)
+// jest.setTimeout(30000)
 
 describe('OPC UA Core', function () {
   let assert = require('chai').assert
@@ -218,7 +218,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead({addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]})).to.be.an('array').that.does.include({name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''})
       done()
     })
 
@@ -234,7 +234,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes in payload from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead( {addressSpaceItems: [{ name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }] })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead( {addressSpaceItems: [{ name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }] })).to.be.an('array').that.does.include({ name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' })
       done()
     })
 

@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(5000)
+// jest.setTimeout(30000)
 
 var inputNode = require('../../src/opcua-iiot-flex-connector')
 
