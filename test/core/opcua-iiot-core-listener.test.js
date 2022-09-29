@@ -8,7 +8,7 @@
  */
 'use strict'
 
-jest.setTimeout(5000)
+// jest.setTimeout(30000)
 
 describe('OPC UA Core Listener', function () {
   let assert = require('chai').assert

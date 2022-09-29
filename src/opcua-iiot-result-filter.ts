@@ -9,12 +9,12 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreFilter from './core/opcua-iiot-core-filter';
 import {convertDataValueByDataType, filterListByNodeId, filterListEntryByNodeId} from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {BrowserPayload} from "./opcua-iiot-browser";
-import {BrowseResult} from "node-opcua";
+import {BrowseResult, StatusCodes} from "node-opcua";
 import {isArray} from "./types/assertion";
 import {ReadPayload} from "./opcua-iiot-read";
 import {ListenPayload} from "./opcua-iiot-listener";
@@ -84,19 +84,19 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.name = config.name
     this.showErrors = config.showErrors
 
-    let self: Todo = this
+    let self: TodoTypeAny = this
     self.iiot = {};
 
     this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     type FilterInputPayload = {
-      statusCodes: Todo[]
-      nodesToWrite: Todo[]
+      statusCodes: StatusCodes[]
+      nodesToWrite: TodoTypeAny[]
       nodetype: string
       value: any
       browserResults?: BrowseResult[]
       crawlerResults?: BrowseResult[]
-      msg: Todo
+      msg: TodoTypeAny
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
@@ -165,7 +165,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const convertAllResults = (payload: FilterInputPayload, result: Todo | Todo[]) => {
+    const convertAllResults = (payload: FilterInputPayload, result: TodoTypeAny | TodoTypeAny[]) => {
       if (!Array.isArray(result)) {
         return convertResult(payload, result)
       } else {
@@ -179,7 +179,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const convertResult = (payload: FilterInputPayload, result: Todo) => {
+    const convertResult = (payload: FilterInputPayload, result: TodoTypeAny) => {
       if (result.value) result = result.value
       try {
         let convertedResult = null
@@ -246,12 +246,12 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (payload.nodetype === 'read' || payload.nodetype === 'listen') {
         return convertResultValue(payload)
       } else if (payload.nodetype === 'browse' || payload.nodetype === 'crawl') {
-        return (payload as Todo).crawlerResults || payload.browserResults
+        return (payload as TodoTypeAny).crawlerResults || payload.browserResults
       }
       return payload.value
     }
 
-    const extractValueFromOPCUAArrayStructure = function (payloadInput: Todo, entryIndex: number) {
+    const extractValueFromOPCUAArrayStructure = function (payloadInput: TodoTypeAny, entryIndex: number) {
       let result = null
       let payload = payloadInput[entryIndex]
 
@@ -272,7 +272,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const extractValueFromOPCUAStructure = function (payload: Todo) {
+    const extractValueFromOPCUAStructure = function (payload: TodoTypeAny) {
       let result
 
       if (payload.hasOwnProperty('value')) {
@@ -328,7 +328,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       return result
     }
 
-    const filterByBrowserType = (payload: BrowserPayload & Todo) => {
+    const filterByBrowserType = (payload: BrowserPayload & TodoTypeAny) => {
       const browserResults = filterListByNodeId(self.nodeId, payload.browserResults)
 
       const addressSpaceItems = (payload.addressSpaceItems && payload.addressSpaceItems.length) ?
@@ -361,7 +361,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const filterByCrawlerType = function (msg: Todo) {
+    const filterByCrawlerType = function (msg: TodoTypeAny) {
       const crawlerResults = filterListByNodeId(self.nodeId, msg.crawlerResults)
 
       const addressItems = (msg.addressSpaceItems && msg.addressSpaceItems.length) ?
@@ -373,7 +373,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const convertDataType = function (result: Todo) {
+    const convertDataType = function (result: TodoTypeAny) {
       coreFilter.internalDebugLog('data type convert for ' + self.nodeId)
       return convertDataValueByDataType(result, self.datatype)
     }

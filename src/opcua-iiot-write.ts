@@ -10,7 +10,7 @@
 'use strict'
 
 import {
-  Todo,
+  TodoTypeAny,
   TodoVoidFunction,
 } from "./types/placeholders";
 import coreClient from "./core/opcua-iiot-core-client";
@@ -25,10 +25,11 @@ import {
   registerToConnector,
   resetIiotNode
 } from "./core/opcua-iiot-core";
+
 import {WriteValueOptions} from "node-opcua-service-write";
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
 import {BrowserPayload} from "./opcua-iiot-browser";
-import {ClientSession} from "node-opcua";
+import {ClientSession, ClientSessionWriteService, StatusCode, StatusCodes} from "node-opcua";
 
 
 interface OPCUAIIoTWrite extends Node {
@@ -48,9 +49,9 @@ interface OPCUAIIoTWriteDef extends NodeDef {
 }
 
 export type WriteResult = {
-  statusCodes: Todo,
-  nodesToWrite: Todo,
-  msg: NodeMessageInFlow & Todo
+  statusCodes: StatusCode[] | undefined,
+  nodesToWrite: TodoTypeAny,
+  msg: NodeMessageInFlow & TodoTypeAny
 }
 
 export type WriteResultMessage = NodeMessageInFlow & {
@@ -59,10 +60,10 @@ export type WriteResultMessage = NodeMessageInFlow & {
 
 export type WritePayload = {
   nodetype: 'write'
-  justValue: Todo
-  nodesToWrite: Todo[]
-  value: Todo
-  valuesToWrite: Todo
+  justValue: TodoTypeAny
+  nodesToWrite: TodoTypeAny[]
+  value: TodoTypeAny
+  valuesToWrite: TodoTypeAny
 }
 
 /**
@@ -81,7 +82,7 @@ module.exports = (RED: NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let self: Todo = this;
+    let self: TodoTypeAny = this;
     self.iiot = initCoreNode()
 
     const handleWriteError = (err: Error, msg: NodeMessage) => {
@@ -96,7 +97,7 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const writeToSession = (session: ClientSession, originMsg: Todo) => {
+    const writeToSession = (session: ClientSessionWriteService, originMsg: TodoTypeAny) => {
       if (checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
@@ -127,7 +128,7 @@ module.exports = (RED: NodeAPI) => {
       return message
     }
 
-    const extractDataValue = (message: WriteResultMessage, result: WriteResult): Todo => {
+    const extractDataValue = (message: WriteResultMessage, result: WriteResult): TodoTypeAny => {
       let dataValues: string
       if (self.justValue) {
         if (message.payload.valuesToWrite) {
@@ -180,6 +181,8 @@ module.exports = (RED: NodeAPI) => {
     registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: TodoVoidFunction) => {
+      self.removeAllListeners()
+
       deregisterToConnector(self, () => {
         resetIiotNode(self)
         done()

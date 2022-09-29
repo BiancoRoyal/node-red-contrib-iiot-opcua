@@ -8,7 +8,7 @@
  */
 'use strict'
 
-jest.setTimeout(5000)
+// jest.setTimeout(30000)
 
 let {default: coreServer} = require('../../src/core/opcua-iiot-core-server')
 const {OPCUAServer} = require("node-opcua");

@@ -10,7 +10,7 @@
 'use strict'
 
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {ClientSession} from "node-opcua";
 import coreClient from "./core/opcua-iiot-core-client";
 import {
@@ -51,7 +51,7 @@ interface OPCUAIIoTReadDef extends NodeDef {
   connector: string
 }
 
-export type ReadPayload = Todo & {
+export type ReadPayload = TodoTypeAny & {
   nodetype: 'read'
 }
 
@@ -76,7 +76,7 @@ module.exports = (RED: NodeAPI) => {
     this.historyDays = parseInt(config.historyDays) || 1
     this.connector = RED.nodes.getNode(config.connector)
 
-    let self: Todo = this;
+    let self: TodoTypeAny = this;
     self.iiot = initCoreNode()
 
     const handleReadError = (err: Error, msg: NodeMessage) => {
@@ -95,9 +95,9 @@ module.exports = (RED: NodeAPI) => {
         handleReadError
       }
 
-    const readAllFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readAllFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
       coreClient.readAllAttributes(session, itemsToRead, msg)
-        .then((readResult: Todo) => {
+        .then((readResult: TodoTypeAny) => {
           try {
             this.send(buildResultMessage('AllAttributes', readResult))
           } catch (err) {
@@ -110,9 +110,9 @@ module.exports = (RED: NodeAPI) => {
       })
     }
 
-    const readValueFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readValueFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
       coreClient.readVariableValue(session, itemsToRead, msg)
-        .then((readResult: Todo) => {
+        .then((readResult: TodoTypeAny) => {
           let message = buildResultMessage('VariableValue', readResult)
           this.send(message)
         }).catch(function (err: Error) {
@@ -121,7 +121,7 @@ module.exports = (RED: NodeAPI) => {
       })
     }
 
-    const readHistoryDataFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readHistoryDataFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
       const startDate = new Date()
       self.iiot.historyStart = new Date()
       self.iiot.historyStart.setDate(startDate.getDate() - self.historyDays)
@@ -133,7 +133,7 @@ module.exports = (RED: NodeAPI) => {
         msg.payload.historyStart || self.iiot.historyStart,
         msg.payload.historyEnd || self.iiot.historyEnd,
         msg)
-        .then((readResult: Todo) => {
+        .then((readResult: TodoTypeAny) => {
           let message = buildResultMessage('HistoryValue', readResult)
           message.payload.historyStart = readResult.startDate || self.iiot.historyStart
           message.payload.historyEnd = readResult.endDate || self.iiot.historyEnd
@@ -144,7 +144,7 @@ module.exports = (RED: NodeAPI) => {
       })
     }
 
-    const readFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
 
       const transformItem = (item: NodeIdLike): ReadValueIdOptions => {
         return {
@@ -157,7 +157,7 @@ module.exports = (RED: NodeAPI) => {
 
 
       coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || self.maxAge, msg)
-        .then((readResult: Todo) => {
+        .then((readResult: TodoTypeAny) => {
           let message = buildResultMessage('Default', readResult)
           message.payload.maxAge = self.maxAge
           this.send(message)
@@ -167,7 +167,7 @@ module.exports = (RED: NodeAPI) => {
       })
     }
 
-    const readFromSession = (session: ClientSession | Todo, itemsToRead: Todo, originMsg: Todo) => {
+    const readFromSession = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny, originMsg: TodoTypeAny) => {
       let msg = Object.assign({}, originMsg)
       if (checkSessionNotValid(session, 'Reader')) {
         return
@@ -189,7 +189,7 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const buildResultMessage = function (readType: Todo, readResult: Todo) {
+    const buildResultMessage = function (readType: TodoTypeAny, readResult: TodoTypeAny) {
       let payload = {
         ...readResult.msg.payload,
         nodetype: 'read',
@@ -212,10 +212,10 @@ module.exports = (RED: NodeAPI) => {
         payload
       }
 
-      return message as Todo
+      return message as TodoTypeAny
     }
 
-    const extractDataValueString = function (readResult: Todo) {
+    const extractDataValueString = function (readResult: TodoTypeAny) {
       let dataValuesString
       if (self.justValue) {
         dataValuesString = JSON.stringify(readResult.results, null, 2)
@@ -225,7 +225,7 @@ module.exports = (RED: NodeAPI) => {
       return dataValuesString
     }
 
-    const setMessageProperties = (payload: Todo, readResult: Todo, stringValue: Todo) => {
+    const setMessageProperties = (payload: TodoTypeAny, readResult: TodoTypeAny, stringValue: TodoTypeAny) => {
       try {
         RED.util.setMessageProperty(payload, 'value', JSON.parse(stringValue))
       } /* istanbul ignore next */ catch (err: any) {
@@ -240,7 +240,7 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const enhanceMessage = (payload: Todo, readResult: Todo) => {
+    const enhanceMessage = (payload: TodoTypeAny, readResult: TodoTypeAny) => {
       try {
         payload.resultsConverted = {}
         let dataValuesString = JSON.stringify(readResult.results, null, 2)
@@ -290,6 +290,8 @@ module.exports = (RED: NodeAPI) => {
     registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
+      self.removeAllListeners()
+
       deregisterToConnector(self, () => {
         resetIiotNode(self)
         done()

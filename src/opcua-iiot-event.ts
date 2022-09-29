@@ -11,14 +11,14 @@
 
 import * as nodered from "node-red";
 import {NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {constructEventFilter, EventFilter} from "node-opcua";
 import {NodeMessageInFlow} from "@node-red/registry";
 import coreListener from "./core/opcua-iiot-core-listener";
 import {InjectPayload} from "./opcua-iiot-inject";
 import {BrowserPayload} from "./opcua-iiot-browser";
 import {Like} from "./types/helpers";
-import {BasicPayload} from "./core/opcua-iiot-core";
+import {IotOpcUaNodeMessage} from "./core/opcua-iiot-core";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string
@@ -46,7 +46,7 @@ interface OPCUAIIoTEventDef extends nodered.NodeDef {
 export type EventMessage = NodeMessageInFlow & {
   payload: EventPayload
 }
-export type EventPayload = (InjectPayload | BrowserPayload | BasicPayload) & {
+export type EventPayload = (InjectPayload | BrowserPayload | IotOpcUaNodeMessage) & {
   eventType?: string,
   uaEventFilter?: EventFilter,
   uaEventFields?: string[],
@@ -75,7 +75,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let self: OPCUAIIoTEvent & Todo = this
+    let self: OPCUAIIoTEvent & TodoTypeAny = this
     self.iiot = {}
 
     const statusCall = (status: NodeStatus | string) => {
@@ -106,7 +106,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const uaEventFilter: EventFilter = constructEventFilter(uaEventFields)
       const responsePayload: EventPayload = {
-        ...msg.payload as BasicPayload,
+        ...msg.payload as IotOpcUaNodeMessage,
         eventType: self.eventType,
         uaEventFilter: uaEventFilter,
         uaEventFields: uaEventFields,
@@ -123,6 +123,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       // TODO: send works but it has a problem with debug node and ByteString
       // I'm not sure what this comment refers to, but I'm leaving it just in case.
+      // Means we can send ByteStrings here, but it was to notice, that the debug node of node-red had/has a problem with ByteStrings in the UI.
       this.send(responseMessage)
     })
 

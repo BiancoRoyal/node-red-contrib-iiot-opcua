@@ -22,13 +22,7 @@ npm install
 
 npm i --only=dev
 
-npm run test:units
-
-npm run test:e2e
-
 npm test
-
-npm run coverage
 
 npm run build
 

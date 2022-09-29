@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(30000)
+// jest.setTimeout(30000)
 
 var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
@@ -130,7 +130,7 @@ describe('OPC UA Response node e2e Testing', function () {
           expect(msg.payload.value.length).toBeGreaterThan(0)
 
           if (counter === 4) {
-            done()                                // Todo: Test fails with "Callback was already called" live error log is at ./ResponseE2EErrorLog.txt
+            done() // Todo: Test fails with "Callback was already called"
           }
         })
       })

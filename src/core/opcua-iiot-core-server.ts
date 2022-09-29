@@ -10,20 +10,20 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 import {
-  AddressSpace,
+  AddressSpace, ApplicationType,
   CallbackT,
   DataType,
   DataValue,
-  EndpointDescription,
+  EndpointDescription, extractFullyQualifiedDomainName,
   ISessionContext,
-  LocalizedText,
+  LocalizedText, makeApplicationUrn,
   nodesets,
   OPCUAServer,
   OPCUAServerEndPoint,
   OPCUAServerOptions,
-  RegisterServerMethod,
+  RegisterServerMethod, SecurityPolicy,
   ServerCapabilitiesOptions,
   standardUnits,
   StatusCodes,
@@ -44,6 +44,7 @@ import debug from 'debug'
 import path from 'path'
 import {NodeMessage, NodeStatus} from "node-red";
 import {constructAlarmAddressSpaceDemo} from "../helpers/alarms-and-conditions-demo";
+import {LocaleId} from "node-opcua-basic-types/source/locale_id";
 
 const internalDebugLog = debug('opcuaIIoT:server') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:server:details') // eslint-disable-line no-use-before-define
@@ -56,9 +57,9 @@ let simulatorInterval = null // eslint-disable-line no-use-before-define
 const maxTimeInterval = 500000 // eslint-disable-line no-use-before-define
 let timeInterval = 1 // eslint-disable-line no-use-before-define
 const UNLIMITED_LISTENERS = 0 // eslint-disable-line no-use-before-define
-let intervalList: Todo[] = [] // eslint-disable-line no-use-before-define
+let intervalList: TodoTypeAny[] = [] // eslint-disable-line no-use-before-define
 
-const simulateVariation = function (data: Todo) {
+const simulateVariation = function (data: TodoTypeAny) {
   let value = (1.0 + Math.sin(timeInterval / 360 * 3)) / 2.0
 
   timeInterval++
@@ -75,7 +76,7 @@ const simulateVariation = function (data: Todo) {
   }
 }
 
-const constructAddressSpaceFromScript = function (server: Todo, constructAddressSpaceScript: Todo, eventObjects: Todo) {
+const constructAddressSpaceFromScript = function (server: TodoTypeAny, constructAddressSpaceScript: TodoTypeAny, eventObjects: TodoTypeAny) {
   return new Promise(
     (resolve, reject) => {
       if (server.engine && constructAddressSpaceScript && constructAddressSpaceScript !== '') {
@@ -90,7 +91,7 @@ const constructAddressSpaceFromScript = function (server: Todo, constructAddress
     })
 }
 
-const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
+const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAny) {
   return new Promise(
     (resolve, reject) => {
       if (!server) {
@@ -115,6 +116,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           new LocalizedText({text: 'OPCUA-IIoT Server Sicht', locale: 'de-DE'})
         ]
       })
+
       if (!asoDemo) {
         resolve(null)
       } else {
@@ -127,7 +129,6 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
         }, 500)
 
         intervalList.push(simulatorInterval)
-
 
         let vendorName = namespace.addObject({
           organizedBy: addressSpace.rootFolder.objects,
@@ -153,6 +154,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 'i=16479',
           browseName: 'MyVariable1',
+          displayName: 'My Variable 1',
           dataType: 'Double',
           value: {
             get: function () {
@@ -170,6 +172,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 'b=1020FFAA',
           browseName: 'MyVariable2',
+          displayName: 'My Variable 2',
           dataType: 'Double',
           value: {
             get: function () {
@@ -178,7 +181,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
                 value: variable2
               })
             },
-            set: function (variant: Todo) {
+            set: function (variant: TodoTypeAny) {
               variable2 = parseFloat(variant.value)
               return StatusCodes.Good
             }
@@ -200,7 +203,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
                 value: variable3
               })
             },
-            set: function (variant: Todo) {
+            set: function (variant: TodoTypeAny) {
               variable3 = parseFloat(variant.value)
               return StatusCodes.Good
             }
@@ -241,6 +244,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 's=Counter',
           browseName: 'Counter',
+          displayName: [
+            new LocalizedText({text: 'Counter', locale: 'en-US'}),
+            new LocalizedText({text: 'Zähler', locale: 'de-DE'})
+          ],
           dataType: 'UInt16',
 
           value: {
@@ -267,6 +274,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           componentOf: vendorName,
           nodeId: 's=FullCounter',
           browseName: 'FullCounter',
+          displayName: [
+            new LocalizedText({text: 'Full-Counter', locale: 'en-US'}),
+            new LocalizedText({text: 'Voll-Zähler', locale: 'de-DE'})
+          ],
           dataType: 'Int32',
 
           value: {
@@ -295,6 +306,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=Pressure',
           browseName: 'Pressure',
+          displayName: [
+            new LocalizedText({text: 'Pressure', locale: 'en-US'}),
+            new LocalizedText({text: 'Druck', locale: 'de-DE'})
+          ],
           dataType: 'Double',
           value: {
             timestamped_get: function () {
@@ -307,6 +322,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=Matrix',
           browseName: 'Matrix',
+          displayName: [new LocalizedText({text: 'Matrix', locale: 'en-US'})],
           dataType: 'Double',
           valueRank: 2,
           arrayDimensions: [3, 3],
@@ -326,6 +342,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=Position',
           browseName: 'Position',
+          displayName: [new LocalizedText({text: 'Position', locale: 'en-US'})],
           dataType: 'Double',
           valueRank: 1,
           arrayDimensions: null,
@@ -403,6 +420,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=FanSpeed',
           browseName: 'FanSpeed',
+          displayName: [
+            new LocalizedText({text: 'Fan Speed', locale: 'en-US'}),
+            new LocalizedText({text: 'Geschwindigkeit Lüfter', locale: 'de-DE'})
+          ],
           dataType: 'Double',
           value: new Variant({dataType: 'Double', value: 1000.0})
         })
@@ -439,7 +460,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
             }]
           })
 
-        method.bindMethod(function (inputArguments: Variant[], context: ISessionContext, callback: CallbackT<Todo>) {
+        method.bindMethod(function (inputArguments: Variant[], context: ISessionContext, callback: CallbackT<TodoTypeAny>) {
           let nbBarks = inputArguments[0].value
           let volume = inputArguments[1].value
           let soundVolume = new Array(volume).join('!')
@@ -464,6 +485,10 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
           organizedBy: vendorName,
           nodeId: 's=TemperatureAnalogItem',
           browseName: 'TemperatureAnalogItem',
+          displayName: [
+            new LocalizedText({text: 'Temperature', locale: 'en-US'}),
+            new LocalizedText({text: 'Temperatur', locale: 'de-DE'})
+          ],
           definition: '(tempA -25) + tempB',
           valuePrecision: 0.5,
           engineeringUnitsRange: {low: 100, high: 200},
@@ -474,7 +499,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
             get: function () {
               return new Variant({
                 dataType: 'Double',
-                value: Math.random() + 19.0
+                value: Math.min(200, Math.random() + 19.0)
               })
             }
           }
@@ -490,8 +515,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: Todo) {
     })
 }
 
-const buildGeneralServerOptions = async (node: Todo, prefix: string) => {
-  let serverOptions: Todo = await buildServerOptions(node, prefix)
+const buildGeneralServerOptions = async (node: TodoTypeAny, prefix: string) => {
+  let serverOptions: TodoTypeAny = await buildServerOptions(node, prefix)
   serverOptions.userManager = {
     isValidUser: function (userName: string, password: string) {
       return checkUser(node, userName, password)
@@ -501,7 +526,7 @@ const buildGeneralServerOptions = async (node: Todo, prefix: string) => {
 }
 
 const destructAddressSpace = function (done: () => void) {
-  intervalList.forEach(function (value: Todo, index: number, list: Todo[]) {
+  intervalList.forEach(function (value: TodoTypeAny, index: number, list: TodoTypeAny[]) {
     clearInterval(value)
     list[index] = null
   })
@@ -509,7 +534,7 @@ const destructAddressSpace = function (done: () => void) {
   done()
 }
 
-const start = function (server: OPCUAServer, node: Todo) {
+const start = function (server: OPCUAServer, node: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!server) {
@@ -537,19 +562,19 @@ const start = function (server: OPCUAServer, node: Todo) {
           internalDebugLog('Primary Server Endpoint URL ' + endpointUrl)
         }
 
-        server.on('newChannel', function (channel: Todo) {
+        server.on('newChannel', function (channel: TodoTypeAny) {
           internalDebugLog('Client connected with address = ' +
             channel.remoteAddress + ' port = ' + channel.remotePort
           )
         })
 
-        server.on('closeChannel', function (channel: Todo) {
+        server.on('closeChannel', function (channel: TodoTypeAny) {
           internalDebugLog('Client disconnected with address = ' +
             channel.remoteAddress + ' port = ' + channel.remotePort
           )
         })
 
-        server.on('create_session', function (session: Todo) {
+        server.on('create_session', function (session: TodoTypeAny) {
           internalDebugLog('############## SESSION CREATED ##############')
           if (session.clientDescription) {
             detailDebugLog('Client application URI:' + session.clientDescription.applicationUri)
@@ -563,7 +588,7 @@ const start = function (server: OPCUAServer, node: Todo) {
           internalDebugLog('Session id:' + session.sessionId)
         })
 
-        server.on('session_closed', function (session: Todo, reason: Todo) {
+        server.on('session_closed', function (session: TodoTypeAny, reason: TodoTypeAny) {
           internalDebugLog('############## SESSION CLOSED ##############')
           internalDebugLog('reason:' + reason)
           internalDebugLog('Session name:' + session.sessionName ? session.sessionName.toString() : 'none session name')
@@ -580,7 +605,7 @@ const start = function (server: OPCUAServer, node: Todo) {
     })
 }
 
-const readConfigOfServerNode = function (node: Todo, config: Todo) {
+const readConfigOfServerNode = function (node: TodoTypeAny, config: TodoTypeAny) {
   node.name = config.name
 
   // network
@@ -620,18 +645,18 @@ const readConfigOfServerNode = function (node: Todo, config: Todo) {
   node.capabilitiesForMDNS = (config.capabilitiesForMDNS) ? config.capabilitiesForMDNS.split(',') : [config.capabilitiesForMDNS]
 }
 
-const initServerNode = function (node: Todo) {
+const initServerNode = function (node: TodoTypeAny) {
   node.iiot = initCoreServerNode()
   if (node.setMaxListeners)
     node.setMaxListeners(UNLIMITED_LISTENERS)
 }
 
-const loadNodeSets = function (node: Todo, dirname: string) {
+const loadNodeSets = function (node: TodoTypeAny, dirname: string) {
   let standardNodeSetFile = nodesets.standard
   let xmlFiles = [standardNodeSetFile]
 
   if (node.xmlsets) {
-    node.xmlsets.forEach((xmlsetFileName: Todo) => {
+    node.xmlsets.forEach((xmlsetFileName: TodoTypeAny) => {
       detailDebugLog('Load XML Set for ' + xmlsetFileName.name)
       if (xmlsetFileName.path) {
         if (xmlsetFileName.path.startsWith('public/vendor/')) {
@@ -648,7 +673,7 @@ const loadNodeSets = function (node: Todo, dirname: string) {
   node.iiot.xmlFiles = xmlFiles
 }
 
-const loadCertificates = function (node: Todo) {
+const loadCertificates = function (node: TodoTypeAny) {
   const nodeOPCUAServerPath = getNodeOPCUAServerPath()
 
   detailDebugLog('config: ' + node.publicCertificateFile)
@@ -666,11 +691,14 @@ const loadCertificates = function (node: Todo) {
   return node
 }
 
-const checkUser = function (node: Todo, userName: string, password: string) {
+const checkUser = function (node: TodoTypeAny, userName: string, password: string) {
+  // valid if there is no user in the server
+  if(node.opcuaUsers && node.opcuaUsers.length < 1) return true
+
   let isValidUser = false
   detailDebugLog('Server User Request For ' + userName)
 
-  node.opcuaUsers.forEach(function (user: Todo) {
+  node.opcuaUsers.forEach(function (user: TodoTypeAny) {
     if (userName === user.name && password === user.password) {
       isValidUser = true
     }
@@ -685,7 +713,7 @@ const checkUser = function (node: Todo, userName: string, password: string) {
   return isValidUser
 }
 
-const initRegisterServerMethod = function (node: Todo) {
+const initRegisterServerMethod = function (node: TodoTypeAny) {
   node.iiot.initialized = false
   node.iiot.opcuaServer = null
 
@@ -706,7 +734,7 @@ const initRegisterServerMethod = function (node: Todo) {
   return node
 }
 
-const setDiscoveryOptions = function (node: Todo, serverOptions: Todo) {
+const setDiscoveryOptions = function (node: TodoTypeAny, serverOptions: TodoTypeAny) {
   if (!node.disableDiscovery) {
     serverOptions.registerServerMethod = node.registerServerMethod
 
@@ -723,7 +751,7 @@ const setDiscoveryOptions = function (node: Todo, serverOptions: Todo) {
   return serverOptions
 }
 
-const getAddressSpace = function (node: Todo, msg: Todo, errorHandler: (err: Error, msg: Todo) => void): AddressSpace | null {
+const getAddressSpace = function (node: TodoTypeAny, msg: TodoTypeAny, errorHandler: (err: Error, msg: TodoTypeAny) => void): AddressSpace | null {
   if (!node.iiot.opcuaServer?.engine?.addressSpace) {
     errorHandler(new Error('Server AddressSpace Not Valid'), msg)
     return null
@@ -732,7 +760,7 @@ const getAddressSpace = function (node: Todo, msg: Todo, errorHandler: (err: Err
   return node.iiot.opcuaServer.engine.addressSpace
 }
 
-const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadableType: Todo, isProperty: boolean, errorHandler: (err: Error, msg: Todo) => void) {
+const addVariableToAddressSpace = function (node: TodoTypeAny, msg: TodoTypeAny, humanReadableType: TodoTypeAny, isProperty: boolean, errorHandler: (err: Error, msg: TodoTypeAny) => void) {
   let addressSpace = getAddressSpace(node, msg, errorHandler)
 
   if (!addressSpace) {
@@ -742,7 +770,7 @@ const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadable
   let rootFolder = addressSpace.findNode(msg.payload.referenceNodeId)
   let variableData = getVariantValue(msg.payload.datatype, msg.payload.value)
 
-  let newNodeOPCUAVariable: Todo = {}
+  let newNodeOPCUAVariable: TodoTypeAny = {}
 
   if (isProperty) {
     newNodeOPCUAVariable = {
@@ -757,7 +785,7 @@ const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadable
 
   newNodeOPCUAVariable.nodeId = msg.payload.nodeId
   newNodeOPCUAVariable.browseName = msg.payload.browsename
-  newNodeOPCUAVariable.displayName = new LocalizedText({locale: null, text: msg.payload.displayname})
+  newNodeOPCUAVariable.displayName = new LocalizedText({locale: "en-US", text: msg.payload.displayname})
   newNodeOPCUAVariable.dataType = msg.payload.datatype
   newNodeOPCUAVariable.value = {
     get() {
@@ -766,7 +794,7 @@ const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadable
         value: variableData
       })
     },
-    set(variant: Todo) {
+    set(variant: TodoTypeAny) {
       variableData = variant.value
       return StatusCodes.Good
     }
@@ -776,7 +804,7 @@ const addVariableToAddressSpace = function (node: Todo, msg: Todo, humanReadable
   internalDebugLog(msg.payload.nodeId + ' ' + humanReadableType + ' Added To Address Space')
 }
 
-const addObjectToAddressSpace = function (node: Todo, msg: Todo, humanReadableType: Todo, errorHandler: (err: Error, msg: Todo) => void) {
+const addObjectToAddressSpace = function (node: TodoTypeAny, msg: TodoTypeAny, humanReadableType: TodoTypeAny, errorHandler: (err: Error, msg: TodoTypeAny) => void) {
   let addressSpace = getAddressSpace(node, msg, errorHandler)
 
   if (!addressSpace) {
@@ -801,7 +829,7 @@ const addObjectToAddressSpace = function (node: Todo, msg: Todo, humanReadableTy
   }
 }
 
-const deleteNodeFromAddressSpace = function (node: Todo, msg: Todo, errorHandler: (err: Error, msg: Todo) => void) {
+const deleteNodeFromAddressSpace = function (node: TodoTypeAny, msg: TodoTypeAny, errorHandler: (err: Error, msg: TodoTypeAny) => void) {
   let addressSpace = getAddressSpace(node, msg, errorHandler)
   if (!addressSpace) {
     return
@@ -819,7 +847,7 @@ const deleteNodeFromAddressSpace = function (node: Todo, msg: Todo, errorHandler
   }
 }
 
-const restartServer = function (node: Todo, statusHandler: (status: string | NodeStatus) => void, emitHandler: (eventName: string | symbol, ...args: any[]) => void, sendHandler: (msg: Todo) => void) {
+const restartServer = function (node: TodoTypeAny, statusHandler: (status: string | NodeStatus) => void, emitHandler: (eventName: string | symbol, ...args: any[]) => void, sendHandler: (msg: TodoTypeAny) => void) {
   if (node.iiot.opcuaServer) {
     node.iiot.opcuaServer.shutdown(function () {
       emitHandler('shutdown')
@@ -833,12 +861,12 @@ const restartServer = function (node: Todo, statusHandler: (status: string | Nod
   node.oldStatusParameter = setNodeStatusTo(node, 'shutdown', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-const createServerNameWithPrefix = function (serverPort: number, prefix: Todo) {
+const createServerNameWithPrefix = function (serverPort: number, prefix: TodoTypeAny) {
   let serverPrefix = (prefix !== '') ? prefix + '-' : prefix
   return 'NodeRED-IIoT-' + serverPrefix + 'Server-' + serverPort
 }
 
-const buildServerOptions = async (node: Todo, prefix: Todo) => {
+const buildServerOptions = async (node: TodoTypeAny, prefix: TodoTypeAny) => {
   let today = new Date()
 
   // const SecurityPolicy = require("node-opcua").SecurityPolicy;
@@ -859,8 +887,8 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
       }
     },
     serverInfo: {
-      // applicationType: ApplicationType.CLIENTANDSERVER,
-      // applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), createServerNameWithPrefix(node.port, prefix)),
+      applicationType: ApplicationType.Server,
+      applicationUri: makeApplicationUrn(await extractFullyQualifiedDomainName(), createServerNameWithPrefix(node.port, prefix)),
       productUri: createServerNameWithPrefix(node.port, prefix),
       applicationName: {text: 'Node-RED', locale: 'en'},
       gatewayServerUri: null,
@@ -870,21 +898,28 @@ const buildServerOptions = async (node: Todo, prefix: Todo) => {
     maxAllowedSessionNumber: node.maxAllowedSessionNumber,
     maxConnectionsPerEndpoint: node.maxConnectionsPerEndpoint,
     allowAnonymous: node.allowAnonymous,
-    /* securityPolicies: [ TODO: configure SecurityPolicies
-      SecurityPolicy.Basic128Rsa15,
-      SecurityPolicy.Basic256,
-      SecurityPolicy.Basic256Sha256
-    ], */
+    securityPolicies: [
+      SecurityPolicy.None,
+      SecurityPolicy.Basic128,
+      SecurityPolicy.Basic192,
+      SecurityPolicy.Basic192Rsa15,
+      SecurityPolicy.Basic256Rsa15,
+      SecurityPolicy.Basic256Sha256,
+      SecurityPolicy.Aes128_Sha256_RsaOaep,
+      SecurityPolicy.Aes256_Sha256_RsaPss,
+      SecurityPolicy.PubSub_Aes128_CTR,
+      SecurityPolicy.PubSub_Aes256_CTR
+    ],
     certificateFile: node.publicCertificateFile,
-    // privateKeyFile: node.privateCertificateFile,
+    privateKeyFile: node.privateCertificateFile,
     alternateHostname: node.alternateHostname || '',
-    userManager: null,
+    userManager: checkUser,
     isAuditing: node.isAuditing,
     registerServerMethod: node.registerServerMethod,
     disableDiscovery: node.disableDiscovery
   }
 }
-const createServer = async (node: Todo, serverOptions: Todo, postInitialize: () => void, statusHandler: (status: string | NodeStatus) => void, verbose: boolean = false) => {
+const createServer = async (node: TodoTypeAny, serverOptions: TodoTypeAny, postInitialize: () => void, statusHandler: (status: string | NodeStatus) => void, verbose: boolean = false) => {
   /* istanbul ignore next */
   if (verbose) {
     coreServer.flexDetailDebugLog('serverOptions:' + JSON.stringify(serverOptions))
@@ -907,12 +942,12 @@ const createServerObject = async (maxSubscriptions: number, serverOptions: OPCUA
   return server
 }
 
-const setOPCUAServerListener = function (node: Todo) {
-  node.iiot.opcuaServer.on('newChannel', function (channel: Todo) {
+const setOPCUAServerListener = function (node: TodoTypeAny) {
+  node.iiot.opcuaServer.on('newChannel', function (channel: TodoTypeAny) {
     internalDebugLog('Client connected new channel with address = ', channel.remoteAddress, ' port = ', channel.remotePort)
   })
 
-  node.iiot.opcuaServer.on('closeChannel', function (channel: Todo) {
+  node.iiot.opcuaServer.on('closeChannel', function (channel: TodoTypeAny) {
     internalDebugLog('Client disconnected close channel with address = ', channel.remoteAddress, ' port = ', channel.remotePort)
   })
 

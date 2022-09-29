@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(30000)
+// jest.setTimeout(30000)
 
 var injectNode = require('../../src/opcua-iiot-inject')
 var connectorNode = require('../../src/opcua-iiot-connector')
@@ -238,14 +238,14 @@ describe('OPC UA Browser node e2e Testing', function () {
 
       helper.load(browseNodesToLoad, flow, function () {
         let n1 = helper.getNode('n1f4')
-        let inject = helper.getNode('21337b84.2a8c2c')
         let counter = 0
         n1.on('input', function (msg) {
           counter++
           expect(msg.payload).toBeDefined()
+          expect(msg.payload.value).toBeDefined()
 
-          if (msg.payload.length) {
-            expect(msg.payload.length).toBeGreaterThan(0)
+          if (msg.payload.value.length) {
+            expect(msg.payload.value.length).toBeGreaterThan(0)
           } else {
             expect(msg.payload.browserResults).toBeDefined()
             expect(msg.payload.browserResults.length).toBeGreaterThan(0)

@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(20000)
+// jest.setTimeout(30000)
 
 var injectNodeRedNode = require('@node-red/nodes/core/common/20-inject')
 var functionNodeRedNode = require('@node-red/nodes/core/function/10-function')
@@ -29,6 +29,7 @@ helper.init(require.resolve('node-red'))
 var writeNodesToLoad = [injectNodeRedNode, injectNode, functionNodeRedNode, connectorNode, inputNode, responseNode, serverNode]
 
 var testFlows = require('./flows/write-e2e-flows')
+const { StatusCodes } = require('node-opcua')
 
 describe('OPC UA Write node e2e Testing', function () {
   beforeEach(function (done) {
@@ -129,8 +130,9 @@ describe('OPC UA Write node e2e Testing', function () {
             'nodeId': 'ns=1;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          // Todo: StatusCode Good check instead JSON
-          expect(msg.payload.value.statusCodes).toMatchObject([{'_value': 0, '_description': 'The operation succeeded.', '_name': 'Good'}])
+          expect(msg.payload.value.statusCodes).toBeDefined()
+          expect(msg.payload.value.statusCodes?.length).toBeGreaterThan(0)
+          expect(msg.payload.value.statusCodes[0]).toMatchObject(StatusCodes.Good)
           expect(msg.topic).toBe('TestTopicWrite')
           expect(msg.payload.nodetype).toBe('write')
           expect(msg.payload.injectType).toBe('write')
@@ -167,8 +169,9 @@ describe('OPC UA Write node e2e Testing', function () {
             'nodeId': 'ns=1;s=TestReadWrite',
             'datatypeName': 'Double'
           }])
-          // Todo: StatusCode Good check instead JSON
-          expect(msg.payload.value.statusCodes).toMatchObject([{'_value': 0, '_description': 'The operation succeeded.', '_name': 'Good'}])
+          expect(msg.payload.value.statusCodes).toBeDefined()
+          expect(msg.payload.value.statusCodes?.length).toBeGreaterThan(0)
+          expect(msg.payload.value.statusCodes[0]).toMatchObject(StatusCodes.Good)
           expect(msg.topic).toBe('TestTopicWrite')
           expect(msg.payload.nodetype).toBe('write')
           expect(msg.payload.injectType).toBe('write')

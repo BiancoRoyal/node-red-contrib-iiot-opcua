@@ -13,7 +13,7 @@
 
 process.env.isTest = 'TRUE'
 
-jest.setTimeout(5000)
+// jest.setTimeout(30000)
 
 var injectNode = require('@node-red/nodes/core/common/20-inject')
 var functionNode = require('@node-red/nodes/core/function/10-function')

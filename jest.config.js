@@ -40,9 +40,7 @@ module.exports = {
   ],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  coverageReporters: [
-    'json-summary'
-  ],
+  coverageReporters: ['clover', 'json', 'lcov', 'text-summary'],
 
   // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: null,
@@ -183,11 +181,25 @@ module.exports = {
   // unmockedModulePathPatterns: undefined,
 
   // Indicates whether each individual test should be reported during the run
-  verbose: true
+  verbose: false,
+
+  silent: true,
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
   // watchPathIgnorePatterns: [],
 
   // Whether to use watchman for file crawling
   // watchman: true,
+
+  detectOpenHandles: true,
+
+  forceExit: true,
+
+  logHeapUsage: true,
+
+  maxConcurrency: 32,
+
+  maxWorkers: 8,
+
+  testTimeout: 40000
 }

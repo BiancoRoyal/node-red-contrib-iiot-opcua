@@ -27,7 +27,7 @@ import {
   TimeUnits,
   WriteMessage
 } from "../types/helpers";
-import {Todo, TodoVoidFunction} from "../types/placeholders";
+import {TodoTypeAny, TodoVoidFunction} from "../types/placeholders";
 import {Node, NodeMessage, NodeStatus} from "node-red";
 import {NodeMessageInFlow, NodeStatusFill, NodeStatusShape} from "@node-red/registry";
 import {isNotDefined} from "../types/assertion";
@@ -306,6 +306,9 @@ export function getVariantValue(datatype: DataTypeInput, value: any): number | D
     case DataType.UInt32:
       let uint32 = new Uint32Array([value])
       return uint32[0]
+    case 'UInt64':
+    case DataType.UInt64:
+      return parseInt(value)
     case 'Int16':
     case DataType.Int16:
     case 'Int32':
@@ -377,14 +380,15 @@ export function convertDataValueByDataType(value: any, dataType: DataTypeInput):
   logger.detailDebugLog('convertDataValue: ' + JSON.stringify(value) +
     ' value origin type ' + valueType + ' convert to' + ' ' + dataType)
 
+  // TODO: we have to check if that is needed or to improve since v2.x - here was a problem, that the node-opcua sent strings or types
   try {
     switch (dataType) {
       case 'NodeId':
       case DataType.NodeId:
         convertedValue = value.toString()
         break
-      case 'NodeIdType':
-      case DataType.ExpandedNodeId: // TODO: investigate, original value (NodeIdType) doesn't exist
+      case 'ExpandedNodeId':
+      case DataType.ExpandedNodeId:
         if (value.value instanceof Buffer) {
           convertedValue = value.toString()
         } else {
@@ -495,7 +499,7 @@ export function convertDataValueByDataType(value: any, dataType: DataTypeInput):
   return convertedValue
 }
 
-export function parseNamspaceFromMsgTopic(msg: BrowseMessage | null): number | undefined {
+export function parseNamespaceFromMsgTopic(msg: BrowseMessage | null): number | undefined {
   let nodeNamespace = ''
 
   if (msg?.topic) {
@@ -559,7 +563,7 @@ export function parseIdentifierFromMsgTopic(msg: BrowseMessage): NodeIdentifier 
 }
 
 export function parseIdentifierFromItemNodeId(item: NodeIdLike): NodeIdentifier {
-  return parseForNodeIdentifier((item as Todo).nodeId || item)
+  return parseForNodeIdentifier((item as TodoTypeAny).nodeId || item)
 }
 
 export function newOPCUANodeIdFromItemNodeId(item: NodeIdLike): NodeId {
@@ -571,7 +575,7 @@ export function newOPCUANodeIdFromItemNodeId(item: NodeIdLike): NodeId {
 }
 
 export function newOPCUANodeIdFromMsgTopic(msg: BrowseMessage): NodeId {
-  let namespace = parseNamspaceFromMsgTopic(msg)
+  let namespace = parseNamespaceFromMsgTopic(msg)
   let nodeIdentifier = parseIdentifierFromMsgTopic(msg)
 
   logger.internalDebugLog('newOPCUANodeIdFromMsgTopic: ' + JSON.stringify(nodeIdentifier))
@@ -588,7 +592,7 @@ export function createItemForWriteList(item: NodeIdLike, value: DataValueOptions
 }
 
 export function normalizeMessage(msg: WriteMessage) {
-  const payload = msg.payload as Todo
+  const payload = msg.payload as TodoTypeAny
   const addressSpaceValues: NodeToWrite[] = payload.nodesToWrite || payload.addressSpaceItems;
 
   if (!addressSpaceValues) return [];
@@ -617,7 +621,7 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
   const writeInputs = normalizeMessage(msg)
 
 
-  const nodesToWrite = writeInputs.map((item: Todo) =>
+  const nodesToWrite = writeInputs.map((item: TodoTypeAny) =>
     createItemForWriteList(item, buildNewVariant(item.datatypeName, item.value)
   ));
 
@@ -626,7 +630,7 @@ export function buildNodesToWrite(msg: WriteMessage): WriteValueOptions[] {
   return nodesToWrite
 }
 
-export function buildNodesToRead(payload: Todo) {
+export function buildNodesToRead(payload: TodoTypeAny) {
   logger.detailDebugLog('buildNodesToRead input: ' + JSON.stringify(payload))
 
   let injectArrayOfNodeIds = (payload.value?.length && payload.value.type === Array) ? payload.value : payload.addressSpaceItems;
@@ -644,27 +648,27 @@ export function buildNodesToRead(payload: Todo) {
 
   */
 
-  let nodePayloadList:Array<Todo> = payload.nodesToRead || payload.nodesToWrite || payload.crawlerResults || payload.browserResults || injectArrayOfNodeIds;
+  let nodePayloadList:Array<AddressSpaceItem> = payload.nodesToRead || payload.nodesToWrite || payload.crawlerResults || payload.browserResults || injectArrayOfNodeIds;
 
   if (nodePayloadList && nodePayloadList.length) {
-    return nodePayloadList.map((item: Todo) => {
-      return (item.nodeId || item).toString()
+    return nodePayloadList.map((item: AddressSpaceItem) => {
+      return item
     })
   } else {
-    let nodeList:Array<Todo> = payload.nodesToRead || payload.nodesToWrite
+    let nodeList:Array<AddressSpaceItem> = payload.nodesToRead || payload.nodesToWrite
     if (nodeList && nodeList.length) {
       // legacy
-      return nodeList.map((item: Todo) => {
-        return (item.nodeId || item).toString()
+      return nodeList.map((item: AddressSpaceItem) => {
+        return item
       })
     } else if (payload.addressSpaceItems && payload.addressSpaceItems.length) {
-      return payload.addressSpaceItems.map((item: Todo) => item.nodeId)
+      return payload.addressSpaceItems.map((item: AddressSpaceItem) => item)
     }
   }
   return []
 }
 
-export function buildNodesToListen(payload: Todo) {
+export function buildNodesToListen(payload: TodoTypeAny) {
   if (payload.addressItemsToRead?.length)
     return payload.addressItemsToRead
   else if (payload.addressSpaceItems?.length)
@@ -673,15 +677,21 @@ export function buildNodesToListen(payload: Todo) {
     return payload.addressSpaceItemList
 }
 
-export function buildNodesFromBrowser(payload: Todo) {
+export function buildNodesFromBrowser(payload: TodoTypeAny) {
   return payload.browserResults || payload.addressSpaceItems
 }
 
-export function buildNodesFromCrawler(payload: Todo) {
+export function buildNodesFromCrawler(payload: TodoTypeAny) {
   return payload.crawlerResults || payload.addressSpaceItems
 }
 
-export function buildNodeListFromClient(payload: Todo) {
+export function buildNodeListFromClient(payload: TodoTypeAny) {
+  /*
+    The node type should help users to be aware of wiring mistakes.
+    We want to support the user with messages if the wiring and inputs are wrong.
+    That brings the needs of a nodeType (where does it come from) and injectType (where should it be for).
+    This was the real last feature and needs some more refactoring and work to be done well.
+   */
   switch (payload.nodetype) {
     case 'read':
     case 'write':
@@ -713,7 +723,7 @@ export function isSessionBad(err: Error) {
     err.toString().includes('Connection'))
 }
 
-export function setNodeInitalState(nodeState: string, node: Todo, statusCall: (status: string | NodeStatus) => void) {
+export function setNodeInitalState(nodeState: string, node: TodoTypeAny, statusCall: (status: string | NodeStatus) => void) {
   switch (nodeState) {
     case 'INITOPCUA':
     case 'SESSIONREQUESTED':
@@ -761,7 +771,7 @@ export function isNodeId(nodeId: NodeId) {
 }
 
 export function checkConnectorState(
-  node: Todo,
+  node: TodoTypeAny,
   msg: NodeMessageInFlow,
   callerType: string,
   errorHandler: (err: Error, msg: NodeMessageInFlow) => void,
@@ -783,14 +793,14 @@ export function checkConnectorState(
   }
 }
 
-export function setNodeOPCUAConnected(node: Todo, opcuaClient: OPCUAClient, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUAConnected(node: TodoTypeAny, opcuaClient: OPCUAClient, statusHandler: (status: string | NodeStatus) => void): void {
   if (isInitializedIIoTNode(node)) {
     node.iiot.opcuaClient = opcuaClient
   }
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUAClosed(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUAClosed(node: TodoTypeAny, statusHandler: (status: string | NodeStatus) => void): void {
   if (isInitializedIIoTNode(node)) {
     // @ts-ignore
     node.iiot.opcuaClient = null
@@ -798,36 +808,36 @@ export function setNodeOPCUAClosed(node: Todo, statusHandler: (status: string | 
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'disconnected', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUALost(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUALost(node: TodoTypeAny, statusHandler: (status: string | NodeStatus) => void): void {
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'lost', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionStarted(node: Todo, opcuaSession: ClientSession, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUASessionStarted(node: TodoTypeAny, opcuaSession: ClientSession, statusHandler: (status: string | NodeStatus) => void): void {
   if (isInitializedIIoTNode(node)) {
     node.iiot.opcuaSession = opcuaSession
   }
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionClosed(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUASessionClosed(node: TodoTypeAny, statusHandler: (status: string | NodeStatus) => void): void {
   if (isInitializedIIoTNode(node)) {
     node.iiot.opcuaSession = null
   }
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionRestart(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUASessionRestart(node: TodoTypeAny, statusHandler: (status: string | NodeStatus) => void): void {
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'restart', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUASessionError(node: Todo, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUASessionError(node: TodoTypeAny, statusHandler: (status: string | NodeStatus) => void): void {
   if (isInitializedIIoTNode(node)) {
     node.iiot.opcuaSession = null
   }
   node.oldStatusParameter = setNodeStatusTo(node as unknown as Node, 'connecting', node.oldStatusParameter, node.showStatusActivities, statusHandler)
 }
 
-export function setNodeOPCUARestart(node: Todo, opcuaClient: OPCUAClient, statusHandler: (status: string | NodeStatus) => void): void {
+export function setNodeOPCUARestart(node: TodoTypeAny, opcuaClient: OPCUAClient, statusHandler: (status: string | NodeStatus) => void): void {
   logger.internalDebugLog('Connector Restart')
   if (opcuaClient && isInitializedIIoTNode(node)) {
     node.iiot.opcuaClient = opcuaClient
@@ -839,7 +849,7 @@ type NodeWithConnector = Node & {
   connector: ConnectorIIoT
 }
 
-export function registerToConnector(node: Todo, statusCallback: (status: string | NodeStatus) => void, onAlias: (event: string, callback: () => void) => void, errorHandler: (err: Error, msg: NodeMessage) => void): void {
+export function registerToConnector(node: TodoTypeAny, statusCallback: (status: string | NodeStatus) => void, onAlias: (event: string, callback: () => void) => void, errorHandler: (err: Error, msg: NodeMessage) => void): void {
   if (!node) {
     logger.internalDebugLog('Node Not Valid On Register To Connector')
     return
@@ -859,7 +869,7 @@ export function registerToConnector(node: Todo, statusCallback: (status: string 
     node.connector.statusCallbacks.forEach((callback: TodoVoidFunction) => callback(status))
   }
 
-  node.connector.on('connector_init', (node: Todo) => {
+  node.connector.on('connector_init', (node: TodoTypeAny) => {
     if (node.iiot?.opcuaClient) {
       // @ts-ignore
       node.iiot.opcuaClient = null
@@ -911,7 +921,7 @@ export function registerToConnector(node: Todo, statusCallback: (status: string 
   })
 
   node.connector.on('after_reconnection', () => {
-    setNodeOPCUARestart(node.connector, OPCUAClient.create((node.connector as Todo).iiot.opcuaClient), statusCall) // TODO: investigate one args v two
+    setNodeOPCUARestart(node.connector, OPCUAClient.create((node.connector as TodoTypeAny).iiot.opcuaClient), statusCall) // TODO: investigate one args v two
   })
   setNodeInitalState(node.connector?.iiot?.stateMachine?.getMachineState(), node, statusCall)
 }
@@ -936,7 +946,7 @@ export function deregisterToConnector(node: NodeWithConnector, done: () => void)
   }
 }
 
-export function checkSessionNotValid(session: Todo, callerType: Todo) {
+export function checkSessionNotValid(session: TodoTypeAny, callerType: TodoTypeAny) {
   if (!session) {
     logger.internalDebugLog('Session Not Valid On Check For ' + callerType)
     return true
@@ -985,7 +995,7 @@ export function initCoreServerNode() {
   }
 }
 
-export function getItemFilterValueWithElement(item: Todo, element: Todo): string | Record<string, any> {
+export function getItemFilterValueWithElement(item: TodoTypeAny, element: TodoTypeAny): string | Record<string, any> {
   let filterValue = ''
 
   switch (element.name) {
@@ -1014,14 +1024,14 @@ export function getItemFilterValueWithElement(item: Todo, element: Todo): string
   return filterValue
 }
 
-export function handleErrorInsideNode(node: Todo, err: Error) {
+export function handleErrorInsideNode(node: TodoTypeAny, err: Error) {
   logger.internalDebugLog(typeof node + ' ' + err.message)
   if (node.showErrors) {
     node.error(err, {payload: err.message})
   }
 }
 
-export function checkCrawlerItemIsNotToFilter(node: Todo, item: Todo, element: Todo, result: Todo): number {
+export function checkCrawlerItemIsNotToFilter(node: TodoTypeAny, item: TodoTypeAny, element: TodoTypeAny, result: TodoTypeAny): number {
   try {
     let filterValue = getItemFilterValueWithElement(item, element)
 
@@ -1054,7 +1064,7 @@ export function checkCrawlerItemIsNotToFilter(node: Todo, item: Todo, element: T
   return result
 }
 
-export function checkResponseItemIsNotToFilter(node: Node, item: Todo, element: Todo, result: Todo) {
+export function checkResponseItemIsNotToFilter(node: Node, item: TodoTypeAny, element: TodoTypeAny, result: TodoTypeAny) {
   try {
     let filterValue = getItemFilterValueWithElement(item, element)
 
@@ -1083,7 +1093,7 @@ export function checkResponseItemIsNotToFilter(node: Node, item: Todo, element: 
   return result
 }
 
-export function checkItemForUnsetState(node: Todo, item: Todo): number {
+export function checkItemForUnsetState(node: TodoTypeAny, item: TodoTypeAny): number {
   let result = 1
 
   if (node.activateUnsetFilter) {
@@ -1101,7 +1111,7 @@ export function checkItemForUnsetState(node: Todo, item: Todo): number {
   return result
 }
 
-export function resetIiotNode(node: Todo) {
+export function resetIiotNode(node: TodoTypeAny) {
   coreListener.internalDebugLog('reset IIoT of the Node with id:' + node.id)
 
   if(_.isObject(node) == false || _.isEmpty(node.iiot)) {
@@ -1123,17 +1133,17 @@ export function filterListEntryByNodeId(nodeId: string, list: string[]) {
   })
 }
 
-export function filterListByNodeId(nodeId: NodeIdLike, list: Todo) {
+export function filterListByNodeId(nodeId: NodeIdLike, list: TodoTypeAny) {
   if (nodeId === '') {
     return list
   }
-  return list.filter((item: Todo) => {
+  return list.filter((item: TodoTypeAny) => {
     // if item.nodeId is null, item may itself be a nodeId
     return (item.nodeId || item).toString().includes(nodeId)
   })
 }
 
-export function isNodeTypeToFilterResponse(payload: Todo) {
+export function isNodeTypeToFilterResponse(payload: TodoTypeAny) {
   return payload.nodetype === 'read' || payload.nodetype === 'browse' || payload.nodetype === 'crawl' || payload.nodetype === 'method'
 }
 
@@ -1141,7 +1151,8 @@ export function isInitializedIIoTNode<T>(node: T | undefined): node is T {
   return !!node
 }
 
-export interface BasicPayload {
+export interface IotOpcUaNodeMessage extends NodeMessage {
+  payload: any
   value: any
   payloadType: string
   nodetype: string

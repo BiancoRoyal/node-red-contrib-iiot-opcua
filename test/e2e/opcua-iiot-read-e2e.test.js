@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(20000)
+// jest.setTimeout(30000)
 
 var functionNode = require('@node-red/nodes/core/function/10-function')
 
@@ -30,6 +30,7 @@ var readNodesToLoad = [injectNode, functionNode, connectorNode, inputNode, respo
 var readNodesToLoadWithFlexServer = [injectNode, functionNode, connectorNode, inputNode, responseNode, flexServerNode]
 
 var testFlows = require('./flows/read-e2e-flows')
+const { AttributeIds } = require('node-opcua')
 
 describe('OPC UA Read node e2e Testing', function () {
   beforeEach(function (done) {
@@ -128,8 +129,8 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49904
       flow[8].endpoint = "opc.tcp://localhost:49904/"
-      flow[3].attributeId = 1
       helper.load(readNodesToLoad, flow, function () {
+      flow[3].attributeId = AttributeIds.NodeId
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
           expect(msg.payload.value).toBe('testpayload')
@@ -147,29 +148,31 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49905
       flow[8].endpoint = "opc.tcp://localhost:49905/"
-      flow[3].attributeId = 1
+      flow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(1)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeId)
          await done()
         })
       })
     })
 
     it('should have read results with response for attributeId Node-ID', function (done) {
+      testFlows.testReadFlow[3].attributeId = 
+      helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49906
       flow[8].endpoint = "opc.tcp://localhost:49906/"
-      flow[3].attributeId = 1
+      flow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(1)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeId)
          await done()
         })
       })
@@ -179,7 +182,7 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49907
       flow[8].endpoint = "opc.tcp://localhost:49907/"
-      flow[3].attributeId = 2
+      flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -198,13 +201,13 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49908
       flow[8].endpoint = "opc.tcp://localhost:49908/"
-      flow[3].attributeId = 2
+      flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(2)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeClass)
          await done()
         })
       })
@@ -214,13 +217,13 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49909
       flow[8].endpoint = "opc.tcp://localhost:49909/"
-      flow[3].attributeId = 2
+      flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(2)
+          expect(msg.payload.attributeId).toBe(AttributeIds.NodeClass)
          await done()
         })
       })
@@ -230,7 +233,7 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49910
       flow[8].endpoint = "opc.tcp://localhost:49910/"
-      flow[3].attributeId = 3
+      flow[3].attributeId = BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -246,16 +249,13 @@ describe('OPC UA Read node e2e Testing', function () {
     })
 
     it('should have read results for attributeId Browse-Name', function (done) {
-      const flow = testFlows.testReadFlow
-      flow[7].port = 49911
-      flow[8].endpoint = "opc.tcp://localhost:49911/"
-      flow[3].attributeId = 3
-      helper.load(readNodesToLoad, flow, function () {
+      testFlows.testReadFlow[3].attributeId = AttributeIds.BrowseName
+      helper.load(readNodesToLoad, testFlows.testReadFlow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(3)
+          expect(msg.payload.attributeId).toBe(AttributeIds.BrowseName)
          await done()
         })
       })
@@ -265,13 +265,13 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49912
       flow[8].endpoint = "opc.tcp://localhost:49912/"
-      flow[3].attributeId = 3
+      flow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(3)
+          expect(msg.payload.attributeId).toBe(AttributeIds.BrowseName)
          await done()
         })
       })
@@ -281,7 +281,7 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49913
       flow[8].endpoint = "opc.tcp://localhost:49913/"
-      flow[3].attributeId = 4
+      flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -300,13 +300,13 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49914
       flow[8].endpoint = "opc.tcp://localhost:49914/"
-      flow[3].attributeId = 4
+      flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(4)
+          expect(msg.payload.attributeId).toBe(AttributeIds.DisplayName)
          await done()
         })
       })
@@ -316,13 +316,13 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49915
       flow[8].endpoint = "opc.tcp://localhost:49915/"
-      flow[3].attributeId = 4
+      flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(4)
+          expect(msg.payload.attributeId).toBe(AttributeIds.DisplayName)
          await done()
         })
       })
@@ -332,7 +332,7 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49916
       flow[8].endpoint = "opc.tcp://localhost:49916/"
-      flow[3].attributeId = 13
+      flow[3].attributeId = Value
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
         n2.on('input', async function (msg) {
@@ -351,13 +351,13 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49917
       flow[8].endpoint = "opc.tcp://localhost:49917/"
-      flow[3].attributeId = 13
+      flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
         n4.on('input', async function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(13)
+          expect(msg.payload.attributeId).toBe(AttributeIds.Value)
          await done()
         })
       })
@@ -367,13 +367,13 @@ describe('OPC UA Read node e2e Testing', function () {
       const flow = testFlows.testReadFlow
       flow[7].port = 49918
       flow[8].endpoint = "opc.tcp://localhost:49918/"
-      flow[3].attributeId = 13
+      flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
         n6.on('input', async function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
           expect(msg.topic).toBe('TestTopicRead')
-          expect(msg.payload.attributeId).toBe(13)
+          expect(msg.payload.attributeId).toBe(AttributeIds.Value)
          await done()
         })
       })

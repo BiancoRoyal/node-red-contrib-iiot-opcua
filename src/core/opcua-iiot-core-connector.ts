@@ -13,7 +13,7 @@
 import * as core from './opcua-iiot-core'
 // @ts-ignore
 import * as Stately from 'stately.js'
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 import {ClientSession, OPCUAClient, OPCUADiscoveryServer, UserIdentityInfo} from "node-opcua";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import {Node} from "node-red";
@@ -30,7 +30,7 @@ export type ConnectorIIoT = {
   stateMachine?: Stately.machine
   opcuaClientOptions?: OPCUAClientOptions
   registeredNodeList?: Record<string, Node>
-  functions?: Record<string, (...args: Todo) => Todo>
+  functions?: Record<string, (...args: TodoTypeAny) => TodoTypeAny>
   sessionNodeRequests: number
 }
 
@@ -162,7 +162,7 @@ function createConnectorStatelyMachine() {
   return stateMachine
 }
 
-function setListenerToClient(node: Todo) {
+function setListenerToClient(node: TodoTypeAny) {
 
   if (!node.iiot.opcuaClient) {
     logger.internalDebugLog('Client Not Valid On Setting Events To Client')
@@ -244,7 +244,7 @@ function setListenerToClient(node: Todo) {
   })
 }
 
-function logSessionInformation(node: Todo) {
+function logSessionInformation(node: TodoTypeAny) {
   if (!node.iiot?.opcuaSession) {
     logger.detailDebugLog('Session Not Valid To Log Information')
     return

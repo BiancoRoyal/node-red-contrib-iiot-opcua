@@ -24,12 +24,12 @@
  */
 'use strict'
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 
 const assert = require('better-assert')
 const nodeOpcuaLib = require('node-opcua')
 
-export function constructAlarmAddressSpaceDemo (test: Todo, addressSpace: Todo) {
+export function constructAlarmAddressSpaceDemo (test: TodoTypeAny, addressSpace: TodoTypeAny) {
   addressSpace.installAlarmsAndConditionsService()
   const LocalizedText = nodeOpcuaLib.LocalizedText
 

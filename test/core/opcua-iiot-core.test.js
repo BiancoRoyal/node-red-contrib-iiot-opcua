@@ -8,7 +8,7 @@
  */
 'use strict'
 
-jest.setTimeout(5000)
+// jest.setTimeout(30000)
 
 describe('OPC UA Core', function () {
   let assert = require('chai').assert
@@ -106,19 +106,19 @@ describe('OPC UA Core', function () {
   describe('core build functions', function () {
 
     it('should return the right namesapce zero from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
+      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
       assert.equal('0', result)
       done()
     })
 
     it('should return the right namesapce five from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
+      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
       assert.equal('1', result)
       done()
     })
 
     it('should return the right namesapce two from msg topic', function (done) {
-      let result = core.parseNamspaceFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
+      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
       assert.equal('2', result)
       done()
     })
@@ -218,7 +218,8 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead({addressSpaceItems: [{name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}]})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      expect(core.buildNodesToRead({addressSpaceItems: [addressSpaceItem]})).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
 
@@ -234,19 +235,20 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes in payload from addressSpaceItems', function (done) {
-      expect(core.buildNodesToRead( {addressSpaceItems: [{ name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }] })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      expect(core.buildNodesToRead( { addressSpaceItems: [addressSpaceItem] } )).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
 
     it('should return array of nodes to listen from payload of addressSpaceItems', function (done) {
-      let addressSapceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
-      expect(core.buildNodesToListen({ addressSpaceItems: [addressSapceItem] })).to.be.an('array').that.does.include(addressSapceItem)
+      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      expect(core.buildNodesToListen({ addressSpaceItems: [addressSpaceItem] })).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
 
     it('should return array of nodes to listen from payload of addressItemsToRead', function (done) {
-      let addressSapceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
-      expect(core.buildNodesToListen({ addressItemsToRead: [addressSapceItem] })).to.be.an('array').that.does.include(addressSapceItem)
+      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      expect(core.buildNodesToListen({ addressItemsToRead: [addressSpaceItem] })).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
 
@@ -328,12 +330,12 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes to listen from payload of addressItemsToRead instead of addressSpaceItems', function (done) {
-      let addressSapceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
-      let addressSapceItem2 = {name: '', nodeId: 'ns=4;s=TestNotUsedItem', datatypeName: ''}
+      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      let addressSpaceItem2 = {name: '', nodeId: 'ns=4;s=TestNotUsedItem', datatypeName: ''}
       expect(core.buildNodesToListen({
-        addressSpaceItems: [addressSapceItem2],
-        addressItemsToRead: [addressSapceItem]
-      })).to.be.an('array').that.does.include(addressSapceItem)
+        addressSpaceItems: [addressSpaceItem2],
+        addressItemsToRead: [addressSpaceItem]
+      })).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
   })

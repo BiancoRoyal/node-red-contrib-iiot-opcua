@@ -10,7 +10,7 @@
 'use strict'
 
 import * as nodered from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {convertDataValueByDataType} from "./core/opcua-iiot-core";
 import {logger} from "./core/opcua-iiot-core-connector";
@@ -53,7 +53,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.injectType = config.injectType
     this.showErrors = config.showErrors
 
-    let self: Todo = this
+    let self: TodoTypeAny = this
     self.iiot = {}
     self.iiot.subscribed = false
     this.status({fill: 'blue', shape: 'ring', text: 'new'})
@@ -61,8 +61,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.on('input', (msg: NodeMessageInFlow) => {
 
       self.iiot.subscribed = !self.iiot.subscribed
-      const payload = msg.payload as Todo
-      const value: Todo = typeof msg.payload === "string" ? msg.payload : (msg.payload as Todo).value;
+      const payload = msg.payload as TodoTypeAny
+      const value: TodoTypeAny = typeof msg.payload === "string" ? msg.payload : (msg.payload as TodoTypeAny).value;
 
       if (self.injectType === 'listen') {
         if (self.iiot.subscribed) {
