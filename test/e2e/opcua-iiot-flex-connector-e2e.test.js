@@ -54,7 +54,9 @@ describe('OPC UA Flex Connector node e2e Testing', function () {
 
   describe('Flex Connector node', function () {
     it('should be loaded and get five injects', function (done) {
-      helper.load(flexConnectorNodes, testFlows.testFlexConnectorFlow,
+      const flow = Array.from(testFlows.testFlexConnectorFlow)
+
+      helper.load(flexConnectorNodes, flow,
         function () {
           let counter = 0
           let nodeUnderTest = helper.getNode('n1fc')
@@ -70,6 +72,12 @@ describe('OPC UA Flex Connector node e2e Testing', function () {
     })
 
     it('should be loaded with connector, inject, and servers', function (done) {
+      const flow = Array.from(testFlows.testWithServersFlexConnector)
+      flow[9].port = "51100"
+      flow[10].port = "51101"
+      flow[11].port = "51102"
+      flow[12].endpoint = "opc.tcp://localhost:51100"
+
       helper.load(flexConnectorNodes, testFlows.testWithServersFlexConnector,
         function () {
           let counter = 0
@@ -86,6 +94,11 @@ describe('OPC UA Flex Connector node e2e Testing', function () {
     })
 
     it('should be loaded with listener, events, and servers', function (done) {
+      const flow = Array.from(testFlows.flexConnectorSwitchingEndpointWithListenerFlow)
+      flow[7].port = "51103"
+      flow[8].port = "51104"
+      flow[17].endpoint = "opc.tcp://localhost:50304/"
+
       helper.load(flexConnectorNodes, testFlows.flexConnectorSwitchingEndpointWithListenerFlow,
         function () {
           let counter = 0
