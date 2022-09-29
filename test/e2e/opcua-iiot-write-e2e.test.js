@@ -52,7 +52,7 @@ describe('OPC UA Write node e2e Testing', function () {
 
   describe('Write node', function () {
     it('should be loaded and live with server', function (done) {
-      const flow = testFlows.testWriteNodeToBeLoadedWithServer
+      const flow = Array.from(testFlows.testWriteNodeToBeLoadedWithServer)
       flow[2].port = 50000
       flow[4].endpoint = "opc.tcp://localhost:50000/"
       helper.load([inputNode, serverNode, connectorNode], flow,
@@ -65,8 +65,8 @@ describe('OPC UA Write node e2e Testing', function () {
         })
     })
 
-    it('should get a message with payload', function (done) {
-      const flow = testFlows.testWriteFlow
+    it('should get a message with payload from inject node', function (done) {
+      const flow = Array.from(testFlows.testWriteFlow)
       flow[9].port = 50001
       flow[10].endpoint = "opc.tcp://localhost:50001/"
       helper.load(writeNodesToLoad, flow, function () {
@@ -81,7 +81,7 @@ describe('OPC UA Write node e2e Testing', function () {
     })
 
     it('should verify addressSpaceItems', function (done) {
-      const flow = testFlows.testWriteFlow
+      const flow = Array.from(testFlows.testWriteFlow)
       flow[9].port = 50002
       flow[10].endpoint = "opc.tcp://localhost:50002/"
       helper.load(writeNodesToLoad, flow, function () {
@@ -98,7 +98,7 @@ describe('OPC UA Write node e2e Testing', function () {
     })
 
     it('should have values to write', function (done) {
-      const flow = testFlows.testWriteFlow
+      const flow = Array.from(testFlows.testWriteFlow)
       flow[9].port = 50003
       flow[10].endpoint = "opc.tcp://localhost:50003/"
       helper.load(writeNodesToLoad, flow, function () {
@@ -119,7 +119,7 @@ describe('OPC UA Write node e2e Testing', function () {
     })
 
     it('should have write results', function (done) {
-      const flow = testFlows.testWriteFlow
+      const flow = Array.from(testFlows.testWriteFlow)
       flow[9].port = 50004
       flow[10].endpoint = "opc.tcp://localhost:50004/"
       helper.load(writeNodesToLoad, flow, function () {
@@ -142,7 +142,7 @@ describe('OPC UA Write node e2e Testing', function () {
     })
 
     it('should have write results with response', function (done) {
-      const flow = testFlows.testWriteFlow
+      const flow = Array.from(testFlows.testWriteFlow)
       flow[9].port = 50005
       flow[10].endpoint = "opc.tcp://localhost:50005/"
       helper.load(writeNodesToLoad, flow, function () {
@@ -158,7 +158,7 @@ describe('OPC UA Write node e2e Testing', function () {
     })
 
     it('should have write results from payload without a valuesToWrite property', function (done) {
-      const flow = testFlows.testWriteWithoutValuesToWriteFlow
+      const flow = Array.from(testFlows.testWriteWithoutValuesToWriteFlow)
       flow[7].port = 50006
       flow[8].endpoint = "opc.tcp://localhost:50006/"
       helper.load(writeNodesToLoad, flow, function () {

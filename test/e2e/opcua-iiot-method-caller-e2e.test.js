@@ -54,7 +54,11 @@ describe('OPC UA Method Caller node e2e Testing', function () {
 
   describe('Method Caller node', function () {
     it('should get a message with payload after inject', function (done) {
-      helper.load(methodCallerNodesToLoad, testFlows.testMethodFlowPayload, function () {
+      const flow = Array.from(testFlows.testMethodFlowPayload)
+      flow[9].port = "50500"
+      flow[10].endpoint = "opc.tcp://localhost:50500/"
+
+      helper.load(methodCallerNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2mcf1')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicMethod')
@@ -66,7 +70,11 @@ describe('OPC UA Method Caller node e2e Testing', function () {
     })
 
     it('should get a message with payload', function (done) {
-      helper.load(methodCallerNodesToLoad, testFlows.testMethodFlowPayload, function () {
+      const flow = Array.from(testFlows.testMethodFlowPayload)
+      flow[9].port = "50501"
+      flow[10].endpoint = "opc.tcp://localhost:50501/"
+
+      helper.load(methodCallerNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2mcf1')
         n2.on('input', function (msg) {
           expect(msg.payload.value).toBe(12345)
@@ -76,7 +84,11 @@ describe('OPC UA Method Caller node e2e Testing', function () {
     })
 
     it('should verify the result with response data', function (done) {
-      helper.load(methodCallerNodesToLoad, testFlows.testMethodFlowPayload, function () {
+      const flow = Array.from(testFlows.testMethodFlowPayload)
+      flow[9].port = "50502"
+      flow[10].endpoint = "opc.tcp://localhost:50502/"
+
+      helper.load(methodCallerNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6mcf1')
         n6.on('input', function (msg) {
           expect(msg.payload.nodetype).toBe('method')
@@ -109,7 +121,11 @@ describe('OPC UA Method Caller node e2e Testing', function () {
     })
 
     it('should get a message with payload after inject event inject', function (done) {
-      helper.load(eventNodesToLoad, testFlows.testMethodInjectFlowPayload, function () {
+      const flow = Array.from(testFlows.testMethodInjectFlowPayload)
+      flow[9].port = "50503"
+      flow[10].endpoint = "opc.tcp://localhost:50503/"
+
+      helper.load(eventNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2mcf2')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicMethod')
@@ -120,7 +136,11 @@ describe('OPC UA Method Caller node e2e Testing', function () {
     })
 
     it('should verify the result with response data event inject', function (done) {
-      helper.load(eventNodesToLoad, testFlows.testMethodInjectFlowPayload, function () {
+      const flow = Array.from(testFlows.testMethodInjectFlowPayload)
+      flow[9].port = "50504"
+      flow[10].endpoint = "opc.tcp://localhost:50504/"
+
+      helper.load(eventNodesToLoad, flow, function () {
         let n8 = helper.getNode('n8mcf2')
         n8.on('input', function (msg) {
           expect(msg.payload.nodetype).toBe('method')

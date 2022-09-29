@@ -47,7 +47,9 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
   describe('Command node', function () {
     it('should get a message with payload on restart command', function (done) {
-      helper.load([injectNode, inputNode], testFlows.testCMDFlow, function () {
+      const flow = Array.from(testFlows.testCMDFlow)
+
+      helper.load([injectNode, inputNode], flow, function () {
         let n5 = helper.getNode('n5cmdf1')
         n5.on('input', function (msg) {
           expect(msg.payload.commandType).toBe('restart')
@@ -60,7 +62,9 @@ describe('OPC UA Server Command node e2e Testing', function () {
     })
 
     it('should get a message with payload on delete ASO command', function (done) {
-      helper.load([injectNode, inputNode], testFlows.testCMDFlow, function () {
+      const flow = Array.from(testFlows.testCMDFlow)
+
+      helper.load([injectNode, inputNode], flow, function () {
         let n6 = helper.getNode('n6cmdf1')
         n6.on('input', function (msg) {
           expect(msg.payload.commandType).toBe('deleteNode')
@@ -73,7 +77,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
     })
 
     it('should get a message with inject to delete ASO', function (done) {
-      helper.load([injectOPCUANode, inputNode, serverNode], testFlows.testInjectCMDFlow, function () {
+      const flow = Array.from(testFlows.testInjectCMDFlow)
+      flow[5].port = "51600"
+
+      helper.load([injectOPCUANode, inputNode, serverNode], flow, function () {
         let n5 = helper.getNode('n5cmdf2')
         n5.on('input', function (msg) {
           expect(msg.payload.commandType).toBe('deleteNode')
@@ -86,7 +93,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
     })
 
     it('should get a message with inject to restart server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, serverNode], testFlows.testCMDWithServerFlow, function () {
+      const flow = Array.from(testFlows.testCMDWithServerFlow)
+      flow[6].port = "51601"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, serverNode], flow, function () {
         let n5 = helper.getNode('n5csf1')
         n5.on('input', function (msg) {
           expect(msg.payload.commandType).toBe('restart')
@@ -99,7 +109,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
     })
 
     it('should get a message with inject to restart flex server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testFlows.testCMDWithFlexServerFlow, function () {
+      const flow = Array.from(testFlows.testCMDWithFlexServerFlow)
+      flow[5].port = "51602"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf3')
         n5.on('input', function (msg) {
           expect(msg.payload.commandType).toBe('restart')
@@ -112,7 +125,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
     })
 
     it('should get no message with wrong command inject to restart flex server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testFlows.testWrongCMDWithFlexServerFlow, function () {
+      const flow = Array.from(testFlows.testWrongCMDWithFlexServerFlow)
+      flow[5].port = "51603"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf4')
         n5.on('input', function (msg) {
           expect(false).toBeTruthy()
@@ -122,7 +138,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
     })
 
     it('should get no message on wrong inject type sent to flex server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testFlows.testWrongInjectWithFlexServerFlow, function () {
+      const flow = Array.from(testFlows.testWrongInjectWithFlexServerFlow)
+      flow[3].port = "51604"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf4')
         n5.on('input', function (msg) {
           expect(false).toBeTruthy()

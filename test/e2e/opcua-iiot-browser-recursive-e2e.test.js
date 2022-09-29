@@ -50,7 +50,7 @@ describe('OPC UA Browser recursive with ASO nodes e2e Testing', function () {
 
   describe('Browser Recursive node', function () {
     it('should verify browser items as result of a recursive browse', function (done) {
-      const flow = testFlows.testBrowseRecursiveASOFlow
+      const flow = Array.from(testFlows.testBrowseRecursiveASOFlow)
       flow[3].port = "50199"
       flow[24].endpoint = "opc.tcp://localhost:50199/"
       helper.load(browseRecursiveNodesToLoad, flow, function () {

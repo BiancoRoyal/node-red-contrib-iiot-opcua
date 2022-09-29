@@ -1,7 +1,7 @@
 const helperExtensions = require('../../helper/test-helper-extensions')
 
 module.exports = {
-  
+
   "testWriteFlow":  helperExtensions.cleanFlowPositionData( [
     {
       "id": "1390f66400457fe6",
@@ -133,7 +133,7 @@ module.exports = {
       "id": "s1wrf1",
       "type": "OPCUA-IIoT-Server",
       "z": "1390f66400457fe6",
-      "port": "",
+      "port": "50001",
       "endpoint": "",
       "acceptExternalCommands": true,
       "maxAllowedSessionNumber": "",
@@ -168,7 +168,7 @@ module.exports = {
       "type": "OPCUA-IIoT-Connector",
       "z": "1390f66400457fe6",
       "discoveryUrl": "",
-      "endpoint": "",
+      "endpoint": "opc.tcp://localhost:50001/",
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",

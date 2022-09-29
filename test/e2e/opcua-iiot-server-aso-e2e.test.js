@@ -22,7 +22,8 @@ var connectorNode = require('../../src/opcua-iiot-connector')
 var readNode = require('../../src/opcua-iiot-read')
 var browserNode = require('../../src/opcua-iiot-browser')
 
-var readAsoNodesToLoad = [functionNode, injectNode, inputNode, serverNode, connectorNode, readNode,  browserNode]
+var asoNodesToLoad = [functionNode, injectNode, inputNode, serverNode, connectorNode, readNode,  browserNode]
+
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
@@ -52,7 +53,10 @@ describe('OPC UA Server ASO node Testing', function () {
 
   describe('Address Space Operation node e2e Testing', function () {
     it('should get all ASO data types with message with payload', function (done) {
-      helper.load([injectNode, functionNode, inputNode, serverNode], testFlows.testASOFlow, function () {
+      const flow = Array.from(testFlows.testASOFlow)
+      flow[25].port = "51500"
+
+      helper.load(asoNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4')
         let test = 0
         n4.on('input', function (msg) {
@@ -116,7 +120,10 @@ describe('OPC UA Server ASO node Testing', function () {
     })
 
     it('should verify an inject message for address space operation', function (done) {
-      helper.load([injectNode, functionNode, inputNode, serverNode], testFlows.testASOFlow, function () {
+      const flow = Array.from(testFlows.testASOFlow)
+      flow[25].port = "51501"
+
+      helper.load(asoNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4')
         let test = 0
         n4.on('input', function (msg) {
@@ -181,7 +188,11 @@ describe('OPC UA Server ASO node Testing', function () {
     })
 
     it('should verify read via browser for address space operations', function (done) {
-      helper.load(readAsoNodesToLoad, testFlows.testASOReadFlow, function () {
+      const flow = Array.from(testFlows.testASOReadFlow)
+      flow[25].port = "51502"
+      flow[34].endpoint = "opc.tcp://localhost:51502/"
+
+      helper.load(asoNodesToLoad, testFlows.testASOReadFlow, function () {
         let n4 = helper.getNode('41ac95a6194a3536')
         n4.on('input', function (msg) {
           expect(msg.payload.addressSpaceItems).toBeDefined()

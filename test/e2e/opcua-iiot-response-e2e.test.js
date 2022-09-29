@@ -53,7 +53,11 @@ describe('OPC UA Response node e2e Testing', function () {
 
   describe('Response node', function () {
     it('should get a message with payload on read not compressed', function (done) {
-      helper.load(testResponseNodes, testFlows.testReadResponseFlow, function () {
+      const flow = Array.from(testFlows.testReadResponseFlow)
+      flow[17].port = "50700"
+      flow[18].endpoint = "opc.tcp://localhost:50700/"
+
+      helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n1rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
@@ -64,7 +68,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get a message with payload on read compressed', function (done) {
-      helper.load(testResponseNodes, testFlows.testReadResponseFlow, function () {
+      const flow = Array.from(testFlows.testReadResponseFlow)
+      flow[17].port = "50701"
+      flow[18].endpoint = "opc.tcp://localhost:50701/"
+
+      helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n2rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
@@ -75,7 +83,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get a message with payload on read TestReadWrite filtered not compressed', function (done) {
-      helper.load(testResponseNodes, testFlows.testReadResponseFlow, function () {
+      const flow = Array.from(testFlows.testReadResponseFlow)
+      flow[17].port = "50702"
+      flow[18].endpoint = "opc.tcp://localhost:50702/"
+
+      helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n4rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
@@ -86,7 +98,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get a message with payload on read TestReadWrite filtered compressed', function (done) {
-      helper.load(testResponseNodes, testFlows.testReadResponseFlow, function () {
+      const flow = Array.from(testFlows.testReadResponseFlow)
+      flow[17].port = "50703"
+      flow[18].endpoint = "opc.tcp://localhost:50703/"
+
+      helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n3rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
@@ -97,7 +113,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get a message with payload on read Counter filtered not compressed', function (done) {
-      helper.load(testResponseNodes, testFlows.testReadResponseFlow, function () {
+      const flow = Array.from(testFlows.testReadResponseFlow)
+      flow[17].port = "50704"
+      flow[18].endpoint = "opc.tcp://localhost:50704/"
+
+      helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n6rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
@@ -108,7 +128,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get a message with payload on read Counter filtered compressed', function (done) {
-      helper.load(testResponseNodes, testFlows.testReadResponseFlow, function () {
+      const flow = Array.from(testFlows.testReadResponseFlow)
+      flow[17].port = "50705"
+      flow[18].endpoint = "opc.tcp://localhost:50705/"
+
+      helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n5rsf1')
         let inject = helper.getNode('ac8b3930.dce72')
         nut.on('input', function (msg) {
@@ -119,7 +143,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get four messages with payload on read after browse with four response nodes', function (done) {
-      helper.load(testResponseNodes, testFlows.testReadAllAttributesResponseFlow, function () {
+      const flow = Array.from(testFlows.testReadAllAttributesResponseFlow)
+      flow[9].port = "50706"
+      flow[10].endpoint = "opc.tcp://localhost:50706/"
+
+      helper.load(testResponseNodes, flow, function () {
         let n1 = helper.getNode('n1rsf2')
         let counter = 0
         n1.on('input', function (msg) {
@@ -137,7 +165,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get six messages with payload on browse with six response nodes on all possible setting of options', function (done) {
-      helper.load(testResponseNodes, testFlows.testAllResponseTypesWithBrowser, function () {
+      const flow = Array.from(testFlows.testAllResponseTypesWithBrowser)
+      flow[1].port = "50707"
+      flow[11].endpoint = "opc.tcp://localhost:50707/"
+
+      helper.load(testResponseNodes, flow, function () {
         let n1 = helper.getNode('n1rsf3')
         let counter = 0
         n1.on('input', function (msg) {
@@ -159,7 +191,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get six messages with payload on crawler with six response nodes on all possible setting of options', function (done) {
-      helper.load(testResponseNodes, testFlows.testCrawlerResponseFlow, function () {
+      const flow = Array.from(testFlows.testCrawlerResponseFlow)
+      flow[10].port = "50708"
+      flow[13].endpoint = "opc.tcp://localhost:50708/"
+
+      helper.load(testResponseNodes, flow, function () {
         let n1 = helper.getNode('193c2083a00aab84')
         let counter = 0
         n1.on('input', function (msg) {
@@ -181,7 +217,11 @@ describe('OPC UA Response node e2e Testing', function () {
     })
 
     it('should get three messages with payload on method call with three response nodes on all possible setting of options', function (done) {
-      helper.load(testResponseNodes, testFlows.testMethodResponseFlow, function () {
+      const flow = Array.from(testFlows.testMethodResponseFlow)
+      flow[7].port = "50709"
+      flow[8].endpoint = "opc.tcp://localhost:50709/"
+
+      helper.load(testResponseNodes, flow, function () {
         let n1 = helper.getNode('n1rsf5')
         let counter = 0
         n1.on('input', function (msg) {

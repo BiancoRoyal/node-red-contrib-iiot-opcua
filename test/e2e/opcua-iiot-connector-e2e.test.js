@@ -64,7 +64,11 @@ describe('OPC UA Connector node e2e Testing', function () {
 
   describe('Connector node', function () {
     it('should success on discovery request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50200"
+      flow[3].endpoint = "opc.tcp://localhost:50200/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/client/discover/c1cf6/' + encodeURIComponent('test'))
           .expect(200)
@@ -88,7 +92,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     */
 
     it('should success on DataTypeId request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50201"
+      flow[3].endpoint = "opc.tcp://localhost:50201/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/plain/DataTypeIds')
           .expect(200)
@@ -97,7 +105,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on AttributeIds request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50202"
+      flow[3].endpoint = "opc.tcp://localhost:50202/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/plain/AttributeIds')
           .expect(200)
@@ -106,7 +118,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on StatusCodes request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50203"
+      flow[3].endpoint = "opc.tcp://localhost:50203/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/plain/StatusCodes')
           .expect(200)
@@ -115,7 +131,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on ObjectTypeIds request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50204"
+      flow[3].endpoint = "opc.tcp://localhost:50204/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/plain/ObjectTypeIds')
           .expect(200)
@@ -124,7 +144,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on VariableTypeIds request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50205"
+      flow[3].endpoint = "opc.tcp://localhost:50205/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/plain/VariableTypeIds')
           .expect(200)
@@ -133,7 +157,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on ReferenceTypeIds request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50206"
+      flow[3].endpoint = "opc.tcp://localhost:50206/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/plain/ReferenceTypeIds')
           .expect(200)
@@ -142,7 +170,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on XML sets request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50207"
+      flow[3].endpoint = "opc.tcp://localhost:50207/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/xmlsets/public')
           .expect(200)
@@ -151,7 +183,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on DataTypeIds list request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50208"
+      flow[3].endpoint = "opc.tcp://localhost:50208/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/list/DataTypeIds')
           .expect(200)
@@ -160,7 +196,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on EventTypeIds list request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50209"
+      flow[3].endpoint = "opc.tcp://localhost:50209/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/list/EventTypeIds')
           .expect(200)
@@ -169,7 +209,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on InstanceTypeIds list request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50210"
+      flow[3].endpoint = "opc.tcp://localhost:50210/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/list/InstanceTypeIds')
           .expect(200)
@@ -178,7 +222,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on VariableTypeIds list request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50211"
+      flow[3].endpoint = "opc.tcp://localhost:50211/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/list/VariableTypeIds')
           .expect(200)
@@ -187,7 +235,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should success on ReferenceTypeIds list request', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorHTTPFlow, function () {
+      const flow = Array.from(testFlows.testConnectorHTTPFlow)
+      flow[2].port = "50212"
+      flow[3].endpoint = "opc.tcp://localhost:50212/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         helper.request()
           .get('/opcuaIIoT/list/ReferenceTypeIds')
           .expect(200)
@@ -196,7 +248,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with payload after inject with browser', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorBrowseFlow, function () {
+      const flow = Array.from(testFlows.testConnectorBrowseFlow)
+      flow[5].port = "50213"
+      flow[6].endpoint = "opc.tcp://localhost:50213/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         let n2 = helper.getNode('n2cf1')
         n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
@@ -206,9 +262,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with topic after browse', function (done) {
-      testFlows.testConnectorBrowseFlow[4].port = 51963
-      testFlows.testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:51963/'
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorBrowseFlow, function () {
+      const flow = Array.from(testFlows.testConnectorBrowseFlow)
+      flow[5].port = "50214"
+      flow[6].endpoint = "opc.tcp://localhost:50214/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicBrowse')
@@ -218,9 +276,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with rootNodeId after browse', function (done) {
-      testFlows.testConnectorBrowseFlow[4].port = 56219
-      testFlows.testConnectorBrowseFlow[5].endpoint = 'opc.tcp://localhost:56219/'
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorBrowseFlow, function () {
+      const flow = Array.from(testFlows.testConnectorBrowseFlow)
+      flow[5].port = "50215"
+      flow[6].endpoint = "opc.tcp://localhost:50215/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
           expect(msg.payload.rootNodeId).toBe('ns=1;i=1234')
@@ -230,7 +290,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with browserResults in payload after browse', function (done) {
-      helper.load(nodesToLoadForBrowser, testFlows.testConnectorBrowseFlow, function () {
+      const flow = Array.from(testFlows.testConnectorBrowseFlow)
+      flow[5].port = "50216"
+      flow[6].endpoint = "opc.tcp://localhost:50216/"
+
+      helper.load(nodesToLoadForBrowser, flow, function () {
         let n5 = helper.getNode('n5cf1')
         n5.on('input', function (msg) {
           expect(msg.payload.rootNodeId).toBe('ns=1;i=1234')
@@ -349,9 +413,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with payload after inject with read', function (done) {
-      testFlows.testConnectorReadFlow[4].port = 56220
-      testFlows.testConnectorReadFlow[5].endpoint = 'opc.tcp://localhost:56220/'
-      helper.load(nodesToLoadForReader, testFlows.testConnectorReadFlow, function () {
+      const flow = Array.from(testFlows.testConnectorReadFlow)
+      flow[5].port = "50217"
+      flow[6].endpoint = "opc.tcp://localhost:50217/"
+
+      helper.load(nodesToLoadForReader, flow, function () {
         let n2 = helper.getNode('n2cf2')
         n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
@@ -362,9 +428,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with nodeId in payload after read', function (done) {
-      testFlows.testConnectorReadFlow[4].port = 56221
-      testFlows.testConnectorReadFlow[5].endpoint = 'opc.tcp://localhost:56221/'
-      helper.load(nodesToLoadForReader, testFlows.testConnectorReadFlow, function () {
+      const flow = Array.from(testFlows.testConnectorReadFlow)
+      flow[5].port = "50218"
+      flow[6].endpoint = "opc.tcp://localhost:50218/"
+
+      helper.load(nodesToLoadForReader, flow, function () {
         let n5 = helper.getNode('n5cf2')
         n5.on('input', function (msg) {
           expect(msg.payload.value[0].nodeId).toBe('ns=1;s=Pressure')
@@ -377,7 +445,11 @@ describe('OPC UA Connector node e2e Testing', function () {
 
     let msgCounter = 0
     it('should get a message with payload after inject with listener', function (done) {
-      helper.load(nodesToLoadForListener, testFlows.testConnectorListenerFlow, function () {
+      const flow = Array.from(testFlows.testConnectorListenerFlow)
+      flow[5].port = "50219"
+      flow[6].endpoint = "opc.tcp://localhost:50219/"
+
+      helper.load(nodesToLoadForListener, flow, function () {
         let n2 = helper.getNode('n2cf3')
         n2.on('input', function (msg) {
           expect(msg.payload.options).toBeDefined()
@@ -399,10 +471,12 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with addressSpaceItems after write', function (done) {
-      testFlows.testConnectorWriteFlow[5].endpoint = 'opc.tcp://localhost:56442/'
-      testFlows.testConnectorWriteFlow[5].credentials = {user: 'peter', password: 'peter'}
-      testFlows.testConnectorWriteFlow[6].port = 56442
-      helper.load(nodesToLoadForWriter, testFlows.testConnectorWriteFlow, testCredentials, function () {
+      const flow = Array.from(testFlows.testConnectorWriteFlow)
+      flow[5].port = "50220"
+      flow[6].endpoint = "opc.tcp://localhost:50220/"
+      flow[6].credentials = {user: 'peter', password: 'peter'}
+
+      helper.load(nodesToLoadForWriter, flow, testCredentials, function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicWrite')
@@ -413,8 +487,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with addressSpaceItems after write with autoselect endpoint', function (done) {
-      testFlows.testConnectorWriteFlow[5].autoSelectRightEndpoint = true
-      testFlows.testConnectorWriteFlow[5].credentials = {user: 'peter', password: 'peter'}
+      const flow = Array.from(testFlows.testConnectorWriteFlow)
+      flow[5].port = "50221"
+      flow[6].endpoint = "opc.tcp://localhost:50221/"
+      flow[6].autoSelectRightEndpoint = true
+      flow[6].credentials = {user: 'peter', password: 'peter'}
       helper.load(nodesToLoadForWriter, testFlows.testConnectorWriteFlow, testCredentials, function () {
         let n5 = helper.getNode('n5cf4')
         n5.on('input', function (msg) {
@@ -426,9 +503,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with payload after inject with method', function (done) {
-      testFlows.testConnectorMethodCallerFlow[5].endpoint = 'opc.tcp://localhost:56446/'
-      testFlows.testConnectorMethodCallerFlow[6].port = 56446
-      helper.load(nodesToLoadForMethodCaller, testFlows.testConnectorMethodCallerFlow, function () {
+      const flow = Array.from(testFlows.testConnectorMethodCallerFlow)
+      flow[5].port = "50222"
+      flow[6].endpoint = "opc.tcp://localhost:50222/"
+
+      helper.load(nodesToLoadForMethodCaller, flow, function () {
         let n2 = helper.getNode('n2cf5')
         n2.on('input', function (msg) {
           expect(msg.payload.value).toBe(1000)
@@ -439,7 +518,11 @@ describe('OPC UA Connector node e2e Testing', function () {
     })
 
     it('should get a message with addressSpaceItems after method', function (done) {
-      helper.load(nodesToLoadForMethodCaller, testFlows.testConnectorMethodCallerFlow, function () {
+      const flow = Array.from(testFlows.testConnectorMethodCallerFlow)
+      flow[5].port = "50223"
+      flow[6].endpoint = "opc.tcp://localhost:50223/"
+
+      helper.load(nodesToLoadForMethodCaller, flow, function () {
         let n5 = helper.getNode('n5cf5')
         n5.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicMethod')

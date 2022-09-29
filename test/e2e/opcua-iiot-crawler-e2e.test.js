@@ -47,7 +47,11 @@ describe('OPC UA Crawler node Testing', function () {
 
   describe('Crawler node', function () {
     it('should verify crawler items as result', function (done) {
-      helper.load(crawlerNodesToLoad, testFlows.testCrawlerFlow, function () {
+      const flow = Array.from(testFlows.testCrawlerFlow)
+      flow[5].port = "50300"
+      flow[6].endpoint = "opc.tcp://localhost:50300/"
+
+      helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f1')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
@@ -61,7 +65,11 @@ describe('OPC UA Crawler node Testing', function () {
     })
 
     it('should verify crawler items as just values result', function (done) {
-      helper.load(crawlerNodesToLoad, testFlows.testCrawlerJustValueFlow, function () {
+      const flow = Array.from(testFlows.testCrawlerJustValueFlow)
+      flow[5].port = "50301"
+      flow[6].endpoint = "opc.tcp://localhost:50301/"
+
+      helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f2')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
@@ -74,7 +82,11 @@ describe('OPC UA Crawler node Testing', function () {
     })
 
     it('should verify crawler items as just values as single result', function (done) {
-      helper.load(crawlerNodesToLoad, testFlows.testCrawlerJustValueSingleFlow, function () {
+      const flow = Array.from(testFlows.testCrawlerJustValueSingleFlow)
+      flow[5].port = "50302"
+      flow[6].endpoint = "opc.tcp://localhost:50302/"
+
+      helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f3')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
@@ -87,7 +99,11 @@ describe('OPC UA Crawler node Testing', function () {
     })
 
     it('should verify filtered crawler items as just values as single result', function (done) {
-      helper.load(crawlerNodesToLoad, testFlows.testCrawlerJustValueSingleFilteredFlow, function () {
+      const flow = Array.from(testFlows.testCrawlerJustValueSingleFilteredFlow)
+      flow[5].port = "50303"
+      flow[6].endpoint = "opc.tcp://localhost:50303/"
+
+      helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f4')
         n4.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
@@ -100,7 +116,11 @@ describe('OPC UA Crawler node Testing', function () {
     })
 
     it('should verify filtered crawler items as filtered results', function (done) {
-      helper.load(crawlerNodesToLoad, testFlows.testCrawlerWithFilter, function () {
+      const flow = Array.from(testFlows.testCrawlerWithFilter)
+      flow[5].port = "50304"
+      flow[6].endpoint = "opc.tcp://localhost:50304/"
+
+      helper.load(crawlerNodesToLoad, flow, function () {
         let h1f = helper.getNode('n4f5')
         h1f.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
@@ -112,7 +132,11 @@ describe('OPC UA Crawler node Testing', function () {
     })
 
     it('should verify filtered crawler items without ns=0', function (done) {
-      helper.load(crawlerNodesToLoad, testFlows.testCrawlerWithFilterNS0, function () {
+      const flow = Array.from(testFlows.testCrawlerWithFilterNS0)
+      flow[5].port = "50305"
+      flow[6].endpoint = "opc.tcp://localhost:50305/"
+
+      helper.load(crawlerNodesToLoad, flow, function () {
         let n2 = helper.getNode('nc2h')
         n2.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
@@ -124,7 +148,11 @@ describe('OPC UA Crawler node Testing', function () {
     })
 
     it('should filter all basic filter types of crawler result', function (done) {
-      helper.load(crawlerNodesToLoad, testFlows.testCrawlerWithAllBasicFilterTypes, function () {
+      const flow = Array.from(testFlows.testCrawlerWithAllBasicFilterTypes)
+      flow[7].port = "50306"
+      flow[8].endpoint = "opc.tcp://localhost:50306/"
+
+      helper.load(crawlerNodesToLoad, flow, function () {
         let n2 = helper.getNode('ncf2h')
         n2.on('input', function (msg) {
           expect(msg.payload.crawlerResults).toBeDefined()
