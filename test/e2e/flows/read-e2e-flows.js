@@ -325,7 +325,7 @@ module.exports = {
       "id": "920108b3.753a68",
       "type": "OPCUA-IIoT-Server",
       "z": "281a910dd4b5ce4e",
-      "port": "",
+      "port": "49900",
       "endpoint": "",
       "acceptExternalCommands": true,
       "maxAllowedSessionNumber": "",
@@ -361,7 +361,7 @@ module.exports = {
       "type": "OPCUA-IIoT-Connector",
       "z": "281a910dd4b5ce4e",
       "discoveryUrl": "",
-      "endpoint": "",
+      "endpoint": "opc.tcp://localhost:49900/",
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
@@ -381,7 +381,8 @@ module.exports = {
       "requestedSessionTimeout": "",
       "connectionStartDelay": "",
       "reconnectDelay": "",
-      "maxBadSessionRequests": ""
+      "maxBadSessionRequests": "",
+      "credentials": {}
     }
   ]),
 
