@@ -22,34 +22,7 @@ helper.init(require.resolve('node-red'))
 
 var crawlerNodesToLoad = [injectNode, functionNode, inputNode]
 
-var crawlerUnitFlow = [
-  {
-    'id': '13e5e190.e34516',
-    'type': 'OPCUA-IIoT-Crawler',
-    'connector': '',
-    'name': 'TestNameCrawler',
-    'justValue': true,
-    'singleResult': false,
-    'showStatusActivities': false,
-    'showErrors': false,
-    'activateUnsetFilter': true,
-    'filters': [
-      {
-        'name': 'Organizes',
-        'nodeId': 'i=35'
-      },
-      {
-        'name': 'GeneratesEvent',
-        'nodeId': 'i=41'
-      },
-      {
-        'name': 'References',
-        'nodeId': 'i=31'
-      }
-    ],
-    'wires': [[]]
-  }
-]
+var testFlows = require('./flows/crawler-flows')
 
 describe('OPC UA Crawler node Unit Testing', function () {
   beforeEach(function (done) {
@@ -72,7 +45,7 @@ describe('OPC UA Crawler node Unit Testing', function () {
 
   describe('Crawler node', function () {
     it('should be loaded', function (done) {
-      helper.load(crawlerNodesToLoad, crawlerUnitFlow,
+      helper.load(crawlerNodesToLoad, testFlows.testUnitCrawlerFlow,
         function () {
           let nodeUnderTest = helper.getNode('13e5e190.e34516')
           expect(nodeUnderTest.name).toBe('TestNameCrawler')
@@ -83,5 +56,27 @@ describe('OPC UA Crawler node Unit Testing', function () {
           done()
         })
     })
+
+    it('should be loaded with default settings', function (done) {
+      helper.load(crawlerNodesToLoad, testFlows.testUnitDefaultCrawlerFlow,
+        function () {
+          let nodeUnderTest = helper.getNode('4bf9f1cbd3fe98bc')
+          expect(nodeUnderTest.name).toBe('')
+          expect(nodeUnderTest.justValue).toBe(true)
+          expect(nodeUnderTest.singleResult).toBe(false)
+          expect(nodeUnderTest.showStatusActivities).toBe(false)
+          expect(nodeUnderTest.showErrors).toBe(false)
+          expect(nodeUnderTest.activateUnsetFilter).toBe(false)
+          expect(nodeUnderTest.activateFilters).toBe(false)
+          expect(nodeUnderTest.negateFilter).toBe(false)
+          expect(nodeUnderTest.filters).toBeInstanceOf(Array)
+          expect(nodeUnderTest.filters.length).toBe(0)
+          expect(nodeUnderTest.delayPerMessage).toBe(0.2)
+          expect(nodeUnderTest.timeout).toBe(30)
+          done()
+        })
+    })
+
+
   })
 })
