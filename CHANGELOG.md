@@ -1,4 +1,4 @@
-## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-09-29)
+## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-09-30)
 
 
 ### Bug Fixes
@@ -23,6 +23,7 @@
 * **test:** cleaned and extracted flows of ASO test and fixed msg testing ([e96998c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e96998cf41e765919c9d8d54664a4f69e0a0b24f))
 * **test:** more result filter e2e tests pass again ([10d9b0e](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/10d9b0e41b31f961072772ae91c948211f93c9b3))
 * **test:** payload type is object rather than Array ([2e59210](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2e592102b84634e33d07f579a36f0236560bed59))
+* **test:** Read e2e history range tests now work again ([bf9fc6d](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/bf9fc6da714d1bae7e7160e3e844790a251102ea))
 * **tests:** None instead NONE of node-opcua for all tests ([778ee96](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/778ee9646e5ac0663b0d521eb5e43cc4bcb6613f))
 * **tests:** server NONE to None as connector parameter ([d811b04](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d811b046e15d36a31bde627281561c311858ebed))
 * **units:** removed node.receive() from inject tests ([d018120](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d018120b8310aaa70105f8987a3b4d4749a20da6))

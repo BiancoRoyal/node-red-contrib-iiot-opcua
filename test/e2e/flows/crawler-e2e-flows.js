@@ -803,10 +803,6 @@ module.exports = {
         {
           "name": "typeDefinition",
           "value": "ns=0;i=58"
-        },
-        {
-          "name": "nodeId",
-          "value": "ns=0;*"
         }
       ],
       "delayPerMessage": "1",

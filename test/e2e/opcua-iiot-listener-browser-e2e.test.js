@@ -48,8 +48,24 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
   })
 
   describe('Listen via Browser node', function () {
-    let msgCounter = 0
+
+    it('should have a message browser', function (done) {
+      testFlows.simpleBrowserAboFlowWithoutListenerInject[14].port = 50400
+      testFlows.simpleBrowserAboFlowWithoutListenerInject[15].endpoint = "opc.tcp://localhost:50400/"
+      const flow = Array.from(testFlows.simpleBrowserAboFlowWithoutListenerInject)
+
+      helper.load(listenerNodesToLoad, flow, function () {
+        let n4 = helper.getNode('n2abo')
+        n4.on('input', function (msg) {
+          done()
+        })
+      })
+    })
+
+
 /*
+
+    let msgCounter = 0
     it('should verify a message from browse node on subscribe recursive', function (done) {
       testFlows.recursiveBrowserAboFlow[14].port = 50407
       testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:50407/"
@@ -184,6 +200,6 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
         })
       })
     })
- */
+*/
   })
 })
