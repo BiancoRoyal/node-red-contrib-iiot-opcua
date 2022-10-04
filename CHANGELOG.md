@@ -3,6 +3,7 @@
 
 ### Bug Fixes
 
+* all tests working with node-opcua 2.79.1 ([77d8b4c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/77d8b4cda537c0ec67d5292ddc00e7da77c537da))
 * changed Node-RED PLUS to PLUS for Node-RED ([767d567](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/767d567974e752ac3b5fcae533cf3cda5a8a3601))
 * **connector-tests:** connector e2e tests running again ([12cda71](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/12cda71444f0687633385707c99ce3ed9c0dce42))
 * **connector:** max subscription deprecated ([d58462b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d58462bd89e4891ef32f25004233bccf8cdff74a))

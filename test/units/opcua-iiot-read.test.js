@@ -26,28 +26,7 @@ helper.init(require.resolve('node-red'))
 
 var readNodesToLoad = [injectNode, functionNode, readNode]
 
-var testReadNodeToBeLoaded = helperExtensions.cleanFlowPositionData([
-  {
-    "id": "41cb29d.1ab50d8",
-    "type": "OPCUA-IIoT-Read",
-    "z": "acd804583564cb8c",
-    "attributeId": 0,
-    "maxAge": 1,
-    "depth": 1,
-    "connector": "",
-    "name": "ReadAll",
-    "justValue": true,
-    "showStatusActivities": false,
-    "showErrors": false,
-    "parseStrings": false,
-    "historyDays": "",
-    "x": 300,
-    "y": 100,
-    "wires": [
-      []
-    ]
-  }
-])
+var testFlows = require('./flows/read-flows')
 
 describe('OPC UA Read node Unit Testing', function () {
   beforeEach(function (done) {
@@ -70,9 +49,9 @@ describe('OPC UA Read node Unit Testing', function () {
 
   describe('Read node', function () {
     it('should be loaded for all attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 0
-      testReadNodeToBeLoaded[0].name = 'ReadAll'
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded,
+      testFlows.testUnitReadFlow[1].attributeId = 0
+      testFlows.testUnitReadFlow[1].name = 'ReadAll'
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           expect(nodeUnderTest.name).toBe('ReadAll')
@@ -84,9 +63,9 @@ describe('OPC UA Read node Unit Testing', function () {
     })
 
     it('should be loaded for Node-Id attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 1
-      testReadNodeToBeLoaded[0].name = 'ReadNodeId'
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded,
+      testFlows.testUnitReadFlow[1].attributeId = 1
+      testFlows.testUnitReadFlow[1].name = 'ReadNodeId'
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           expect(nodeUnderTest.name).toBe('ReadNodeId')
@@ -98,9 +77,9 @@ describe('OPC UA Read node Unit Testing', function () {
     })
 
     it('should be loaded for Node-Class attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 2
-      testReadNodeToBeLoaded[0].name = 'ReadNodeClass'
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded,
+      testFlows.testUnitReadFlow[1].attributeId = 2
+      testFlows.testUnitReadFlow[1].name = 'ReadNodeClass'
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           expect(nodeUnderTest.name).toBe('ReadNodeClass')
@@ -112,9 +91,9 @@ describe('OPC UA Read node Unit Testing', function () {
     })
 
     it('should be loaded for browse name attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 3
-      testReadNodeToBeLoaded[0].name = 'ReadBrowseName'
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded,
+      testFlows.testUnitReadFlow[1].attributeId = 3
+      testFlows.testUnitReadFlow[1].name = 'ReadBrowseName'
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           expect(nodeUnderTest.name).toBe('ReadBrowseName')
@@ -126,9 +105,9 @@ describe('OPC UA Read node Unit Testing', function () {
     })
 
     it('should be loaded for display name attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 4
-      testReadNodeToBeLoaded[0].name = 'ReadDisplayName'
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded,
+      testFlows.testUnitReadFlow[1].attributeId = 4
+      testFlows.testUnitReadFlow[1].name = 'ReadDisplayName'
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           expect(nodeUnderTest.name).toBe('ReadDisplayName')
@@ -140,9 +119,9 @@ describe('OPC UA Read node Unit Testing', function () {
     })
 
     it('should be loaded for values attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 13
-      testReadNodeToBeLoaded[0].name = 'ReadValues'
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded,
+      testFlows.testUnitReadFlow[1].attributeId = 13
+      testFlows.testUnitReadFlow[1].name = 'ReadValues'
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           expect(nodeUnderTest.name).toBe('ReadValues')
@@ -154,9 +133,9 @@ describe('OPC UA Read node Unit Testing', function () {
     })
 
     it('should be loaded for history values attributes', function (done) {
-      testReadNodeToBeLoaded[0].attributeId = 130
-      testReadNodeToBeLoaded[0].name = 'ReadHistoryValues'
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded,
+      testFlows.testUnitReadFlow[1].attributeId = 130
+      testFlows.testUnitReadFlow[1].name = 'ReadHistoryValues'
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow,
         function () {
           let nodeUnderTest = helper.getNode('41cb29d.1ab50d8')
           expect(nodeUnderTest.name).toBe('ReadHistoryValues')
@@ -168,7 +147,7 @@ describe('OPC UA Read node Unit Testing', function () {
     })
 
     it('should be loaded and handle error', function (done) {
-      helper.load(readNodesToLoad, testReadNodeToBeLoaded, () => {
+      helper.load(readNodesToLoad, testFlows.testUnitReadFlow, () => {
         let n1 = helper.getNode('41cb29d.1ab50d8')
         if (n1) {
           n1.functions.handleReadError(new Error('Testing Error To Handle'), {payload: {}})
