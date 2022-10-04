@@ -18,7 +18,7 @@ var serverNode = require('../../src/opcua-iiot-server')
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testFlows = require('./flows/sever-flows')
+var testFlows = require('./flows/server-flows')
 
 describe('OPC UA Server node Unit Testing', function () {
   beforeAll(function (done) {

@@ -16,7 +16,7 @@ module.exports = {
       "id": "6ec4ef50.86dc1",
       "type": "OPCUA-IIoT-Server",
       "z": "b233bdeab126bfd4",
-      "port": "51200",
+      "port": "51250",
       "endpoint": "",
       "acceptExternalCommands": true,
       "maxAllowedSessionNumber": "",

@@ -19,7 +19,7 @@ var serverAsoNode = require('../../src/opcua-iiot-server-aso')
 
 var serverAsoFlowNodes = [injectNode, functionNode, serverAsoNode]
 
-var testFlows = require('./flows/sever-aso-flows')
+var testFlows = require('./flows/server-aso-flows')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
