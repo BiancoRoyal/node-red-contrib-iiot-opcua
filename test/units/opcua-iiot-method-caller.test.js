@@ -25,52 +25,7 @@ helper.init(require.resolve('node-red'))
 
 var methodCallerNodesToLoad = [injectNode, functionNode, inputNode]
 
-var methodUnitFlow = [
-  {
-    'id': '706d43c1.90baac',
-    'type': 'OPCUA-IIoT-Method-Caller',
-    'connector': '',
-    'objectId': 'ns=1;i=1234',
-    'methodId': 'ns=1;i=12345',
-    'methodType': 'basic',
-    'value': '',
-    'justValue': false,
-    'name': 'TestName',
-    'showStatusActivities': false,
-    'showErrors': true,
-    'inputArguments': [
-      {
-        'name': 'barks',
-        'dataType': 'UInt32',
-        'value': '3'
-      },
-      {
-        'name': 'volume',
-        'dataType': 'UInt32',
-        'value': '6'
-      }
-    ],
-    'wires': [[]]
-  }
-]
-
-var methodNotConfiguredUnitFlow = [
-  {
-    'id': '706d43c1.90babc',
-    'type': 'OPCUA-IIoT-Method-Caller',
-    'connector': '',
-    'objectId': '',
-    'methodId': '',
-    'methodType': 'basic',
-    'value': '',
-    'justValue': false,
-    'name': 'TestName',
-    'showStatusActivities': false,
-    'showErrors': true,
-    'inputArguments': [],
-    'wires': [[]]
-  }
-]
+var testFlows = require('./flows/method-caller-flows')
 
 describe('OPC UA Method Caller node Unit Testing', function () {
   beforeAll(function (done) {
@@ -95,7 +50,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
 
   describe('Method Caller node', function () {
     it('should load with basic settings', function (done) {
-      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerFlow, () => {
         let nodeUnderTest = helper.getNode('706d43c1.90baac')
         expect(nodeUnderTest.name).toBe('TestName')
         expect(nodeUnderTest.methodType).toBe('basic')
@@ -119,7 +74,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle error', function (done) {
-      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
         n1.functions.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
@@ -128,7 +83,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
         n1.receive({payload: { objectId: 1 }})
@@ -137,7 +92,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
         n1.receive({payload: { objectId: 1, methodId: 1 }})
@@ -146,7 +101,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
         n1.receive({payload: { objectId: 1, methodId: 1, inputArguments: [] }})
@@ -155,7 +110,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
         n1.receive({payload: {}})
@@ -164,7 +119,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle error', function (done) {
-      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerNotConfiguredFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
         n1.functions.handleMethodError(new Error('Testing Error To Handle'), {payload: {}})
@@ -173,7 +128,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerNotConfiguredFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
         n1.receive({payload: { objectId: 1 }})
@@ -182,7 +137,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerNotConfiguredFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
         n1.receive({payload: {}, objectId: 1, methodId: 1})
@@ -191,7 +146,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerNotConfiguredFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
         n1.receive({payload: { objectId: 1, methodId: 1, inputArguments: [] }})
@@ -200,7 +155,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing input', function (done) {
-      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerNotConfiguredFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
         n1.receive({payload: {}})
@@ -209,7 +164,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle method warn message', function (done) {
-      helper.load(methodCallerNodesToLoad, methodNotConfiguredUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerNotConfiguredFlow, () => {
         let n1 = helper.getNode('706d43c1.90babc')
         expect(n1).toBeDefined()
         n1.functions.handleMethodWarn('Test')
@@ -218,7 +173,7 @@ describe('OPC UA Method Caller node Unit Testing', function () {
     })
 
     it('should be loaded and handle missing session', function (done) {
-      helper.load(methodCallerNodesToLoad, methodUnitFlow, () => {
+      helper.load(methodCallerNodesToLoad, testFlows.testUnitMethodCallerFlow, () => {
         let n1 = helper.getNode('706d43c1.90baac')
         expect(n1).toBeDefined()
         n1.functions.callMethodOnSession(null)

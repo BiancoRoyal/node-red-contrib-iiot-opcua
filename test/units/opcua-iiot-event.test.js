@@ -19,33 +19,7 @@ var inputNode = require('../../src/opcua-iiot-event')
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testEventNodeFlow = [
-  {
-    'id': 'n1evf1',
-    'type': 'inject',
-    'topic': 'TestTopic',
-    'payload': '{"value":1000}',
-    'payloadType': 'json',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'wires': [['n2evf1', 'n3evf1']]
-  },
-  {id: 'n2evf1', type: 'helper'},
-  {
-    'id': 'n3evf1',
-    'type': 'OPCUA-IIoT-Event',
-    'eventType': 'i=2041',
-    'eventTypeLabel': 'BaseTypeEvent',
-    'queueSize': 10,
-    'usingListener': true,
-    'name': 'TestName',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'wires': [['n4evf1']]
-  },
-  {id: 'n4evf1', type: 'helper'}
-]
+var testFlows = require('./flows/event-flows')
 
 describe('OPC UA Event node Unit Testing', function () {
   beforeAll(function (done) {
@@ -72,7 +46,7 @@ describe('OPC UA Event node Unit Testing', function () {
     it('should load with basic settings', function (done) {
       helper.load(
         [injectNode, inputNode],
-          testEventNodeFlow,
+          testFlows.testUnitEventFlow,
         function () {
           let nodeUnderTest = helper.getNode('n3evf1')
           expect(nodeUnderTest.name).toBe('TestName')
@@ -85,7 +59,7 @@ describe('OPC UA Event node Unit Testing', function () {
     })
 
     it('should get a message with payload', function (done) {
-      helper.load([injectNode, inputNode], testEventNodeFlow, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitEventFlow, function () {
         let n2 = helper.getNode('n2evf1')
         n2.on('input', function (msg) {
           expect(msg.payload).toBeDefined()
@@ -95,7 +69,7 @@ describe('OPC UA Event node Unit Testing', function () {
     })
 
     it('should verify a message for event parameters', function (done) {
-      helper.load([injectNode, inputNode], testEventNodeFlow, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitEventFlow, function () {
         let n4 = helper.getNode('n4evf1')
         n4.on('input', function (msg) {
           expect(msg.payload.eventType).toBeDefined()

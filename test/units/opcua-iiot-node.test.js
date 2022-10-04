@@ -19,157 +19,7 @@ var inputNode = require('../../src/opcua-iiot-node')
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testNodeFlow = [
-  {
-    'id': 'n1nf1',
-    'type': 'inject',
-    'name': 'TestName',
-    'topic': 'TestTopicNode',
-    'payload': '12345.34',
-    'payloadType': 'num',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '',
-    'wires': [
-      [
-        'n2nf1',
-        'n3nf1'
-      ]
-    ]
-  },
-  {id: 'n2nf1', type: 'helper'},
-  {
-    'id': 'n3nf1',
-    'type': 'OPCUA-IIoT-Node',
-    'injectType': 'write',
-    'nodeId': 'ns=2;s=TestReadWrite',
-    'datatype': 'String',
-    'value': '',
-    'name': 'TestReadWrite',
-    'topic': '',
-    'showErrors': false,
-    wires: [['n4nf1']]
-  },
-  {id: 'n4nf1', type: 'helper'}
-]
-
-var testNodeEventFlow = [
-  {
-    'id': 'n1nf2',
-    'type': 'inject',
-    'name': 'TestReadWrite',
-    'topic': 'TestTopicNode',
-    'payload': '1234',
-    'payloadType': 'num',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '',
-    'wires': [
-      [
-        'n2nf2',
-        'n3nf2'
-      ]
-    ]
-  },
-  {id: 'n2nf2', type: 'helper'},
-  {
-    'id': 'n3nf2',
-    'type': 'OPCUA-IIoT-Node',
-    'injectType': 'write',
-    'nodeId': 'ns=2;s=TestReadWrite',
-    'datatype': 'Int16',
-    'value': '',
-    'name': 'TestReadWrite',
-    'topic': '',
-    'showErrors': false,
-    'wires': [
-      [
-        'n4nf2'
-      ]
-    ]
-  },
-  {id: 'n4nf2', type: 'helper'}
-]
-
-var testEventValueNumberFlowPayload = [
-  {
-    'id': 'n1nf3',
-    'type': 'inject',
-    'name': 'TestReadWrite',
-    'topic': '',
-    'payload': '',
-    'payloadType': 'str',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '',
-    'wires': [
-      [
-        'n2nf3',
-        'n3nf3'
-      ]
-    ]
-  },
-  {id: 'n2nf3', type: 'helper'},
-  {
-    'id': 'n3nf3',
-    'type': 'OPCUA-IIoT-Node',
-    'injectType': 'write',
-    'nodeId': 'ns=2;s=TestReadWrite',
-    'datatype': 'Int16',
-    'value': 2345,
-    'name': 'TestReadWrite',
-    'topic': 'NODETOPICOVERRIDE',
-    'showErrors': false,
-    'wires': [
-      [
-        'n4nf3'
-      ]
-    ]
-  },
-  {id: 'n4nf3', type: 'helper'}
-]
-
-var testNodeEventWithPayloadFlow = [
-  {
-    'id': 'n1',
-    'type': 'inject',
-    'name': 'Error 1',
-    'topic': 'ERRORS',
-    'payload': '1234',
-    'payloadType': 'num',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '',
-    'wires': [
-      [
-        'n2',
-        'n3'
-      ]
-    ]
-  },
-  {id: 'n2', type: 'helper'},
-  {
-    'id': 'n3',
-    'type': 'OPCUA-IIoT-Node',
-    'injectType': 'write',
-    'nodeId': 'ns=1;s=GESTRUCKEST',
-    'datatype': 'Int16',
-    'value': '',
-    'name': 'ERRORNODE',
-    'topic': '',
-    'showErrors': false,
-    'wires': [
-      [
-        'n4'
-      ]
-    ]
-  },
-  {id: 'n4', type: 'helper'}
-]
+var testFlows = require('./flows/node-flows')
 
 describe('OPC UA Node node Unit Testing', function () {
   beforeAll(function (done) {
@@ -220,7 +70,7 @@ describe('OPC UA Node node Unit Testing', function () {
     })
 
     it('should get a message with payload', function (done) {
-      helper.load([injectNode, inputNode], testNodeFlow, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitNodeFlow, function () {
         let n2 = helper.getNode('n2nf1')
         n2.on('input', function (msg) {
           expect(msg.payload).toBe(12345.34)
@@ -230,7 +80,7 @@ describe('OPC UA Node node Unit Testing', function () {
     })
 
     it('should verify a message', function (done) {
-      helper.load([injectNode, inputNode], testNodeFlow, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitNodeFlow, function () {
         let n4 = helper.getNode('n4nf1')
         let n3 = helper.getNode('n3nf1')
         n4.on('input', function (msg) {
@@ -243,7 +93,7 @@ describe('OPC UA Node node Unit Testing', function () {
     })
 
     it('should have payload', function (done) {
-      helper.load([injectNode, inputNode], testNodeFlow, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitNodeFlow, function () {
         let n4 = helper.getNode('n4nf1')
         let n3 = helper.getNode('n3nf1')
         n4.on('input', function (msg) {
@@ -255,7 +105,7 @@ describe('OPC UA Node node Unit Testing', function () {
     })
 
     it('should have work with payloads', function (done) {
-      helper.load([injectNode, inputNode], testNodeEventWithPayloadFlow, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitNodeEventWithPayloadFlow, function () {
         let n4 = helper.getNode('n4')
         let n3 = helper.getNode('n3')
         n4.on('input', function (msg) {
@@ -267,7 +117,7 @@ describe('OPC UA Node node Unit Testing', function () {
     })
 
     it('should have work with payload number', function (done) {
-      helper.load([injectNode, inputNode], testNodeEventFlow, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitNodeEventFlow, function () {
         let n4 = helper.getNode('n4nf2')
         let n3 = helper.getNode('n3nf2')
         n4.on('input', function (msg) {
@@ -285,7 +135,7 @@ describe('OPC UA Node node Unit Testing', function () {
     })
 
     it('should have work with node value', function (done) {
-      helper.load([injectNode, inputNode], testEventValueNumberFlowPayload, function () {
+      helper.load([injectNode, inputNode], testFlows.testUnitNodeEventValueNumberPayloadFlow, function () {
         let n4 = helper.getNode('n4nf3')
         let n3 = helper.getNode('n3nf3')
         n4.on('input', function (msg) {

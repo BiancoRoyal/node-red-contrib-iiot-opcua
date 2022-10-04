@@ -26,30 +26,7 @@ var inputNode = require('../../src/opcua-iiot-connector')
 
 var nodesToLoadConnector = [injectNode, functionNode, inputNode]
 
-var connectorUnitFlow = [
-  {
-    'id': 'n4',
-    'type': 'OPCUA-IIoT-Connector',
-    'discoveryUrl': '',
-    'endpoint': '',
-    'keepSessionAlive': false,
-    'loginEnabled': false,
-    'securityPolicy': 'None',
-    'securityMode': 'None',
-    'name': 'TESTSERVER',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'publicCertificateFile': '',
-    'privateKeyFile': '',
-    'defaultSecureTokenLifetime': '60000',
-    'endpointMustExist': false,
-    'autoSelectRightEndpoint': false,
-    'strategyMaxRetry': '',
-    'strategyInitialDelay': '',
-    'strategyMaxDelay': '',
-    'strategyRandomisationFactor': ''
-  }
-]
+var testFlows = require('./flows/connector-flows')
 
 describe('OPC UA Connector node Unit Testing', function () {
   beforeAll(function (done) {
@@ -75,30 +52,7 @@ describe('OPC UA Connector node Unit Testing', function () {
   describe('Connector node', function () {
     it('should be loaded without server for the endpoint', function (done) {
       try {
-        helper.load(nodesToLoadConnector, [
-          {
-            'id': 'n4',
-            'type': 'OPCUA-IIoT-Connector',
-            'discoveryUrl': '',
-            'endpoint': 'opc.tcp://localhost:48402/',
-            'keepSessionAlive': false,
-            'loginEnabled': false,
-            'securityPolicy': 'None',
-            'securityMode': 'None',
-            'name': 'TESTSERVER',
-            'showStatusActivities': false,
-            'showErrors': false,
-            'publicCertificateFile': '',
-            'privateKeyFile': '',
-            'defaultSecureTokenLifetime': '60000',
-            'endpointMustExist': false,
-            'autoSelectRightEndpoint': false,
-            'strategyMaxRetry': '',
-            'strategyInitialDelay': '',
-            'strategyMaxDelay': '',
-            'strategyRandomisationFactor': ''
-          }
-        ], () => {
+        helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
           let n4 = helper.getNode('n4')
           if (n4) {
             expect(n4.functions).toBeDefined()
@@ -111,7 +65,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded with no endpoint', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.functions.connectToClient()
@@ -122,7 +76,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and execute reset for Bad Session', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.functions.resetBadSession()
@@ -132,7 +86,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and do not start session on state END', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.iiot.stateMachine.lock().end()
@@ -143,7 +97,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and do not start session on state is not OPEN', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.iiot.stateMachine.lock()
@@ -154,7 +108,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and do not start session without OPC UA client', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.iiot.stateMachine.lock().open()
@@ -166,7 +120,7 @@ describe('OPC UA Connector node Unit Testing', function () {
 
     // TODO whole new functions
     it('should be loaded and do restart session on state is not RECONFIGURED', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.iiot.stateMachine.lock().open()
@@ -176,7 +130,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and do restart connection on state is RECONFIGURED', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.iiot.stateMachine.lock().reconfigure()
@@ -186,7 +140,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and do reset BadSession on state is LOCKED', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.iiot.stateMachine.lock()
@@ -198,7 +152,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and do reset BadSession on state is RECONFIGURED', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.iiot.stateMachine.lock().reconfigure()
@@ -210,7 +164,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and handle error', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.functions.handleError(new Error('Testing Error To Handle'))
@@ -220,7 +174,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and register call done without node', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.functions.registerForOPCUA(null)
@@ -230,7 +184,7 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     it('should be loaded and deregister call done without node', function (done) {
-      helper.load(nodesToLoadConnector, connectorUnitFlow, () => {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
           n4.functions.deregisterForOPCUA(null, done)
@@ -240,7 +194,7 @@ describe('OPC UA Connector node Unit Testing', function () {
 
     // TODO: Figure out why this isn't working
     // it('should success on FilterTypes request', function (done) {
-    //   helper.load(nodesToLoadConnector, connectorUnitFlow, function () {
+    //   helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, function () {
     //     helper.request()
     //       .get('/opcuaIIoT/list/FilterTypes')
     //       .expect(200)
