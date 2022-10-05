@@ -27,6 +27,7 @@ var inputNode = require('../../src/opcua-iiot-connector')
 var nodesToLoadConnector = [injectNode, functionNode, inputNode]
 
 var testFlows = require('./flows/connector-flows')
+const { MessageSecurityMode } = require('node-opcua')
 
 describe('OPC UA Connector node Unit Testing', function () {
   beforeAll(function (done) {
@@ -190,6 +191,38 @@ describe('OPC UA Connector node Unit Testing', function () {
           n4.functions.deregisterForOPCUA(null, done)
         }
       })
+    })
+
+
+    it('should be loaded with correct defaults', function (done) {
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorDefaultsFlow, //Todo: setup default flow "testUnitConnectorDefaultFlow".
+        function () {
+          let nodeUnderTest = helper.getNode('n4') //Todo: Ask Klaus for Default Connector Node in Node-RED.
+          expect(nodeUnderTest.discoveryUrl).toBe('' || null)
+          expect(nodeUnderTest.endpoint).toBe("opc.tcp://localhost:55388/")
+          expect(nodeUnderTest.endpointMustExist).toBe(false)
+          expect(nodeUnderTest.keepSessionAlive).toBe(true)
+          expect(nodeUnderTest.loginEnabled).toBe(false)
+          expect(nodeUnderTest.name).toBe('LOCAL SERVER')
+          expect(nodeUnderTest.showErrors).toBe(false)
+          expect(nodeUnderTest.securityPolicy).toBe("http://opcfoundation.org/UA/SecurityPolicy#None")
+          expect(nodeUnderTest.securityMode).toBe('None') // Todo: check Test.
+          expect(nodeUnderTest.individualCerts).toBe(false)
+          expect(nodeUnderTest.publicCertificateFile).toBe('')
+          expect(nodeUnderTest.privateKeyFile).toBe('')
+          expect(nodeUnderTest.defaultSecureTokenLifetime).toBe('' || 120000)
+          expect(nodeUnderTest.autoSelectRightEndpoint).toBe(false)
+          expect(nodeUnderTest.strategyMaxRetry).toBe('' || 10000)
+          expect(nodeUnderTest.strategyInitialDelay).toBe('' || 1000)
+          expect(nodeUnderTest.strategyMaxDelay).toBe('' || 30000)
+          expect(nodeUnderTest.strategyRandomisationFactor).toBe('' || 0.2)
+          expect(nodeUnderTest.requestedSessionTimeout).toBe('' || 60000)
+          expect(nodeUnderTest.connectionStartDelay).toBe('' || CONNECTION_START_DELAY)
+          expect(nodeUnderTest.connectionStopDelay).toBe('' || RECONNECT_DELAY)
+          expect(nodeUnderTest.reconnectDelay).toBe('' || CONNECTION_STOP_DELAY)
+          expect(nodeUnderTest.maxBadSessionRequests).toBe(10)
+          setTimeout(done, 3000)
+        })
     })
 
     // TODO: Figure out why this isn't working

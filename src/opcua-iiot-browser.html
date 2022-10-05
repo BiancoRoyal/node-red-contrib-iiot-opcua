@@ -14,19 +14,20 @@
     category: 'IIoT',
     color: '#ABCDEF',
     defaults: {
-      connector: {type: "OPCUA-IIoT-Connector", required: true},
       nodeId: {value: ""},
       name: {value: ""},
       justValue: {value: true},
       sendNodesToRead: {value: false},
-      sendNodesToListener: {value: false},
       sendNodesToBrowser: {value: false},
+      sendNodesToListener: {value: false},
       multipleOutputs: {value: false},
+      showStatusActivities: {value: false},
+      showErrors: {value: false},
       recursiveBrowse: {value: false},
       recursiveDepth: {value: 1},
       delayPerMessage: {value: 0.2},
-      showStatusActivities: {value: false},
-      showErrors: {value: false}
+
+      connector: {type: "OPCUA-IIoT-Connector", required: true}
     },
     inputs: 1,
     outputs: 1,

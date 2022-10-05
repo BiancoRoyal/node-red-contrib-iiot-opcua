@@ -14,17 +14,17 @@
     defaults: {
       discoveryUrl: {value: ''},
       endpoint: {value: "opc.tcp://localhost:55388/", required: true},
+      endpointMustExist: {value: false},
       keepSessionAlive: {value: true},
       loginEnabled: {value: false},
-      securityPolicy: {value: 'None', required: true},
-      securityMode: {value: 'None', required: true},
       name: {value: "LOCAL SERVER"},
       showErrors: {value: false},
+      securityPolicy: {value: 'None', required: true},
+      securityMode: {value: 'None', required: true},
       individualCerts: {value: false},
       publicCertificateFile: {value: ''},
       privateKeyFile: {value: ''},
       defaultSecureTokenLifetime: {value: ''},
-      endpointMustExist: {value: false},
       autoSelectRightEndpoint: {value: false},
       strategyMaxRetry: {value: ''},
       strategyInitialDelay: {value: ''},
@@ -32,6 +32,7 @@
       strategyRandomisationFactor: {value: ''},
       requestedSessionTimeout: {value: ''},
       connectionStartDelay: {value: ''},
+      //connectionStopDelay: {value: ''}, //Todo: check missing default assignment for constants.
       reconnectDelay: {value: ''},
       maxBadSessionRequests: {value: 10}
     },
