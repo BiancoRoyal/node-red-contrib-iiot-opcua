@@ -26,7 +26,8 @@ helper.init(require.resolve('node-red'))
 
 var writeNodesToLoad = [injectNodeRedNode, functionNodeRedNode, inputNode]
 
-var writeUnitFlow = [
+var testFlows = require('./flows/write-flows')
+
   {
     'id': '34d2c6bc.43275b',
     'type': 'OPCUA-IIoT-Write',
@@ -60,7 +61,7 @@ describe('OPC UA Write node Unit Testing', function () {
 
   describe('Write node', function () {
     it('should be loaded', function (done) {
-      helper.load(writeNodesToLoad, writeUnitFlow,
+      helper.load(writeNodesToLoad, testFlows.testUnitWriteFlow,
         function () {
           let nodeUnderTest = helper.getNode('34d2c6bc.43275b')
           expect(nodeUnderTest.name).toBe('TestWrite')
@@ -71,7 +72,7 @@ describe('OPC UA Write node Unit Testing', function () {
     })
 
     it('should be loaded and handle error', function (done) {
-      helper.load(writeNodesToLoad, writeUnitFlow, () => {
+      helper.load(writeNodesToLoad, testFlows.testUnitWriteFlow, () => {
         let n1 = helper.getNode('34d2c6bc.43275b')
         if (n1) {
           n1.functions.handleWriteError(new Error('Testing Error To Handle'), {payload: {}})

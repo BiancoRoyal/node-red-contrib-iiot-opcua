@@ -22,6 +22,8 @@ var serverCmdNodes = [injectNode, functionNode, serverCmdNode]
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
+var testFlows = require('./flows/server-cmd-flows')
+
 describe('OPC UA Server Command node Unit Testing', function () {
   beforeAll(function (done) {
     helper.startServer(function () {
@@ -45,16 +47,7 @@ describe('OPC UA Server Command node Unit Testing', function () {
 
   describe('Command node', function () {
     it('should be loaded', function (done) {
-      helper.load(serverCmdNodes,
-        [{
-          'id': 'n3cmdf1',
-          'type': 'OPCUA-IIoT-Server-Command',
-          'commandtype': 'restart',
-          'nodeId': '',
-          'name': 'TestName',
-          'wires': [[]]
-        }
-        ],
+      helper.load(serverCmdNodes, testFlows.testUnitServerCommandFlow,
         function () {
           let nodeUnderTest = helper.getNode('n3cmdf1')
           expect(nodeUnderTest.name).toBe('TestName')
