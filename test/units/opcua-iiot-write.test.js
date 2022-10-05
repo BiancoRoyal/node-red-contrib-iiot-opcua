@@ -28,18 +28,6 @@ var writeNodesToLoad = [injectNodeRedNode, functionNodeRedNode, inputNode]
 
 var testFlows = require('./flows/write-flows')
 
-  {
-    'id': '34d2c6bc.43275b',
-    'type': 'OPCUA-IIoT-Write',
-    'connector': '',
-    'name': 'TestWrite',
-    'justValue': false,
-    'showStatusActivities': false,
-    'showErrors': true,
-    'wires': [[]]
-  }
-]
-
 describe('OPC UA Write node Unit Testing', function () {
   beforeEach(function (done) {
     helper.startServer(function () {
