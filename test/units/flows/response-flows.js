@@ -3,7 +3,7 @@ const helperExtensions = require('../../helper/test-helper-extensions')
 
 module.exports = {
 
-  "testFlowPayload": helperExtensions.cleanFlowPositionData([
+  "testUnitFlowPayloadFlow": helperExtensions.cleanFlowPositionData([
     {
       "id": "628990c93a2db9aa",
       "type": "tab",
@@ -82,7 +82,7 @@ module.exports = {
     }
   ]),
 
-  "testResponseFlow" : helperExtensions.cleanFlowPositionData([
+  "testUnitResponseFlow" : helperExtensions.cleanFlowPositionData([
     {
       "id": "e41e66b2c57b1657",
       "type": "tab",
@@ -201,7 +201,7 @@ module.exports = {
     }
   ]),
 
-  "testCompressedResponseFlow" : helperExtensions.cleanFlowPositionData([
+  "testUnitCompressedResponseFlow" : helperExtensions.cleanFlowPositionData([
     {
       "id": "e41e66b2c57b1657",
       "type": "tab",
@@ -320,7 +320,7 @@ module.exports = {
     }
   ]),
 
-  "testDefaultResponseFlow" : helperExtensions.cleanFlowPositionData([
+  "testUnitDefaultResponseFlow" : helperExtensions.cleanFlowPositionData([
     {
       "id": "e41e66b2c57b1657",
       "type": "tab",

@@ -50,7 +50,7 @@ describe('OPC UA Response node Unit Testing', function () {
 
   describe('Response node', function () {
     it('should load with default settings', function (done) {
-      helper.load(responseNode,testFlows.testDefaultResponseFlow,
+      helper.load(responseNode,testFlows.testUnitDefaultResponseFlow,
         function () {
           let nodeUnderTest = helper.getNode('be0763d2593bd6ef')
           expect(nodeUnderTest.name).toBe('')
@@ -98,7 +98,7 @@ describe('OPC UA Response node Unit Testing', function () {
     })
 
     it('should filter dataType from results', function (done) {
-      helper.load(responseFlowNodes, testFlows.testResponseFlow,
+      helper.load(responseFlowNodes, testFlows.testUnitResponseFlow,
         function () {
           let nodeUnderTest = helper.getNode('n1rh')
           nodeUnderTest.on('input', (msg) => {
@@ -109,7 +109,7 @@ describe('OPC UA Response node Unit Testing', function () {
     })
 
     it('should filter dataType from results and compressing msg', function (done) {
-      helper.load(responseFlowNodes, testFlows.testCompressedResponseFlow,
+      helper.load(responseFlowNodes, testFlows.testUnitCompressedResponseFlow,
         function () {
           let nodeUnderTest = helper.getNode('n1rh')
           nodeUnderTest.on('input', msg => {
@@ -120,7 +120,7 @@ describe('OPC UA Response node Unit Testing', function () {
     })
 
     it('should handle default msg', function (done) {
-      helper.load(responseFlowNodes, testFlows.testCompressedResponseFlow,
+      helper.load(responseFlowNodes, testFlows.testUnitCompressedResponseFlow,
         function () {
           let nodeUnderTest = helper.getNode('76202549.fd7c1c')
           expect(nodeUnderTest).toBeDefined()

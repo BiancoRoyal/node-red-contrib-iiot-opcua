@@ -3,7 +3,7 @@ const helperExtensions = require('../../helper/test-helper-extensions')
 
 module.exports = {
 
-  "testServerWithDemoFlow": helperExtensions.cleanFlowPositionData([
+  "testUnitServerWithDemoFlow": helperExtensions.cleanFlowPositionData([
     {
       "id": "b233bdeab126bfd4",
       "type": "tab",
@@ -49,7 +49,7 @@ module.exports = {
     }
   ]),
 
-  "testServerWithoutDemoFlow": helperExtensions.cleanFlowPositionData([
+  "testUnitServerWithoutDemoFlow": helperExtensions.cleanFlowPositionData([
     {
       "id": "4a4f0ffea30b6dcb",
       "type": "tab",

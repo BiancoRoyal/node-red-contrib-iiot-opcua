@@ -44,6 +44,7 @@ module.exports = {
       ]
     }
   ]),
+
   "testUnitMethodCallerNotConfiguredFlow": helperExtensions.cleanFlowPositionData([
     {
       "id": "b79fdf68790c5ed2",

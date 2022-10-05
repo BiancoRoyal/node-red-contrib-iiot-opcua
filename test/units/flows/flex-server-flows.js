@@ -48,6 +48,7 @@ module.exports = {
       ]
     }
   ]),
+
   "testUnitFlexServerWithUserAndISA95Flow": helperExtensions.cleanFlowPositionData([
     {
       "id": "b79fdf68790c5ed2",

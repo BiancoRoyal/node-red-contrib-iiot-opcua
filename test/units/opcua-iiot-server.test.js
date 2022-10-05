@@ -43,7 +43,7 @@ describe('OPC UA Server node Unit Testing', function () {
 
   describe('Server node', function () {
     it('should be loaded with demo address-space', function (done) {
-      helper.load(serverNode, testFlows.testServerWithDemoFlow,
+      helper.load(serverNode, testFlows.testUnitServerWithDemoFlow,
         function () {
           let nodeUnderTest = helper.getNode('6ec4ef50.86dc1')
           // expect(nodeUnderTest).toBeDefined()
@@ -59,7 +59,7 @@ describe('OPC UA Server node Unit Testing', function () {
     })
 
     it('should be loaded with discovery and without demo address-space', function (done) {
-      helper.load(serverNode, testFlows.testServerWithoutDemoFlow,
+      helper.load(serverNode, testFlows.testUnitServerWithoutDemoFlow,
         function () {
           let nodeUnderTest = helper.getNode('6ec4ef50.86dc2')
           expect(nodeUnderTest).toBeDefined()

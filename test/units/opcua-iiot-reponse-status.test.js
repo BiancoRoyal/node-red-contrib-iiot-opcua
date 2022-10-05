@@ -178,17 +178,17 @@ var listenResultSimulation = {
 
 var testFlows = require('./flows/response-flows')
 
-var readGoodTestFlowPayload = testFlows.testFlowPayload.concat([readResultSimulation, readGoodInject])
-var writeGoodTestFlowPayload = testFlows.testFlowPayload.concat([writeResultSimulation, writeGoodInject])
-var listenGoodTestFlowPayload = testFlows.testFlowPayload.concat([listenResultSimulation, listenGoodInject])
+var readGoodTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([readResultSimulation, readGoodInject])
+var writeGoodTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([writeResultSimulation, writeGoodInject])
+var listenGoodTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([listenResultSimulation, listenGoodInject])
 
-var readBadTestFlowPayload = testFlows.testFlowPayload.concat([readResultSimulation, readBadInject])
-var writeBadTestFlowPayload = testFlows.testFlowPayload.concat([writeResultSimulation, writeBadInject])
-var listenBadTestFlowPayload = testFlows.testFlowPayload.concat([listenResultSimulation, listenBadInject])
+var readBadTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([readResultSimulation, readBadInject])
+var writeBadTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([writeResultSimulation, writeBadInject])
+var listenBadTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([listenResultSimulation, listenBadInject])
 
-var readOtherTestFlowPayload = testFlows.testFlowPayload.concat([readResultSimulation, readOtherInject])
-var writeOtherTestFlowPayload = testFlows.testFlowPayload.concat([writeResultSimulation, writeOtherInject])
-var listenOtherTestFlowPayload = testFlows.testFlowPayload.concat([listenResultSimulation, listenOtherInject])
+var readOtherTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([readResultSimulation, readOtherInject])
+var writeOtherTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([writeResultSimulation, writeOtherInject])
+var listenOtherTestFlowPayload = testFlows.testUnitFlowPayloadFlow.concat([listenResultSimulation, listenOtherInject])
 
 describe('OPC UA Response Status node Unit Testing', function () {
   beforeAll(function (done) {
