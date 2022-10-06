@@ -634,9 +634,9 @@ module.exports = function (RED: nodered.NodeAPI) {
         this.iiot.stateService.send('CLOSE')
         let fsmState = this.iiot.stateService.state.value
         detailDebugLog('Disconnected On State ' + fsmState)
-        if (!isInactiveOnOPCUA() && fsmState !== 'CLOSED') {
-          done()
-        }
+        // if (!isInactiveOnOPCUA() && fsmState !== 'CLOSED') { //Todo: check state machine to be closed
+        //   return;
+        // }
         done()
       })
     }

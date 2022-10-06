@@ -13,7 +13,7 @@
 let {default: coreConnector} = require('../../src/core/opcua-iiot-core-connector')
 const events = require('events')
 
-describe('OPC UA Core Connector', function () {
+describe('OPC UA Core Connector', function () {   // Todo: implement new fsm package tests
   describe('core functions', function () {
     it('should have IDLE state', function (done) {
       let fsm = coreConnector.createConnectorStatelyMachine()

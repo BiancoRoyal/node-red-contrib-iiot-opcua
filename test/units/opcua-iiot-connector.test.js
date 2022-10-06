@@ -93,6 +93,9 @@ describe('OPC UA Connector node Unit Testing', function () {
         if (n4) {
           //n4.iiot.stateMachine.lock().end()
           n4.iiot.stateService.send('END')
+
+          expect(n4.iiot.stateService.state.value).toBe('end')
+
           n4.functions.startSession()
           done()
         }
@@ -105,6 +108,9 @@ describe('OPC UA Connector node Unit Testing', function () {
         if (n4) {
           //n4.iiot.stateMachine.lock()
           n4.iiot.stateService.send('LOCK')
+
+          expect(n4.iiot.stateService.state.value).toBe('locked')
+
           n4.functions.startSession()
           done()
         }
@@ -116,7 +122,11 @@ describe('OPC UA Connector node Unit Testing', function () {
         let n4 = helper.getNode('n4')
         if (n4) {
           //n4.iiot.stateMachine.lock().open()
+          n4.iiot.stateService.send('INITOPCUA')
           n4.iiot.stateService.send('OPEN')
+
+          expect(n4.iiot.stateService.state.value).toBe('opened')
+
           n4.functions.startSession()
           done()
         }
@@ -131,9 +141,12 @@ describe('OPC UA Connector node Unit Testing', function () {
         let n4 = helper.getNode('n4')
         if (n4) {
           //n4.iiot.stateMachine.lock().open()
-          n4.iiot.stateMachine.transition('locked', 'OPEN')
+          n4.iiot.stateService.send('INITOPCUA')
+          n4.iiot.stateService.send('OPEN')
+
           expect(n4.iiot.stateService.state.value).toBe('opened')
-          setTimeout(n4.functions.renewConnection(done), 1000)
+
+          n4.functions.renewConnection(done)
         }
       })
     })
@@ -144,9 +157,14 @@ describe('OPC UA Connector node Unit Testing', function () {
         let n4 = helper.getNode('n4')
         if (n4) {
           //n4.iiot.stateMachine.lock().reconfigure()
-          n4.iiot.stateMachine.transition('locked', 'RECONFIGURE')
+          n4.iiot.stateService.send('LOCK')
+          n4.iiot.stateService.send('RECONFIGURE')
+
           expect(n4.iiot.stateService.state.value).toBe('reconfigured')
-          setTimeout(n4.functions.renewConnection(done), 500)
+
+          var test = 0
+
+          n4.functions.renewConnection(done)
         }
       })
     })
@@ -157,10 +175,13 @@ describe('OPC UA Connector node Unit Testing', function () {
         if (n4) {
           //n4.iiot.stateMachine.lock()
           n4.iiot.stateService.send('LOCK')
+
           expect(n4.iiot.stateService.state.value).toBe('locked')
+
           n4.iiot.sessionNodeRequests = 10
           n4.functions.resetBadSession()
-          setTimeout(done, 1000)
+          //setTimeout(done, 1500)
+          done()
         }
       })
     })
@@ -170,7 +191,11 @@ describe('OPC UA Connector node Unit Testing', function () {
         let n4 = helper.getNode('n4')
         if (n4) {
           //n4.iiot.stateMachine.lock().reconfigure()
+          n4.iiot.stateService.send('LOCK')
           n4.iiot.stateService.send('RECONFIGURE')
+
+          expect(n4.iiot.stateService.state.value).toBe('reconfigured')
+
           n4.iiot.sessionNodeRequests = 10
           n4.functions.resetBadSession()
           setTimeout(done, 1000)
