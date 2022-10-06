@@ -17,6 +17,7 @@ process.env.isTest = 'TRUE'
 
 var injectNode = require('@node-red/nodes/core/common/20-inject')
 var functionNode = require('@node-red/nodes/core/function/10-function')
+var readNode = require('../../src/opcua-iiot-read')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
@@ -24,7 +25,7 @@ helper.init(require.resolve('node-red'))
 // iiot opc ua nodes
 var inputNode = require('../../src/opcua-iiot-connector')
 
-var nodesToLoadConnector = [injectNode, functionNode, inputNode]
+var nodesToLoadConnector = [injectNode, functionNode, inputNode, readNode]
 
 var testFlows = require('./flows/connector-flows')
 const { MessageSecurityMode, SecurityPolicy } = require('node-opcua')
@@ -195,10 +196,10 @@ describe('OPC UA Connector node Unit Testing', function () {
 
 
     it('should be loaded with correct defaults', function (done) {
-      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorDefaultsFlow, //testFlows.testUnitConnectorDefaultsFlow,
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorGeneratedDefaultsFlow, //testFlows.testUnitConnectorDefaultsFlow,
         function () {
           let nodeUnderTest = helper.getNode('594b2860fa40bda5')
-          expect(nodeUnderTest.discoveryUrl).toBe('' || null)
+          expect(nodeUnderTest.discoveryUrl).toBe(null)
           expect(nodeUnderTest.endpoint).toBe("opc.tcp://localhost:55388/")
           expect(nodeUnderTest.endpointMustExist).toBe(false)
           expect(nodeUnderTest.keepSessionAlive).toBe(true)
@@ -206,10 +207,10 @@ describe('OPC UA Connector node Unit Testing', function () {
           expect(nodeUnderTest.name).toBe('LOCAL SERVER')
           expect(nodeUnderTest.showErrors).toBe(false)
           expect(nodeUnderTest.securityPolicy).toBe(SecurityPolicy.None)
-          expect(nodeUnderTest.securityMode).toBe(MessageSecurityMode.None) // Todo: check Test.
-          expect(nodeUnderTest.individualCerts).toBe(false)
-          expect(nodeUnderTest.publicCertificateFile).toBe('')
-          expect(nodeUnderTest.privateKeyFile).toBe('')
+          expect(nodeUnderTest.messageSecurityMode).toBe(MessageSecurityMode.None)
+          expect(nodeUnderTest.individualCerts).toBe(false)  // Todo: exists in defaults but not init. expected false, received undefined - wo in server options? Übernehmen in init
+          expect(nodeUnderTest.publicCertificateFile).toBe(null)
+          expect(nodeUnderTest.privateKeyFile).toBe(null)
           expect(nodeUnderTest.defaultSecureTokenLifetime).toBe('' || 120000)
           expect(nodeUnderTest.autoSelectRightEndpoint).toBe(false)
           expect(nodeUnderTest.strategyMaxRetry).toBe('' || 10000)
@@ -217,10 +218,10 @@ describe('OPC UA Connector node Unit Testing', function () {
           expect(nodeUnderTest.strategyMaxDelay).toBe('' || 30000)
           expect(nodeUnderTest.strategyRandomisationFactor).toBe('' || 0.2)
           expect(nodeUnderTest.requestedSessionTimeout).toBe('' || 60000)
-          expect(nodeUnderTest.connectionStartDelay).toBe('' || CONNECTION_START_DELAY)
-          expect(nodeUnderTest.connectionStopDelay).toBe('' || RECONNECT_DELAY)
-          expect(nodeUnderTest.reconnectDelay).toBe('' || CONNECTION_STOP_DELAY)
-          expect(nodeUnderTest.maxBadSessionRequests).toBe(10)
+          expect(nodeUnderTest.connectionStartDelay).toBe(2000) //CONNECTION_START_DELAY
+          expect(nodeUnderTest.connectionStopDelay).toBe(2000) //RECONNECT_DELAY //Todo: set to 1000 as const in .ts-file received 2000 - placeholder anpassen
+          expect(nodeUnderTest.reconnectDelay).toBe(1000) //CONNECTION_STOP_DELAY //Todo: set to 2000 as const in .ts-file received 1000
+          expect(nodeUnderTest.maxBadSessionRequests).toBe(10) // Todo: is set as type number but received "10"
           setTimeout(done, 3000)
         })
     })

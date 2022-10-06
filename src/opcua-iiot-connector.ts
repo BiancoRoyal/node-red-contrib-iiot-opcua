@@ -134,6 +134,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showErrors = config.showErrors
     this.securityPolicy = coerceSecurityPolicy(config.securityPolicy)
     this.messageSecurityMode = coerceMessageSecurityMode(config.securityMode) || MessageSecurityMode.None
+    this.individualCerts = config.individualCerts
     this.publicCertificateFile = config.publicCertificateFile
     this.privateKeyFile = config.privateKeyFile
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 120000
@@ -146,7 +147,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.connectionStartDelay = config.connectionStartDelay || CONNECTION_START_DELAY
     this.reconnectDelay = config.reconnectDelay || RECONNECT_DELAY
     this.connectionStopDelay = config.connectionStopDelay || CONNECTION_STOP_DELAY
-    this.maxBadSessionRequests = config.maxBadSessionRequests || 10
+    this.maxBadSessionRequests = parseInt(config.maxBadSessionRequests.toString()) || 10
 
     this.iiot = coreConnector.initConnectorNode()
 

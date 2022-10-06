@@ -133,7 +133,7 @@ module.exports = {
       "requestedSessionTimeout": "",
       "connectionStartDelay": "",
       "reconnectDelay": "",
-      "maxBadSessionRequests": "10"
+      "maxBadSessionRequests": 10
     }
   ])
 }
