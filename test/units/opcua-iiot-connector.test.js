@@ -27,7 +27,7 @@ var inputNode = require('../../src/opcua-iiot-connector')
 var nodesToLoadConnector = [injectNode, functionNode, inputNode]
 
 var testFlows = require('./flows/connector-flows')
-const { MessageSecurityMode } = require('node-opcua')
+const { MessageSecurityMode, SecurityPolicy } = require('node-opcua')
 
 describe('OPC UA Connector node Unit Testing', function () {
   beforeAll(function (done) {
@@ -195,9 +195,9 @@ describe('OPC UA Connector node Unit Testing', function () {
 
 
     it('should be loaded with correct defaults', function (done) {
-      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorDefaultsFlow, //Todo: setup default flow "testUnitConnectorDefaultFlow".
+      helper.load(nodesToLoadConnector, testFlows.testUnitConnectorDefaultsFlow, //testFlows.testUnitConnectorDefaultsFlow,
         function () {
-          let nodeUnderTest = helper.getNode('n4') //Todo: Ask Klaus for Default Connector Node in Node-RED.
+          let nodeUnderTest = helper.getNode('594b2860fa40bda5')
           expect(nodeUnderTest.discoveryUrl).toBe('' || null)
           expect(nodeUnderTest.endpoint).toBe("opc.tcp://localhost:55388/")
           expect(nodeUnderTest.endpointMustExist).toBe(false)
@@ -205,8 +205,8 @@ describe('OPC UA Connector node Unit Testing', function () {
           expect(nodeUnderTest.loginEnabled).toBe(false)
           expect(nodeUnderTest.name).toBe('LOCAL SERVER')
           expect(nodeUnderTest.showErrors).toBe(false)
-          expect(nodeUnderTest.securityPolicy).toBe("http://opcfoundation.org/UA/SecurityPolicy#None")
-          expect(nodeUnderTest.securityMode).toBe('None') // Todo: check Test.
+          expect(nodeUnderTest.securityPolicy).toBe(SecurityPolicy.None)
+          expect(nodeUnderTest.securityMode).toBe(MessageSecurityMode.None) // Todo: check Test.
           expect(nodeUnderTest.individualCerts).toBe(false)
           expect(nodeUnderTest.publicCertificateFile).toBe('')
           expect(nodeUnderTest.privateKeyFile).toBe('')
