@@ -91,7 +91,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.iiot.stateMachine.lock().end()
+          //n4.iiot.stateMachine.lock().end()
+          n4.iiot.stateService.send('END')
           n4.functions.startSession()
           done()
         }
@@ -102,7 +103,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.iiot.stateMachine.lock()
+          //n4.iiot.stateMachine.lock()
+          n4.iiot.stateService.send('LOCK')
           n4.functions.startSession()
           done()
         }
@@ -113,7 +115,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.iiot.stateMachine.lock().open()
+          //n4.iiot.stateMachine.lock().open()
+          n4.iiot.stateService.send('OPEN')
           n4.functions.startSession()
           done()
         }
@@ -121,22 +124,29 @@ describe('OPC UA Connector node Unit Testing', function () {
     })
 
     // TODO whole new functions
+
+    // Todo: Cannot change state to open in one jump, if the transition doesnt allow it
     it('should be loaded and do restart session on state is not RECONFIGURED', function (done) {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.iiot.stateMachine.lock().open()
-          n4.functions.renewConnection(done)
+          //n4.iiot.stateMachine.lock().open()
+          n4.iiot.stateMachine.transition('locked', 'OPEN')
+          expect(n4.iiot.stateService.state.value).toBe('opened')
+          setTimeout(n4.functions.renewConnection(done), 1000)
         }
       })
     })
 
+    // Todo: Cannot change state to reconfigured in one jump, if the transition doesnt allow it
     it('should be loaded and do restart connection on state is RECONFIGURED', function (done) {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.iiot.stateMachine.lock().reconfigure()
-          n4.functions.renewConnection(done)
+          //n4.iiot.stateMachine.lock().reconfigure()
+          n4.iiot.stateMachine.transition('locked', 'RECONFIGURE')
+          expect(n4.iiot.stateService.state.value).toBe('reconfigured')
+          setTimeout(n4.functions.renewConnection(done), 500)
         }
       })
     })
@@ -145,7 +155,9 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.iiot.stateMachine.lock()
+          //n4.iiot.stateMachine.lock()
+          n4.iiot.stateService.send('LOCK')
+          expect(n4.iiot.stateService.state.value).toBe('locked')
           n4.iiot.sessionNodeRequests = 10
           n4.functions.resetBadSession()
           setTimeout(done, 1000)
@@ -157,7 +169,8 @@ describe('OPC UA Connector node Unit Testing', function () {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorFlow, () => {
         let n4 = helper.getNode('n4')
         if (n4) {
-          n4.iiot.stateMachine.lock().reconfigure()
+          //n4.iiot.stateMachine.lock().reconfigure()
+          n4.iiot.stateService.send('RECONFIGURE')
           n4.iiot.sessionNodeRequests = 10
           n4.functions.resetBadSession()
           setTimeout(done, 1000)

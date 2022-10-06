@@ -17,7 +17,8 @@ import {TodoTypeAny} from "../types/placeholders";
 import {ClientSession, OPCUAClient, OPCUADiscoveryServer, UserIdentityInfo} from "node-opcua";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import {Node} from "node-red";
-import {createMachine, interpret} from "@xstate/fsm";
+import {createMachine, interpret, StateMachine} from "@xstate/fsm";
+import Service = StateMachine.Service;
 
 export type ConnectorIIoT = {
   endpoints: string[],
@@ -28,7 +29,10 @@ export type ConnectorIIoT = {
   discoveryServerEndpointUrl?: string
   hasOpcUaSubscriptions: boolean
   userIdentity?: UserIdentityInfo
-  stateMachine?: Stately.machine
+  //stateMachine?: Stately.machine
+  stateMachine?: TodoTypeAny
+  stateService?: TodoTypeAny
+  stateSubscription?: TodoTypeAny
   opcuaClientOptions?: OPCUAClientOptions
   registeredNodeList?: Record<string, Node>
   functions?: Record<string, (...args: TodoTypeAny) => TodoTypeAny>
@@ -59,7 +63,7 @@ const initConnectorNode = (): ConnectorIIoT => {
   }
 
 }
-
+/*
 export type CoreMachineStates =
   'IDLE' |
   'INITOPCUA' |
@@ -76,8 +80,11 @@ export type CoreMachineStates =
   'STOPPED' |
   'END';
 
+ */
+
 // export type CoreStateMachine = Record<CoreMachineStates, Record<string, CoreMachineStates>>
 
+/*
 // TODO: @xstate/fsm is a good package to replace it. See: modbus contribution package core client
 // many functions are now available and working well in node-opcua and maybe it needs less control from our package
 function createConnectorStatelyMachine() {
@@ -162,10 +169,10 @@ function createConnectorStatelyMachine() {
   logger.detailDebugLog('FSM events:' + stateMachine.getMachineEvents())
   return stateMachine
 }
-
+ */
 
 interface ConnectorTestContext {
-  testString?: string
+  debugContext?: string
 }
 
 type ConnectorEvent =
@@ -176,9 +183,11 @@ type ConnectorEvent =
     | { type: 'SESSIONREQUEST'}
     | { type: 'IDLE'}
     | { type: 'LOCK'}
+    | { type: 'UNLOCK'}
     | { type: 'END'}
     | { type: 'CLOSE'}
     | { type: 'OPEN'}
+    | { type: 'STOP'}
     | { type: 'RESTART'}
     | { type: 'RENEW'}
     | { type: 'RECONFIGURE'};
@@ -190,7 +199,6 @@ type ConnectorState =
     | { value: 'sessionRequested'; context: ConnectorTestContext & { testString: undefined } }
     | { value: 'sessionActive'; context: ConnectorTestContext & { testString: undefined } }
     | { value: 'sessionClosed'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'sessionStart'; context: ConnectorTestContext & { testString: undefined } }
     | { value: 'sessionRestart'; context: ConnectorTestContext & { testString: undefined } }
     | { value: 'closed'; context: ConnectorTestContext & { testString: undefined } }
     | { value: 'locked'; context: ConnectorTestContext & { testString: undefined } }
@@ -200,10 +208,27 @@ type ConnectorState =
     | { value: 'reconfigured'; context: ConnectorTestContext  & { testString: undefined }}
     | { value: 'renewed'; context: ConnectorTestContext & { testString: undefined } };
 
+export enum fsmConnectorStates {
+  StateIdle = 'idle',
+  StateInit = 'init',
+  StateOpened = 'opened',
+  StateSessionRequested = 'sessionRequested',
+  StateSessionActive = 'sessionActive',
+  StateSessionClosed = 'sessionClosed',
+  StateSessionRestart = 'sessionRestart',
+  StateClosed = 'closed',
+  StateLocked = 'locked',
+  StateUnlocked = 'unlocked',
+  StateStopped = 'stopped',
+  StateEnd = 'end',
+  StateReconfigured = 'reconfigured',
+  StateRenewed = 'renewed',
+}
+
 const createConnectorFinalStateMachine = function () {
   return createMachine<ConnectorTestContext, ConnectorEvent, ConnectorState>({
     id: 'connector',
-    initial: 'new',
+    initial: 'idle',
     states:{
       idle: { on: {
           INITOPCUA: 'init',
@@ -232,13 +257,60 @@ const createConnectorFinalStateMachine = function () {
           END: 'end'
         }
       },
-      sessionActive: { on: {}},
-      sessionClosed: { on: {}},
-      sessionStart: { on: {}},
-      sessionRestart: { on: {}},
-      closed: { on: {}},
-      locked: { on: {}},
-      unlocked: { on: {}},
+      sessionActive: { on: {
+          OPEN: 'opened',
+          SESSIONCLOSE: 'sessionClosed',
+          LOCK: 'locked',
+          END: 'end'
+        }
+      },
+      sessionClosed: { on: {
+          IDLE: 'idle',
+          OPEN: 'opened',
+          CLOSE: 'closed',
+          SESSIONRESTART: 'sessionRestart',
+          LOCK: 'locked',
+          UNLOCK: 'unlocked',
+          END: 'end'
+        }
+      },
+      sessionRestart: { on: {
+          IDLE: 'idle',
+          SESSIONCLOSE: 'sessionClosed',
+          OPEN: 'opened',
+          CLOSE: 'closed',
+          LOCK: 'locked',
+          END: 'end'
+        }
+      },
+      closed: { on: {
+          OPEN: 'opened',
+          LOCK: 'locked',
+          UNLOCK: 'unlocked',
+          END: 'end',
+          IDLE: 'idle'
+        }
+      },
+      locked: { on: {
+          SESSIONCLOSE: 'sessionClosed',
+          OPEN: 'opened',
+          CLOSE: 'closed',
+          LOCK: 'locked',
+          UNLOCK: 'unlocked',
+          SESSIONRESTART: 'sessionRestart',
+          RECONFIGURE: 'reconfigured',
+          STOP: 'stopped',
+          RENEW: 'renewed',
+          END: 'end'
+        }
+      },
+      unlocked: { on: {
+          IDLE: 'idle',
+          OPEN: 'opened',
+          END: 'end',
+          LOCK: 'locked'
+        }
+      },
       stopped: { on: {}},
       end: { on: {}},
       reconfigured: { on: {}},
@@ -249,6 +321,12 @@ const createConnectorFinalStateMachine = function () {
 
 const startConnectorMachineService = (toggleMachine: any) => {
   return interpret(toggleMachine).start()
+}
+
+const subscribeConnectorFSMService = (service: TodoTypeAny, eventFn: (state: any) => void) => {
+  if(service === undefined || eventFn === undefined) throw new Error('Service or event handler missing')
+
+  return service.subscribe(eventFn)
 }
 
 function setListenerToClient(node: TodoTypeAny) {
@@ -380,9 +458,10 @@ function checkEndpoint(endpoint: string, errorHandler: (err: Error) => void) {
 
 const coreConnector = {
   initConnectorNode,
-  createConnectorStatelyMachine,
+  //createConnectorStatelyMachine,
   createConnectorFinalStateMachine,
   startConnectorMachineService,
+  subscribeConnectorFSMService,
   setListenerToClient,
   logSessionInformation,
   checkEndpoint,
