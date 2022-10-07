@@ -30,7 +30,7 @@ import {
   StatusCodes,
   VariableTypeIds
 } from "node-opcua";
-import coreConnector, {ConnectorIIoT, logger, Stately, fsmConnectorStates} from "./core/opcua-iiot-core-connector";
+import coreConnector, {ConnectorIIoT, logger, Stately, FsmConnectorStates} from "./core/opcua-iiot-core-connector";
 import {FindServerResults} from "node-opcua-client/source/tools/findservers";
 import _, {isUndefined} from "underscore";
 import {UserTokenType} from "node-opcua-service-endpoints";
@@ -731,11 +731,11 @@ module.exports = function (RED: nodered.NodeAPI) {
       if(this.iiot === undefined) return;
 
       switch (state.value) {
-        case fsmConnectorStates.StateIdle:
+        case FsmConnectorStates.StateIdle:
           detailDebugLog('Connector IDLE Event FSM')
           resetOPCUAObjects()
           break
-        case fsmConnectorStates.StateInit:
+        case FsmConnectorStates.StateInit:
           detailDebugLog('Connector Init OPC UA Event FSM')
 
           if (!this.iiot) {
@@ -765,7 +765,7 @@ module.exports = function (RED: nodered.NodeAPI) {
             }
           }, this.connectionStartDelay)
           break
-        case fsmConnectorStates.StateOpened:
+        case FsmConnectorStates.StateOpened:
           detailDebugLog('Connector Open Event FSM')
           if (isInitializedIIoTNode(this.iiot)) {
             this.emit('connection_started', this.iiot.opcuaClient, statusHandler)
@@ -774,27 +774,27 @@ module.exports = function (RED: nodered.NodeAPI) {
             await startSession('Open Event')
           }
           break
-        case fsmConnectorStates.StateSessionRequested:
+        case FsmConnectorStates.StateSessionRequested:
           detailDebugLog('Connector Session Request Event FSM')
           break
-        case fsmConnectorStates.StateSessionActive:
+        case FsmConnectorStates.StateSessionActive:
           detailDebugLog('Connector Session Active Event FSM')
           if (!isUndefined(this.iiot))
             this.iiot.sessionNodeRequests = 0
           this.emit('session_started', this.iiot?.opcuaSession)
           break
-        case fsmConnectorStates.StateSessionRestart:
+        case FsmConnectorStates.StateSessionRestart:
           detailDebugLog('Connector Session Restart Event FSM')
           this.emit('session_restart')
           break
-        case fsmConnectorStates.StateSessionClosed:
+        case FsmConnectorStates.StateSessionClosed:
           detailDebugLog('Connector Session Close Event FSM')
           this.emit('session_closed')
           if (isInitializedIIoTNode(this.iiot)) {
             this.iiot.opcuaSession = undefined
           }
           break
-        case fsmConnectorStates.StateClosed:
+        case FsmConnectorStates.StateClosed:
           detailDebugLog('Connector Client Close Event FSM')
           this.emit('connection_closed')
           if (isInitializedIIoTNode(this.iiot)) {
@@ -808,34 +808,34 @@ module.exports = function (RED: nodered.NodeAPI) {
             }
           }
           break
-        case fsmConnectorStates.StateLocked:
+        case FsmConnectorStates.StateLocked:
           detailDebugLog('Connector Lock Event FSM')
           break
-        case fsmConnectorStates.StateUnlocked:
+        case FsmConnectorStates.StateUnlocked:
           detailDebugLog('Connector Unlock Event FSM')
           break
-        case fsmConnectorStates.StateStopped:
+        case FsmConnectorStates.StateStopped:
           detailDebugLog('Connector Stopped Event FSM')
           this.emit('connection_stopped')
           if (isInitializedIIoTNode(this.iiot)) {
             resetAllTimer()
           }
           break
-        case fsmConnectorStates.StateEnd:
+        case FsmConnectorStates.StateEnd:
           detailDebugLog('Connector End Event FSM')
           this.emit('connection_end')
           if (isInitializedIIoTNode(this.iiot)) {
             resetAllTimer()
           }
           break
-        case fsmConnectorStates.StateReconfigured:
+        case FsmConnectorStates.StateReconfigured:
           detailDebugLog('Connector Reconfigure Event FSM')
           this.emit('connection_reconfigure')
           if (isInitializedIIoTNode(this.iiot)) {
             resetAllTimer()
           }
           break
-        case fsmConnectorStates.StateRenewed:
+        case FsmConnectorStates.StateRenewed:
           detailDebugLog('Connector Renew Event FSM')
           this.emit('connection_renew')
           if (isInitializedIIoTNode(this.iiot)) {

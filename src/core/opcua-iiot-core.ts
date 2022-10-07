@@ -13,7 +13,7 @@
 import {debug as Debug} from 'debug'
 import * as os from 'os'
 import * as underscore from 'underscore'
-import {isObject} from 'underscore'
+import _, {isObject} from 'underscore'
 
 import * as nodeOPCUAId from 'node-opcua-nodeid'
 import {NodeIdLike} from 'node-opcua-nodeid'
@@ -36,22 +36,22 @@ import {
   ClientSession,
   DataType,
   DataValue,
-  DataValueOptions, NodeClass,
+  DataValueOptions,
+  NodeClass,
   NodeId,
   NodeIdType,
   OPCUAClient,
 } from "node-opcua";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
-import {ConnectorIIoT} from "./opcua-iiot-core-connector";
+import {ConnectorIIoT, FsmConnectorStates} from "./opcua-iiot-core-connector";
 import coreListener from "./opcua-iiot-core-listener";
-import _ from 'underscore'
 
 export {Debug, os, underscore, nodeOPCUAId}
 
 export const OBJECTS_ROOT: string = 'ns=0;i=84'
 export const TEN_SECONDS_TIMEOUT: number = 10
-export const RUNNING_STATE: string = 'SESSIONACTIVE'
+export const RUNNING_STATE: FsmConnectorStates = FsmConnectorStates.StateSessionActive
 export const isWindows: boolean = /^win/.test(os.platform())
 export const FAKTOR_SEC_TO_MSEC: number = 1000
 export const DEFAULT_TIMEOUT: number = 1000
@@ -778,9 +778,9 @@ export function checkConnectorState(
   emitHandler: (msg: string) => void,
   statusHandler: (status: string | NodeStatus) => void
 ): boolean {
-  const state = node.connector?.iiot.stateMachine?.getMachineState()
+  const state = node.connector?.iiot.stateService?.state.value
   logger.internalDebugLog('Check Connector State ' + state + ' By ' + callerType)
-  if (node.connector?.iiot?.stateMachine && state !== RUNNING_STATE) {
+  if (state !== RUNNING_STATE) {
     logger.internalDebugLog('Wrong Client State ' + state + ' By ' + callerType)
     if (node.showErrors) {
       errorHandler(new Error('Client Not ' + RUNNING_STATE + ' On ' + callerType), msg)
@@ -923,7 +923,7 @@ export function registerToConnector(node: TodoTypeAny, statusCallback: (status: 
   node.connector.on('after_reconnection', () => {
     setNodeOPCUARestart(node.connector, OPCUAClient.create((node.connector as TodoTypeAny).iiot.opcuaClient), statusCall) // TODO: investigate one args v two
   })
-  setNodeInitalState(node.connector?.iiot?.stateMachine?.getMachineState(), node, statusCall)
+  setNodeInitalState(node.connector?.iiot?.stateService.state.value, node, statusCall) //Todo: switch to xstate/fsm from stately
 }
 
 export function deregisterToConnector(node: NodeWithConnector, done: () => void) {

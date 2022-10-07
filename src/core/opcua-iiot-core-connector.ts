@@ -192,123 +192,123 @@ type ConnectorEvent =
     | { type: 'RENEW'}
     | { type: 'RECONFIGURE'};
 
-type ConnectorState =
-    | { value: 'idle'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'init'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'opened'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'sessionRequested'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'sessionActive'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'sessionClosed'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'sessionRestart'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'closed'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'locked'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'unlocked'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'stopped'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'end'; context: ConnectorTestContext & { testString: undefined } }
-    | { value: 'reconfigured'; context: ConnectorTestContext  & { testString: undefined }}
-    | { value: 'renewed'; context: ConnectorTestContext & { testString: undefined } };
-
-export enum fsmConnectorStates {
-  StateIdle = 'idle',
-  StateInit = 'init',
-  StateOpened = 'opened',
-  StateSessionRequested = 'sessionRequested',
-  StateSessionActive = 'sessionActive',
-  StateSessionClosed = 'sessionClosed',
-  StateSessionRestart = 'sessionRestart',
-  StateClosed = 'closed',
-  StateLocked = 'locked',
-  StateUnlocked = 'unlocked',
-  StateStopped = 'stopped',
-  StateEnd = 'end',
-  StateReconfigured = 'reconfigured',
-  StateRenewed = 'renewed',
+export enum FsmConnectorStates {
+    StateIdle = 'idle',
+    StateInit = 'init',
+    StateOpened = 'opened',
+    StateSessionRequested = 'sessionRequested',
+    StateSessionActive = 'sessionActive',
+    StateSessionClosed = 'sessionClosed',
+    StateSessionRestart = 'sessionRestart',
+    StateClosed = 'closed',
+    StateLocked = 'locked',
+    StateUnlocked = 'unlocked',
+    StateStopped = 'stopped',
+    StateEnd = 'end',
+    StateReconfigured = 'reconfigured',
+    StateRenewed = 'renewed',
 }
+
+type ConnectorState =
+    | { value: FsmConnectorStates.StateIdle; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateInit; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateOpened; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateSessionRequested; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateSessionActive; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateSessionClosed; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateSessionRestart; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateClosed; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateLocked; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateUnlocked; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateStopped; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateEnd; context: ConnectorTestContext & { testString: undefined } }
+    | { value: FsmConnectorStates.StateReconfigured; context: ConnectorTestContext  & { testString: undefined }}
+    | { value: FsmConnectorStates.StateRenewed; context: ConnectorTestContext & { testString: undefined } };
 
 const createConnectorFinalStateMachine = function () {
   return createMachine<ConnectorTestContext, ConnectorEvent, ConnectorState>({
     id: 'connector',
-    initial: 'idle',
+    initial: FsmConnectorStates.StateIdle,
     states:{
       idle: { on: {
-          INITOPCUA: 'init',
-          LOCK: 'locked',
-          END: 'end'
+          INITOPCUA: FsmConnectorStates.StateInit,
+          LOCK: FsmConnectorStates.StateLocked,
+          END: FsmConnectorStates.StateEnd
         }
       },
       init: { on: {
-          OPEN: 'opened',
-          CLOSE: 'closed',
-          LOCK: 'locked',
-          END: 'end'
+          OPEN: FsmConnectorStates.StateOpened,
+          CLOSE: FsmConnectorStates.StateClosed,
+          LOCK: FsmConnectorStates.StateLocked,
+          END: FsmConnectorStates.StateEnd
         }
       },
       opened: { on: {
-          SESSIONREQUEST: 'sessionRequested',
-          CLOSE: 'closed',
-          LOCK: 'locked',
-          END: 'end'
+          SESSIONREQUEST: FsmConnectorStates.StateSessionRequested,
+          CLOSE: FsmConnectorStates.StateClosed,
+          LOCK: FsmConnectorStates.StateLocked,
+          END: FsmConnectorStates.StateEnd
         }
       },
       sessionRequested: { on: {
-          OPEN: 'opened',
-          SESSIONACTIVATE: 'sessionActive',
-          LOCK: 'locked',
-          END: 'end'
+          OPEN: FsmConnectorStates.StateOpened,
+          SESSIONACTIVATE: FsmConnectorStates.StateSessionActive,
+          LOCK: FsmConnectorStates.StateLocked,
+          END: FsmConnectorStates.StateEnd
         }
       },
       sessionActive: { on: {
-          OPEN: 'opened',
-          SESSIONCLOSE: 'sessionClosed',
-          LOCK: 'locked',
-          END: 'end'
+          OPEN: FsmConnectorStates.StateOpened,
+          SESSIONCLOSE: FsmConnectorStates.StateClosed,
+          LOCK: FsmConnectorStates.StateLocked,
+          END: FsmConnectorStates.StateEnd
         }
       },
       sessionClosed: { on: {
-          IDLE: 'idle',
-          OPEN: 'opened',
-          CLOSE: 'closed',
-          SESSIONRESTART: 'sessionRestart',
-          LOCK: 'locked',
-          UNLOCK: 'unlocked',
-          END: 'end'
+          IDLE: FsmConnectorStates.StateIdle,
+          OPEN: FsmConnectorStates.StateOpened,
+          CLOSE: FsmConnectorStates.StateClosed,
+          SESSIONRESTART: FsmConnectorStates.StateSessionRestart,
+          LOCK: FsmConnectorStates.StateLocked,
+          UNLOCK: FsmConnectorStates.StateUnlocked,
+          END: FsmConnectorStates.StateEnd
         }
       },
       sessionRestart: { on: {
-          IDLE: 'idle',
-          SESSIONCLOSE: 'sessionClosed',
-          OPEN: 'opened',
-          CLOSE: 'closed',
-          LOCK: 'locked',
-          END: 'end'
+          IDLE: FsmConnectorStates.StateIdle,
+          SESSIONCLOSE: FsmConnectorStates.StateClosed,
+          OPEN: FsmConnectorStates.StateOpened,
+          CLOSE: FsmConnectorStates.StateClosed,
+          LOCK: FsmConnectorStates.StateLocked,
+          END: FsmConnectorStates.StateEnd
         }
       },
       closed: { on: {
-          OPEN: 'opened',
-          LOCK: 'locked',
-          UNLOCK: 'unlocked',
-          END: 'end',
-          IDLE: 'idle'
+          OPEN: FsmConnectorStates.StateOpened,
+          LOCK: FsmConnectorStates.StateLocked,
+          UNLOCK: FsmConnectorStates.StateUnlocked,
+          END: FsmConnectorStates.StateEnd,
+          IDLE: FsmConnectorStates.StateIdle
         }
       },
       locked: { on: {
-          SESSIONCLOSE: 'sessionClosed',
-          OPEN: 'opened',
-          CLOSE: 'closed',
-          LOCK: 'locked',
-          UNLOCK: 'unlocked',
-          SESSIONRESTART: 'sessionRestart',
-          RECONFIGURE: 'reconfigured',
-          STOP: 'stopped',
-          RENEW: 'renewed',
-          END: 'end'
+          SESSIONCLOSE: FsmConnectorStates.StateClosed,
+          OPEN: FsmConnectorStates.StateOpened,
+          CLOSE: FsmConnectorStates.StateClosed,
+          LOCK: FsmConnectorStates.StateLocked,
+          UNLOCK: FsmConnectorStates.StateUnlocked,
+          SESSIONRESTART: FsmConnectorStates.StateSessionRestart,
+          RECONFIGURE: FsmConnectorStates.StateReconfigured,
+          STOP: FsmConnectorStates.StateStopped,
+          RENEW: FsmConnectorStates.StateRenewed,
+          END: FsmConnectorStates.StateEnd
         }
       },
       unlocked: { on: {
-          IDLE: 'idle',
-          OPEN: 'opened',
-          END: 'end',
-          LOCK: 'locked'
+          IDLE: FsmConnectorStates.StateIdle,
+          OPEN: FsmConnectorStates.StateOpened,
+          END: FsmConnectorStates.StateEnd,
+          LOCK: FsmConnectorStates.StateLocked
         }
       },
       stopped: { on: {}},
