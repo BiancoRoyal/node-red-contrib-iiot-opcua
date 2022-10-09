@@ -268,7 +268,8 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.iiot.opcuaClient.connect(this.endpoint, (err: Error | undefined): void => {
         if (isInitializedIIoTNode(this) && !isUndefined(this.iiot)) {
           if (err) {
-            this.iiot?.stateMachine.lock().stopopcua()
+            //this.iiot.stateMachine.lock().stopopcua()
+            this.iiot?.stateMachine.send('STOP')
             handleError(err)
           } else {
             internalDebugLog('Client Is Connected To ' + this.endpoint)
@@ -287,6 +288,8 @@ module.exports = function (RED: nodered.NodeAPI) {
           if (isUndefined(this.iiot)) return;
           renewFiniteStateMachine()
           //this.iiot.stateMachine.idle().initopcua();
+          // Todo: the steps have to be used as before
+          this.iiot.stateService.send('IDLE')
           this.iiot.stateService.send('INITOPCUA')
           done()
         })
@@ -884,7 +887,8 @@ module.exports = function (RED: nodered.NodeAPI) {
             } catch (err: any) {
               handleError(err)
               resetOPCUAObjects()
-              this.iiot.stateMachine.lock().stopopcua()
+              //this.iiot.stateMachine.lock().stopopcua()
+              this.iiot.stateMachine.send('STOP')
             }
           }
         }, this.connectionStartDelay)
