@@ -197,7 +197,7 @@ module.exports = {
 
   logHeapUsage: true,
 
-  maxConcurrency: 32,
+  maxConcurrency: 64,
 
   maxWorkers: 8,
 
