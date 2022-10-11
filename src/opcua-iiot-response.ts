@@ -290,6 +290,8 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.on('input', (msg: NodeMessageInFlow) => {
       try {
 
+        this.status({fill: 'green', shape: 'dot', text: 'active'})
+
         const internalMsg = msg as IotOpcUaNodeMessage
 
         if (self.activateUnsetFilter) {
