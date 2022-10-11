@@ -53,7 +53,7 @@ describe('OPC UA Node node e2e Testing', function () {
   describe('Node node', function () {
     let msgCounter = 0
 
-    it('should get two messages with no payload and one value inject on subscribe', function (done) {
+    it('should get two messages with payload and value after inject on subscribe with listener', function (done) {
       const flow = Array.from(testFlows.testNodeFlow)
       flow[9].port = 51400
       flow[16].endpoint = "opc.tcp://localhost:51400/"
@@ -69,8 +69,8 @@ describe('OPC UA Node node e2e Testing', function () {
             expect(msg.payload.value).toBeDefined()
           }
           if(msgCounter === 2) {
-            expect(msg.payload).toBeUndefined()
-            expect(msg.value).toBeDefined()
+            expect(msg.payload).toBeDefined()
+            expect(msg.payload.value).toBeDefined()
             done()
           }
           })
