@@ -3,11 +3,11 @@ const helperExtensions = require('../../helper/test-helper-extensions')
 
 module.exports = {
 
-  "testBrowseFlow": helperExtensions.cleanFlowPositionData([
+  "testNodeFlow": helperExtensions.cleanFlowPositionData([
     {
       "id": "5199fbd4.d70cec",
       "type": "tab",
-      "label": "Test Node Listener Flow",
+      "label": "Node Test Flow",
       "disabled": false,
       "info": ""
     },
@@ -23,11 +23,11 @@ module.exports = {
       "activateFilters": false,
       "negateFilter": false,
       "filters": [],
-      "x": 780,
-      "y": 120,
+      "x": 720,
+      "y": 180,
       "wires": [
         [
-          "b79f4f7c56fcb140"
+          "4354a9923dabe949"
         ]
       ]
     },
@@ -42,8 +42,27 @@ module.exports = {
       "name": "",
       "topic": "",
       "showErrors": false,
-      "x": 350,
-      "y": 180,
+      "x": 330,
+      "y": 160,
+      "wires": [
+        [
+          "a8972b2d.2013f"
+        ]
+      ]
+    },
+    {
+      "id": "4602cdb3.217b64",
+      "type": "OPCUA-IIoT-Node",
+      "z": "5199fbd4.d70cec",
+      "injectType": "listen",
+      "nodeId": "ns=1;s=TestReadWrite",
+      "datatype": "NodeId",
+      "value": "",
+      "name": "",
+      "topic": "",
+      "showErrors": false,
+      "x": 330,
+      "y": 320,
       "wires": [
         [
           "a8972b2d.2013f"
@@ -54,7 +73,7 @@ module.exports = {
       "id": "7b9f4f56.422f58",
       "type": "inject",
       "z": "5199fbd4.d70cec",
-      "name": "",
+      "name": "test1 sub",
       "props": [
         {
           "p": "payload"
@@ -67,15 +86,44 @@ module.exports = {
       "repeat": "",
       "crontab": "",
       "once": true,
-      "onceDelay": "3",
-      "topic": "",
-      "payload": "{ \"interval\": 500, \"queueSize\": 10 }",
-      "payloadType": "json",
-      "x": 170,
-      "y": 160,
+      "onceDelay": "5",
+      "topic": "testTopic1",
+      "payload": "",
+      "payloadType": "date",
+      "x": 180,
+      "y": 120,
       "wires": [
         [
           "d661a888.37c9b8"
+        ]
+      ]
+    },
+    {
+      "id": "9935e96d.7c4588",
+      "type": "inject",
+      "z": "5199fbd4.d70cec",
+      "name": "test2 sub",
+      "props": [
+        {
+          "p": "payload"
+        },
+        {
+          "p": "topic",
+          "vt": "str"
+        }
+      ],
+      "repeat": "",
+      "crontab": "",
+      "once": true,
+      "onceDelay": "5",
+      "topic": "testTopic2",
+      "payload": "",
+      "payloadType": "date",
+      "x": 180,
+      "y": 280,
+      "wires": [
+        [
+          "4602cdb3.217b64"
         ]
       ]
     },
@@ -91,43 +139,15 @@ module.exports = {
       "justValue": true,
       "useGroupItems": false,
       "showStatusActivities": false,
-      "showErrors": true,
-      "x": 520,
+      "showErrors": false,
+      "x": 500,
       "y": 240,
       "wires": [
         [
           "53aa4e70.57ae7",
-          "e89f48d5.837be",
           "9df04321.80beb",
-          "e2f10f45.b1d6c8",
-          "9c7eb4a929396c62"
-        ]
-      ]
-    },
-    {
-      "id": "e89f48d5.837be",
-      "type": "OPCUA-IIoT-Result-Filter",
-      "z": "5199fbd4.d70cec",
-      "nodeId": "ns=1;s=FullCounter",
-      "datatype": "UInt32",
-      "fixedValue": false,
-      "fixPoint": 2,
-      "withPrecision": false,
-      "precision": 2,
-      "entry": 1,
-      "justValue": true,
-      "withValueCheck": false,
-      "minvalue": "",
-      "maxvalue": "",
-      "defaultvalue": "",
-      "topic": "",
-      "name": "",
-      "showErrors": false,
-      "x": 810,
-      "y": 240,
-      "wires": [
-        [
-          "5789f1186c3c3c11"
+          "4178fe5e.f20bd",
+          "9902563b094d0417"
         ]
       ]
     },
@@ -150,21 +170,21 @@ module.exports = {
       "topic": "",
       "name": "",
       "showErrors": false,
-      "x": 790,
-      "y": 180,
+      "x": 730,
+      "y": 300,
       "wires": [
         [
-          "a322998a81d748af"
+          "5163093453399f1b"
         ]
       ]
     },
     {
-      "id": "e2f10f45.b1d6c8",
+      "id": "4178fe5e.f20bd",
       "type": "OPCUA-IIoT-Result-Filter",
       "z": "5199fbd4.d70cec",
-      "nodeId": "ns=1;s=Counter",
-      "datatype": "UInt16",
-      "fixedValue": false,
+      "nodeId": "ns=1;s=TestReadWrite",
+      "datatype": "Double",
+      "fixedValue": true,
       "fixPoint": 2,
       "withPrecision": false,
       "precision": 2,
@@ -177,133 +197,26 @@ module.exports = {
       "topic": "",
       "name": "",
       "showErrors": false,
-      "x": 800,
-      "y": 300,
+      "x": 760,
+      "y": 240,
       "wires": [
         [
-          "8bad11890c277af4"
+          "c7d02068b47b0c9d"
         ]
       ]
     },
     {
-      "id": "042b6ec66d2a63ef",
-      "type": "inject",
-      "z": "5199fbd4.d70cec",
-      "name": "",
-      "props": [
-        {
-          "p": "payload"
-        },
-        {
-          "p": "topic",
-          "vt": "str"
-        }
-      ],
-      "repeat": "",
-      "crontab": "",
-      "once": true,
-      "onceDelay": "9",
-      "topic": "",
-      "payload": "",
-      "payloadType": "date",
-      "x": 150,
-      "y": 200,
-      "wires": [
-        [
-          "d661a888.37c9b8"
-        ]
-      ]
-    },
-    {
-      "id": "24447f36151cfdf2",
-      "type": "OPCUA-IIoT-Node",
-      "z": "5199fbd4.d70cec",
-      "injectType": "listen",
-      "nodeId": "ns=1;s=Counter",
-      "datatype": "Int32",
-      "value": "",
-      "name": "",
-      "topic": "",
-      "showErrors": false,
-      "x": 350,
-      "y": 300,
-      "wires": [
-        [
-          "a8972b2d.2013f",
-          "429c3a5b1b97891e"
-        ]
-      ]
-    },
-    {
-      "id": "f641937ccc88a669",
-      "type": "inject",
-      "z": "5199fbd4.d70cec",
-      "name": "",
-      "props": [
-        {
-          "p": "payload"
-        },
-        {
-          "p": "topic",
-          "vt": "str"
-        }
-      ],
-      "repeat": "",
-      "crontab": "",
-      "once": true,
-      "onceDelay": "3",
-      "topic": "",
-      "payload": "{ \"interval\": 2000, \"queueSize\": 10 }",
-      "payloadType": "json",
-      "x": 170,
-      "y": 280,
-      "wires": [
-        [
-          "24447f36151cfdf2"
-        ]
-      ]
-    },
-    {
-      "id": "2454a579ac2c3720",
-      "type": "inject",
-      "z": "5199fbd4.d70cec",
-      "name": "",
-      "props": [
-        {
-          "p": "payload"
-        },
-        {
-          "p": "topic",
-          "vt": "str"
-        }
-      ],
-      "repeat": "",
-      "crontab": "",
-      "once": true,
-      "onceDelay": "9",
-      "topic": "",
-      "payload": "",
-      "payloadType": "date",
-      "x": 150,
-      "y": 320,
-      "wires": [
-        [
-          "24447f36151cfdf2"
-        ]
-      ]
-    },
-    {
-      "id": "d46ffacc98d72867",
+      "id": "2c8443488e3080ca",
       "type": "OPCUA-IIoT-Server",
       "z": "5199fbd4.d70cec",
-      "port": "55388",
+      "port": "51400",
       "endpoint": "",
       "acceptExternalCommands": true,
       "maxAllowedSessionNumber": "",
       "maxConnectionsPerEndpoint": "",
       "maxAllowedSubscriptionNumber": "",
       "alternateHostname": "",
-      "name": "",
+      "name": "Server",
       "showStatusActivities": false,
       "showErrors": false,
       "asoDemo": true,
@@ -315,23 +228,23 @@ module.exports = {
       "xmlsets": [],
       "publicCertificateFile": "",
       "privateCertificateFile": "",
-      "registerServerMethod": "1",
+      "registerServerMethod": 1,
       "discoveryServerEndpointUrl": "",
       "capabilitiesForMDNS": "",
-      "maxNodesPerRead": "",
-      "maxNodesPerBrowse": "",
-      "delayToClose": "",
-      "x": 370,
-      "y": 80,
+      "maxNodesPerRead": 1000,
+      "maxNodesPerBrowse": 2000,
+      "delayToClose": 1000,
+      "x": 490,
+      "y": 140,
       "wires": [
         []
       ]
     },
     {
-      "id": "429c3a5b1b97891e",
+      "id": "4354a9923dabe949",
       "type": "helper",
       "z": "5199fbd4.d70cec",
-      "name": "",
+      "name": "helper 1",
       "active": true,
       "tosidebar": true,
       "console": false,
@@ -340,66 +253,15 @@ module.exports = {
       "targetType": "msg",
       "statusVal": "",
       "statusType": "auto",
-      "x": 530,
-      "y": 360,
-      "wires": []
-    },
-    {
-      "id": "8bad11890c277af4",
-      "type": "helper",
-      "z": "5199fbd4.d70cec",
-      "name": "",
-      "active": true,
-      "tosidebar": true,
-      "console": false,
-      "tostatus": false,
-      "complete": "payload",
-      "targetType": "msg",
-      "statusVal": "",
-      "statusType": "auto",
-      "x": 1030,
-      "y": 300,
-      "wires": []
-    },
-    {
-      "id": "5789f1186c3c3c11",
-      "type": "helper",
-      "z": "5199fbd4.d70cec",
-      "name": "",
-      "active": true,
-      "tosidebar": true,
-      "console": false,
-      "tostatus": false,
-      "complete": "payload",
-      "targetType": "msg",
-      "statusVal": "",
-      "statusType": "auto",
-      "x": 1030,
-      "y": 240,
-      "wires": []
-    },
-    {
-      "id": "a322998a81d748af",
-      "type": "helper",
-      "z": "5199fbd4.d70cec",
-      "name": "",
-      "active": true,
-      "tosidebar": true,
-      "console": false,
-      "tostatus": false,
-      "complete": "payload",
-      "targetType": "msg",
-      "statusVal": "",
-      "statusType": "auto",
-      "x": 1030,
+      "x": 1000,
       "y": 180,
       "wires": []
     },
     {
-      "id": "b79f4f7c56fcb140",
+      "id": "c7d02068b47b0c9d",
       "type": "helper",
       "z": "5199fbd4.d70cec",
-      "name": "",
+      "name": "helper 2",
       "active": true,
       "tosidebar": true,
       "console": false,
@@ -408,15 +270,15 @@ module.exports = {
       "targetType": "msg",
       "statusVal": "",
       "statusType": "auto",
-      "x": 1030,
-      "y": 120,
+      "x": 1000,
+      "y": 240,
       "wires": []
     },
     {
-      "id": "9c7eb4a929396c62",
+      "id": "5163093453399f1b",
       "type": "helper",
       "z": "5199fbd4.d70cec",
-      "name": "",
+      "name": "helper 3",
       "active": true,
       "tosidebar": true,
       "console": false,
@@ -425,7 +287,81 @@ module.exports = {
       "targetType": "msg",
       "statusVal": "",
       "statusType": "auto",
-      "x": 790,
+      "x": 1000,
+      "y": 300,
+      "wires": []
+    },
+    {
+      "id": "92a01d8fd09ef676",
+      "type": "inject",
+      "z": "5199fbd4.d70cec",
+      "name": "test1 unsub",
+      "props": [
+        {
+          "p": "payload"
+        },
+        {
+          "p": "topic",
+          "vt": "str"
+        }
+      ],
+      "repeat": "",
+      "crontab": "",
+      "once": true,
+      "onceDelay": "10",
+      "topic": "testTopic1",
+      "payload": "",
+      "payloadType": "date",
+      "x": 170,
+      "y": 200,
+      "wires": [
+        [
+          "d661a888.37c9b8"
+        ]
+      ]
+    },
+    {
+      "id": "c3b257305670140a",
+      "type": "inject",
+      "z": "5199fbd4.d70cec",
+      "name": "test2 unsub",
+      "props": [
+        {
+          "p": "payload"
+        },
+        {
+          "p": "topic",
+          "vt": "str"
+        }
+      ],
+      "repeat": "",
+      "crontab": "",
+      "once": true,
+      "onceDelay": "10",
+      "topic": "testTopic2",
+      "payload": "",
+      "payloadType": "date",
+      "x": 170,
+      "y": 360,
+      "wires": [
+        [
+          "4602cdb3.217b64"
+        ]
+      ]
+    },
+    {
+      "id": "9902563b094d0417",
+      "type": "helper",
+      "z": "5199fbd4.d70cec",
+      "name": "helper 4",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "false",
+      "statusVal": "",
+      "statusType": "auto",
+      "x": 720,
       "y": 360,
       "wires": []
     },
@@ -434,18 +370,18 @@ module.exports = {
       "type": "OPCUA-IIoT-Connector",
       "z": "5199fbd4.d70cec",
       "discoveryUrl": "",
-      "endpoint": "opc.tcp://localhost:55388/",
+      "endpoint": "opc.tcp://localhost:51400/",
+      "endpointMustExist": false,
       "keepSessionAlive": true,
       "loginEnabled": false,
-      "securityPolicy": "None",
-      "securityMode": "None",
       "name": "LOCAL DEMO SERVER",
       "showErrors": false,
+      "securityPolicy": "None",
+      "securityMode": "None",
       "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
-      "endpointMustExist": false,
       "autoSelectRightEndpoint": false,
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
