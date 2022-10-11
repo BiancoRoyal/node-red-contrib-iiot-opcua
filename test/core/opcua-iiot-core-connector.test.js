@@ -12,7 +12,7 @@
 
 let {default: coreConnector} = require('../../src/core/opcua-iiot-core-connector')
 const events = require('events')
-const { FsmConnectorStates } = require('../../opcuaIIoT/core/opcua-iiot-core')
+const { FsmConnectorStates } = require('../../src/core/opcua-iiot-core')
 
 describe('OPC UA Core Connector', function () {
   describe('core functions', function () {

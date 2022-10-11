@@ -64,20 +64,20 @@ type ConnectorEvent =
     | { type: 'RECONFIGURE'};
 
 type ConnectorState =
-    | { value: FsmConnectorStates.StateIdle; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateInit; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateOpened; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateSessionRequested; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateSessionActive; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateSessionClosed; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateSessionRestart; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateClosed; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateLocked; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateUnlocked; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateStopped; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateEnd; context: ConnectorTestContext & { testString: undefined } }
-    | { value: FsmConnectorStates.StateReconfigured; context: ConnectorTestContext  & { testString: undefined }}
-    | { value: FsmConnectorStates.StateRenewed; context: ConnectorTestContext & { testString: undefined } };
+    | { value: FsmConnectorStates.StateIdle; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateInit; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateOpened; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateSessionRequested; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateSessionActive; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateSessionClosed; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateSessionRestart; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateClosed; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateLocked; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateUnlocked; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateStopped; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateEnd; context: ConnectorTestContext & { debugContext: undefined } }
+    | { value: FsmConnectorStates.StateReconfigured; context: ConnectorTestContext  & { debugContext: undefined }}
+    | { value: FsmConnectorStates.StateRenewed; context: ConnectorTestContext & { debugContext: undefined } };
 
 const createConnectorFinalStateMachine = function () {
   return createMachine<ConnectorTestContext, ConnectorEvent, ConnectorState>({
