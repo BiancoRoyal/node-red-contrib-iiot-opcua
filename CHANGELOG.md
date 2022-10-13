@@ -1,4 +1,4 @@
-## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-10-12)
+## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-10-13)
 
 
 ### Bug Fixes
@@ -21,6 +21,7 @@
 * **listener:** e2e test improved ([bb3ac03](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/bb3ac036073396c31425786550fcf2f5ed32fda6))
 * **response-test:** wrong node id ([6fc8405](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/6fc84053c8460e34ad9f1a10b97dd56766d345eb))
 * **response:** now fills the green box after an incoming message ([e9387cc](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e9387cc7107eefa86cb6470fb9310b4431b44b17))
+* **response:** now fills the green box after an incoming message ([a8ea725](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/a8ea72582439619c8dd4d002963d713e5a8aa437))
 * **server-cmd:** e2e test server cmd works again ([ee47e17](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/ee47e178bdaab993b816da0e9c06957e51fb4bbc))
 * **test:** cleaned and extracted flows of ASO test and fixed msg testing ([e96998c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e96998cf41e765919c9d8d54664a4f69e0a0b24f))
 * **test:** more result filter e2e tests pass again ([10d9b0e](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/10d9b0e41b31f961072772ae91c948211f93c9b3))
