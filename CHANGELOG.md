@@ -1,9 +1,9 @@
-## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-10-06)
+## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-10-12)
 
 
 ### Bug Fixes
 
-* all tests working with node-opcua 2.79.1 ([77d8b4c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/77d8b4cda537c0ec67d5292ddc00e7da77c537da))
+* all tests working with node-opcua 2.79.1 ([a2a08dc](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/a2a08dc10ec484fbaf97cba7eb40ee02fc6a386f))
 * changed Node-RED PLUS to PLUS for Node-RED ([767d567](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/767d567974e752ac3b5fcae533cf3cda5a8a3601))
 * **connector-tests:** connector e2e tests running again ([12cda71](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/12cda71444f0687633385707c99ce3ed9c0dce42))
 * **connector:** max subscription deprecated ([d58462b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d58462bd89e4891ef32f25004233bccf8cdff74a))
@@ -20,6 +20,7 @@
 * **listener:** did not stop directly ([cad1543](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/cad1543525748cf9d8e87c1c6ae1d2ab8e94d219))
 * **listener:** e2e test improved ([bb3ac03](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/bb3ac036073396c31425786550fcf2f5ed32fda6))
 * **response-test:** wrong node id ([6fc8405](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/6fc84053c8460e34ad9f1a10b97dd56766d345eb))
+* **response:** now fills the green box after an incoming message ([e9387cc](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e9387cc7107eefa86cb6470fb9310b4431b44b17))
 * **server-cmd:** e2e test server cmd works again ([ee47e17](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/ee47e178bdaab993b816da0e9c06957e51fb4bbc))
 * **test:** cleaned and extracted flows of ASO test and fixed msg testing ([e96998c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e96998cf41e765919c9d8d54664a4f69e0a0b24f))
 * **test:** more result filter e2e tests pass again ([10d9b0e](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/10d9b0e41b31f961072772ae91c948211f93c9b3))
@@ -32,13 +33,14 @@
 
 ### Features
 
-* added default unit test ([ca36e55](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/ca36e551886c190588d4c0960a514d034493df4d))
+* added default unit test ([c764822](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/c764822940d87d1af0e496d8211fde51ca73da3f))
 * added npm run scripts for e2e, unit and core tests on their own ([f282bd4](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f282bd4264ffc63cd52a9f3d4ba26539229a7d4c))
+* continued working on tests ([a37f6f5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/a37f6f53e63d9e3a99974c27d2026b6fbb85bc30))
 * direct use of OPC UA object types ([9b9cc72](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/9b9cc72ba65a011cfb49697615d73622a3fa6768))
-* extracted flows from unit tests ([7c982d1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/7c982d1926c8df7a6ebf962c144d067e2c55ead6))
-* extracted flows from unit tests ([d154bb6](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d154bb6ec0ae498bba386deaf4bc383d02999b1b))
-* extracted flows from Unit tests ([9597e81](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/9597e8147df9d1ceab8de975bb8792b84acd556b))
-* extracted read-flows ([fde0339](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/fde033986a193b08839f6f395d8554db5be8e8da))
+* extracted flows from unit tests ([523a835](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/523a835031af643febdb34ea26a01504483160e9))
+* extracted flows from unit tests ([66ea610](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/66ea610243e0e0e33e106ec5aa21cd98028f764e))
+* extracted flows from Unit tests ([b1929c7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b1929c77ce003cc1d3ea3ecf0cd080a7ebe4d36d))
+* extracted read-flows ([b08a1a5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b08a1a5220999419e731e44e5c79264b61b10f70))
 * **response:** new payload type in json ([de22d9b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/de22d9b25ee4c7bede50a4077f691097ddcf5f5f))
 
 

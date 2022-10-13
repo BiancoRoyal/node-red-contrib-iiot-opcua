@@ -22,6 +22,8 @@ npm install
 
 npm i --only=dev
 
+npm run test:clearCache
+
 npm test
 
 npm run build
