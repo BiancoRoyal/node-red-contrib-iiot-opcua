@@ -18,7 +18,7 @@ import debug from 'debug'
 
 
 import {AttributeIds, DataType, DataValue, resolveNodeId, TimestampsToReturn} from "node-opcua";
-import {FsmConnectorStates, initCoreNode} from "./opcua-iiot-core";
+import {initCoreNode, FsmListenerStates} from "./opcua-iiot-core";
 import {createMachine, interpret} from "@xstate/fsm";
 
 const internalDebugLog = debug('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
@@ -34,7 +34,7 @@ const SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-defi
 const EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 const EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
 const METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
-const RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
+const RUNNING_STATE = FsmListenerStates.StateStarted // eslint-disable-line no-use-before-define
 const MAX_INT32 = 2147483647 // eslint-disable-line no-use-before-define
 
 interface ListenerDebugContext {
@@ -49,16 +49,6 @@ type ListenerEvent =
     | { type: 'TERMINATE'}
     | { type: 'ERROR'}
     | { type: 'IDLE'}
-
-export enum FsmListenerStates {
-  StateIdle = 'idle',
-  StateInit = 'init',
-  StateEnd = 'end',
-  StateRequested = 'requested',
-  StateStarted = 'started',
-  StateError = 'error',
-  StateTerminated = 'terminated'
-}
 
 type ListenerState =
     | { value: FsmListenerStates.StateIdle; context: ListenerDebugContext & { debugContext: undefined } }
@@ -468,10 +458,10 @@ const analyzeEvent = function (session: TodoTypeAny, browseForBrowseName: (...ar
 }
 
 const checkState = function (node: TodoTypeAny, msg: TodoTypeAny, callerType: TodoTypeAny) {
-  internalDebugLog('Check Listener State ' + node.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+  internalDebugLog('Check Listener State ' + node.iiot.stateService.state.value + ' By ' + callerType)
 
-  if (node.connector && node.iiot.stateMachine && node.iiot.stateMachine.getMachineState() !== RUNNING_STATE) {
-    internalDebugLog('Wrong Listener State ' + node.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+  if (node.connector && node.iiot.stateService && node.iiot.stateService.state.value !== RUNNING_STATE) {
+    internalDebugLog('Wrong Listener State ' + node.iiot.stateService.state.value + ' By ' + callerType)
     if (node.showErrors) {
       node.error(new Error('Listener Not ' + RUNNING_STATE + ' On ' + callerType), msg)
     }

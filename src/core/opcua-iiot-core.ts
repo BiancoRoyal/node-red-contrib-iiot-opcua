@@ -44,7 +44,6 @@ import {
 } from "node-opcua";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
-import coreListener from "./opcua-iiot-core-listener";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 
 export {Debug, os, underscore, nodeOPCUAId}
@@ -82,6 +81,16 @@ export enum FsmConnectorStates {
   StateEnd = 'end',
   StateReconfigured = 'reconfigured',
   StateRenewed = 'renewed',
+}
+
+export enum FsmListenerStates {
+  StateIdle = 'idle',
+  StateInit = 'init',
+  StateEnd = 'end',
+  StateRequested = 'requested',
+  StateStarted = 'started',
+  StateError = 'error',
+  StateTerminated = 'terminated'
 }
 
 export const OBJECTS_ROOT: string = 'ns=0;i=84'
@@ -1147,7 +1156,9 @@ export function checkItemForUnsetState(node: TodoTypeAny, item: TodoTypeAny): nu
 }
 
 export function resetIiotNode(node: TodoTypeAny) {
-  coreListener.internalDebugLog('reset IIoT of the Node with id:' + node.id)
+  // coreListener.internalDebugLog('reset IIoT of the Node with id:' + node.id)   /// Invalid import of lower hirarchy module
+  // Valid hirarchy is supposed to be: Core -> CoreSpecific (CoreListener, CoreConnector, ...) -> Specific (Listener, Browser, ...)
+  // This is because looped imports and usages before declaration can happen if this is not kept in mind
 
   if(_.isObject(node) == false || _.isEmpty(node.iiot)) {
     return
