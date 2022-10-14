@@ -154,7 +154,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.connectionStartDelay = config.connectionStartDelay || CONNECTION_START_DELAY
     this.reconnectDelay = config.reconnectDelay || RECONNECT_DELAY
     this.connectionStopDelay = config.connectionStopDelay || CONNECTION_STOP_DELAY
-    this.maxBadSessionRequests = parseInt(config.maxBadSessionRequests.toString()) || 10
+    this.maxBadSessionRequests = parseInt(config.maxBadSessionRequests?.toString()) || 10
 
     this.iiot = coreConnector.initConnectorNode()
 
