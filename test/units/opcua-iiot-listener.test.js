@@ -63,7 +63,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.iiot.stateMachine.endsub()
+          nodeUnderTest.iiot.stateService.send('END')
           nodeUnderTest.functions.createSubscription({ payload: {} })
           done()
         })
@@ -74,7 +74,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.iiot.stateMachine.endsub()
+          nodeUnderTest.iiot.stateService.send('END')
           nodeUnderTest.functions.subscribeActionInput({ payload: {} })
           done()
         })
@@ -85,7 +85,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.iiot.stateMachine.endsub()
+          nodeUnderTest.iiot.stateService.send('END')
           nodeUnderTest.iiot.opcuaSession = null
           nodeUnderTest.functions.subscribeMonitoredItem({ payload: {} })
           done()
@@ -97,7 +97,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.iiot.stateMachine.endsub()
+          nodeUnderTest.iiot.stateService.send('END')
           nodeUnderTest.functions.monitoredItemTerminated({ payload: {} }, null, {}, new Error('Test Error Monitored Item'))
           done()
         })
@@ -118,7 +118,7 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
-          nodeUnderTest.iiot.stateMachine.endsub()
+          nodeUnderTest.iiot.stateService.send('END')
           let testItem = {nodeId: {identifierType: NodeIdType.STRING, namespace: 0, identifier: 'TestItem'}}
           nodeUnderTest.functions.setMonitoring({ itemToMonitor: testItem, on: (string, callback) => {console.log('Added ' + string)}})
           done()
