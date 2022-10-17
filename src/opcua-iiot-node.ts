@@ -55,31 +55,38 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     let self: TodoTypeAny = this
     self.iiot = {}
+
     self.iiot.subscribed = false
-    this.status({fill: 'blue', shape: 'ring', text: 'new'})
+    self.status({fill: 'blue', shape: 'ring', text: 'new'})
 
-    this.on('input', (msg: NodeMessageInFlow) => {
-
+    self.toggleNodeStatusSymbol = () => {
       self.iiot.subscribed = !self.iiot.subscribed
-      const payload = msg.payload as TodoTypeAny
-      const value: TodoTypeAny = typeof msg.payload === "string" ? msg.payload : (msg.payload as TodoTypeAny).value;
 
       if (self.injectType === 'listen') {
         if (self.iiot.subscribed) {
-          this.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
+          self.status({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
-          this.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})
+          self.status({fill: 'blue', shape: 'ring', text: 'not subscribed'})
         }
       } else {
-        this.status({fill: 'blue', shape: 'dot', text: 'injected'})
+        self.status({fill: 'blue', shape: 'dot', text: 'injected'})
       }
+    }
+
+    this.on('input', (msg: NodeMessageInFlow) => {
+
+      self.toggleNodeStatusSymbol();
+
       const topic = msg.topic || self.topic
+      const payload = msg.payload as TodoTypeAny
+      const value: TodoTypeAny = payload?.value ? payload.value : msg.payload;
       const valuesToWrite = payload.valuesToWrite || []
       const addressSpaceItems = payload.addressSpaceItems || []
+
       if (self.injectType === 'write') {
         addressSpaceItems.push({name: self.name, nodeId: self.nodeId, datatypeName: self.datatype})
         try {
-          valuesToWrite.push(convertDataValueByDataType({value: self.value === '' ? msg.payload : self.value}, self.datatype))
+          valuesToWrite.push(convertDataValueByDataType({value: self.value === '' ? value : self.value}, self.datatype))
         } catch (err) {
           logger.internalDebugLog(err)
           if (self.showErrors) {
@@ -89,6 +96,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       } else {
         addressSpaceItems.push({name: self.name, nodeId: self.nodeId, datatypeName: self.datatype})
       }
+
       const outputPayload = {
         nodetype: "node",
         injectType: self.injectType || payload.injectType,
