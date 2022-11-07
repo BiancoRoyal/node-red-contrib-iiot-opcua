@@ -273,7 +273,7 @@ describe('OPC UA Inject node Unit Testing', function () {
       })
     })
 
-    it('should send a messages at an interval of 2 seconds +-3ms ', function (done) {
+    it('should send a messages at an interval of 2 seconds +-5ms ', function (done) {
       helper.load([inputNode], testFlows.testInjectWithIntervalFlow, function () {
         const n1 = helper.getNode('920deb27a882f242')
         let messages = []
@@ -287,11 +287,12 @@ describe('OPC UA Inject node Unit Testing', function () {
 
             let difAverage = (dif0 + dif1 + dif2) / 3
 
-            expect(difAverage).toBeGreaterThanOrEqual(1997)
-            expect(difAverage).toBeLessThanOrEqual(2003)
+            expect(difAverage).toBeGreaterThanOrEqual(1995)
+            expect(difAverage).toBeLessThanOrEqual(2005)
+
+            done()
           }
 
-          done()
         })
       })
     })
