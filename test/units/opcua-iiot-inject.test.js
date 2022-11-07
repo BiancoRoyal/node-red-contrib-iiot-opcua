@@ -297,6 +297,22 @@ describe('OPC UA Inject node Unit Testing', function () {
       })
     })
 
+    it('should send a message payload Date with invalid payloadType = null and empty payload', function (done) {
+      const flow = Array.from(testFlows.testInjectFlow)
+      flow[1].payload = ""
+      flow[1].payloadType = null
+      helper.load([inputNode], flow, function () {
+        const n1 = helper.getNode('n2ijf1')
+        n1.on('input', function (msg) {
+
+          expect(msg.payload).toBeDefined()
+          expect(msg.payload.value).toBeGreaterThan(1000000000000)
+          expect(msg.payload.payloadType).toBe(null)
+          done()
+        })
+      })
+    })
+
     it('should fail on inject button request with wrong id', function (done) {
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         helper.request()
