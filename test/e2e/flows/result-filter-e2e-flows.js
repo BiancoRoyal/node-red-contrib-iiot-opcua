@@ -1,4 +1,3 @@
-
 const helperExtensions = require('../../helper/test-helper-extensions')
 
 module.exports = {
@@ -703,6 +702,197 @@ module.exports = {
       "connectionStartDelay": "",
       "reconnectDelay": "",
       "maxBadSessionRequests": ""
+    }
+  ]),
+
+  "testBrowserReadFilterFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "f907d5d45a2f32aa",
+      "type": "tab",
+      "label": "Test Browser Read Filter Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
+      "id": "e41b31a770aae974",
+      "type": "OPCUA-IIoT-Inject",
+      "z": "f907d5d45a2f32aa",
+      "injectType": "inject",
+      "payload": "",
+      "payloadType": "date",
+      "topic": "",
+      "repeat": "",
+      "crontab": "",
+      "once": true,
+      "startDelay": "3",
+      "name": "",
+      "addressSpaceItems": [
+        {
+          "name": "",
+          "nodeId": "ns=1;i=1234",
+          "datatypeName": ""
+        }
+      ],
+      "x": 183,
+      "y": 276,
+      "wires": [
+        [
+          "a56f06c60c748adc"
+        ]
+      ]
+    },
+    {
+      "id": "a56f06c60c748adc",
+      "type": "OPCUA-IIoT-Browser",
+      "z": "f907d5d45a2f32aa",
+      "nodeId": "",
+      "name": "",
+      "justValue": true,
+      "sendNodesToRead": false,
+      "sendNodesToBrowser": false,
+      "sendNodesToListener": false,
+      "multipleOutputs": false,
+      "showStatusActivities": false,
+      "showErrors": false,
+      "recursiveBrowse": false,
+      "recursiveDepth": 1,
+      "delayPerMessage": 0.2,
+      "connector": "adcdcb3b6536f1a0",
+      "x": 331,
+      "y": 276,
+      "wires": [
+        [
+          "33a45514d924a66f"
+        ]
+      ]
+    },
+    {
+      "id": "94f643951fbe1db3",
+      "type": "OPCUA-IIoT-Read",
+      "z": "f907d5d45a2f32aa",
+      "attributeId": 0,
+      "maxAge": 1,
+      "depth": 1,
+      "connector": "adcdcb3b6536f1a0",
+      "name": "",
+      "justValue": true,
+      "showStatusActivities": false,
+      "showErrors": false,
+      "parseStrings": false,
+      "historyDays": 1,
+      "x": 654,
+      "y": 275,
+      "wires": [
+        [
+          "920deb27a882f242"
+        ]
+      ]
+    },
+    {
+      "id": "33a45514d924a66f",
+      "type": "OPCUA-IIoT-Result-Filter",
+      "z": "f907d5d45a2f32aa",
+      "nodeId": "ns=1;s=Pressure",
+      "datatype": "",
+      "fixedValue": false,
+      "fixPoint": 2,
+      "withPrecision": false,
+      "precision": 2,
+      "entry": 1,
+      "justValue": false,
+      "withValueCheck": false,
+      "minvalue": "",
+      "maxvalue": "",
+      "defaultvalue": "",
+      "topic": "",
+      "name": "Result Filter",
+      "showErrors": false,
+      "x": 500,
+      "y": 276,
+      "wires": [
+        [
+          "94f643951fbe1db3"
+        ]
+      ]
+    },
+    {
+      "id": "920deb27a882f242",
+      "type": "helper",
+      "z": "f907d5d45a2f32aa",
+      "name": "helper 1",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "false",
+      "statusVal": "",
+      "statusType": "auto",
+      "x": 797,
+      "y": 275,
+      "wires": []
+    },
+    {
+      "id": "1da9bda808ddfb0f",
+      "type": "OPCUA-IIoT-Server",
+      "z": "f907d5d45a2f32aa",
+      "port": "55388",
+      "endpoint": "",
+      "acceptExternalCommands": true,
+      "maxAllowedSessionNumber": "",
+      "maxConnectionsPerEndpoint": "",
+      "maxAllowedSubscriptionNumber": "",
+      "alternateHostname": "",
+      "name": "",
+      "showStatusActivities": false,
+      "showErrors": false,
+      "asoDemo": true,
+      "allowAnonymous": true,
+      "individualCerts": false,
+      "isAuditing": false,
+      "serverDiscovery": true,
+      "users": [],
+      "xmlsets": [],
+      "publicCertificateFile": "",
+      "privateCertificateFile": "",
+      "registerServerMethod": 1,
+      "discoveryServerEndpointUrl": "",
+      "capabilitiesForMDNS": "",
+      "maxNodesPerRead": 1000,
+      "maxNodesPerBrowse": 2000,
+      "delayToClose": 1000,
+      "x": 155,
+      "y": 111,
+      "wires": [
+        []
+      ]
+    },
+    {
+      "id": "adcdcb3b6536f1a0",
+      "type": "OPCUA-IIoT-Connector",
+      "z": "f907d5d45a2f32aa",
+      "discoveryUrl": "",
+      "endpoint": "opc.tcp://localhost:55388/",
+      "endpointMustExist": false,
+      "keepSessionAlive": true,
+      "loginEnabled": false,
+      "name": "LOCAL SERVER",
+      "showErrors": false,
+      "securityPolicy": "None",
+      "securityMode": "None",
+      "individualCerts": false,
+      "publicCertificateFile": "",
+      "privateKeyFile": "",
+      "defaultSecureTokenLifetime": "",
+      "autoSelectRightEndpoint": false,
+      "strategyMaxRetry": "",
+      "strategyInitialDelay": "",
+      "strategyMaxDelay": "",
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": "10"
     }
   ])
 }
