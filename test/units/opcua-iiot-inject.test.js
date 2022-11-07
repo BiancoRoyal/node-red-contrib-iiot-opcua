@@ -273,6 +273,29 @@ describe('OPC UA Inject node Unit Testing', function () {
       })
     })
 
+    it('should send a messages at an interval of 2 seconds +-3ms ', function (done) {
+      helper.load([inputNode], testFlows.testInjectWithIntervalFlow, function () {
+        const n1 = helper.getNode('920deb27a882f242')
+        let messages = []
+        n1.on('input', function (msg) {
+          messages.push(msg)
+
+          if(messages.length >= 4) {
+            let dif0 = messages[1].payload.value - messages[0].payload.value
+            let dif1 = messages[2].payload.value - messages[1].payload.value
+            let dif2 = messages[3].payload.value - messages[2].payload.value
+
+            let difAverage = (dif0 + dif1 + dif2) / 3
+
+            expect(difAverage).toBeGreaterThanOrEqual(1997)
+            expect(difAverage).toBeLessThanOrEqual(2003)
+          }
+
+          done()
+        })
+      })
+    })
+
     it('should fail on inject button request with wrong id', function (done) {
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         helper.request()
