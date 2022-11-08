@@ -15,11 +15,11 @@ import {TodoTypeAny} from "../types/placeholders";
 import debug from 'debug'
 
 // @ts-ignore
-import * as Stately from 'stately.js'
 
 
 import {AttributeIds, DataType, DataValue, resolveNodeId, TimestampsToReturn} from "node-opcua";
-import {initCoreNode} from "./opcua-iiot-core";
+import {FsmConnectorStates, initCoreNode} from "./opcua-iiot-core";
+import {createMachine, interpret} from "@xstate/fsm";
 
 const internalDebugLog = debug('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:listener:details') // eslint-disable-line no-use-before-define
@@ -37,36 +37,88 @@ const METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
 const RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
 const MAX_INT32 = 2147483647 // eslint-disable-line no-use-before-define
 
+interface ListenerDebugContext {
+  debugContext?: string
+}
+
+type ListenerEvent =
+    | { type: 'REQUESTINIT' }
+    | { type: 'END'}
+    | { type: 'INIT'}
+    | { type: 'START'}
+    | { type: 'TERMINATE'}
+    | { type: 'ERROR'}
+    | { type: 'IDLE'}
+
+export enum FsmListenerStates {
+  StateIdle = 'idle',
+  StateInit = 'init',
+  StateEnd = 'end',
+  StateRequested = 'requested',
+  StateStarted = 'started',
+  StateError = 'error',
+  StateTerminated = 'terminated'
+}
+
+type ListenerState =
+    | { value: FsmListenerStates.StateIdle; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateInit; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateEnd; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateRequested; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateStarted; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateError; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateTerminated; context: ListenerDebugContext & { debugContext: undefined } }
+
 const createListenerStateMachine = function () {
-  return Stately.machine({
-    'IDLE': {
-      'requestinitsub': 'REQUESTED',
-      'endsub': 'END'
-    },
-    'REQUESTED': {
-      'initsub': 'INIT'
-    },
-    'INIT': {
-      'startsub': 'STARTED',
-      'terminatesub': 'TERMINATED',
-      'errorsub': 'ERROR'
-    },
-    'STARTED': {
-      'terminatesub': 'TERMINATED',
-      'errorsub': 'ERROR'
-    },
-    'TERMINATED': {
-      'idlesub': 'IDLE',
-      'errorsub': 'ERROR',
-      'endsub': 'END'
-    },
-    'ERROR': {
-      'idlesub': 'IDLE',
-      'initsub': 'INIT',
-      'endsub': 'END'
-    },
-    'END': {}
-  }, 'IDLE')
+  return createMachine<ListenerDebugContext, ListenerEvent, ListenerState>({
+    id: 'listener',
+    initial: FsmListenerStates.StateIdle,
+    states: {
+      idle: { on: {
+          REQUESTINIT: FsmListenerStates.StateRequested,
+          END: FsmListenerStates.StateEnd
+        }
+      },
+      init: { on: {
+          START: FsmListenerStates.StateStarted,
+          TERMINATE: FsmListenerStates.StateTerminated,
+          ERROR: FsmListenerStates.StateError
+        }
+      },
+      requested: { on: {
+          INIT: FsmListenerStates.StateInit
+        }
+      },
+      started: { on: {
+          TERMINATE: FsmListenerStates.StateTerminated,
+          ERROR: FsmListenerStates.StateError
+        }
+      },
+      error: { on: {
+          IDLE: FsmListenerStates.StateIdle,
+          INIT: FsmListenerStates.StateInit,
+          END: FsmListenerStates.StateEnd
+        }
+      },
+      terminated: { on: {
+          IDLE: FsmListenerStates.StateIdle,
+          ERROR: FsmListenerStates.StateError,
+          END: FsmListenerStates.StateEnd
+        }
+      },
+      end: { on: {} }
+    }
+  })
+}
+
+const startListenerMachineService = (toggleMachine: any) => {
+  return interpret(toggleMachine).start()
+}
+
+const subscribeListenerFSMService = (service: TodoTypeAny, eventFn: (state: any) => void) => {
+  if(service === undefined || eventFn === undefined) throw new Error('Service or event handler missing')
+
+  return service.subscribe(eventFn)
 }
 
 const getEventSubscriptionParameters = function (timeMilliseconds: number) {
@@ -458,6 +510,8 @@ const coreListener = {
   MAX_INT32,
 
   createListenerStateMachine,
+  startListenerMachineService,
+  subscribeListenerFSMService,
   getEventSubscriptionParameters,
   getSubscriptionParameters,
   collectAlarmFields,
