@@ -12,34 +12,12 @@
 
 import * as core from './opcua-iiot-core'
 // @ts-ignore
-import * as Stately from 'stately.js'
 import {TodoTypeAny} from "../types/placeholders";
 import {ClientSession, OPCUAClient, OPCUADiscoveryServer, UserIdentityInfo} from "node-opcua";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import {Node} from "node-red";
-import {createMachine, interpret, StateMachine} from "@xstate/fsm";
-import Service = StateMachine.Service;
-
-export type ConnectorIIoT = {
-  endpoints: string[],
-  opcuaClient?: OPCUAClient
-  opcuaSession?: ClientSession
-  discoveryServer?: OPCUADiscoveryServer
-  serverCertificate?: string
-  discoveryServerEndpointUrl?: string
-  hasOpcUaSubscriptions: boolean
-  userIdentity?: UserIdentityInfo
-  //stateMachine?: Stately.machine
-  stateMachine?: TodoTypeAny
-  stateService?: TodoTypeAny
-  stateSubscription?: TodoTypeAny
-  opcuaClientOptions?: OPCUAClientOptions
-  registeredNodeList?: Record<string, Node>
-  functions?: Record<string, (...args: TodoTypeAny) => TodoTypeAny>
-  sessionNodeRequests: number
-}
-
-export {Stately}
+import {createMachine, interpret} from "@xstate/fsm";
+import {ConnectorIIoT, FsmConnectorStates} from "./opcua-iiot-core";
 
 export namespace logger {
   export const internalDebugLog = core.Debug('opcuaIIoT:connector')
@@ -63,113 +41,6 @@ const initConnectorNode = (): ConnectorIIoT => {
   }
 
 }
-/*
-export type CoreMachineStates =
-  'IDLE' |
-  'INITOPCUA' |
-  'OPEN' |
-  'SESSIONREQUESTED' |
-  'SESSIONACTIVE' |
-  'SESSIONRESTART' |
-  'SESSIONCLOSED' |
-  'CLOSED' |
-  'LOCKED' |
-  'UNLOCKED' |
-  'RECONFIGURED' |
-  'RENEW' |
-  'STOPPED' |
-  'END';
-
- */
-
-// export type CoreStateMachine = Record<CoreMachineStates, Record<string, CoreMachineStates>>
-
-/*
-// TODO: @xstate/fsm is a good package to replace it. See: modbus contribution package core client
-// many functions are now available and working well in node-opcua and maybe it needs less control from our package
-function createConnectorStatelyMachine() {
-  const stateMachine: Stately.stateMachine = Stately.machine({
-    'IDLE': {
-      'initopcua': 'INITOPCUA',
-      'lock': 'LOCKED',
-      'end': 'END'
-    },
-    'INITOPCUA': {
-      'open': 'OPEN',
-      'close': 'CLOSED',
-      'lock': 'LOCKED',
-      'end': 'END'
-    },
-    'OPEN': {
-      'sessionrequest': 'SESSIONREQUESTED',
-      'close': 'CLOSED',
-      'lock': 'LOCKED',
-      'end': 'END'
-    },
-    'SESSIONREQUESTED': {
-      'open': 'OPEN',
-      'sessionactive': 'SESSIONACTIVE',
-      'lock': 'LOCKED',
-      'end': 'END'
-    },
-    'SESSIONACTIVE': {
-      'open': 'OPEN',
-      'sessionclose': 'SESSIONCLOSED',
-      'lock': 'LOCKED',
-      'end': 'END'
-    },
-    'SESSIONRESTART': {
-      'idle': 'IDLE',
-      'open': 'OPEN',
-      'sessionclose': 'SESSIONCLOSED',
-      'close': 'CLOSED',
-      'lock': 'LOCKED',
-      'end': 'END'
-    },
-    'SESSIONCLOSED': {
-      'idle': 'IDLE',
-      'open': 'OPEN',
-      'close': 'CLOSED',
-      'sessionrestart': 'SESSIONRESTART',
-      'lock': 'LOCKED',
-      'unlock': 'UNLOCKED',
-      'end': 'END'
-    },
-    'CLOSED': {
-      'open': 'OPEN',
-      'lock': 'LOCKED',
-      'unlock': 'UNLOCKED',
-      'end': 'END',
-      'idle': 'IDLE'
-    },
-    'LOCKED': {
-      'sessionclose': 'SESSIONCLOSED',
-      'open': 'OPEN',
-      'close': 'CLOSED',
-      'unlock': 'UNLOCKED',
-      'lock': 'LOCKED',
-      'sessionrestart': 'SESSIONRESTART',
-      'reconfigure': 'RECONFIGURED',
-      'stopopcua': 'STOPPED',
-      'renew': 'RENEW',
-      'end': 'END'
-    },
-    'UNLOCKED': {
-      'idle': 'IDLE',
-      'lock': 'LOCKED',
-      'open': 'OPEN',
-      'end': 'END'
-    },
-    'RECONFIGURED': {},
-    'RENEW': {},
-    'STOPPED': {},
-    'END': {}
-  }, 'IDLE')
-  logger.internalDebugLog('Start FSM: ' + stateMachine.getMachineState())
-  logger.detailDebugLog('FSM events:' + stateMachine.getMachineEvents())
-  return stateMachine
-}
- */
 
 interface ConnectorTestContext {
   debugContext?: string
@@ -191,23 +62,6 @@ type ConnectorEvent =
     | { type: 'RESTART'}
     | { type: 'RENEW'}
     | { type: 'RECONFIGURE'};
-
-export enum FsmConnectorStates {
-    StateIdle = 'idle',
-    StateInit = 'init',
-    StateOpened = 'opened',
-    StateSessionRequested = 'sessionRequested',
-    StateSessionActive = 'sessionActive',
-    StateSessionClosed = 'sessionClosed',
-    StateSessionRestart = 'sessionRestart',
-    StateClosed = 'closed',
-    StateLocked = 'locked',
-    StateUnlocked = 'unlocked',
-    StateStopped = 'stopped',
-    StateEnd = 'end',
-    StateReconfigured = 'reconfigured',
-    StateRenewed = 'renewed',
-}
 
 type ConnectorState =
     | { value: FsmConnectorStates.StateIdle; context: ConnectorTestContext & { testString: undefined } }
@@ -358,7 +212,7 @@ function setListenerToClient(node: TodoTypeAny) {
   node.iiot.opcuaClient.on('backoff', function (number: number, delay: number) {
     logger.internalDebugLog('!!! CONNECTION FAILED (backoff) FOR #', number, ' retrying ', delay / 1000.0, ' sec. !!!')
     logger.internalDebugLog('CONNECTION FAILED: ' + node.endpoint)
-    node.iiot.stateMachine.lock()
+    node.iiot.stateService.send('LOCK')
   })
 
   node.iiot.opcuaClient.on('abort', function () {
@@ -377,20 +231,20 @@ function setListenerToClient(node: TodoTypeAny) {
   node.iiot.opcuaClient.on('connection_lost', function () {
     logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION LOST !!!!!!!!!!!!!!!!!!!')
     logger.internalDebugLog('CONNECTION LOST: ' + node.endpoint)
-    node.iiot.stateMachine.lock()
+    node.iiot.stateService.send('LOCK')
     node.emit('server_connection_lost')
   })
 
   node.iiot.opcuaClient.on('connection_reestablished', function () {
     logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT CONNECTION RE-ESTABLISHED !!!!!!!!!!!!!!!!!!!')
     logger.internalDebugLog('CONNECTION RE-ESTABLISHED: ' + node.endpoint)
-    node.iiot.stateMachine.unlock()
+    node.iiot.stateService.send('UNLOCK')
   })
 
   node.iiot.opcuaClient.on('start_reconnection', function () {
     logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!  CLIENT STARTING RECONNECTION !!!!!!!!!!!!!!!!!!!')
     logger.internalDebugLog('CONNECTION STARTING RECONNECTION: ' + node.endpoint)
-    node.iiot.stateMachine.lock()
+    node.iiot.stateService.send('LOCK')
   })
 
   node.iiot.opcuaClient.on('timed_out_request', function () {
@@ -400,14 +254,14 @@ function setListenerToClient(node: TodoTypeAny) {
 
   node.iiot.opcuaClient.on('security_token_renewed', function () {
     logger.detailDebugLog('!!!!!!!!!!!!!!!!!!!!!!!! CLIENT SECURITY TOKEN RENEWED !!!!!!!!!!!!!!!!!!!')
-    logger.detailDebugLog('CONNECTION SECURITY TOKEN RENEWE: ' + node.endpoint)
+    logger.detailDebugLog('CONNECTION SECURITY TOKEN RENEWED: ' + node.endpoint)
   })
 
   node.iiot.opcuaClient.on('after_reconnection', function () {
     logger.internalDebugLog('!!!!!!!!!!!!!!!!!!!!!!!!      CLIENT RECONNECTED     !!!!!!!!!!!!!!!!!!!')
     logger.internalDebugLog('CONNECTION RECONNECTED: ' + node.endpoint)
     node.emit('after_reconnection', node.iiot.opcuaClient)
-    node.iiot.stateMachine.unlock()
+    node.iiot.stateService.send('UNLOCK')
   })
 }
 
@@ -458,7 +312,6 @@ function checkEndpoint(endpoint: string, errorHandler: (err: Error) => void) {
 
 const coreConnector = {
   initConnectorNode,
-  //createConnectorStatelyMachine,
   createConnectorFinalStateMachine,
   startConnectorMachineService,
   subscribeConnectorFSMService,

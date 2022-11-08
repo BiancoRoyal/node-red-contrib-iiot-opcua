@@ -1,10 +1,11 @@
-## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-10-13)
+## [4.0.12](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.0.12) (2022-10-10)
 
 
 ### Bug Fixes
 
-* all tests working with node-opcua 2.79.1 ([a2a08dc](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/a2a08dc10ec484fbaf97cba7eb40ee02fc6a386f))
+* all tests working with node-opcua 2.79.1 ([77d8b4c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/77d8b4cda537c0ec67d5292ddc00e7da77c537da))
 * changed Node-RED PLUS to PLUS for Node-RED ([767d567](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/767d567974e752ac3b5fcae533cf3cda5a8a3601))
+* connector state machine problems on test ([cdb82e9](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/cdb82e9aebb910021d79172b80a54716c646094f))
 * **connector-tests:** connector e2e tests running again ([12cda71](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/12cda71444f0687633385707c99ce3ed9c0dce42))
 * **connector:** max subscription deprecated ([d58462b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d58462bd89e4891ef32f25004233bccf8cdff74a))
 * **core:** missing inject handling and wrong method call ([b8ff7e3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b8ff7e3ed53fce7cdd4880d7108e7519670c9d74))
@@ -14,7 +15,9 @@
 * event shortcut functions deprecated ([04dafc3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/04dafc3ee726a4fd93c1bdeeb83ced527a22db7a))
 * **event-listener:** e2e tests improved ([73a6e94](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/73a6e94af2dc659fad3ff7c039dc938d40e6abe1))
 * **flex-connector:** new throw error and e2e works again ([efce751](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/efce751dcae371dcc1c6263d98f6bc09db71288c))
+* **flex-server:** changes to the new TS structrues ([eafbda1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/eafbda106e9adc3605c8de2d776c48e8c209e666))
 * **flex-server:** missing new msg structure handling ([be856dd](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/be856dd83d271085096f66914a8c8df981000085))
+* **flex-server:** wrong function call ([bd79485](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/bd7948512f5cbca4f365cca8c5865141d7958db6))
 * listener now handles nodetype='events' msg and subs events ([c20d6ea](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/c20d6eafa4adc8536ce441e61acc8f37f8c7ba61))
 * listener now handles nodetype='events' msg and subs events ([2ef0bfc](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2ef0bfcf6f4b1f0ff69feb5911e25e1fbcd5959b))
 * **listener:** did not stop directly ([cad1543](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/cad1543525748cf9d8e87c1c6ae1d2ab8e94d219))
@@ -36,12 +39,9 @@
 
 * added default unit test ([c764822](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/c764822940d87d1af0e496d8211fde51ca73da3f))
 * added npm run scripts for e2e, unit and core tests on their own ([f282bd4](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f282bd4264ffc63cd52a9f3d4ba26539229a7d4c))
-* continued working on tests ([a37f6f5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/a37f6f53e63d9e3a99974c27d2026b6fbb85bc30))
+* created type safe xstate fsm template ([e0a0dc0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e0a0dc001840865bfd3b05a8562bd791cc27e466))
 * direct use of OPC UA object types ([9b9cc72](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/9b9cc72ba65a011cfb49697615d73622a3fa6768))
-* extracted flows from unit tests ([523a835](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/523a835031af643febdb34ea26a01504483160e9))
-* extracted flows from unit tests ([66ea610](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/66ea610243e0e0e33e106ec5aa21cd98028f764e))
-* extracted flows from Unit tests ([b1929c7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b1929c77ce003cc1d3ea3ecf0cd080a7ebe4d36d))
-* extracted read-flows ([b08a1a5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b08a1a5220999419e731e44e5c79264b61b10f70))
+* replaced every stately call to xstate/fsm call ([9848317](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/98483175e9cc123bec71ef534907d17eec446f82))
 * **response:** new payload type in json ([de22d9b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/de22d9b25ee4c7bede50a4077f691097ddcf5f5f))
 * start xstate implementation 1 ([421519c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/421519c1af5fbcdf08dc137c7adf061cd861b51e))
 

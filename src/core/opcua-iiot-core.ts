@@ -40,14 +40,49 @@ import {
   NodeClass,
   NodeId,
   NodeIdType,
-  OPCUAClient,
+  OPCUAClient, OPCUADiscoveryServer, UserIdentityInfo,
 } from "node-opcua";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {VariantOptions} from "node-opcua-variant";
-import {ConnectorIIoT, FsmConnectorStates} from "./opcua-iiot-core-connector";
 import coreListener from "./opcua-iiot-core-listener";
+import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 
 export {Debug, os, underscore, nodeOPCUAId}
+
+export type ConnectorIIoT = {
+  endpoints: string[],
+  opcuaClient?: OPCUAClient
+  opcuaSession?: ClientSession
+  discoveryServer?: OPCUADiscoveryServer
+  serverCertificate?: string
+  discoveryServerEndpointUrl?: string
+  hasOpcUaSubscriptions: boolean
+  userIdentity?: UserIdentityInfo
+  stateMachine?: TodoTypeAny
+  stateService?: TodoTypeAny
+  stateSubscription?: TodoTypeAny
+  opcuaClientOptions?: OPCUAClientOptions
+  registeredNodeList?: Record<string, Node>
+  functions?: Record<string, (...args: TodoTypeAny) => TodoTypeAny>
+  sessionNodeRequests: number
+}
+
+export enum FsmConnectorStates {
+  StateIdle = 'idle',
+  StateInit = 'init',
+  StateOpened = 'opened',
+  StateSessionRequested = 'sessionRequested',
+  StateSessionActive = 'sessionActive',
+  StateSessionClosed = 'sessionClosed',
+  StateSessionRestart = 'sessionRestart',
+  StateClosed = 'closed',
+  StateLocked = 'locked',
+  StateUnlocked = 'unlocked',
+  StateStopped = 'stopped',
+  StateEnd = 'end',
+  StateReconfigured = 'reconfigured',
+  StateRenewed = 'renewed',
+}
 
 export const OBJECTS_ROOT: string = 'ns=0;i=84'
 export const TEN_SECONDS_TIMEOUT: number = 10
