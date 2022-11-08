@@ -264,6 +264,9 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (isUndefined(this.iiot))
         return
 
+      if(isUndefined(this.iiot.stateService))
+        return
+
       // Needs to be separate if so that typescript understands the types properly
       if (isUndefined(this.iiot.opcuaClient))
         return
@@ -272,10 +275,10 @@ module.exports = function (RED: nodered.NodeAPI) {
         return
       }
       this.iiot.opcuaClient.connect(this.endpoint, (err: Error | undefined): void => {
-        if (isInitializedIIoTNode(this) && !isUndefined(this.iiot)) {
+        if (isInitializedIIoTNode(this) && !isUndefined(this.iiot) && !isUndefined(this.iiot.stateService)) {
           if (err) {
             //this.iiot.stateMachine.lock().stopopcua()
-            this.iiot?.stateMachine.send('STOP')
+            this.iiot?.stateService.send('STOP')
             handleError(err)
           } else {
             internalDebugLog('Client Is Connected To ' + this.endpoint)
