@@ -517,10 +517,40 @@ describe('OPC UA Connector node e2e Testing', function () {
       })
     })
 
+    it('should be loaded with secure mode and policy', function (done) {
+      const flow = Array.from(testFlows.testConnectorBrowseFlow)
+      flow[5].port = "50223"
+      flow[5].users =  [
+        {
+          "name": "test",
+          "password": "test"
+        }
+      ]
+      flow[6].loginEnabled = true
+      flow[6].credentials = {
+        "user": "test",
+        "password": "test"
+      }
+      flow[6].endpoint = "opc.tcp://localhost:50223/"
+      flow[6].securityPolicy = "Basic128"
+      flow[6].securityMode = "Sign"
+
+      helper.load(nodesToLoadForBrowser, flow, () => {
+        let n = helper.getNode('c1cf1')
+        if (n) {
+          expect(n.publicCertificateFile).toBeDefined()
+          expect(n.publicCertificateFile !== "").toBe(true)
+          expect(n.privateKeyFile).toBeDefined()
+          expect(n.privateKeyFile !== "").toBe(true)
+          setTimeout(done, 1000)
+        }
+      })
+    })
+
     it('should get a message with addressSpaceItems after method', function (done) {
       const flow = Array.from(testFlows.testConnectorMethodCallerFlow)
-      flow[5].port = "50223"
-      flow[6].endpoint = "opc.tcp://localhost:50223/"
+      flow[5].port = "50225"
+      flow[6].endpoint = "opc.tcp://localhost:50225/"
 
       helper.load(nodesToLoadForMethodCaller, flow, function () {
         let n5 = helper.getNode('n5cf5')
