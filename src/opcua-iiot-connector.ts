@@ -202,6 +202,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
         internalDebugLog('Connecting With Login Data On ' + this.endpoint)
       } else {
+        /* istanbul ignore next */
         this.error(new Error('Login Enabled But No Credentials'), {payload: ''})
       }
     }
@@ -250,6 +251,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (!this.iiot.opcuaClient)
         this.iiot.opcuaClient = OPCUAClient.create({...this.iiot.opcuaClientOptions}) // Need to use the spread operator, because otherwise there is phantom circular references
       if (Object.keys(this.iiot.opcuaClient).length === 0) {
+        /* istanbul ignore next */
         detailDebugLog('Failed to create OPCUA Client ', {opcuaClient: this.iiot.opcuaClient})
       }
 
@@ -286,6 +288,7 @@ module.exports = function (RED: nodered.NodeAPI) {
             this.iiot.stateService.send('OPEN')
           }
         } else {
+          /* istanbul ignore next */
           internalDebugLog('iiot not valid on connect resolve')
         }
       })
@@ -303,6 +306,7 @@ module.exports = function (RED: nodered.NodeAPI) {
           done()
         })
       } else {
+        /* istanbul ignore next */
         internalDebugLog('iiot not valid on renew connection')
       }
     }
@@ -321,6 +325,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     const selectEndpointFromSettings = (discoverClient: OPCUAClient) => {
       discoverClient.getEndpoints((err, endpoints) => {
         if (err) {
+          /* istanbul ignore next */
           internalDebugLog('Auto Switch To Endpoint Error ' + err)
           if (this.showErrors) {
             this.error(err, {payload: 'Get Endpoints Request Error'})
@@ -331,6 +336,7 @@ module.exports = function (RED: nodered.NodeAPI) {
           })
 
           if (endpoint && endpoint.endpointUrl != null) {
+            /* istanbul ignore next */
             internalDebugLog('Auto Switch To Endpoint ' + endpoint.endpointUrl)
             this.endpoint = endpoint.endpointUrl
           } else {
@@ -340,8 +346,10 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         discoverClient.disconnect((err: Error | undefined) => {
           if (err) {
+            /* istanbul ignore next */
             internalDebugLog('Endpoints Auto Request Error ' + err)
             if (this.showErrors) {
+              /* istanbul ignore next */
               this.error(err, {payload: 'Discover Client Disconnect Error'})
             }
           } else {
@@ -370,6 +378,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         this.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
       }).catch((err: Error) => {
+        /* istanbul ignore next */
         internalDebugLog('Get Auto Endpoint Request Error ' + err.message)
         if (isInitializedIIoTNode<ConnectorIIoT>(this.iiot) && !isUndefined(this.iiot.opcuaClientOptions)) {
           this.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
@@ -382,12 +391,14 @@ module.exports = function (RED: nodered.NodeAPI) {
     const startSession = async (callerInfo: string) => {
       internalDebugLog('Request For New Session From ' + callerInfo)
       if (isUndefined(this.iiot)) {
+        /* istanbul ignore next */
         return
       }
 
       if (isInactiveOnOPCUA()) {
         internalDebugLog('State Is Not Active While Start Session-> ' + this.iiot.stateService.state.value)
         if (this.showErrors) {
+          /* istanbul ignore next */
           this.error(new Error('OPC UA Connector Is Not Active'), {payload: 'Create Session Error'})
         }
         return
@@ -396,6 +407,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (this.iiot.stateService.state.value !== FsmConnectorStates.StateOpened) {
         internalDebugLog('Session Request Not Allowed On State ' + this.iiot.stateService.state.value)
         if (this.showErrors) {
+          /* istanbul ignore next */
           this.error(new Error('OPC UA Connector Is Not Open'), {payload: 'Create Session Error'})
         }
         return
@@ -404,6 +416,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (!this.iiot.opcuaClient) {
         internalDebugLog('OPC UA Client Connection Is Not Valid On State ' + this.iiot.stateService.state.value)
         if (this.showErrors) {
+          /* istanbul ignore next */
           this.error(new Error('OPC UA Client Connection Is Not Valid'), {payload: 'Create Session Error'})
         }
         return
@@ -427,6 +440,7 @@ module.exports = function (RED: nodered.NodeAPI) {
             handleSessionClose(statusCode)
           })
         }).catch((err: Error) => {
+            /* istanbul ignore next */
           if (isInitializedIIoTNode<ConnectorIIoT>(this.iiot)) {
             //this.iiot.stateMachine.lock().stopopcua()
             this.iiot.stateService.send('LOCK')
@@ -442,12 +456,14 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const resetBadSession = () => {
       if (!this.iiot) {
+        /* istanbul ignore next */
         return
       }
 
       this.iiot.sessionNodeRequests += 1
       detailDebugLog('Session Node Requests At Connector No.: ' + this.iiot.sessionNodeRequests)
       if (this.showErrors) {
+        /* istanbul ignore next */
         internalDebugLog('!!!!!!!!!!!!!!!!!!!!!   BAD SESSION ON CONNECTOR   !!!!!!!!!!!!!!!!!!')
       }
 
@@ -486,12 +502,14 @@ module.exports = function (RED: nodered.NodeAPI) {
     const handleError = (err: Error) => {
       internalDebugLog('Handle Error On ' + this.endpoint + ' err: ' + err)
       if (this.showErrors) {
+        /* istanbul ignore next */
         this.error(err, {payload: 'Handle Connector Error'})
       }
     }
 
     const closeSession = (done: () => void) => {
       if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        /* istanbul ignore next */
         done()
         return
       }
@@ -508,6 +526,7 @@ module.exports = function (RED: nodered.NodeAPI) {
             done()
           })
         } catch (err: any) {
+          /* istanbul ignore next */
           handleError(err)
           done()
         } finally {
