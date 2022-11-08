@@ -17,6 +17,7 @@ import {TodoTypeAny} from "../types/placeholders";
 import {ClientSession, OPCUAClient, OPCUADiscoveryServer, UserIdentityInfo} from "node-opcua";
 import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import {Node} from "node-red";
+import {createMachine, interpret} from "@xstate/fsm";
 
 export type ConnectorIIoT = {
   endpoints: string[],
@@ -162,6 +163,94 @@ function createConnectorStatelyMachine() {
   return stateMachine
 }
 
+
+interface ConnectorTestContext {
+  testString?: string
+}
+
+type ConnectorEvent =
+    | { type: 'INITOPCUA' }
+    | { type: 'SESSIONACTIVATE'}
+    | { type: 'SESSIONRESTART'}
+    | { type: 'SESSIONCLOSE'}
+    | { type: 'SESSIONREQUEST'}
+    | { type: 'IDLE'}
+    | { type: 'LOCK'}
+    | { type: 'END'}
+    | { type: 'CLOSE'}
+    | { type: 'OPEN'}
+    | { type: 'RESTART'}
+    | { type: 'RENEW'}
+    | { type: 'RECONFIGURE'};
+
+type ConnectorState =
+    | { value: 'idle'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'init'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'opened'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'sessionRequested'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'sessionActive'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'sessionClosed'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'sessionStart'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'sessionRestart'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'closed'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'locked'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'unlocked'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'stopped'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'end'; context: ConnectorTestContext & { testString: undefined } }
+    | { value: 'reconfigured'; context: ConnectorTestContext  & { testString: undefined }}
+    | { value: 'renewed'; context: ConnectorTestContext & { testString: undefined } };
+
+const createConnectorFinalStateMachine = function () {
+  return createMachine<ConnectorTestContext, ConnectorEvent, ConnectorState>({
+    id: 'connector',
+    initial: 'new',
+    states:{
+      idle: { on: {
+          INITOPCUA: 'init',
+          LOCK: 'locked',
+          END: 'end'
+        }
+      },
+      init: { on: {
+          OPEN: 'opened',
+          CLOSE: 'closed',
+          LOCK: 'locked',
+          END: 'end'
+        }
+      },
+      opened: { on: {
+          SESSIONREQUEST: 'sessionRequested',
+          CLOSE: 'closed',
+          LOCK: 'locked',
+          END: 'end'
+        }
+      },
+      sessionRequested: { on: {
+          OPEN: 'opened',
+          SESSIONACTIVATE: 'sessionActive',
+          LOCK: 'locked',
+          END: 'end'
+        }
+      },
+      sessionActive: { on: {}},
+      sessionClosed: { on: {}},
+      sessionStart: { on: {}},
+      sessionRestart: { on: {}},
+      closed: { on: {}},
+      locked: { on: {}},
+      unlocked: { on: {}},
+      stopped: { on: {}},
+      end: { on: {}},
+      reconfigured: { on: {}},
+      renewed: { on: {}}
+    }
+  })
+}
+
+const startConnectorMachineService = (toggleMachine: any) => {
+  return interpret(toggleMachine).start()
+}
+
 function setListenerToClient(node: TodoTypeAny) {
 
   if (!node.iiot.opcuaClient) {
@@ -292,6 +381,8 @@ function checkEndpoint(endpoint: string, errorHandler: (err: Error) => void) {
 const coreConnector = {
   initConnectorNode,
   createConnectorStatelyMachine,
+  createConnectorFinalStateMachine,
+  startConnectorMachineService,
   setListenerToClient,
   logSessionInformation,
   checkEndpoint,

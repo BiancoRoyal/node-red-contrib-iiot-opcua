@@ -111,16 +111,6 @@ interface OPCUAIIoTConnectorConfigurationDef extends nodered.NodeDef {
   maxBadSessionRequests: number
 }
 
-type ConnectorEvent = { type: 'INIT' }
-    | { type: 'BREAK'}
-    | { type: 'ACTIVATE'}
-    | { type: 'START'}
-    | { type: 'CLOSE'}
-    | { type: 'REQUEST'}
-    | { type: 'IDLE'}
-    | { type: 'OPEN'}; //Todo: XState
-
-
 /**
  * OPC UA connector Node-RED config this.
  *
@@ -731,38 +721,8 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     /* #########   FSM   #########     */
 
-    const createStateMachineService = function () {
-      return createMachine({
-        id: 'connector',
-        initial: 'new',
-        states:{
-          new: { on: {INIT: 'init', BREAK: 'broken'}},
-          idle: { on: {CLOSE: 'closed', ACTIVATE: 'sessionActivate', BREAK: 'broken'}},
-          broken: { on: {}},
-          init: { on: {}},
-          opened: { on: {}},
-          sessionRequested: { on: {}},
-          sessionActive: { on: {}},
-          sessionClosed: { on: {}},
-          sessionStart: { on: {}},
-          sessionRestart: { on: {}},
-          closed: { on: {}},
-          locked: { on: {}},
-          unlocked: { on: {}},
-          stopped: { on: {}},
-          end: { on: {}},
-          reconfigured: { on: {}},
-          renewed: { on: {}}
-        }
-      })
-    }
-
-    const startMachineService = (toggleMachine: any) => {
-      return interpret(toggleMachine).start()
-    }
-
-    this.stateMachine = createStateMachineService()
-    this.stateService = startMachineService(this.stateMachine)
+    this.stateMachine = coreConnector.createStateMachineService()
+    this.stateService = coreConnector.startMachineService(this.stateMachine)
 
     const subscribeFSMEvents = (fsm: Stately.stateMachine) => {
       /* #########   FSM EVENTS  #########     */

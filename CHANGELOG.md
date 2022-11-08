@@ -43,6 +43,7 @@
 * extracted flows from Unit tests ([b1929c7](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b1929c77ce003cc1d3ea3ecf0cd080a7ebe4d36d))
 * extracted read-flows ([b08a1a5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b08a1a5220999419e731e44e5c79264b61b10f70))
 * **response:** new payload type in json ([de22d9b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/de22d9b25ee4c7bede50a4077f691097ddcf5f5f))
+* start xstate implementation 1 ([421519c](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/421519c1af5fbcdf08dc137c7adf061cd861b51e))
 
 
 
