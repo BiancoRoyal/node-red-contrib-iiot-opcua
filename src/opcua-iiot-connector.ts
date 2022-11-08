@@ -38,6 +38,8 @@ import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import internalDebugLog = logger.internalDebugLog;
 import detailDebugLog = logger.detailDebugLog;
 import {getEnumKeys} from "./types/helpers";
+import {createMachine, interpret} from "@xstate/fsm"
+import {TodoTypeAny} from "./types/placeholders";
 
 interface OPCUAIIoTConnectorCredentials {
   user: string
@@ -69,6 +71,8 @@ export type OPCUAIIoTConnectorNode = nodered.Node<OPCUAIIoTConnectorCredentials>
   connectionStopDelay: number
   maxBadSessionRequests: number
   securedCommunication?: boolean
+  stateMachine: TodoTypeAny
+  stateService: TodoTypeAny
   iiot?: ConnectorIIoT
   functions?: {
     [key: string]: Function
@@ -106,6 +110,15 @@ interface OPCUAIIoTConnectorConfigurationDef extends nodered.NodeDef {
   connectionStopDelay: number
   maxBadSessionRequests: number
 }
+
+type ConnectorEvent = { type: 'INIT' }
+    | { type: 'BREAK'}
+    | { type: 'ACTIVATE'}
+    | { type: 'START'}
+    | { type: 'CLOSE'}
+    | { type: 'REQUEST'}
+    | { type: 'IDLE'}
+    | { type: 'OPEN'}; //Todo: XState
 
 
 /**
@@ -148,6 +161,9 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.reconnectDelay = config.reconnectDelay || RECONNECT_DELAY
     this.connectionStopDelay = config.connectionStopDelay || CONNECTION_STOP_DELAY
     this.maxBadSessionRequests = parseInt(config.maxBadSessionRequests.toString()) || 10
+
+    this.stateMachine = null
+    this.stateService = null
 
     this.iiot = coreConnector.initConnectorNode()
 
@@ -712,6 +728,41 @@ module.exports = function (RED: nodered.NodeAPI) {
         this.iiot.opcuaClient = undefined
       }
     }
+
+    /* #########   FSM   #########     */
+
+    const createStateMachineService = function () {
+      return createMachine({
+        id: 'connector',
+        initial: 'new',
+        states:{
+          new: { on: {INIT: 'init', BREAK: 'broken'}},
+          idle: { on: {CLOSE: 'closed', ACTIVATE: 'sessionActivate', BREAK: 'broken'}},
+          broken: { on: {}},
+          init: { on: {}},
+          opened: { on: {}},
+          sessionRequested: { on: {}},
+          sessionActive: { on: {}},
+          sessionClosed: { on: {}},
+          sessionStart: { on: {}},
+          sessionRestart: { on: {}},
+          closed: { on: {}},
+          locked: { on: {}},
+          unlocked: { on: {}},
+          stopped: { on: {}},
+          end: { on: {}},
+          reconfigured: { on: {}},
+          renewed: { on: {}}
+        }
+      })
+    }
+
+    const startMachineService = (toggleMachine: any) => {
+      return interpret(toggleMachine).start()
+    }
+
+    this.stateMachine = createStateMachineService()
+    this.stateService = startMachineService(this.stateMachine)
 
     const subscribeFSMEvents = (fsm: Stately.stateMachine) => {
       /* #########   FSM EVENTS  #########     */
