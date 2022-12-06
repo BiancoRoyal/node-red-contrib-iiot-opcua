@@ -81,7 +81,9 @@
     "compressStructure": false,
     "showStatusActivities": false,
     "showErrors": false,
+    "activateUnsetFilter": false,
     "activateFilters": false,
+    "negateFilter": false,
     "filters": [],
     "x": 680,
     "y": 80,
@@ -101,6 +103,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 810,
     "y": 80,
     "wires": []
@@ -113,6 +118,9 @@
     "func": "msg.payload.nodetype = 'inject';\nmsg.payload.injectType = 'write'\nmsg.payload.valuesToWrite = [16.04]\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
     "x": 410,
     "y": 80,
     "wires": [
@@ -122,21 +130,32 @@
     ]
   },
   {
+    "id": "f1ed16b147240f8d",
+    "type": "comment",
+    "z": "f49a0646.6b54a8",
+    "name": "Use Demo Server Example!",
+    "info": "Import Demo Server example with\nstrg+i -> Example -> opcuaIIoT -> Server -> Demo Server",
+    "x": 200,
+    "y": 32,
+    "wires": []
+  },
+  {
     "id": "7316e0da.4324d",
     "type": "OPCUA-IIoT-Connector",
     "z": "f49a0646.6b54a8",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388",
+    "endpointMustExist": false,
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "Basic256",
-    "securityMode": "SIGN",
     "name": "LOCAL DEMO SERVER",
     "showErrors": false,
+    "securityPolicy": "None",
+    "securityMode": "None",
+    "individualCerts": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
-    "endpointMustExist": false,
     "autoSelectRightEndpoint": false,
     "strategyMaxRetry": "",
     "strategyInitialDelay": "",
@@ -144,6 +163,7 @@
     "strategyRandomisationFactor": "",
     "requestedSessionTimeout": "",
     "connectionStartDelay": "",
-    "reconnectDelay": ""
+    "reconnectDelay": "",
+    "maxBadSessionRequests": ""
   }
 ]
