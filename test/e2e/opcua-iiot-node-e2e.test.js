@@ -76,5 +76,7 @@ describe('OPC UA Node node e2e Testing', function () {
           })
         })
       })
+
+      // TODO: tests to see if the different inject node payloads work for all types as expected (Node-RED and IIoT inject)
     })
 })

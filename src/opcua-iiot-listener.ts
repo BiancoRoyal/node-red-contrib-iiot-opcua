@@ -20,7 +20,7 @@ import {
   buildNodesToListen,
   checkConnectorState,
   checkSessionNotValid,
-  deregisterToConnector,
+  deregisterToConnector, FsmListenerStates,
   isInitializedIIoTNode,
   isNodeId,
   isSessionBad,
@@ -96,23 +96,75 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     self.iiot = coreListener.initListenerNode()
 
+
+    /* #########   FSM EVENTS  #########     */
+
+    const fsmEventHandlerFunction = function (state: any) {
+      if(!state.changed) return
+
+      switch (state.value) {
+        case FsmListenerStates.StateStarted:
+
+          coreListener.detailDebugLog('Listener STARTED Event FSM')
+
+          switch (self.action) {
+            case 'subscribe':
+              while (self.iiot.messageQueue.length > 0) {
+                subscribeMonitoredItem(self.iiot.messageQueue.shift())
+              }
+              break
+            case 'events':
+              while (self.iiot.messageQueue.length > 0) {
+                subscribeMonitoredEvent(self.iiot.messageQueue.shift())
+              }
+              break
+            default:
+              coreListener.internalDebugLog('Unknown Action Type ' + self.action)
+          }
+          break
+        case FsmListenerStates.StateIdle:
+          coreListener.detailDebugLog('Listener IDLE Event FSM')
+          break
+        case FsmListenerStates.StateRequested:
+          coreListener.detailDebugLog('Listener REQUESTED Event FSM')
+          break
+        case FsmListenerStates.StateInit:
+          coreListener.detailDebugLog('Listener INIT Event FSM')
+          break
+        case FsmListenerStates.StateTerminated:
+          coreListener.detailDebugLog('Listener TERMINATED Event FSM')
+          break
+        case FsmListenerStates.StateError:
+          coreListener.detailDebugLog('Listener ERROR Event FSM')
+          break
+        case FsmListenerStates.StateEnd:
+          coreListener.detailDebugLog('Listener END Event FSM')
+          break
+        default:
+          coreListener.detailDebugLog('Listener NO VALID FSM EVENT')
+      }
+    }
+
     self.iiot.stateMachine = coreListener.createListenerStateMachine()
-    coreListener.internalDebugLog('Start FSM: ' + self.iiot.stateMachine.getMachineState())
-    coreListener.detailDebugLog('FSM events:' + self.iiot.stateMachine.getMachineEvents())
+    self.iiot.stateService = coreListener.startListenerMachineService(self.iiot.stateMachine)
+    self.iiot.stateSubscription = coreListener.subscribeListenerFSMService(self.iiot.stateService, fsmEventHandlerFunction)
+    coreListener.internalDebugLog('Start FSM: ' + self.iiot.stateService.state.value)
+    //coreListener.detailDebugLog('FSM events:' + self.iiot.stateMachine.getMachineEvents())  //Stately not in use anymore -> xstate similar function?
 
     const createSubscription = (msg: TodoTypeAny) => {
-      if (self.iiot.stateMachine.getMachineState() !== 'IDLE') {
-        coreListener.internalDebugLog('New Subscription Request On State ' + self.iiot.stateMachine.getMachineState())
+
+      if (self.iiot.stateService.state.value !== FsmListenerStates.StateIdle) {
+        coreListener.internalDebugLog('New Subscription Request On State ' + self.iiot.stateService.state.value)
         return
       }
 
-      coreListener.internalDebugLog('Create Subscription On State ' + self.iiot.stateMachine.getMachineState())
+      coreListener.internalDebugLog('Create Subscription On State ' + self.iiot.stateService.state.value)
 
       if (self.iiot?.opcuaSubscription) {
         self.iiot.opcuaSubscription = null
       }
 
-      self.iiot.stateMachine.requestinitsub()
+      self.iiot.stateService.send('REQUESTINIT')
 
       const timeMilliseconds = (typeof msg.payload.value === 'number') ? msg.payload.value : null
       const dynamicOptions = (msg.payload.listenerParameters) ? msg.payload.listenerParameters.options : msg.payload.options
@@ -127,17 +179,19 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const setSubscriptionEvents = (subscription: ClientSubscription) => {
+
       subscription.on('started', () => {
         coreListener.internalDebugLog('Subscription started')
         self.oldStatusParameter = setNodeStatusTo(this, 'started', self.oldStatusParameter, self.showStatusActivities, statusHandler)
         self.iiot.monitoredItems.clear()
-        self.iiot.stateMachine.startsub()
+        self.iiot.stateService.send('START')
       })
 
       subscription.on('terminated', () => {
         coreListener.internalDebugLog('Subscription terminated')
         self.oldStatusParameter = setNodeStatusTo(this, 'terminated', self.oldStatusParameter, self.showStatusActivities, statusHandler)
-        self.iiot.stateMachine.terminatesub().idlesub()
+        self.iiot.stateService.send('TERMINATE')
+        self.iiot.stateService.send('IDLE')
         resetSubscription()
       })
 
@@ -147,7 +201,7 @@ module.exports = (RED: nodered.NodeAPI) => {
           this.error(err, {payload: 'Internal Error'})
         }
         self.oldStatusParameter = setNodeStatusTo(this, 'error', self.oldStatusParameter, self.showStatusActivities, statusHandler)
-        self.iiot.stateMachine.errorsub()
+        self.iiot.stateService.send('ERROR')
         resetSubscription()
       })
 
@@ -174,7 +228,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         self.iiot.hasOpcUaSubscriptions = true
       }
       setSubscriptionEvents(self.iiot.opcuaSubscription)
-      self.iiot.stateMachine.initsub()
+      self.iiot.stateService.send('INIT')
     }
 
     const resetSubscription = function () {
@@ -195,7 +249,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const subscribeActionInput = function (msg: TodoTypeAny) {
-      if (self.iiot.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+      if (self.iiot.stateService.state.value !== coreListener.RUNNING_STATE) {
         self.iiot.messageQueue.push(msg)
       } else {
         subscribeMonitoredItem(msg)
@@ -203,7 +257,7 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const subscribeEventsInput = function (msg: TodoTypeAny) {
-      if (self.iiot.stateMachine.getMachineState() !== coreListener.RUNNING_STATE) {
+      if (self.iiot.stateService.state.value !== coreListener.RUNNING_STATE) {
         self.iiot.messageQueue.push(msg)
       } else {
         subscribeMonitoredEvent(msg)
@@ -655,7 +709,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         return
       }
 
-      if (self.iiot.stateMachine.getMachineState() === 'IDLE') {
+      if (self.iiot.stateService.state.value === FsmListenerStates.StateIdle) {
         self.iiot.messageQueue.push(outputMessage)
         createSubscription(outputMessage)
       } else {
@@ -724,15 +778,15 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const terminateSubscription = function (done: () => void) {
-      if (self.iiot?.opcuaSubscription && self.iiot?.stateMachine.getMachineState() === coreListener.RUNNING_STATE) {
-        self.iiot.stateMachine.terminatesub()
+      if (self.iiot?.opcuaSubscription && self.iiot?.stateService.state.value === coreListener.RUNNING_STATE) {
+        self.iiot.stateService.send('TERMINATE')
         self.iiot.opcuaSubscription.terminate(() => {
           self.iiot.opcuaSubscription.removeAllListeners()
-          self.iiot.stateMachine.idlesub()
+          self.iiot.stateService.send('IDLE')
           done()
         })
       } else {
-        self.iiot?.stateMachine.idlesub()
+        self.iiot.stateService.send('IDLE')
         done()
       }
     }
@@ -769,8 +823,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       })
     })
 
-    /* #########   FSM EVENTS  #########     */
-
+/*
     self.iiot.stateMachine.onIDLE = function () {
       coreListener.detailDebugLog('Listener IDLE Event FSM')
     }
@@ -813,7 +866,10 @@ module.exports = (RED: nodered.NodeAPI) => {
     self.iiot.stateMachine.onEND = function () {
       coreListener.detailDebugLog('Listener END Event FSM')
     }
+    */
   }
+
+
 
   RED.nodes.registerType('OPCUA-IIoT-Listener', OPCUAIIoTListener)
 }

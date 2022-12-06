@@ -152,5 +152,7 @@ describe('OPC UA Node node Unit Testing', function () {
         n3.receive()
       })
     })
+
+    // TODO: tests to see if the inject payload works for all types as expected (IIoT inject only)
   })
 })

@@ -12,8 +12,13 @@
     "z": "b3974c60.a56ab8",
     "name": "",
     "active": true,
-    "console": "false",
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 730,
     "y": 120,
     "wires": []
@@ -93,21 +98,32 @@
     ]
   },
   {
+    "id": "193736fe173d5219",
+    "type": "comment",
+    "z": "b3974c60.a56ab8",
+    "name": "Use Demo Server Example",
+    "info": "Please use the Demo Server example for this example to work.\nImport that with strg+i -> Examples -> opcuaIIoT -> Server -> Demo Server",
+    "x": 250,
+    "y": 62,
+    "wires": []
+  },
+  {
     "id": "fe9e7411.128358",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "b3974c60.a56ab8",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388/",
+    "endpointMustExist": false,
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "None",
-    "securityMode": "None",
     "name": "LOCAL EVENT SERVER",
     "showErrors": false,
+    "securityPolicy": "None",
+    "securityMode": "None",
+    "individualCerts": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "",
-    "endpointMustExist": false,
     "autoSelectRightEndpoint": false,
     "strategyMaxRetry": "",
     "strategyInitialDelay": "",
@@ -115,6 +131,7 @@
     "strategyRandomisationFactor": "",
     "requestedSessionTimeout": "",
     "connectionStartDelay": "",
-    "reconnectDelay": ""
+    "reconnectDelay": "",
+    "maxBadSessionRequests": ""
   }
 ]

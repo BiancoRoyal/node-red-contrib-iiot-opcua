@@ -113,7 +113,7 @@ module.exports = {
       "id": "594b2860fa40bda5",
       "type": "OPCUA-IIoT-Connector",
       "discoveryUrl": "",
-      "endpoint": "opc.tcp://localhost:55388/",
+      "endpoint": "opc.tcp://localhost:44840/",
       "keepSessionAlive": true,
       "loginEnabled": false,
       "securityPolicy": "None",

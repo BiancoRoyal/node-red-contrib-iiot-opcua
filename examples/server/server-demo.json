@@ -114,6 +114,7 @@
     "showErrors": false,
     "asoDemo": true,
     "allowAnonymous": true,
+    "individualCerts": false,
     "isAuditing": false,
     "serverDiscovery": true,
     "users": [],
@@ -144,6 +145,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 730,
     "y": 140,
     "wires": []
@@ -158,6 +162,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 510,
     "y": 100,
     "wires": []
@@ -172,6 +179,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 330,
     "y": 100,
     "wires": []

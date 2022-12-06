@@ -395,5 +395,54 @@ module.exports = {
       "y": 140,
       "wires": []
     }
+  ]),
+
+  "testInjectWithIntervalFlow" : helperExtensions.cleanFlowPositionData([
+    {
+      "id": "f907d5d45a2f32aa",
+      "type": "tab",
+      "label": "Test Inject with interval Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
+      "id": "e41b31a770aae974",
+      "type": "OPCUA-IIoT-Inject",
+      "z": "f907d5d45a2f32aa",
+      "injectType": "inject",
+      "payload": "",
+      "payloadType": "date",
+      "topic": "",
+      "repeat": "2",
+      "crontab": "",
+      "once": true,
+      "startDelay": "3",
+      "name": "",
+      "addressSpaceItems": [],
+      "x": 183,
+      "y": 276,
+      "wires": [
+        [
+          "920deb27a882f242"
+        ]
+      ]
+    },
+    {
+      "id": "920deb27a882f242",
+      "type": "helper",
+      "z": "f907d5d45a2f32aa",
+      "name": "helper 1",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "false",
+      "statusVal": "",
+      "statusType": "auto",
+      "x": 383,
+      "y": 277,
+      "wires": []
+    }
   ])
 }

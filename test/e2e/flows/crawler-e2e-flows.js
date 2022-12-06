@@ -58,7 +58,7 @@ module.exports = {
       "justValue": false,
       "singleResult": false,
       "showStatusActivities": false,
-      "showErrors": false,
+      "showErrors": true,
       "activateUnsetFilter": false,
       "activateFilters": false,
       "negateFilter": false,
@@ -95,7 +95,7 @@ module.exports = {
       "alternateHostname": "",
       "name": "",
       "showStatusActivities": false,
-      "showErrors": false,
+      "showErrors": true,
       "asoDemo": false,
       "allowAnonymous": true,
       "individualCerts": false,
@@ -111,7 +111,7 @@ module.exports = {
       "maxNodesPerBrowse": 10000,
       "delayToClose": "",
       "x": 450,
-      "y": 100,
+      "y": 80,
       "wires": [
         []
       ]
@@ -119,24 +119,29 @@ module.exports = {
     {
       "id": "n1c1",
       "type": "OPCUA-IIoT-Connector",
-      "discoveryUrl": "",
       "z": "c00fed124f2538c4",
+      "discoveryUrl": "",
       "endpoint": "opc.tcp://localhost:51999/",
+      "endpointMustExist": false,
       "keepSessionAlive": false,
       "loginEnabled": false,
+      "name": "LOCAL DEMO SERVER",
+      "showErrors": true,
       "securityPolicy": "None",
       "securityMode": "None",
-      "name": "LOCAL DEMO SERVER",
-      "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
-      "endpointMustExist": false,
       "autoSelectRightEndpoint": false,
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
   ] ),
 

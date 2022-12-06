@@ -12,8 +12,13 @@
     "z": "3118d8d7.c7e91",
     "name": "",
     "active": true,
-    "console": "false",
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 810,
     "y": 80,
     "wires": []
@@ -82,12 +87,22 @@
     "type": "inject",
     "z": "3118d8d7.c7e91",
     "name": "",
-    "topic": "",
-    "payload": "",
-    "payloadType": "date",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
+    "onceDelay": "",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
     "x": 140,
     "y": 240,
     "wires": [
@@ -104,6 +119,9 @@
     "func": "msg.payload = {\n    objectId: 'ns=1;i=1234',\n    methodId: 'ns=1;i=12345',\n    inputArguments: [\n        {name: 'barks', dataType:'UInt32', value:'6'},\n        {name: 'volume', dataType:'UInt32', value:'12'}\n    ],\n    methodType: 'basic'\n}\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
     "x": 340,
     "y": 240,
     "wires": [
@@ -111,16 +129,6 @@
         "d48a0e23.4ab278"
       ]
     ]
-  },
-  {
-    "id": "898f8c10.d99ea8",
-    "type": "comment",
-    "z": "3118d8d7.c7e91",
-    "name": "Information",
-    "info": "If you have none OPC UA server on other tabs, \nplease drag&drop an OPC UA Server \nfrom the package nodes on this tab!",
-    "x": 150,
-    "y": 120,
-    "wires": []
   },
   {
     "id": "928a3d1d.05bf48",
@@ -132,6 +140,9 @@
     "console": false,
     "tostatus": false,
     "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 830,
     "y": 120,
     "wires": []
@@ -166,6 +177,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1030,
     "y": 180,
     "wires": []
@@ -200,6 +214,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1030,
     "y": 300,
     "wires": []
@@ -234,6 +251,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1030,
     "y": 240,
     "wires": []
@@ -242,28 +262,39 @@
     "id": "3572ebfa.8aef2c",
     "type": "comment",
     "z": "3118d8d7.c7e91",
-    "name": "Response does not support all for methods",
+    "name": "Response node does not support all methods",
     "info": "",
-    "x": 930,
+    "x": 935,
     "y": 360,
+    "wires": []
+  },
+  {
+    "id": "8f5673dfe42a2860",
+    "type": "comment",
+    "z": "3118d8d7.c7e91",
+    "name": "Use Demo Server Example!",
+    "info": "Import Demo Server example with\nstrg+i -> Example -> opcuaIIoT -> Server -> Demo Server",
+    "x": 202,
+    "y": 120,
     "wires": []
   },
   {
     "id": "ae72fc9e.f521f8",
     "type": "OPCUA-IIoT-Connector",
-    "z": "",
+    "z": "3118d8d7.c7e91",
     "discoveryUrl": "",
-    "endpoint": "opc.tcp://localhost:55388/UA/NodeREDIIoTServer",
+    "endpoint": "opc.tcp://localhost:55388/",
+    "endpointMustExist": false,
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "Basic256",
-    "securityMode": "SIGN",
     "name": "LOCAL DEMO SERVER",
     "showErrors": false,
+    "securityPolicy": "None",
+    "securityMode": "None",
+    "individualCerts": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "60000",
-    "endpointMustExist": false,
     "autoSelectRightEndpoint": false,
     "strategyMaxRetry": "",
     "strategyInitialDelay": "",
@@ -271,6 +302,8 @@
     "strategyRandomisationFactor": "",
     "requestedSessionTimeout": "",
     "connectionStartDelay": "",
-    "reconnectDelay": ""
+    "reconnectDelay": "",
+    "maxBadSessionRequests": "",
+    "credentials": {}
   }
 ]

@@ -21,11 +21,14 @@ var listenerNode = require('../../src/opcua-iiot-listener')
 var crawlerNode = require('../../src/opcua-iiot-crawler')
 var serverNode = require('../../src/opcua-iiot-server')
 var filterNode = require('../../src/opcua-iiot-result-filter')
+var browserNode = require('../../src/opcua-iiot-browser')
 
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testFilterNodes = [injectNode, connectorNode, readNode, responseNode, serverNode, crawlerNode, filterNode, listenerNode]
+var testFilterNodes = [injectNode, connectorNode, readNode,
+  responseNode, serverNode, crawlerNode, filterNode,
+  listenerNode, browserNode]
 
 var testFlows = require('./flows/result-filter-e2e-flows')
 
@@ -154,6 +157,24 @@ describe('OPC UA Result Filter node e2e Testing', function () {
           expect(msg.payload.value).toBeGreaterThan(0)
           expect(msg.payload.nodeId).toBeDefined()
           expect(msg.payload.nodeId).toBe('ns=0;i=2277')
+          done()
+        })
+      })
+    })
+
+    it('should be able to do read with a filtered message', function (done) {
+      const flow = Array.from(testFlows.testBrowserReadFilterFlow)
+      flow[6].port = "50606"
+      flow[7].endpoint = "opc.tcp://localhost:50606/"
+
+      helper.load(testFilterNodes, flow, function () {
+        let n1 = helper.getNode('920deb27a882f242')
+        n1.on('input', function (msg) {
+          expect(msg.payload).toBeDefined()
+          expect(msg.payload.value).toBeDefined()
+          expect(msg.payload.value).toHaveLength(1)
+          expect(msg.payload.nodeId).toBeDefined()
+          expect(msg.payload.nodeId).toBe('ns=1;s=Pressure')
           done()
         })
       })

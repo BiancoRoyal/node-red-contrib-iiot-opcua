@@ -273,6 +273,46 @@ describe('OPC UA Inject node Unit Testing', function () {
       })
     })
 
+    it('should send a messages at an interval of 2 seconds +-10ms ', function (done) {
+      helper.load([inputNode], testFlows.testInjectWithIntervalFlow, function () {
+        const n1 = helper.getNode('920deb27a882f242')
+        let messages = []
+        n1.on('input', function (msg) {
+          messages.push(msg)
+
+          if(messages.length >= 4) {
+            let dif0 = messages[1].payload.value - messages[0].payload.value
+            let dif1 = messages[2].payload.value - messages[1].payload.value
+            let dif2 = messages[3].payload.value - messages[2].payload.value
+
+            let difAverage = (dif0 + dif1 + dif2) / 3
+
+            expect(difAverage).toBeGreaterThanOrEqual(1990)
+            expect(difAverage).toBeLessThanOrEqual(2010)
+
+            done()
+          }
+
+        })
+      })
+    })
+
+    it('should send a message payload Date with invalid payloadType = null and empty payload', function (done) {
+      const flow = Array.from(testFlows.testInjectFlow)
+      flow[1].payload = ""
+      flow[1].payloadType = null
+      helper.load([inputNode], flow, function () {
+        const n1 = helper.getNode('n2ijf1')
+        n1.on('input', function (msg) {
+
+          expect(msg.payload).toBeDefined()
+          expect(msg.payload.value).toBeGreaterThan(1000000000000)
+          expect(msg.payload.payloadType).toBe(null)
+          done()
+        })
+      })
+    })
+
     it('should fail on inject button request with wrong id', function (done) {
       helper.load([inputNode], testFlows.testInjectFlow, function () {
         helper.request()
