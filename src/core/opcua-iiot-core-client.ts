@@ -11,13 +11,17 @@
 // SOURCE-MAP-REQUIRED
 
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 
 import debug from "debug";
-import {ClientSession, DataValue, StatusCodes} from "node-opcua";
+import {ClientSession, ClientSessionWriteService, DataValue, NodeAttributes, StatusCode, StatusCodes} from "node-opcua";
 import {ReadValueIdOptions} from "node-opcua-service-read";
 import {WriteValueOptions} from "node-opcua-service-write";
 import {WriteResult} from "../opcua-iiot-write";
+import {ClientSessionReadHistoryService, ClientSessionReadService} from "node-opcua-client/source/client_session";
+import {HistoryReadResult} from "node-opcua-service-history";
+import {AddressSpaceItem} from "../types/helpers";
+import {NodeIdLike} from "node-opcua-nodeid";
 
 const internalDebugLog = debug('opcuaIIoT:client') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:client:details') // eslint-disable-line no-use-before-define
@@ -37,12 +41,12 @@ const READ_TYPE = Object.freeze({
   HISTORY: 130
 }) // eslint-disable-line no-use-before-define
 
-const write = (session: ClientSession, nodesToWrite: WriteValueOptions[], originMsg: Todo): Promise<WriteResult> => {
+const write = (session: ClientSessionWriteService, nodesToWrite: WriteValueOptions[], originMsg: TodoTypeAny): Promise<WriteResult> => {
   return new Promise(
     (resolve, reject) => {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.write(nodesToWrite, (err: Error | null, statusCodes?: StatusCodes[]) => {
+        session.write(nodesToWrite, (err: Error | null, statusCodes?: StatusCode[]) => {
           if (err) {
             reject(err)
           } else {
@@ -54,13 +58,13 @@ const write = (session: ClientSession, nodesToWrite: WriteValueOptions[], origin
           }
         })
       } else {
-        reject(new Error('Session Not Valid To Write'))
+        reject(new Error('ClientSessionWriteService Not Valid To Write'))
       }
     }
   )
 }
 
-const read = function (session: ClientSession, nodesToRead: ReadValueIdOptions[], maxAge: number, msg: Todo) {
+const read = function (session: ClientSessionReadService, nodesToRead: ReadValueIdOptions[], maxAge: number, msg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
@@ -76,18 +80,18 @@ const read = function (session: ClientSession, nodesToRead: ReadValueIdOptions[]
           }
         })
       } else {
-        reject(new Error('Session Not Valid To Read'))
+        reject(new Error('ClientSessionReadService Not Valid To Read'))
       }
     }
   )
 }
 
-const readVariableValue = function (session: Todo, nodesToRead: Todo, originMsg: Todo) {
+const readVariableValue = function (session: ClientSessionReadService, nodesToRead: TodoTypeAny, originMsg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readVariableValue(nodesToRead, function (err: Error, dataValues: Todo) {
+        session.read(nodesToRead, function (err: Error | null, dataValues?: DataValue[]) {
           if (err) {
             reject(err)
           } else {
@@ -99,23 +103,23 @@ const readVariableValue = function (session: Todo, nodesToRead: Todo, originMsg:
           }
         })
       } else {
-        reject(new Error('Session Not Valid To Read Variable Value'))
+        reject(new Error('ClientSessionReadService Not Valid To Read Variable Value'))
       }
     }
   )
 }
 
-const readHistoryValue = function (session: Todo, nodesToRead: Todo, startDate: Todo, endDate: Todo, originMsg: Todo) {
+const readHistoryValue = function (session: ClientSessionReadHistoryService, nodesToRead: TodoTypeAny, startDate: TodoTypeAny, endDate: TodoTypeAny, originMsg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readHistoryValue(nodesToRead, startDate, endDate, function (err: Error, dataValues: Todo) {
+        session.readHistoryValue(nodesToRead, startDate, endDate, function (err: Error | null, results?: HistoryReadResult[]) {
           if (err) {
             reject(err)
           } else {
             resolve({
-              results: dataValues,
+              results,
               nodesToRead,
               startDate,
               endDate,
@@ -124,36 +128,38 @@ const readHistoryValue = function (session: Todo, nodesToRead: Todo, startDate: 
           }
         })
       } else {
-        reject(new Error('Session Not Valid To Read History Value'))
+        reject(new Error('ClientSessionReadHistoryService Not Valid To Read History Value'))
       }
     }
   )
 }
 
-const readAllAttributes = function (session: Todo, nodesToRead: Todo, originMsg: Todo) {
+const readAllAttributes = function (session: ClientSession, nodesToRead: TodoTypeAny[], originMsg: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (session) {
         let msg = Object.assign({}, originMsg)
-        session.readAllAttributes(nodesToRead, function (err: Error, dataValues: Todo) {
+        const nodeIdStrings = nodesToRead.map( (item: TodoTypeAny | string) => item.nodeId || item )
+        // @ts-ignore see ClientSessionImpl
+        session.readAllAttributes(nodeIdStrings, function (err: Error | null, data?: NodeAttributes[]) {
           if (err) {
             reject(err)
           } else {
             resolve({
-              results: dataValues,
+              results: data,
               nodesToRead,
               msg
             })
           }
         })
       } else {
-        reject(new Error('Session Not Valid To Read All Attributes'))
+        reject(new Error('ClientSessionReadService Not Valid To Read All Attributes'))
       }
     }
   )
 }
 
-const stringifyFormatted = function (dataValues: Todo) {
+const stringifyFormatted = function (dataValues: TodoTypeAny) {
   return JSON.stringify(dataValues, null, 2)
 }
 

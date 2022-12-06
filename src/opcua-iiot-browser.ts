@@ -121,12 +121,12 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig: BrowseNodeWithConfig | any = this;
+    let self: BrowseNodeWithConfig | any = this;
     const {iiot, browseTopic} = coreBrowser.initBrowserNode();
-    nodeConfig.browseTopic = browseTopic;
-    nodeConfig.iiot = iiot;
+    self.browseTopic = browseTopic;
+    self.iiot = iiot;
 
-    nodeConfig.iiot.delayMessageTimer = []
+    self.iiot.delayMessageTimer = []
 
     const extractDataFromBrowserResults = (browserResultToFilter: BrowseResult[], lists: Lists) => {
       lists.addressItemList = []
@@ -156,24 +156,24 @@ module.exports = function (RED: nodered.NodeAPI) {
     type BrowseCallback = (rootNodeId: NodeIdLike, depth: number, msg: NodeMessageInFlow, lists: Lists) => void
 
     const browse = function (rootNodeId: NodeId, msg: NodeMessageInFlow, depth: number, lists: Lists, callback: BrowseCallback) {
-      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'Browse')) {
+      if (checkSessionNotValid(self.connector.iiot.opcuaSession, 'Browse')) {
         return
       }
 
       coreBrowser.internalDebugLog('Browse Topic To Call Browse ' + rootNodeId)
       let rootNode = 'list'
 
-      coreBrowser.browse(nodeConfig.connector.iiot.opcuaSession, rootNodeId)
+      coreBrowser.browse(self.connector.iiot.opcuaSession, rootNodeId)
         .then((browserResults: BrowseResult[]) => {
           if (browserResults.length) {
             coreBrowser.detailDebugLog('Browser Result To String: ' + browserResults.toString())
             extractDataFromBrowserResults(browserResults, lists)
-            if (nodeConfig.recursiveBrowse) {
+            if (self.recursiveBrowse) {
               if (depth > 0) {
                 let newDepth = depth - 1
 
                 let subLists = createListsObject()
-                if (nodeConfig.multipleOutputs) {
+                if (self.multipleOutputs) {
                   callback(rootNode, depth, msg, lists)
                 } else {
                   subLists = lists
@@ -190,7 +190,7 @@ module.exports = function (RED: nodered.NodeAPI) {
             coreBrowser.internalDebugLog('No Browse Results On ' + rootNodeId)
           }
         }).catch(function (err: Error) {
-        coreBrowser.browseErrorHandling(nodeConfig, err, msg, lists, callError, statusHandler)
+        coreBrowser.browseErrorHandling(self, err, msg, lists, callError, statusHandler)
       })
     }
 
@@ -209,24 +209,24 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     const browseNodeList = (addressSpaceItems: AddressSpaceItem[], msg: NodeMessageInFlow, depth: number, lists: Lists, callback: BrowseCallback) => {
-      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'BrowseList')) {
+      if (checkSessionNotValid(self.connector.iiot.opcuaSession, 'BrowseList')) {
         return
       }
 
       coreBrowser.internalDebugLog('Browse For NodeId List')
       let rootNode = 'list'
 
-      if (nodeConfig.connector.iiot.opcuaSession) {
-        coreBrowser.browseAddressSpaceItems(nodeConfig.connector.iiot.opcuaSession, addressSpaceItems)
+      if (self.connector.iiot.opcuaSession) {
+        coreBrowser.browseAddressSpaceItems(self.connector.iiot.opcuaSession, addressSpaceItems)
           .then((browserResults: BrowseResult[]) => {
             coreBrowser.detailDebugLog('List Browser Result To String: ' + browserResults.toString())
             extractDataFromBrowserResults(browserResults, lists)
-            if (nodeConfig.recursiveBrowse) {
+            if (self.recursiveBrowse) {
               if (depth > 0) {
                 let newDepth = depth - 1
 
                 let subLists = createListsObject()
-                if (nodeConfig.multipleOutputs) {
+                if (self.multipleOutputs) {
                   callback(rootNode, depth, msg, lists)
                 } else {
                   subLists = lists
@@ -240,7 +240,7 @@ module.exports = function (RED: nodered.NodeAPI) {
               callback(rootNode, depth, msg, lists)
             }
           }).catch(function (err: Error) {
-          coreBrowser.browseErrorHandling(nodeConfig, err, msg, lists, callError, statusHandler)
+          coreBrowser.browseErrorHandling(self, err, msg, lists, callError, statusHandler)
         })
       }
     }
@@ -248,7 +248,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     const sendMessage = (rootNodeId: NodeIdLike, depth: number, originMessage: NodeMessageInFlow, lists: Lists) => {
       if (!lists) {
         coreBrowser.internalDebugLog('Lists Not Valid!')
-        if (nodeConfig.showErrors) {
+        if (self.showErrors) {
           this.error(new Error('Lists Not Valid On Browse Send Message'), originMessage)
         }
       }
@@ -258,13 +258,13 @@ module.exports = function (RED: nodered.NodeAPI) {
       const payload: BrowserPayload = {
         ...(originMessage.payload as BrowserInputPayload),
         nodetype: 'browse',
-        justValue: nodeConfig.justValue,
+        justValue: self.justValue,
         rootNodeId,
         // @ts-ignore because TS is misunderstanding lists.brwoserResults type
         browserResults: lists.browserResults,
-        recursiveBrowse: nodeConfig.recursiveBrowse,
+        recursiveBrowse: self.recursiveBrowse,
         recursiveDepth: depth,
-        recursiveDepthMax: nodeConfig.recursiveDepth,
+        recursiveDepthMax: self.recursiveDepth,
         listenerParameters,
         ...enhanceMessage(lists),
         ...setMessageLists(lists)
@@ -274,19 +274,19 @@ module.exports = function (RED: nodered.NodeAPI) {
         payload
       }
 
-      nodeConfig.iiot.messageList.push(newMessaage)
+      self.iiot.messageList.push(newMessaage)
 
-      if (nodeConfig.showStatusActivities && nodeConfig.oldStatusParameter.text !== 'active') {
-        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'active', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
+      if (self.showStatusActivities && self.oldStatusParameter.text !== 'active') {
+        self.oldStatusParameter = setNodeStatusTo(self, 'active', self.oldStatusParameter, self.showStatusActivities, statusHandler)
       }
 
-      nodeConfig.iiot.delayMessageTimer.push(setTimeout(() => {
-        this.send(nodeConfig.iiot.messageList.shift())
-      }, nodeConfig.delayPerMessage * FAKTOR_SEC_TO_MSEC))
+      self.iiot.delayMessageTimer.push(setTimeout(() => {
+        this.send(self.iiot.messageList.shift())
+      }, self.delayPerMessage * FAKTOR_SEC_TO_MSEC))
     }
 
     const resetAllTimer = function () {
-      nodeConfig.iiot.delayMessageTimer.forEach((timerId: NodeJS.Timeout | null) => {
+      self.iiot.delayMessageTimer.forEach((timerId: NodeJS.Timeout | null) => {
         if (timerId)
           clearTimeout(timerId)
         timerId = null
@@ -302,16 +302,16 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     const enhanceMessage = (lists: Lists) => {
-      if (nodeConfig.justValue)
+      if (self.justValue)
         return {
           browserResults: lists.addressSpaceItemList
         }
 
       return {
-        browseTopic: nodeConfig.browseTopic,
+        browseTopic: self.browseTopic,
         browserResultsCount: lists.browserResults.length,
-        endpoint: nodeConfig.connector?.endpoint,
-        session: (nodeConfig.connector.iiot.opcuaSession) ? nodeConfig.connector.iiot.opcuaSession.name : 'none'
+        endpoint: self.connector?.endpoint,
+        session: (self.connector.iiot.opcuaSession) ? self.connector.iiot.opcuaSession.name : 'none'
       }
     }
 
@@ -328,7 +328,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const browseSendResult = function (rootNodeId: NodeIdLike, depth: number, msg: NodeMessageInFlow, lists: Lists) {
       coreBrowser.internalDebugLog(rootNodeId + ' called by depth ' + depth)
-      if (nodeConfig.multipleOutputs) {
+      if (self.multipleOutputs) {
         if (depth <= 0) {
           sendMessage(rootNodeId, depth, msg, lists)
           reset(lists)
@@ -347,6 +347,9 @@ module.exports = function (RED: nodered.NodeAPI) {
       const payload = msg.payload as BrowserInputPayloadLike
 
       // Todo: a browse can overload addressSpaceItems, maybe this have to get more clear code and flow
+      // Yes, it should get addressSpaceItems to browse from and should send addressSpaceItems as the result from the browse later
+      // A good point could it be to use terms like addressSpaceItemsInput and addressSpaceItemsOutput
+
       if (payload.addressItemsToBrowse && payload.addressItemsToBrowse.length > 0) {
         payload.addressSpaceItems = payload.addressItemsToBrowse
       }
@@ -355,32 +358,32 @@ module.exports = function (RED: nodered.NodeAPI) {
         browseNodeList(payload.addressSpaceItems, msg, depth, lists, browseSendResult)
       } else {
         coreBrowser.detailDebugLog('Fallback NodeId On Browse Without AddressSpace Items')
-        nodeConfig.browseTopic = nodeConfig.nodeId || coreBrowser.browseToRoot()
-        browse(nodeConfig.browseTopic, msg, depth, lists, browseSendResult)
+        self.browseTopic = self.nodeId || coreBrowser.browseToRoot()
+        browse(self.browseTopic, msg, depth, lists, browseSendResult)
       }
     }
 
     const startBrowser = (msg: NodeMessageInFlow) => {
-      if (checkSessionNotValid(nodeConfig.connector.iiot.opcuaSession, 'Browser')) {
+      if (checkSessionNotValid(self.connector.iiot.opcuaSession, 'Browser')) {
         this.status({fill: 'red', shape: 'ring', text: 'invalid connector session'})
         return
       }
       let lists = createListsObject()
-      let depth = (nodeConfig.recursiveBrowse) ? nodeConfig.recursiveDepth : 0
-      nodeConfig.browseTopic = coreBrowser.extractNodeIdFromTopic(msg.payload as BrowserInputPayloadLike, nodeConfig) // set topic to the node object for HTTP requests at node
-      if (nodeConfig.browseTopic && nodeConfig.browseTopic !== '') {
-        browse(nodeConfig.browseTopic, msg, depth, lists, browseSendResult)
+      let depth = (self.recursiveBrowse) ? self.recursiveDepth : 0
+      self.browseTopic = coreBrowser.extractNodeIdFromTopic(msg.payload as BrowserInputPayloadLike, self) // set topic to the node object for HTTP requests at node
+      if (self.browseTopic && self.browseTopic !== '') {
+        browse(self.browseTopic, msg, depth, lists, browseSendResult)
       } else {
         browseWithAddressSpaceItems(msg, depth, lists)
       }
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
-      if (!checkConnectorState(nodeConfig, msg, 'Browser', errorHandler, emitHandler, statusHandler)) {
+      if (!checkConnectorState(self, msg, 'Browser', errorHandler, emitHandler, statusHandler)) {
         return
       }
-      if (nodeConfig.showStatusActivities) {
-        nodeConfig.oldStatusParameter = setNodeStatusTo(nodeConfig, 'browsing', nodeConfig.oldStatusParameter, nodeConfig.showStatusActivities, statusHandler)
+      if (self.showStatusActivities) {
+        self.oldStatusParameter = setNodeStatusTo(self, 'browsing', self.oldStatusParameter, self.showStatusActivities, statusHandler)
       }
       startBrowser(msg)
     })
@@ -402,11 +405,13 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.on(event, callback)
     }
 
-    registerToConnector(nodeConfig, statusHandler, onAlias, errorHandler)
+    registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
-      deregisterToConnector(nodeConfig, () => {
-        resetIiotNode(nodeConfig)
+      self.removeAllListeners()
+
+      deregisterToConnector(self, () => {
+        resetIiotNode(self)
         done()
       })
     })

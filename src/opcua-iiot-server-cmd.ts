@@ -10,7 +10,7 @@
 
 import * as nodered from "node-red";
 import {NodeMessageInFlow} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {logger} from "./core/opcua-iiot-core-connector";
 import {resetIiotNode} from "./core/opcua-iiot-core";
 import internalDebugLog = logger.internalDebugLog;
@@ -43,15 +43,14 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.nodeId = config.nodeId
     this.name = config.name
 
-    let node = this
+    let self = this
 
-
-    this.on('input', (msg: NodeMessageInFlow | Todo) => {
-      let returnPayload: Todo = {};
+    this.on('input', (msg: NodeMessageInFlow | TodoTypeAny) => {
+      let returnPayload: TodoTypeAny = {};
 
       returnPayload.nodetype = 'inject'
       returnPayload.injectType = 'CMD'
-      returnPayload.commandType = node.commandtype
+      returnPayload.commandType = self.commandtype
 
       if (msg.payload.addressSpaceItems && msg.payload.addressSpaceItems.length > 0) {
         let addressSpaceItem
@@ -65,8 +64,8 @@ module.exports = (RED: nodered.NodeAPI) => {
           })
         }
       } else {
-        if (node.nodeId) {
-          returnPayload.nodeId = node.nodeId
+        if (self.nodeId) {
+          returnPayload.nodeId = self.nodeId
         }
         this.send({...msg, payload: returnPayload})
       }
@@ -74,7 +73,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     this.on('close', (done: () => void) => {
       internalDebugLog('Close CMD Node')
-      resetIiotNode(node)
+      resetIiotNode(self)
       done()
     })
   }

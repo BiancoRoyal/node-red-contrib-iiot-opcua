@@ -10,7 +10,7 @@
 'use strict'
 
 import {
-  Todo,
+  TodoTypeAny,
   TodoVoidFunction,
 } from "./types/placeholders";
 import coreClient from "./core/opcua-iiot-core-client";
@@ -25,10 +25,11 @@ import {
   registerToConnector,
   resetIiotNode
 } from "./core/opcua-iiot-core";
+
 import {WriteValueOptions} from "node-opcua-service-write";
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
 import {BrowserPayload} from "./opcua-iiot-browser";
-import {ClientSession} from "node-opcua";
+import {ClientSession, ClientSessionWriteService, StatusCode, StatusCodes} from "node-opcua";
 
 
 interface OPCUAIIoTWrite extends Node {
@@ -48,9 +49,9 @@ interface OPCUAIIoTWriteDef extends NodeDef {
 }
 
 export type WriteResult = {
-  statusCodes: Todo,
-  nodesToWrite: Todo,
-  msg: NodeMessageInFlow & Todo
+  statusCodes: StatusCode[] | undefined,
+  nodesToWrite: TodoTypeAny,
+  msg: NodeMessageInFlow & TodoTypeAny
 }
 
 export type WriteResultMessage = NodeMessageInFlow & {
@@ -59,10 +60,10 @@ export type WriteResultMessage = NodeMessageInFlow & {
 
 export type WritePayload = {
   nodetype: 'write'
-  justValue: Todo
-  nodesToWrite: Todo[]
-  value: Todo
-  valuesToWrite: Todo
+  justValue: TodoTypeAny
+  nodesToWrite: TodoTypeAny[]
+  value: TodoTypeAny
+  valuesToWrite: TodoTypeAny
 }
 
 /**
@@ -81,12 +82,12 @@ module.exports = (RED: NodeAPI) => {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: Todo = this;
-    node.iiot = initCoreNode()
+    let self: TodoTypeAny = this;
+    self.iiot = initCoreNode()
 
     const handleWriteError = (err: Error, msg: NodeMessage) => {
       coreClient.writeDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
 
@@ -96,7 +97,7 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const writeToSession = (session: ClientSession, originMsg: Todo) => {
+    const writeToSession = (session: ClientSessionWriteService, originMsg: TodoTypeAny) => {
       if (checkSessionNotValid(session, 'Writer')) {
         /* istanbul ignore next */
         return
@@ -110,26 +111,26 @@ module.exports = (RED: NodeAPI) => {
           this.send(message)
         } catch (err: any) {
           /* istanbul ignore next */
-          isInitializedIIoTNode(node) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+          isInitializedIIoTNode(self) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
         }
       }).catch(function (err: Error) {
         /* istanbul ignore next */
-        isInitializedIIoTNode(node) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
+        isInitializedIIoTNode(self) ? handleWriteError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
     const buildResultMessage = (result: WriteResult): WriteResultMessage => {
       let message = Object.assign({}, result.msg)
       message.payload.nodetype = 'write'
-      message.payload.justValue = node.justValue
+      message.payload.justValue = self.justValue
 
       message.payload.value = extractDataValue(message, result)
       return message
     }
 
-    const extractDataValue = (message: WriteResultMessage, result: WriteResult): Todo => {
+    const extractDataValue = (message: WriteResultMessage, result: WriteResult): TodoTypeAny => {
       let dataValues: string
-      if (node.justValue) {
+      if (self.justValue) {
         if (message.payload.valuesToWrite) {
           delete message.payload['valuesToWrite']
         }
@@ -156,17 +157,17 @@ module.exports = (RED: NodeAPI) => {
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
-      if (!checkConnectorState(node, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
+      if (!checkConnectorState(self, msg, 'Write', errorHandler, emitHandler, statusHandler)) {
         return
       }
       const payload = msg.payload as BrowserPayload
       // recursivePrintTypes(msg);
       if (payload.injectType === 'write') {
-        writeToSession(node.connector.iiot.opcuaSession, msg)
+        writeToSession(self.connector.iiot.opcuaSession, msg)
       } else {
         coreClient.writeDebugLog('Wrong Inject Type ' + payload.injectType + '! The Type has to be write.')
         /* istanbul ignore next */
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.warn('Wrong Inject Type ' + payload.injectType + '! The msg.payload.injectType has to be write.')
         }
       }
@@ -177,16 +178,18 @@ module.exports = (RED: NodeAPI) => {
       this.on(event, callback)
     }
 
-    registerToConnector(node, statusHandler, onAlias, errorHandler)
+    registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: TodoVoidFunction) => {
-      deregisterToConnector(node, () => {
-        resetIiotNode(node)
+      self.removeAllListeners()
+
+      deregisterToConnector(self, () => {
+        resetIiotNode(self)
         done()
       })
     })
     if (process.env.TEST === "true") {
-      node.functions = {
+      self.functions = {
         handleWriteError
       }
     }

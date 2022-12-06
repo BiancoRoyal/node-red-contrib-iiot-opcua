@@ -10,7 +10,7 @@
 
 import * as nodered from "node-red";
 import {Node} from "@node-red/registry";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreMethod from "./core/opcua-iiot-core-method";
 import {
   checkConnectorState, checkSessionNotValid,
@@ -47,7 +47,7 @@ interface OPCUAIIoTMethodCallerDef extends nodered.NodeDef {
   connector: string
 }
 
-export type MethodPayload = Todo & {
+export type MethodPayload = TodoTypeAny & {
   nodetype: 'method'
 }
 
@@ -72,12 +72,12 @@ module.exports = (RED: nodered.NodeAPI) => {
     this.inputArguments = config.inputArguments
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: Todo = this
-    node.iiot = initCoreNode()
+    let self: TodoTypeAny = this
+    self.iiot = initCoreNode()
 
-    const handleMethodError = (err: Error, msg: Todo) => {
+    const handleMethodError = (err: Error, msg: TodoTypeAny) => {
       coreMethod.internalDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
 
@@ -86,33 +86,33 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const handleMethodWarn = (message: Todo) => {
-      if (node.showErrors) {
+    const handleMethodWarn = (message: TodoTypeAny) => {
+      if (self.showErrors) {
         this.warn(message)
       }
 
       coreMethod.internalDebugLog(message)
     }
 
-    const callMethodOnSession = (session: Todo, msg: Todo) => {
+    const callMethodOnSession = (session: TodoTypeAny, msg: TodoTypeAny) => {
       if (checkSessionNotValid(session, 'MethodCaller')) {
         return
       }
 
       if (msg.payload.methodId && msg.payload.inputArguments) {
-        coreMethod.getArgumentDefinition(node.connector.iiot.opcuaSession, msg).then(function (results: Todo) {
+        coreMethod.getArgumentDefinition(self.connector.iiot.opcuaSession, msg).then(function (results: TodoTypeAny) {
           coreMethod.detailDebugLog('Call Argument Definition Results: ' + JSON.stringify(results))
           callMethod(msg, results)
         }).catch((err: Error) => {
-          isInitializedIIoTNode(node) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
+          isInitializedIIoTNode(self) ? handleMethodError(err, msg) : coreMethod.internalDebugLog(err.message)
         })
       } else {
         coreMethod.internalDebugLog(new Error('No Method Id And/Or Parameters'))
       }
     }
 
-    const getDataValue = (message: Todo, result: Todo, definitionResults: Todo) => {
-      if (node.justValue) {
+    const getDataValue = (message: TodoTypeAny, result: TodoTypeAny, definitionResults: TodoTypeAny) => {
+      if (self.justValue) {
         if (message.payload.inputArguments) {
           delete message.payload['inputArguments']
         }
@@ -125,8 +125,8 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const callMethod = (msg: Todo, definitionResults: Todo) => {
-      coreMethod.callMethods(node.connector.iiot.opcuaSession, msg).then((data: Todo) => {
+    const callMethod = (msg: TodoTypeAny, definitionResults: TodoTypeAny) => {
+      coreMethod.callMethods(self.connector.iiot.opcuaSession, msg).then((data: TodoTypeAny) => {
         coreMethod.detailDebugLog('Methods Call Results: ' + JSON.stringify(data))
 
         let result = null
@@ -144,7 +144,7 @@ module.exports = (RED: nodered.NodeAPI) => {
 
         message.payload.value = getDataValue(message, data.results, definitionResults) || outputArguments
         // TODO: we have to check this again what value is to be ...
-        /* ?.map((item: Todo) => {
+        /* ?.map((item: TodoTypeAny) => {
           if (item.statusCode) {
             return {
               ...item,
@@ -162,7 +162,7 @@ module.exports = (RED: nodered.NodeAPI) => {
         this.send(message)
       }).catch((err: Error) => {
         coreMethod.internalDebugLog(err)
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.error(err, msg)
         }
       })
@@ -180,16 +180,16 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.status(status)
     }
 
-    this.on('input', function (msg: Todo) {
-      if (!checkConnectorState(node, msg, 'MethodCaller', errorHandler, emitHandler, statusHandler)) {
+    this.on('input', function (msg: TodoTypeAny) {
+      if (!checkConnectorState(self, msg, 'MethodCaller', errorHandler, emitHandler, statusHandler)) {
         return
       }
 
-      const message = coreMethod.buildCallMessage(node, msg)
-      if (coreMethod.invalidMessage(node, message, handleMethodWarn)) {
+      const message = coreMethod.buildCallMessage(self, msg)
+      if (coreMethod.invalidMessage(self, message, handleMethodWarn)) {
         return
       }
-      callMethodOnSession(node.connector.iiot.opcuaSession, message)
+      callMethodOnSession(self.connector.iiot.opcuaSession, message)
     })
 
     const onAlias = (event: string, callback: (...args: any) => void) => {
@@ -197,17 +197,17 @@ module.exports = (RED: nodered.NodeAPI) => {
       this.on(event, callback)
     }
 
-    registerToConnector(node as Todo, statusHandler, onAlias, errorHandler)
+    registerToConnector(self as TodoTypeAny, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
-      deregisterToConnector(node as Todo, () => {
-        resetIiotNode(node)
+      deregisterToConnector(self as TodoTypeAny, () => {
+        resetIiotNode(self)
         done()
       })
     })
 
     if (process.env.TEST === "true")
-      node.functions = {
+      self.functions = {
         handleMethodError,
         handleMethodWarn,
         callMethodOnSession

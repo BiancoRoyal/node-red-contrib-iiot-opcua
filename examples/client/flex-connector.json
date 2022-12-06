@@ -14,8 +14,8 @@
     "showStatusActivities": false,
     "showErrors": true,
     "connector": "4545bd8a.162794",
-    "x": 400,
-    "y": 140,
+    "x": 394,
+    "y": 187,
     "wires": [
       [
         "9b8fcce6.503a68"
@@ -27,15 +27,24 @@
     "type": "inject",
     "z": "c23b6c91.59828",
     "name": "Server 81",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55381/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
-    "x": 160,
-    "y": 140,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55381/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
+    "x": 154,
+    "y": 187,
     "wires": [
       [
         "cac3c43b.22962"
@@ -52,8 +61,11 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
-    "x": 570,
-    "y": 140,
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 564,
+    "y": 187,
     "wires": []
   },
   {
@@ -61,15 +73,24 @@
     "type": "inject",
     "z": "c23b6c91.59828",
     "name": "Server 82 wrong",
-    "topic": "",
-    "payload": "{\"endpoint\":\"opc.tcp://localhost:55382/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
-    "x": 180,
-    "y": 100,
+    "topic": "",
+    "payload": "{\"endpoint\":\"opc.tcp://localhost:55382/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
+    "payloadType": "json",
+    "x": 174,
+    "y": 147,
     "wires": [
       [
         "cac3c43b.22962"
@@ -81,15 +102,24 @@
     "type": "inject",
     "z": "c23b6c91.59828",
     "name": "Server 80",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55380/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
-    "x": 160,
-    "y": 180,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55380/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
+    "x": 154,
+    "y": 227,
     "wires": [
       [
         "cac3c43b.22962"
@@ -100,10 +130,10 @@
     "id": "1d4990a8.c5c607",
     "type": "comment",
     "z": "c23b6c91.59828",
-    "name": "Please, use the client browser flow!",
+    "name": "Please, use the client browser example!",
     "info": "see Node-RED menu -> \nImport -> Examples -> \niiot opcua -> client -> browser",
-    "x": 500,
-    "y": 80,
+    "x": 478,
+    "y": 53,
     "wires": []
   },
   {
@@ -122,6 +152,7 @@
     "showErrors": true,
     "asoDemo": true,
     "allowAnonymous": true,
+    "individualCerts": false,
     "isAuditing": false,
     "serverDiscovery": false,
     "users": [],
@@ -151,21 +182,62 @@
     "wires": []
   },
   {
+    "id": "058c11fa9be95cb3",
+    "type": "comment",
+    "z": "c23b6c91.59828",
+    "name": "Use Server Examples",
+    "info": "Please use the Demo Server and Flex Server examples for this example to work.\nImport that with strg+i -> Examples -> opcuaIIoT -> Server -> Demo Server/Flex Server",
+    "x": 421,
+    "y": 456,
+    "wires": []
+  },
+  {
+    "id": "b162ab37a36d5f92",
+    "type": "comment",
+    "z": "c23b6c91.59828",
+    "name": "Server 80 is Default Flex Server",
+    "info": "",
+    "x": 451,
+    "y": 418,
+    "wires": []
+  },
+  {
+    "id": "9fdb18cde3c62eab",
+    "type": "comment",
+    "z": "c23b6c91.59828",
+    "name": "Change Connector Node to \"all flows\" in config tab",
+    "info": "Double click the connector node.\nOn the bottom right, there is a drop down menu\nwhere you can choose the scope of the config node (here connector node).\nChoose \"all flows\".\n\nOtherwise, the browser example will not work!!!",
+    "x": 517,
+    "y": 89,
+    "wires": []
+  },
+  {
+    "id": "cc8d0551c977555b",
+    "type": "comment",
+    "z": "c23b6c91.59828",
+    "name": "Change connector node in browser example",
+    "info": "After importing and changing the scope of the connector node of this example,\nplease go to the browser example and double click on the browser node.\nThere, you have to change the connector of the browser node.\n\nOtherwise, the browser example will not work!!!",
+    "x": 499,
+    "y": 127,
+    "wires": []
+  },
+  {
     "id": "4545bd8a.162794",
     "type": "OPCUA-IIoT-Connector",
     "z": "c23b6c91.59828",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388/",
+    "endpointMustExist": false,
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "None",
-    "securityMode": "NONE",
     "name": "LOCAL FLEX CONECTOR SERVER",
     "showErrors": true,
+    "securityPolicy": "None",
+    "securityMode": "None",
+    "individualCerts": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "",
-    "endpointMustExist": false,
     "autoSelectRightEndpoint": false,
     "strategyMaxRetry": "",
     "strategyInitialDelay": "",

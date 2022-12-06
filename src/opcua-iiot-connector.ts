@@ -12,7 +12,13 @@
 import * as path from 'path'
 import * as nodered from 'node-red'
 import {NodeStatus} from 'node-red'
-import {getNodeOPCUAClientPath, isInitializedIIoTNode, resetIiotNode} from './core/opcua-iiot-core'
+import {
+  ConnectorIIoT,
+  FsmConnectorStates,
+  getNodeOPCUAClientPath,
+  isInitializedIIoTNode,
+  resetIiotNode
+} from './core/opcua-iiot-core'
 import {
   AttributeIds,
   ClientSession,
@@ -30,7 +36,7 @@ import {
   StatusCodes,
   VariableTypeIds
 } from "node-opcua";
-import coreConnector, {ConnectorIIoT, logger, Stately} from "./core/opcua-iiot-core-connector";
+import coreConnector, {logger} from "./core/opcua-iiot-core-connector";
 import {FindServerResults} from "node-opcua-client/source/tools/findservers";
 import _, {isUndefined} from "underscore";
 import {UserTokenType} from "node-opcua-service-endpoints";
@@ -38,6 +44,8 @@ import {OPCUAClientOptions} from "node-opcua-client/dist/opcua_client";
 import internalDebugLog = logger.internalDebugLog;
 import detailDebugLog = logger.detailDebugLog;
 import {getEnumKeys} from "./types/helpers";
+import {createMachine, interpret} from "@xstate/fsm"
+import {TodoTypeAny} from "./types/placeholders";
 
 interface OPCUAIIoTConnectorCredentials {
   user: string
@@ -107,7 +115,6 @@ interface OPCUAIIoTConnectorConfigurationDef extends nodered.NodeDef {
   maxBadSessionRequests: number
 }
 
-
 /**
  * OPC UA connector Node-RED config this.
  *
@@ -134,6 +141,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showErrors = config.showErrors
     this.securityPolicy = coerceSecurityPolicy(config.securityPolicy)
     this.messageSecurityMode = coerceMessageSecurityMode(config.securityMode) || MessageSecurityMode.None
+    this.individualCerts = config.individualCerts
     this.publicCertificateFile = config.publicCertificateFile
     this.privateKeyFile = config.privateKeyFile
     this.defaultSecureTokenLifetime = config.defaultSecureTokenLifetime || 120000
@@ -146,13 +154,15 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.connectionStartDelay = config.connectionStartDelay || CONNECTION_START_DELAY
     this.reconnectDelay = config.reconnectDelay || RECONNECT_DELAY
     this.connectionStopDelay = config.connectionStopDelay || CONNECTION_STOP_DELAY
-    this.maxBadSessionRequests = config.maxBadSessionRequests || 10
+    this.maxBadSessionRequests = parseInt(config.maxBadSessionRequests?.toString()) || 10
 
     this.iiot = coreConnector.initConnectorNode()
 
     if (!this.iiot) throw Error('IIoT Initialization Failed')
 
     this.setMaxListeners(UNLIMITED_LISTENERS)
+
+    const self = this
 
     internalDebugLog('Open Connector Node')
 
@@ -192,6 +202,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         }
         internalDebugLog('Connecting With Login Data On ' + this.endpoint)
       } else {
+        /* istanbul ignore next */
         this.error(new Error('Login Enabled But No Credentials'), {payload: ''})
       }
     }
@@ -240,6 +251,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (!this.iiot.opcuaClient)
         this.iiot.opcuaClient = OPCUAClient.create({...this.iiot.opcuaClientOptions}) // Need to use the spread operator, because otherwise there is phantom circular references
       if (Object.keys(this.iiot.opcuaClient).length === 0) {
+        /* istanbul ignore next */
         detailDebugLog('Failed to create OPCUA Client ', {opcuaClient: this.iiot.opcuaClient})
       }
 
@@ -254,6 +266,9 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (isUndefined(this.iiot))
         return
 
+      if(isUndefined(this.iiot.stateService))
+        return
+
       // Needs to be separate if so that typescript understands the types properly
       if (isUndefined(this.iiot.opcuaClient))
         return
@@ -262,15 +277,18 @@ module.exports = function (RED: nodered.NodeAPI) {
         return
       }
       this.iiot.opcuaClient.connect(this.endpoint, (err: Error | undefined): void => {
-        if (isInitializedIIoTNode(this) && !isUndefined(this.iiot)) {
+        if (isInitializedIIoTNode(this) && !isUndefined(this.iiot) && !isUndefined(this.iiot.stateService)) {
           if (err) {
-            this.iiot?.stateMachine.lock().stopopcua()
+            //this.iiot.stateMachine.lock().stopopcua()
+            this.iiot?.stateService.send('STOP')
             handleError(err)
           } else {
             internalDebugLog('Client Is Connected To ' + this.endpoint)
-            this.iiot.stateMachine.open()
+            //this.iiot.stateMachine.open()
+            this.iiot.stateService.send('OPEN')
           }
         } else {
+          /* istanbul ignore next */
           internalDebugLog('iiot not valid on connect resolve')
         }
       })
@@ -281,10 +299,14 @@ module.exports = function (RED: nodered.NodeAPI) {
         opcuaDirectDisconnect(() => {
           if (isUndefined(this.iiot)) return;
           renewFiniteStateMachine()
-          this.iiot.stateMachine.idle().initopcua();
+          //this.iiot.stateMachine.idle().initopcua();
+          // Todo: the steps have to be used as before
+          this.iiot.stateService.send('IDLE')
+          this.iiot.stateService.send('INITOPCUA')
           done()
         })
       } else {
+        /* istanbul ignore next */
         internalDebugLog('iiot not valid on renew connection')
       }
     }
@@ -303,6 +325,7 @@ module.exports = function (RED: nodered.NodeAPI) {
     const selectEndpointFromSettings = (discoverClient: OPCUAClient) => {
       discoverClient.getEndpoints((err, endpoints) => {
         if (err) {
+          /* istanbul ignore next */
           internalDebugLog('Auto Switch To Endpoint Error ' + err)
           if (this.showErrors) {
             this.error(err, {payload: 'Get Endpoints Request Error'})
@@ -313,6 +336,7 @@ module.exports = function (RED: nodered.NodeAPI) {
           })
 
           if (endpoint && endpoint.endpointUrl != null) {
+            /* istanbul ignore next */
             internalDebugLog('Auto Switch To Endpoint ' + endpoint.endpointUrl)
             this.endpoint = endpoint.endpointUrl
           } else {
@@ -322,8 +346,10 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         discoverClient.disconnect((err: Error | undefined) => {
           if (err) {
+            /* istanbul ignore next */
             internalDebugLog('Endpoints Auto Request Error ' + err)
             if (this.showErrors) {
+              /* istanbul ignore next */
               this.error(err, {payload: 'Discover Client Disconnect Error'})
             }
           } else {
@@ -352,6 +378,7 @@ module.exports = function (RED: nodered.NodeAPI) {
 
         this.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
       }).catch((err: Error) => {
+        /* istanbul ignore next */
         internalDebugLog('Get Auto Endpoint Request Error ' + err.message)
         if (isInitializedIIoTNode<ConnectorIIoT>(this.iiot) && !isUndefined(this.iiot.opcuaClientOptions)) {
           this.iiot.opcuaClientOptions.endpointMustExist = endpointMustExist
@@ -364,40 +391,47 @@ module.exports = function (RED: nodered.NodeAPI) {
     const startSession = async (callerInfo: string) => {
       internalDebugLog('Request For New Session From ' + callerInfo)
       if (isUndefined(this.iiot)) {
+        /* istanbul ignore next */
         return
       }
 
       if (isInactiveOnOPCUA()) {
-        internalDebugLog('State Is Not Active While Start Session-> ' + this.iiot.stateMachine.getMachineState())
+        internalDebugLog('State Is Not Active While Start Session-> ' + this.iiot.stateService.state.value)
         if (this.showErrors) {
+          /* istanbul ignore next */
           this.error(new Error('OPC UA Connector Is Not Active'), {payload: 'Create Session Error'})
         }
         return
       }
-      if (this.iiot.stateMachine.getMachineState() !== 'OPEN') {
-        internalDebugLog('Session Request Not Allowed On State ' + this.iiot.stateMachine.getMachineState())
+
+      if (this.iiot.stateService.state.value !== FsmConnectorStates.StateOpened) {
+        internalDebugLog('Session Request Not Allowed On State ' + this.iiot.stateService.state.value)
         if (this.showErrors) {
+          /* istanbul ignore next */
           this.error(new Error('OPC UA Connector Is Not Open'), {payload: 'Create Session Error'})
         }
         return
       }
+
       if (!this.iiot.opcuaClient) {
-        internalDebugLog('OPC UA Client Connection Is Not Valid On State ' + this.iiot.stateMachine.getMachineState())
+        internalDebugLog('OPC UA Client Connection Is Not Valid On State ' + this.iiot.stateService.state.value)
         if (this.showErrors) {
+          /* istanbul ignore next */
           this.error(new Error('OPC UA Client Connection Is Not Valid'), {payload: 'Create Session Error'})
         }
         return
       }
 
-      this.iiot.stateMachine.sessionrequest()
+      //this.iiot.stateMachine.sessionrequest()
+      this.iiot.stateService.send('SESSIONREQUEST')
       const res = await this.iiot.opcuaClient.createSession(this.iiot.userIdentity)
         .then((session: ClientSession) => {
-          if (isUndefined(this.iiot))
-            return
+          if (isUndefined(this.iiot)) return
 
           session.requestedMaxReferencesPerNode = 100000
           this.iiot.opcuaSession = session
-          this.iiot.stateMachine.sessionactive()
+          //this.iiot.stateMachine.sessionactive()
+          this.iiot.stateService.send('SESSIONACTIVATE')
 
           detailDebugLog('Session Created On ' + this.endpoint + ' For ' + callerInfo)
           coreConnector.logSessionInformation(this)
@@ -406,8 +440,11 @@ module.exports = function (RED: nodered.NodeAPI) {
             handleSessionClose(statusCode)
           })
         }).catch((err: Error) => {
+            /* istanbul ignore next */
           if (isInitializedIIoTNode<ConnectorIIoT>(this.iiot)) {
-            this.iiot.stateMachine.lock().stopopcua()
+            //this.iiot.stateMachine.lock().stopopcua()
+            this.iiot.stateService.send('LOCK')
+            this.iiot.stateService.send('STOP')
             handleError(err)
           } else {
             internalDebugLog(err.message)
@@ -419,24 +456,30 @@ module.exports = function (RED: nodered.NodeAPI) {
 
     const resetBadSession = () => {
       if (!this.iiot) {
+        /* istanbul ignore next */
         return
       }
 
       this.iiot.sessionNodeRequests += 1
       detailDebugLog('Session Node Requests At Connector No.: ' + this.iiot.sessionNodeRequests)
       if (this.showErrors) {
+        /* istanbul ignore next */
         internalDebugLog('!!!!!!!!!!!!!!!!!!!!!   BAD SESSION ON CONNECTOR   !!!!!!!!!!!!!!!!!!')
       }
 
       if (this.iiot.sessionNodeRequests > this.maxBadSessionRequests) {
-        internalDebugLog('Reset Bad Session Request On State ' + this.iiot.stateMachine.getMachineState())
+        internalDebugLog('Reset Bad Session Request On State ' + this.iiot.stateService.state.value)
         resetOPCUAConnection('ToManyBadSessionRequests')
       }
     }
 
     const isInactiveOnOPCUA = () => {
-      let state = this.iiot?.stateMachine?.getMachineState()
-      return (state === 'STOPPED' || state === 'END' || state === 'RENEW' || state === 'RECONFIGURED')
+      //let state = this.iiot?.stateMachine?.getMachineState()
+      let state = this.iiot?.stateService?.state.value
+      return (state === FsmConnectorStates.StateStopped ||
+              state === FsmConnectorStates.StateEnd ||
+              state === FsmConnectorStates.StateRenewed ||
+              state === FsmConnectorStates.StateReconfigured)
     }
 
     const resetOPCUAConnection = (callerInfo: string) => {
@@ -445,7 +488,9 @@ module.exports = function (RED: nodered.NodeAPI) {
         return
       }
 
-      this.iiot.stateMachine.lock().renew()
+      //this.iiot.stateMachine.lock().renew()
+      this.iiot.stateService.send('LOCK')
+      this.iiot.stateService.send('RENEW')
       this.emit('reset_opcua_connection')
       closeSession(() => {
         renewConnection(() => {
@@ -457,17 +502,20 @@ module.exports = function (RED: nodered.NodeAPI) {
     const handleError = (err: Error) => {
       internalDebugLog('Handle Error On ' + this.endpoint + ' err: ' + err)
       if (this.showErrors) {
+        /* istanbul ignore next */
         this.error(err, {payload: 'Handle Connector Error'})
       }
     }
 
     const closeSession = (done: () => void) => {
-      if (isUndefined(this.iiot)) {
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        /* istanbul ignore next */
+        done()
         return
       }
 
       if (this.iiot?.opcuaClient && this.iiot?.opcuaSession) {
-        detailDebugLog('Close Session And Remove Subscriptions From Session On State ' + this.iiot.stateMachine.getMachineState())
+        detailDebugLog('Close Session And Remove Subscriptions From Session On State ' + this.iiot.stateService.state.value)
 
         try {
           this.iiot.opcuaSession.removeAllListeners()
@@ -478,6 +526,7 @@ module.exports = function (RED: nodered.NodeAPI) {
             done()
           })
         } catch (err: any) {
+          /* istanbul ignore next */
           handleError(err)
           done()
         } finally {
@@ -485,9 +534,17 @@ module.exports = function (RED: nodered.NodeAPI) {
             this.iiot.opcuaSession = undefined
         }
       } else {
-        internalDebugLog('Close Session Without Session On State ' + this.iiot.stateMachine.getMachineState())
+        internalDebugLog('Close Session Without Session On State ' + this.iiot.stateService.state.value)
         done()
       }
+    }
+
+    const hasNoSession = () => {
+      return _.isUndefined(this.iiot) || _.isUndefined(this.iiot?.opcuaSession) || _.isNull(this.iiot?.opcuaSession)
+    }
+
+    const hasSession = () => {
+      return !hasNoSession()
     }
 
     const handleSessionClose = (statusCode: number) => {
@@ -503,17 +560,20 @@ module.exports = function (RED: nodered.NodeAPI) {
 
 
       coreConnector.logSessionInformation(this)
-      if (this.iiot?.stateMachine && this.iiot.stateMachine.getMachineState() !== 'SESSIONRESTART') {
-        this.iiot.stateMachine.lock().sessionclose()
+      if (this.iiot?.stateMachine && this.iiot.stateService.state.value !== FsmConnectorStates.StateSessionRestart) {
+        //this.iiot.stateMachine.lock().sessionclose()
+        this.iiot.stateService.send('LOCK')
+        this.iiot.stateService.send('SESSIONCLOSE')
       }
     }
 
     const disconnectNodeOPCUA = (done: () => void) => {
-      if (isUndefined(this.iiot)) {
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        done()
         return
       }
 
-      internalDebugLog('OPC UA Disconnect Connector On State ' + this.iiot.stateMachine.getMachineState())
+      internalDebugLog('OPC UA Disconnect Connector On State ' + this.iiot.stateService.state.value)
 
       if (this.iiot?.opcuaClient) {
         internalDebugLog('Close Node Disconnect Connector From ' + this.endpoint)
@@ -538,6 +598,13 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     this.on('close', (done: () => void) => {
+      self.removeAllListeners()
+
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        done()
+        return
+      }
+
       if (!isInitializedIIoTNode<ConnectorIIoT>(this.iiot)) {
         done() // if we have a very fast deploy clicking uer
       } else {
@@ -546,14 +613,14 @@ module.exports = function (RED: nodered.NodeAPI) {
           resetIiotNode(this)
           done()
         } else {
-          detailDebugLog('OPC UA Client Is Active On Close Node With State ' + this.iiot.stateMachine.getMachineState())
-          if (this.iiot.stateMachine.getMachineState() === 'SESSIONACTIVE') {
+          detailDebugLog('OPC UA Client Is Active On Close Node With State ' + this.iiot.stateService.state.value)
+          if (this.iiot.stateService.state.value === FsmConnectorStates.StateSessionActive) {
             closeConnector(() => {
               resetIiotNode(this)
               done()
             })
           } else {
-            internalDebugLog(this.iiot.stateMachine.getMachineState() + ' -> !!!  CHECK CONNECTOR STATE ON CLOSE  !!!')
+            internalDebugLog(this.iiot.stateService.state.value + ' -> !!!  CHECK CONNECTOR STATE ON CLOSE  !!!')
             resetIiotNode(this)
             done()
           }
@@ -562,7 +629,13 @@ module.exports = function (RED: nodered.NodeAPI) {
     })
 
     const opcuaDisconnect = (done: () => void) => {
-      if (isUndefined(this.iiot) || isUndefined(this.iiot.registeredNodeList)) {
+
+      if ( isUndefined(this.iiot) ||
+           isUndefined(this.iiot.registeredNodeList) ||
+          _.isEmpty(this.iiot) ||
+          _.isArray(this.iiot.registeredNodeList) === false)
+      {
+        opcuaDirectDisconnect(done)
         return
       }
 
@@ -583,21 +656,25 @@ module.exports = function (RED: nodered.NodeAPI) {
     }
 
     const opcuaDirectDisconnect = (done: () => void) => {
-      if (isUndefined(this.iiot)) {
+      if (isUndefined(this.iiot) || _.isEmpty(this.iiot)) {
+        done()
         return
       }
 
-      detailDebugLog('OPC UA Disconnect From Connector ' + this.iiot.stateMachine.getMachineState())
+      detailDebugLog('OPC UA Disconnect From Connector ' + this.iiot.stateService.state.value)
       disconnectNodeOPCUA(() => {
         if (isUndefined(this.iiot)) {
+          done()
           return
         }
-        this.iiot.stateMachine.lock().close()
-        let fsmState = this.iiot.stateMachine.getMachineState()
+        //this.iiot.stateMachine.lock().close()
+        this.iiot.stateService.send('LOCK')
+        this.iiot.stateService.send('CLOSE')
+        let fsmState = this.iiot.stateService.state.value
         detailDebugLog('Disconnected On State ' + fsmState)
-        if (!isInactiveOnOPCUA() && fsmState !== 'CLOSED') {
-          done()
-        }
+        // if (!isInactiveOnOPCUA() && fsmState !== 'CLOSED') { //Todo: check state machine to be closed
+        //    return;
+        // }
         done()
       })
     }
@@ -606,7 +683,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (isUndefined(this.iiot)) {
         return
       }
-      detailDebugLog('Close Connector ' + this.iiot.stateMachine.getMachineState())
+      detailDebugLog('Close Connector ' + this.iiot.stateService.value)
 
       if (isInactiveOnOPCUA()) {
         detailDebugLog('OPC UA Client Is Not Active On Close Connector')
@@ -626,8 +703,10 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (isUndefined(this.iiot)) {
         return
       }
-      internalDebugLog('Renew With Flex Connector Request On State ' + this.iiot.stateMachine.getMachineState())
-      this.iiot.stateMachine.lock().reconfigure()
+      internalDebugLog('Renew With Flex Connector Request On State ' + this.iiot.stateService.state.value)
+      //this.iiot.stateMachine.lock().reconfigure()
+      this.iiot.stateService.send('LOCK')
+      this.iiot.stateService.send('RECONFIGURE')
       updateSettings(config)
       initCertificatesAndKeys()
       renewConnection(done)
@@ -684,134 +763,136 @@ module.exports = function (RED: nodered.NodeAPI) {
       }
     }
 
-    const subscribeFSMEvents = (fsm: Stately.stateMachine) => {
-      /* #########   FSM EVENTS  #########     */
+    /* #########   FSM   #########     */
 
-      fsm.onIDLE = () => {
-        detailDebugLog('Connector IDLE Event FSM')
-        resetOPCUAObjects()
-      }
+    const connectorStateEventFunction = async (state: any) =>{
+      if(!state.changed) return;
+      if(this.iiot === undefined) return;
 
-      fsm.onINITOPCUA = async () => {
-        detailDebugLog('Connector Init OPC UA Event FSM')
+      switch (state.value) {
+        case FsmConnectorStates.StateIdle:
+          detailDebugLog('Connector IDLE Event FSM')
+          resetOPCUAObjects()
+          break
+        case FsmConnectorStates.StateInit:
+          detailDebugLog('Connector Init OPC UA Event FSM')
 
-        if (!this.iiot) {
-          return
-        }
+          if (!this.iiot) {
+            return
+          }
 
-        resetOPCUAObjects()
-        resetAllTimer()
-        this.emit('connector_init', this)
-        initCertificatesAndKeys()
+          resetOPCUAObjects()
+          resetAllTimer()
+          this.emit('connector_init', this)
+          initCertificatesAndKeys()
 
-        if (clientStartTimeout) {
-          clearTimeout(clientStartTimeout)
-          clientStartTimeout = null
-        }
-        detailDebugLog('connecting OPC UA with delay of msec: ' + this.connectionStartDelay)
-        clientStartTimeout = setTimeout(() => {
+          if (clientStartTimeout) {
+            clearTimeout(clientStartTimeout)
+            clientStartTimeout = null
+          }
+          detailDebugLog('connecting OPC UA with delay of msec: ' + this.connectionStartDelay)
+          clientStartTimeout = setTimeout(() => {
+            if (isInitializedIIoTNode(this.iiot)) {
+              try {
+                connectOPCUAEndpoint()
+              } catch (err: any) {
+                handleError(err)
+                resetOPCUAObjects()
+                //this.iiot.stateMachine.lock().stopopcua()
+                this.iiot.stateService.send('LOCK')
+                this.iiot.stateService.send('STOP')
+              }
+            }
+          }, this.connectionStartDelay)
+          break
+        case FsmConnectorStates.StateOpened:
+          detailDebugLog('Connector Open Event FSM')
           if (isInitializedIIoTNode(this.iiot)) {
-            try {
-              connectOPCUAEndpoint()
-            } catch (err: any) {
-              handleError(err)
-              resetOPCUAObjects()
-              this.iiot.stateMachine.lock().stopopcua()
+            this.emit('connection_started', this.iiot.opcuaClient, statusHandler)
+            internalDebugLog('Client Connected To ' + this.endpoint)
+            detailDebugLog('Client Options ' + JSON.stringify(this.iiot.opcuaClientOptions))
+            await startSession('Open Event')
+          }
+          break
+        case FsmConnectorStates.StateSessionRequested:
+          detailDebugLog('Connector Session Request Event FSM')
+          break
+        case FsmConnectorStates.StateSessionActive:
+          detailDebugLog('Connector Session Active Event FSM')
+          if (!isUndefined(this.iiot))
+            this.iiot.sessionNodeRequests = 0
+          this.emit('session_started', this.iiot?.opcuaSession)
+          break
+        case FsmConnectorStates.StateSessionRestart:
+          detailDebugLog('Connector Session Restart Event FSM')
+          this.emit('session_restart')
+          break
+        case FsmConnectorStates.StateSessionClosed:
+          detailDebugLog('Connector Session Close Event FSM')
+          this.emit('session_closed')
+          if (isInitializedIIoTNode(this.iiot)) {
+            this.iiot.opcuaSession = undefined
+          }
+          break
+        case FsmConnectorStates.StateClosed:
+          detailDebugLog('Connector Client Close Event FSM')
+          this.emit('connection_closed')
+          if (isInitializedIIoTNode(this.iiot)) {
+            if (Object.keys(this.iiot.opcuaClient || {}).length > 1) {
+              this.iiot.opcuaClient?.disconnect((err?: Error) => {
+                if (err) {
+                  handleError(err)
+                }
+              })
+              this.iiot.opcuaClient = undefined
             }
           }
-        }, this.connectionStartDelay)
-      }
-
-      fsm.onOPEN = async () => {
-        detailDebugLog('Connector Open Event FSM')
-        if (isInitializedIIoTNode(this.iiot)) {
-          this.emit('connection_started', this.iiot.opcuaClient, statusHandler)
-          internalDebugLog('Client Connected To ' + this.endpoint)
-          detailDebugLog('Client Options ' + JSON.stringify(this.iiot.opcuaClientOptions))
-          await startSession('Open Event')
-        }
-
-      }
-
-      fsm.onSESSIONREQUESTED = () => {
-        detailDebugLog('Connector Session Request Event FSM')
-      }
-
-      fsm.onSESSIONACTIVE = () => {
-        detailDebugLog('Connector Session Active Event FSM')
-        if (!isUndefined(this.iiot))
-          this.iiot.sessionNodeRequests = 0
-        this.emit('session_started', this.iiot?.opcuaSession)
-      }
-
-      fsm.onSESSIONCLOSED = () => {
-        detailDebugLog('Connector Session Close Event FSM')
-        this.emit('session_closed')
-        if (isInitializedIIoTNode(this.iiot)) {
-          this.iiot.opcuaSession = undefined
-        }
-      }
-
-      fsm.onSESSIONRESTART = () => {
-        detailDebugLog('Connector Session Restart Event FSM')
-        this.emit('session_restart')
-      }
-
-      fsm.onCLOSED = () => {
-        detailDebugLog('Connector Client Close Event FSM')
-        this.emit('connection_closed')
-        if (isInitializedIIoTNode(this.iiot)) {
-          if (Object.keys(this.iiot.opcuaClient || {}).length > 1) {
-            this.iiot.opcuaClient?.disconnect((err?: Error) => {
-              if (err) {
-                handleError(err)
-              }
-            })
-            this.iiot.opcuaClient = undefined
+          break
+        case FsmConnectorStates.StateLocked:
+          detailDebugLog('Connector Lock Event FSM')
+          break
+        case FsmConnectorStates.StateUnlocked:
+          detailDebugLog('Connector Unlock Event FSM')
+          break
+        case FsmConnectorStates.StateStopped:
+          detailDebugLog('Connector Stopped Event FSM')
+          this.emit('connection_stopped')
+          if (isInitializedIIoTNode(this.iiot)) {
+            resetAllTimer()
           }
-        }
+          break
+        case FsmConnectorStates.StateEnd:
+          detailDebugLog('Connector End Event FSM')
+          this.emit('connection_end')
+          if (isInitializedIIoTNode(this.iiot)) {
+            resetAllTimer()
+          }
+          break
+        case FsmConnectorStates.StateReconfigured:
+          detailDebugLog('Connector Reconfigure Event FSM')
+          this.emit('connection_reconfigure')
+          if (isInitializedIIoTNode(this.iiot)) {
+            resetAllTimer()
+          }
+          break
+        case FsmConnectorStates.StateRenewed:
+          detailDebugLog('Connector Renew Event FSM')
+          this.emit('connection_renew')
+          if (isInitializedIIoTNode(this.iiot)) {
+            resetAllTimer()
+          }
+          break
+        default:
+          throw new Error('Connector FSM is not in a valid state')
       }
 
-      fsm.onLOCKED = () => {
-        detailDebugLog('Connector Lock Event FSM')
-      }
-
-      fsm.onUNLOCKED = () => {
-        detailDebugLog('Connector Unlock Event FSM')
-      }
-
-      fsm.onSTOPPED = () => {
-        detailDebugLog('Connector Stopped Event FSM')
-        this.emit('connection_stopped')
-        if (isInitializedIIoTNode(this.iiot)) {
-          resetAllTimer()
-        }
-      }
-
-      fsm.onEND = () => {
-        detailDebugLog('Connector End Event FSM')
-        this.emit('connection_end')
-        if (isInitializedIIoTNode(this.iiot)) {
-          resetAllTimer()
-        }
-      }
-
-      fsm.onRECONFIGURED = () => {
-        detailDebugLog('Connector Reconfigure Event FSM')
-        this.emit('connection_reconfigure')
-        if (isInitializedIIoTNode(this.iiot)) {
-          resetAllTimer()
-        }
-      }
-
-      fsm.onRENEW = () => {
-        detailDebugLog('Connector Renew Event FSM')
-        this.emit('connection_renew')
-        if (isInitializedIIoTNode(this.iiot)) {
-          resetAllTimer()
-        }
-      }
     }
+
+    this.iiot.stateMachine = coreConnector.createConnectorFinalStateMachine()
+    this.iiot.stateService = coreConnector.startConnectorMachineService(this.iiot.stateMachine)
+    this.iiot.stateSubscription = coreConnector.subscribeConnectorFSMService(this.iiot.stateService, connectorStateEventFunction)
+
+
 
     const resetAllTimer = () => {
       detailDebugLog('Reset All Timer')
@@ -838,8 +919,17 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (isUndefined(this.iiot))
         return
       this.iiot.stateMachine = null
+      this.iiot.stateService = null
+      this.iiot.stateSubscription = null
+
+      /* Stately
       this.iiot.stateMachine = coreConnector.createConnectorStatelyMachine()
       subscribeFSMEvents(this.iiot.stateMachine)
+       */
+      // @xstate/fsm
+      this.iiot.stateMachine = coreConnector.createConnectorFinalStateMachine()
+      this.iiot.stateService = coreConnector.startConnectorMachineService(this.iiot.stateMachine)
+      this.iiot.stateSubscription = coreConnector.subscribeConnectorFSMService(this.iiot.stateService, connectorStateEventFunction)
     }
 
     const registerForOPCUA = (opcuaNode: nodered.Node, onAlias: (event: string, ...args: any) => void) => {
@@ -858,7 +948,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.iiot.registeredNodeList[opcuaNode.id] = opcuaNode
 
       onAlias('opcua_client_not_ready', () => {
-        if (isInitializedIIoTNode(this.iiot) && this.iiot.stateMachine.getMachineState() !== 'END') {
+        if (isInitializedIIoTNode(this.iiot) && this.iiot.stateService.state.value !== FsmConnectorStates.StateEnd) {
           resetBadSession()
         }
       })
@@ -866,7 +956,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       if (Object.keys(this.iiot.registeredNodeList).length === 1) {
         internalDebugLog('Start Connector OPC UA Connection')
         renewFiniteStateMachine()
-        this.iiot.stateMachine.idle().initopcua();
+        this.iiot.stateService.send('INITOPCUA');
       } else {
       }
     }
@@ -888,13 +978,15 @@ module.exports = function (RED: nodered.NodeAPI) {
       internalDebugLog('Deregister In Connector NodeId: ' + opcuaNode.id)
       delete this.iiot.registeredNodeList[opcuaNode.id]
 
-      if (this.iiot.stateMachine.getMachineState() === 'STOPPED' || this.iiot.stateMachine.getMachineState() === 'END') {
+      if (this.iiot.stateService.state.value === FsmConnectorStates.StateStopped || this.iiot.stateService.state.value === FsmConnectorStates.StateEnd) {
         done()
         return
       }
 
       if (Object.keys(this.iiot.registeredNodeList).length === 0) {
-        this.iiot.stateMachine.lock().stopopcua()
+        //this.iiot.stateMachine.lock().stopopcua()
+        this.iiot.stateService.send('LOCK')
+        this.iiot.stateService.send('STOP')
         if (this.iiot.opcuaClient) {
           detailDebugLog('OPC UA Direct Disconnect On Unregister Of All Nodes')
           try {
@@ -924,7 +1016,10 @@ module.exports = function (RED: nodered.NodeAPI) {
       restartWithNewSettings,
       registerForOPCUA,
       deregisterForOPCUA,
-      getUpdatedServerOptions
+      getUpdatedServerOptions,
+      hasNoSession,
+      hasSession,
+      startSession
     }
 
     if (process.env.isTest == 'TRUE') {
@@ -934,7 +1029,6 @@ module.exports = function (RED: nodered.NodeAPI) {
         connectToClient,
         connectOPCUAEndpoint,
         resetBadSession,
-        startSession,
         renewConnection,
         handleError,
         deregisterForOPCUA,

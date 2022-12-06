@@ -1,12 +1,20 @@
-const helperExtensions = require('../../test-helper-extensions')
+const helperExtensions = require('../../helper/test-helper-extensions')
 
 module.exports = {
-  
+
   "testWriteFlow":  helperExtensions.cleanFlowPositionData( [
+    {
+      "id": "1390f66400457fe6",
+      "type": "tab",
+      "label": "Test Write Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
     {
       "id": "n1wrf1",
       "type": "OPCUA-IIoT-Inject",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "injectType": "write",
       "payload": "12345.67",
       "payloadType": "num",
@@ -24,7 +32,7 @@ module.exports = {
         }
       ],
       "x": 160,
-      "y": 180,
+      "y": 220,
       "wires": [
         [
           "n2wrf1",
@@ -35,16 +43,16 @@ module.exports = {
     {
       "id": "n2wrf1",
       "type": "helper",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "active": true,
       "x": 390,
-      "y": 240,
+      "y": 280,
       "wires": []
     },
     {
       "id": "n3wrf1",
       "type": "function",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "name": "",
       "func": "msg.payload.valuesToWrite = [12345.22]\nreturn msg;",
       "outputs": 1,
@@ -53,7 +61,7 @@ module.exports = {
       "finalize": "",
       "libs": [],
       "x": 380,
-      "y": 180,
+      "y": 220,
       "wires": [
         [
           "n4wrf1",
@@ -64,23 +72,23 @@ module.exports = {
     {
       "id": "n4wrf1",
       "type": "helper",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "active": true,
       "x": 630,
-      "y": 240,
+      "y": 280,
       "wires": []
     },
     {
       "id": "n5wrf1",
       "type": "OPCUA-IIoT-Write",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "connector": "c1wrf1",
       "name": "TestWrite",
       "justValue": true,
       "showStatusActivities": false,
       "showErrors": true,
       "x": 620,
-      "y": 180,
+      "y": 220,
       "wires": [
         [
           "n6wrf1",
@@ -91,21 +99,21 @@ module.exports = {
     {
       "id": "n6wrf1",
       "type": "helper",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "active": true,
       "x": 870,
-      "y": 220,
+      "y": 260,
       "wires": []
     },
     {
       "id": "n7wrf1",
       "type": "OPCUA-IIoT-Response",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "name": "TestWriteResponse",
       "showStatusActivities": false,
       "showErrors": false,
       "x": 890,
-      "y": 160,
+      "y": 200,
       "wires": [
         [
           "n8wrf1"
@@ -115,17 +123,17 @@ module.exports = {
     {
       "id": "n8wrf1",
       "type": "helper",
-      "z": "c872ebc86181e41c",
+      "z": "1390f66400457fe6",
       "active": true,
       "x": 1090,
-      "y": 160,
+      "y": 200,
       "wires": []
     },
     {
       "id": "s1wrf1",
       "type": "OPCUA-IIoT-Server",
-      "z": "c872ebc86181e41c",
-      "port": "51972",
+      "z": "1390f66400457fe6",
+      "port": "50001",
       "endpoint": "",
       "acceptExternalCommands": true,
       "maxAllowedSessionNumber": "",
@@ -150,7 +158,7 @@ module.exports = {
       "maxNodesPerBrowse": 2000,
       "delayToClose": "",
       "x": 390,
-      "y": 80,
+      "y": 120,
       "wires": [
         []
       ]
@@ -158,14 +166,16 @@ module.exports = {
     {
       "id": "c1wrf1",
       "type": "OPCUA-IIoT-Connector",
+      "z": "1390f66400457fe6",
       "discoveryUrl": "",
-      "endpoint": "opc.tcp://localhost:51972/",
+      "endpoint": "opc.tcp://localhost:50001/",
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "LOCAL DEMO SERVER",
       "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
@@ -174,15 +184,27 @@ module.exports = {
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
-  ] ),
+  ]),
 
   "testWriteWithoutValuesToWriteFlow":  helperExtensions.cleanFlowPositionData( [
     {
+      "id": "19152f4e3d25f8d0",
+      "type": "tab",
+      "label": "Test Write without Values to write Flow",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "n1wrf2",
       "type": "OPCUA-IIoT-Inject",
-      "z": "c872ebc86181e41c",
+      "z": "19152f4e3d25f8d0",
       "injectType": "write",
       "payload": "12345.67",
       "payloadType": "num",
@@ -199,7 +221,7 @@ module.exports = {
           "datatypeName": "Double"
         }
       ],
-      "x": 160,
+      "x": 200,
       "y": 180,
       "wires": [
         [
@@ -211,22 +233,22 @@ module.exports = {
     {
       "id": "n2wrf2",
       "type": "helper",
-      "z": "c872ebc86181e41c",
+      "z": "19152f4e3d25f8d0",
       "active": true,
-      "x": 390,
+      "x": 430,
       "y": 240,
       "wires": []
     },
     {
       "id": "n3wrf2",
       "type": "OPCUA-IIoT-Write",
-      "z": "c872ebc86181e41c",
+      "z": "19152f4e3d25f8d0",
       "connector": "c1wrf2",
       "name": "TestWrite",
       "justValue": true,
       "showStatusActivities": false,
       "showErrors": true,
-      "x": 380,
+      "x": 420,
       "y": 180,
       "wires": [
         [
@@ -238,20 +260,20 @@ module.exports = {
     {
       "id": "n4wrf2",
       "type": "helper",
-      "z": "c872ebc86181e41c",
+      "z": "19152f4e3d25f8d0",
       "active": true,
-      "x": 630,
+      "x": 670,
       "y": 240,
       "wires": []
     },
     {
       "id": "n5wrf2",
       "type": "OPCUA-IIoT-Response",
-      "z": "c872ebc86181e41c",
+      "z": "19152f4e3d25f8d0",
       "name": "TestWriteResponse",
       "showStatusActivities": false,
       "showErrors": false,
-      "x": 650,
+      "x": 690,
       "y": 180,
       "wires": [
         [
@@ -262,17 +284,17 @@ module.exports = {
     {
       "id": "n6wrf2",
       "type": "helper",
-      "z": "c872ebc86181e41c",
+      "z": "19152f4e3d25f8d0",
       "active": true,
-      "x": 850,
+      "x": 890,
       "y": 180,
       "wires": []
     },
     {
       "id": "s1wrf2",
       "type": "OPCUA-IIoT-Server",
-      "z": "c872ebc86181e41c",
-      "port": "51973",
+      "z": "19152f4e3d25f8d0",
+      "port": "",
       "endpoint": "",
       "acceptExternalCommands": true,
       "maxAllowedSessionNumber": "",
@@ -296,7 +318,7 @@ module.exports = {
       "maxNodesPerRead": 1000,
       "maxNodesPerBrowse": 2000,
       "delayToClose": "",
-      "x": 370,
+      "x": 410,
       "y": 120,
       "wires": [
         []
@@ -305,14 +327,16 @@ module.exports = {
     {
       "id": "c1wrf2",
       "type": "OPCUA-IIoT-Connector",
+      "z": "19152f4e3d25f8d0",
       "discoveryUrl": "",
-      "endpoint": "opc.tcp://localhost:51973/",
+      "endpoint": "",
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "LOCAL DEMO SERVER",
       "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
@@ -321,31 +345,45 @@ module.exports = {
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
   ] ),
 
   "testWriteNodeToBeLoadedWithServer":  helperExtensions.cleanFlowPositionData(  [
     {
+      "id": "311916e87bb45178",
+      "type": "tab",
+      "label": "Test Write Node to be loaded with Server",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
       "id": "34d2c6bc.43275b",
       "type": "OPCUA-IIoT-Write",
-      "z": "c872ebc86181e41c",
+      "z": "311916e87bb45178",
       "connector": "d35ceb8e.d06aa8",
       "name": "TestWrite",
       "justValue": false,
       "showStatusActivities": false,
       "showErrors": true,
-      "x": 240,
-      "y": 140,
+      "x": 220,
+      "y": 160,
       "wires": [
-        []
+        [
+          "6c817bf531523e3b"
+        ]
       ]
     },
     {
       "id": "s1wrf2",
       "type": "OPCUA-IIoT-Server",
-      "z": "c872ebc86181e41c",
-      "port": "55392",
+      "z": "311916e87bb45178",
+      "port": "",
       "endpoint": "",
       "acceptExternalCommands": true,
       "maxAllowedSessionNumber": "",
@@ -369,23 +407,42 @@ module.exports = {
       "maxNodesPerRead": 1000,
       "maxNodesPerBrowse": 2000,
       "delayToClose": "",
-      "x": 250,
-      "y": 80,
+      "x": 230,
+      "y": 100,
       "wires": [
         []
       ]
     },
     {
+      "id": "6c817bf531523e3b",
+      "type": "helper",
+      "z": "311916e87bb45178",
+      "name": "helper 1",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "payload",
+      "targetType": "msg",
+      "statusVal": "",
+      "statusType": "auto",
+      "x": 440,
+      "y": 160,
+      "wires": []
+    },
+    {
       "id": "d35ceb8e.d06aa8",
       "type": "OPCUA-IIoT-Connector",
+      "z": "311916e87bb45178",
       "discoveryUrl": "",
-      "endpoint": "opc.tcp://localhost:55392/",
+      "endpoint": "",
       "keepSessionAlive": false,
       "loginEnabled": false,
       "securityPolicy": "None",
-      "securityMode": "NONE",
+      "securityMode": "None",
       "name": "TESTSERVER",
       "showErrors": false,
+      "individualCerts": false,
       "publicCertificateFile": "",
       "privateKeyFile": "",
       "defaultSecureTokenLifetime": "60000",
@@ -394,7 +451,11 @@ module.exports = {
       "strategyMaxRetry": "",
       "strategyInitialDelay": "",
       "strategyMaxDelay": "",
-      "strategyRandomisationFactor": ""
+      "strategyRandomisationFactor": "",
+      "requestedSessionTimeout": "",
+      "connectionStartDelay": "",
+      "reconnectDelay": "",
+      "maxBadSessionRequests": ""
     }
   ] )
 }

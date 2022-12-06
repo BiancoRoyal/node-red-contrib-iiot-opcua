@@ -10,7 +10,7 @@
 <script type="text/javascript">
   RED.nodes.registerType('OPCUA-IIoT-Result-Filter', {
     category: 'IIoT',
-    color: "#ABCDEF",
+    color: '#ABCDEF',
     defaults: {
       nodeId: {value: "", required: true},
       datatype: {value: ""},
@@ -63,7 +63,7 @@
       let datatypeLookupButton = $("#node-lookup-datatype")
       let datatypeField = $("#node-input-datatype")
 
-      datatypeLookupButton.click(function () {
+      datatypeLookupButton.on("click", function () {
         datatypeLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/list/DataTypeIds', function (data) {
           datatypeLookupButton.removeClass('disabled')

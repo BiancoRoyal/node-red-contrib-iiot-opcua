@@ -331,7 +331,7 @@
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "None",
-    "securityMode": "NONE",
+    "securityMode": "None",
     "name": "LOCAL FLEX 80",
     "showErrors": true,
     "publicCertificateFile": "",

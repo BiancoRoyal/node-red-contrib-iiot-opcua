@@ -1,5 +1,5 @@
 {
-  /*TODO https://github.com/microsoft/TypeScript-Node-Starter/blob/master/tsconfig.json */
+  /* https://github.com/microsoft/TypeScript-Node-Starter/blob/master/tsconfig.json */
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 

@@ -11,7 +11,7 @@
 
 'use strict'
 
-jest.setTimeout(10000)
+// jest.setTimeout(30000)
 
 var injectNode = require('@node-red/nodes/core/common/20-inject')
 var injectOPCUANode = require('../../src/opcua-iiot-inject')
@@ -22,321 +22,7 @@ var flexServerNode = require('../../src/opcua-iiot-flex-server')
 var helper = require('node-red-node-test-helper')
 helper.init(require.resolve('node-red'))
 
-var testCMDFlow = [
-  {
-    'id': 'n1cmdf1',
-    'type': 'inject',
-    'payload': 'testpayload',
-    'payloadType': 'str',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'wires': [['n2cmdf1', 'n3cmdf1', 'n4cmdf1']]
-  },
-  {id: 'n2cmdf1', type: 'helper'},
-  {
-    'id': 'n3cmdf1',
-    'type': 'OPCUA-IIoT-Server-Command',
-    'commandtype': 'restart',
-    'nodeId': '',
-    'name': '',
-    'wires': [
-      ['n5cmdf1']
-    ]
-  },
-  {
-    'id': 'n4cmdf1',
-    'type': 'OPCUA-IIoT-Server-Command',
-    'commandtype': 'deleteNode',
-    'nodeId': 'ns=1;s=TestFolder',
-    'name': '',
-    'wires': [
-      ['n6cmdf1']
-    ]
-  },
-  {id: 'n5cmdf1', type: 'helper'},
-  {id: 'n6cmdf1', type: 'helper'}
-]
-
-var testCMDWithServerFlow = [
-  {
-    'id': 'n1csf1',
-    'type': 'inject',
-    'payload': 'testpayload',
-    'payloadType': 'str',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '4',
-    'wires': [['n2csf1', 'n3csf1']]
-  },
-  {id: 'n2csf1', type: 'helper'},
-  {
-    'id': 'n3csf1',
-    'type': 'OPCUA-IIoT-Server-Command',
-    'commandtype': 'restart',
-    'nodeId': '',
-    'name': '',
-    'wires': [
-      ['n4csf1', 's1csr']
-    ]
-  },
-  {id: 'n4csf1', type: 'helper'},
-  {
-    'id': 's1csr',
-    'type': 'OPCUA-IIoT-Server',
-    'port': '52819',
-    'endpoint': '',
-    'acceptExternalCommands': true,
-    'maxAllowedSessionNumber': '',
-    'maxConnectionsPerEndpoint': '',
-    'maxAllowedSubscriptionNumber': '',
-    'alternateHostname': '',
-    'name': 'TestServer',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'asoDemo': true,
-    'allowAnonymous': true,
-    'isAuditing': false,
-    'serverDiscovery': false,
-    'users': [],
-    'xmlsets': [],
-    'publicCertificateFile': '',
-    'privateCertificateFile': '',
-    'maxNodesPerRead': 1000,
-    'maxNodesPerBrowse': 2000,
-    'wires': [['n5csf1']]
-  },
-  {id: 'n5csf1', type: 'helper'}
-]
-
-var testInjectCMDFlow = [
-  {
-    'id': 'n1cmdf2',
-    'type': 'OPCUA-IIoT-Inject',
-    'injectType': 'inject',
-    'payload': 'testpayload',
-    'payloadType': 'str',
-    'topic': 'TestTopicCMD',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'startDelay': '3',
-    'name': 'TestName',
-    'addressSpaceItems': [
-      {
-        'name': 'TestFolder',
-        'nodeId': 'ns=1;s=TestFolder',
-        'datatypeName': ''
-      }
-    ],
-    'wires': [['n2cmdf2', 'n3cmdf2']]
-  },
-  {id: 'n2cmdf2', type: 'helper'},
-  {
-    'id': 'n3cmdf2',
-    'type': 'OPCUA-IIoT-Server-Command',
-    'commandtype': 'deleteNode',
-    'nodeId': '',
-    'name': '',
-    'wires': [
-      ['n4cmdf2', 's1cf5']
-    ]
-  },
-  {id: 'n4cmdf2', type: 'helper'},
-  {
-    'id': 's1cf5',
-    'type': 'OPCUA-IIoT-Server',
-    'port': '51698',
-    'endpoint': '',
-    'acceptExternalCommands': true,
-    'maxAllowedSessionNumber': '',
-    'maxConnectionsPerEndpoint': '',
-    'maxAllowedSubscriptionNumber': '',
-    'alternateHostname': '',
-    'name': 'TestServer',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'asoDemo': true,
-    'allowAnonymous': true,
-    'isAuditing': false,
-    'serverDiscovery': false,
-    'users': [],
-    'xmlsets': [],
-    'publicCertificateFile': '',
-    'privateCertificateFile': '',
-    'maxNodesPerRead': 1000,
-    'maxNodesPerBrowse': 2000,
-    'wires': [['n5cmdf2']]
-  },
-  {id: 'n5cmdf2', type: 'helper'}
-]
-
-var testCMDWithFlexServerFlow = [
-  {
-    'id': 'n1csf3',
-    'type': 'inject',
-    'payload': 'testpayload',
-    'payloadType': 'str',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '4',
-    'wires': [['n2csf3', 'n3csf3']]
-  },
-  {id: 'n2csf3', type: 'helper'},
-  {
-    'id': 'n3csf3',
-    'type': 'OPCUA-IIoT-Server-Command',
-    'commandtype': 'restart',
-    'nodeId': '',
-    'name': '',
-    'wires': [
-      ['n4csf3', 's3csfr']
-    ]
-  },
-  {id: 'n4csf3', type: 'helper'},
-  {
-    'id': 's3csfr',
-    'type': 'OPCUA-IIoT-Flex-Server',
-    'port': '54120',
-    'endpoint': '',
-    'acceptExternalCommands': true,
-    'maxAllowedSessionNumber': '',
-    'maxConnectionsPerEndpoint': '',
-    'maxAllowedSubscriptionNumber': '',
-    'alternateHostname': '',
-    'name': 'DEMOFLEXSERVER',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'allowAnonymous': true,
-    'isAuditing': false,
-    'serverDiscovery': false,
-    'users': [],
-    'xmlsets': [],
-    'publicCertificateFile': '',
-    'privateCertificateFile': '',
-    'registerServerMethod': '1',
-    'discoveryServerEndpointUrl': '',
-    'capabilitiesForMDNS': '',
-    'maxNodesPerRead': 1000,
-    'maxNodesPerBrowse': 2000,
-    'delayToClose': 500,
-    'addressSpaceScript': 'function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n  done()\n}',
-    'wires': [
-      ['n5csf3']
-    ]
-  },
-  {id: 'n5csf3', type: 'helper'}
-]
-
-var testWrongCMDWithFlexServerFlow = [
-  {
-    'id': 'n1csf4',
-    'type': 'inject',
-    'payload': 'testpayload',
-    'payloadType': 'str',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '3',
-    'wires': [['n2csf4', 'n3csf4']]
-  },
-  {id: 'n2csf4', type: 'helper'},
-  {
-    'id': 'n3csf4',
-    'type': 'OPCUA-IIoT-Server-Command',
-    'commandtype': 'test',
-    'nodeId': '',
-    'name': '',
-    'wires': [
-      ['n4csf4', 's4csfr']
-    ]
-  },
-  {id: 'n4csf4', type: 'helper'},
-  {
-    'id': 's4csfr',
-    'type': 'OPCUA-IIoT-Flex-Server',
-    'port': '54121',
-    'endpoint': '',
-    'acceptExternalCommands': true,
-    'maxAllowedSessionNumber': '',
-    'maxConnectionsPerEndpoint': '',
-    'maxAllowedSubscriptionNumber': '',
-    'alternateHostname': '',
-    'name': 'DEMOFLEXSERVER',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'allowAnonymous': true,
-    'isAuditing': false,
-    'serverDiscovery': false,
-    'users': [],
-    'xmlsets': [],
-    'publicCertificateFile': '',
-    'privateCertificateFile': '',
-    'registerServerMethod': '1',
-    'discoveryServerEndpointUrl': '',
-    'capabilitiesForMDNS': '',
-    'maxNodesPerRead': 1000,
-    'maxNodesPerBrowse': 2000,
-    'delayToClose': 500,
-    'addressSpaceScript': 'function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n  done()\n}',
-    'wires': [
-      ['n5csf4']
-    ]
-  },
-  {id: 'n5csf4', type: 'helper'}
-]
-
-var testWrongInjectWithFlexServerFlow = [
-  {
-    'id': 'n1csf5',
-    'type': 'inject',
-    'payload': 'testpayload',
-    'payloadType': 'str',
-    'repeat': '',
-    'crontab': '',
-    'once': true,
-    'onceDelay': '3',
-    'commandType': 'test',
-    'nodetype': 'inject',
-    'injecType': 'TEST',
-    'wires': [['n2csf5', 's5csfr']]
-  },
-  {id: 'n2csf5', type: 'helper'},
-  {
-    'id': 's5csfr',
-    'type': 'OPCUA-IIoT-Flex-Server',
-    'port': '54122',
-    'endpoint': '',
-    'acceptExternalCommands': true,
-    'maxAllowedSessionNumber': '',
-    'maxConnectionsPerEndpoint': '',
-    'maxAllowedSubscriptionNumber': '',
-    'alternateHostname': '',
-    'name': 'DEMOFLEXSERVER',
-    'showStatusActivities': false,
-    'showErrors': false,
-    'allowAnonymous': true,
-    'isAuditing': false,
-    'serverDiscovery': false,
-    'users': [],
-    'xmlsets': [],
-    'publicCertificateFile': '',
-    'privateCertificateFile': '',
-    'registerServerMethod': '1',
-    'discoveryServerEndpointUrl': '',
-    'capabilitiesForMDNS': '',
-    'maxNodesPerRead': 1000,
-    'maxNodesPerBrowse': 2000,
-    'delayToClose': 500,
-    'addressSpaceScript': 'function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n  done()\n}',
-    'wires': [
-      ['n5csf4']
-    ]
-  },
-  {id: 'n5csf4', type: 'helper'}
-]
+var testFlows = require('./flows/server-cmd-e2e-flows')
 
 describe('OPC UA Server Command node e2e Testing', function () {
   beforeAll(function (done) {
@@ -361,72 +47,88 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
   describe('Command node', function () {
     it('should get a message with payload on restart command', function (done) {
-      helper.load([injectNode, inputNode], testCMDFlow, function () {
+      const flow = Array.from(testFlows.testCMDFlow)
+
+      helper.load([injectNode, inputNode], flow, function () {
         let n5 = helper.getNode('n5cmdf1')
         n5.on('input', function (msg) {
-          expect(msg.commandType).toBe('restart')
+          expect(msg.payload.commandType).toBe('restart')
           expect(msg.payload.nodeId).toBeUndefined()
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('CMD')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('CMD')
           done()
         })
       })
     })
 
     it('should get a message with payload on delete ASO command', function (done) {
-      helper.load([injectNode, inputNode], testCMDFlow, function () {
+      const flow = Array.from(testFlows.testCMDFlow)
+
+      helper.load([injectNode, inputNode], flow, function () {
         let n6 = helper.getNode('n6cmdf1')
         n6.on('input', function (msg) {
-          expect(msg.commandType).toBe('deleteNode')
+          expect(msg.payload.commandType).toBe('deleteNode')
           expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('CMD')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('CMD')
           done()
         })
       })
     })
 
     it('should get a message with inject to delete ASO', function (done) {
-      helper.load([injectOPCUANode, inputNode, serverNode], testInjectCMDFlow, function () {
+      const flow = Array.from(testFlows.testInjectCMDFlow)
+      flow[5].port = "51600"
+
+      helper.load([injectOPCUANode, inputNode, serverNode], flow, function () {
         let n5 = helper.getNode('n5cmdf2')
         n5.on('input', function (msg) {
-          expect(msg.commandType).toBe('deleteNode')
+          expect(msg.payload.commandType).toBe('deleteNode')
           expect(msg.payload.nodeId).toBe('ns=1;s=TestFolder')
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('CMD')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('CMD')
           done()
         })
       })
     })
 
     it('should get a message with inject to restart server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, serverNode], testCMDWithServerFlow, function () {
+      const flow = Array.from(testFlows.testCMDWithServerFlow)
+      flow[6].port = "51601"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, serverNode], flow, function () {
         let n5 = helper.getNode('n5csf1')
         n5.on('input', function (msg) {
-          expect(msg.commandType).toBe('restart')
+          expect(msg.payload.commandType).toBe('restart')
           expect(msg.payload.nodeId).toBeUndefined()
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('CMD')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('CMD')
           setTimeout(done, 3000)
         })
       })
     })
 
     it('should get a message with inject to restart flex server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testCMDWithFlexServerFlow, function () {
+      const flow = Array.from(testFlows.testCMDWithFlexServerFlow)
+      flow[5].port = "51602"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf3')
         n5.on('input', function (msg) {
-          expect(msg.commandType).toBe('restart')
+          expect(msg.payload.commandType).toBe('restart')
           expect(msg.payload.nodeId).toBeUndefined()
-          expect(msg.nodetype).toBe('inject')
-          expect(msg.injectType).toBe('CMD')
+          expect(msg.payload.nodetype).toBe('inject')
+          expect(msg.payload.injectType).toBe('CMD')
           setTimeout(done, 3000)
         })
       })
     })
 
     it('should get no message with wrong command inject to restart flex server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testWrongCMDWithFlexServerFlow, function () {
+      const flow = Array.from(testFlows.testWrongCMDWithFlexServerFlow)
+      flow[5].port = "51603"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf4')
         n5.on('input', function (msg) {
           expect(false).toBeTruthy()
@@ -436,7 +138,10 @@ describe('OPC UA Server Command node e2e Testing', function () {
     })
 
     it('should get no message on wrong inject type sent to flex server', function (done) {
-      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], testWrongInjectWithFlexServerFlow, function () {
+      const flow = Array.from(testFlows.testWrongInjectWithFlexServerFlow)
+      flow[3].port = "51604"
+
+      helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf4')
         n5.on('input', function (msg) {
           expect(false).toBeTruthy()

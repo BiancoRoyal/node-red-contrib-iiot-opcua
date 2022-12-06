@@ -365,7 +365,7 @@
     "keepSessionAlive": true,
     "loginEnabled": true,
     "securityPolicy": "Basic256",
-    "securityMode": "SIGNANDENCRYPT",
+    "securityMode": "SignAndEncrypt",
     "name": "LOCAL DEMO SERVER",
     "showErrors": true,
     "individualCerts": false,

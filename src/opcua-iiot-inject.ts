@@ -10,23 +10,23 @@
 'use strict'
 import * as nodered from "node-red";
 import {NodeMessageInFlow} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreInject from "./core/opcua-iiot-core-inject";
-import {resetIiotNode} from "./core/opcua-iiot-core";
+import {resetIiotNode, IotOpcUaNodeMessage} from "./core/opcua-iiot-core";
 import {CronJob} from 'cron';
 import {AddressSpaceItem} from "./types/helpers";
 
 interface OPCUAIIoTInject extends nodered.Node {
   name: string
   topic: string
-  payload: Todo // TODO: config.payload
-  payloadType: Todo
+  payload: any
+  payloadType: TodoTypeAny
   repeat: number
   crontab: string
-  once: Todo
-  startDelay: number // TODO: parseFloat(config.startDelay) || 10
+  once: TodoTypeAny
+  startDelay: number
   injectType: string
-  addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
+  addressSpaceItems: Array<AddressSpaceItem>
 }
 
 interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
@@ -34,25 +34,20 @@ interface OPCUAIIoTInjectConfigurationDef extends nodered.NodeDef {
   topic: string
   payload: string
   payloadType: string
-  repeat: string
+  repeat: number
   crontab: string
   once: boolean
   startDelay: string
   injectType: string
-  addressSpaceItems: Todo // TODO: config.addressSpaceItems || []
+  addressSpaceItems: Array<AddressSpaceItem>
 }
 
 export interface InjectMessage extends NodeMessageInFlow {
   payload: InjectPayload
 }
 
-export interface InjectPayload {
-  value: any
-  payloadType: string
-  nodetype: 'inject'
-  injectType: string
-  addressSpaceItems: AddressSpaceItem[]
-  manualInject: boolean
+export interface InjectPayload extends IotOpcUaNodeMessage {
+  nodetype: 'inject' | string // Todo: fix typo to nodeType with version 5.x - first we need the cli tools working for version migrations
 }
 
 /**
@@ -75,10 +70,11 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.startDelay = parseFloat(config.startDelay) || 10
     this.name = config.name
     this.injectType = config.injectType || 'inject'
+    this.repeat = config.repeat || 0
 
     this.addressSpaceItems = config.addressSpaceItems || []
 
-    let node: Todo = this
+    let self: TodoTypeAny = this
 
     let intervalId: NodeJS.Timer | null = null
     let onceTimeout: NodeJS.Timeout | null = null
@@ -88,16 +84,16 @@ module.exports = function (RED: nodered.NodeAPI) {
     const INPUT_TIMEOUT_MILLISECONDS = 1000
 
     const repeaterSetup = () => {
-      coreInject.internalDebugLog('Repeat Is ' + node.repeat)
-      coreInject.internalDebugLog('Crontab Is ' + node.crontab)
-      if (node.repeat !== '') {
-        node.repeat = parseFloat(config.repeat) * REPEAT_FACTOR
+      coreInject.internalDebugLog('Repeat Is ' + self.repeat)
+      coreInject.internalDebugLog('Crontab Is ' + self.crontab)
+      if (self.repeat !== 0) {
+        self.repeat = config.repeat * REPEAT_FACTOR
 
-        if (node.repeat === 0) {
-          node.repeat = ONE_SECOND
+        if (self.repeat === 0) {
+          self.repeat = ONE_SECOND
         }
 
-        coreInject.internalDebugLog('Repeat Interval Start With ' + node.repeat + ' msec.')
+        coreInject.internalDebugLog('Repeat Interval Start With ' + self.repeat + ' msec.')
 
         // existing interval timer must be deleted
         if (intervalId) {
@@ -105,14 +101,14 @@ module.exports = function (RED: nodered.NodeAPI) {
           intervalId = null
         }
 
-        if (typeof node.repeat !== "number" || isNaN(node.repeat)) return;
+        if (typeof self.repeat !== "number" || isNaN(self.repeat)) return;
 
         intervalId = setInterval(() => {
           this.emit('input', newMessage())
-        }, node.repeat)
+        }, self.repeat)
 
-      } else if (node.crontab !== '') {
-        cronjob = new CronJob(node.crontab,
+      } else if (self.crontab !== '') {
+        cronjob = new CronJob(self.crontab,
           () => {
             this.emit('input', newMessage())
           },
@@ -124,9 +120,12 @@ module.exports = function (RED: nodered.NodeAPI) {
     const newMessage = function () {
       return {
         _msgid: RED.util.generateId(),
-        payload: {
-          injectType: node.injectType
-        }
+        topic: self.topic,
+        payload: generateOutputValue(self.payload, {
+          _msgid: RED.util.generateId(),
+          payload: {
+            injectType: self.injectType }
+        })
       }
     }
 
@@ -148,41 +147,47 @@ module.exports = function (RED: nodered.NodeAPI) {
         case 'none':
           return ''
         case 'str':
-          return node.payload.toString()
+          return self.payload.toString()
         case 'num':
-          return Number(node.payload)
+          return Number(self.payload)
         case 'bool':
-          return (node.payload === true || node.payload === 'true')
+          return (self.payload === true || self.payload === 'true')
         case 'json':
-          return JSON.parse(node.payload)
+          return JSON.parse(self.payload)
         case 'date':
           return Date.now()
         default:
-          if (node.payloadType === null) {
-            if (node.payload === '') {
+          if (self.payloadType === null) {
+            if (self.payload === '') {
               return Date.now()
             } else {
-              return node.payload
+              return self.payload
             }
           } else {
-            return RED.util.evaluateNodeProperty(node.payload, node.payloadType, this, inputMessage)
+            return RED.util.evaluateNodeProperty(self.payload, self.payloadType, this, inputMessage)
           }
       }
     }
 
     this.on('input', (msg: NodeMessageInFlow) => {
-      if (Object.keys(msg).length === 0) return; // Todo: Why? Maybe it should be build by newMessage
+      if (Object.keys(msg).length === 0) {
+        // security: never use a completely empty message with any key, this is not a valid node-red msg than
+        return;
+      }
 
       try {
-        const topic = node.topic || msg.topic
+        const topic = self.topic || msg.topic
+
         const payload: InjectPayload = {
-          payloadType: node.payloadType,
-          value: generateOutputValue(node.payloadType, msg),
+          payload: msg.payload,
+          payloadType: self.payloadType,
+          value: generateOutputValue(self.payloadType, msg),
           nodetype: 'inject',
-          injectType: (msg.payload as Todo)?.injectType || node.injectType,
-          addressSpaceItems: [...node.addressSpaceItems],
+          injectType: (msg.payload as TodoTypeAny)?.injectType || self.injectType,
+          addressSpaceItems: [...self.addressSpaceItems],
           manualInject: Object.keys(msg).length !== 0
         }
+
         const outputMessage: NodeMessageInFlow = {
           ...msg,
           topic,
@@ -203,7 +208,7 @@ module.exports = function (RED: nodered.NodeAPI) {
       onceTimeout = null
     }
 
-    let timeout = INPUT_TIMEOUT_MILLISECONDS * node.startDelay
+    let timeout = INPUT_TIMEOUT_MILLISECONDS * self.startDelay
 
     if (this.once) {
       coreInject.detailDebugLog('injecting once at start delay timeout ' + timeout + ' msec.')
@@ -212,7 +217,7 @@ module.exports = function (RED: nodered.NodeAPI) {
         this.emit('input', newMessage())
         repeaterSetup()
       }, timeout)
-    } else if (node.repeat || node.crontab) {
+    } else if (self.repeat || self.crontab) {
       coreInject.detailDebugLog('start with delay timeout ' + timeout + ' msec.')
       onceTimeout = setTimeout(function () {
         coreInject.detailDebugLog('had a start delay of ' + timeout + ' msec. to setup inject interval')
@@ -225,12 +230,12 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.close = async (removed: boolean) => {
       if (cronjob) {
         cronjob.stop()
-        delete node['cronjob']
+        delete self['cronjob']
       }
 
       await resetAllTimer() // all timers have to be reset
-
-      resetIiotNode(node)
+      self.removeAllListeners()
+      resetIiotNode(self)
     }
   }
 

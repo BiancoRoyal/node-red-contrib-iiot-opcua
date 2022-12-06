@@ -1704,7 +1704,7 @@
     "keepSessionAlive": true,
     "loginEnabled": true,
     "securityPolicy": "Basic256Sha256",
-    "securityMode": "SIGNANDENCRYPT",
+    "securityMode": "SignAndEncrypt",
     "name": "PROSYS SERVER",
     "showErrors": true,
     "individualCerts": false,

@@ -11,13 +11,14 @@
 
 import * as nodered from "node-red";
 import {NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {constructEventFilter, EventFilter} from "node-opcua";
 import {NodeMessageInFlow} from "@node-red/registry";
 import coreListener from "./core/opcua-iiot-core-listener";
 import {InjectPayload} from "./opcua-iiot-inject";
 import {BrowserPayload} from "./opcua-iiot-browser";
 import {Like} from "./types/helpers";
+import {IotOpcUaNodeMessage} from "./core/opcua-iiot-core";
 
 interface OPCUAIIoTEvent extends nodered.Node {
   eventType: string
@@ -45,10 +46,11 @@ interface OPCUAIIoTEventDef extends nodered.NodeDef {
 export type EventMessage = NodeMessageInFlow & {
   payload: EventPayload
 }
-export type EventPayload = (InjectPayload | BrowserPayload) & {
+export type EventPayload = (InjectPayload | BrowserPayload | IotOpcUaNodeMessage) & {
   eventType?: string,
   uaEventFilter?: EventFilter,
   uaEventFields?: string[],
+  nodetype: 'events' | string,
   queueSize?: number,
   interval?: number,
 }
@@ -73,20 +75,20 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showStatusActivities = config.showStatusActivities
     this.showErrors = config.showErrors
 
-    let nodeConfig: OPCUAIIoTEvent & Todo = this
-    nodeConfig.iiot = {}
+    let self: OPCUAIIoTEvent & TodoTypeAny = this
+    self.iiot = {}
 
     const statusCall = (status: NodeStatus | string) => {
       this.status(status)
     }
-    nodeConfig.iiot.subscribed = false
+    self.iiot.subscribed = false
 
     statusCall({fill: 'blue', shape: 'ring', text: 'new'})
     this.on('input', (msg: NodeMessageInFlow) => {
-      nodeConfig.iiot.subscribed = !nodeConfig.iiot.subscribed
+      self.iiot.subscribed = !self.iiot.subscribed
 
-      if (nodeConfig.usingListener) {
-        if (nodeConfig.iiot.subscribed) {
+      if (self.usingListener) {
+        if (self.iiot.subscribed) {
           statusCall({fill: 'blue', shape: 'dot', text: 'subscribed'})
         } else {
           statusCall({fill: 'blue', shape: 'ring', text: 'not subscribed'})
@@ -104,11 +106,12 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       const uaEventFilter: EventFilter = constructEventFilter(uaEventFields)
       const responsePayload: EventPayload = {
-        ...msg.payload as InjectPayload | BrowserPayload,
-        eventType: nodeConfig.eventType,
+        ...msg.payload as IotOpcUaNodeMessage,
+        eventType: self.eventType,
         uaEventFilter: uaEventFilter,
         uaEventFields: uaEventFields,
-        queueSize: nodeConfig.queueSize,
+        nodetype: 'events',
+        queueSize: self.queueSize,
         interval: typeof interval === 'number' ? interval : 1000
       }
 
@@ -120,11 +123,12 @@ module.exports = function (RED: nodered.NodeAPI) {
 
       // TODO: send works but it has a problem with debug node and ByteString
       // I'm not sure what this comment refers to, but I'm leaving it just in case.
+      // Means we can send ByteStrings here, but it was to notice, that the debug node of node-red had/has a problem with ByteStrings in the UI.
       this.send(responseMessage)
     })
 
     const getAdditionalEventFields = () => {
-      switch (nodeConfig.resultType) {
+      switch (self.resultType) {
         case 'condition':
           return (coreListener.getConditionFields())
         case 'state':

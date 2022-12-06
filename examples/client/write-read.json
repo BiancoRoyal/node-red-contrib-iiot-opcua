@@ -157,7 +157,7 @@
     "keepSessionAlive": true,
     "loginEnabled": false,
     "securityPolicy": "Basic256",
-    "securityMode": "SIGN",
+    "securityMode": "Sign",
     "name": "LOCAL WRITE READ SERVER",
     "showErrors": false,
     "publicCertificateFile": "",

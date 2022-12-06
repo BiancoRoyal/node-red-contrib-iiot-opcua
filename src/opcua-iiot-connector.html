@@ -14,17 +14,17 @@
     defaults: {
       discoveryUrl: {value: ''},
       endpoint: {value: "opc.tcp://localhost:55388/", required: true},
+      endpointMustExist: {value: false},
       keepSessionAlive: {value: true},
       loginEnabled: {value: false},
-      securityPolicy: {value: 'None', required: true},
-      securityMode: {value: 'None', required: true},
       name: {value: "LOCAL SERVER"},
       showErrors: {value: false},
+      securityPolicy: {value: 'None', required: true},
+      securityMode: {value: 'None', required: true},
       individualCerts: {value: false},
       publicCertificateFile: {value: ''},
       privateKeyFile: {value: ''},
       defaultSecureTokenLifetime: {value: ''},
-      endpointMustExist: {value: false},
       autoSelectRightEndpoint: {value: false},
       strategyMaxRetry: {value: ''},
       strategyInitialDelay: {value: ''},
@@ -32,6 +32,7 @@
       strategyRandomisationFactor: {value: ''},
       requestedSessionTimeout: {value: ''},
       connectionStartDelay: {value: ''},
+      //connectionStopDelay: {value: ''}, //Todo: check missing default assignment for constants.
       reconnectDelay: {value: ''},
       maxBadSessionRequests: {value: 10}
     },
@@ -127,7 +128,7 @@
       let discoveryLookupButton = $("#node-config-lookup-discovery")
       let discoveryUrlField = $("#node-config-input-discoveryUrl")
 
-      discoveryLookupButton.click(function () {
+      discoveryLookupButton.on("click", function () {
         discoveryLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/client/discover/' + node.id + '/' + encodeURIComponent(discoveryUrlField.val()), function (data) {
           discoveryLookupButton.removeClass('disabled')
@@ -163,7 +164,7 @@
       let securityPolicyField = $("#node-config-input-securityPolicy")
       let securityModeField = $("#node-config-input-securityMode")
 
-      endpointsLookupButton.click(function () {
+      endpointsLookupButton.on("click", function () {
         endpointsLookupButton.addClass('disabled')
         $.getJSON('/opcuaIIoT/client/endpoints/' + node.id + '/' + encodeURIComponent(endpointField.val()), function (data) {
           endpointsLookupButton.removeClass('disabled')
@@ -256,13 +257,15 @@
                 <span data-i18n="opcua-iiot-contrib.label.securityPolicy"></span></label>
                 <select type="text" id="node-config-input-securityPolicy">
                     <option value="None">None</option>
-                    <option value="Basic256Sha256">Basic256Sha256</option>
-                    <option value="Basic256Rsa15">Basic256Rsa15</option>
-                    <option value="Basic256">Basic256</option>
+                    <option value="Basic128">Basic128</option>
+                    <option value="Basic192">Basic192</option>
                     <option value="Basic192Rsa15">Basic192Rsa15</option>
-                    <option value="Basic128Rsa15">Basic128Rsa15</option>
+                    <option value="Basic256Rsa15">Basic256Rsa15</option>
+                    <option value="Basic256Sha256">Basic256Sha256</option>
+                    <option value="Aes128_Sha256_RsaOaep">Aes128_Sha256_RsaOaep</option>
                     <option value="Aes256_Sha256_RsaPss">Aes256_Sha256_RsaPss</option>
-                    <option value="Aes128_Sha256_RsaOaep">Aes128_Sha256_RsaOaep</option>                                        
+                    <option value="PubSub_Aes128_CTR">PubSub_Aes128_CTR</option>
+                    <option value="PubSub_Aes256_CTR">PubSub_Aes256_CTR</option>
                   </select>
             </div>
             <div class="form-row">
@@ -434,7 +437,7 @@
 
     <h3>Certificates</h3>
     <p>Use the node-opcua-pki package or other tools to build your individual key pair and set the path to file here.
-    Otherwise you get pre installed keys from node-opcua for secured communication.
+    Otherwise, you get pre-installed keys from node-opcua for secured communication.
     </p>
 
     <p>You could set up your own certificate and private key files. This is optional.</p>

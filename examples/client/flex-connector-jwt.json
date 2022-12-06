@@ -27,13 +27,22 @@
     "type": "inject",
     "z": "45689007.c2c51",
     "name": "Server 86",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
     "x": 760,
     "y": 160,
     "wires": [
@@ -52,6 +61,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1170,
     "y": 220,
     "wires": []
@@ -61,13 +73,22 @@
     "type": "inject",
     "z": "45689007.c2c51",
     "name": "Server 89",
-    "topic": "",
-    "payload": "{\"endpoint\":\"opc.tcp://localhost:55389/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"endpoint\":\"opc.tcp://localhost:55389/\",\"keepSessionAlive\":true,\"showErrors\":true,\"defaultSecureTokenLifetime\":360000,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false}",
+    "payloadType": "json",
     "x": 760,
     "y": 240,
     "wires": [
@@ -81,13 +102,22 @@
     "type": "inject",
     "z": "45689007.c2c51",
     "name": "Server 88",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55388/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55388/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
     "x": 760,
     "y": 200,
     "wires": [
@@ -112,6 +142,7 @@
     "showErrors": true,
     "asoDemo": true,
     "allowAnonymous": true,
+    "individualCerts": false,
     "isAuditing": false,
     "serverDiscovery": false,
     "users": [],
@@ -145,6 +176,7 @@
     "showStatusActivities": false,
     "showErrors": true,
     "allowAnonymous": true,
+    "individualCerts": false,
     "isAuditing": false,
     "serverDiscovery": true,
     "users": [],
@@ -157,7 +189,7 @@
     "maxNodesPerRead": 1000,
     "maxNodesPerBrowse": 2000,
     "delayToClose": 1000,
-    "addressSpaceScript": "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n    // server = the created node-opcua server\n    // addressSpace = script placeholder\n    // eventObjects = to hold event variables in memory from this script\n    \n    // internal global sandbox objects are \n    // node = node of the flex server, \n    // coreServer = core iiot server object for debug and access to nodeOPCUA,\n    // and scriptObjects to hold variables and functions\n    const LocalizedText = coreServer.core.nodeOPCUA.LocalizedText\n    const namespace = addressSpace.getOwnNamespace()\n\n    coreServer.internalDebugLog('init dynamic address space')\n    node.warn('construct new address space for OPC UA')\n    \n    // from here - see the node-opcua docs how to build address sapces\n    let tanks = namespace.addObject({\n        browseName: 'Tanks',\n        description: 'The Object representing some tanks',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    let oilTankLevel = namespace.addVariable({\n        browseName: 'OilTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the oil tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    // ---------------------------------------------------------------------------------\n    // Let's create a exclusive Limit Alarm that automatically raise itself\n    // when the tank level is out of limit\n    // ---------------------------------------------------------------------------------\n    let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n    node.iiot.assert(exclusiveLimitAlarmType !== null)\n    \n    let oilTankLevelCondition = namespace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: oilTankLevel,\n        browseName: 'OilTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Oil Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Öl Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'ExclusiveLimitAlarmType Condition',\n        conditionName: 'OilLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: oilTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // --------------------------------------------------------------\n    // Let's create a second letiable with no Exclusive alarm\n    // --------------------------------------------------------------\n    let gasTankLevel = namespace.addVariable({\n        browseName: 'GasTankLevel',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand', locale: 'de-DE'})\n        ],\n        description: 'Fill level in percentage (0% to 100%) of the gas tank',\n        propertyOf: tanks,\n        dataType: 'Double',\n        eventSourceOf: tanks\n    })\n    \n    let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n    node.iiot.assert(nonExclusiveLimitAlarmType !== null)\n    \n    let gasTankLevelCondition = namespace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n        componentOf: tanks,\n        conditionSource: gasTankLevel,\n        browseName: 'GasTankLevelCondition',\n        displayName: [\n          new LocalizedText({text: 'Gas Tank Level Condition', locale: 'en-US'}),\n          new LocalizedText({text: 'Gas Tank Füllstand Bedingung', locale: 'de-DE'})\n        ],\n        description: 'NonExclusiveLimitAlarmType Condition',\n        conditionName: 'GasLevelCondition',\n        optionals: [\n          'ConfirmedState', 'Confirm' // confirm state and confirm Method\n        ],\n        inputNode: gasTankLevel,   // the letiable that will be monitored for change\n        highHighLimit: 0.9,\n        highLimit: 0.8,\n        lowLimit: 0.2\n    })\n    \n    // variable with value\n    if(scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n            scriptObjects.testReadWrite = 1000.0\n    }\n    \n    let myVariables = namespace.addObject({\n        browseName: 'MyVariables',\n        description: 'The Object representing some variables',\n        organizedBy: addressSpace.rootFolder.objects,\n        notifierOf: addressSpace.rootFolder.objects.server\n    })\n    \n    if(coreServer.core) {\n        namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=TestReadWrite',\n            browseName: 'TestReadWrite',\n            displayName: [\n                new LocalizedText({text: 'Test Read and Write', locale: 'en-US'}),\n                new LocalizedText({text: 'Test Lesen Schreiben', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            value: {\n                get: function () {\n                    return new coreServer.core.nodeOPCUA.Variant({\n                        dataType: 'Double',\n                        value: scriptObjects.testReadWrite\n                    })\n                },\n                set: function (variant) {\n                    scriptObjects.testReadWrite = parseFloat(variant.value)\n                    return coreServer.core.nodeOPCUA.StatusCodes.Good\n                }\n            }\n            \n        })\n        \n        let memoryVariable = namespace.addVariable({\n            componentOf: myVariables,\n            nodeId: 'ns=1;s=free_memory',\n            browseName: 'FreeMemory',\n            displayName: [\n                new LocalizedText({text: 'Free Memory', locale: 'en-US'}),\n                new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})\n            ],\n            dataType: 'Double',\n            \n            value: {\n              get: function () {\n                return new coreServer.core.nodeOPCUA.Variant({\n                  dataType: 'Double',\n                  value: coreServer.core.availableMemory()\n                })\n              }\n            }\n        })\n        addressSpace.installHistoricalDataNode(memoryVariable)\n       \n    } else {\n        coreServer.internalDebugLog('coreServer.core needed for coreServer.core.nodeOPCUA')\n    }\n\n    // hold event objects in memory \n    eventObjects.oilTankLevel = oilTankLevel\n    eventObjects.oilTankLevelCondition = oilTankLevelCondition\n    \n    eventObjects.gasTankLevel = gasTankLevel\n    eventObjects.gasTankLevelCondition = gasTankLevelCondition\n    \n    done()\n}",
+    "addressSpaceScript": "function constructAlarmAddressSpace(server, addressSpace, eventObjects, done) {\n  // server = the created node-opcua server\n  // addressSpace = script placeholder\n  // eventObjects = to hold event variables in memory from this script\n\n  // internal global sandbox objects are \n  // node = node of the flex server, \n  // coreServer = core iiot server object for debug and access to nodeOPCUA,\n  // and scriptObjects to hold variables and functions\n  const LocalizedText = opcua.LocalizedText\n  const namespace = addressSpace.getOwnNamespace()\n\n  coreServer.internalDebugLog('init dynamic address space')\n  node.warn('construct new address space for OPC UA')\n\n  // from here - see the node-opcua docs how to build address sapces\n  let tanks = namespace.addObject({\n    browseName: 'Tanks',\n    description: 'The Object representing some tanks',\n    organizedBy: addressSpace.rootFolder.objects,\n    notifierOf: addressSpace.rootFolder.objects.server\n  })\n\n  let oilTankLevel = namespace.addVariable({\n    browseName: 'OilTankLevel',\n    displayName: [\n      new LocalizedText({ text: 'Oil Tank Level', locale: 'en-US' }),\n      new LocalizedText({ text: 'Öl Tank Füllstand', locale: 'de-DE' })\n    ],\n    description: 'Fill level in percentage (0% to 100%) of the oil tank',\n    propertyOf: tanks,\n    dataType: 'Double',\n    eventSourceOf: tanks\n  })\n\n  // ---------------------------------------------------------------------------------\n  // Let's create a exclusive Limit Alarm that automatically raise itself\n  // when the tank level is out of limit\n  // ---------------------------------------------------------------------------------\n  let exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType')\n  let oilTankLevelCondition = namespace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {\n    componentOf: tanks,\n    conditionSource: oilTankLevel,\n    browseName: 'OilTankLevelCondition',\n    displayName: [\n      new LocalizedText({ text: 'Oil Tank Level Condition', locale: 'en-US' }),\n      new LocalizedText({ text: 'Öl Tank Füllstand Bedingung', locale: 'de-DE' })\n    ],\n    description: 'ExclusiveLimitAlarmType Condition',\n    conditionName: 'OilLevelCondition',\n    optionals: [\n      'ConfirmedState', 'Confirm' // confirm state and confirm Method\n    ],\n    inputNode: oilTankLevel,   // the letiable that will be monitored for change\n    highHighLimit: 0.9,\n    highLimit: 0.8,\n    lowLimit: 0.2\n  })\n\n  // --------------------------------------------------------------\n  // Let's create a second letiable with no Exclusive alarm\n  // --------------------------------------------------------------\n  let gasTankLevel = namespace.addVariable({\n    browseName: 'GasTankLevel',\n    displayName: [\n      new LocalizedText({ text: 'Gas Tank Level', locale: 'en-US' }),\n      new LocalizedText({ text: 'Gas Tank Füllstand', locale: 'de-DE' })\n    ],\n    description: 'Fill level in percentage (0% to 100%) of the gas tank',\n    propertyOf: tanks,\n    dataType: 'Double',\n    eventSourceOf: tanks\n  })\n\n  let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')\n  let gasTankLevelCondition = namespace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {\n    componentOf: tanks,\n    conditionSource: gasTankLevel,\n    browseName: 'GasTankLevelCondition',\n    displayName: [\n      new LocalizedText({ text: 'Gas Tank Level Condition', locale: 'en-US' }),\n      new LocalizedText({ text: 'Gas Tank Füllstand Bedingung', locale: 'de-DE' })\n    ],\n    description: 'NonExclusiveLimitAlarmType Condition',\n    conditionName: 'GasLevelCondition',\n    optionals: [\n      'ConfirmedState', 'Confirm' // confirm state and confirm Method\n    ],\n    inputNode: gasTankLevel,   // the letiable that will be monitored for change\n    highHighLimit: 0.9,\n    highLimit: 0.8,\n    lowLimit: 0.2\n  })\n\n  // variable with value\n  if (scriptObjects.testReadWrite === undefined || scriptObjects.testReadWrite === null) {\n    scriptObjects.testReadWrite = 1000.0\n  }\n\n  let myVariables = namespace.addObject({\n    browseName: 'MyVariables',\n    description: 'The Object representing some variables',\n    organizedBy: addressSpace.rootFolder.objects,\n    notifierOf: addressSpace.rootFolder.objects.server\n  })\n\n  if (coreServer.core) {\n    namespace.addVariable({\n      componentOf: myVariables,\n      nodeId: 'ns=1;s=TestReadWrite',\n      browseName: 'TestReadWrite',\n      displayName: [\n        new LocalizedText({ text: 'Test Read and Write', locale: 'en-US' }),\n        new LocalizedText({ text: 'Test Lesen Schreiben', locale: 'de-DE' })\n      ],\n      dataType: 'Double',\n      value: {\n        get: function () {\n          return new opcua.Variant({\n            dataType: 'Double',\n            value: scriptObjects.testReadWrite\n          })\n        },\n        set: function (variant) {\n          scriptObjects.testReadWrite = parseFloat(variant.value)\n          return opcua.StatusCodes.Good\n        }\n      }\n\n    })\n\n    let memoryVariable = namespace.addVariable({\n      componentOf: myVariables,\n      nodeId: 'ns=1;s=free_memory',\n      browseName: 'FreeMemory',\n      displayName: [\n        new LocalizedText({ text: 'Free Memory', locale: 'en-US' }),\n        new LocalizedText({ text: 'ungenutzer RAM', locale: 'de-DE' })\n      ],\n      dataType: 'Double',\n\n      value: {\n        get: function () {\n          return new opcua.Variant({\n            dataType: 'Double',\n            value: coreServer.core.availableMemory()\n          })\n        }\n      }\n    })\n    addressSpace.installHistoricalDataNode(memoryVariable)\n\n  } else {\n    coreServer.internalDebugLog('coreServer.core needed for opcua')\n  }\n\n  // hold event objects in memory \n  eventObjects.oilTankLevel = oilTankLevel\n  eventObjects.oilTankLevelCondition = oilTankLevelCondition\n\n  eventObjects.gasTankLevel = gasTankLevel\n  eventObjects.gasTankLevelCondition = gasTankLevelCondition\n\n  done()\n}",
     "x": 260,
     "y": 520,
     "wires": [
@@ -178,19 +210,19 @@
     "id": "7aabc096.22f898",
     "type": "OPCUA-IIoT-Browser",
     "z": "45689007.c2c51",
-    "connector": "c441ba33.56b788",
     "nodeId": "ns=1;i=1234",
     "name": "",
     "justValue": true,
     "sendNodesToRead": true,
-    "sendNodesToListener": true,
     "sendNodesToBrowser": true,
-    "singleBrowseResult": true,
+    "sendNodesToListener": true,
+    "multipleOutputs": false,
+    "showStatusActivities": false,
+    "showErrors": true,
     "recursiveBrowse": false,
     "recursiveDepth": "",
     "delayPerMessage": "",
-    "showStatusActivities": false,
-    "showErrors": true,
+    "connector": "c441ba33.56b788",
     "x": 900,
     "y": 520,
     "wires": [
@@ -234,6 +266,9 @@
     "console": false,
     "tostatus": false,
     "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1110,
     "y": 520,
     "wires": []
@@ -246,7 +281,9 @@
     "compressStructure": true,
     "showStatusActivities": false,
     "showErrors": false,
+    "activateUnsetFilter": false,
     "activateFilters": false,
+    "negateFilter": false,
     "filters": [],
     "x": 1110,
     "y": 580,
@@ -267,6 +304,9 @@
     "console": false,
     "tostatus": false,
     "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1310,
     "y": 580,
     "wires": []
@@ -281,6 +321,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1290,
     "y": 540,
     "wires": []
@@ -295,6 +338,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1090,
     "y": 480,
     "wires": []
@@ -304,13 +350,22 @@
     "type": "inject",
     "z": "45689007.c2c51",
     "name": "Server 78",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55378/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55378/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
     "x": 760,
     "y": 280,
     "wires": [
@@ -323,19 +378,19 @@
     "id": "23cbf8b0.8d702",
     "type": "OPCUA-IIoT-Browser",
     "z": "45689007.c2c51",
-    "connector": "c441ba33.56b788",
     "nodeId": "ns=1;i=1234",
     "name": "",
     "justValue": false,
     "sendNodesToRead": false,
-    "sendNodesToListener": false,
     "sendNodesToBrowser": false,
-    "singleBrowseResult": true,
+    "sendNodesToListener": false,
+    "multipleOutputs": false,
+    "showStatusActivities": false,
+    "showErrors": true,
     "recursiveBrowse": false,
     "recursiveDepth": "",
     "delayPerMessage": "",
-    "showStatusActivities": false,
-    "showErrors": true,
+    "connector": "c441ba33.56b788",
     "x": 900,
     "y": 580,
     "wires": [
@@ -441,13 +496,22 @@
     "type": "inject",
     "z": "45689007.c2c51",
     "name": "Server 86",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
     "x": 200,
     "y": 380,
     "wires": [
@@ -466,6 +530,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 530,
     "y": 340,
     "wires": []
@@ -485,6 +552,8 @@
     "randomLast": "5",
     "randomUnits": "seconds",
     "drop": false,
+    "allowrate": false,
+    "outputs": 1,
     "x": 560,
     "y": 380,
     "wires": [
@@ -503,6 +572,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 970,
     "y": 380,
     "wires": []
@@ -550,6 +622,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 970,
     "y": 80,
     "wires": []
@@ -593,13 +668,22 @@
     "type": "inject",
     "z": "45689007.c2c51",
     "name": "Server 86",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55386/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
     "x": 200,
     "y": 80,
     "wires": [
@@ -618,6 +702,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 530,
     "y": 40,
     "wires": []
@@ -632,6 +719,9 @@
     "console": false,
     "tostatus": false,
     "complete": "payload.endpoint",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1140,
     "y": 640,
     "wires": []
@@ -641,13 +731,22 @@
     "type": "inject",
     "z": "45689007.c2c51",
     "name": "Server 80",
-    "topic": "",
-    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55380/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"NONE\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
-    "payloadType": "json",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:55380/\",\"keepSessionAlive\":true,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}",
+    "payloadType": "json",
     "x": 760,
     "y": 320,
     "wires": [
@@ -662,16 +761,16 @@
     "z": "45689007.c2c51",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388/",
+    "endpointMustExist": false,
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "None",
-    "securityMode": "NONE",
     "name": "LOCAL FLEX CONECTOR SERVER",
     "showErrors": true,
+    "securityPolicy": "None",
+    "securityMode": "None",
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "",
-    "endpointMustExist": false,
     "autoSelectRightEndpoint": false,
     "strategyMaxRetry": "",
     "strategyInitialDelay": "",

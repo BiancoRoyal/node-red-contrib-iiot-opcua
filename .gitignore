@@ -21,3 +21,6 @@ jcoverage/
 certificates/
 
 dist/
+
+*.log
+*.bak

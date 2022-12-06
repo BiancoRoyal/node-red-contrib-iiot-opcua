@@ -38,6 +38,7 @@
       }
     ],
     "delayPerMessage": "0.5",
+    "timeout": "",
     "x": 360,
     "y": 100,
     "wires": [
@@ -56,6 +57,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 550,
     "y": 100,
     "wires": []
@@ -94,6 +98,7 @@
     "z": "33e49fa5.330158",
     "name": "",
     "scope": null,
+    "uncaught": false,
     "x": 860,
     "y": 60,
     "wires": [
@@ -112,6 +117,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 1010,
     "y": 60,
     "wires": []
@@ -164,6 +172,7 @@
       }
     ],
     "delayPerMessage": "1",
+    "timeout": "",
     "x": 360,
     "y": 300,
     "wires": [
@@ -212,6 +221,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 550,
     "y": 260,
     "wires": []
@@ -253,6 +265,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 300,
     "wires": []
@@ -305,6 +320,7 @@
       }
     ],
     "delayPerMessage": "1",
+    "timeout": "",
     "x": 360,
     "y": 600,
     "wires": [
@@ -359,6 +375,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 550,
     "y": 440,
     "wires": []
@@ -400,6 +419,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 480,
     "wires": []
@@ -441,6 +463,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 540,
     "wires": []
@@ -482,6 +507,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 360,
     "wires": []
@@ -520,9 +548,9 @@
     "id": "370a5de1.95aa0a",
     "type": "comment",
     "z": "33e49fa5.330158",
-    "name": "you could catch errors to react on it",
+    "name": "you can catch errors to react on it",
     "info": "",
-    "x": 940,
+    "x": 930,
     "y": 100,
     "wires": []
   },
@@ -556,6 +584,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 600,
     "wires": []
@@ -595,6 +626,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 660,
     "wires": []
@@ -634,6 +668,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 720,
     "wires": []
@@ -673,6 +710,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 780,
     "wires": []
@@ -707,6 +747,9 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 840,
     "wires": []
@@ -741,8 +784,21 @@
     "console": false,
     "tostatus": false,
     "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
     "x": 770,
     "y": 900,
+    "wires": []
+  },
+  {
+    "id": "88f9253ed61b0938",
+    "type": "comment",
+    "z": "33e49fa5.330158",
+    "name": "Use Demo Server Example",
+    "info": "Please use the Demo Server example for this example to work.\nImport that with strg+i -> Examples -> opcuaIIoT -> Server -> Demo Server",
+    "x": 210,
+    "y": 197,
     "wires": []
   },
   {
@@ -751,16 +807,17 @@
     "z": "33e49fa5.330158",
     "discoveryUrl": "",
     "endpoint": "opc.tcp://localhost:55388/",
+    "endpointMustExist": false,
     "keepSessionAlive": true,
     "loginEnabled": false,
-    "securityPolicy": "None",
-    "securityMode": "NONE",
     "name": "LOCAL CRAWLER SERVER",
     "showErrors": false,
+    "securityPolicy": "None",
+    "securityMode": "None",
+    "individualCerts": false,
     "publicCertificateFile": "",
     "privateKeyFile": "",
     "defaultSecureTokenLifetime": "",
-    "endpointMustExist": false,
     "autoSelectRightEndpoint": false,
     "strategyMaxRetry": "",
     "strategyInitialDelay": "",
@@ -768,6 +825,7 @@
     "strategyRandomisationFactor": "",
     "requestedSessionTimeout": "",
     "connectionStartDelay": "",
-    "reconnectDelay": ""
+    "reconnectDelay": "",
+    "maxBadSessionRequests": ""
   }
 ]

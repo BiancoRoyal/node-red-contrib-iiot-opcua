@@ -10,7 +10,7 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 import debug from 'debug';
 import {Node, NodeStatusFill} from "node-red";
 import {BrowseResult, StatusCode} from "node-opcua";
@@ -29,7 +29,7 @@ type EntryStatus = {
 }
 
 export type ResponseInputPayload = {
-  outputArguments: Todo;
+  outputArguments: TodoTypeAny;
   value?: any
   browserResults?: BrowseResult[]
   crawlerResults?: (string | BrowseResult[])[]
@@ -44,10 +44,11 @@ export type ResponseInputPayload = {
   nodesToWrite?: AddressSpaceItem[]
   valuesToWrite?: AddressSpaceItem[]
   addressSpaceItems: AddressSpaceItem[]
-  dataType?: Todo
+  dataType?: TodoTypeAny
   nodeId?: NodeIdLike
   methodType?: string
-  nodetype?: string
+  nodetype?: string,
+  payloadType?: string
 }
 
 const internalDebugLog = debug('opcuaIIoT:response') // eslint-disable-line no-use-before-define
@@ -111,7 +112,7 @@ const setNodeStatus = (node: Node, entryStatus: EntryStatus, informationText: st
   node.status({fill: fillColor, shape: 'dot', text: informationText})
 }
 
-const analyzeWriteResults = function (node: Node, msg: Todo) {
+const analyzeWriteResults = function (node: Node, msg: TodoTypeAny) {
   let entryStatus = handlePayloadArrayOfStatusCodes(msg)
   setNodeStatusInfo(node, msg, entryStatus)
 }
@@ -182,7 +183,7 @@ const handlePayloadStatusCode = <T extends Record<any, any>>(node: Node, statusI
   payload.entryStatus = entryStatus
 }
 
-const setNodeStatusInfo = function (node: Node, payload: ResponseInputPayload, entryStatus: Todo) {
+const setNodeStatusInfo = function (node: Node, payload: ResponseInputPayload, entryStatus: TodoTypeAny) {
   payload.entryStatus = entryStatus
   payload.entryStatusText = 'Good:' + entryStatus['good'] + ' Bad:' + entryStatus['bad'] + ' Other:' + entryStatus['other']
   setNodeStatus(node, payload.entryStatus, payload.entryStatusText)
@@ -331,7 +332,7 @@ export type CompressedBrowseResult = {
 
 const compressBrowseMessageStructure = function (payload: BrowserPayload) {
   if (payload.browserResults?.length) {
-    payload.value = payload.browserResults.map((item: Todo) => {
+    payload.value = payload.browserResults.map((item: TodoTypeAny) => {
       return {
         nodeId: item.nodeId.toString(),
         browseName: (item.browseName?.namespaceIndex) ? item.browseName?.namespaceIndex + ':' + item.browseName?.name : item.browseName,
@@ -347,7 +348,7 @@ const compressBrowseMessageStructure = function (payload: BrowserPayload) {
 
 const compressCrawlerMessageStructure = function (payload: CrawlerPayload) {
   if (payload.hasOwnProperty('crawlerResults') && payload.crawlerResults?.length) {
-    payload.value = payload.crawlerResults?.map((item: Todo) => {
+    payload.value = payload.crawlerResults?.map((item: TodoTypeAny) => {
       return {
         nodeId: item.nodeId.toString(),
         browseName: (item.browseName.namespaceIndex) ? item.browseName.namespaceIndex + ':' + item.browseName.name : item.browseName,
@@ -366,7 +367,7 @@ const reconsturctNodeIdOnRead = function (payload: ResponseInputPayload) {
   let nodesToRead = payload.nodesToRead
 
   if (results && results.length) {
-    payload.value = results.map((item: Todo, index: number) => {
+    payload.value = results.map((item: TodoTypeAny, index: number) => {
       if (item?.value?.value) {
         let nodeId = null
         if (nodesToRead && index < nodesToRead.length) {
@@ -426,8 +427,8 @@ const compressReadMessageStructure = function (payload: any) {
 const compressWriteMessageStructure = function (payload: any) {
   defaultCompress(payload)
 
-  let itemList: Todo[] = []
-  payload.value = payload.statusCodes.map((item: Todo, index: number) => {
+  let itemList: TodoTypeAny[] = []
+  payload.value = payload.statusCodes.map((item: TodoTypeAny, index: number) => {
     return {
       nodeId: (payload.nodesToWrite) ? payload.nodesToWrite[index] : payload.addressSpaceItems[index],
       statusCode: item,

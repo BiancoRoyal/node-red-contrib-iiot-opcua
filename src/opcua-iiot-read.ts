@@ -10,7 +10,7 @@
 'use strict'
 
 import {Node, NodeAPI, NodeDef, NodeMessage, NodeMessageInFlow, NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import {ClientSession} from "node-opcua";
 import coreClient from "./core/opcua-iiot-core-client";
 import {
@@ -51,7 +51,7 @@ interface OPCUAIIoTReadDef extends NodeDef {
   connector: string
 }
 
-export type ReadPayload = Todo & {
+export type ReadPayload = TodoTypeAny & {
   nodetype: 'read'
 }
 
@@ -76,12 +76,12 @@ module.exports = (RED: NodeAPI) => {
     this.historyDays = parseInt(config.historyDays) || 1
     this.connector = RED.nodes.getNode(config.connector)
 
-    let node: Todo = this;
-    node.iiot = initCoreNode()
+    let self: TodoTypeAny = this;
+    self.iiot = initCoreNode()
 
     const handleReadError = (err: Error, msg: NodeMessage) => {
       coreClient.readDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
 
@@ -91,90 +91,90 @@ module.exports = (RED: NodeAPI) => {
     }
 
     if (process.env.TEST === "true")
-      node.functions = {
+      self.functions = {
         handleReadError
       }
 
-    const readAllFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readAllFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
       coreClient.readAllAttributes(session, itemsToRead, msg)
-        .then((readResult: Todo) => {
+        .then((readResult: TodoTypeAny) => {
           try {
             this.send(buildResultMessage('AllAttributes', readResult))
           } catch (err) {
             /* istanbul ignore next */
-            node.iiot.handleReadError(err, readResult.msg)
+            self.iiot.handleReadError(err, readResult.msg)
           }
         }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    const readValueFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readValueFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
       coreClient.readVariableValue(session, itemsToRead, msg)
-        .then((readResult: Todo) => {
+        .then((readResult: TodoTypeAny) => {
           let message = buildResultMessage('VariableValue', readResult)
           this.send(message)
         }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    const readHistoryDataFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readHistoryDataFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
       const startDate = new Date()
-      node.iiot.historyStart = new Date()
-      node.iiot.historyStart.setDate(startDate.getDate() - node.historyDays)
-      node.iiot.historyEnd = new Date()
+      self.iiot.historyStart = new Date()
+      self.iiot.historyStart.setDate(startDate.getDate() - self.historyDays)
+      self.iiot.historyEnd = new Date()
 
       coreClient.readHistoryValue(
         session,
         itemsToRead,
-        msg.payload.historyStart || node.iiot.historyStart,
-        msg.payload.historyEnd || node.iiot.historyEnd,
+        msg.payload.historyStart || self.iiot.historyStart,
+        msg.payload.historyEnd || self.iiot.historyEnd,
         msg)
-        .then((readResult: Todo) => {
+        .then((readResult: TodoTypeAny) => {
           let message = buildResultMessage('HistoryValue', readResult)
-          message.payload.historyStart = readResult.startDate || node.iiot.historyStart
-          message.payload.historyEnd = readResult.endDate || node.iiot.historyEnd
+          message.payload.historyStart = readResult.startDate || self.iiot.historyStart
+          message.payload.historyEnd = readResult.endDate || self.iiot.historyEnd
           this.send(message)
         }).catch((err: Error) => {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    const readFromNodeId = (session: ClientSession | Todo, itemsToRead: Todo[], msg: Todo) => {
+    const readFromNodeId = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny[], msg: TodoTypeAny) => {
 
       const transformItem = (item: NodeIdLike): ReadValueIdOptions => {
         return {
           nodeId: item,
-          attributeId: Number(node.attributeId) || undefined
+          attributeId: Number(self.attributeId) || undefined
         }
       }
 
       const transformedItemsToRead = itemsToRead.map(transformItem)
 
 
-      coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || node.maxAge, msg)
-        .then((readResult: Todo) => {
+      coreClient.read(session, transformedItemsToRead, msg.payload.maxAge || self.maxAge, msg)
+        .then((readResult: TodoTypeAny) => {
           let message = buildResultMessage('Default', readResult)
-          message.payload.maxAge = node.maxAge
+          message.payload.maxAge = self.maxAge
           this.send(message)
         }).catch(function (err: Error) {
         /* istanbul ignore next */
-        (isInitializedIIoTNode(node)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
+        (isInitializedIIoTNode(self)) ? handleReadError(err, msg) : coreClient.internalDebugLog(err.message)
       })
     }
 
-    const readFromSession = (session: ClientSession | Todo, itemsToRead: Todo, originMsg: Todo) => {
+    const readFromSession = (session: ClientSession | TodoTypeAny, itemsToRead: TodoTypeAny, originMsg: TodoTypeAny) => {
       let msg = Object.assign({}, originMsg)
       if (checkSessionNotValid(session, 'Reader')) {
         return
       }
 
-      coreClient.readDebugLog('Read With AttributeId ' + node.attributeId)
-      switch (parseInt(node.attributeId)) {
+      coreClient.readDebugLog('Read With AttributeId ' + self.attributeId)
+      switch (parseInt(self.attributeId)) {
         case coreClient.READ_TYPE.ALL:
           readAllFromNodeId(session, itemsToRead, msg)
           break
@@ -189,13 +189,13 @@ module.exports = (RED: NodeAPI) => {
       }
     }
 
-    const buildResultMessage = function (readType: Todo, readResult: Todo) {
+    const buildResultMessage = function (readType: TodoTypeAny, readResult: TodoTypeAny) {
       let payload = {
         ...readResult.msg.payload,
         nodetype: 'read',
         readtype: readType,
-        attributeId: node.attributeId,
-        justValue: node.justValue,
+        attributeId: self.attributeId,
+        justValue: self.justValue,
         payloadType: 'read'
       }
 
@@ -203,7 +203,7 @@ module.exports = (RED: NodeAPI) => {
 
       payload = setMessageProperties(payload, readResult, dataValuesString)
 
-      if (!node.justValue) {
+      if (!self.justValue) {
         payload = enhanceMessage(payload, readResult)
       }
 
@@ -212,12 +212,12 @@ module.exports = (RED: NodeAPI) => {
         payload
       }
 
-      return message as Todo
+      return message as TodoTypeAny
     }
 
-    const extractDataValueString = function (readResult: Todo) {
+    const extractDataValueString = function (readResult: TodoTypeAny) {
       let dataValuesString
-      if (node.justValue) {
+      if (self.justValue) {
         dataValuesString = JSON.stringify(readResult.results, null, 2)
       } else {
         dataValuesString = JSON.stringify(readResult, null, 2)
@@ -225,11 +225,11 @@ module.exports = (RED: NodeAPI) => {
       return dataValuesString
     }
 
-    const setMessageProperties = (payload: Todo, readResult: Todo, stringValue: Todo) => {
+    const setMessageProperties = (payload: TodoTypeAny, readResult: TodoTypeAny, stringValue: TodoTypeAny) => {
       try {
         RED.util.setMessageProperty(payload, 'value', JSON.parse(stringValue))
       } /* istanbul ignore next */ catch (err: any) {
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.warn('JSON not to parse from string for dataValues type ' + JSON.stringify(readResult, null, 2))
           this.error(err, readResult.msg)
         }
@@ -240,13 +240,13 @@ module.exports = (RED: NodeAPI) => {
       return payload
     }
 
-    const enhanceMessage = (payload: Todo, readResult: Todo) => {
+    const enhanceMessage = (payload: TodoTypeAny, readResult: TodoTypeAny) => {
       try {
         payload.resultsConverted = {}
         let dataValuesString = JSON.stringify(readResult.results, null, 2)
         RED.util.setMessageProperty(payload, 'resultsConverted', JSON.parse(dataValuesString))
       } /* istanbul ignore next */ catch (err: any) {
-        if (node.showErrors) {
+        if (self.showErrors) {
           this.warn('JSON not to parse from string for dataValues type ' + readResult.results)
           this.error(err, readResult.msg)
         }
@@ -270,12 +270,12 @@ module.exports = (RED: NodeAPI) => {
     }
 
     this.on('input', function (msg: NodeMessageInFlow, send: (msg: NodeMessage | Array<NodeMessage | NodeMessage[] | null>) => void, done: () => void) {
-      if (!checkConnectorState(node, msg, 'Read', errorHandler, emitHandler, statusHandler)) {
+      if (!checkConnectorState(self, msg, 'Read', errorHandler, emitHandler, statusHandler)) {
         return
       }
 
       try {
-        readFromSession(node.connector.iiot.opcuaSession, buildNodesToRead(msg.payload), msg)
+        readFromSession(self.connector.iiot.opcuaSession, buildNodesToRead(msg.payload), msg)
       } /* istanbul ignore next */ catch (err: any) {
         handleReadError(err, msg)
       }
@@ -287,18 +287,20 @@ module.exports = (RED: NodeAPI) => {
 
     }
 
-    registerToConnector(node, statusHandler, onAlias, errorHandler)
+    registerToConnector(self, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
-      deregisterToConnector(node, () => {
-        resetIiotNode(node)
+      self.removeAllListeners()
+
+      deregisterToConnector(self, () => {
+        resetIiotNode(self)
         done()
       })
     })
 
     if (process.env.isTest === 'TRUE') {
-      node.iiot = {
-        ...node.iiot,
+      self.iiot = {
+        ...self.iiot,
         handleReadError,
       }
     }

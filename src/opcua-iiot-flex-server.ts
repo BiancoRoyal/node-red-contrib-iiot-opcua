@@ -11,7 +11,7 @@
 
 import * as nodered from "node-red";
 import {NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreServer from "./core/opcua-iiot-core-server";
 import {resetIiotNode, setNodeStatusTo} from "./core/opcua-iiot-core";
 import {VM} from "vm2";
@@ -23,7 +23,7 @@ type OPCUAIIoTFlexServer = nodered.Node & {
 }
 
 interface OPCUAIIoTFlexServerDef extends nodered.NodeDef {
-  addressSpaceScript: Todo
+  addressSpaceScript: TodoTypeAny
 }
 
 /**
@@ -39,65 +39,65 @@ module.exports = (RED: nodered.NodeAPI) => {
     RED.nodes.createNode(this, config)
     coreServer.flexInternalDebugLog('Open Server Node')
 
-    let node: Todo = this;
+    let self: TodoTypeAny = this;
 
-    coreServer.readConfigOfServerNode(node, config)
-    coreServer.initServerNode(node)
-    coreServer.loadNodeSets(node, __dirname)
+    coreServer.readConfigOfServerNode(self, config)
+    coreServer.initServerNode(self)
+    coreServer.loadNodeSets(self, __dirname)
     // node = coreServer.loadCertificates(node)
-    node.context = this.context
+    self.context = this.context
 
     const vm = new VM({
       allowAsync: false,
       sandbox: {
         // allow the node-opcua library to be accessed in user-submitted scripts as 'opcua'
         opcua: require('node-opcua'),
-        node,
+        node: self,
         coreServer,
         scriptObjects,
         RED,
         sandboxNodeContext: {
           set: function () {
-            node.context().set.apply(node, arguments)
+            self.context().set.apply(self, arguments)
           },
           get: function () {
-            return node.context().get.apply(node, arguments)
+            return self.context().get.apply(self, arguments)
           },
           keys: function () {
-            return node.context().keys.apply(node, arguments)
+            return self.context().keys.apply(self, arguments)
           },
           get global() {
-            return node.context().global
+            return self.context().global
           },
           get flow() {
-            return node.context().flow
+            return self.context().flow
           }
         },
         sandboxFlowContext: {
           set: function () {
-            node.context().flow.set.apply(node, arguments)
+            self.context().flow.set.apply(self, arguments)
           },
           get: function () {
-            return node.context().flow.get.apply(node, arguments)
+            return self.context().flow.get.apply(self, arguments)
           },
           keys: function () {
-            return node.context().flow.keys.apply(node, arguments)
+            return self.context().flow.keys.apply(self, arguments)
           }
         },
         sandboxGlobalContext: {
           set: function () {
-            node.context().global.set.apply(node, arguments)
+            self.context().global.set.apply(self, arguments)
           },
           get: function () {
-            return node.context().global.get.apply(node, arguments)
+            return self.context().global.get.apply(self, arguments)
           },
           keys: function () {
-            return node.context().global.keys.apply(node, arguments)
+            return self.context().global.keys.apply(self, arguments)
           }
         },
         sandboxEnv: {
-          get: function (envVar: Todo) {
-            let flow = node._flow
+          get: function (envVar: TodoTypeAny) {
+            let flow = self._flow
             return flow.getSetting(envVar)
           }
         }
@@ -113,11 +113,11 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     const initNewServer = () => {
-      node = coreServer.initRegisterServerMethod(node)
-      let serverOptions = coreServer.buildGeneralServerOptions(node, 'Flex')
+      self = coreServer.initRegisterServerMethod(self)
+      let serverOptions = coreServer.buildGeneralServerOptions(self, 'Flex')
       // serverOptions = coreServer.setDiscoveryOptions(node, serverOptions)
       try {
-        coreServer.createServer(node, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
+        coreServer.createServer(self, serverOptions, postInitialize, statusHandler, RED.settings.verbose)
       } catch (err: any) {
         /* istanbul ignore next */
         this.emit('server_create_error')
@@ -126,24 +126,24 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const handleServerError = (err: Error, msg: Todo) => {
+    const handleServerError = (err: Error, msg: TodoTypeAny) => {
       coreServer.internalDebugLog(err)
-      if (node.showErrors) {
+      if (self.showErrors) {
         this.error(err, msg)
       }
     }
 
     const postInitialize = () => {
-      node.iiot.eventObjects = {} // event objects should stay in memory
-      coreServer.constructAddressSpaceFromScript(node.iiot.opcuaServer, constructAddressSpaceScript, node.iiot.eventObjects)
+      self.iiot.eventObjects = {} // event objects should stay in memory
+      coreServer.constructAddressSpaceFromScript(self.iiot.opcuaServer, constructAddressSpaceScript, self.iiot.eventObjects)
         .then(() => {
-          coreServer.start(node.iiot.opcuaServer, node).then(() => {
-            node.oldStatusParameter = setNodeStatusTo(node, 'active', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+          coreServer.start(self.iiot.opcuaServer, self).then(() => {
+            self.oldStatusParameter = setNodeStatusTo(self, 'active', self.oldStatusParameter, self.showStatusActivities, statusHandler)
             this.emit('server_running')
           }).catch((err: Error) => {
             /* istanbul ignore next */
             this.emit('server_start_error')
-            node.oldStatusParameter = setNodeStatusTo(node, 'errors', node.oldStatusParameter, node.showStatusActivities, statusHandler)
+            self.oldStatusParameter = setNodeStatusTo(self, 'errors', self.oldStatusParameter, self.showStatusActivities, statusHandler)
             handleServerError(err, {payload: 'Server Start Failure'})
           })
         }).catch(function (err: Error) {
@@ -154,21 +154,21 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     initNewServer()
 
-    this.on('input', function (msg: Todo) {
-      if (!node.iiot.opcuaServer || !node.iiot.initialized) {
+    this.on('input', function (msg: TodoTypeAny) {
+      if (!self.iiot.opcuaServer || !self.iiot.initialized) {
         handleServerError(new Error('Server Not Ready For Inputs'), msg)
         return
       }
 
-      if (msg.injectType === 'CMD') {
+      if (msg.payload.injectType === 'CMD') {
         executeOpcuaCommand(msg)
       } else {
-        handleServerError(new Error('Unknown Flex Inject Type ' + msg.injectType), msg)
+        handleServerError(new Error('Unknown Flex Inject Type ' + msg.payload.injectType), msg)
       }
     })
 
-    const executeOpcuaCommand = (msg: Todo) => {
-      if (msg.commandType === 'restart') {
+    const executeOpcuaCommand = (msg: TodoTypeAny) => {
+      if (msg.payload.commandType === 'restart') {
         restartServer()
         this.send(msg)
       } else {
@@ -176,7 +176,7 @@ module.exports = (RED: nodered.NodeAPI) => {
       }
     }
 
-    const sendHandler = (msg: Todo) => {
+    const sendHandler = (msg: TodoTypeAny) => {
       this.send(msg)
     }
 
@@ -186,9 +186,9 @@ module.exports = (RED: nodered.NodeAPI) => {
 
     const restartServer = function () {
       coreServer.flexInternalDebugLog('Restart OPC UA Server')
-      coreServer.restartServer(node, statusHandler, emitHandler, sendHandler)
+      coreServer.restartServer(self, statusHandler, emitHandler, sendHandler)
 
-      if (node.iiot.opcuaServer) {
+      if (self.iiot.opcuaServer) {
         coreServer.flexInternalDebugLog('OPC UA Server restarted')
       } else {
         coreServer.flexInternalDebugLog('Can not restart OPC UA Server')
@@ -196,16 +196,18 @@ module.exports = (RED: nodered.NodeAPI) => {
     }
 
     this.on('close', function (done: () => void) {
+      self.removeAllListeners()
+
       closeServer(() => {
         coreServer.flexInternalDebugLog('Close Server Node')
-        resetIiotNode(node)
+        resetIiotNode(self)
         done()
       })
     })
 
     this.on('shutdown', () => {
-      node.iiot.opcuaServer = null
-      node.iiot.initNewServer()
+      self.iiot.opcuaServer = null
+      initNewServer()
     })
 
     const closeServer = function (done: () => void) {
@@ -214,9 +216,9 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreServer.simulatorInterval = null
       }
 
-      if (node.iiot.opcuaServer) {
-        node.iiot.opcuaServer.removeAllListeners()
-        node.iiot.opcuaServer.shutdown(node.delayToClose, done)
+      if (self.iiot.opcuaServer) {
+        self.iiot.opcuaServer.removeAllListeners()
+        self.iiot.opcuaServer.shutdown(self.delayToClose, done)
       } else {
         done()
       }

@@ -9,7 +9,7 @@
 'use strict'
 import * as nodered from "node-red";
 import {NodeMessage, NodeStatus} from "node-red";
-import {Todo} from "./types/placeholders";
+import {TodoTypeAny} from "./types/placeholders";
 import coreConnector from "./core/opcua-iiot-core-connector";
 import {deregisterToConnector, registerToConnector, resetIiotNode} from "./core/opcua-iiot-core";
 import {NodeMessageInFlow} from "@node-red/registry";
@@ -18,7 +18,7 @@ export interface OPCUAIIoTFlexConnector extends nodered.Node {
   showStatusActivities: boolean
   showErrors: boolean
   connector: any
-  iiot?: Todo
+  iiot?: TodoTypeAny
 }
 
 interface OPCUAIIoTFlexConnectorConfigurationDef extends nodered.NodeDef {
@@ -42,21 +42,21 @@ module.exports = function (RED: nodered.NodeAPI) {
     this.showErrors = config.showErrors
     this.connector = RED.nodes.getNode(config.connector)
 
-    let nodeConfig = this;
-    nodeConfig.iiot = {}
+    let self = this;
+    self.iiot = {}
 
     this.status({fill: 'blue', shape: 'ring', text: 'new'})
 
     this.on('input', (msg: NodeMessageInFlow) => {
       coreConnector.internalDebugLog('connector change request input')
 
-      const payload: Todo = msg.payload
+      const payload: TodoTypeAny = msg.payload
 
-      if (nodeConfig.connector) {
+      if (self.connector) {
         if (payload.endpoint && payload.endpoint.includes('opc.tcp:')) {
           coreConnector.internalDebugLog('connector change possible')
           coreConnector.internalDebugLog(payload)
-          nodeConfig.connector.functions.restartWithNewSettings(payload, () => {
+          self.connector.functions.restartWithNewSettings(payload, () => {
             coreConnector.internalDebugLog('connector change injected')
             this.send(msg)
           })
@@ -86,7 +86,9 @@ module.exports = function (RED: nodered.NodeAPI) {
     registerToConnector(this, statusHandler, onAlias, errorHandler)
 
     this.on('close', (done: () => void) => {
-      deregisterToConnector(this as Todo, () => {
+      self.removeAllListeners()
+
+      deregisterToConnector(this as TodoTypeAny, () => {
         resetIiotNode(this)
         done()
       })

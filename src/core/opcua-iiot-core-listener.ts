@@ -10,16 +10,16 @@
 'use strict'
 // SOURCE-MAP-REQUIRED
 
-import {Todo} from "../types/placeholders";
+import {TodoTypeAny} from "../types/placeholders";
 
 import debug from 'debug'
 
 // @ts-ignore
-import * as Stately from 'stately.js'
 
 
 import {AttributeIds, DataType, DataValue, resolveNodeId, TimestampsToReturn} from "node-opcua";
-import {initCoreNode} from "./opcua-iiot-core";
+import {initCoreNode, FsmListenerStates} from "./opcua-iiot-core";
+import {createMachine, interpret} from "@xstate/fsm";
 
 const internalDebugLog = debug('opcuaIIoT:listener') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:listener:details') // eslint-disable-line no-use-before-define
@@ -34,39 +34,81 @@ const SUBSCRIBE_DEFAULT_QUEUE_SIZE = 1 // eslint-disable-line no-use-before-defi
 const EVENT_DEFAULT_INTERVAL = 250 // eslint-disable-line no-use-before-define
 const EVENT_DEFAULT_QUEUE_SIZE = 10000 // eslint-disable-line no-use-before-define
 const METHOD_TYPE = 'ns=0;i=0' // eslint-disable-line no-use-before-define
-const RUNNING_STATE = 'STARTED' // eslint-disable-line no-use-before-define
+const RUNNING_STATE = FsmListenerStates.StateStarted // eslint-disable-line no-use-before-define
 const MAX_INT32 = 2147483647 // eslint-disable-line no-use-before-define
 
+interface ListenerDebugContext {
+  debugContext?: string
+}
+
+type ListenerEvent =
+    | { type: 'REQUESTINIT' }
+    | { type: 'END'}
+    | { type: 'INIT'}
+    | { type: 'START'}
+    | { type: 'TERMINATE'}
+    | { type: 'ERROR'}
+    | { type: 'IDLE'}
+
+type ListenerState =
+    | { value: FsmListenerStates.StateIdle; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateInit; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateEnd; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateRequested; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateStarted; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateError; context: ListenerDebugContext & { debugContext: undefined } }
+    | { value: FsmListenerStates.StateTerminated; context: ListenerDebugContext & { debugContext: undefined } }
+
 const createListenerStateMachine = function () {
-  return Stately.machine({
-    'IDLE': {
-      'requestinitsub': 'REQUESTED',
-      'endsub': 'END'
-    },
-    'REQUESTED': {
-      'initsub': 'INIT'
-    },
-    'INIT': {
-      'startsub': 'STARTED',
-      'terminatesub': 'TERMINATED',
-      'errorsub': 'ERROR'
-    },
-    'STARTED': {
-      'terminatesub': 'TERMINATED',
-      'errorsub': 'ERROR'
-    },
-    'TERMINATED': {
-      'idlesub': 'IDLE',
-      'errorsub': 'ERROR',
-      'endsub': 'END'
-    },
-    'ERROR': {
-      'idlesub': 'IDLE',
-      'initsub': 'INIT',
-      'endsub': 'END'
-    },
-    'END': {}
-  }, 'IDLE')
+  return createMachine<ListenerDebugContext, ListenerEvent, ListenerState>({
+    id: 'listener',
+    initial: FsmListenerStates.StateIdle,
+    states: {
+      idle: { on: {
+          REQUESTINIT: FsmListenerStates.StateRequested,
+          END: FsmListenerStates.StateEnd
+        }
+      },
+      init: { on: {
+          START: FsmListenerStates.StateStarted,
+          TERMINATE: FsmListenerStates.StateTerminated,
+          ERROR: FsmListenerStates.StateError
+        }
+      },
+      requested: { on: {
+          INIT: FsmListenerStates.StateInit
+        }
+      },
+      started: { on: {
+          TERMINATE: FsmListenerStates.StateTerminated,
+          ERROR: FsmListenerStates.StateError
+        }
+      },
+      error: { on: {
+          IDLE: FsmListenerStates.StateIdle,
+          INIT: FsmListenerStates.StateInit,
+          END: FsmListenerStates.StateEnd
+        }
+      },
+      terminated: { on: {
+          IDLE: FsmListenerStates.StateIdle,
+          ERROR: FsmListenerStates.StateError,
+          END: FsmListenerStates.StateEnd
+        }
+      },
+      end: { on: {} }
+    }
+  })
+}
+
+const startListenerMachineService = (toggleMachine: any) => {
+  return interpret(toggleMachine).start()
+}
+
+const subscribeListenerFSMService = (service: TodoTypeAny, eventFn: (state: any) => void) => {
+  if(service === undefined || eventFn === undefined) throw new Error('Service or event handler missing')
+
+  return service.subscribe(eventFn)
 }
 
 const getEventSubscriptionParameters = function (timeMilliseconds: number) {
@@ -93,7 +135,7 @@ const getSubscriptionParameters = function (timeMilliseconds: number) {
   }
 }
 
-const collectAlarmFields = function (field: Todo, dataType: Todo, value: Todo) {
+const collectAlarmFields = function (field: TodoTypeAny, dataType: TodoTypeAny, value: TodoTypeAny) {
   return {
     field,
     dataType,
@@ -175,7 +217,7 @@ const getConditionFields = function () {
   ]
 }
 
-const monitorItems = function (node: Todo, msg: Todo, uaSubscription: Todo) {
+const monitorItems = function (node: TodoTypeAny, msg: TodoTypeAny, uaSubscription: TodoTypeAny) {
 
   for (let addressSpaceItem of msg.addressSpaceItems) {
     if (!addressSpaceItem.nodeId) {
@@ -193,7 +235,7 @@ const monitorItems = function (node: Todo, msg: Todo, uaSubscription: Todo) {
     if (nodeIdToMonitor) {
       subscribeDebugLog('Monitored Item Subscribing ' + nodeIdToMonitor)
       buildNewMonitoredItem(nodeIdToMonitor, msg, uaSubscription)
-        .then(function (result: Todo) {
+        .then(function (result: TodoTypeAny) {
           if (result.monitoredItem.monitoredItemId) {
             subscribeDebugLog('Monitored Item Subscribed Id:' + result.monitoredItem.monitoredItemId + ' to ' + result.nodeId)
             node.iiot.monitoredASO.set(result.nodeId.toString(), {
@@ -211,7 +253,7 @@ const monitorItems = function (node: Todo, msg: Todo, uaSubscription: Todo) {
   }
 }
 
-const buildNewMonitoredItem = function (nodeId: Todo, msg: Todo, subscription: Todo) {
+const buildNewMonitoredItem = function (nodeId: TodoTypeAny, msg: TodoTypeAny, subscription: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!nodeId) {
@@ -247,7 +289,7 @@ const buildNewMonitoredItem = function (nodeId: Todo, msg: Todo, subscription: T
           queueSize: queueSize
         },
         TimestampsToReturn.Both,
-        function (err: Error, monitoredItemResult: Todo) {
+        function (err: Error, monitoredItemResult: TodoTypeAny) {
           if (err) {
             internalDebugLog('subscribing monitored item ' + err)
             reject(err)
@@ -259,7 +301,7 @@ const buildNewMonitoredItem = function (nodeId: Todo, msg: Todo, subscription: T
     })
 }
 
-const buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpaceItems: Todo, subscription: Todo) {
+const buildNewMonitoredItemGroup = function (node: TodoTypeAny, msg: TodoTypeAny, addressSpaceItems: TodoTypeAny, subscription: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!addressSpaceItems) {
@@ -285,12 +327,12 @@ const buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpace
         queueSize = SUBSCRIBE_DEFAULT_QUEUE_SIZE
       }
 
-      let filteredAddressSpaceItems = addressSpaceItems.filter((addressSpaceItem: Todo) => {
+      let filteredAddressSpaceItems = addressSpaceItems.filter((addressSpaceItem: TodoTypeAny) => {
         return addressSpaceItem.datatypeName !== METHOD_TYPE
       })
 
-      let subcriptionItems: Todo[] = []
-      filteredAddressSpaceItems.forEach((item: Todo) => {
+      let subcriptionItems: TodoTypeAny[] = []
+      filteredAddressSpaceItems.forEach((item: TodoTypeAny) => {
         subcriptionItems.push({
           nodeId: resolveNodeId(item.nodeId),
           attributeId: AttributeIds.Value
@@ -305,7 +347,7 @@ const buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpace
           queueSize: queueSize
         },
         TimestampsToReturn.Both,
-        function (err: Error, monitoredItemGroup: Todo) {
+        function (err: Error, monitoredItemGroup: TodoTypeAny) {
           if (err) {
             internalDebugLog('subscribing monitored item group ' + err)
             reject(err)
@@ -317,7 +359,7 @@ const buildNewMonitoredItemGroup = function (node: Todo, msg: Todo, addressSpace
     })
 }
 
-const buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo) {
+const buildNewEventItem = function (nodeId: TodoTypeAny, msg: TodoTypeAny, subscription: TodoTypeAny) {
   return new Promise(
     function (resolve, reject) {
       if (!nodeId) {
@@ -352,7 +394,7 @@ const buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo)
           filter: msg.payload.eventFilter
         },
         TimestampsToReturn.Both,
-        function (err: Error, monitoredItemResult: Todo) {
+        function (err: Error, monitoredItemResult: TodoTypeAny) {
           if (err) {
             internalDebugLog('subscribing event item ' + err)
             reject(err)
@@ -364,7 +406,7 @@ const buildNewEventItem = function (nodeId: Todo, msg: Todo, subscription: Todo)
     })
 }
 
-const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Todo) => Todo, dataValue: DataValue[]) {
+const analyzeEvent = function (session: TodoTypeAny, browseForBrowseName: (...args: TodoTypeAny) => TodoTypeAny, dataValue: DataValue[]) {
   return new Promise(
     function (resolve, reject) {
       if (!session) {
@@ -380,18 +422,18 @@ const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Tod
         reject(new Error('Event Response Not Valid'))
       } else {
         let index = 0
-        let eventInformation: Todo = {}
-        let eventResults: Todo[] = []
+        let eventInformation: TodoTypeAny = {}
+        let eventResults: TodoTypeAny[] = []
         dataValue.forEach((dv) => {
           const variant = dv.value
           eventDebugLog('variant entry: ' + variant?.toString())
 
           try {
             if (variant.dataType && variant.value) {
-              eventInformation = collectAlarmFields((dataValue as Todo).monitoringParameters.filter.selectClauses[index], variant?.dataType?.toString(), variant.value)
+              eventInformation = collectAlarmFields((dataValue as TodoTypeAny).monitoringParameters.filter.selectClauses[index], variant?.dataType?.toString(), variant.value)
 
               if (variant.dataType === DataType.NodeId) {
-                browseForBrowseName(session, variant.value, function (err: Error | undefined, browseName: Todo) {
+                browseForBrowseName(session, variant.value, function (err: Error | undefined, browseName: TodoTypeAny) {
                   if (err) {
                     reject(err)
                   } else {
@@ -415,11 +457,11 @@ const analyzeEvent = function (session: Todo, browseForBrowseName: (...args: Tod
   )
 }
 
-const checkState = function (node: Todo, msg: Todo, callerType: Todo) {
-  internalDebugLog('Check Listener State ' + node.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+const checkState = function (node: TodoTypeAny, msg: TodoTypeAny, callerType: TodoTypeAny) {
+  internalDebugLog('Check Listener State ' + node.iiot.stateService.state.value + ' By ' + callerType)
 
-  if (node.connector && node.iiot.stateMachine && node.iiot.stateMachine.getMachineState() !== RUNNING_STATE) {
-    internalDebugLog('Wrong Listener State ' + node.iiot.stateMachine.getMachineState() + ' By ' + callerType)
+  if (node.connector && node.iiot.stateService && node.iiot.stateService.state.value !== RUNNING_STATE) {
+    internalDebugLog('Wrong Listener State ' + node.iiot.stateService.state.value + ' By ' + callerType)
     if (node.showErrors) {
       node.error(new Error('Listener Not ' + RUNNING_STATE + ' On ' + callerType), msg)
     }
@@ -458,6 +500,8 @@ const coreListener = {
   MAX_INT32,
 
   createListenerStateMachine,
+  startListenerMachineService,
+  subscribeListenerFSMService,
   getEventSubscriptionParameters,
   getSubscriptionParameters,
   collectAlarmFields,

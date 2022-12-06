@@ -2,6 +2,53 @@
 
 ## Known Issues
 
+* Result Filter does not filter correctly in every case (Will be fixed in v6.x)
+* Read after browse in browse example does not work
+  * No output and no error
+* Browse-Listener and grouped-listener example top browse/listen will throw following error
+
+```
+Error: encodeObject Error: [Error] Value: {
+  payload: 'Monitored Item Error',
+  monitoredItem: ClientMonitoredItemImpl {
+    _events: {
+      initialized: [Function (anonymous)],
+      changed: [Function (anonymous)],
+      err: [Function (anonymous)],
+      terminated: [Function (anonymous)]
+    },
+    _eventsCount: 4,
+    _maxListeners: undefined,
+    statusCode: ConstantStatusCode {
+      _value: 2150957056,
+      _description: 'The attribute is not supported for the specified Node.',
+      _name: 'BadAttributeIdInvalid'
+    },
+    subscription: ClientSubscriptionImpl {
+      _events: [Object],
+      _eventsCount: 4,
+      _maxListeners: undefined,
+      monitoredItemGroups: [],
+      timeoutHint: 14000,
+      _nextClientHandle: 26,
+      publishEngine: [ClientSidePublishEngine],
+      lastSequenceNumber: 10,
+      publishingInterval: 200,
+      lifetimeCount: 18000,
+      maxKeepAliveCount: 60,
+      maxNotificationsPerPublish: 100,
+      publishingEnabled: true,
+      priority: 10,
+```
+Removing the catch node will bring the following error messages 
+```
+"{"name":"Error","message":"ns=0;i=2253: BadAttributeIdInvalid (0x80350000)"}"
+```
+Maybe that happens because the browser browses the root object recursively and returns also 
+nodes of the server that aren't allowed to be listened
+
+
+
 ### Features
 
 #### ASO and Servers
@@ -18,4 +65,4 @@
 
 #### Listener
 
-* Events can not be monitored (error node-opcua maxAge)
+* Events cannot be monitored (error node-opcua maxAge)

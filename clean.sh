@@ -8,6 +8,8 @@ rm -rf opcuaIIoT/
 
 rm -rf code/
 
+rm -rf certificates/
+
 rm -rf coverage/
 
 rm -rf docs/gen
@@ -20,9 +22,9 @@ npm install
 
 npm i --only=dev
 
-# npm test
+npm run test:clearCache
 
-# npm run coverage
+npm test
 
 npm run build
 

@@ -12,21 +12,22 @@
 
   RED.nodes.registerType('OPCUA-IIoT-Browser', {
     category: 'IIoT',
-    color: "#ABCDEF",
+    color: '#ABCDEF',
     defaults: {
-      connector: {type: "OPCUA-IIoT-Connector", required: true},
       nodeId: {value: ""},
       name: {value: ""},
       justValue: {value: true},
       sendNodesToRead: {value: false},
-      sendNodesToListener: {value: false},
       sendNodesToBrowser: {value: false},
+      sendNodesToListener: {value: false},
       multipleOutputs: {value: false},
+      showStatusActivities: {value: false},
+      showErrors: {value: false},
       recursiveBrowse: {value: false},
       recursiveDepth: {value: 1},
       delayPerMessage: {value: 0.2},
-      showStatusActivities: {value: false},
-      showErrors: {value: false}
+
+      connector: {type: "OPCUA-IIoT-Connector", required: true}
     },
     inputs: 1,
     outputs: 1,
@@ -44,7 +45,7 @@
       let nodeIdLookupButton = $("#node-lookup-nodeId")
       let nodeIdField = $("#node-input-nodeId")
 
-      nodeIdLookupButton.click(function () {
+      nodeIdLookupButton.on("click", function () {
         nodeIdLookupButton.addClass('disabled')
         let rootid = nodeIdField.val() || 'ns=0;i=84' // root
         $.getJSON('/opcuaIIoT/browse/'+ node.id + '/' + encodeURIComponent(rootid), function (data) {
@@ -177,6 +178,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="OPCUA-IIoT-Browser">
+@browser-data-help
  <h2>OPC UA IIoT Browser</h2>
 
  <p>Use the Browser to browse OPC UA address spaces.
@@ -244,6 +246,10 @@
         </ul>
     </ul>
  </div>
+
+<h3> Defaults </h3>
+
+<p>  </p>
 
  <strong>Name</strong>
  <p>Name in the flow of Node-RED.</p>
