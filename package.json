@@ -97,7 +97,7 @@
     "test:summarize": "node scripts/JestOutputToSummary.js > summary.md",
     "summary": "npm run coverage:ci && npm run test:summarize && jest-coverage-badges input \"./jcoverage/coverage-summary.json\" output \"./badges\"",
     "build": "standard --fix && gulp publish",
-    "prepublishOnly": "npm run test:units && npm run test:units:coverage && npm run build",
+    "prepublishOnly": "npm run test && npm run coverage && npm run build",
     "release": "standard-version -a",
     "inspect": "jsinspect ./src > .jsinspect-results.json",
     "rewrite-changelog": "gulp changelog",
