@@ -16,6 +16,7 @@ describe('OPC UA Core Browser', function () {
   const events = require('events')
 
   describe('Core Browser unit test', function () {
+    global.lastOpcuaPort = 54200
     it('should return the objects root nodeId', function (done) {
       expect(coreBrowser.browseToRoot()).toBe(OBJECTS_ROOT)
       done()

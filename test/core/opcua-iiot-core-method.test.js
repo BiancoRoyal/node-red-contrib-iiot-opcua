@@ -12,6 +12,7 @@
 
 describe('OPC UA Core Method', function () {
   let {default: coreMethod} = require('../../src/core/opcua-iiot-core-method')
+  global.lastOpcuaPort = 54600
 
   describe('getArgumentDefinition', function () {
     it('should return Error object, if none value is present', function (done) {

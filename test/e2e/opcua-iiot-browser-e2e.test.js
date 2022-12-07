@@ -21,11 +21,13 @@ var responseNode = require('../../src/opcua-iiot-response')
 var resultFilterNode = require('../../src/opcua-iiot-result-filter')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var browseNodesToLoad = [injectNode, connectorNode, resultFilterNode, inputNode, serverNode, responseNode]
 
 var testFlows = require('./flows/browser-e2e-flows')
+global.lastOpcuaPort = 54800
 
 describe('OPC UA Browser node e2e Testing', function () {
   beforeEach(function (done) {
@@ -49,8 +51,9 @@ describe('OPC UA Browser node e2e Testing', function () {
   describe('Browser node', function () {
     it('should verify browser items as result', function (done) {
       const flow = Array.from(testFlows.testBrowseFlow)
-      flow[9].port = 50100
-      flow[10].endpoint = "opc.tcp://localhost:50100/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[10].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f1')
@@ -66,8 +69,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result', function (done) {
       const flow = Array.from(testFlows.testBrowseItemFlow)
-      flow[5].port = 50101
-      flow[6].endpoint = "opc.tcp://localhost:50101/"
+      const port = portHelper.getPort()
+      flow[5].port = port
+      flow[6].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
@@ -83,8 +87,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single of full result', function (done) {
       const flow = Array.from(testFlows.testBrowseItemFlow)
-      flow[5].port = 50102
-      flow[6].endpoint = "opc.tcp://localhost:50102/"
+      const port = portHelper.getPort()
+      flow[5].port = port
+      flow[6].endpoint = "opc.tcp://localhost:" + port
       flow[3].justValue = false
 
       helper.load(browseNodesToLoad, flow, function () {
@@ -104,8 +109,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result with Nodes To Read', function (done) {
       const flow = Array.from(testFlows.testBrowseItemFlow)
-      flow[5].port = 50103
-      flow[6].endpoint = "opc.tcp://localhost:50103/"
+      const port = portHelper.getPort()
+      flow[5].port = port
+      flow[6].endpoint = "opc.tcp://localhost:" + port
       flow[3].sendNodesToRead = true
       helper.load(browseNodesToLoad, flow, function () {
         let n5 = helper.getNode('n5f3')
@@ -121,8 +127,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result with Nodes To Listener', function (done) {
       const flow = Array.from(testFlows.testBrowseItemFlow)
-      flow[5].port = 50104
-      flow[6].endpoint = "opc.tcp://localhost:50104/"
+      const port = portHelper.getPort()
+      flow[5].port = port
+      flow[6].endpoint = "opc.tcp://localhost:" + port
       flow[3].sendNodesToListener = true
 
       helper.load(browseNodesToLoad, flow, function () {
@@ -139,8 +146,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result with Nodes To Browser', function (done) {
       const flow = Array.from(testFlows.testBrowseItemFlow)
-      flow[5].port = 50105
-      flow[6].endpoint = "opc.tcp://localhost:50105/"
+      const port = portHelper.getPort()
+      flow[5].port = port
+      flow[6].endpoint = "opc.tcp://localhost:" + port
       flow[3].sendNodesToBrowser = true
 
       helper.load(browseNodesToLoad, flow, function () {
@@ -157,8 +165,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result with nodes to Read, Browse, and Listener', function (done) {
       const flow = Array.from(testFlows.testBrowseItemFlow)
-      flow[5].port = 50106
-      flow[6].endpoint = "opc.tcp://localhost:50106/"
+      const port = portHelper.getPort()
+      flow[5].port = port
+      flow[6].endpoint = "opc.tcp://localhost:" + port
       flow[3].sendNodesToRead = true
       flow[3].sendNodesToListener = true
       flow[3].sendNodesToBrowser = true
@@ -181,8 +190,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result with nodes to Browse with levels', function (done) {
       const flow = Array.from(testFlows.testBrowseLevelsFlow)
-      flow[7].port = 50107
-      flow[8].endpoint = "opc.tcp://localhost:50107/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(browseNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f2')
@@ -198,8 +208,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result with nodes to Read with levels', function (done) {
       const flow = Array.from(testFlows.testBrowseLevelsFlow)
-      flow[7].port = 50108
-      flow[8].endpoint = "opc.tcp://localhost:50108/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(browseNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6f2')
@@ -215,8 +226,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should verify browser items as single result with nodes to Read with levels recursive', function (done) {
       const flow = Array.from(testFlows.testBrowseLevelsFlow)
-      flow[7].port = 50109
-      flow[8].endpoint = "opc.tcp://localhost:50109/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].recursiveBrowse = true
 
       helper.load(browseNodesToLoad, flow, function () {
@@ -233,8 +245,9 @@ describe('OPC UA Browser node e2e Testing', function () {
 
     it('should get ten messages with payload on browser with six response nodes and four result-filter nodes', function (done) {
       const flow = Array.from(testFlows.testBrowserResponseResultFilterFlow)
-      flow[14].port = 50110
-      flow[15].endpoint = "opc.tcp://localhost:50110/"
+      const port = portHelper.getPort()
+      flow[14].port = port
+      flow[15].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(browseNodesToLoad, flow, function () {
         let n1 = helper.getNode('n1f4')
@@ -262,8 +275,9 @@ describe('OPC UA Browser node e2e Testing', function () {
   describe('Browser node HTTP requests', function () {
     it('should success on browse for a root id', function (done) {
       const flow = Array.from(testFlows.testBrowseFlow)
-      flow[9].port = 50111
-      flow[10].endpoint = "opc.tcp://localhost:50111/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[10].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(browseNodesToLoad, Array.from(testFlows.testBrowseFlow), function () {
         let n3 = helper.getNode('n3f1')

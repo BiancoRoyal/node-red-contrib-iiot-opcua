@@ -20,8 +20,10 @@ var serverAsoNode = require('../../src/opcua-iiot-server-aso')
 var serverAsoFlowNodes = [injectNode, functionNode, serverAsoNode]
 
 var testFlows = require('./flows/server-aso-flows')
+global.lastOpcuaPort = 58000
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 beforeAll(function (done) {

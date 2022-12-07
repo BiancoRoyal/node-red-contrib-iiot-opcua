@@ -21,12 +21,14 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../../src/opcua-iiot-listener')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 const {NodeIdType} = require("node-opcua");
 helper.init(require.resolve('node-red'))
 
 var listenerNodesToLoad = [injectNode, functionNode, inputNode]
 
 var testFlows = require('./flows/listener-flows')
+global.lastOpcuaPort = 57200
 
 describe('OPC UA Listener monitoring node Unit Testing', function () {
   beforeEach(function (done) {

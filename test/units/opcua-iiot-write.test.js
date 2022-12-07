@@ -22,11 +22,13 @@ var functionNodeRedNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../../src/opcua-iiot-write')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var writeNodesToLoad = [injectNodeRedNode, functionNodeRedNode, inputNode]
 
 var testFlows = require('./flows/write-flows')
+global.lastOpcuaPort = 58200
 
 describe('OPC UA Write node Unit Testing', function () {
   beforeEach(function (done) {

@@ -16,6 +16,7 @@ describe('OPC UA Core', function () {
   let { NodeIdType, DataType } = require('node-opcua')
   let core = require('../../src/core/opcua-iiot-core')
   let isWindows = /^win/.test(core.os.platform())
+  global.lastOpcuaPort = 54100
 
   describe('get the name of a time unit', function () {
     it('should return the right string when the value is present', function (done) {

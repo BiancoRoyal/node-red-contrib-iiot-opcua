@@ -22,11 +22,13 @@ var readNode = require('../../src/opcua-iiot-read')
 const helperExtensions = require('../helper/test-helper-extensions')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var readNodesToLoad = [injectNode, functionNode, readNode]
 
 var testFlows = require('./flows/read-flows')
+global.lastOpcuaPort = 57500
 
 describe('OPC UA Read node Unit Testing', function () {
   beforeEach(function (done) {

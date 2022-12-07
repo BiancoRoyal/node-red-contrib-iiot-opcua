@@ -11,6 +11,7 @@
 // jest.setTimeout(30000)
 
 describe('OPC UA Core Listener', function () {
+  global.lastOpcuaPort = 54500
   let assert = require('chai').assert
   let expect = require('chai').expect
   let {default: coreListener} = require('../../src/core/opcua-iiot-core-listener')

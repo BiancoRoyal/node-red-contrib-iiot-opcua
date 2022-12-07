@@ -26,6 +26,8 @@ npm run test:clearCache
 
 npm test
 
+npm run coverage
+
 npm run build
 
 npm run rewrite-changelog

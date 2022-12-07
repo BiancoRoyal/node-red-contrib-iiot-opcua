@@ -15,6 +15,7 @@ const events = require('events')
 const { FsmConnectorStates } = require('../../src/core/opcua-iiot-core')
 
 describe('OPC UA Core Connector', function () {
+  global.lastOpcuaPort = 54400
   describe('core functions', function () {
     it('should have IDLE state', function (done) {
       let fsm = coreConnector.createConnectorFinalStateMachine()

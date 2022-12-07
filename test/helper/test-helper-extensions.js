@@ -10,7 +10,25 @@
 
 'use strict'
 
+const net = require('net')
+
+const isPortTaken = (port) => {
+  const server = net.createServer()
+  let result
+  server.on('error', (err) => {
+    result = true
+  }).on('listening', () => {
+    result = false
+    server.close()
+  })
+
+  server.listen(port)
+
+  return result
+}
+
 module.exports = {
+
   cleanFlowPositionData: (jsonFlow) => {
     let cleanFlow = []
     // flow is an array of JSON objects with x,y,z from the Node-RED export
@@ -27,5 +45,19 @@ module.exports = {
     } )
 
     return cleanFlow
+  },
+
+  getPort: () => {
+    let tempPort
+
+    tempPort = global.lastOpcuaPort
+
+    do{
+      tempPort++
+    } while (isPortTaken(tempPort))
+
+    global.lastOpcuaPort = tempPort
+
+    return tempPort
   }
 }

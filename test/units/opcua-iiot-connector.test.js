@@ -20,6 +20,7 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 var readNode = require('../../src/opcua-iiot-read')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 // iiot opc ua nodes
@@ -29,6 +30,7 @@ var nodesToLoadConnector = [injectNode, functionNode, inputNode, readNode]
 
 var testFlows = require('./flows/connector-flows')
 const { MessageSecurityMode, SecurityPolicy } = require('node-opcua')
+global.lastOpcuaPort = 56500
 
 describe('OPC UA Connector node Unit Testing', function () {
   beforeAll(function (done) {

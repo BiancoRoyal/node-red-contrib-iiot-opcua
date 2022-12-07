@@ -24,12 +24,14 @@ var serverNode = require('../../src/opcua-iiot-server')
 var inputNode = require('../../src/opcua-iiot-method-caller')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var methodCallerNodesToLoad = [injectNode, connectorNode, inputNode, responseNode, serverNode]
 var eventNodesToLoad = [injectNodeRed, functionNode, connectorNode, inputNode, responseNode, serverNode]
 
 var testFlows = require('./flows/method-caller-e2e-flow')
+global.lastOpcuaPort = 55600
 
 describe('OPC UA Method Caller node e2e Testing', function () {
   beforeAll(function (done) {
@@ -55,8 +57,9 @@ describe('OPC UA Method Caller node e2e Testing', function () {
   describe('Method Caller node', function () {
     it('should get a message with payload after inject', function (done) {
       const flow = Array.from(testFlows.testMethodFlowPayload)
-      flow[9].port = "50500"
-      flow[10].endpoint = "opc.tcp://localhost:50500/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[10].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(methodCallerNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2mcf1')
@@ -71,8 +74,9 @@ describe('OPC UA Method Caller node e2e Testing', function () {
 
     it('should get a message with payload', function (done) {
       const flow = Array.from(testFlows.testMethodFlowPayload)
-      flow[9].port = "50501"
-      flow[10].endpoint = "opc.tcp://localhost:50501/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[10].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(methodCallerNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2mcf1')
@@ -85,8 +89,9 @@ describe('OPC UA Method Caller node e2e Testing', function () {
 
     it('should verify the result with response data', function (done) {
       const flow = Array.from(testFlows.testMethodFlowPayload)
-      flow[9].port = "50502"
-      flow[10].endpoint = "opc.tcp://localhost:50502/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[10].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(methodCallerNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6mcf1')
@@ -122,8 +127,9 @@ describe('OPC UA Method Caller node e2e Testing', function () {
 
     it('should get a message with payload after inject event inject', function (done) {
       const flow = Array.from(testFlows.testMethodInjectFlowPayload)
-      flow[9].port = "50503"
-      flow[10].endpoint = "opc.tcp://localhost:50503/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[10].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(eventNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2mcf2')
@@ -137,8 +143,9 @@ describe('OPC UA Method Caller node e2e Testing', function () {
 
     it('should verify the result with response data event inject', function (done) {
       const flow = Array.from(testFlows.testMethodInjectFlowPayload)
-      flow[9].port = "50504"
-      flow[10].endpoint = "opc.tcp://localhost:50504/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[10].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(eventNodesToLoad, flow, function () {
         let n8 = helper.getNode('n8mcf2')

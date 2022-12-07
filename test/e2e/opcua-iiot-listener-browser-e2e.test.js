@@ -22,11 +22,14 @@ var inputNode = require('../../src/opcua-iiot-listener')
 var browserNode = require('../../src/opcua-iiot-browser')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var listenerNodesToLoad = [injectNode, browserNode, connectorNode, inputNode, responseNode, serverNode]
 
 var testFlows = require('./flows/listener-browser-e2e-flows')
+
+global.lastOpcuaPort = 55400
 
 describe('OPC UA Listener monitoring via Browser node e2e Testing', function () {
   beforeEach(function (done) {
@@ -50,9 +53,11 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
   describe('Listen via Browser node', function () {
 
     it('should have a message browser', function (done) {
-      testFlows.simpleBrowserAboFlowWithoutListenerInject[14].port = 50400
-      testFlows.simpleBrowserAboFlowWithoutListenerInject[15].endpoint = "opc.tcp://localhost:50400/"
       const flow = Array.from(testFlows.simpleBrowserAboFlowWithoutListenerInject)
+      const port = portHelper.getPort()
+      flow[14].port = port
+      flow[15].endpoint = "opc.tcp://localhost:" + port
+
 
       helper.load(listenerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n2abo')
@@ -67,8 +72,9 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
 
     let msgCounter = 0
     it('should verify a message from browse node on subscribe recursive', function (done) {
-      testFlows.recursiveBrowserAboFlow[14].port = 50407
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:50407/"
+      const port = portHelper.getPort()
+      testFlows.recursiveBrowserAboFlow[14].port = port
+      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
       const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -98,8 +104,9 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
     })
 
     it('should verify a compressed message from response after browser node on subscribe recursive', function (done) {
-      testFlows.recursiveBrowserAboFlow[14].port = 50408
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:50408/"
+      const port = portHelper.getPort()
+      testFlows.recursiveBrowserAboFlow[14].port = port
+      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
       const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -124,8 +131,9 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
     })
 
     it('should verify a message from listener node on subscribe recursive', function (done) {
-      testFlows.recursiveBrowserAboFlow[14].port = 50409
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:50409/"
+      const port = portHelper.getPort()
+      testFlows.recursiveBrowserAboFlow[14].port = port
+      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
       const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -146,8 +154,9 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
     })
 
     it('should verify a compressed message from response after listener node on subscribe recursive as single result', function (done) {
-      testFlows.recursiveBrowserAboFlow[14].port = 50410
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:50410/"
+      const port = portHelper.getPort()
+      testFlows.recursiveBrowserAboFlow[14].port = port
+      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
       const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -164,9 +173,10 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
     })
 
     it('should subscribe from recursive browse from multiple results', function (done) {
+      const port = portHelper.getPort()
       testFlows.feedListenerWithRecursiveBrowse[1].singleBrowseResult = false
-      testFlows.feedListenerWithRecursiveBrowse[8].port = 50411
-      testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:50411/"
+      testFlows.feedListenerWithRecursiveBrowse[8].port = port
+      testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:" + port
       const flow = Array.from(testFlows.feedListenerWithRecursiveBrowse)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -183,9 +193,10 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
     })
 
     it('should subscribe from recursive browse from single result', function (done) {
+      const port = portHelper.getPort()
       testFlows.feedListenerWithRecursiveBrowse[1].singleBrowseResult = true
-      testFlows.feedListenerWithRecursiveBrowse[8].port = 50412
-      testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:50412/"
+      testFlows.feedListenerWithRecursiveBrowse[8].port = port
+      testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:" + port
       const flow = Array.from(testFlows.feedListenerWithRecursiveBrowse)
 
       helper.load(listenerNodesToLoad, flow, function () {

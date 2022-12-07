@@ -18,11 +18,13 @@ var injectNode = require('@node-red/nodes/core/common/20-inject')
 var browserNode = require('../../src/opcua-iiot-browser')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var browseNodesToLoad = [injectNode, functionNode, browserNode]
 
 var testFlows = require('./flows/browser-flows')
+global.lastOpcuaPort = 56400
 
 describe('OPC UA Browser node Unit Testing', function () {
   beforeEach(function (done) {
@@ -45,7 +47,9 @@ describe('OPC UA Browser node Unit Testing', function () {
 
   describe('Browser node', function () {
     it('should be loaded with correct defaults', function (done) {
-      helper.load(browseNodesToLoad, testFlows.testUnitBrowseFlow,
+      const flow = Array.from(testFlows.testUnitBrowseFlow)
+
+      helper.load(browseNodesToLoad, flow,
         function () {
           let nodeUnderTest = helper.getNode('4ac0b7c8.bebe18')
           expect(nodeUnderTest.nodeId).toBe('ns=1;i=1234')

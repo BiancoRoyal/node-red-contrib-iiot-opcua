@@ -17,9 +17,11 @@ var inputNode = require('../../src/opcua-iiot-inject')
 const helperExtensions = require('../helper/test-helper-extensions')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/inject-flows')
+global.lastOpcuaPort = 57100
 
 describe('OPC UA Inject node Unit Testing', function () {
   beforeAll(function (done) {

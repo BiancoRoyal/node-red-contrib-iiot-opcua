@@ -20,10 +20,12 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../../src/opcua-iiot-result-filter')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 const { StatusCodes } = require('node-opcua')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/result-filter-flows')
+global.lastOpcuaPort = 57800
 
 describe('OPC UA Result Filter node Testing', function () {
   beforeAll(function (done) {

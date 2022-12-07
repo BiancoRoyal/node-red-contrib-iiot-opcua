@@ -27,9 +27,11 @@ var injectIIoTNode = require('../../src/opcua-iiot-inject')
 var flexConnectorNodes = [injectNode, injectIIoTNode, inputNode, connectorNode, serverNode, flexServerNode, responseNode, listenerNode, eventNode, browserNode]
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/flex-connector-e2e-flows')
+global.lastOpcuaPort = 55300
 
 describe('OPC UA Flex Connector node e2e Testing', function () {
   beforeAll(function (done) {
@@ -78,16 +80,19 @@ describe('OPC UA Flex Connector node e2e Testing', function () {
 
     it('should be loaded with connector, inject, and servers', function (done) {
       const flow = Array.from(testFlows.testWithServersFlexConnector)
-      flow[1].payload = "{\"discoveryUrl\":null,\"endpoint\":\"localhost:51100\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
-      flow[2].payload = "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:51101/\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
-      flow[3].payload = "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:51100/\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
-      flow[4].payload = "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:51102/\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
+      const port1 = portHelper.getPort()
+      const port2 = portHelper.getPort()
+      const port3 = portHelper.getPort()
+      flow[1].payload = "{\"discoveryUrl\":null,\"endpoint\":\"localhost:"+port1+"\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
+      flow[2].payload = "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:"+port2+"/\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
+      flow[3].payload = "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:"+port1+"/\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
+      flow[4].payload = "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:"+port3+"/\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
       flow[5].payload = "{\"discoveryUrl\":null,\"endpoint\":\"opc.tcp://localhost:12345/\",\"keepSessionAlive\":false,\"securityPolicy\":\"None\",\"securityMode\":\"None\",\"name\":\"LOCAL FLEXIBLE INJECTED SERVER\",\"showErrors\":true,\"publicCertificateFile\":null,\"privateKeyFile\":null,\"defaultSecureTokenLifetime\":0,\"endpointMustExist\":false,\"autoSelectRightEndpoint\":false,\"strategyMaxRetry\":0,\"strategyInitialDelay\":0,\"strategyMaxDelay\":0,\"strategyRandomisationFactor\":0,\"requestedSessionTimeout\":0,\"connectionStartDelay\":0,\"reconnectDelay\":0}"
 
-      flow[9].port = "51100"
-      flow[10].port = "51101"
-      flow[11].port = "51102"
-      flow[12].endpoint = "opc.tcp://localhost:51100"
+      flow[9].port = port1
+      flow[10].port = port2
+      flow[11].port = port3
+      flow[12].endpoint = "opc.tcp://localhost:" + port1
 
       helper.load(flexConnectorNodes, testFlows.testWithServersFlexConnector,
         function () {
@@ -106,11 +111,13 @@ describe('OPC UA Flex Connector node e2e Testing', function () {
 
     it('should be loaded with listener, events, and servers', function (done) {
       const flow = Array.from(testFlows.flexConnectorSwitchingEndpointWithListenerFlow)
-      flow[7].port = "51103"
-      flow[8].port = "51104"
-      flow[17].endpoint = "opc.tcp://localhost:50304/"
+      const port1 = portHelper.getPort()
+      const port2 = portHelper.getPort()
+      flow[7].port = port1
+      flow[8].port = port2
+      flow[17].endpoint = "opc.tcp://localhost:" + port2
 
-      helper.load(flexConnectorNodes, testFlows.flexConnectorSwitchingEndpointWithListenerFlow,
+      helper.load(flexConnectorNodes, flow,
         function () {
           let counter = 0
           let nodeUnderTest = helper.getNode('n1rcf1')

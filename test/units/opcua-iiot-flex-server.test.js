@@ -20,9 +20,11 @@ var flexServerNode = require('../../src/opcua-iiot-flex-server')
 var flexServerFlowNodes = [injectNode, functionNode, flexServerNode]
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/flex-server-flows')
+global.lastOpcuaPort = 57000
 
 describe('OPC UA Flex Server node Unit Testing', function () {
   beforeAll(function (done) {

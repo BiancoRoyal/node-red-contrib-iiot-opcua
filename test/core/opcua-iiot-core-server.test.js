@@ -15,6 +15,8 @@ const {OPCUAServer} = require("node-opcua");
 let opcuaserver = null
 
 describe('OPC UA Core Server', function () {
+  global.lastOpcuaPort = 54700
+
   beforeEach(function (done) {
     opcuaserver = null
     opcuaserver = new OPCUAServer({

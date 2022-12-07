@@ -20,9 +20,11 @@ var serverCmdNode = require('../../src/opcua-iiot-server-cmd')
 var serverCmdNodes = [injectNode, functionNode, serverCmdNode]
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/server-cmd-flows')
+global.lastOpcuaPort = 58100
 
 describe('OPC UA Server Command node Unit Testing', function () {
   beforeAll(function (done) {

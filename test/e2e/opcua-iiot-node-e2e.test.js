@@ -25,11 +25,13 @@ var inputNode = require('../../src/opcua-iiot-node')
 var resultFilterNode = require('../../src/opcua-iiot-result-filter')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var nodeNodesToLoad = [injectNode, inputNode, connectorNode, listenerNode, responseNode, serverNode, resultFilterNode]
 
 var testFlows = require('./flows/node-e2e-flows')
+global.lastOpcuaPort = 55700
 
 describe('OPC UA Node node e2e Testing', function () {
   beforeEach(function (done) {
@@ -55,8 +57,9 @@ describe('OPC UA Node node e2e Testing', function () {
 
     it('should get two messages with payload and value after inject on subscribe with listener', function (done) {
       const flow = Array.from(testFlows.testNodeFlow)
-      flow[9].port = 51400
-      flow[16].endpoint = "opc.tcp://localhost:51400/"
+      const port = portHelper.getPort()
+      flow[9].port = port
+      flow[16].endpoint = "opc.tcp://localhost:" + port
 
       helper.load(nodeNodesToLoad, flow, function () {
         msgCounter = 0

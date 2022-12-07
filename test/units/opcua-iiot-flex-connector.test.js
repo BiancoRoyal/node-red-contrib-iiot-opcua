@@ -16,9 +16,11 @@
 var inputNode = require('../../src/opcua-iiot-flex-connector')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/flex-connector-flows')
+global.lastOpcuaPort = 56900
 
 describe('OPC UA Flex Connector node Unit Testing', function () {
   beforeAll(function (done) {

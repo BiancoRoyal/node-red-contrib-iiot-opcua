@@ -21,11 +21,13 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../../src/opcua-iiot-method-caller')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var methodCallerNodesToLoad = [injectNode, functionNode, inputNode]
 
 var testFlows = require('./flows/method-caller-flows')
+global.lastOpcuaPort = 57300
 
 describe('OPC UA Method Caller node Unit Testing', function () {
   beforeAll(function (done) {

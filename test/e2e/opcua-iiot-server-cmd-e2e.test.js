@@ -20,9 +20,11 @@ var serverNode = require('../../src/opcua-iiot-server')
 var flexServerNode = require('../../src/opcua-iiot-flex-server')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/server-cmd-e2e-flows')
+global.lastOpcuaPort = 56200
 
 describe('OPC UA Server Command node e2e Testing', function () {
   beforeAll(function (done) {
@@ -78,7 +80,8 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
     it('should get a message with inject to delete ASO', function (done) {
       const flow = Array.from(testFlows.testInjectCMDFlow)
-      flow[5].port = "51600"
+      const port = portHelper.getPort()
+      flow[5].port = port
 
       helper.load([injectOPCUANode, inputNode, serverNode], flow, function () {
         let n5 = helper.getNode('n5cmdf2')
@@ -94,7 +97,8 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
     it('should get a message with inject to restart server', function (done) {
       const flow = Array.from(testFlows.testCMDWithServerFlow)
-      flow[6].port = "51601"
+      const port = portHelper.getPort()
+      flow[6].port = port
 
       helper.load([injectNode, injectOPCUANode, inputNode, serverNode], flow, function () {
         let n5 = helper.getNode('n5csf1')
@@ -110,7 +114,8 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
     it('should get a message with inject to restart flex server', function (done) {
       const flow = Array.from(testFlows.testCMDWithFlexServerFlow)
-      flow[5].port = "51602"
+      const port = portHelper.getPort()
+      flow[5].port = port
 
       helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf3')
@@ -126,7 +131,8 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
     it('should get no message with wrong command inject to restart flex server', function (done) {
       const flow = Array.from(testFlows.testWrongCMDWithFlexServerFlow)
-      flow[5].port = "51603"
+      const port = portHelper.getPort()
+      flow[5].port = port
 
       helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf4')
@@ -139,7 +145,8 @@ describe('OPC UA Server Command node e2e Testing', function () {
 
     it('should get no message on wrong inject type sent to flex server', function (done) {
       const flow = Array.from(testFlows.testWrongInjectWithFlexServerFlow)
-      flow[3].port = "51604"
+      const port = portHelper.getPort()
+      flow[3].port = port
 
       helper.load([injectNode, injectOPCUANode, inputNode, flexServerNode], flow, function () {
         let n5 = helper.getNode('n5csf4')

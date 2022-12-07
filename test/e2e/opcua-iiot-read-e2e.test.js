@@ -24,12 +24,14 @@ var serverNode = require('../../src/opcua-iiot-server')
 var flexServerNode = require('../../src/opcua-iiot-flex-server')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var readNodesToLoad = [injectNode, functionNode, connectorNode, inputNode, responseNode, serverNode]
 var readNodesToLoadWithFlexServer = [injectNode, functionNode, connectorNode, inputNode, responseNode, flexServerNode]
 
 var testFlows = require('./flows/read-e2e-flows')
+global.lastOpcuaPort = 55800
 const { AttributeIds } = require('node-opcua')
 
 describe('OPC UA Read node e2e Testing', function () {
@@ -54,8 +56,9 @@ describe('OPC UA Read node e2e Testing', function () {
   describe('Read node',  function () {
     it('should get a message with payload for attributeId All',  function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49900
-      flow[8].endpoint = "opc.tcp://localhost:49900/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = 0
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
@@ -73,8 +76,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId All', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49901
-      flow[8].endpoint = "opc.tcp://localhost:49901/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = 0
 
       helper.load(readNodesToLoad, flow, function () {
@@ -90,8 +94,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId 0', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49902
-      flow[8].endpoint = "opc.tcp://localhost:49902/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = 0
 
       helper.load(readNodesToLoad, flow, function () {
@@ -111,8 +116,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId 0 from flex server', function (done) {
       const flow = testFlows.testReadFlexServerFlow
-      flow[7].port = 49903
-      flow[8].endpoint = "opc.tcp://localhost:49903/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = 0
       helper.load(readNodesToLoadWithFlexServer, flow, function () {
         let n6 = helper.getNode('n6rdf3')
@@ -127,8 +133,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should get a message with payload for attributeId Node-ID', function (done) {
       const flow = Array.from(Array.from(testFlows.testReadFlow))
-      flow[7].port = 49904
-      flow[8].endpoint = "opc.tcp://localhost:49904/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       helper.load(readNodesToLoad, flow, function () {
       flow[3].attributeId = AttributeIds.NodeId
         let n2 = helper.getNode('n2rdf1')
@@ -146,8 +153,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId Node-ID', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49905
-      flow[8].endpoint = "opc.tcp://localhost:49905/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
@@ -162,8 +170,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId Node-ID', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49906
-      flow[8].endpoint = "opc.tcp://localhost:49906/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
@@ -178,8 +187,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should get a message with payload for attributeId Node-Class', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49907
-      flow[8].endpoint = "opc.tcp://localhost:49907/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
@@ -197,8 +207,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId Node-Class', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49908
-      flow[8].endpoint = "opc.tcp://localhost:49908/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
@@ -213,8 +224,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId Node-Class', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49909
-      flow[8].endpoint = "opc.tcp://localhost:49909/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
@@ -229,8 +241,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should get a message with payload for attributeId Browse-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49910
-      flow[8].endpoint = "opc.tcp://localhost:49910/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
@@ -248,8 +261,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId Browse-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49911
-      flow[8].endpoint = "opc.tcp://localhost:49911/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
@@ -264,8 +278,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId Browse-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49912
-      flow[8].endpoint = "opc.tcp://localhost:49912/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
@@ -280,8 +295,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should get a message with payload for attributeId Display-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49913
-      flow[8].endpoint = "opc.tcp://localhost:49913/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
@@ -299,8 +315,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId Display-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49914
-      flow[8].endpoint = "opc.tcp://localhost:49914/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
@@ -315,8 +332,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId Display-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49915
-      flow[8].endpoint = "opc.tcp://localhost:49915/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
@@ -331,8 +349,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should get a message with payload for attributeId Value', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49916
-      flow[8].endpoint = "opc.tcp://localhost:49916/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
@@ -350,8 +369,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId Value', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49917
-      flow[8].endpoint = "opc.tcp://localhost:49917/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
@@ -366,8 +386,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId Value', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49918
-      flow[8].endpoint = "opc.tcp://localhost:49918/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
@@ -382,8 +403,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should get a message with payload for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49919
-      flow[8].endpoint = "opc.tcp://localhost:49919/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = 130
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
@@ -401,8 +423,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49920
-      flow[8].endpoint = "opc.tcp://localhost:49920/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = 130
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
@@ -419,8 +442,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      flow[7].port = 49921
-      flow[8].endpoint = "opc.tcp://localhost:49921/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       flow[3].attributeId = 130
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
@@ -438,8 +462,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read with an injected time range results with response for attributeId History', function (done) {
       let flow = Array.from(testFlows.testReadHistoryRangeFlow)
-      flow[7].port = 49922
-      flow[8].endpoint = "opc.tcp://localhost:49922/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       helper.load(readNodesToLoad, flow, function () {
         let msgCounter = 0
         let n1 = helper.getNode('nr1h')
@@ -469,8 +494,9 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read with an injected time range results with compressed response for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadHistoryRangeFlow)
-      flow[7].port = 49923
-      flow[8].endpoint = "opc.tcp://localhost:49923/"
+      const port = portHelper.getPort()
+      flow[7].port = port
+      flow[8].endpoint = "opc.tcp://localhost:" + port
       helper.load(readNodesToLoad, flow, function () {
         let msgCounter = 0
         let n2 = helper.getNode('nr2h')

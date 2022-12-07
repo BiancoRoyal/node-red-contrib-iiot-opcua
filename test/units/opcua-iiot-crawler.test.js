@@ -18,11 +18,13 @@ var functionNode = require('@node-red/nodes/core/function/10-function')
 var inputNode = require('../../src/opcua-iiot-crawler')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var crawlerNodesToLoad = [injectNode, functionNode, inputNode]
 
 var testFlows = require('./flows/crawler-flows')
+global.lastOpcuaPort = 56600
 
 describe('OPC UA Crawler node Unit Testing', function () {
   beforeEach(function (done) {

@@ -16,9 +16,12 @@
 var serverNode = require('../../src/opcua-iiot-server')
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/server-flows')
+
+global.lastOpcuaPort = 57900
 
 describe('OPC UA Server node Unit Testing', function () {
   beforeAll(function (done) {
@@ -43,7 +46,9 @@ describe('OPC UA Server node Unit Testing', function () {
 
   describe('Server node', function () {
     it('should be loaded with demo address-space', function (done) {
-      helper.load(serverNode, testFlows.testUnitServerWithDemoFlow,
+      const flow = Array.from(testFlows.testUnitServerWithDemoFlow)
+      flow[1].port = portHelper.getPort()
+      helper.load(serverNode, flow,
         function () {
           let nodeUnderTest = helper.getNode('6ec4ef50.86dc1')
           // expect(nodeUnderTest).toBeDefined()
@@ -59,7 +64,9 @@ describe('OPC UA Server node Unit Testing', function () {
     })
 
     it('should be loaded with discovery and without demo address-space', function (done) {
-      helper.load(serverNode, testFlows.testUnitServerWithoutDemoFlow,
+      const flow = Array.from(testFlows.testUnitServerWithoutDemoFlow)
+      flow[1].port = portHelper.getPort()
+      helper.load(serverNode, flow,
         function () {
           let nodeUnderTest = helper.getNode('6ec4ef50.86dc2')
           expect(nodeUnderTest).toBeDefined()

@@ -16,6 +16,7 @@ describe('OPC UA Core Client', function () {
   let {default: coreClient} = require('../../src/core/opcua-iiot-core-client')
 
   describe('write', function () {
+    global.lastOpcuaPort = 54300
     it('should return Error object, if none value is present', function (done) {
       coreClient.write(null, null, null).catch(function (err) {
         assert.equal('ClientSessionWriteService Not Valid To Write', err.message)

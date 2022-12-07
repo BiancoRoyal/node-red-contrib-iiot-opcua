@@ -119,11 +119,12 @@ module.exports = (RED: nodered.NodeAPI) => {
         coreFilter.internalDebugLog('filtering message without payload')
         return
       }
+      /*
       if (messageIsToFilter(msg)) {
         coreFilter.internalDebugLog('filtering message on filter')
         return
       }
-
+      */
       const payload = msg.payload as FilterInputPayload & BrowserPayload
       const filtered = filterByType(payload)
       const value =

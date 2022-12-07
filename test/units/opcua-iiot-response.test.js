@@ -22,10 +22,13 @@ var responseNode = require('../../src/opcua-iiot-response')
 var responseFlowNodes = [injectNode, functionNode, responseNode]
 
 var helper = require('node-red-node-test-helper')
+var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/response-flows')
 const helperExtensions = require('../helper/test-helper-extensions')
+
+global.lastOpcuaPort = 57700
 
 describe('OPC UA Response node Unit Testing', function () {
   beforeAll(function (done) {
