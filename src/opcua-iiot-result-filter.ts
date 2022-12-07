@@ -99,9 +99,28 @@ module.exports = (RED: nodered.NodeAPI) => {
       msg: TodoTypeAny
     }
 
+    const isNodeIdNotToFindInAddressSpaceItems = function (msg: any) {
+      if (msg.payload.addressSpaceItems) {
+        let filteredNodeIds = _.filter(msg.payload.addressSpaceItems, function (entry: any) {
+          return entry.nodeId === self.nodeId
+        })
+        return filteredNodeIds.length < 1;
+      } else {
+        return true
+      }
+    }
+
+    const messageIsToFilter = function (msg: any) {
+      return isNodeIdNotToFindInAddressSpaceItems(msg)
+    }
+
     this.on('input', (msg: NodeMessageInFlow) => {
       if (!msg.hasOwnProperty('payload') || msg.payload === null || msg.payload === void 0) { // values with false has to be true
         coreFilter.internalDebugLog('filtering message without payload')
+        return
+      }
+      if (messageIsToFilter(msg)) {
+        coreFilter.internalDebugLog('filtering message on filter')
         return
       }
 
