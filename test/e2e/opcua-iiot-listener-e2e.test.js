@@ -28,9 +28,15 @@ helper.init(require.resolve('node-red'))
 var listenerNodesToLoad = [injectNode, browserNode, connectorNode, inputNode, responseNode, serverNode]
 
 var testFlows = require('./flows/listener-e2e-flows')
-global.lastOpcuaPort = 55500
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Listener monitoring node e2e Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 54100
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -53,9 +59,10 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     let msgCounter = 0
 
     it('should get a message with payload after inject on unsubscribe', function (done) {
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       testFlows.testListenerMonitoringFlow[8].port = port
-      testFlows.testListenerMonitoringFlow[9].endpoint = "opc.tcp://localhost:" + port
+      testFlows.testListenerMonitoringFlow[9].endpoint = 'opc.tcp://localhost:' + port
       const flow = Array.from(testFlows.testListenerMonitoringFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -74,9 +81,10 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     })
 
     it('should verify a message on changed monitored item with statusCode on subscribe', function (done) {
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       testFlows.testListenerMonitoringFlow[8].port = port
-      testFlows.testListenerMonitoringFlow[9].endpoint = "opc.tcp://localhost:" + port
+      testFlows.testListenerMonitoringFlow[9].endpoint = 'opc.tcp://localhost:' + port
       const flow = Array.from(testFlows.testListenerMonitoringFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -96,9 +104,10 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     })
 
     it('should verify a compressed message from response node on subscribe', function (done) {
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       testFlows.testListenerMonitoringFlow[8].port = port
-      testFlows.testListenerMonitoringFlow[9].endpoint = "opc.tcp://localhost:" + port
+      testFlows.testListenerMonitoringFlow[9].endpoint = 'opc.tcp://localhost:' + port
       const flow = Array.from(testFlows.testListenerMonitoringFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -119,9 +128,10 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     })
 
     it('should get a message with payload after injecting twice', function (done) {
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       testFlows.testListenerMonitoringAboFlow[11].port = port
-      testFlows.testListenerMonitoringAboFlow[12].endpoint = "opc.tcp://localhost:" + port
+      testFlows.testListenerMonitoringAboFlow[12].endpoint = 'opc.tcp://localhost:' + port
       const flow = Array.from(testFlows.testListenerMonitoringAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -146,9 +156,10 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     })
 
     it('should verify a message on changed monitored item with statusCode on subscribing twice', function (done) {
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       testFlows.testListenerMonitoringAboFlow[11].port = port
-      testFlows.testListenerMonitoringAboFlow[12].endpoint = "opc.tcp://localhost:" + port
+      testFlows.testListenerMonitoringAboFlow[12].endpoint = 'opc.tcp://localhost:' + port
       const flow = Array.from(testFlows.testListenerMonitoringAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -174,9 +185,10 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     })
 
     it('should verify message from listener node on subscribing twice', function (done) {
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       testFlows.testListenerMonitoringAboFlow[11].port = port
-      testFlows.testListenerMonitoringAboFlow[12].endpoint = "opc.tcp://localhost:" + port
+      testFlows.testListenerMonitoringAboFlow[12].endpoint = 'opc.tcp://localhost:' + port
       const flow = Array.from(testFlows.testListenerMonitoringAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {
@@ -193,9 +205,10 @@ describe('OPC UA Listener monitoring node e2e Testing', function () {
     })
 
     it('should verify a compressed message from response node on subscribing twice', function (done) {
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       testFlows.testListenerMonitoringAboFlow[11].port = port
-      testFlows.testListenerMonitoringAboFlow[12].endpoint = "opc.tcp://localhost:" + port
+      testFlows.testListenerMonitoringAboFlow[12].endpoint = 'opc.tcp://localhost:' + port
       const flow = Array.from(testFlows.testListenerMonitoringAboFlow)
 
       helper.load(listenerNodesToLoad, flow, function () {

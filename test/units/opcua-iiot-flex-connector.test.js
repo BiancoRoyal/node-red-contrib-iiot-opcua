@@ -20,10 +20,16 @@ var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/flex-connector-flows')
-global.lastOpcuaPort = 56900
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Flex Connector node Unit Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57550
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -31,37 +37,35 @@ describe('OPC UA Flex Connector node Unit Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
   describe('Flex Connector node', function () {
     it('should be loaded without connector', function (done) {
       helper.load([inputNode], testFlows.testUnitFlexConnectorFlow,
-      function () {
-        let nodeUnderTest = helper.getNode('14d54403.f94f04')
-        expect(nodeUnderTest).toBeDefined()
-        expect(nodeUnderTest.name).toBe('TestFlexConnector')
-        done()
-      })
+        function () {
+          let nodeUnderTest = helper.getNode('14d54403.f94f04')
+          expect(nodeUnderTest).toBeDefined()
+          expect(nodeUnderTest.name).toBe('TestFlexConnector')
+          done()
+        })
     })
 
     it('should be loaded without connector and showing activities', function (done) {
       helper.load([inputNode], testFlows.testUnitFlexConnectorShowActivitiesFlow,
-      function () {
-        let nodeUnderTest = helper.getNode('14d54403.f94f05')
-        expect(nodeUnderTest).toBeDefined()
-        expect(nodeUnderTest.name).toBe('TestFlexConnector2')
-        done()
-      })
+        function () {
+          let nodeUnderTest = helper.getNode('14d54403.f94f05')
+          expect(nodeUnderTest).toBeDefined()
+          expect(nodeUnderTest.name).toBe('TestFlexConnector2')
+          done()
+        })
     })
   })
 })

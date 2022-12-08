@@ -13,10 +13,16 @@
 describe('OPC UA Core Client', function () {
   let assert = require('chai').assert
   let expect = require('chai').expect
-  let {default: coreClient} = require('../../src/core/opcua-iiot-core-client')
+  let { default: coreClient } = require('../../src/core/opcua-iiot-core-client')
+
+  let testingOpcUaPort = 0
+
+  beforeAll(() => {
+    testingOpcUaPort = 50420
+  })
 
   describe('write', function () {
-    global.lastOpcuaPort = 54300
+
     it('should return Error object, if none value is present', function (done) {
       coreClient.write(null, null, null).catch(function (err) {
         assert.equal('ClientSessionWriteService Not Valid To Write', err.message)
@@ -98,7 +104,7 @@ describe('OPC UA Core Client', function () {
 
   describe('basic functions', function () {
     it('should stringify formattedt', function (done) {
-      let objectData = {test: 'test', testFolder: {name: ''}}
+      let objectData = { test: 'test', testFolder: { name: '' } }
       let sut = coreClient.stringifyFormatted(objectData)
       assert.equal(sut, JSON.stringify(objectData, null, 2))
       done()

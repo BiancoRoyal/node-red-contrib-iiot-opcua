@@ -21,10 +21,16 @@ var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/event-flows')
-global.lastOpcuaPort = 56800
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Event node Unit Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57450
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -32,15 +38,13 @@ describe('OPC UA Event node Unit Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
@@ -48,7 +52,7 @@ describe('OPC UA Event node Unit Testing', function () {
     it('should load with basic settings', function (done) {
       helper.load(
         [injectNode, inputNode],
-          testFlows.testUnitEventFlow,
+        testFlows.testUnitEventFlow,
         function () {
           let nodeUnderTest = helper.getNode('n3evf1')
           expect(nodeUnderTest.name).toBe('TestName')
@@ -85,7 +89,7 @@ describe('OPC UA Event node Unit Testing', function () {
             interval: 1000 }) */
           done()
         })
-        n4.receive({payload: {value: 1000}})
+        n4.receive({ payload: { value: 1000 } })
       })
     })
   })

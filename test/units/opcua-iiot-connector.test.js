@@ -30,10 +30,16 @@ var nodesToLoadConnector = [injectNode, functionNode, inputNode, readNode]
 
 var testFlows = require('./flows/connector-flows')
 const { MessageSecurityMode, SecurityPolicy } = require('node-opcua')
-global.lastOpcuaPort = 56500
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Connector node Unit Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57150
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -41,15 +47,13 @@ describe('OPC UA Connector node Unit Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
@@ -234,13 +238,12 @@ describe('OPC UA Connector node Unit Testing', function () {
       })
     })
 
-
     it('should be loaded with correct defaults', function (done) {
       helper.load(nodesToLoadConnector, testFlows.testUnitConnectorGeneratedDefaultsFlow,
         function () {
           let nodeUnderTest = helper.getNode('594b2860fa40bda5')
           expect(nodeUnderTest.discoveryUrl).toBe(null)
-          expect(nodeUnderTest.endpoint).toBe("opc.tcp://localhost:44840/")
+          expect(nodeUnderTest.endpoint).toBe('opc.tcp://localhost:44840/')
           expect(nodeUnderTest.endpointMustExist).toBe(false)
           expect(nodeUnderTest.keepSessionAlive).toBe(true)
           expect(nodeUnderTest.loginEnabled).toBe(false)

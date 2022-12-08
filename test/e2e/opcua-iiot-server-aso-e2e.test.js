@@ -22,18 +22,23 @@ var connectorNode = require('../../src/opcua-iiot-connector')
 var readNode = require('../../src/opcua-iiot-read')
 var browserNode = require('../../src/opcua-iiot-browser')
 
-var asoNodesToLoad = [functionNode, injectNode, inputNode, serverNode, connectorNode, readNode,  browserNode]
-
+var asoNodesToLoad = [functionNode, injectNode, inputNode, serverNode, connectorNode, readNode, browserNode]
 
 var helper = require('node-red-node-test-helper')
 var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/server-aso-e2e-flows')
-global.lastOpcuaPort = 56100
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Server ASO node Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 55900
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -41,22 +46,21 @@ describe('OPC UA Server ASO node Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
   describe('Address Space Operation node e2e Testing', function () {
     it('should get all ASO data types with message with payload', function (done) {
       const flow = Array.from(testFlows.testASOFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[25].port = port
 
       helper.load(asoNodesToLoad, flow, function () {
@@ -124,7 +128,8 @@ describe('OPC UA Server ASO node Testing', function () {
 
     it('should verify an inject message for address space operation', function (done) {
       const flow = Array.from(testFlows.testASOFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[25].port = port
 
       helper.load(asoNodesToLoad, flow, function () {
@@ -193,9 +198,10 @@ describe('OPC UA Server ASO node Testing', function () {
 
     it('should verify read via browser for address space operations', function (done) {
       const flow = Array.from(testFlows.testASOReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[25].port = port
-      flow[34].endpoint = "opc.tcp://localhost:" + port
+      flow[34].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(asoNodesToLoad, testFlows.testASOReadFlow, function () {
         let n4 = helper.getNode('41ac95a6194a3536')

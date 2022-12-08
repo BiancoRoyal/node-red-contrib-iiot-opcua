@@ -21,10 +21,16 @@ var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/inject-flows')
-global.lastOpcuaPort = 57100
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Inject node Unit Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57750
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -32,15 +38,13 @@ describe('OPC UA Inject node Unit Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
@@ -65,15 +69,15 @@ describe('OPC UA Inject node Unit Testing', function () {
 
     it('should load with basic settings', function (done) {
       helper.load([inputNode], testFlows.testUnitInjectFlow,
-      function () {
-        let nodeUnderTest = helper.getNode('f93b472c.486038')
-        expect(nodeUnderTest.name).toBe('TestName')
-        expect(nodeUnderTest.injectType).toBe('inject')
-        expect(nodeUnderTest.payload).toBe('123456')
-        expect(nodeUnderTest.topic).toBe('TestTopicInject')
-        expect(nodeUnderTest.startDelay).toBe(10)
-        done()
-      })
+        function () {
+          let nodeUnderTest = helper.getNode('f93b472c.486038')
+          expect(nodeUnderTest.name).toBe('TestName')
+          expect(nodeUnderTest.injectType).toBe('inject')
+          expect(nodeUnderTest.payload).toBe('123456')
+          expect(nodeUnderTest.topic).toBe('TestTopicInject')
+          expect(nodeUnderTest.startDelay).toBe(10)
+          done()
+        })
     })
 
     it('should send a message with payload', function (done) {
@@ -81,7 +85,7 @@ describe('OPC UA Inject node Unit Testing', function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          msg.should.have.property("payload")
+          msg.should.have.property('payload')
           done()
         })
       })
@@ -93,7 +97,7 @@ describe('OPC UA Inject node Unit Testing', function () {
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicInject')
-          msg.should.have.property("topic")
+          msg.should.have.property('topic')
           done()
         })
       })
@@ -101,18 +105,16 @@ describe('OPC UA Inject node Unit Testing', function () {
 
     it('should load with basic settings read node', function (done) {
       helper.load([inputNode], testFlows.testUnitReadInjectFlow,
-      function () {
-        let nodeUnderTest = helper.getNode('f93b472c.486038')
-        expect(nodeUnderTest.name).toBe('TestName')
-        expect(nodeUnderTest.injectType).toBe('read')
-        expect(nodeUnderTest.payload).toBe('123456')
-        expect(nodeUnderTest.topic).toBe('TestTopicInject')
-        expect(nodeUnderTest.startDelay).toBe(1)
-        done()
-      })
+        function () {
+          let nodeUnderTest = helper.getNode('f93b472c.486038')
+          expect(nodeUnderTest.name).toBe('TestName')
+          expect(nodeUnderTest.injectType).toBe('read')
+          expect(nodeUnderTest.payload).toBe('123456')
+          expect(nodeUnderTest.topic).toBe('TestTopicInject')
+          expect(nodeUnderTest.startDelay).toBe(1)
+          done()
+        })
     })
-
-    
 
     it('should send a message with payload read node', function (done) {
       testFlows.testInjectFlow[1].injectType = 'read'
@@ -120,7 +122,7 @@ describe('OPC UA Inject node Unit Testing', function () {
         const n2 = helper.getNode('n2ijf1')
         const n1 = helper.getNode('n1ijf1')
         n2.on('input', function (msg) {
-          expect(msg.payload.injectType).toBe("read")
+          expect(msg.payload.injectType).toBe('read')
           done()
         })
       })
@@ -153,15 +155,15 @@ describe('OPC UA Inject node Unit Testing', function () {
 
     it('should load with basic settings listen node', function (done) {
       helper.load([inputNode], testFlows.testUnitListenInjectFlow,
-      function () {
-        let nodeUnderTest = helper.getNode('f93b472c.486038')
-        expect(nodeUnderTest.name).toBe('TestName')
-        expect(nodeUnderTest.injectType).toBe('listen')
-        expect(nodeUnderTest.payload).toBe('123456')
-        expect(nodeUnderTest.topic).toBe('TestTopicInject')
-        expect(nodeUnderTest.startDelay).toBe(1)
-        done()
-      })
+        function () {
+          let nodeUnderTest = helper.getNode('f93b472c.486038')
+          expect(nodeUnderTest.name).toBe('TestName')
+          expect(nodeUnderTest.injectType).toBe('listen')
+          expect(nodeUnderTest.payload).toBe('123456')
+          expect(nodeUnderTest.topic).toBe('TestTopicInject')
+          expect(nodeUnderTest.startDelay).toBe(1)
+          done()
+        })
     })
 
     it('should send a message with payload listen node', function (done) {
@@ -203,15 +205,15 @@ describe('OPC UA Inject node Unit Testing', function () {
 
     it('should load with basic settings write node', function (done) {
       helper.load([inputNode], testFlows.testUnitWriteInjectFlow,
-      function () {
-        let nodeUnderTest = helper.getNode('f93b472c.486038')
-        expect(nodeUnderTest.name).toBe('TestName')
-        expect(nodeUnderTest.injectType).toBe('write')
-        expect(nodeUnderTest.payload).toBe('123456')
-        expect(nodeUnderTest.topic).toBe('TestTopicInject')
-        expect(nodeUnderTest.startDelay).toBe(1)
-        done()
-      })
+        function () {
+          let nodeUnderTest = helper.getNode('f93b472c.486038')
+          expect(nodeUnderTest.name).toBe('TestName')
+          expect(nodeUnderTest.injectType).toBe('write')
+          expect(nodeUnderTest.payload).toBe('123456')
+          expect(nodeUnderTest.topic).toBe('TestTopicInject')
+          expect(nodeUnderTest.startDelay).toBe(1)
+          done()
+        })
     })
 
     it('should send a message with payload write node', function (done) {
@@ -282,7 +284,7 @@ describe('OPC UA Inject node Unit Testing', function () {
         n1.on('input', function (msg) {
           messages.push(msg)
 
-          if(messages.length >= 4) {
+          if (messages.length >= 4) {
             let dif0 = messages[1].payload.value - messages[0].payload.value
             let dif1 = messages[2].payload.value - messages[1].payload.value
             let dif2 = messages[3].payload.value - messages[2].payload.value
@@ -301,7 +303,7 @@ describe('OPC UA Inject node Unit Testing', function () {
 
     it('should send a message payload Date with invalid payloadType = null and empty payload', function (done) {
       const flow = Array.from(testFlows.testInjectFlow)
-      flow[1].payload = ""
+      flow[1].payload = ''
       flow[1].payloadType = null
       helper.load([inputNode], flow, function () {
         const n1 = helper.getNode('n2ijf1')

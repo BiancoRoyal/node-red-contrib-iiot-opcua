@@ -29,9 +29,15 @@ helper.init(require.resolve('node-red'))
 var browseRecursiveNodesToLoad = [injectNode, asoNode, listenerNode, connectorNode, resultFilterNode, inputNode, serverNode, responseNode]
 
 var testFlows = require('./flows/browser-recursive-e2e-flows')
-global.lastOpcuaPort = 54900
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Browser recursive with ASO nodes e2e Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 52300
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -53,9 +59,10 @@ describe('OPC UA Browser recursive with ASO nodes e2e Testing', function () {
   describe('Browser Recursive node', function () {
     it('should verify browser items as result of a recursive browse', function (done) {
       const flow = Array.from(testFlows.testBrowseRecursiveASOFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[3].port = port
-      flow[24].endpoint = "opc.tcp://localhost:" + port
+      flow[24].endpoint = 'opc.tcp://localhost:' + port
       helper.load(browseRecursiveNodesToLoad, flow, function () {
         let n1 = helper.getNode('helperNode')
         n1.on('input', function (msg) {

@@ -11,7 +11,7 @@
 
 'use strict'
 
-process.env.TEST = "true"
+process.env.TEST = 'true'
 
 // jest.setTimeout(30000)
 
@@ -28,9 +28,15 @@ helper.init(require.resolve('node-red'))
 var writeNodesToLoad = [injectNodeRedNode, functionNodeRedNode, inputNode]
 
 var testFlows = require('./flows/write-flows')
-global.lastOpcuaPort = 58200
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Write node Unit Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 58350
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -65,7 +71,7 @@ describe('OPC UA Write node Unit Testing', function () {
       helper.load(writeNodesToLoad, testFlows.testUnitWriteFlow, () => {
         let n1 = helper.getNode('34d2c6bc.43275b')
         if (n1) {
-          n1.functions.handleWriteError(new Error('Testing Error To Handle'), {payload: {}})
+          n1.functions.handleWriteError(new Error('Testing Error To Handle'), { payload: {} })
           done()
         }
       })

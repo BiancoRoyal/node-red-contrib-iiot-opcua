@@ -24,9 +24,15 @@ helper.init(require.resolve('node-red'))
 var crawlerNodesToLoad = [injectNode, functionNode, inputNode]
 
 var testFlows = require('./flows/crawler-flows')
-global.lastOpcuaPort = 56600
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Crawler node Unit Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57250
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -78,7 +84,6 @@ describe('OPC UA Crawler node Unit Testing', function () {
           done()
         })
     })
-
 
   })
 })

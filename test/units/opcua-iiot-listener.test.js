@@ -11,7 +11,7 @@
 
 'use strict'
 
-process.env.TEST = "true"
+process.env.TEST = 'true'
 
 // jest.setTimeout(30000)
 
@@ -22,15 +22,21 @@ var inputNode = require('../../src/opcua-iiot-listener')
 
 var helper = require('node-red-node-test-helper')
 var portHelper = require('./../helper/test-helper-extensions')
-const {NodeIdType} = require("node-opcua");
+const { NodeIdType } = require('node-opcua')
 helper.init(require.resolve('node-red'))
 
 var listenerNodesToLoad = [injectNode, functionNode, inputNode]
 
 var testFlows = require('./flows/listener-flows')
-global.lastOpcuaPort = 57200
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Listener monitoring node Unit Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57850
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -121,8 +127,11 @@ describe('OPC UA Listener monitoring node Unit Testing', function () {
           let nodeUnderTest = helper.getNode('bee3e3b0.ca1a08')
           expect(nodeUnderTest).toBeDefined()
           nodeUnderTest.iiot.stateService.send('END')
-          let testItem = {nodeId: {identifierType: NodeIdType.STRING, namespace: 0, identifier: 'TestItem'}}
-          nodeUnderTest.functions.setMonitoring({ itemToMonitor: testItem, on: (string, callback) => {console.log('Added ' + string)}})
+          let testItem = { nodeId: { identifierType: NodeIdType.STRING, namespace: 0, identifier: 'TestItem' } }
+          nodeUnderTest.functions.setMonitoring({
+            itemToMonitor: testItem,
+            on: (string, callback) => {console.log('Added ' + string)}
+          })
           done()
         })
     })

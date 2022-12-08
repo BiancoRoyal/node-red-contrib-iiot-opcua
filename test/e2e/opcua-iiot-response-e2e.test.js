@@ -30,10 +30,16 @@ helper.init(require.resolve('node-red'))
 var testResponseNodes = [injectNode, connectorNode, browserNode, crawlerNode, methodsNode, readNode, resultFilterNode, responseNode, serverNode]
 
 var testFlows = require('./flows/response-e2e-flows')
-global.lastOpcuaPort = 55900
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Response node e2e Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 55300
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -41,24 +47,23 @@ describe('OPC UA Response node e2e Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
   describe('Response node', function () {
     it('should get a message with payload on read not compressed', function (done) {
       const flow = Array.from(testFlows.testReadResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[17].port = port
-      flow[18].endpoint = "opc.tcp://localhost:" + port
+      flow[18].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n1rsf1')
@@ -72,9 +77,10 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get a message with payload on read compressed', function (done) {
       const flow = Array.from(testFlows.testReadResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[17].port = port
-      flow[18].endpoint = "opc.tcp://localhost:" + port
+      flow[18].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n2rsf1')
@@ -88,9 +94,10 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get a message with payload on read TestReadWrite filtered not compressed', function (done) {
       const flow = Array.from(testFlows.testReadResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[17].port = port
-      flow[18].endpoint = "opc.tcp://localhost:" + port
+      flow[18].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n4rsf1')
@@ -104,9 +111,10 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get a message with payload on read TestReadWrite filtered compressed', function (done) {
       const flow = Array.from(testFlows.testReadResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[17].port = port
-      flow[18].endpoint = "opc.tcp://localhost:" + port
+      flow[18].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n3rsf1')
@@ -120,9 +128,10 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get a message with payload on read Counter filtered not compressed', function (done) {
       const flow = Array.from(testFlows.testReadResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[17].port = port
-      flow[18].endpoint = "opc.tcp://localhost:" + port
+      flow[18].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n6rsf1')
@@ -136,9 +145,10 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get a message with payload on read Counter filtered compressed', function (done) {
       const flow = Array.from(testFlows.testReadResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[17].port = port
-      flow[18].endpoint = "opc.tcp://localhost:" + port
+      flow[18].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let nut = helper.getNode('n5rsf1')
@@ -160,7 +170,8 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get four messages with payload on read after browse with four response nodes', function (done) {
       const flow = Array.from(testFlows.testReadAllAttributesResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+const port = testingOpcUaPort
       flow[9].port = port
       flow[10].endpoint = "opc.tcp://localhost:" + port
 
@@ -184,9 +195,10 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get six messages with payload on browse with six response nodes on all possible setting of options', function (done) {
       const flow = Array.from(testFlows.testAllResponseTypesWithBrowser)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[1].port = port
-      flow[11].endpoint = "opc.tcp://localhost:" + port
+      flow[11].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let n1 = helper.getNode('n1rsf3')
@@ -209,7 +221,6 @@ describe('OPC UA Response node e2e Testing', function () {
       })
     })
 
-
     /*  Todo: fix broken Tests
     //  The crawler seems to have problems with a callback error
     //  Either the implementation of browser and crawler needs to be updated or the server, session and ASO
@@ -220,7 +231,8 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get six messages with payload on crawler with six response nodes on all possible setting of options', function (done) {
       const flow = Array.from(testFlows.testCrawlerResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+const port = testingOpcUaPort
       flow[10].port = port
       flow[13].endpoint = "opc.tcp://localhost:" + port
 
@@ -249,9 +261,10 @@ describe('OPC UA Response node e2e Testing', function () {
 
     it('should get three messages with payload on method call with three response nodes on all possible setting of options', function (done) {
       const flow = Array.from(testFlows.testMethodResponseFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testResponseNodes, flow, function () {
         let n1 = helper.getNode('n1rsf5')

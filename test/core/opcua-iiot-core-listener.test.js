@@ -11,13 +11,20 @@
 // jest.setTimeout(30000)
 
 describe('OPC UA Core Listener', function () {
-  global.lastOpcuaPort = 54500
   let assert = require('chai').assert
   let expect = require('chai').expect
-  let {default: coreListener} = require('../../src/core/opcua-iiot-core-listener')
+  let { default: coreListener } = require('../../src/core/opcua-iiot-core-listener')
   const TIME_IN_MILLISECONDS = 10000
 
+  let testingOpcUaPort = 0
+
+  beforeAll(() => {
+    testingOpcUaPort = 50820
+  })
+
   describe('Parameter', function () {
+
+
     it('should return Event Subscribtion Parameters', function (done) {
       let sut = coreListener.getEventSubscriptionParameters(TIME_IN_MILLISECONDS)
       expect(sut).to.be.an('object').that.has.property('requestedPublishingInterval', TIME_IN_MILLISECONDS)
@@ -100,7 +107,7 @@ describe('OPC UA Core Listener', function () {
       let sut = null
 
       for (field of allFields) {
-        sut = coreListener.collectAlarmFields(field, 'key', {text: 'Hello World!'})
+        sut = coreListener.collectAlarmFields(field, 'key', { text: 'Hello World!' })
         expect(sut).to.be.an('object').that.has.property('field', field)
         expect(sut).to.be.an('object').that.has.property('dataType', 'key')
         expect(sut.value).to.be.an('object').that.has.property('text', 'Hello World!')

@@ -28,9 +28,15 @@ helper.init(require.resolve('node-red'))
 var eventNodesToLoad = [injectNode, eventNode, connectorNode, inputNode, serverNode, responseNode]
 
 var testFlows = require('./flows/event-listener-e2e-flows')
-global.lastOpcuaPort = 55200
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Listener event node e2e Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 53200
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -54,9 +60,10 @@ describe('OPC UA Listener event node e2e Testing', function () {
 
     it('should get a message with nodetype events after base event node subscribe', function (done) {
       const flow = Array.from(testFlows.testListenerEventFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[8].port = port
-      flow[9].endpoint = "opc.tcp://localhost:" + port
+      flow[9].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(eventNodesToLoad, flow, function () {
         msgCounter = 0
@@ -75,9 +82,10 @@ describe('OPC UA Listener event node e2e Testing', function () {
 
     it('should get a message with payload test after base event node subscribe', function (done) {
       const flow = Array.from(testFlows.testListenerEventFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[8].port = port
-      flow[9].endpoint = "opc.tcp://localhost:" + port
+      flow[9].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(eventNodesToLoad, flow, function () {
         msgCounter = 0
@@ -96,9 +104,10 @@ describe('OPC UA Listener event node e2e Testing', function () {
 
     it('should get a message with payload after inject unsubscribe', function (done) {
       const flow = Array.from(testFlows.testListenerEventFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[8].port = port
-      flow[9].endpoint = "opc.tcp://localhost:" + port
+      flow[9].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(eventNodesToLoad, flow, function () {
         msgCounter = 0
@@ -117,9 +126,10 @@ describe('OPC UA Listener event node e2e Testing', function () {
 
     it('should get a message with payload after base event unsubscribe', function (done) {
       const flow = Array.from(testFlows.testListenerEventFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[8].port = port
-      flow[9].endpoint = "opc.tcp://localhost:" + port
+      flow[9].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(eventNodesToLoad, flow, function () {
         msgCounter = 0
@@ -138,9 +148,10 @@ describe('OPC UA Listener event node e2e Testing', function () {
 
     it('should get a message with payload after base event subscribe', function (done) {
       const flow = Array.from(testFlows.listenToEventsOnServer)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[5].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(eventNodesToLoad, flow, function () {
         let n1 = helper.getNode('nh1ev')
@@ -155,9 +166,10 @@ describe('OPC UA Listener event node e2e Testing', function () {
 
     it('should get a compressed response with payload after base event subscribe', function (done) {
       const flow = Array.from(testFlows.listenToEventsWithResponseOnServer)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[9].port = port
-      flow[12].endpoint = "opc.tcp://localhost:" + port
+      flow[12].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(eventNodesToLoad, flow, function () {
         let n2 = helper.getNode('nh2evf2')

@@ -29,9 +29,15 @@ var listenerNodesToLoad = [injectNode, browserNode, connectorNode, inputNode, re
 
 var testFlows = require('./flows/listener-browser-e2e-flows')
 
-global.lastOpcuaPort = 55400
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Listener monitoring via Browser node e2e Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 53800
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -54,10 +60,10 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
 
     it('should have a message browser', function (done) {
       const flow = Array.from(testFlows.simpleBrowserAboFlowWithoutListenerInject)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[14].port = port
-      flow[15].endpoint = "opc.tcp://localhost:" + port
-
+      flow[15].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(listenerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n2abo')
@@ -67,150 +73,155 @@ describe('OPC UA Listener monitoring via Browser node e2e Testing', function () 
       })
     })
 
+    /*
 
-/*
+        let msgCounter = 0
+        it('should verify a message from browse node on subscribe recursive', function (done) {
+          testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+    const port = testingOpcUaPort
+          testFlows.recursiveBrowserAboFlow[14].port = port
+          testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
+          const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
-    let msgCounter = 0
-    it('should verify a message from browse node on subscribe recursive', function (done) {
-      const port = portHelper.getPort()
-      testFlows.recursiveBrowserAboFlow[14].port = port
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
-      const flow = Array.from(testFlows.recursiveBrowserAboFlow)
+          helper.load(listenerNodesToLoad, flow, function () {
+            msgCounter = 0
+            let n2 = helper.getNode('n2abo')
+            n2.on('input', function (msg) {
+              msgCounter++
+              if (msgCounter === 1) {
+                expect(msg.payload.browserResults).toBeDefined()
+                expect(msg.payload.browserResults.length).toBe(95)
+              }
 
-      helper.load(listenerNodesToLoad, flow, function () {
-        msgCounter = 0
-        let n2 = helper.getNode('n2abo')
-        n2.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.payload.browserResults).toBeDefined()
-            expect(msg.payload.browserResults.length).toBe(95)
-          }
+              if (msgCounter === 2) {
+                expect(msg.payload.browserResults).toBeDefined()
+                expect(msg.payload).toBeDefined()
+                expect(msg.topic).toBe('unsub')
+              }
 
-          if (msgCounter === 2) {
-            expect(msg.payload.browserResults).toBeDefined()
-            expect(msg.payload).toBeDefined()
-            expect(msg.topic).toBe('unsub')
-          }
-
-          if (msgCounter === 3) {
-            expect(msg.payload.browserResults).toBeDefined()
-            expect(msg.payload).toBeDefined()
-            expect(msg.topic).toBe('unsub')
-            setTimeout(done, 3000)
-          }
+              if (msgCounter === 3) {
+                expect(msg.payload.browserResults).toBeDefined()
+                expect(msg.payload).toBeDefined()
+                expect(msg.topic).toBe('unsub')
+                setTimeout(done, 3000)
+              }
+            })
+          })
         })
-      })
-    })
 
-    it('should verify a compressed message from response after browser node on subscribe recursive', function (done) {
-      const port = portHelper.getPort()
-      testFlows.recursiveBrowserAboFlow[14].port = port
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
-      const flow = Array.from(testFlows.recursiveBrowserAboFlow)
+        it('should verify a compressed message from response after browser node on subscribe recursive', function (done) {
+          testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+    const port = testingOpcUaPort
+          testFlows.recursiveBrowserAboFlow[14].port = port
+          testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
+          const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
-      helper.load(listenerNodesToLoad, flow, function () {
-        msgCounter = 0
-        let n3 = helper.getNode('n3abo')
-        n3.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.payload).toBeDefined()
-            expect(msg.payload.browserResults.length).toBe(95)
-            expect(msg.payload.recursiveDepth).toBe(0)
-          }
+          helper.load(listenerNodesToLoad, flow, function () {
+            msgCounter = 0
+            let n3 = helper.getNode('n3abo')
+            n3.on('input', function (msg) {
+              msgCounter++
+              if (msgCounter === 1) {
+                expect(msg.payload).toBeDefined()
+                expect(msg.payload.browserResults.length).toBe(95)
+                expect(msg.payload.recursiveDepth).toBe(0)
+              }
 
-          if (msgCounter === 2) {
-            expect(msg.payload).toBeDefined()
-            expect(msg.payload.browserResults).toBeDefined()
-            expect(msg.payload.recursiveDepth).toBe(0)
-            setTimeout(done, 3000)
-          }
+              if (msgCounter === 2) {
+                expect(msg.payload).toBeDefined()
+                expect(msg.payload.browserResults).toBeDefined()
+                expect(msg.payload.recursiveDepth).toBe(0)
+                setTimeout(done, 3000)
+              }
+            })
+          })
         })
-      })
-    })
 
-    it('should verify a message from listener node on subscribe recursive', function (done) {
-      const port = portHelper.getPort()
-      testFlows.recursiveBrowserAboFlow[14].port = port
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
-      const flow = Array.from(testFlows.recursiveBrowserAboFlow)
+        it('should verify a message from listener node on subscribe recursive', function (done) {
+          testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+    const port = testingOpcUaPort
+          testFlows.recursiveBrowserAboFlow[14].port = port
+          testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
+          const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
-      helper.load(listenerNodesToLoad, flow, function () {
-        msgCounter = 0
-        let n4 = helper.getNode('n4abo')
-        n4.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.payload).toBeDefined()
-          }
+          helper.load(listenerNodesToLoad, flow, function () {
+            msgCounter = 0
+            let n4 = helper.getNode('n4abo')
+            n4.on('input', function (msg) {
+              msgCounter++
+              if (msgCounter === 1) {
+                expect(msg.payload).toBeDefined()
+              }
 
-          if (msgCounter === 2) {
-            expect(msg.payload).toBeDefined()
-            setTimeout(done, 3000)
-          }
+              if (msgCounter === 2) {
+                expect(msg.payload).toBeDefined()
+                setTimeout(done, 3000)
+              }
+            })
+          })
         })
-      })
-    })
 
-    it('should verify a compressed message from response after listener node on subscribe recursive as single result', function (done) {
-      const port = portHelper.getPort()
-      testFlows.recursiveBrowserAboFlow[14].port = port
-      testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
-      const flow = Array.from(testFlows.recursiveBrowserAboFlow)
+        it('should verify a compressed message from response after listener node on subscribe recursive as single result', function (done) {
+          testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+    const port = testingOpcUaPort
+          testFlows.recursiveBrowserAboFlow[14].port = port
+          testFlows.recursiveBrowserAboFlow[15].endpoint = "opc.tcp://localhost:" + port
+          const flow = Array.from(testFlows.recursiveBrowserAboFlow)
 
-      helper.load(listenerNodesToLoad, flow, function () {
-        msgCounter = 0
-        let n5 = helper.getNode('n5abo')
-        n5.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.payload).toBeDefined()
-            setTimeout(done, 3000)
-          }
+          helper.load(listenerNodesToLoad, flow, function () {
+            msgCounter = 0
+            let n5 = helper.getNode('n5abo')
+            n5.on('input', function (msg) {
+              msgCounter++
+              if (msgCounter === 1) {
+                expect(msg.payload).toBeDefined()
+                setTimeout(done, 3000)
+              }
+            })
+          })
         })
-      })
-    })
 
-    it('should subscribe from recursive browse from multiple results', function (done) {
-      const port = portHelper.getPort()
-      testFlows.feedListenerWithRecursiveBrowse[1].singleBrowseResult = false
-      testFlows.feedListenerWithRecursiveBrowse[8].port = port
-      testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:" + port
-      const flow = Array.from(testFlows.feedListenerWithRecursiveBrowse)
+        it('should subscribe from recursive browse from multiple results', function (done) {
+          testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+    const port = testingOpcUaPort
+          testFlows.feedListenerWithRecursiveBrowse[1].singleBrowseResult = false
+          testFlows.feedListenerWithRecursiveBrowse[8].port = port
+          testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:" + port
+          const flow = Array.from(testFlows.feedListenerWithRecursiveBrowse)
 
-      helper.load(listenerNodesToLoad, flow, function () {
-        msgCounter = 0
-        let n2 = helper.getNode('n2brli')
-        n2.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.payload).toBeDefined()
-            setTimeout(done, 3000)
-          }
+          helper.load(listenerNodesToLoad, flow, function () {
+            msgCounter = 0
+            let n2 = helper.getNode('n2brli')
+            n2.on('input', function (msg) {
+              msgCounter++
+              if (msgCounter === 1) {
+                expect(msg.payload).toBeDefined()
+                setTimeout(done, 3000)
+              }
+            })
+          })
         })
-      })
-    })
 
-    it('should subscribe from recursive browse from single result', function (done) {
-      const port = portHelper.getPort()
-      testFlows.feedListenerWithRecursiveBrowse[1].singleBrowseResult = true
-      testFlows.feedListenerWithRecursiveBrowse[8].port = port
-      testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:" + port
-      const flow = Array.from(testFlows.feedListenerWithRecursiveBrowse)
+        it('should subscribe from recursive browse from single result', function (done) {
+          testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+    const port = testingOpcUaPort
+          testFlows.feedListenerWithRecursiveBrowse[1].singleBrowseResult = true
+          testFlows.feedListenerWithRecursiveBrowse[8].port = port
+          testFlows.feedListenerWithRecursiveBrowse[9].endpoint = "opc.tcp://localhost:" + port
+          const flow = Array.from(testFlows.feedListenerWithRecursiveBrowse)
 
-      helper.load(listenerNodesToLoad, flow, function () {
-        msgCounter = 0
-        let n2 = helper.getNode('n2brli')
-        n2.on('input', function (msg) {
-          msgCounter++
-          if (msgCounter === 1) {
-            expect(msg.payload).toBeDefined()
-            setTimeout(done, 3000)
-          }
+          helper.load(listenerNodesToLoad, flow, function () {
+            msgCounter = 0
+            let n2 = helper.getNode('n2brli')
+            n2.on('input', function (msg) {
+              msgCounter++
+              if (msgCounter === 1) {
+                expect(msg.payload).toBeDefined()
+                setTimeout(done, 3000)
+              }
+            })
+          })
         })
-      })
-    })
-*/
+    */
   })
 })

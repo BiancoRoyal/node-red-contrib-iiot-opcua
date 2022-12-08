@@ -21,10 +21,16 @@ var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/node-flows')
-global.lastOpcuaPort = 57400
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Node node Unit Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57850
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -32,15 +38,13 @@ describe('OPC UA Node node Unit Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
@@ -57,7 +61,8 @@ describe('OPC UA Node node Unit Testing', function () {
           'name': 'TestReadWrite',
           'topic': 'TestTopicNode',
           'showErrors': false,
-          'wires': [[]]}
+          'wires': [[]]
+        }
         ],
         function () {
           let nodeUnderTest = helper.getNode('3a234e92.cbc0f2')
@@ -86,7 +91,11 @@ describe('OPC UA Node node Unit Testing', function () {
         let n4 = helper.getNode('n4nf1')
         let n3 = helper.getNode('n3nf1')
         n4.on('input', function (msg) {
-          expect(msg.payload.addressSpaceItems).toMatchObject([{'name': 'TestReadWrite', 'nodeId': 'ns=2;s=TestReadWrite', 'datatypeName': 'String'}])
+          expect(msg.payload.addressSpaceItems).toMatchObject([{
+            'name': 'TestReadWrite',
+            'nodeId': 'ns=2;s=TestReadWrite',
+            'datatypeName': 'String'
+          }])
           expect(msg.topic).toBe('TestTopicNode')
           done()
         })
@@ -111,7 +120,7 @@ describe('OPC UA Node node Unit Testing', function () {
         let n4 = helper.getNode('n4')
         let n3 = helper.getNode('n3')
         n4.on('input', function (msg) {
-          expect(msg.payload.valuesToWrite).toMatchObject([{value: 1234}])
+          expect(msg.payload.valuesToWrite).toMatchObject([{ value: 1234 }])
           done()
         })
         n3.receive()
@@ -123,7 +132,7 @@ describe('OPC UA Node node Unit Testing', function () {
         let n4 = helper.getNode('n4nf2')
         let n3 = helper.getNode('n3nf2')
         n4.on('input', function (msg) {
-          expect(msg.payload.valuesToWrite).toMatchObject([{value: 1234}])
+          expect(msg.payload.valuesToWrite).toMatchObject([{ value: 1234 }])
           expect(msg.topic).toBe('TestTopicNode')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',
@@ -141,7 +150,7 @@ describe('OPC UA Node node Unit Testing', function () {
         let n4 = helper.getNode('n4nf3')
         let n3 = helper.getNode('n3nf3')
         n4.on('input', function (msg) {
-          expect(msg.payload.valuesToWrite).toMatchObject([{value: 2345}])
+          expect(msg.payload.valuesToWrite).toMatchObject([{ value: 2345 }])
           expect(msg.payload.value).toBe('')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'TestReadWrite',

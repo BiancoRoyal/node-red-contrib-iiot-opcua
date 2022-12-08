@@ -24,9 +24,15 @@ helper.init(require.resolve('node-red'))
 var browseNodesToLoad = [injectNode, functionNode, browserNode]
 
 var testFlows = require('./flows/browser-flows')
-global.lastOpcuaPort = 56400
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Browser node Unit Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 57050
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()

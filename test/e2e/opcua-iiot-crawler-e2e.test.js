@@ -26,9 +26,15 @@ helper.init(require.resolve('node-red'))
 var crawlerNodesToLoad = [injectNode, connectorNode, inputNode, serverNode, responseNode]
 
 var testFlows = require('./flows/crawler-e2e-flows')
-global.lastOpcuaPort = 55100
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Crawler node Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 52900
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -50,9 +56,10 @@ describe('OPC UA Crawler node Testing', function () {
   describe('Crawler node', function () {
     it('should verify crawler items as result', function (done) {
       const flow = Array.from(testFlows.testCrawlerFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[5].port = port
-      flow[6].endpoint = "opc.tcp://localhost:" + port
+      flow[6].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f1')
@@ -69,9 +76,10 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify crawler items as just values result', function (done) {
       const flow = Array.from(testFlows.testCrawlerJustValueFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[5].port = port
-      flow[6].endpoint = "opc.tcp://localhost:" + port
+      flow[6].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f2')
@@ -87,9 +95,10 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify crawler items as just values as single result', function (done) {
       const flow = Array.from(testFlows.testCrawlerJustValueSingleFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[5].port = port
-      flow[6].endpoint = "opc.tcp://localhost:" + port
+      flow[6].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f3')
@@ -105,9 +114,10 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify filtered crawler items as just values as single result', function (done) {
       const flow = Array.from(testFlows.testCrawlerJustValueSingleFilteredFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[5].port = port
-      flow[6].endpoint = "opc.tcp://localhost:" + port
+      flow[6].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(crawlerNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4f4')
@@ -123,9 +133,10 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify filtered crawler items as filtered results', function (done) {
       const flow = Array.from(testFlows.testCrawlerWithFilter)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[5].port = port
-      flow[6].endpoint = "opc.tcp://localhost:" + port
+      flow[6].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(crawlerNodesToLoad, flow, function () {
         let h1f = helper.getNode('n4f5')
@@ -149,7 +160,8 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should verify filtered crawler items without ns=0', function (done) {
       const flow = Array.from(testFlows.testCrawlerWithFilterNS0)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+const port = testingOpcUaPort
       flow[5].port = port
       flow[6].endpoint = "opc.tcp://localhost:" + port
 
@@ -167,7 +179,8 @@ describe('OPC UA Crawler node Testing', function () {
 
     it('should filter all basic filter types of crawler result', function (done) {
       const flow = Array.from(testFlows.testCrawlerWithAllBasicFilterTypes)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+const port = testingOpcUaPort
       flow[7].port = port
       flow[8].endpoint = "opc.tcp://localhost:" + port
 

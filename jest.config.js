@@ -58,9 +58,9 @@ module.exports = {
   // globalTeardown: null,
 
   // A set of global variables that need to be available in all test environments
-  globals: {
-    lastOpcuaPort: 53300
-  },
+  // globals: {
+  //   lastOpcuaPort: 50100
+  // },
 
   // An array of directory names to be searched recursively up from the requiring module's location
   moduleDirectories: [
@@ -199,9 +199,9 @@ module.exports = {
 
   logHeapUsage: true,
 
-  maxConcurrency: 1,
+  maxConcurrency: 11,
 
-  maxWorkers: 1,
+  maxWorkers: 3,
 
   testTimeout: 40000
 }

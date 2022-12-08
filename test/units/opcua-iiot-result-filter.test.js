@@ -11,7 +11,7 @@
 
 'use strict'
 
-process.env.TEST = "true"
+process.env.TEST = 'true'
 
 // jest.setTimeout(30000)
 
@@ -25,10 +25,16 @@ const { StatusCodes } = require('node-opcua')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/result-filter-flows')
-global.lastOpcuaPort = 57800
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Result Filter node Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 58250
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -36,15 +42,13 @@ describe('OPC UA Result Filter node Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
@@ -90,48 +94,59 @@ describe('OPC UA Result Filter node Testing', function () {
     })
   })
 
-    it('should have nodeId, payload and topic as result', function (done) {
-      helper.load([injectNode, functionNode, inputNode], testFlows.testUnitReadTestFlowPayloadFlow, function () {
-        let n6 = helper.getNode('n6rff1')
-        let n5 = helper.getNode('n5rff1')
-        n6.on('input', function (msg) {
-          expect(msg.payload.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
-          expect(msg.payload.value).toBe(16.04)
-          expect(msg.topic).toBe('TestTopic')
-          done()
-        })
-        n5.receive({
-          topic: "TestTopic",
-          payload: {
-            "node": "ns=1;s=TemperatureAnalogItem",
-            "nodeId": "ns=1;s=TemperatureAnalogItem",
-            "nodetype": "read",
-            "nodeClass": 2,
-            "browseName": {"namespaceIndex": 0, "name": "TemperatureAnalogItem"},
-            "displayName": {"text": "TemperatureAnalogItem"},
-            "description": {},
-            "writeMask": 0,
-            "userWriteMask": 0,
-            "value": 16.041979,
-            "dataType": "Double",
-            "valueRank": -1,
-            "arrayDimensions": {},
-            "accessLevel": 3,
-            "userAccessLevel": 3,
-            "minimumSamplingInterval": 0,
-            "historizing": false,
-            "statusCode": {"value": 0, "description": "No Error", "name": "Good"}
-          }
-        })
+  it('should have nodeId, payload and topic as result', function (done) {
+    helper.load([injectNode, functionNode, inputNode], testFlows.testUnitReadTestFlowPayloadFlow, function () {
+      let n6 = helper.getNode('n6rff1')
+      let n5 = helper.getNode('n5rff1')
+      n6.on('input', function (msg) {
+        expect(msg.payload.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
+        expect(msg.payload.value).toBe(16.04)
+        expect(msg.topic).toBe('TestTopic')
+        done()
+      })
+      n5.receive({
+        topic: 'TestTopic',
+        payload: {
+          'node': 'ns=1;s=TemperatureAnalogItem',
+          'nodeId': 'ns=1;s=TemperatureAnalogItem',
+          'nodetype': 'read',
+          'nodeClass': 2,
+          'browseName': { 'namespaceIndex': 0, 'name': 'TemperatureAnalogItem' },
+          'displayName': { 'text': 'TemperatureAnalogItem' },
+          'description': {},
+          'writeMask': 0,
+          'userWriteMask': 0,
+          'value': 16.041979,
+          'dataType': 'Double',
+          'valueRank': -1,
+          'arrayDimensions': {},
+          'accessLevel': 3,
+          'userAccessLevel': 3,
+          'minimumSamplingInterval': 0,
+          'historizing': false,
+          'statusCode': { 'value': 0, 'description': 'No Error', 'name': 'Good' }
+        }
       })
     })
+  })
 
   describe('Result Filter node after listener', function () {
     it('should get a message with payload', function (done) {
       helper.load([injectNode, functionNode, inputNode], testFlows.testUnitListenTestFlowPayloadFlow, function () {
         let n2 = helper.getNode('n2rff2')
         n2.on('input', function (msg) {
-          expect(msg.payload).toMatchObject({'value': {'dataType': 'Double', 'arrayType': 'Scalar', 'value': 16.041979}, 'statusCode': {'value': 0, 'description': 'No Error', 'name': 'Good'}, 'sourceTimestamp': '2018-03-13T21:43:10.470Z', 'sourcePicoseconds': 0, 'serverTimestamp': '2018-03-13T21:43:11.051Z', 'serverPicoseconds': 3})
+          expect(msg.payload).toMatchObject({
+            'value': {
+              'dataType': 'Double',
+              'arrayType': 'Scalar',
+              'value': 16.041979
+            },
+            'statusCode': { 'value': 0, 'description': 'No Error', 'name': 'Good' },
+            'sourceTimestamp': '2018-03-13T21:43:10.470Z',
+            'sourcePicoseconds': 0,
+            'serverTimestamp': '2018-03-13T21:43:11.051Z',
+            'serverPicoseconds': 3
+          })
           done()
         })
       })
@@ -194,34 +209,34 @@ describe('OPC UA Result Filter node Testing', function () {
             statusCodes: [
               {
                 value: 0,
-                description: "Good",
-                name: "Good"
+                description: 'Good',
+                name: 'Good'
               }
             ],
             nodesToWrite: [
               {
-                nodeId: "ns=1;s=TestReadWrite",
+                nodeId: 'ns=1;s=TestReadWrite',
                 attributeId: 13,
                 indexRange: null,
                 value: {
                   value: {
-                    dataType: "Double",
+                    dataType: 'Double',
                     value: 22980.7896,
-                    arrayType: "Scalar"
+                    arrayType: 'Scalar'
                   }
                 }
               }
             ],
             msg: {
-              _msgid: "11cc64dd.bde67b",
-              topic: "",
-              nodetype: "inject",
-              injectType: "write",
+              _msgid: '11cc64dd.bde67b',
+              topic: '',
+              nodetype: 'inject',
+              injectType: 'write',
               addressSpaceItems: [
                 {
-                  name: "TestReadWrite",
-                  nodeId: "ns=1;s=TestReadWrite",
-                  datatypeName: "Double"
+                  name: 'TestReadWrite',
+                  nodeId: 'ns=1;s=TestReadWrite',
+                  datatypeName: 'Double'
                 }
               ],
               payload: 1539981968143,
@@ -334,11 +349,11 @@ describe('OPC UA Result Filter node Testing', function () {
     })
 
     it('should return given object on missing datatype input to convertResultValue', function (done) {
-      testFlows.testUnitWriteTestValueCheckFlowPayloadFlow[5].datatype = "String"
+      testFlows.testUnitWriteTestValueCheckFlowPayloadFlow[5].datatype = 'String'
       helper.load([injectNode, functionNode, inputNode], testFlows.testUnitWriteTestValueCheckFlowPayloadFlow, function () {
         let n5 = helper.getNode('n5rff5')
         expect(n5.functions.convertResultValue({ value: 'Test' })).toBe('Test')
-        testFlows.testUnitWriteTestValueCheckFlowPayloadFlow[5].datatype = "Double"
+        testFlows.testUnitWriteTestValueCheckFlowPayloadFlow[5].datatype = 'Double'
         done()
       })
     })
@@ -354,7 +369,7 @@ describe('OPC UA Result Filter node Testing', function () {
     it('should return min value with datatype input to convertResultValue', function (done) {
       helper.load([injectNode, functionNode, inputNode], testFlows.testUnitWriteTestValueCheckFlowPayloadFlow, function () {
         let n5 = helper.getNode('n5rff5')
-        expect(n5.functions.convertResultValue({value: {value: 0.6778, datatype: 'Double'}})).toBe(0.30)
+        expect(n5.functions.convertResultValue({ value: { value: 0.6778, datatype: 'Double' } })).toBe(0.30)
         done()
       })
     })

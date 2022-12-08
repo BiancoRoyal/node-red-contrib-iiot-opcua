@@ -31,10 +31,16 @@ var readNodesToLoad = [injectNode, functionNode, connectorNode, inputNode, respo
 var readNodesToLoadWithFlexServer = [injectNode, functionNode, connectorNode, inputNode, responseNode, flexServerNode]
 
 var testFlows = require('./flows/read-e2e-flows')
-global.lastOpcuaPort = 55800
 const { AttributeIds } = require('node-opcua')
 
+let testingOpcUaPort = 0
+
 describe('OPC UA Read node e2e Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 55000
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -53,16 +59,17 @@ describe('OPC UA Read node e2e Testing', function () {
     })
   })
 
-  describe('Read node',  function () {
-    it('should get a message with payload for attributeId All',  function (done) {
+  describe('Read node', function () {
+    it('should get a message with payload for attributeId All', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = 0
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'ServerStatus',
@@ -76,14 +83,15 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results for attributeId All', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = 0
 
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
-        n4.on('input',  function (msg) {
+        n4.on('input', function (msg) {
           expect(msg.payload.value[0].nodeId).toBe('ns=0;i=2256')
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(0)
@@ -94,18 +102,19 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId 0', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = 0
 
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
-        n6.on('input',  function (msg) {
+        n6.on('input', function (msg) {
           expect(msg.payload.entryStatus).toMatchObject({
-            "good": 1,
-            "bad": 0,
-            "other": 0
+            'good': 1,
+            'bad': 0,
+            'other': 0
           })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(0)
@@ -116,362 +125,382 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read results with response for attributeId 0 from flex server', function (done) {
       const flow = testFlows.testReadFlexServerFlow
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = 0
       helper.load(readNodesToLoadWithFlexServer, flow, function () {
         let n6 = helper.getNode('n6rdf3')
-        n6.on('input',  function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+        n6.on('input', function (msg) {
+          expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(0)
-         done()
+          done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Node-ID', function (done) {
       const flow = Array.from(Array.from(testFlows.testReadFlow))
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       helper.load(readNodesToLoad, flow, function () {
-      flow[3].attributeId = AttributeIds.NodeId
+        flow[3].attributeId = AttributeIds.NodeId
         let n2 = helper.getNode('n2rdf1')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'ServerStatus',
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-         done()
+          done()
         })
       })
     })
 
     it('should have read results for attributeId Node-ID', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
-        n4.on('input',  function (msg) {
+        n4.on('input', function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.NodeId)
-         done()
+          done()
         })
       })
     })
 
     it('should have read results with response for attributeId Node-ID', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.NodeId
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
-        n6.on('input',  function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+        n6.on('input', function (msg) {
+          expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.NodeId)
-         done()
+          done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Node-Class', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'ServerStatus',
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-         done()
+          done()
         })
       })
     })
 
     it('should have read results for attributeId Node-Class', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
-        n4.on('input',  function (msg) {
+        n4.on('input', function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.NodeClass)
-         done()
+          done()
         })
       })
     })
 
     it('should have read results with response for attributeId Node-Class', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.NodeClass
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
-        n6.on('input',  function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+        n6.on('input', function (msg) {
+          expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.NodeClass)
-         done()
+          done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Browse-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'ServerStatus',
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-         done()
+          done()
         })
       })
     })
 
     it('should have read results for attributeId Browse-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
-        n4.on('input',  function (msg) {
+        n4.on('input', function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.BrowseName)
-         done()
+          done()
         })
       })
     })
 
     it('should have read results with response for attributeId Browse-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.BrowseName
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
-        n6.on('input',  function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+        n6.on('input', function (msg) {
+          expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.BrowseName)
-         done()
+          done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Display-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'ServerStatus',
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-         done()
+          done()
         })
       })
     })
 
     it('should have read results for attributeId Display-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
-        n4.on('input',  function (msg) {
+        n4.on('input', function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.DisplayName)
-         done()
+          done()
         })
       })
     })
 
     it('should have read results with response for attributeId Display-Name', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.DisplayName
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
-        n6.on('input',  function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+        n6.on('input', function (msg) {
+          expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.DisplayName)
-         done()
+          done()
         })
       })
     })
 
     it('should get a message with payload for attributeId Value', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'ServerStatus',
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-         done()
+          done()
         })
       })
     })
 
     it('should have read results for attributeId Value', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
-        n4.on('input',  function (msg) {
+        n4.on('input', function (msg) {
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.Value)
-         done()
+          done()
         })
       })
     })
 
     it('should have read results with response for attributeId Value', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = AttributeIds.Value
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
-        n6.on('input',  function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+        n6.on('input', function (msg) {
+          expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.attributeId).toBe(AttributeIds.Value)
-         done()
+          done()
         })
       })
     })
 
     it('should get a message with payload for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = 130
       helper.load(readNodesToLoad, flow, function () {
         let n2 = helper.getNode('n2rdf1')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           expect(msg.payload.value).toBe('testpayload')
           expect(msg.payload.addressSpaceItems).toMatchObject([{
             'name': 'ServerStatus',
             'nodeId': 'ns=0;i=2256',
             'datatypeName': ''
           }])
-         done()
+          done()
         })
       })
     })
 
     it('should have read results for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = 130
       helper.load(readNodesToLoad, flow, function () {
         let n4 = helper.getNode('n4rdf1')
-        n4.on('input',  function (msg) {
+        n4.on('input', function (msg) {
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.value[0]).toBeDefined()
           expect(msg.payload.historyStart).toBeDefined()
           expect(msg.payload.historyEnd).toBeDefined()
           expect(msg.payload.attributeId).toBe(130)
-         done()
+          done()
         })
       })
     })
 
     it('should have read results with response for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       flow[3].attributeId = 130
       helper.load(readNodesToLoad, flow, function () {
         let n6 = helper.getNode('n6rdf1')
-        n6.on('input',  function (msg) {
-          expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+        n6.on('input', function (msg) {
+          expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
           expect(msg.topic).toBe('TestTopicRead')
           expect(msg.payload.readtype).toBe('HistoryValue')
           expect(msg.payload.historyStart).toBeDefined()
           expect(msg.payload.historyEnd).toBeDefined()
           expect(msg.payload.attributeId).toBe(130)
-         done()
+          done()
         })
       })
     })
 
     it('should have read with an injected time range results with response for attributeId History', function (done) {
       let flow = Array.from(testFlows.testReadHistoryRangeFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       helper.load(readNodesToLoad, flow, function () {
         let msgCounter = 0
         let n1 = helper.getNode('nr1h')
-        n1.on('input',  function (msg) {
+        n1.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+            expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
             expect(msg.topic).toBe('TestTopicRead1')
             expect(msg.payload.readtype).toBe('HistoryValue')
             expect(msg.payload.historyStart).toBeDefined()
@@ -480,13 +509,13 @@ describe('OPC UA Read node e2e Testing', function () {
           }
 
           if (msgCounter === 2) {
-            expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+            expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
             expect(msg.topic).toBe('TestTopicRead2')
             expect(msg.payload.readtype).toBe('HistoryValue')
             expect(msg.payload.historyStart).toBeDefined()
             expect(msg.payload.historyEnd).toBeDefined()
             expect(msg.payload.attributeId).toBe(130)
-           done()
+            done()
           }
         })
       })
@@ -494,16 +523,17 @@ describe('OPC UA Read node e2e Testing', function () {
 
     it('should have read with an injected time range results with compressed response for attributeId History', function (done) {
       const flow = Array.from(testFlows.testReadHistoryRangeFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[7].port = port
-      flow[8].endpoint = "opc.tcp://localhost:" + port
+      flow[8].endpoint = 'opc.tcp://localhost:' + port
       helper.load(readNodesToLoad, flow, function () {
         let msgCounter = 0
         let n2 = helper.getNode('nr2h')
-        n2.on('input',  function (msg) {
+        n2.on('input', function (msg) {
           msgCounter++
           if (msgCounter === 1) {
-            expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+            expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
             expect(msg.topic).toBe('TestTopicRead1')
             expect(msg.payload.historyStart).toBeDefined()
             expect(msg.payload.historyEnd).toBeDefined()
@@ -511,12 +541,12 @@ describe('OPC UA Read node e2e Testing', function () {
           }
 
           if (msgCounter === 2) {
-            expect(msg.payload.entryStatus).toMatchObject({ "good": 1, "bad": 0, "other": 0 })
+            expect(msg.payload.entryStatus).toMatchObject({ 'good': 1, 'bad': 0, 'other': 0 })
             expect(msg.topic).toBe('TestTopicRead2')
             expect(msg.payload.historyStart).toBeDefined()
             expect(msg.payload.historyEnd).toBeDefined()
             expect(msg.payload.attributeId).toBeUndefined()
-           done()
+            done()
           }
         })
       })

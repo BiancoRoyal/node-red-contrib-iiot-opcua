@@ -20,44 +20,50 @@ var serverAsoNode = require('../../src/opcua-iiot-server-aso')
 var serverAsoFlowNodes = [injectNode, functionNode, serverAsoNode]
 
 var testFlows = require('./flows/server-aso-flows')
-global.lastOpcuaPort = 58000
 
 var helper = require('node-red-node-test-helper')
 var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
-beforeAll(function (done) {
-  helper.startServer(function () {
-    done()
-  })
-})
+let testingOpcUaPort = 0
 
-afterEach(function (done) {
-  helper.unload().then(function () {
-    done()
-  }).catch(function () {
-    done()
-  })
-})
+describe('OPC UA Server ASO node Unit Testing', function () {
 
-afterAll(function (done) {
-  helper.stopServer(function () {
-    done()
+  beforeAll(() => {
+    testingOpcUaPort = 58350
   })
-})
 
-describe('Address Space Operation node Unit Testing', function () {
-  it('should be loaded', function (done) {
-    helper.load(serverAsoFlowNodes, testFlows.testUnitServerASOFlow,
-    function () {
-      let nodeUnderTest = helper.getNode('7cb85115.7635')
-      expect(nodeUnderTest.name).toBe('Folder')
-      expect(nodeUnderTest.nodeId.toString()).toBe('ns=1;s=TestVariables')
-      expect(nodeUnderTest.datatype).toBe('Double')
-      expect(nodeUnderTest.value).toBe('1.0')
-      expect(nodeUnderTest.browsename).toBe('TestVariables')
-      expect(nodeUnderTest.displayname).toBe('Test Variables')
+  beforeEach(function (done) {
+    helper.startServer(function () {
       done()
+    })
+  })
+
+  afterEach(function (done) {
+    helper.unload().then(function () {
+      helper.stopServer(function () {
+        done()
+      })
+    }).catch(function () {
+      helper.stopServer(function () {
+        done()
+      })
+    })
+  })
+
+  describe('Address Space Operation node Unit Testing', function () {
+    it('should be loaded', function (done) {
+      helper.load(serverAsoFlowNodes, testFlows.testUnitServerASOFlow,
+        function () {
+          let nodeUnderTest = helper.getNode('7cb85115.7635')
+          expect(nodeUnderTest.name).toBe('Folder')
+          expect(nodeUnderTest.nodeId.toString()).toBe('ns=1;s=TestVariables')
+          expect(nodeUnderTest.datatype).toBe('Double')
+          expect(nodeUnderTest.value).toBe('1.0')
+          expect(nodeUnderTest.browsename).toBe('TestVariables')
+          expect(nodeUnderTest.displayname).toBe('Test Variables')
+          done()
+        })
     })
   })
 })

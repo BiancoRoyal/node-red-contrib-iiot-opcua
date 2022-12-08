@@ -29,35 +29,45 @@ const isPortTaken = (port) => {
 
 module.exports = {
 
+  cleanNodePositionData: (item) => {
+    let newObject = JSON.parse(JSON.stringify(item))
+
+    if (newObject.type === 'helper') {
+      newObject = { 'id': newObject.id, 'type': 'helper', wires: newObject.wires }
+    } else {
+      delete newObject['x']
+      delete newObject['y']
+      delete newObject['z']
+    }
+
+    return newObject
+  },
+
   cleanFlowPositionData: (jsonFlow) => {
     let cleanFlow = []
     // flow is an array of JSON objects with x,y,z from the Node-RED export
-    jsonFlow.forEach( (item, index, array) => {
+    jsonFlow.forEach((item, index, array) => {
       let newObject = JSON.parse(JSON.stringify(item))
-      if(newObject.type === 'helper') {
-        cleanFlow.push({"id": newObject.id, "type": "helper", wires: newObject.wires})
+      if (newObject.type === 'helper') {
+        cleanFlow.push({ 'id': newObject.id, 'type': 'helper', wires: newObject.wires })
       } else {
-        delete newObject["x"]
-        delete newObject["y"]
-        delete newObject["z"]
+        delete newObject['x']
+        delete newObject['y']
+        delete newObject['z']
         cleanFlow.push(newObject)
       }
-    } )
+    })
 
     return cleanFlow
   },
 
-  getPort: () => {
-    let tempPort
+  getPort: (portOffset) => {
+    let testPort = portOffset
 
-    tempPort = global.lastOpcuaPort
+    do {
+      testPort++
+    } while (isPortTaken(testPort))
 
-    do{
-      tempPort++
-    } while (isPortTaken(tempPort))
-
-    global.lastOpcuaPort = tempPort
-
-    return tempPort
+    return testPort
   }
 }

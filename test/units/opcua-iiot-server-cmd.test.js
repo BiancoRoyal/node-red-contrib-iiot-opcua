@@ -24,10 +24,16 @@ var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/server-cmd-flows')
-global.lastOpcuaPort = 58100
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Server Command node Unit Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 58350
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -35,15 +41,13 @@ describe('OPC UA Server Command node Unit Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 

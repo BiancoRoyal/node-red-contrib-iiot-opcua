@@ -16,7 +16,12 @@ describe('OPC UA Core', function () {
   let { NodeIdType, DataType } = require('node-opcua')
   let core = require('../../src/core/opcua-iiot-core')
   let isWindows = /^win/.test(core.os.platform())
-  global.lastOpcuaPort = 54100
+
+  let testingOpcUaPort = 0
+
+  beforeAll(() => {
+    testingOpcUaPort = 50020
+  })
 
   describe('get the name of a time unit', function () {
     it('should return the right string when the value is present', function (done) {
@@ -107,25 +112,25 @@ describe('OPC UA Core', function () {
   describe('core build functions', function () {
 
     it('should return the right namesapce zero from msg topic', function (done) {
-      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
+      let result = core.parseNamespaceFromMsgTopic({ payload: '', topic: 'ns=0;i=85' })
       assert.equal('0', result)
       done()
     })
 
     it('should return the right namesapce five from msg topic', function (done) {
-      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
+      let result = core.parseNamespaceFromMsgTopic({ payload: '', topic: 'ns=1;s=TestReadWrite' })
       assert.equal('1', result)
       done()
     })
 
     it('should return the right namesapce two from msg topic', function (done) {
-      let result = core.parseNamespaceFromMsgTopic({payload: '', topic: 'ns=2;b=TestReadWrite'})
+      let result = core.parseNamespaceFromMsgTopic({ payload: '', topic: 'ns=2;b=TestReadWrite' })
       assert.equal('2', result)
       done()
     })
 
     it('should return the right identifier zero from numeric msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=0;i=85'})
+      let result = core.parseIdentifierFromMsgTopic({ payload: '', topic: 'ns=0;i=85' })
       assert(result)
       let resultExpected = { identifier: 85, type: NodeIdType.NUMERIC }
       expect(result).to.deep.equal(resultExpected)
@@ -133,7 +138,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right identifier five from string msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=1;s=TestReadWrite'})
+      let result = core.parseIdentifierFromMsgTopic({ payload: '', topic: 'ns=1;s=TestReadWrite' })
       assert(result)
       let resultExpected = { identifier: 'TestReadWrite', type: NodeIdType.STRING }
       expect(result).to.deep.equal(resultExpected)
@@ -141,7 +146,7 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right identifier two from byte string msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;b=M/RbkPCxe45TX=='})
+      let result = core.parseIdentifierFromMsgTopic({ payload: '', topic: 'ns=2;b=M/RbkPCxe45TX==' })
       assert(result)
       let resultExpected = { identifier: 'M/RbkPCxe45TX==', type: NodeIdType.BYTESTRING }
       expect(result).to.deep.equal(resultExpected)
@@ -149,7 +154,10 @@ describe('OPC UA Core', function () {
     })
 
     it('should return the right identifier two from GUID msg topic', function (done) {
-      let result = core.parseIdentifierFromMsgTopic({payload: '', topic: 'ns=2;g=034595a-545i-5e456-64f4-ab345e456cb3'})
+      let result = core.parseIdentifierFromMsgTopic({
+        payload: '',
+        topic: 'ns=2;g=034595a-545i-5e456-64f4-ab345e456cb3'
+      })
       assert(result)
       let resultExpected = { identifier: '034595a-545i-5e456-64f4-ab345e456cb3', type: NodeIdType.GUID }
       expect(result).to.deep.equal(resultExpected)
@@ -209,18 +217,24 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes to read', function (done) {
-      expect(core.buildNodesToRead({payload: '', nodesToRead: ['ns=4;s=TestReadWrite']})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({
+        payload: '',
+        nodesToRead: ['ns=4;s=TestReadWrite']
+      })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes to write', function (done) {
-      expect(core.buildNodesToRead({payload: '', nodesToWrite: ['ns=4;s=TestReadWrite']})).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({
+        payload: '',
+        nodesToWrite: ['ns=4;s=TestReadWrite']
+      })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes from addressSpaceItems', function (done) {
-      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
-      expect(core.buildNodesToRead({addressSpaceItems: [addressSpaceItem]})).to.be.an('array').that.does.include(addressSpaceItem)
+      let addressSpaceItem = { name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }
+      expect(core.buildNodesToRead({ addressSpaceItems: [addressSpaceItem] })).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
 
@@ -231,24 +245,24 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes to write in payload', function (done) {
-      expect(core.buildNodesToRead( {nodesToWrite: ['ns=4;s=TestReadWrite'] })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
+      expect(core.buildNodesToRead({ nodesToWrite: ['ns=4;s=TestReadWrite'] })).to.be.an('array').that.does.include('ns=4;s=TestReadWrite')
       done()
     })
 
     it('should return array of nodes in payload from addressSpaceItems', function (done) {
-      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
-      expect(core.buildNodesToRead( { addressSpaceItems: [addressSpaceItem] } )).to.be.an('array').that.does.include(addressSpaceItem)
+      let addressSpaceItem = { name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }
+      expect(core.buildNodesToRead({ addressSpaceItems: [addressSpaceItem] })).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
 
     it('should return array of nodes to listen from payload of addressSpaceItems', function (done) {
-      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      let addressSpaceItem = { name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }
       expect(core.buildNodesToListen({ addressSpaceItems: [addressSpaceItem] })).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
 
     it('should return array of nodes to listen from payload of addressItemsToRead', function (done) {
-      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
+      let addressSpaceItem = { name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }
       expect(core.buildNodesToListen({ addressItemsToRead: [addressSpaceItem] })).to.be.an('array').that.does.include(addressSpaceItem)
       done()
     })
@@ -331,8 +345,8 @@ describe('OPC UA Core', function () {
     })
 
     it('should return array of nodes to listen from payload of addressItemsToRead instead of addressSpaceItems', function (done) {
-      let addressSpaceItem = {name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: ''}
-      let addressSpaceItem2 = {name: '', nodeId: 'ns=4;s=TestNotUsedItem', datatypeName: ''}
+      let addressSpaceItem = { name: '', nodeId: 'ns=4;s=TestReadWrite', datatypeName: '' }
+      let addressSpaceItem2 = { name: '', nodeId: 'ns=4;s=TestNotUsedItem', datatypeName: '' }
       expect(core.buildNodesToListen({
         addressSpaceItems: [addressSpaceItem2],
         addressItemsToRead: [addressSpaceItem]
@@ -348,8 +362,8 @@ describe('OPC UA Core', function () {
       const variantFromString = core.buildNewVariant('Float', '22.2')
       const variantFromString2 = core.buildNewVariant('Float', '22.2')
       const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 22.2)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -361,8 +375,8 @@ describe('OPC UA Core', function () {
       const variantFromString = core.buildNewVariant('Double', '22.2')
       const variantFromString2 = core.buildNewVariant('Double', '22.2')
       const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 22.2)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -374,8 +388,8 @@ describe('OPC UA Core', function () {
       const variantFromString = core.buildNewVariant('UInt16', '220')
       const variantFromString2 = core.buildNewVariant('UInt16', '220')
       const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 220)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -387,8 +401,8 @@ describe('OPC UA Core', function () {
       const variantFromString = core.buildNewVariant('UInt32', '33220')
       const variantFromString2 = core.buildNewVariant('UInt32', '33220')
       const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -400,8 +414,8 @@ describe('OPC UA Core', function () {
       const variantFromString = core.buildNewVariant('Int32', '33220')
       const variantFromString2 = core.buildNewVariant('Int32', '33220')
       const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -413,8 +427,8 @@ describe('OPC UA Core', function () {
       const variantFromString = core.buildNewVariant('Int16', '33220')
       const variantFromString2 = core.buildNewVariant('Int16', '33220')
       const variantFromObject = core.buildNewVariant(dataTypeOPCUA, 33220)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -426,8 +440,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('Int64', '833999220')
       let variantFromString2 = core.buildNewVariant('Int64', '833999220')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 833999220)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -440,8 +454,8 @@ describe('OPC UA Core', function () {
       let variantFromString2 = core.buildNewVariant('Boolean', '1')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 1)
       let variantFromNumberObject = core.buildNewVariant(dataTypeOPCUA, true)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromNumberObject)
@@ -455,8 +469,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('LocalizedText', '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
       let variantFromString2 = core.buildNewVariant('LocalizedText', '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, '[{"text":"Hello", "locale":"en"}, {"text":"Hallo", "locale":"de"}]')
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -468,8 +482,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('DateTime', 1522274988816)
       let variantFromString2 = core.buildNewVariant('DateTime', 1522274988816)
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, 1522274988816)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -481,8 +495,8 @@ describe('OPC UA Core', function () {
       let variantFromString = core.buildNewVariant('String', parsedValue)
       let variantFromString2 = core.buildNewVariant('String', parsedValue)
       let variantFromObject = core.buildNewVariant(dataTypeOPCUA, parsedValue)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromString)
-      expect({value: {dataType: dataTypeOPCUA, value: parsedValue}}).to.deep.equal(variantFromObject)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromString)
+      expect({ value: { dataType: dataTypeOPCUA, value: parsedValue } }).to.deep.equal(variantFromObject)
       expect(variantFromString).to.deep.equal(variantFromString2)
       expect(variantFromString).to.deep.equal(variantFromObject)
       done()
@@ -813,21 +827,21 @@ describe('OPC UA Core', function () {
 
     it('should get Boolean object false', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false}
+      let value = { 'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false }
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
-      expect(variantFromString).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false})
-      expect(variantFromObject).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false})
+      expect(variantFromString).to.deep.equal({ 'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false })
+      expect(variantFromObject).to.deep.equal({ 'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': false })
       done()
     })
 
     it('should get Boolean object true', function (done) {
       let dataTypeOPCUA = DataType.Boolean
-      let value = {'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true}
+      let value = { 'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true }
       let variantFromString = core.convertDataValueByDataType(value, 'Boolean')
       let variantFromObject = core.convertDataValueByDataType(value, dataTypeOPCUA)
-      expect(variantFromString).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true})
-      expect(variantFromObject).to.deep.equal({'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true})
+      expect(variantFromString).to.deep.equal({ 'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true })
+      expect(variantFromObject).to.deep.equal({ 'dataType': 'Boolean', 'arrayType': 'Scalar', 'value': true })
       done()
     })
 
@@ -868,12 +882,12 @@ describe('OPC UA Core', function () {
     })
 
     it('should handle null item value on check for unset state', function (done) {
-      expect(core.checkItemForUnsetState({ activateUnsetFilter: true }, {value: null})).is.equal(0)
+      expect(core.checkItemForUnsetState({ activateUnsetFilter: true }, { value: null })).is.equal(0)
       done()
     })
 
     it('should handle null item value on check for unset state', function (done) {
-      expect(core.checkItemForUnsetState({ activateUnsetFilter: true }, {value: 1})).is.equal(1)
+      expect(core.checkItemForUnsetState({ activateUnsetFilter: true }, { value: 1 })).is.equal(1)
       done()
     })
   })

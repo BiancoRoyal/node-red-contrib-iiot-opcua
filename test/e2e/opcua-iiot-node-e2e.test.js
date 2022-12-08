@@ -31,9 +31,15 @@ helper.init(require.resolve('node-red'))
 var nodeNodesToLoad = [injectNode, inputNode, connectorNode, listenerNode, responseNode, serverNode, resultFilterNode]
 
 var testFlows = require('./flows/node-e2e-flows')
-global.lastOpcuaPort = 55700
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Node node e2e Testing', function () {
+
+  beforeAll(() => {
+    testingOpcUaPort = 54700
+  })
+
   beforeEach(function (done) {
     helper.startServer(function () {
       done()
@@ -57,9 +63,10 @@ describe('OPC UA Node node e2e Testing', function () {
 
     it('should get two messages with payload and value after inject on subscribe with listener', function (done) {
       const flow = Array.from(testFlows.testNodeFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[9].port = port
-      flow[16].endpoint = "opc.tcp://localhost:" + port
+      flow[16].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(nodeNodesToLoad, flow, function () {
         msgCounter = 0
@@ -67,19 +74,19 @@ describe('OPC UA Node node e2e Testing', function () {
         // let n2 = helper.getNode('53aa4e70.57ae7')
         n2.on('input', function (msg) {
           msgCounter++
-          if(msgCounter === 1) {
+          if (msgCounter === 1) {
             expect(msg.payload).toBeDefined()
             expect(msg.payload.value).toBeDefined()
           }
-          if(msgCounter === 2) {
+          if (msgCounter === 2) {
             expect(msg.payload).toBeDefined()
             expect(msg.payload.value).toBeDefined()
             done()
           }
-          })
         })
       })
-
-      // TODO: tests to see if the different inject node payloads work for all types as expected (Node-RED and IIoT inject)
     })
+
+    // TODO: tests to see if the different inject node payloads work for all types as expected (Node-RED and IIoT inject)
+  })
 })

@@ -31,10 +31,16 @@ var portHelper = require('./../helper/test-helper-extensions')
 helper.init(require.resolve('node-red'))
 
 var testFlows = require('./flows/flex-connector-e2e-flows')
-global.lastOpcuaPort = 55300
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Flex Connector node e2e Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 53500
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -42,15 +48,13 @@ describe('OPC UA Flex Connector node e2e Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 

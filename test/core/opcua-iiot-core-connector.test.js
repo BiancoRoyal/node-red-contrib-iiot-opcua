@@ -10,12 +10,18 @@
 
 // jest.setTimeout(30000)
 
-let {default: coreConnector} = require('../../src/core/opcua-iiot-core-connector')
+let { default: coreConnector } = require('../../src/core/opcua-iiot-core-connector')
 const events = require('events')
 const { FsmConnectorStates } = require('../../src/core/opcua-iiot-core')
 
+let testingOpcUaPort = 0
+
 describe('OPC UA Core Connector', function () {
-  global.lastOpcuaPort = 54400
+
+  beforeAll(() => {
+    testingOpcUaPort = 50620
+  })
+
   describe('core functions', function () {
     it('should have IDLE state', function (done) {
       let fsm = coreConnector.createConnectorFinalStateMachine()

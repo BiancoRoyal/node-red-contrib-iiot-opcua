@@ -10,17 +10,28 @@
 
 // jest.setTimeout(30000)
 
-let {default: coreServer} = require('../../src/core/opcua-iiot-core-server')
-const {OPCUAServer} = require("node-opcua");
-let opcuaserver = null
+let { default: coreServer } = require('../../src/core/opcua-iiot-core-server')
+const { OPCUAServer } = require('node-opcua')
+const portHelper = require('../helper/test-helper-extensions')
+
+let opcuaServer = null
 
 describe('OPC UA Core Server', function () {
-  global.lastOpcuaPort = 54700
+
+  let testingOpcUaPort = 0
+
+  beforeAll(() => {
+    testingOpcUaPort = 51220
+  })
 
   beforeEach(function (done) {
-    opcuaserver = null
-    opcuaserver = new OPCUAServer({
-      port: 53531,
+    opcuaServer = null
+
+    testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+    const port = testingOpcUaPort
+
+    opcuaServer = new OPCUAServer({
+      port,
       resourcePath: '/UA/MyLittleTestServer',
       buildInfo: {
         productName: 'MyTestServer1',
@@ -32,13 +43,13 @@ describe('OPC UA Core Server', function () {
   })
 
   afterEach(function (done) {
-    opcuaserver.shutdown(function () {
+    opcuaServer.shutdown(function () {
       coreServer.destructAddressSpace(done)
     })
   })
 
   afterAll(function (done) {
-    opcuaserver = null
+    opcuaServer = null
     coreServer = null
     done()
   })
@@ -46,8 +57,8 @@ describe('OPC UA Core Server', function () {
   describe('core server functions', function () {
     it('should work on server initialize callback', function (done) {
       const run = async () => {
-        await opcuaserver.initialize()
-        coreServer.constructAddressSpace(opcuaserver, true).then(() => {
+        await opcuaServer.initialize()
+        coreServer.constructAddressSpace(opcuaServer, true).then(() => {
           done()
         })
       }
@@ -55,9 +66,9 @@ describe('OPC UA Core Server', function () {
     })
 
     it('should reset count server timeInterval on maxTimeInterval', function (done) {
-      opcuaserver.initialize(function () {
+      opcuaServer.initialize(function () {
         const run = async () => {
-          coreServer.constructAddressSpace(opcuaserver, true).then(function () {
+          coreServer.constructAddressSpace(opcuaServer, true).then(function () {
             coreServer.timeInterval = coreServer.maxTimeInterval
             coreServer.simulateVariation({})
             expect(coreServer.timeInterval).toBe(500000)
@@ -78,9 +89,9 @@ describe('OPC UA Core Server', function () {
     })
 
     it('should catch error on start with empty node', function (done) {
-      opcuaserver.initialize(function () {
-        coreServer.constructAddressSpace(opcuaserver, true).then(function () {
-          coreServer.start(opcuaserver, null).then().catch(function (err) {
+      opcuaServer.initialize(function () {
+        coreServer.constructAddressSpace(opcuaServer, true).then(function () {
+          coreServer.start(opcuaServer, null).then().catch(function (err) {
             if (err) {
               expect(err.message).toBe('Node Not Valid To Start')
               done()
@@ -91,10 +102,10 @@ describe('OPC UA Core Server', function () {
     })
 
     it('should work on server start callback', function (done) {
-      opcuaserver.initialize(function () {
-        coreServer.constructAddressSpace(opcuaserver, true).then(function () {
-          let node = { iiot: {initialized: false} }
-          coreServer.start(opcuaserver, node).then(function () {
+      opcuaServer.initialize(function () {
+        coreServer.constructAddressSpace(opcuaServer, true).then(function () {
+          let node = { iiot: { initialized: false } }
+          coreServer.start(opcuaServer, node).then(function () {
             expect(node.iiot.initialized).toBe(true)
             done()
           })

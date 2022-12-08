@@ -11,7 +11,7 @@
 
 'use strict'
 
-process.env.TEST = "true"
+process.env.TEST = 'true'
 
 // jest.setTimeout(30000)
 
@@ -28,10 +28,15 @@ helper.init(require.resolve('node-red'))
 var testFlows = require('./flows/response-flows')
 const helperExtensions = require('../helper/test-helper-extensions')
 
-global.lastOpcuaPort = 57700
+let testingOpcUaPort = 0
 
 describe('OPC UA Response node Unit Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 58150
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -39,21 +44,19 @@ describe('OPC UA Response node Unit Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
   describe('Response node', function () {
     it('should load with default settings', function (done) {
-      helper.load(responseNode,testFlows.testUnitDefaultResponseFlow,
+      helper.load(responseNode, testFlows.testUnitDefaultResponseFlow,
         function () {
           let nodeUnderTest = helper.getNode('be0763d2593bd6ef')
           expect(nodeUnderTest.name).toBe('')
@@ -68,24 +71,23 @@ describe('OPC UA Response node Unit Testing', function () {
         })
     })
 
-
     it('should load with basic settings', function (done) {
       helper.load(responseNode, helperExtensions.cleanFlowPositionData([
           {
-            "id": "595c852.3ea227c",
-            "type": "OPCUA-IIoT-Response",
-            "z": "e41e66b2c57b1657",
-            "name": "TestName",
-            "compressStructure": false,
-            "showStatusActivities": false,
-            "showErrors": false,
-            "activateUnsetFilter": false,
-            "activateFilters": false,
-            "negateFilter": false,
-            "filters": [],
-            "x": 280,
-            "y": 280,
-            "wires": [
+            'id': '595c852.3ea227c',
+            'type': 'OPCUA-IIoT-Response',
+            'z': 'e41e66b2c57b1657',
+            'name': 'TestName',
+            'compressStructure': false,
+            'showStatusActivities': false,
+            'showErrors': false,
+            'activateUnsetFilter': false,
+            'activateFilters': false,
+            'negateFilter': false,
+            'filters': [],
+            'x': 280,
+            'y': 280,
+            'wires': [
               []
             ]
           }
@@ -127,7 +129,7 @@ describe('OPC UA Response node Unit Testing', function () {
         function () {
           let nodeUnderTest = helper.getNode('76202549.fd7c1c')
           expect(nodeUnderTest).toBeDefined()
-          let payload = {value: []}
+          let payload = { value: [] }
           nodeUnderTest.functions.handleNodeTypeOfMsg(payload)
           expect(payload).toStrictEqual({ value: [], entryStatus: { bad: 1, good: 0, other: 0 } })
           done()

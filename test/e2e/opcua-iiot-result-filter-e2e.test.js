@@ -32,10 +32,16 @@ var testFilterNodes = [injectNode, connectorNode, readNode,
   listenerNode, browserNode]
 
 var testFlows = require('./flows/result-filter-e2e-flows')
-global.lastOpcuaPort = 56000
+
+let testingOpcUaPort = 0
 
 describe('OPC UA Result Filter node e2e Testing', function () {
-  beforeAll(function (done) {
+
+  beforeAll(() => {
+    testingOpcUaPort = 55600
+  })
+
+  beforeEach(function (done) {
     helper.startServer(function () {
       done()
     })
@@ -43,24 +49,23 @@ describe('OPC UA Result Filter node e2e Testing', function () {
 
   afterEach(function (done) {
     helper.unload().then(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     }).catch(function () {
-      done()
-    })
-  })
-
-  afterAll(function (done) {
-    helper.stopServer(function () {
-      done()
+      helper.stopServer(function () {
+        done()
+      })
     })
   })
 
   describe('Result Filter node Unit Testing', function () {
     it('should read and filter the right node named TestReadWrite', function (done) {
       const flow = Array.from(testFlows.testFilterReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[6].port = port
-      flow[7].endpoint = "opc.tcp://localhost:" + port
+      flow[7].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testFilterNodes, flow, function () {
         let n1 = helper.getNode('n1frf1')
@@ -77,9 +82,10 @@ describe('OPC UA Result Filter node e2e Testing', function () {
 
     it('should read and filter the right node named Counter', function (done) {
       const flow = Array.from(testFlows.testFilterReadFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[6].port = port
-      flow[7].endpoint = "opc.tcp://localhost:" + port
+      flow[7].endpoint = 'opc.tcp://localhost:' + port
       flow[3].entry = 2
       flow[3].nodeId = 'ns=1;s=Counter'
       helper.load(testFilterNodes, flow, function () {
@@ -97,9 +103,10 @@ describe('OPC UA Result Filter node e2e Testing', function () {
 
     it('should monitor and filter the right node named FullCounter', function (done) {
       const flow = Array.from(testFlows.testListenerFilterFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[11].port = port
-      flow[12].endpoint = "opc.tcp://localhost:" + port
+      flow[12].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testFilterNodes, flow, function () {
         let n1 = helper.getNode('n1frf2')
@@ -115,9 +122,10 @@ describe('OPC UA Result Filter node e2e Testing', function () {
 
     it('should monitor and filter the right node named TestReadWrite', function (done) {
       const flow = Array.from(testFlows.testListenerFilterFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[11].port = port
-      flow[12].endpoint = "opc.tcp://localhost:" + port
+      flow[12].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testFilterNodes, flow, function () {
         let n2 = helper.getNode('n2frf2')
@@ -134,9 +142,10 @@ describe('OPC UA Result Filter node e2e Testing', function () {
 
     it('should monitor and filter the right node named Counter', function (done) {
       const flow = Array.from(testFlows.testListenerFilterFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[11].port = port
-      flow[12].endpoint = "opc.tcp://localhost:" + port
+      flow[12].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testFilterNodes, flow, function () {
         let n3 = helper.getNode('n3frf2')
@@ -153,9 +162,10 @@ describe('OPC UA Result Filter node e2e Testing', function () {
 
     it('should monitor and filter the right node i=2277', function (done) {
       const flow = Array.from(testFlows.testListenerFilterFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[11].port = port
-      flow[12].endpoint = "opc.tcp://localhost:" + port
+      flow[12].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testFilterNodes, flow, function () {
         let n4 = helper.getNode('n4frf2')
@@ -172,9 +182,10 @@ describe('OPC UA Result Filter node e2e Testing', function () {
 
     it('should be able to do read with a filtered message', function (done) {
       const flow = Array.from(testFlows.testBrowserReadFilterFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+      const port = testingOpcUaPort
       flow[6].port = port
-      flow[7].endpoint = "opc.tcp://localhost:" + port
+      flow[7].endpoint = 'opc.tcp://localhost:' + port
 
       helper.load(testFilterNodes, flow, function () {
         let n1 = helper.getNode('920deb27a882f242')
@@ -189,13 +200,13 @@ describe('OPC UA Result Filter node e2e Testing', function () {
       })
     })
 
-
     /* Todo: fix broken Tests
     // Crawler in combination with a filter let tests fail. For more information look at e2e tests of the crawler
 
     it('should crawl and filter the right node i=1002', function (done) {
       const flow = Array.from(testFlows.testCrawlerFilterFlow)
-      const port = portHelper.getPort()
+      testingOpcUaPort = portHelper.getPort(testingOpcUaPort)
+const port = testingOpcUaPort
       flow[5].port = port
       flow[6].endpoint = "opc.tcp://localhost:" + port
 

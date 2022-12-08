@@ -11,19 +11,25 @@
 // jest.setTimeout(30000)
 
 describe('OPC UA Core Browser', function () {
-  let {default: coreBrowser} = require('../../src/core/opcua-iiot-core-browser')
-  let {OBJECTS_ROOT} = require("../../src/core/opcua-iiot-core")
+  let { default: coreBrowser } = require('../../src/core/opcua-iiot-core-browser')
+  let { OBJECTS_ROOT } = require('../../src/core/opcua-iiot-core')
   const events = require('events')
 
+  let testingOpcUaPort = 0
+
+  beforeAll(() => {
+    testingOpcUaPort = 50220
+  })
+
   describe('Core Browser unit test', function () {
-    global.lastOpcuaPort = 54200
+
     it('should return the objects root nodeId', function (done) {
       expect(coreBrowser.browseToRoot()).toBe(OBJECTS_ROOT)
       done()
     })
 
     it('should return the default objects nodeId without root in payload request', function (done) {
-      expect(coreBrowser.extractNodeIdFromTopic({ }, {})).toBe(null)
+      expect(coreBrowser.extractNodeIdFromTopic({}, {})).toBe(null)
       done()
     })
 
@@ -33,7 +39,10 @@ describe('OPC UA Core Browser', function () {
     })
 
     it('should return the nodeId from root in payload request', function (done) {
-      expect(coreBrowser.extractNodeIdFromTopic({ actiontype: 'browse', root: { nodeId: 'ns=1;s=MyDemo' } }, {})).toBe('ns=1;s=MyDemo')
+      expect(coreBrowser.extractNodeIdFromTopic({
+        actiontype: 'browse',
+        root: { nodeId: 'ns=1;s=MyDemo' }
+      }, {})).toBe('ns=1;s=MyDemo')
       done()
     })
 
@@ -47,9 +56,9 @@ describe('OPC UA Core Browser', function () {
         error: (err, msg) => { coreBrowser.internalDebugLog(err.message) }
       }
       const statusHandler = (status) => {
-        node.statusText = status.text || status;
+        node.statusText = status.text || status
       }
-      coreBrowser.browseErrorHandling(node, new Error('Error'), { payload: {} }, [], (err, msg) => {return}, statusHandler, "idle")
+      coreBrowser.browseErrorHandling(node, new Error('Error'), { payload: {} }, [], (err, msg) => {return}, statusHandler, 'idle')
       expect(node.statusText).toBe('error')
       done()
     })
