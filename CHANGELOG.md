@@ -1,4 +1,4 @@
-# [4.1.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.10...v4.1.0) (2022-12-06)
+# [4.1.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.11...v4.1.0) (2022-12-07)
 
 
 ### Bug Fixes
@@ -54,6 +54,7 @@
 * extracted read-flows ([b08a1a5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/b08a1a5220999419e731e44e5c79264b61b10f70))
 * **listener:** Now properly uses xstate/fsm instead of stately ([0f6bc07](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/0f6bc07ce8e65fce565167c9ae4ee497c2e670e2))
 * replaced every stately call to xstate/fsm call ([d46422b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d46422b7b8874757e282ecf4ff4c694500911043))
+* **response-filter:** message is to filter ([8066c9a](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/8066c9a86680a106c6b765673b08a35b72864fcd))
 * **response:** new payload type in json ([de22d9b](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/de22d9b25ee4c7bede50a4077f691097ddcf5f5f))
 * start xstate implementation 1 ([77a5ec6](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/77a5ec6a75968d1933bd52208add2e0085ab4181))
 * **xstate/fsm:** started converting stately to @xstate/fsm for listener ([ca318a3](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/ca318a38c0edf8b54c259429ba24eff49b2196b6))
