@@ -29,7 +29,7 @@ module.exports = {
       "repeat": "",
       "crontab": "",
       "once": true,
-      "onceDelay": "",
+      "onceDelay": "4",
       "topic": "TestTopic",
       "payload": "{\"value\":1000}",
       "payloadType": "json",

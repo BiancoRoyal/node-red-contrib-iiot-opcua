@@ -262,7 +262,7 @@ module.exports = {
       "repeat": "",
       "crontab": "",
       "once": true,
-      "onceDelay": "3",
+      "onceDelay": "4",
       "topic": "TestTopicMethod",
       "payload": "23456",
       "payloadType": "num",
