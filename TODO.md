@@ -2,7 +2,7 @@
 
 ## Known Issues
 
-* Result Filter does not filter correctly in every case (Will be fixed in v6.x)
+* Result Filter does not filter correctly in every case (Will be fixed in v5.x)
 * Read after browse in browse example does not work
   * No output and no error
 * Browse-Listener and grouped-listener example top browse/listen will throw following error
