@@ -220,15 +220,26 @@ export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStat
   return {fill: fillValue, shape: shapeValue, text: statusValue}
 }
 
+function extractValue(value: any) {
+
+  logger.detailDebugLog('extractValue value:' + value)
+  if (_.isUndefined(value.value) === false) {
+    return value.value // value could be null, 0, and any other, but not undefined
+  }
+
+  return value
+}
+
 export function buildNewVariant(datatype: DataTypeInput, value: any): DataValueOptions {
   let variantValue: VariantOptions = {
     dataType: DataType.Null,
     value: null
   }
-  if (value.value)
-    value = value.value
 
-  logger.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
+  let originValue = Object.assign({}, value)
+  value = extractValue(value);
+
+  logger.detailDebugLog('buildNewVariant datatype: ' + datatype + ' originValue:' + originValue + ' value:' + value)
   switch (datatype) {
     case 'Float':
     case DataType.Float:
