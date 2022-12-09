@@ -538,10 +538,10 @@ export function convertDataValueByDataType(value: any, dataType: DataTypeInput):
         break;
       default:
         logger.internalDebugLog('convertDataValue unused DataType: ' + dataType)
-        if (!isNotDefined(value)) {
-          convertedValue = value
-        } else {
+        if(_.isUndefined(value)) {
           convertedValue = null
+        } else {
+          convertedValue = value
         }
         break
     }
