@@ -1,4 +1,15 @@
-# [4.1.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.11...v4.1.0) (2022-12-07)
+## [4.1.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.1.0...v4.1.1) (2022-12-09)
+
+
+### Bug Fixes
+
+* **core:** [#190](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/190) data check was wrong ([f560daf](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f560dafd3d1de415a2af970512028c641cff6943))
+* **known-issues:** corrected version num of approximated fix of filter ([6a4d0b5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/6a4d0b58982dbabc2c66ec3ccf120fea82e5c2d0))
+* **opcua-node:** [#202](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/202) set value on write from local value in node ([d6d2dd8](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d6d2dd82cf2e3c82357b74037fa0451d135cbccb))
+
+
+
+# [4.1.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.11...v4.1.0) (2022-12-08)
 
 
 ### Bug Fixes
