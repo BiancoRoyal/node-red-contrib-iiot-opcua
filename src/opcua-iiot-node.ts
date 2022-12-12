@@ -87,6 +87,9 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (self.injectType === 'write') {
         addressSpaceItems.push({name: self.name, nodeId: self.nodeId, datatypeName: self.datatype})
         try {
+          if(typeof self.value !== "string"){
+            self.value = self.value.toString()
+          }
           valuesToWrite.push(convertDataValueByDataType( (_.isEmpty(self.value)) ? value : self.value, self.datatype))
         } catch (err) {
           logger.internalDebugLog(err)
