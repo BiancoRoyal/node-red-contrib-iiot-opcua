@@ -978,7 +978,7 @@ export function registerToConnector(node: TodoTypeAny, statusCallback: (status: 
   node.connector.on('after_reconnection', () => {
     setNodeOPCUARestart(node.connector, OPCUAClient.create((node.connector as TodoTypeAny).iiot.opcuaClient), statusCall) // TODO: investigate one args v two
   })
-  setNodeInitalState(node.connector?.iiot?.stateService.state.value, node, statusCall) //Todo: switch to xstate/fsm from stately
+  setNodeInitalState(node.connector?.iiot?.stateService.state.value, node, statusCall)
 }
 
 export function deregisterToConnector(node: NodeWithConnector, done: () => void) {
