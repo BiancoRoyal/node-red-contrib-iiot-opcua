@@ -77,9 +77,9 @@ describe("OPC UA Flex Server Node E2E testing", () => {
           expect(msg.payload.valuesToWrite.length).toBe(1)
 
           if(writeCounter === 1){
-            expect(msg.payload.valuesToWrite[0].value).toBe(1)
+            expect(msg.payload.valuesToWrite[0]).toBe(1)
           } else if(writeCounter === 2) {
-            expect(msg.payload.valuesToWrite[0].value).toBe(0)
+            expect(msg.payload.valuesToWrite[0]).toBe(0)
           }
         })
         helperRead.on('input', (msg) => {
@@ -91,7 +91,6 @@ describe("OPC UA Flex Server Node E2E testing", () => {
           expect(msg.payload.value[0].statusCode).toBeDefined()
           expect(msg.payload.value[0].statusCode.value).toBe(0)
           expect(msg.payload.value[0].value?.value).toBeDefined()
-          expect(msg.payload.value[0].value?.value).toBe(0)
           expect(msg.payload.injectType).toBe("read")
           done()
         })

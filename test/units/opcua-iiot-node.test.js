@@ -99,7 +99,6 @@ describe('OPC UA Node node Unit Testing', function () {
           expect(msg.topic).toBe('TestTopicNode')
           done()
         })
-        n3.receive()
       })
     })
 
@@ -111,7 +110,6 @@ describe('OPC UA Node node Unit Testing', function () {
           expect(msg.payload).toBeDefined()
           done()
         })
-        n3.receive()
       })
     })
 
@@ -123,7 +121,6 @@ describe('OPC UA Node node Unit Testing', function () {
           expect(msg.payload.valuesToWrite).toMatchObject([{ value: 1234 }])
           done()
         })
-        n3.receive()
       })
     })
 
@@ -141,7 +138,6 @@ describe('OPC UA Node node Unit Testing', function () {
           }])
           done()
         })
-        n3.receive()
       })
     })
 
@@ -160,7 +156,6 @@ describe('OPC UA Node node Unit Testing', function () {
           expect(msg.topic).toBe('NODETOPICOVERRIDE')
           done()
         })
-        n3.receive()
       })
     })
 

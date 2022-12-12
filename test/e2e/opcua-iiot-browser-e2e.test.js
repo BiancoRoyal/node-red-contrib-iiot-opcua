@@ -68,7 +68,7 @@ describe('OPC UA Browser node e2e Testing', function () {
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.browserResults).toBeInstanceOf(Array)
-          expect(msg.payload.browserResults.length).toBe(15)
+          expect(msg.payload.browserResults.length).toBe(17)
           done()
         })
       })
@@ -87,7 +87,7 @@ describe('OPC UA Browser node e2e Testing', function () {
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.browserResults).toBeInstanceOf(Array)
-          expect(msg.payload.browserResults.length).toBe(15)
+          expect(msg.payload.browserResults.length).toBe(17)
           done()
         })
       })
@@ -109,7 +109,7 @@ describe('OPC UA Browser node e2e Testing', function () {
           expect(msg.payload.endpoint).toBeDefined()
           expect(msg.payload.session).toBeDefined()
           expect(msg.payload.browserResults).toBeInstanceOf(Array)
-          expect(msg.payload.browserResults.length).toBe(15)
+          expect(msg.payload.browserResults.length).toBe(17)
           expect(msg.payload.browserResults.length).toBe(msg.payload.browserResultsCount)
           done()
         })
@@ -129,7 +129,7 @@ describe('OPC UA Browser node e2e Testing', function () {
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
-          expect(msg.payload.nodesToRead.length).toBe(15)
+          expect(msg.payload.nodesToRead.length).toBe(17)
           done()
         })
       })
@@ -149,7 +149,7 @@ describe('OPC UA Browser node e2e Testing', function () {
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
-          expect(msg.payload.nodesToRead.length).toBe(15)
+          expect(msg.payload.nodesToRead.length).toBe(17)
           done()
         })
       })
@@ -169,7 +169,7 @@ describe('OPC UA Browser node e2e Testing', function () {
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.addressItemsToBrowse).toBeInstanceOf(Array)
-          expect(msg.payload.addressItemsToBrowse.length).toBe(15)
+          expect(msg.payload.addressItemsToBrowse.length).toBe(17)
           done()
         })
       })
@@ -191,11 +191,11 @@ describe('OPC UA Browser node e2e Testing', function () {
         n5.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
-          expect(msg.payload.nodesToRead.length).toBe(15)
+          expect(msg.payload.nodesToRead.length).toBe(17)
           expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
-          expect(msg.payload.nodesToRead.length).toBe(15)
+          expect(msg.payload.nodesToRead.length).toBe(17)
           expect(msg.payload.addressItemsToBrowse).toBeInstanceOf(Array)
-          expect(msg.payload.addressItemsToBrowse.length).toBe(15)
+          expect(msg.payload.addressItemsToBrowse.length).toBe(17)
           done()
         })
       })
@@ -214,7 +214,7 @@ describe('OPC UA Browser node e2e Testing', function () {
         n4.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.addressItemsToBrowse).toBeInstanceOf(Array)
-          expect(msg.payload.addressItemsToBrowse.length).toBe(15)
+          expect(msg.payload.addressItemsToBrowse.length).toBe(17)
           done()
         })
       })
@@ -233,7 +233,7 @@ describe('OPC UA Browser node e2e Testing', function () {
         n6.on('input', function (msg) {
           expect(msg.payload.browserResults).toBeDefined()
           expect(msg.payload.nodesToRead).toBeInstanceOf(Array)
-          expect(msg.payload.nodesToRead.length).toBe(10)
+          expect(msg.payload.nodesToRead.length).toBeGreaterThan(10)
           done()
         })
       })
