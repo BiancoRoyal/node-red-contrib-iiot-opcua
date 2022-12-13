@@ -22,7 +22,7 @@ module.exports = {
       "repeat": "",
       "crontab": "",
       "once": true,
-      "startDelay": "3",
+      "startDelay": "4",
       "name": "TestReadWrite",
       "addressSpaceItems": [
         {
