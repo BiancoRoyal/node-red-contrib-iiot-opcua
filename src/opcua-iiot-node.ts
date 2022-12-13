@@ -14,6 +14,7 @@ import {TodoTypeAny} from "./types/placeholders";
 import {NodeMessageInFlow} from "@node-red/registry";
 import {convertDataValueByDataType} from "./core/opcua-iiot-core";
 import {logger} from "./core/opcua-iiot-core-connector";
+import _ from "underscore";
 
 interface OPCUAIIoTNode extends nodered.Node {
   nodeId: string
@@ -86,7 +87,10 @@ module.exports = (RED: nodered.NodeAPI) => {
       if (self.injectType === 'write') {
         addressSpaceItems.push({name: self.name, nodeId: self.nodeId, datatypeName: self.datatype})
         try {
-          valuesToWrite.push(convertDataValueByDataType({value: self.value === '' ? value : self.value}, self.datatype))
+          if(typeof self.value !== "string"){
+            self.value = self.value.toString()
+          }
+          valuesToWrite.push(convertDataValueByDataType( (_.isEmpty(self.value)) ? value : self.value, self.datatype))
         } catch (err) {
           logger.internalDebugLog(err)
           if (self.showErrors) {

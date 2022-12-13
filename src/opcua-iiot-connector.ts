@@ -922,10 +922,6 @@ module.exports = function (RED: nodered.NodeAPI) {
       this.iiot.stateService = null
       this.iiot.stateSubscription = null
 
-      /* Stately
-      this.iiot.stateMachine = coreConnector.createConnectorStatelyMachine()
-      subscribeFSMEvents(this.iiot.stateMachine)
-       */
       // @xstate/fsm
       this.iiot.stateMachine = coreConnector.createConnectorFinalStateMachine()
       this.iiot.stateService = coreConnector.startConnectorMachineService(this.iiot.stateMachine)

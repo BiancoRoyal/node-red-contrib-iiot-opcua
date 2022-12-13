@@ -87,6 +87,31 @@ describe('OPC UA Node node e2e Testing', function () {
       })
     })
 
-    // TODO: tests to see if the different inject node payloads work for all types as expected (Node-RED and IIoT inject)
+    it('should get two messages with payload and a value after inject with local value on write', function (done) {
+      const flow = Array.from(testFlows.testWithValueFromNode)
+
+      helper.load(nodeNodesToLoad, flow, function () {
+        msgCounter = 0
+        let n2 = helper.getNode('91ffe73f63f8e590')
+        n2.on('input', function (msg) {
+          msgCounter++
+          if (msgCounter === 1) {
+            expect(msg.payload).toBeDefined()
+            expect(msg.payload.value).toBeDefined()
+            expect(msg.payload.valuesToWrite).toBeDefined()
+            expect(msg.payload.valuesToWrite.length).toBe(1)
+            expect(msg.payload.valuesToWrite[0]).toBe(39)
+          }
+          if (msgCounter === 2) {
+            expect(msg.payload).toBeDefined()
+            expect(msg.payload.value).toBeDefined()
+            expect(msg.payload.valuesToWrite).toBeDefined()
+            expect(msg.payload.valuesToWrite.length).toBe(1)
+            expect(msg.payload.valuesToWrite[0]).toBe(39)
+            done()
+          }
+        })
+      })
+    })
   })
 })

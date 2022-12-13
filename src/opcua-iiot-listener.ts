@@ -149,7 +149,6 @@ module.exports = (RED: nodered.NodeAPI) => {
     self.iiot.stateService = coreListener.startListenerMachineService(self.iiot.stateMachine)
     self.iiot.stateSubscription = coreListener.subscribeListenerFSMService(self.iiot.stateService, fsmEventHandlerFunction)
     coreListener.internalDebugLog('Start FSM: ' + self.iiot.stateService.state.value)
-    //coreListener.detailDebugLog('FSM events:' + self.iiot.stateMachine.getMachineEvents())  //Stately not in use anymore -> xstate similar function?
 
     const createSubscription = (msg: TodoTypeAny) => {
 

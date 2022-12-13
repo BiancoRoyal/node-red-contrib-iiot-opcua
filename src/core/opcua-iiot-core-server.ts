@@ -12,21 +12,25 @@
 
 import {TodoTypeAny} from "../types/placeholders";
 import {
-  AddressSpace, ApplicationType,
+  AddressSpace,
+  ApplicationType,
   CallbackT,
   DataType,
   DataValue,
-  EndpointDescription, extractFullyQualifiedDomainName,
+  EndpointDescription,
+  extractFullyQualifiedDomainName,
   ISessionContext,
-  LocalizedText, makeApplicationUrn,
+  LocalizedText,
+  makeApplicationUrn,
   nodesets,
   OPCUAServer,
   OPCUAServerEndPoint,
   OPCUAServerOptions,
-  RegisterServerMethod, SecurityPolicy,
-  ServerCapabilitiesOptions,
+  RegisterServerMethod,
+  SecurityPolicy,
   standardUnits,
   StatusCodes,
+  UAEventType,
   Variant,
   VariantArrayType
 } from "node-opcua";
@@ -42,9 +46,8 @@ import {
 
 import debug from 'debug'
 import path from 'path'
-import {NodeMessage, NodeStatus} from "node-red";
+import {NodeStatus} from "node-red";
 import {constructAlarmAddressSpaceDemo} from "../helpers/alarms-and-conditions-demo";
-import {LocaleId} from "node-opcua-basic-types/source/locale_id";
 
 const internalDebugLog = debug('opcuaIIoT:server') // eslint-disable-line no-use-before-define
 const detailDebugLog = debug('opcuaIIoT:server:details') // eslint-disable-line no-use-before-define
@@ -58,6 +61,7 @@ const maxTimeInterval = 500000 // eslint-disable-line no-use-before-define
 let timeInterval = 1 // eslint-disable-line no-use-before-define
 const UNLIMITED_LISTENERS = 0 // eslint-disable-line no-use-before-define
 let intervalList: TodoTypeAny[] = [] // eslint-disable-line no-use-before-define
+let conditions = []
 
 const simulateVariation = function (data: TodoTypeAny) {
   let value = (1.0 + Math.sin(timeInterval / 360 * 3)) / 2.0
@@ -106,14 +110,26 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
         return
       }
 
+      addressSpace.installAlarmsAndConditionsService();
+
       const namespace = addressSpace.getOwnNamespace()
+
+      const exclusiveLimitAlarmType = addressSpace.findEventType('ExclusiveLimitAlarmType') as UAEventType
+      if (!exclusiveLimitAlarmType) {
+        throw new Error("cannot find ExclusiveLimitAlarmType in namespace 0");
+      }
+
+      let nonExclusiveLimitAlarmType = addressSpace.findEventType('NonExclusiveLimitAlarmType')
+      if (!nonExclusiveLimitAlarmType) {
+        throw new Error("cannot find NonExclusiveLimitAlarmType in namespace 0");
+      }
 
       let view = namespace.addView({
         organizedBy: addressSpace?.rootFolder.views,
-        browseName: 'IiotServerView',
+        browseName: 'PLUS4NODERED_VIEW',
         displayName: [
-          new LocalizedText({text: 'OPCUA-IIoT Server View', locale: 'en-US'}),
-          new LocalizedText({text: 'OPCUA-IIoT Server Sicht', locale: 'de-DE'})
+          new LocalizedText({text: 'OPCUA-IIoT plus4nodered.com Server View', locale: 'en-US'}),
+          new LocalizedText({text: 'OPCUA-IIoT plus4nodered.com Server Sicht', locale: 'de-DE'})
         ]
       })
 
@@ -134,11 +150,13 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           organizedBy: addressSpace.rootFolder.objects,
           typeDefinition: 'FolderType',
           nodeId: 'i=1234',
-          browseName: 'IiotServer',
+          browseName: 'PLUS4NODERED',
           displayName: [
-            new LocalizedText({text: 'OPCUA-IIoT Server', locale: 'en-US'}),
-            new LocalizedText({text: 'OPCUA-IIoT Server', locale: 'de-DE'})
+            new LocalizedText({text: 'OPCUA-IIoT plus4nodered.com Server', locale: 'en-US'}),
+            new LocalizedText({text: 'OPCUA-IIoT plus4nodered.com Server', locale: 'de-DE'})
           ],
+          eventNotifier: 1,
+          notifierOf: addressSpace.rootFolder.objects.server
         })
 
         let variable1 = 1
@@ -154,7 +172,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           componentOf: vendorName,
           nodeId: 'i=16479',
           browseName: 'MyVariable1',
-          displayName: 'My Variable 1',
+          displayName: 'PLUS for Node-RED Double Variable',
           dataType: 'Double',
           value: {
             get: function () {
@@ -172,7 +190,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           componentOf: vendorName,
           nodeId: 'b=1020FFAA',
           browseName: 'MyVariable2',
-          displayName: 'My Variable 2',
+          displayName: 'PLUS for Node-RED Double Binary Variable',
           dataType: 'Double',
           value: {
             get: function () {
@@ -194,7 +212,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           componentOf: vendorName,
           nodeId: 's=TestReadWrite',
           browseName: 'TestReadWrite',
-          displayName: 'Test Read and Write',
+          displayName: 'PLUS for Node-RED Test Read and Write',
           dataType: 'Double',
           value: {
             get: function () {
@@ -215,8 +233,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           nodeId: 's=free_memory',
           browseName: 'FreeMemory',
           displayName: [
-            new LocalizedText({text: 'Free Memory', locale: 'en-US'}),
-            new LocalizedText({text: 'ungenutzer RAM', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Free Memory', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Freier Arbeitsspeicher', locale: 'de-DE'})
           ],
           dataType: 'Double',
 
@@ -245,8 +263,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           nodeId: 's=Counter',
           browseName: 'Counter',
           displayName: [
-            new LocalizedText({text: 'Counter', locale: 'en-US'}),
-            new LocalizedText({text: 'Zähler', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Counter', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Zähler', locale: 'de-DE'})
           ],
           dataType: 'UInt16',
 
@@ -261,35 +279,57 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
         })
         addressSpace.installHistoricalDataNode(counterVariable)
 
-        let fullcounterValue = 0
-        intervalList.push(setInterval(function () {
-          if (fullcounterValue < 100000) {
-            fullcounterValue += 1
-          } else {
-            fullcounterValue = -100000
-          }
-        }, 500))
+        let fullCounterValue = 8900
 
-        let fullcounterVariable = namespace.addVariable({
+        let fullCounterVariable = namespace.addVariable({
           componentOf: vendorName,
+          eventSourceOf: vendorName,
           nodeId: 's=FullCounter',
           browseName: 'FullCounter',
           displayName: [
-            new LocalizedText({text: 'Full-Counter', locale: 'en-US'}),
-            new LocalizedText({text: 'Voll-Zähler', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Full-Counter', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Voll-Zähler', locale: 'de-DE'})
           ],
           dataType: 'Int32',
-
           value: {
             get: function () {
               return new Variant({
                 dataType: 'Int32',
-                value: fullcounterValue
+                value: fullCounterValue
               })
             }
           }
         })
-        addressSpace.installHistoricalDataNode(fullcounterVariable)
+        addressSpace.installHistoricalDataNode(fullCounterVariable)
+
+        namespace.instantiateNonExclusiveLimitAlarm(nonExclusiveLimitAlarmType, {
+          componentOf: vendorName,
+          conditionSource: fullCounterVariable,
+          browseName: 'FullCounterLimitCondition',
+          displayName: new LocalizedText({text: 'Full Counter Limit Condition', locale: 'en-US'}),
+          description: 'ExclusiveLimitAlarmType Condition',
+          conditionName: 'FullCounterLimitCondition',
+          inputNode: fullCounterVariable,   // the variable that will be monitored for change
+          highHighLimit: 9990,
+          highLimit: 9000,
+          lowLimit: -9000,
+          lowLowLimit: -9990,
+          optionals: [
+            "ConfirmedState", "Confirm" // confirm state and confirm Method
+          ]
+        })
+
+        intervalList.push(setInterval(function () {
+          if (fullCounterValue < 10000) {
+            fullCounterValue += 1
+          } else {
+            fullCounterValue = -10000
+          }
+          fullCounterVariable.setValueFromSource({
+            dataType: DataType.Int32,
+            value: fullCounterValue
+          });
+        }, 100))
 
         let externalValueWithSourceTimestamp = new DataValue({
           value: new Variant({dataType: 'Double', value: 10.0}),
@@ -307,8 +347,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           nodeId: 's=Pressure',
           browseName: 'Pressure',
           displayName: [
-            new LocalizedText({text: 'Pressure', locale: 'en-US'}),
-            new LocalizedText({text: 'Druck', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Pressure', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Druck', locale: 'de-DE'})
           ],
           dataType: 'Double',
           value: {
@@ -322,7 +362,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           organizedBy: vendorName,
           nodeId: 's=Matrix',
           browseName: 'Matrix',
-          displayName: [new LocalizedText({text: 'Matrix', locale: 'en-US'})],
+          displayName: [new LocalizedText({text: 'P4NR Matrix', locale: 'en-US'})],
           dataType: 'Double',
           valueRank: 2,
           arrayDimensions: [3, 3],
@@ -342,7 +382,7 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           organizedBy: vendorName,
           nodeId: 's=Position',
           browseName: 'Position',
-          displayName: [new LocalizedText({text: 'Position', locale: 'en-US'})],
+          displayName: [new LocalizedText({text: 'P4NR Position', locale: 'en-US'})],
           dataType: 'Double',
           valueRank: 1,
           arrayDimensions: null,
@@ -357,13 +397,13 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           }
         })
 
-        namespace.addVariable({
+        let pumpSpeed = namespace.addVariable({
           organizedBy: vendorName,
           nodeId: 's=PumpSpeed',
           browseName: 'PumpSpeed',
           displayName: [
-            new LocalizedText({text: 'Pump Speed', locale: 'en-US'}),
-            new LocalizedText({text: 'Geschwindigkeit Pumpe', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Pump Speed', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Geschwindigkeit Pumpe', locale: 'de-DE'})
           ],
           dataType: 'Double',
           value: {
@@ -381,8 +421,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           nodeId: 's=SomeDate',
           browseName: 'SomeDate',
           displayName: [
-            new LocalizedText({text: 'Some Date', locale: 'en-US'}),
-            new LocalizedText({text: 'Einfaches Datum', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Some Date', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Einfaches Datum', locale: 'de-DE'})
           ],
           dataType: 'DateTime',
           value: {
@@ -400,8 +440,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           nodeId: 's=MultiLanguageText',
           browseName: 'MultiLanguageText',
           displayName: [
-            new LocalizedText({text: 'Multi Language Text', locale: 'en-US'}),
-            new LocalizedText({text: 'Mehrsprachiger Text', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Multi Language Text', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Mehrsprachiger Text', locale: 'de-DE'})
           ],
           dataType: 'LocalizedText',
           value: {
@@ -409,8 +449,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
               return new Variant({
                 dataType: DataType.LocalizedText,
                 value: [{text: 'multilingual text', locale: 'en'},
-                  {text: 'mehrsprachiger Text', locale: 'de'},
-                  {text: 'texte multilingue', locale: 'fr'}]
+                  {text: 'plus4nodered.de mehrsprachiger Text', locale: 'de'},
+                  {text: 'plus4nodered.com texte multilingue', locale: 'fr'}]
               })
             }
           }
@@ -421,8 +461,8 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           nodeId: 's=FanSpeed',
           browseName: 'FanSpeed',
           displayName: [
-            new LocalizedText({text: 'Fan Speed', locale: 'en-US'}),
-            new LocalizedText({text: 'Geschwindigkeit Lüfter', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Fan Speed', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Geschwindigkeit Lüfter', locale: 'de-DE'})
           ],
           dataType: 'Double',
           value: new Variant({dataType: 'Double', value: 1000.0})
@@ -481,13 +521,16 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
           callback(null, callMethodResult)
         })
 
+        let temperatureValue = 170
+
         let analogItemNode = namespace.addAnalogDataItem({
-          organizedBy: vendorName,
+          componentOf: vendorName,
+          eventSourceOf: vendorName,
           nodeId: 's=TemperatureAnalogItem',
           browseName: 'TemperatureAnalogItem',
           displayName: [
-            new LocalizedText({text: 'Temperature', locale: 'en-US'}),
-            new LocalizedText({text: 'Temperatur', locale: 'de-DE'})
+            new LocalizedText({text: 'P4NR Temperature', locale: 'en-US'}),
+            new LocalizedText({text: 'P4NR Temperatur', locale: 'de-DE'})
           ],
           definition: '(tempA -25) + tempB',
           valuePrecision: 0.5,
@@ -499,15 +542,44 @@ const constructAddressSpace = function (server: OPCUAServer, asoDemo: TodoTypeAn
             get: function () {
               return new Variant({
                 dataType: 'Double',
-                value: Math.min(200, Math.random() + 19.0)
+                value: temperatureValue
               })
             }
           }
         })
 
+        namespace.instantiateExclusiveLimitAlarm(exclusiveLimitAlarmType, {
+          componentOf: vendorName,
+          conditionSource: analogItemNode,
+          browseName: 'TemperatureLimitCondition',
+          displayName: new LocalizedText({text: 'Temperature Limit Condition', locale: 'en-US'}),
+          description: 'ExclusiveLimitAlarmType Condition',
+          conditionName: 'TemperatureLimitCondition',
+          inputNode: analogItemNode,   // the variable that will be monitored for change
+          highHighLimit: 240,
+          highLimit: 200,
+          lowLimit: 100,
+          lowLowLimit: 10,
+          optionals: [
+            "ConfirmedState", "Confirm" // confirm state and confirm Method
+          ]
+        })
+
+        intervalList.push(setInterval(function () {
+          if (temperatureValue < 250) {
+            temperatureValue += 0.5
+          } else {
+            temperatureValue = -40
+          }
+          analogItemNode.setValueFromSource({
+            dataType: DataType.Double,
+            value: temperatureValue
+          });
+        }, 500))
+
         view.addReference({
           referenceType: 'Organizes',
-          nodeId: analogItemNode.nodeId
+          nodeId: pumpSpeed.nodeId
         })
 
         resolve('')

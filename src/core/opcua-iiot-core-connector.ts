@@ -301,7 +301,7 @@ function logSessionInformation(node: TodoTypeAny) {
 }
 
 function checkEndpoint(endpoint: string, errorHandler: (err: Error) => void) {
-  if (endpoint && endpoint.includes('opc.tcp://')) {
+  if (endpoint && endpoint.includes('opc.tcp://') && endpoint.lastIndexOf(':') > 8) {
     return true
   } else {
     logger.internalDebugLog('Endpoint Not Valid -> ' + endpoint)

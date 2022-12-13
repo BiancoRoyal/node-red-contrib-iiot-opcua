@@ -1,4 +1,21 @@
-# [4.1.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.11...v4.1.0) (2022-12-07)
+## [4.1.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.1.0...v4.1.1) (2022-12-12)
+
+
+### Bug Fixes
+
+* **core:** [#190](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/190) data check was wrong ([f560daf](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f560dafd3d1de415a2af970512028c641cff6943))
+* **demo-server:** no events active on i=1234 ([2df5a92](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2df5a92382e6b3b0c784fa49416fc6d31c643bc2))
+* **known-issues:** corrected version num of approximated fix of filter ([6a4d0b5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/6a4d0b58982dbabc2c66ec3ccf120fea82e5c2d0))
+* **opcua-node:** [#202](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/202) set value on write from local value in node ([d6d2dd8](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d6d2dd82cf2e3c82357b74037fa0451d135cbccb))
+
+
+### Features
+
+* **checkEndpoint:** now checks Endpoint for a the colon of the port ([8cdc790](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/8cdc790882b77d30821380e22d90d7c22efd9eac))
+
+
+
+# [4.1.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.0.11...v4.1.0) (2022-12-08)
 
 
 ### Bug Fixes
