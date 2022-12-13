@@ -89,7 +89,6 @@ describe('OPC UA Event node Unit Testing', function () {
             interval: 1000 }) */
           done()
         })
-        n4.receive({ payload: { value: 1000 } })
       })
     })
   })

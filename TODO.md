@@ -2,7 +2,7 @@
 
 ## Known Issues
 
-* Result Filter does not filter correctly in every case (Will be fixed in v6.x)
+* Result Filter does not filter correctly in every case (Will be fixed in v5.x)
 * Read after browse in browse example does not work
   * No output and no error
 * Browse-Listener and grouped-listener example top browse/listen will throw following error
@@ -46,7 +46,10 @@ Removing the catch node will bring the following error messages
 ```
 Maybe that happens because the browser browses the root object recursively and returns also 
 nodes of the server that aren't allowed to be listened
-
+* Event Listener monitoring the basic opc ua events will always return an empty array of values
+  * Discovered following error: Expected data is unavailable for the requested time range due to an 
+  un-mounted volume, an off-line archive or tape, or similar reason for temporary unavailability. 
+  (Will be fixed in v5.x)
 
 
 ### Features

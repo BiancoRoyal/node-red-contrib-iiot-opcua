@@ -97,35 +97,11 @@ describe('OPC UA Result Filter node Testing', function () {
   it('should have nodeId, payload and topic as result', function (done) {
     helper.load([injectNode, functionNode, inputNode], testFlows.testUnitReadTestFlowPayloadFlow, function () {
       let n6 = helper.getNode('n6rff1')
-      let n5 = helper.getNode('n5rff1')
       n6.on('input', function (msg) {
         expect(msg.payload.nodeId).toBe('ns=1;s=TemperatureAnalogItem')
         expect(msg.payload.value).toBe(16.04)
         expect(msg.topic).toBe('TestTopic')
         done()
-      })
-      n5.receive({
-        topic: 'TestTopic',
-        payload: {
-          'node': 'ns=1;s=TemperatureAnalogItem',
-          'nodeId': 'ns=1;s=TemperatureAnalogItem',
-          'nodetype': 'read',
-          'nodeClass': 2,
-          'browseName': { 'namespaceIndex': 0, 'name': 'TemperatureAnalogItem' },
-          'displayName': { 'text': 'TemperatureAnalogItem' },
-          'description': {},
-          'writeMask': 0,
-          'userWriteMask': 0,
-          'value': 16.041979,
-          'dataType': 'Double',
-          'valueRank': -1,
-          'arrayDimensions': {},
-          'accessLevel': 3,
-          'userAccessLevel': 3,
-          'minimumSamplingInterval': 0,
-          'historizing': false,
-          'statusCode': { 'value': 0, 'description': 'No Error', 'name': 'Good' }
-        }
       })
     })
   })
@@ -273,16 +249,11 @@ describe('OPC UA Result Filter node Testing', function () {
     it('should have nodeId, payload and topic as result', function (done) {
       helper.load([injectNode, functionNode, inputNode], testFlows.testUnitWriteTestFlowPayloadFlow, function () {
         let n6 = helper.getNode('n6rff4')
-        let n1 = helper.getNode('n1rff4')
         n6.on('input', function (msg) {
           expect(msg.payload.nodeId).toBe('ns=1;s=TestReadWrite')
           expect(msg.payload.value).toBe(22980.7896)
           expect(msg.topic).toBe('TestTopic')
           done()
-        })
-        n1.receive({
-          _msgid: '11cc64dd.bde67b',
-          topic: 'TestTopic',
         })
       })
     })

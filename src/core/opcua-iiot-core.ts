@@ -220,15 +220,26 @@ export function getNodeStatus(statusValue: string, statusLog: boolean): NodeStat
   return {fill: fillValue, shape: shapeValue, text: statusValue}
 }
 
+function extractValue(value: any) {
+
+  logger.detailDebugLog('extractValue value:' + value)
+  if (_.isUndefined(value.value) === false) {
+    return value.value // value could be null, 0, and any other, but not undefined
+  }
+
+  return value
+}
+
 export function buildNewVariant(datatype: DataTypeInput, value: any): DataValueOptions {
   let variantValue: VariantOptions = {
     dataType: DataType.Null,
     value: null
   }
-  if (value.value)
-    value = value.value
 
-  logger.detailDebugLog('buildNewVariant datatype: ' + datatype + ' value:' + value)
+  let originValue = Object.assign({}, value)
+  value = extractValue(value);
+
+  logger.detailDebugLog('buildNewVariant datatype: ' + datatype + ' originValue:' + originValue + ' value:' + value)
   switch (datatype) {
     case 'Float':
     case DataType.Float:
@@ -527,10 +538,10 @@ export function convertDataValueByDataType(value: any, dataType: DataTypeInput):
         break;
       default:
         logger.internalDebugLog('convertDataValue unused DataType: ' + dataType)
-        if (!isNotDefined(value)) {
-          convertedValue = value
-        } else {
+        if(_.isUndefined(value)) {
           convertedValue = null
+        } else {
+          convertedValue = value
         }
         break
     }
@@ -967,7 +978,7 @@ export function registerToConnector(node: TodoTypeAny, statusCallback: (status: 
   node.connector.on('after_reconnection', () => {
     setNodeOPCUARestart(node.connector, OPCUAClient.create((node.connector as TodoTypeAny).iiot.opcuaClient), statusCall) // TODO: investigate one args v two
   })
-  setNodeInitalState(node.connector?.iiot?.stateService.state.value, node, statusCall) //Todo: switch to xstate/fsm from stately
+  setNodeInitalState(node.connector?.iiot?.stateService.state.value, node, statusCall)
 }
 
 export function deregisterToConnector(node: NodeWithConnector, done: () => void) {

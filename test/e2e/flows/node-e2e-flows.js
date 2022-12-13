@@ -798,5 +798,110 @@ module.exports = {
       "reconnectDelay": "",
       "maxBadSessionRequests": "10"
     }
+  ]),
+
+  "testWithValueFromNode": helperExtensions.cleanFlowPositionData([
+    {
+      "id": "310ae6dc97505ebc",
+      "type": "tab",
+      "label": "Test Node with Value",
+      "disabled": false,
+      "info": "",
+      "env": []
+    },
+    {
+      "id": "02e4d246d1152d2a",
+      "type": "OPCUA-IIoT-Node",
+      "z": "310ae6dc97505ebc",
+      "injectType": "write",
+      "nodeId": "ns=2;s=Tunga_Mitsubishi.ElolinkPLC.TM20_Anritsu_Inline.TM20InlineCounter",
+      "datatype": "UInt16",
+      "value": "39",
+      "name": "Node",
+      "topic": "",
+      "showErrors": true,
+      "x": 370,
+      "y": 280,
+      "wires": [
+        [
+          "91ffe73f63f8e590"
+        ]
+      ]
+    },
+    {
+      "id": "092bdd3725f364bc",
+      "type": "inject",
+      "z": "310ae6dc97505ebc",
+      "name": "",
+      "props": [
+        {
+          "p": "payload.timestamp",
+          "v": "",
+          "vt": "date"
+        },
+        {
+          "p": "topic",
+          "vt": "str"
+        }
+      ],
+      "repeat": "",
+      "crontab": "",
+      "once": true,
+      "onceDelay": "4",
+      "topic": "",
+      "x": 210,
+      "y": 260,
+      "wires": [
+        [
+          "02e4d246d1152d2a"
+        ]
+      ]
+    },
+    {
+      "id": "91ffe73f63f8e590",
+      "type": "helper",
+      "z": "310ae6dc97505ebc",
+      "name": "helper",
+      "active": true,
+      "tosidebar": true,
+      "console": false,
+      "tostatus": false,
+      "complete": "payload",
+      "targetType": "msg",
+      "statusVal": "",
+      "statusType": "auto",
+      "x": 510,
+      "y": 280,
+      "wires": []
+    },
+    {
+      "id": "d490865a9c99a0e2",
+      "type": "inject",
+      "z": "310ae6dc97505ebc",
+      "name": "",
+      "props": [
+        {
+          "p": "payload"
+        },
+        {
+          "p": "topic",
+          "vt": "str"
+        }
+      ],
+      "repeat": "",
+      "crontab": "",
+      "once": true,
+      "onceDelay": "5",
+      "topic": "",
+      "payload": "12345",
+      "payloadType": "num",
+      "x": 210,
+      "y": 320,
+      "wires": [
+        [
+          "02e4d246d1152d2a"
+        ]
+      ]
+    }
   ])
 }
