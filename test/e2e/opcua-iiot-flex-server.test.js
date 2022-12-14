@@ -91,6 +91,8 @@ describe("OPC UA Flex Server Node E2E testing", () => {
           expect(msg.payload.value[0].statusCode).toBeDefined()
           expect(msg.payload.value[0].statusCode.value).toBe(0)
           expect(msg.payload.value[0].value?.value).toBeDefined()
+          expect(msg.payload.value[0].value?.value).toBe(0)
+          expect(msg.payload.value[0].value?.dataType).toBe("Double")
           expect(msg.payload.injectType).toBe("read")
           done()
         })

@@ -656,7 +656,7 @@ export function normalizeMessage(msg: WriteMessage) {
 
   if (!isNotDefined(writeValues)) {
     return addressSpaceValues.map((item, index) => {
-      return {...item, value: writeValues[index] || ''}
+      return {...item, value: _.isUndefined(writeValues[index]) ? null : writeValues[index]}
     })
   } else
     return addressSpaceValues.map((item, index) => {
