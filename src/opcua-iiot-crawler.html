@@ -110,7 +110,7 @@
 
           filterLookupButton.addClass('disabled')
 
-          $.getJSON('/opcuaIIoT/list/FilterTypes', function (data) {
+          $.getJSON('opcuaIIoT/list/FilterTypes', function (data) {
             filterLookupButton.removeClass('disabled')
             node.lookupItems = []
 

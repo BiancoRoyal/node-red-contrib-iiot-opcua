@@ -1,4 +1,22 @@
-## [4.1.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.1.0...v4.1.1) (2022-12-12)
+# [4.2.0](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.1.2...v4.2.0) (2023-04-10)
+
+
+### Bug Fixes
+
+* **web:** get routes for FlowForge ([0251b51](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/0251b514299afb5db4a80b926e1ecf6576737217))
+
+
+
+## [4.1.2](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.1.1...v4.1.2) (2022-12-14)
+
+
+### Bug Fixes
+
+* **write:** [#190](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/190) write 0 and improve test for it ([e12e798](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/e12e798a491e9bf0dd1c06c6eab70ce18c0eec3a))
+
+
+
+## [4.1.1](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/compare/v4.1.0...v4.1.1) (2022-12-14)
 
 
 ### Bug Fixes
@@ -6,7 +24,9 @@
 * **core:** [#190](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/190) data check was wrong ([f560daf](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/f560dafd3d1de415a2af970512028c641cff6943))
 * **demo-server:** no events active on i=1234 ([2df5a92](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/2df5a92382e6b3b0c784fa49416fc6d31c643bc2))
 * **known-issues:** corrected version num of approximated fix of filter ([6a4d0b5](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/6a4d0b58982dbabc2c66ec3ccf120fea82e5c2d0))
+* **node:** now works with int as input again ([d7cdf3a](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d7cdf3aef40650f8030a3410349821a83a8a1291))
 * **opcua-node:** [#202](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/issues/202) set value on write from local value in node ([d6d2dd8](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/d6d2dd82cf2e3c82357b74037fa0451d135cbccb))
+* **tests:** removed wrong receives and fixed node tests expect values ([fd8d6ab](https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua/commit/fd8d6ab5095315b5188762299413da4f9064f290))
 
 
 ### Features

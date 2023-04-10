@@ -130,7 +130,7 @@
 
       discoveryLookupButton.on("click", function () {
         discoveryLookupButton.addClass('disabled')
-        $.getJSON('/opcuaIIoT/client/discover/' + node.id + '/' + encodeURIComponent(discoveryUrlField.val()), function (data) {
+        $.getJSON('opcuaIIoT/client/discover/' + node.id + '/' + encodeURIComponent(discoveryUrlField.val()), function (data) {
           discoveryLookupButton.removeClass('disabled')
           node.lookupItems = []
           let security = null
@@ -166,7 +166,7 @@
 
       endpointsLookupButton.on("click", function () {
         endpointsLookupButton.addClass('disabled')
-        $.getJSON('/opcuaIIoT/client/endpoints/' + node.id + '/' + encodeURIComponent(endpointField.val()), function (data) {
+        $.getJSON('opcuaIIoT/client/endpoints/' + node.id + '/' + encodeURIComponent(endpointField.val()), function (data) {
           endpointsLookupButton.removeClass('disabled')
           node.lookupItems = []
           let security = null

@@ -48,7 +48,7 @@
       nodeIdLookupButton.on("click", function () {
         nodeIdLookupButton.addClass('disabled')
         let rootid = nodeIdField.val() || 'ns=0;i=84' // root
-        $.getJSON('/opcuaIIoT/browse/'+ node.id + '/' + encodeURIComponent(rootid), function (data) {
+        $.getJSON('opcuaIIoT/browse/'+ node.id + '/' + encodeURIComponent(rootid), function (data) {
           nodeIdLookupButton.removeClass('disabled')
           node.lookupItems = []
 

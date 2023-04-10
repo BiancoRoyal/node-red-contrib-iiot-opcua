@@ -438,7 +438,7 @@
 
         datatypesLookupButton.addClass('disabled')
 
-        $.getJSON('/opcuaIIoT/plain/DataTypeIds', function (data) {
+        $.getJSON('opcuaIIoT/plain/DataTypeIds', function (data) {
           datatypesLookupButton.removeClass('disabled')
           node.datatypeNames = []
 

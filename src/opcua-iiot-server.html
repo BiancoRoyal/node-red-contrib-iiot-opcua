@@ -192,7 +192,7 @@
 
           xmlsetLookupButton.addClass('disabled')
 
-          $.getJSON('/opcuaIIoT/xmlsets/public', function (data) {
+          $.getJSON('opcuaIIoT/xmlsets/public', function (data) {
             xmlsetLookupButton.removeClass('disabled')
             node.xmlsetSelect = []
 

@@ -41,7 +41,7 @@
 
       objecttypeLookupButton.on("click", function () {
         objecttypeLookupButton.addClass('disabled')
-        $.getJSON('/opcuaIIoT/list/InstanceTypeIds', function (data) {
+        $.getJSON('opcuaIIoT/list/InstanceTypeIds', function (data) {
           objecttypeLookupButton.removeClass('disabled')
           node.lookupItems = []
 
@@ -72,7 +72,7 @@
 
       datatypeLookupButton.on("click", function () {
         datatypeLookupButton.addClass('disabled')
-        $.getJSON('/opcuaIIoT/list/DataTypeIds', function (data) {
+        $.getJSON('opcuaIIoT/list/DataTypeIds', function (data) {
           datatypeLookupButton.removeClass('disabled')
           node.lookupItems = []
 
@@ -103,7 +103,7 @@
 
       referencetypeLookupButton.on("click", function () {
         referencetypeLookupButton.addClass('disabled')
-        $.getJSON('/opcuaIIoT/list/ReferenceTypeIds', function (data) {
+        $.getJSON('opcuaIIoT/list/ReferenceTypeIds', function (data) {
           referencetypeLookupButton.removeClass('disabled')
           node.lookupItems = []
 
