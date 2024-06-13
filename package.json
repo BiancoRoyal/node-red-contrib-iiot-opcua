@@ -119,7 +119,7 @@
     "@types/semver": "^7.3.12",
     "@types/underscore": "^1.11.4",
     "chai": "^4.3.6",
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.0",
     "gulp-babel": "^8.0.0",
     "gulp-clean": "^0.4.0",
     "gulp-conventional-changelog": "^2.0.35",
