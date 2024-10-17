@@ -391,7 +391,7 @@ const buildNewEventItem = function (nodeId: TodoTypeAny, msg: TodoTypeAny, subsc
           samplingInterval: interval,
           discardOldest: true,
           queueSize: queueSize,
-          filter: msg.payload.eventFilter
+          filter: msg.payload.uaEventFilter
         },
         TimestampsToReturn.Both,
         function (err: Error, monitoredItemResult: TodoTypeAny) {
