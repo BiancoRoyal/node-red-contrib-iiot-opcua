@@ -157,5 +157,5 @@ Special thanks also go to [Klaus Landsdorf][1] for creating _node-red-contrib-ii
 [4]:https://github.com/node-opcua/node-opcua
 [5]:https://github.com/DATATRONiQ
 [6]:https://iniationware.com/
-[7]:https://www.noderedplus.de/de/
-[8]:https://www.noderedplus.de/
+[7]:https://plus4nodered.com/de/
+[8]:https://plus4nodered.com/
