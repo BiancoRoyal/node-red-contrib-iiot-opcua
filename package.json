@@ -7,7 +7,7 @@
     "url": "https://github.com/BiancoRoyal/node-red-contrib-iiot-opcua"
   },
   "dependencies": {
-    "@xstate/fsm": "~2.0.0",
+    "@xstate/fsm": "~2.1.0",
     "cron": "~2.3.0",
     "debug": "~4.3.4",
     "g": "~2.0.1",
