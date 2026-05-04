@@ -11,10 +11,10 @@
     "cron": "~2.3.0",
     "debug": "~4.3.4",
     "g": "~2.0.1",
-    "node-opcua": "~2.81.0",
+    "node-opcua": "~2.170.1",
     "rimraf": "~3.0.2",
     "underscore": "~1.13.6",
-    "vm2": "~3.9.15"
+    "vm2": "~3.10.5"
   },
   "keywords": [
     "node-red",
@@ -111,7 +111,7 @@
     "create_certificates.js"
   ],
   "devDependencies": {
-    "@node-red/nodes": "^3.0.2",
+    "@node-red/nodes": "^4.1.8",
     "@types/cron": "^2.0.0",
     "@types/debug": "^4.1.7",
     "@types/jest": "^29.0.2",
@@ -134,7 +134,7 @@
     "jest-coverage-badges": "^1.1.2",
     "jsdoc": "^3.6.11",
     "nock": "^13.2.9",
-    "node-red": "^3.0.2",
+    "node-red": "^4.1.8",
     "node-red-node-test-helper": "^0.3.0",
     "standard": "^17.0.0",
     "standard-version": "^9.5.0",
